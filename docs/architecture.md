@@ -93,7 +93,6 @@ verst/
     adr/0001-…md … 0009-…md
     contracts/plan-response.example.json      # generated (DEV-018)
     design-canvas/*.dc.html
-    design/                                   # Designer deliverables (DES-*)
   backend/
     planner/                    # pure-Python engine, importable as `verst_planner`
       pyproject.toml            # name=verst-planner, requires-python>=3.12, no dependencies
@@ -138,6 +137,7 @@ verst/
     prometheus/ grafana/ backup/
   admin/
     directus/ (snapshot.yaml roles.md)
+  design/                       # Designer deliverables (DES-*): tokens.json, DesignTokens.kt, components.md, screens/, icons/
   .github/workflows/ (backend.yml android.yml release-android.yml)
 ```
 
@@ -1739,7 +1739,7 @@ Worlds: `central_russia_v1` (Moscow hub: М-1…М-12, Р-22, Golden Ring, Tula,
 | ID | Case | World | Key expectation | Sprint |
 | --- | --- | --- | --- | --- |
 | G01 | Москва → Ярославль → Москва (round trip), 2 adults, 300 km/day | central | 2 days, overnight Ярославль, no warnings | 1 |
-| G02 | Ready route «Золотое кольцо», 2 adults + 1 child + dog, 300 km/day, budget 40 000 | central | 3 days, nights Ярославль, Суздаль (`template`), total = hand calculation from world prices ±5 % (5 meals per SPEC §8 rules; the canvas «7 приёмов» example is not reproducible, see open question Q-4) | 1 |
+| G02 | Ready route «Золотое кольцо», 2 adults + 1 child + dog, 300 km/day, budget 40 000 | central | 3 days, nights Ярославль, Суздаль (`template`), total = hand calculation from world prices ±5 % (5 meals per SPEC §8 rules; the canvas «7 приёмов» example is not reproducible, see D-16) | 1 |
 | G03 | Москва → Волгоград, 500 km/day, 2 adults + child (5) + dog | central | 2 days, overnight Тамбов (dog-friendly), decoy town without dog hotels excluded, 1 evening fuel stop | 1 |
 | G04 | Москва → Казань by М-12, `just_drive`, 1 adult, 900 km/day | central | 1 day, no sights, 1 fuel, rests every 3 h, tolls line > 0 | 1 |
 | G05 | Тестовск → Конечный, dog, only lodging in corridor lacks `dogs_allowed` | edge | warning `NO_LODGING`, fallback `no_hotel`, no hotel selected, lodging line uses default price | 1 |
@@ -1808,6 +1808,7 @@ G01–G12 are Sprint 1 (G01–G05 are the Manager's mandatory set). SPEC §17 co
 | D-13 | Tolls when `avoidTolls` impossible | route kept, toll costed, warning `TOLLS_UNAVOIDABLE` |
 | D-14 | Children ages | optional `childAges`; unknown age counts as ≥ 7 (food weight 1, child ticket) — conservative estimate |
 | D-15 | Rooms rule | `ceil(adults / 2)` rooms (SPEC), children share; dog adds no cost in MVP |
+| D-16 | Meals vs. Waybill canvas (Q-4, decided by Manager 2026-10-23) | Follow SPEC §8: breakfast at the hotel included, lunch + dinner on the road, first day after breakfast at home → 5 meals for the 3-day Golden Ring; the canvas «7 приёмов» example is illustrative only and is corrected by DES-004 |
 
 ### 15.2 SPEC deviations and extensions (for CEO/Manager visibility)
 
@@ -1879,7 +1880,7 @@ G01–G12 are Sprint 1 (G01–G05 are the Manager's mandatory set). SPEC §17 co
 | Q-1 | When will package registries / Docker Hub / Geofabrik be reachable from the dev sandbox? | Sprint 1 = planner only; Sprint 2 (API, DB, Android, maps) starts the day access is enabled. Needed: PyPI, Maven Central, Google Maven, Gradle Plugin Portal, Docker Hub, ghcr.io, download.geofabrik.de, GitHub releases (fonts), Android SDK repository |
 | Q-2 | Domain and package name | `verst.app` (`api.`, `admin.`, `tiles.` subdomains), Android `applicationId = app.verst` |
 | Q-3 | Hosting provider | Selectel (2 VMs per §12.2, Moscow region); Yandex Cloud is equivalent for the design — only the backup target changes |
-| Q-4 | Meals rule: SPEC §8 gives 5 meals for the 3-day Golden Ring, the Waybill canvas shows «7 приёмов» | Follow SPEC §8 (breakfast at hotel included); the Designer updates the canvas example text (DES-004) |
+| Q-4 | ~~Meals rule vs. canvas «7 приёмов»~~ | **Decided** → D-16 (follow SPEC §8, 5 meals) |
 | Q-5 | Default mood for adults-only trips | `more_stops` (D-1) |
 | Q-6 | Ask children's ages in the Instruments mirror? | Not in MVP UI; API accepts optional `childAges`; unknown age counts as ≥ 7 (conservative cost) |
 | Q-7 | Travelpayouts marker/program ids | Until provided, partner links open unwrapped (no attribution) and are logged; booking UX unchanged |

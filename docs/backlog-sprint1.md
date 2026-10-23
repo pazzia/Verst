@@ -52,7 +52,7 @@ Designer: DES-001, DES-002, DES-004, DES-006 in parallel from day 1; DES-003, DE
 | DEV-019 | Sandbox coverage tool, Makefile targets, README check | Developer | 018 | 0.5 d |
 | DEV-020 | (optional) SSE bridge spike on bare Starlette | Developer | 017 | 0.5 d |
 | DEV-021 | SQL DDL file and seed skeleton (written, not executed) | Developer | 002 | 0.5 d |
-| DES-001 | Token reconciliation (canvas ↔ SPEC §6) | Designer | — | 0.5 d |
+| DES-001 | Verify `design/tokens.json` covers every canvas colour | Designer | — | 0.5 d |
 | DES-002 | Road-sign pictograms and arrows as SVG | Designer | — | 1.5 d |
 | DES-004 | Russian copy deck and reason-template review | Designer | DEV-005 draft | 1 d |
 | DES-006 | Missing states (loading, offline, empty, error, slow, NO_LODGING) | Designer | — | 2 d |
@@ -69,7 +69,7 @@ Designer: DES-001, DES-002, DES-004, DES-006 in parallel from day 1; DES-003, DE
 - `backend/planner/pyproject.toml`: `[project] name="verst-planner"`, `version="0.1.0"`, `requires-python=">=3.12"`, `dependencies=[]`; `[tool.ruff] line-length=110, target-version="py312"`, `[tool.ruff.lint] select=["E","F","W","I","B","UP","SIM","RUF"]`; `[tool.mypy] strict=true, python_version="3.12"`.
 - `backend/planner/verst_planner/__init__.py` with `ENGINE_VERSION = "0.1.0"`; empty subpackages `domain, geo, pipeline, cost, explain, adapters, adapters/fake` (each with `__init__.py`), `resources/` directory.
 - `backend/planner/tests/__init__.py`, `tests/unit/__init__.py`, `tests/golden/__init__.py`, `tests/contract/__init__.py`, `tests/unit/test_smoke.py` (asserts `ENGINE_VERSION` matches `^\d+\.\d+\.\d+$`).
-- Placeholders: `backend/api/.gitkeep`, `backend/migrations/.gitkeep`, `android/.gitkeep`, `infra/.gitkeep`, `admin/.gitkeep`, `docs/contracts/.gitkeep`, `docs/design/.gitkeep`.
+- Placeholders: `backend/api/.gitkeep`, `backend/migrations/.gitkeep`, `android/.gitkeep`, `infra/.gitkeep`, `admin/.gitkeep`, `docs/contracts/.gitkeep` (`design/` already exists — do not touch).
 
 **Acceptance.**
 1. `make test-planner` → exit 0, output contains `Ran 1 test` and `OK`.
@@ -346,23 +346,23 @@ Golden inputs (all `startAt` explicit; clock `2026-10-23T09:00:00+03:00`; vehicl
 
 ## Designer tasks
 
-### DES-001 — Token reconciliation
-Compare every colour, radius and size in `docs/design-canvas/*.dc.html` with SPEC §6 tokens; output `docs/design/tokens.json` (`{"color": {"dash": "#141416", …, "hill": "#3C3346"}, "radius": {…}, "type": {…}, "motion": {…}}`) and list every canvas literal not covered by a token with a proposed token name (e.g. `hill` #3C3346, seat fill #3A3A42, dashed seat border #55555E, dog #C99A5B, radio border #3A5266, child-silhouette #E9E2F2, highlight row #1A2C3B / #0F1A22).
-**Acceptance:** `python3 -m json.tool docs/design/tokens.json > /dev/null`; `grep -ohE '#[0-9A-Fa-f]{6}' docs/design-canvas/*.dc.html | tr a-f A-F | sort -u` — every printed colour appears in `tokens.json` (Manager runs `python3 -c` one-liner comparing sets; output empty).
+### DES-001 — Verify existing token coverage
+Verify that the existing `design/tokens.json` covers every colour used in `docs/design-canvas/*.dc.html` and every SPEC §6 token. Add any missing canvas literal with a token name (candidates: `hill` #3C3346, seat fill #3A3A42, dashed seat border #55555E, dog #C99A5B, radio border #3A5266, child silhouette #E9E2F2, highlight rows #1A2C3B / #0F1A22), and keep `design/DesignTokens.kt` in sync.
+**Acceptance:** `python3 -m json.tool design/tokens.json > /dev/null`; `grep -ohE '#[0-9A-Fa-f]{6}' docs/design-canvas/*.dc.html | tr a-f A-F | sort -u` — every printed colour appears in `design/tokens.json` (Manager runs `python3 -c` one-liner comparing sets; output empty).
 
 ### DES-002 — Road-sign pictograms and arrows
-SVG set (24×24 viewBox, single-colour, stroke-free paths) for: fuel 7.3, food 7.7, rest 7.11, hotel 7.12, tourist pictograms (kremlin, monastery, museum, view, walk, generic), 8 direction arrows (the canvas paths UR/UP/DN/DL + the remaining 4), dog, child, adult silhouettes; plus `docs/design/signs.md` specifying each `RoadSign` variant's geometry (border widths 3/2 dp, radii) for Compose.
-**Acceptance:** `ls docs/design/icons/*.svg | wc -l` ≥ 21; each file contains `viewBox="0 0 24 24"` and no `<image`/`<text`; `python3 -c "import xml.dom.minidom,glob;[xml.dom.minidom.parse(f) for f in glob.glob('docs/design/icons/*.svg')]"` passes.
+SVG set (24×24 viewBox, single-colour, stroke-free paths) for: fuel 7.3, food 7.7, rest 7.11, hotel 7.12, tourist pictograms (kremlin, monastery, museum, view, walk, generic), 8 direction arrows (the canvas paths UR/UP/DN/DL + the remaining 4), dog, child, adult silhouettes; plus `design/signs.md` specifying each `RoadSign` variant's geometry (border widths 3/2 dp, radii) for Compose.
+**Acceptance:** `ls design/icons/*.svg | wc -l` ≥ 21; each file contains `viewBox="0 0 24 24"` and no `<image`/`<text`; `python3 -c "import xml.dom.minidom,glob;[xml.dom.minidom.parse(f) for f in glob.glob('design/icons/*.svg')]"` passes.
 
 ### DES-003 — Fonts (BLOCKED-ON-NETWORK)
 Download IBM Plex Sans Condensed 400/500/600/700, IBM Plex Mono 600, Marck Script 400 (OFL) and verify Cyrillic coverage (А–я, Ёё, №, ₽, U+202F) with a glyph check; place into `android/core-ui/src/main/res/font/` with OFL texts in `android/core-ui/src/main/assets/licenses/`.
 
 ### DES-004 — Russian copy deck and reason-template review
-`docs/design/copy-ru.md`: every user-visible string per screen and state (SPEC §5, §12 errors, A§8.1 templates, warnings, empty/offline states), with string resource keys (`windshield_offline_title`, …) and plural forms. Review `reasons.ru.json` (DEV-005) for tone and length (≤ 140 characters per rendered reason). Resolve Q-4: Waybill example text with 5 meals.
+`design/copy-ru.md`: every user-visible string per screen and state (SPEC §5, §12 errors, A§8.1 templates, warnings, empty/offline states), with string resource keys (`windshield_offline_title`, …) and plural forms. Review `reasons.ru.json` (DEV-005) for tone and length (≤ 140 characters per rendered reason). Apply D-16: change the Waybill example text to 5 meals.
 **Acceptance:** every key in `backend/planner/verst_planner/resources/reasons.ru.json` appears in `copy-ru.md` (`python3 -c` key check prints nothing missing); Manager reads the deck.
 
 ### DES-005 — Reference screenshots (BLOCKED-ON-NETWORK: needs a headless browser and fonts)
-PNG 390×844 per screen and state rendered from the canvases into `docs/design/reference/`, used as Paparazzi comparison targets.
+PNG 390×844 per screen and state rendered from the canvases into `design/reference/`, used as Paparazzi comparison targets.
 
 ### DES-006 — Missing states
 Design (as additional `.dc.html` canvases in `docs/design-canvas/states/`) the states that SPEC §5 requires but the canvas does not show: Windshield loading (shimmer plates), offline, no ready routes; Navigator no results / far from Russia; Drive slow (20 s) and error; Road ahead with a `NO_LODGING` overnight (no hotel sign, warning plate, «ближайшая подходящая»), with an over-budget day; Waybill over budget (red «перерасход» + hints); offline plates «Нужен интернет».
