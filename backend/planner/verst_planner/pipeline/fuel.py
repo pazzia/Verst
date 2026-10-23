@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from verst_planner.domain.enums import StopKind, Tag, WarningCode
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop, PlanWarning, Vehicle
 from verst_planner.pipeline import Corridor, PlanContext, round_half_up
-from verst_planner.pipeline.timeline import Profile, day_for_km, insert_stop, schedule_day
+from verst_planner.pipeline.timeline import day_for_km, insert_stop
 
 COINCIDE_KINDS = frozenset({StopKind.OVERNIGHT, StopKind.VIA, StopKind.SIGHT, StopKind.FOOD})
 LAST_FILL_MARGIN_KM = 10.0
@@ -130,6 +130,7 @@ def plan_fuel(
             reason_params=params,
             region_code=best.region_code,
             litres=litres,
+            pool="fuel",
         )
         insert_stop(day_for_km(days, best.km_at), stop)
         inserted.append(stop)
@@ -141,27 +142,4 @@ def plan_fuel(
         last = max(inserted, key=lambda s: s.km_at)
         if last.reason_key == "fuel.range":
             last.reason_key, last.reason_params = "fuel.last", {}
-    upgrade_coffee(days, ctx.profile_for(corridor.route), ctx)
     return warnings
-
-
-def upgrade_coffee(days: list[DayPlan], profile: Profile, ctx: PlanContext) -> None:
-    """A fuel stop with a cafe becomes a coffee stop (15 min, counts as a break) after ≥ 60 min of driving."""
-    min_break = ctx.cfg.rest.break_min_dwell
-    for day in days:
-        slots = schedule_day(day, profile)
-        since = 0.0
-        for s, slot in zip(day.stops, slots, strict=True):
-            since += slot.drive_min
-            if (
-                s.kind is StopKind.FUEL
-                and s.auto
-                and not s.coffee
-                and s.place is not None
-                and Tag.CAFE_AT_FUEL in s.place.tags
-                and since >= ctx.cfg.fuel.coffee_after_drive_min
-            ):
-                s.coffee = True
-                s.dwell_min = ctx.cfg.dwell_min.fuel_coffee
-            if s.dwell_min >= min_break or s.kind is StopKind.START:
-                since = 0.0

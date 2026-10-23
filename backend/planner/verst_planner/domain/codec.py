@@ -51,6 +51,7 @@ from verst_planner.domain.model import (
     PointInput,
     ScheduledStop,
     StopState,
+    StopTime,
     TicketUnit,
     TollHit,
     TollSegment,
@@ -343,6 +344,8 @@ def alt_units_to_json(u: AltUnits) -> Json:
         "childRub": u.child_rub,
         "name": u.name_ru,
         "placeId": u.place_id,
+        "priceRub": None if u.price_rub is None else dec_to_str(u.price_rub),
+        "regionName": u.region_name_ru,
     }
 
 
@@ -355,6 +358,8 @@ def alt_units_from_json(d: Mapping[str, Any]) -> AltUnits:
         child_rub=d["childRub"],
         name_ru=d["name"],
         place_id=d["placeId"],
+        price_rub=None if d.get("priceRub") is None else _dec(d["priceRub"]),
+        region_name_ru=d.get("regionName", ""),
     )
 
 
@@ -368,6 +373,16 @@ def _alternative_to_json(a: Alternative) -> Json:
         "shiftMin": a.shift_min,
         "units": alt_units_to_json(a.units),
         "stop": stop_to_json(a.stop),
+        "dayPatch": [
+            {
+                "stopId": p.stop_id,
+                "seq": p.seq,
+                "arriveAt": dt_to_str(p.arrive_at),
+                "departAt": dt_to_str(p.depart_at),
+                "kmFromPrev": p.km_from_prev,
+            }
+            for p in a.day_patch
+        ],
     }
 
 
@@ -381,6 +396,12 @@ def _alternative_from_json(d: Mapping[str, Any]) -> Alternative:
         shift_min=d["shiftMin"],
         stop=stop_from_json(d["stop"]),
         units=alt_units_from_json(d["units"]),
+        day_patch=tuple(
+            StopTime(
+                p["stopId"], p["seq"], dt_from_str(p["arriveAt"]), dt_from_str(p["departAt"]), p["kmFromPrev"]
+            )
+            for p in d.get("dayPatch", [])
+        ),
     )
 
 
@@ -409,6 +430,7 @@ def stop_to_json(s: ScheduledStop) -> Json:
         "verified": s.verified,
         "replaceable": s.replaceable,
         "alternatives": [_alternative_to_json(a) for a in s.alternatives],
+        "alternativesNote": s.alternatives_note_ru,
         "hotelOptions": [_hotel_option_to_json(h) for h in s.hotel_options],
         "selectedHotelId": s.selected_hotel_id,
     }
@@ -440,6 +462,7 @@ def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
         alternatives=tuple(_alternative_from_json(a) for a in d["alternatives"]),
         hotel_options=tuple(_hotel_option_from_json(h) for h in d["hotelOptions"]),
         selected_hotel_id=d["selectedHotelId"],
+        alternatives_note_ru=d.get("alternativesNote"),
     )
 
 
@@ -490,6 +513,7 @@ def units_to_json(u: CostUnits) -> Json:
                 for r in u.fuel.regions
             ],
             "asOf": u.fuel.as_of,
+            "tripKm": u.fuel.trip_km,
         },
         "tolls": [
             {
@@ -559,6 +583,7 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
                 for r in f["regions"]
             ),
             as_of=f["asOf"],
+            trip_km=f.get("tripKm"),
         ),
         tolls=tuple(
             TollUnit(t["segmentId"], t["roadRef"], t["rub"], t["night"], t["asOf"]) for t in d["tolls"]
@@ -703,6 +728,7 @@ def _stop_state_to_json(s: StopState) -> Json:
         "meal": None if s.meal is None else s.meal.value,
         "litres": s.litres,
         "coffee": s.coffee,
+        "pool": s.pool,
     }
 
 
@@ -724,6 +750,7 @@ def _stop_state_from_json(d: Mapping[str, Any]) -> StopState:
         meal=None if d.get("meal") is None else Meal(d["meal"]),
         litres=float(d.get("litres", 0.0)),
         coffee=bool(d.get("coffee", False)),
+        pool=str(d.get("pool", "")),
     )
 
 

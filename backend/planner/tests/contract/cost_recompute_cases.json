@@ -149,7 +149,8 @@
     "perPersonRub": 11500,
     "remainingRub": 5500,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -299,7 +300,8 @@
     "perPersonRub": 10400,
     "remainingRub": 8700,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -453,7 +455,8 @@
      "cheaper_overnight",
      "fewer_sights",
      "just_drive"
-    ]
+    ],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -603,7 +606,8 @@
     "perPersonRub": 11500,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -753,7 +757,8 @@
     "perPersonRub": 11500,
     "remainingRub": 0,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -903,7 +908,8 @@
     "perPersonRub": 15900,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -1053,7 +1059,8 @@
     "perPersonRub": 13800,
     "remainingRub": 53100,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -1203,7 +1210,8 @@
     "perPersonRub": 23000,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -1355,7 +1363,8 @@
     "perPersonRub": 10700,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -1508,7 +1517,8 @@
     "perPersonRub": 9500,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -1658,7 +1668,8 @@
     "perPersonRub": 10100,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -1810,7 +1821,8 @@
     "perPersonRub": 10700,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -1962,7 +1974,8 @@
     "perPersonRub": 10100,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -2121,7 +2134,8 @@
      "cheaper_overnight",
      "fewer_sights",
      "just_drive"
-    ]
+    ],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -2277,7 +2291,8 @@
     "perPersonRub": 11500,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 745
    }
   },
   {
@@ -2439,7 +2454,8 @@
     "perPersonRub": 11400,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 814
    }
   },
   {
@@ -2589,7 +2605,8 @@
     "perPersonRub": 10700,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 222
    }
   },
   {
@@ -2732,7 +2749,8 @@
     "perPersonRub": 10100,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": null
    }
   },
   {
@@ -2904,7 +2922,8 @@
     "perPersonRub": 12500,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -3058,7 +3077,8 @@
     "perPersonRub": 11300,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -3212,7 +3232,8 @@
     "perPersonRub": 11500,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -3374,7 +3395,8 @@
     "perPersonRub": 10600,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 752
    }
   },
   {
@@ -3536,7 +3558,8 @@
     "perPersonRub": 10400,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 749
    }
   },
   {
@@ -3698,7 +3721,8 @@
     "perPersonRub": 11800,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 753
    }
   },
   {
@@ -3860,7 +3884,8 @@
     "perPersonRub": 11500,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 749
    }
   },
   {
@@ -4010,7 +4035,8 @@
     "perPersonRub": 10400,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -4076,7 +4102,8 @@
     "perPersonRub": 2800,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -4198,7 +4225,8 @@
     "perPersonRub": 8700,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -4324,7 +4352,8 @@
     "perPersonRub": 9400,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -4468,7 +4497,8 @@
     "overBudget": true,
     "hintKeys": [
      "cheaper_overnight"
-    ]
+    ],
+    "fuelFormulaKm": 750
    }
   },
   {
@@ -4618,7 +4648,504 @@
     "perPersonRub": 11500,
     "remainingRub": null,
     "overBudget": false,
-    "hintKeys": []
+    "hintKeys": [],
+    "fuelFormulaKm": 750
+   }
+  },
+  {
+   "name": "replaced_new_region_priced",
+   "note": "A§16.6: an alternative in a region the trip did not cross adds that region at its price",
+   "units": {
+    "fuel": {
+     "consumption": 8.0,
+     "fuelType": "ai95",
+     "regions": [
+      {
+       "regionCode": "RU-YAR",
+       "regionName": "Ярославская область",
+       "km": 750.0,
+       "priceRub": "62.00"
+      }
+     ],
+     "asOf": "2026-10"
+    },
+    "tolls": [],
+    "nights": [
+     {
+      "stopId": "d1s05",
+      "day": 1,
+      "townName": "Ярославль",
+      "selectedPlaceId": "h_yar",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_yar",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     },
+     {
+      "stopId": "d2s05",
+      "day": 2,
+      "townName": "Суздаль",
+      "selectedPlaceId": "h_suz",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_suz",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       },
+       {
+        "placeId": "h_suz2",
+        "priceNightRub": 4500,
+        "breakfastIncluded": false
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     }
+    ],
+    "meals": [
+     {
+      "day": 1,
+      "meal": "lunch",
+      "stopId": "d1s03",
+      "checkRub": 600
+     },
+     {
+      "day": 1,
+      "meal": "dinner",
+      "stopId": "d1s05",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "lunch",
+      "stopId": "d2s03",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "dinner",
+      "stopId": "d2s05",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": "d3s02",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "dinner",
+      "stopId": null,
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": null,
+      "checkRub": 600
+     }
+    ],
+    "tickets": [
+     {
+      "stopId": "d1s02",
+      "placeId": "pl_k",
+      "name": "Кремль",
+      "adultRub": 1000,
+      "childRub": 1000
+     }
+    ],
+    "reserveFrac": "0.10",
+    "lineStep": 10,
+    "totalStep": 100,
+    "childAges": null,
+    "assumedChildAge": 8,
+    "childFoodWeightUnder7": "0.50",
+    "asOf": {
+     "fuel": "2026-10",
+     "lodging": "2026-09"
+    },
+    "moodJustDrive": false
+   },
+   "crew": {
+    "adults": 2,
+    "children": 1,
+    "dog": true,
+    "childAges": null
+   },
+   "reserveOn": true,
+   "budget": null,
+   "overrides": {
+    "replaced": {
+     "d1s04": {
+      "deltaKm": 6.5,
+      "regionCode": "RU-VLA",
+      "checkRub": null,
+      "adultRub": null,
+      "childRub": null,
+      "name": "Замена",
+      "placeId": "pl_alt",
+      "priceRub": "63.10",
+      "regionName": "Владимирская область"
+     }
+    }
+   },
+   "expected": {
+    "lines": {
+     "fuel": 3750,
+     "tolls": 0,
+     "lodging": 12000,
+     "food": 12600,
+     "tickets": 3000,
+     "reserve": 3140
+    },
+    "subtotalRub": 31350,
+    "totalRub": 34500,
+    "perPersonRub": 11500,
+    "remainingRub": null,
+    "overBudget": false,
+    "hintKeys": [],
+    "fuelFormulaKm": 757
+   }
+  },
+  {
+   "name": "replaced_rest_by_sight",
+   "note": "A§16.6: a rest stop (no ticket unit) replaced by a short sight from the rest pool adds its ticket",
+   "units": {
+    "fuel": {
+     "consumption": 8.0,
+     "fuelType": "ai95",
+     "regions": [
+      {
+       "regionCode": "RU-YAR",
+       "regionName": "Ярославская область",
+       "km": 750.0,
+       "priceRub": "62.00"
+      }
+     ],
+     "asOf": "2026-10"
+    },
+    "tolls": [],
+    "nights": [
+     {
+      "stopId": "d1s05",
+      "day": 1,
+      "townName": "Ярославль",
+      "selectedPlaceId": "h_yar",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_yar",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     },
+     {
+      "stopId": "d2s05",
+      "day": 2,
+      "townName": "Суздаль",
+      "selectedPlaceId": "h_suz",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_suz",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       },
+       {
+        "placeId": "h_suz2",
+        "priceNightRub": 4500,
+        "breakfastIncluded": false
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     }
+    ],
+    "meals": [
+     {
+      "day": 1,
+      "meal": "lunch",
+      "stopId": "d1s03",
+      "checkRub": 600
+     },
+     {
+      "day": 1,
+      "meal": "dinner",
+      "stopId": "d1s05",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "lunch",
+      "stopId": "d2s03",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "dinner",
+      "stopId": "d2s05",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": "d3s02",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "dinner",
+      "stopId": null,
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": null,
+      "checkRub": 600
+     }
+    ],
+    "tickets": [
+     {
+      "stopId": "d1s02",
+      "placeId": "pl_k",
+      "name": "Кремль",
+      "adultRub": 1000,
+      "childRub": 1000
+     }
+    ],
+    "reserveFrac": "0.10",
+    "lineStep": 10,
+    "totalStep": 100,
+    "childAges": null,
+    "assumedChildAge": 8,
+    "childFoodWeightUnder7": "0.50",
+    "asOf": {
+     "fuel": "2026-10",
+     "lodging": "2026-09"
+    },
+    "moodJustDrive": false
+   },
+   "crew": {
+    "adults": 2,
+    "children": 1,
+    "dog": true,
+    "childAges": null
+   },
+   "reserveOn": true,
+   "budget": null,
+   "overrides": {
+    "replaced": {
+     "d2s02": {
+      "deltaKm": 0.8,
+      "regionCode": "RU-YAR",
+      "checkRub": null,
+      "adultRub": 250,
+      "childRub": 100,
+      "name": "Замена",
+      "placeId": "pl_alt",
+      "priceRub": null,
+      "regionName": ""
+     }
+    }
+   },
+   "expected": {
+    "lines": {
+     "fuel": 3720,
+     "tolls": 0,
+     "lodging": 12000,
+     "food": 12600,
+     "tickets": 3600,
+     "reserve": 3190
+    },
+    "subtotalRub": 31920,
+    "totalRub": 35100,
+    "perPersonRub": 11700,
+    "remainingRub": null,
+    "overBudget": false,
+    "hintKeys": [],
+    "fuelFormulaKm": 751
+   }
+  },
+  {
+   "name": "trip_km_formula",
+   "note": "A§16.7: the fuel formula shows tripKm (Σ day km) plus the replaced detours",
+   "units": {
+    "fuel": {
+     "consumption": 8.0,
+     "fuelType": "ai95",
+     "regions": [
+      {
+       "regionCode": "RU-YAR",
+       "regionName": "Ярославская область",
+       "km": 750.0,
+       "priceRub": "62.00"
+      }
+     ],
+     "asOf": "2026-10",
+     "tripKm": 748
+    },
+    "tolls": [],
+    "nights": [
+     {
+      "stopId": "d1s05",
+      "day": 1,
+      "townName": "Ярославль",
+      "selectedPlaceId": "h_yar",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_yar",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     },
+     {
+      "stopId": "d2s05",
+      "day": 2,
+      "townName": "Суздаль",
+      "selectedPlaceId": "h_suz",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_suz",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       },
+       {
+        "placeId": "h_suz2",
+        "priceNightRub": 4500,
+        "breakfastIncluded": false
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     }
+    ],
+    "meals": [
+     {
+      "day": 1,
+      "meal": "lunch",
+      "stopId": "d1s03",
+      "checkRub": 600
+     },
+     {
+      "day": 1,
+      "meal": "dinner",
+      "stopId": "d1s05",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "lunch",
+      "stopId": "d2s03",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "dinner",
+      "stopId": "d2s05",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": "d3s02",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "dinner",
+      "stopId": null,
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": null,
+      "checkRub": 600
+     }
+    ],
+    "tickets": [
+     {
+      "stopId": "d1s02",
+      "placeId": "pl_k",
+      "name": "Кремль",
+      "adultRub": 1000,
+      "childRub": 1000
+     }
+    ],
+    "reserveFrac": "0.10",
+    "lineStep": 10,
+    "totalStep": 100,
+    "childAges": null,
+    "assumedChildAge": 8,
+    "childFoodWeightUnder7": "0.50",
+    "asOf": {
+     "fuel": "2026-10",
+     "lodging": "2026-09"
+    },
+    "moodJustDrive": false
+   },
+   "crew": {
+    "adults": 2,
+    "children": 1,
+    "dog": true,
+    "childAges": null
+   },
+   "reserveOn": true,
+   "budget": null,
+   "overrides": {
+    "replaced": {
+     "d1s04": {
+      "deltaKm": 2.6,
+      "regionCode": "RU-YAR",
+      "checkRub": null,
+      "adultRub": null,
+      "childRub": null,
+      "name": "Замена",
+      "placeId": "pl_alt",
+      "priceRub": null,
+      "regionName": ""
+     }
+    }
+   },
+   "expected": {
+    "lines": {
+     "fuel": 3730,
+     "tolls": 0,
+     "lodging": 12000,
+     "food": 12600,
+     "tickets": 3000,
+     "reserve": 3130
+    },
+    "subtotalRub": 31330,
+    "totalRub": 34500,
+    "perPersonRub": 11500,
+    "remainingRub": null,
+    "overBudget": false,
+    "hintKeys": [],
+    "fuelFormulaKm": 751
    }
   }
  ]

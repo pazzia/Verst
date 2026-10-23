@@ -128,17 +128,30 @@ class FuelTest(unittest.TestCase):
         self.assertEqual(warnings[0].day, 1)
         self.assertEqual(fuel_stops(days), [])
 
-    def test_fuel_coffee_upgrade(self) -> None:
+    def test_fuel_stage_does_not_upgrade_coffee(self) -> None:
+        # A§16.2: coffee upgrades belong to stage 7 (only where a break is due); stage 6 plans 10-min fills
         ctx, inp = ctx_inp()
         cor = corridor(1100, [station("f_cafe", 520, {Tag.CAFE_AT_FUEL}), station("f_plain", 1020)])
         days = days_for(1100, [])
         plan_fuel(days, cor, inp, ctx)  # type: ignore[arg-type]
         cafe, plain = fuel_stops(days)
-        self.assertTrue(cafe.coffee)
-        self.assertEqual(cafe.dwell_min, 15)
+        self.assertEqual((cafe.coffee, cafe.dwell_min, cafe.pool), (False, 10, "fuel"))
         self.assertFalse(plain.coffee)
         self.assertEqual(plain.dwell_min, 10)
         self.assertAlmostEqual(plain.litres, (1020 - 520 + 0.52) * 0.08)
+
+    def test_evening_reason_precedes_last(self) -> None:
+        # A§16.7: the last fill of a round trip that is an evening fill keeps «Заправиться вечером…»
+        ctx, inp = ctx_inp(round_trip=True)
+        cor = corridor(900, [station("f_460", 460)])
+        days = days_for(900, [470])  # trigger 500 is within 60 km after the overnight at 470
+        plan_fuel(days, cor, inp, ctx)  # type: ignore[arg-type]
+        (only,) = fuel_stops(days)
+        self.assertEqual((only.km_at, only.reason_key), (460, "fuel.evening"))
+        days = days_for(900, [])  # no overnight: the same station is a range fill → «Последняя…»
+        cor = corridor(900, [station("f_510", 510)])
+        plan_fuel(days, cor, inp, ctx)  # type: ignore[arg-type]
+        self.assertEqual(fuel_stops(days)[0].reason_key, "fuel.last")
 
     def test_last_fill_before_home(self) -> None:
         ctx, inp = ctx_inp(round_trip=True)

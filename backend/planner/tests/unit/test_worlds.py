@@ -218,5 +218,15 @@ class WorldsTest(unittest.TestCase):
         self.assertEqual(dwell, [240, 240])
 
 
+    def test_generator_matches_committed_json(self) -> None:
+        """A§16.10: `tools/gen_worlds.py` reproduces both committed worlds byte for byte."""
+        from tests.contract.test_cost_recompute_contract import generated
+
+        out = generated("gen_worlds.py")["GENERATED"]
+        self.assertEqual(sorted(out), ["central_russia_v1", "edge_cases_v1"])
+        for name, text in out.items():
+            with self.subTest(world=name):
+                self.assertEqual(text, (WORLDS / f"{name}.json").read_text(encoding="utf-8"))
+
 if __name__ == "__main__":
     unittest.main()

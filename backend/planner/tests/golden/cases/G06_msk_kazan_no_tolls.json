@@ -31,7 +31,7 @@
     "nights": 1,
     "kmRange": [
       814,
-      850
+      840
     ],
     "maxDayKm": 472.5,
     "overnightTownIds": [
@@ -61,10 +61,16 @@
       "all"
     ],
     "costWorkings": [
-      "route: М-12 toll edges cost ×100 → М-7, 814 km, refs {М-7}",
-      "split: N = ceil(814/450) = 2, T = 407; window [max(284.9, 814 − 472.5), min(427.4, 472.5)] = [341.5, 427.4]: Дзержинск 386 (H = 2 × 0.5 + … = 1.5, Q 1) S ≈ 3·1.5 + 2 − 2·0.21 ≈ 6.1; Нижний Новгород 424: H = min(5, 3 + 0.5) = 3.5, Q 3, E 1 → 10.5 + 6 + 1.5 − 0.34 − … ≈ 17.6 → Нижний",
-      "hotel: Волжский откос 4.7 + 0.5 + 0.3 − 0.72 = 4.78 (best) → 7 200 × 1 room",
-      "km = 814 + Σ stop detours: day 2 first rest window [60, 90] min after 09:00 (more_stops R = 90) holds only the coffee station «Башнефть, М-12, 490 км», 6.4 km off the М-7 (detour 2·6.4·1.3 = 16.6 km; the rest area at km 487 arrives at 58.9 min, just outside) → A§6.8 picks it; other detours ≈ 10 km → ≈ 841 km; range [814, 850] (first draft 840 did not allow for this detour)"
-    ]
+      "route: Москва → Казань on М-7 814 km (avoid tolls) + detours ≈ 18 km → ≈ 832 km ∈ [814, 840]; the М-12 coffee 6.4 km off the route (27 min) is no longer a rest (rest.max_detour_min = 10)",
+      "fuel: 832 km × 8 l/100 ≈ 66.6 l at ≈ 60.80 ₽ → ≈ 4 050 ₽",
+      "lodging (2 adults, no filters): Нижний Новгород «Волга» 4.7 + 0.5 + 0.3 − 0.72 = 4.78 > Кремлёвская 4.25 → 7 200",
+      "food (2 people): day 1 lunch at a М-7 roadside café (500–800; Кафе «Привал» 700) + dinner Нижний median_low(700, 800, 1000, 1000) = 800; breakfast included; day 2 lunch Чебоксары, Чувашская кухня 650 (kids + parking 4.4 + 1 = 5.4 > Кафе у залива 4.1 + 0.5 = 4.6); finish ≈ 18:50 < 19:00 → no dinner → 2 × 2 150 = 4 300",
+      "tickets: Золотые ворота 2 × 250 = 500 (Покрова на Нерли, Старый Гороховец, Набережная Фёдоровского, Чебоксарский залив, Монумент are free) → 500",
+      "subtotal 4 050 + 0 + 7 200 + 4 300 + 500 = 16 050; reserve 1 610 (1 605 half up); total round_to(17 660, 100) = 17 700"
+    ],
+    "costTotalRub": {
+      "value": 17700,
+      "tolerancePct": 5
+    }
   }
 }

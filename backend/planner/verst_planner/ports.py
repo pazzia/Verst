@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from datetime import datetime
+from datetime import date, datetime
 from typing import NamedTuple, Protocol
 
 from verst_planner.domain.enums import FuelType, PlaceType
@@ -67,6 +67,11 @@ class PriceRepository(Protocol):
     def food_default_check(self, town_population: int) -> int: ...
 
     def lodging_default_night(self, town_population: int) -> int: ...
+
+    def defaults_as_of(self) -> date:
+        """Date of the default prices (lodging/food/tickets defaults; A§16.7): the fake world's `asOf`,
+        `core.app_config['planner'].updated_at` in Postgres."""
+        ...
 
 
 class TollRepository(Protocol):

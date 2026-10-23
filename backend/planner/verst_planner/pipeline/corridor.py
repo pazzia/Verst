@@ -123,16 +123,18 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
 def place_fixed(
     pts: ResolvedPoints, corridor: Corridor, inp: NormalizedInput, ctx: PlanContext
 ) -> list[PlannedStop]:
-    """VIA stops at their waypoint km and template sights at their projection between waypoints (A§6.2).
+    """User VIA stops at their waypoint km and template sights at their projection between waypoints.
 
     The first and last waypoints (origin, destination/origin) are the START and FINISH anchors, not here.
+    Ready-route `via` points are routing waypoints only and produce no stop (A§16.3, D-21).
     """
     route = corridor.route
     wp_km = [route.cum_km[i] for i in route.waypoint_idx]
     town_ids = [w.town_id for w in pts.waypoints if w.town_id]
     towns = ctx.ports.places.get_towns(town_ids) if town_ids else {}
     out: list[PlannedStop] = []
-    for i in range(1, len(pts.waypoints) - 1):
+    user_vias = range(1, len(pts.waypoints) - 1) if pts.template is None else range(0)
+    for i in user_vias:
         w = pts.waypoints[i]
         town = towns.get(w.town_id) if w.town_id else None
         out.append(
@@ -144,6 +146,7 @@ def place_fixed(
                 town=town,
                 dwell_min=ctx.cfg.dwell_min.via,
                 fixed=True,
+                reason_key="via.user",
                 region_code=town.region_code if town else ctx.region_at(w.point).code,
             )
         )

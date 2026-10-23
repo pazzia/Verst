@@ -333,6 +333,8 @@ class PlannedStop:
     region_code: str = ""
     litres: float = 0.0
     coffee: bool = False
+    pool: str = ""
+    """Stage pool the stop came from (`rest`, `fuel`, `food`, `sight`; A§16.6), "" for anchors/fixed."""
 
 
 @dataclass(slots=True)
@@ -364,6 +366,7 @@ class OvernightChoice:
     region_code: str = ""
     detour_km: float = 0.0
     detour_min: int = 0
+    day_start_km: float = 0.0  # km of the day's start (the previous overnight), for `.limit` (A§16.8)
 
 
 @dataclass(slots=True)
@@ -393,6 +396,8 @@ class FuelUnits:
     fuel_type: FuelType
     regions: tuple[FuelRegionUnit, ...]
     as_of: str
+    trip_km: int | None = None
+    """The km shown in the fuel formula: `TripPlan.km` (A§16.7); None = Σ region km (older units)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -469,6 +474,9 @@ class AltUnits:
     child_rub: int | None
     name_ru: str
     place_id: str
+    price_rub: Decimal | None = None
+    """Fuel price in `region_code`, so a replace into a region the trip did not cross adds its unit."""
+    region_name_ru: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -517,6 +525,19 @@ class ScheduledStop:
     alternatives: tuple[Alternative, ...]
     hotel_options: tuple[HotelOption, ...]
     selected_hotel_id: str | None
+    alternatives_note_ru: str | None = None
+    """A§16.6: «Других вариантов…» / «Нашли только один…» when fewer than two alternatives were found."""
+
+
+@dataclass(frozen=True, slots=True)
+class StopTime:
+    """One row of an alternative's day patch (A§16.6): the day as it is after the replace."""
+
+    stop_id: str
+    seq: int
+    arrive_at: datetime | None
+    depart_at: datetime | None
+    km_from_prev: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -529,6 +550,7 @@ class Alternative:
     shift_min: int
     stop: ScheduledStop
     units: AltUnits
+    day_patch: tuple[StopTime, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -618,6 +640,7 @@ class StopState:
     meal: Meal | None = None
     litres: float = 0.0
     coffee: bool = False
+    pool: str = ""
 
 
 @dataclass(frozen=True, slots=True)

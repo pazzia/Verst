@@ -266,6 +266,39 @@ class CostTest(unittest.TestCase):
         self.assertEqual(res.prices_as_of, "2026-07")
         self.assertEqual(res.lines[1].as_of, "2026-10")  # no tolls → defaults
 
+    def test_formula_km_equals_trip_km(self) -> None:
+        from tests.helpers import make_planner, trip
+        from verst_planner.domain.model import CostOverrides
+
+        planner, _ = make_planner()
+        plan = planner.plan(trip(round_trip=True))
+        fuel = plan.cost.lines[0]
+        self.assertTrue(fuel.formula_ru.startswith(f"{plan.km} км ×"), fuel.formula_ru)
+        self.assertEqual(plan.cost.units.fuel.trip_km, plan.km)
+        regions_km = sum(r.km for r in plan.cost.units.fuel.regions)
+        self.assertAlmostEqual(regions_km, plan.km, delta=len(plan.days_list))  # exact km stay in the units
+        stop = next(s for d in plan.days_list for s in d.stops if s.alternatives)
+        alt = stop.alternatives[0]
+        offline = recompute(
+            plan.cost.units, plan.input.crew, True, None, CostOverrides(replaced={stop.id: alt.units})
+        )
+        shown = round(plan.km + alt.units.delta_km)
+        self.assertTrue(offline.lines[0].formula_ru.startswith(f"{shown} км ×"))
+        replaced = planner.replace_stop(plan, stop.id, alt.id)
+        self.assertTrue(replaced.cost.lines[0].formula_ru.startswith(f"{replaced.km} км ×"))
+
+    def test_as_of_uses_defaults_date(self) -> None:
+        from tests.helpers import make_planner, trip
+
+        planner, fakes = make_planner()
+        self.assertEqual(fakes.prices.defaults_as_of(), date(2026, 10, 1))  # the world's asOf
+        fakes.prices.defaults_as_of = lambda: date(2026, 6, 15)  # type: ignore[method-assign]
+        plan = planner.plan(trip(round_trip=True))  # no tolls, default-priced breakfast/dinner checks
+        lines = {x.key.value: x for x in plan.cost.lines}
+        self.assertEqual(lines["tolls"].as_of, "2026-06")
+        self.assertEqual(lines["food"].as_of, "2026-06")  # dinner is priced at defaults
+        self.assertNotEqual(lines["fuel"].as_of, "2026-06")  # fuel keeps its own price dates
+
     def test_meal_rules_d6(self) -> None:
         ctx, _ = make_ctx()
         inp = sample_normalized()

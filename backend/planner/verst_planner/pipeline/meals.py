@@ -1,40 +1,27 @@
-"""Stage 8: lunch stops; dinner and breakfast are cost units only [D-5, D-6] (A§6.8)."""
+"""Stage 8: lunch stops; dinner and breakfast are cost units only [D-5, D-6] (A§6.8, A§16.2)."""
 
 from __future__ import annotations
 
-from datetime import datetime, time
+from collections.abc import Callable
+from datetime import datetime
 
 from verst_planner.domain.enums import Meal, StopKind, Tag
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop, Town, TownCandidate
 from verst_planner.explain import ru
 from verst_planner.pipeline import Corridor, PlanContext
-from verst_planner.pipeline.timeline import (
-    Profile,
-    Slot,
-    day_end,
-    eta_if_inserted,
-    insert_stop,
-    local,
-    schedule_day,
+from verst_planner.pipeline.checks import (
+    covers_lunch_window,
+    day_valid,
+    in_window,
+    lunch_out_of_window,
+    sights_still_open,
 )
+from verst_planner.pipeline.timeline import Profile, eta_if_inserted, insert_stop, local, schedule_day
 
 PARKING = frozenset({Tag.PARKING, Tag.PARKING_GUARDED})
 NEAREST_TOWN_KM = 30.0
 
-
-def in_window(t: datetime, window: tuple[time, time]) -> bool:
-    """`t` is naive local; the lunch window applies to its own calendar day."""
-    return window[0] <= t.time() <= window[1]
-
-
-def covers_lunch_window(day: DayPlan, slots: list[Slot], ctx: PlanContext) -> bool:
-    """The day's driving schedule overlaps the lunch window (local to the day's start)."""
-    lo, hi = ctx.cfg.lunch_window
-    start = local(day.start_at, day.tz)
-    end = local(day_end(slots), day.tz)
-    w_lo = start.replace(hour=lo.hour, minute=lo.minute, second=0, microsecond=0)
-    w_hi = start.replace(hour=hi.hour, minute=hi.minute, second=0, microsecond=0)
-    return start < w_hi and end > w_lo
+DayCheck = Callable[[DayPlan], bool]
 
 
 def lunch_score(c: Candidate, inp: NormalizedInput, eta_local: datetime, ctx: PlanContext) -> float:
@@ -88,26 +75,21 @@ def make_lunch_stop(
         reason_key=key,
         reason_params=params,
         region_code=c.region_code,
+        pool="food",
     )
 
 
-def sights_still_open(day: DayPlan, slots: list[Slot], ctx: PlanContext) -> bool:
-    for s, slot in zip(day.stops, slots, strict=True):
-        if s.kind is StopKind.SIGHT and s.place is not None:
-            hours = ctx.hours(s.place)
-            if hours is None:
-                continue
-            assert slot.arrive is not None and slot.depart is not None
-            tz = ctx.tz_of(s.region_code, s.point)
-            if not hours.covers(local(slot.arrive, tz), local(slot.depart, tz)):
-                return False
-    return True
-
-
 def lunch_candidates(
-    day: DayPlan, corridor: Corridor, inp: NormalizedInput, ctx: PlanContext, profile: Profile, used: set[str]
+    day: DayPlan,
+    corridor: Corridor,
+    inp: NormalizedInput,
+    ctx: PlanContext,
+    profile: Profile,
+    used: set[str],
+    ok: DayCheck | None = None,
 ) -> list[tuple[float, PlannedStop]]:
-    """Feasible lunch stops for `day` with their score (ETA in the window, open for the whole meal)."""
+    """Feasible lunch stops for `day` with their score: ETA in the window, open for the whole meal, every
+    sight still open, and `ok(day with the lunch)` (the stage-9 budget check with rests, A§16.2)."""
     out: list[tuple[float, PlannedStop]] = []
     for c in corridor.food:
         if not (day.km_start < c.km_at < day.km_end) or c.place.id in used:
@@ -122,7 +104,12 @@ def lunch_candidates(
         hours = ctx.hours(c.place)
         if hours is not None and not hours.covers(arrive, depart):
             continue
-        if not sights_still_open_after(day, probe, ctx, profile):
+        i = insert_stop(day, probe)
+        try:
+            fine = day_valid(day, ctx, profile) and (ok is None or ok(day))
+        finally:
+            day.stops.pop(i)
+        if not fine:
             continue
         score = lunch_score(c, inp, arrive, ctx)
         probe.score = score
@@ -130,28 +117,45 @@ def lunch_candidates(
     return out
 
 
-def sights_still_open_after(day: DayPlan, probe: PlannedStop, ctx: PlanContext, profile: Profile) -> bool:
-    i = insert_stop(day, probe)
-    try:
-        return sights_still_open(day, schedule_day(day, profile), ctx)
-    finally:
-        day.stops.pop(i)
+def best_lunch(cands: list[tuple[float, PlannedStop]]) -> PlannedStop:
+    return min(cands, key=lambda x: (-round(x[0], 9), x[1].km_at, x[1].place.id if x[1].place else ""))[1]
 
 
-def plan_meals(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
+def needs_lunch(day: DayPlan, ctx: PlanContext, profile: Profile) -> bool:
+    if any(s.meal is Meal.LUNCH for s in day.stops):
+        return False
+    return covers_lunch_window(day, schedule_day(day, profile), ctx)
+
+
+def plan_meals(
+    days: list[DayPlan],
+    corridor: Corridor,
+    inp: NormalizedInput,
+    ctx: PlanContext,
+    ok: DayCheck | None = None,
+) -> None:
+    """Stage 8: one lunch per day whose schedule overlaps the lunch window (best `lunch_score`)."""
     profile = ctx.profile_for(corridor.route)
     used = {s.place.id for d in days for s in d.stops if s.place is not None}
     for day in days:
-        if any(s.meal is Meal.LUNCH for s in day.stops):
+        if not needs_lunch(day, ctx, profile):
             continue
-        if not covers_lunch_window(day, schedule_day(day, profile), ctx):
-            continue
-        cands = lunch_candidates(day, corridor, inp, ctx, profile, used)
+        cands = lunch_candidates(day, corridor, inp, ctx, profile, used, ok)
         if not cands:
             continue
-        _score, best = min(
-            cands, key=lambda x: (-round(x[0], 9), x[1].km_at, x[1].place.id if x[1].place else "")
-        )
+        best = best_lunch(cands)
         insert_stop(day, best)
         if best.place is not None:
             used.add(best.place.id)
+
+
+__all__ = [
+    "covers_lunch_window",
+    "in_window",
+    "lunch_candidates",
+    "lunch_out_of_window",
+    "lunch_score",
+    "make_lunch_stop",
+    "plan_meals",
+    "sights_still_open",
+]

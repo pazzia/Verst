@@ -31,6 +31,7 @@ def planned_sight(pid: str, km: float, score: float, dwell: int, fixed: bool = F
         score=score,
         fixed=fixed,
         region_code="RU-MOS",
+        pool="" if fixed else "sight",
     )
 
 
@@ -76,6 +77,75 @@ class ScheduleTest(unittest.TestCase):
         self.assertTrue(sched[0].over_budget)
         self.assertEqual(sight_ids(d), ["F1", "F2"])  # fixed sights are never dropped
         self.assertGreater(sched[0].duration_min, 540)
+
+    def test_long_drive_not_over_budget(self) -> None:
+        # calm budget 540; 600 km = 600 min of driving + rests: the user asked for it via dailyKm, and
+        # duration ≤ mandatory_min (driving + auto stops) → no DAY_OVER_BUDGET (A§16.5, G04)
+        from tests.unit.test_rest import corridor as rest_corridor
+        from tests.unit.test_rest import rests_every
+
+        ctx, inp = setup(Mood.CALM)
+        d = day(600)
+        cor = rest_corridor(rests_every(2, 600))
+        plan_rests([d], cor, inp, ctx)
+        self.assertEqual(len([s for s in d.stops if s.auto]), 4)
+        sched, warnings = schedule_with_rerun([d], cor, inp, ctx)
+        self.assertGreater(sched[0].duration_min, 540)
+        self.assertEqual((warnings, sched[0].over_budget, ctx.rerun), ([], False, 0))
+
+    def test_fixed_overflow_warns(self) -> None:
+        # only fixed/user stops can push a day over max(budget, mandatory): 400 + 2 × 120 = 640 > 540
+        ctx, inp = setup(Mood.CALM)
+        d = day(
+            400,
+            [planned_sight("F1", 100, 5.0, 120, fixed=True), planned_sight("F2", 200, 5.0, 120, fixed=True)],
+        )
+        sched, warnings = schedule_with_rerun([d], corridor([]), inp, ctx)
+        self.assertEqual(
+            [(w.code, w.day, w.detail) for w in warnings], [(WarningCode.DAY_OVER_BUDGET, 1, "minutes=640")]
+        )
+        self.assertTrue(sched[0].over_budget)
+
+    def test_fixed_sight_closed_dropped_with_warning(self) -> None:
+        ctx, inp = setup(Mood.CALM)
+        closed = planned_sight("F_closed", 100, 5.0, 60, fixed=True)
+        closed.place = sight("F_closed", 100, hours="Mo-Su 14:00-18:00").place  # reached at 09:40
+        closed.name_ru = "Музей-усадьба"
+        d = day(300, [closed])
+        sched, warnings = schedule_with_rerun([d], corridor([]), inp, ctx)
+        self.assertEqual(sight_ids(d), [])
+        self.assertEqual(
+            [(w.code, w.day, w.detail) for w in warnings], [(WarningCode.STOP_CLOSED, 1, "place=F_closed")]
+        )
+        self.assertEqual(warnings[0].message_ru, "«Музей-усадьба» в этот день закрыт — убрали из маршрута")
+        self.assertFalse(sched[0].over_budget)
+
+    def test_repair_restores_hours_and_lunch(self) -> None:
+        # after the stages, a non-fixed sight closes before its visit ends and the lunch left its window:
+        # the repair drops the sight, re-plans the lunch (8b) and the rests, so the day is valid again
+        from tests.unit.test_meals import corridor as food_corridor
+        from tests.unit.test_meals import food
+        from verst_planner.domain.enums import Meal
+        from verst_planner.pipeline.checks import closed_sights, lunch_out_of_window
+        from verst_planner.pipeline.meals import make_lunch_stop
+        from verst_planner.pipeline.schedule import final_repair
+        from verst_planner.pipeline.timeline import schedule_day
+
+        ctx, inp = setup(Mood.CALM)
+        cor = food_corridor([food("f110", 110, set()), food("f250", 250, set())])
+        late = planned_sight("S_late", 100, 3.0, 60)
+        late.place = sight("S_late", 100, hours="Mo-Su 06:00-09:00").place  # 09:40 → closed
+        lunch = make_lunch_stop(cor.food[0], inp, ctx, [], 0.0)  # km 110 → 10:50 without the sight
+        d = day(400, [late, lunch])
+        profile = ctx.profile_for(cor.route)
+        self.assertTrue(closed_sights(d, schedule_day(d, profile), ctx))
+        warnings = final_repair([d], cor, inp, ctx)
+        slots = schedule_day(d, profile)
+        self.assertEqual(warnings, [])  # a non-fixed sight is dropped silently
+        self.assertEqual(sight_ids(d), [])
+        self.assertEqual(closed_sights(d, slots, ctx), [])
+        self.assertFalse(lunch_out_of_window(d, slots, ctx))
+        self.assertEqual([s.place.id for s in d.stops if s.meal is Meal.LUNCH and s.place], ["f250"])
 
     def test_no_rerun_when_fine(self) -> None:
         ctx, inp = setup(Mood.CALM)

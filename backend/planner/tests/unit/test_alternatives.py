@@ -87,7 +87,6 @@ class AlternativesTest(unittest.TestCase):
                     for a in s.alternatives:
                         self.assertNotIn(a.place_id, used)
                         self.assertNotEqual(a.place_id, s.place_id)
-                        self.assertEqual(a.stop.kind, s.kind)
                         self.assertEqual(a.stop.id, s.id)
                         self.assertEqual(a.id, f"alt_{s.id}_{a.place_id}")
                         self.assertEqual(a.stop.alternatives, ())
@@ -108,13 +107,88 @@ class AlternativesTest(unittest.TestCase):
         self.assertGreaterEqual(checked, 0)
 
     def test_delta_and_shift(self) -> None:
-        for _p, _d, s in self.all_stops():
+        for _p, d, s in self.all_stops():
             for a in s.alternatives:
-                self.assertEqual(
-                    a.delta_min, a.shift_min
-                )  # neighbours are kept: the day end moves as they do
-                self.assertEqual(a.delta_rub, a.stop.cost_rub - s.cost_rub)
                 self.assertEqual(a.units.place_id, a.place_id)
+                patch = {p.stop_id: p for p in a.day_patch}
+                self.assertEqual(set(patch), {x.id for x in d.stops})
+                # delta_min = change of the day end; shift_min = arrival change of the next stop
+                end = a.day_patch[-1].arrive_at
+                assert end is not None and d.end_at is not None
+                self.assertLessEqual(abs((end - d.end_at).total_seconds() / 60 - a.delta_min), 1)
+                k = [p.stop_id for p in a.day_patch].index(s.id)
+                if k + 1 < len(a.day_patch):
+                    nxt = a.day_patch[k + 1]
+                    old = next(x for x in d.stops if x.id == nxt.stop_id)
+                    assert nxt.arrive_at is not None and old.arrive_at is not None
+                    diff = (nxt.arrive_at - old.arrive_at).total_seconds() / 60
+                    self.assertLessEqual(abs(diff - a.shift_min), 1)
+
+    def test_any_position(self) -> None:
+        # A§16.6: the candidate is inserted at its own km, so the order of the day may change
+        from tests.unit.test_rest import corridor, day, place_at, setup
+        from verst_planner.domain.enums import PlaceType, Tag
+        from verst_planner.domain.model import LatLon, PlannedStop
+        from verst_planner.pipeline.alternatives import Pools, alternatives_for_day
+        from verst_planner.pipeline.rest import make_rest_stop
+        from verst_planner.pipeline.schedule import ScheduledDay
+        from verst_planner.pipeline.timeline import schedule_day
+
+        ctx, inp = setup()
+        here = place_at("r100", PlaceType.REST, 100, {Tag.WC})
+        later = place_at("r125", PlaceType.REST, 125, {Tag.WC, Tag.VIEW})
+        museum = PlannedStop(StopKind.SIGHT, 110.0, "музей", LatLon(52, 38), dwell_min=20, fixed=True)
+        d = day(300, [make_rest_stop(here, inp, ctx, 100.0), museum])
+        cor = corridor([here, later])
+        profile = ctx.profile_for(cor.route)
+        sd = ScheduledDay(d, schedule_day(d, profile), 600, ids=["a", "b", "c", "d"])
+        alts, notes = alternatives_for_day(sd, Pools.of(cor), {"r100"}, inp, ctx, profile, None, 300.0)
+        (alt,) = alts[1]
+        self.assertEqual(alt.place_id, "r125")
+        self.assertEqual(
+            [p.stop_id for p in alt.day_patch], ["a", "c", "b", "d"]
+        )  # rest now after the museum
+        self.assertEqual(notes[1], "Нашли только один вариант в это время.")
+        self.assertEqual(alt.shift_min, 0)  # same dwell and detour: the finish after the rest does not move
+        # the museum is now reached 20 min earlier (08:00 + 110 min), before the rest
+        self.assertEqual(alt.day_patch[1].arrive_at, d.start_at.replace(tzinfo=None, hour=9, minute=50))
+
+    def test_note_when_fewer_than_two(self) -> None:
+        none = "Других вариантов в это время поблизости нет."
+        one = "Нашли только один вариант в это время."
+        seen = set()
+        for _p, _d, s in self.all_stops():
+            if not s.replaceable:
+                self.assertIsNone(s.alternatives_note_ru, s.id)
+                continue
+            expected = {0: none, 1: one}.get(len(s.alternatives))
+            self.assertEqual(s.alternatives_note_ru, expected, s.id)
+            seen.add(expected)
+        self.assertIn(None, seen)
+
+    def test_delta_rub_matches_recompute(self) -> None:
+        from verst_planner.cost.recompute import recompute
+        from verst_planner.domain.model import CostOverrides
+
+        checked = 0
+        for plan in plans():
+            base = recompute(plan.cost.units, plan.input.crew, True, None)
+            base_sum = sum(line.rub for line in base.lines[:5])
+            for d in plan.days_list:
+                for s in d.stops:
+                    for a in s.alternatives:
+                        r = recompute(
+                            plan.cost.units,
+                            plan.input.crew,
+                            True,
+                            None,
+                            CostOverrides(replaced={s.id: a.units}),
+                        )
+                        change = sum(line.rub for line in r.lines[:5]) - base_sum
+                        with self.subTest(alt=a.id):
+                            self.assertLessEqual(abs(change - a.delta_rub), 10, (change, a.delta_rub))
+                        checked += 1
+        self.assertGreater(checked, 20)
 
 
 if __name__ == "__main__":

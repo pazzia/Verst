@@ -94,6 +94,8 @@ class RestCfg:
     widen_after_min: int
     min_remaining_drive_min: int
     break_min_dwell: int
+    max_detour_min: int
+    min_gap_min: int
 
 
 @dataclass(frozen=True, slots=True)

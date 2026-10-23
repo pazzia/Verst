@@ -84,6 +84,7 @@ class CostInput:
     days: tuple[DayInput, ...]
     sights: tuple[SightInput, ...]
     defaults_as_of: date
+    trip_km: int | None = None  # `TripPlan.km`, shown in the fuel formula (A§16.7)
 
 
 def ym(d: date) -> str:
@@ -128,6 +129,7 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
             FuelRegionUnit(r.code, r.name_ru, round(r.km, 3), r.price.price_rub) for r in ci.regions
         ),
         as_of=ym(fuel_as_of),
+        trip_km=ci.trip_km,
     )
     tolls = tuple(toll_unit(t, cfg) for t in ci.tolls)
     toll_as_of = min((t.hit.segment.as_of for t in ci.tolls), default=ci.defaults_as_of)
@@ -262,6 +264,7 @@ __all__ = [
     "food_cost",
     "fuel_stop_cost",
     "overnight_cost",
+    "people_weight",
     "sight_cost",
     "ticket_prices",
     "ym",

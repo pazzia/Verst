@@ -13,7 +13,7 @@
         "driveMin": 220,
         "tz": "Europe/Moscow",
         "startAt": "2026-10-24T08:00",
-        "endAt": "2026-10-24T13:20",
+        "endAt": "2026-10-24T17:00",
         "overBudget": false,
         "stops": [
           {
@@ -40,6 +40,7 @@
             "verified": true,
             "replaceable": false,
             "alternatives": [],
+            "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null
           },
@@ -84,7 +85,9 @@
                   "adultRub": null,
                   "childRub": null,
                   "name": "Площадка отдыха, Р-999, 40 км",
-                  "placeId": "pl_tst_rest_040"
+                  "placeId": "pl_tst_rest_040",
+                  "priceRub": "61.00",
+                  "regionName": "Тестовая область"
                 },
                 "stop": {
                   "id": "d1s02",
@@ -112,9 +115,47 @@
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
+                  "alternativesNote": null,
                   "hotelOptions": [],
                   "selectedHotelId": null
-                }
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T08:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T08:29",
+                    "departAt": "2026-10-24T08:49",
+                    "kmFromPrev": 40
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T10:17",
+                    "departAt": "2026-10-24T14:17",
+                    "kmFromPrev": 121
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T14:28",
+                    "departAt": "2026-10-24T15:28",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T17:00",
+                    "departAt": null,
+                    "kmFromPrev": 125
+                  }
+                ]
               },
               {
                 "id": "alt_d1s02_pl_tst_rest_140",
@@ -130,7 +171,9 @@
                   "adultRub": null,
                   "childRub": null,
                   "name": "Площадка отдыха, Р-999, 140 км",
-                  "placeId": "pl_tst_rest_140"
+                  "placeId": "pl_tst_rest_140",
+                  "priceRub": "61.00",
+                  "regionName": "Тестовая область"
                 },
                 "stop": {
                   "id": "d1s02",
@@ -158,11 +201,50 @@
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
+                  "alternativesNote": null,
                   "hotelOptions": [],
                   "selectedHotelId": null
-                }
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T08:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T09:43",
+                    "departAt": "2026-10-24T10:03",
+                    "kmFromPrev": 140
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T10:17",
+                    "departAt": "2026-10-24T14:17",
+                    "kmFromPrev": 21
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T14:28",
+                    "departAt": "2026-10-24T15:28",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T17:00",
+                    "departAt": null,
+                    "kmFromPrev": 125
+                  }
+                ]
               }
             ],
+            "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null
           },
@@ -170,122 +252,31 @@
             "id": "d1s03",
             "seq": 3,
             "day": 1,
-            "kind": "rest",
-            "sign": "rest",
-            "placeId": "pl_tst_rest_190",
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_tst_park_long",
             "townId": null,
-            "name": "Площадка отдыха, Р-999, 190 км",
+            "name": "Парк-усадьба «Долгая»",
             "note": null,
-            "lat": 57.998191256534085,
-            "lon": 53.22407508508508,
-            "arriveAt": "2026-10-24T10:39",
-            "departAt": "2026-10-24T10:59",
+            "lat": 58.001808743465915,
+            "lon": 52.715009019019014,
+            "arriveAt": "2026-10-24T10:17",
+            "departAt": "2026-10-24T14:17",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 101,
-            "kmAt": 190,
-            "dwellMin": 20,
+            "kmFromPrev": 71,
+            "kmAt": 160,
+            "dwellMin": 240,
             "tags": [
-              "wc",
-              "walk"
+              "view",
+              "walk",
+              "free_entry"
             ],
             "costRub": 0,
-            "reason": "Разминка 20 минут: собаке погулять.",
+            "reason": "4 ч на осмотр. Собака ждёт с одним из взрослых.",
             "verified": true,
             "replaceable": true,
-            "alternatives": [
-              {
-                "id": "alt_d1s03_pl_tst_rest_140",
-                "placeId": "pl_tst_rest_140",
-                "name": "Площадка отдыха, Р-999, 140 км",
-                "deltaMin": 0,
-                "deltaRub": 0,
-                "shiftMin": 0,
-                "units": {
-                  "deltaKm": 0.0,
-                  "regionCode": "RU-TST",
-                  "checkRub": null,
-                  "adultRub": null,
-                  "childRub": null,
-                  "name": "Площадка отдыха, Р-999, 140 км",
-                  "placeId": "pl_tst_rest_140"
-                },
-                "stop": {
-                  "id": "d1s03",
-                  "seq": 3,
-                  "day": 1,
-                  "kind": "rest",
-                  "sign": "rest",
-                  "placeId": "pl_tst_rest_140",
-                  "townId": null,
-                  "name": "Площадка отдыха, Р-999, 140 км",
-                  "note": null,
-                  "lat": 57.998191256534085,
-                  "lon": 52.37563164164164,
-                  "arriveAt": "2026-10-24T10:03",
-                  "departAt": "2026-10-24T10:23",
-                  "tz": "Europe/Moscow",
-                  "kmFromPrev": 51,
-                  "kmAt": 140,
-                  "dwellMin": 20,
-                  "tags": [
-                    "wc"
-                  ],
-                  "costRub": 0,
-                  "reason": "Разминка 20 минут: собаке погулять.",
-                  "verified": true,
-                  "replaceable": true,
-                  "alternatives": [],
-                  "hotelOptions": [],
-                  "selectedHotelId": null
-                }
-              },
-              {
-                "id": "alt_d1s03_pl_tst_rest_240",
-                "placeId": "pl_tst_rest_240",
-                "name": "Площадка отдыха, Р-999, 240 км",
-                "deltaMin": 0,
-                "deltaRub": 0,
-                "shiftMin": 0,
-                "units": {
-                  "deltaKm": 0.0,
-                  "regionCode": "RU-TST",
-                  "checkRub": null,
-                  "adultRub": null,
-                  "childRub": null,
-                  "name": "Площадка отдыха, Р-999, 240 км",
-                  "placeId": "pl_tst_rest_240"
-                },
-                "stop": {
-                  "id": "d1s03",
-                  "seq": 3,
-                  "day": 1,
-                  "kind": "rest",
-                  "sign": "rest",
-                  "placeId": "pl_tst_rest_240",
-                  "townId": null,
-                  "name": "Площадка отдыха, Р-999, 240 км",
-                  "note": null,
-                  "lat": 57.998191256534085,
-                  "lon": 54.072514504504504,
-                  "arriveAt": "2026-10-24T11:16",
-                  "departAt": "2026-10-24T11:36",
-                  "tz": "Europe/Moscow",
-                  "kmFromPrev": 151,
-                  "kmAt": 240,
-                  "dwellMin": 20,
-                  "tags": [
-                    "wc"
-                  ],
-                  "costRub": 0,
-                  "reason": "Разминка 20 минут: собаке погулять.",
-                  "verified": true,
-                  "replaceable": true,
-                  "alternatives": [],
-                  "hotelOptions": [],
-                  "selectedHotelId": null
-                }
-              }
-            ],
+            "alternatives": [],
+            "alternativesNote": "Других вариантов в это время поблизости нет.",
             "hotelOptions": [],
             "selectedHotelId": null
           },
@@ -295,17 +286,17 @@
             "day": 1,
             "kind": "food",
             "sign": "food",
-            "placeId": "pl_tst_cafe_295",
+            "placeId": "pl_tst_cafe_175",
             "townId": null,
-            "name": "Кафе «Тестовое», Р-999, 295 км",
+            "name": "Кафе «Тестовое», Р-999, 175 км",
             "note": null,
             "lat": 58.001808743465915,
-            "lon": 55.00579678678678,
-            "arriveAt": "2026-10-24T12:16",
-            "departAt": "2026-10-24T13:16",
+            "lon": 52.96954205205205,
+            "arriveAt": "2026-10-24T14:28",
+            "departAt": "2026-10-24T15:28",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 106,
-            "kmAt": 295,
+            "kmFromPrev": 16,
+            "kmAt": 175,
             "dwellMin": 60,
             "tags": [
               "parking"
@@ -315,6 +306,7 @@
             "verified": true,
             "replaceable": true,
             "alternatives": [],
+            "alternativesNote": "Других вариантов в это время поблизости нет.",
             "hotelOptions": [],
             "selectedHotelId": null
           },
@@ -330,10 +322,10 @@
             "note": null,
             "lat": 58.0,
             "lon": 55.08555,
-            "arriveAt": "2026-10-24T13:20",
+            "arriveAt": "2026-10-24T17:00",
             "departAt": null,
             "tz": "Europe/Moscow",
-            "kmFromPrev": 5,
+            "kmFromPrev": 125,
             "kmAt": 300,
             "dwellMin": 0,
             "tags": [],
@@ -342,6 +334,7 @@
             "verified": true,
             "replaceable": false,
             "alternatives": [],
+            "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null
           }
@@ -353,7 +346,7 @@
         "driveMin": 224,
         "tz": "Europe/Moscow",
         "startAt": "2026-10-25T09:00",
-        "endAt": "2026-10-25T15:04",
+        "endAt": "2026-10-25T14:44",
         "overBudget": false,
         "stops": [
           {
@@ -380,6 +373,7 @@
             "verified": true,
             "replaceable": false,
             "alternatives": [],
+            "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null
           },
@@ -424,7 +418,9 @@
                   "adultRub": null,
                   "childRub": null,
                   "name": "Площадка отдыха, Р-999, 340 км",
-                  "placeId": "pl_tst_rest_340"
+                  "placeId": "pl_tst_rest_340",
+                  "priceRub": "61.00",
+                  "regionName": "Тестовая область"
                 },
                 "stop": {
                   "id": "d2s02",
@@ -452,9 +448,54 @@
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
+                  "alternativesNote": null,
                   "hotelOptions": [],
                   "selectedHotelId": null
-                }
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T09:30",
+                    "departAt": "2026-10-25T09:50",
+                    "kmFromPrev": 41
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:12",
+                    "departAt": "2026-10-25T11:42",
+                    "kmFromPrev": 111
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T12:28",
+                    "departAt": "2026-10-25T12:38",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T13:41",
+                    "departAt": "2026-10-25T14:41",
+                    "kmFromPrev": 86
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 11,
+                    "arriveAt": "2026-10-25T14:44",
+                    "departAt": null,
+                    "kmFromPrev": 5
+                  }
+                ]
               },
               {
                 "id": "alt_d2s02_pl_tst_rest_440",
@@ -470,7 +511,9 @@
                   "adultRub": null,
                   "childRub": null,
                   "name": "Площадка отдыха, Р-999, 440 км",
-                  "placeId": "pl_tst_rest_440"
+                  "placeId": "pl_tst_rest_440",
+                  "priceRub": "61.00",
+                  "regionName": "Тестовая область"
                 },
                 "stop": {
                   "id": "d2s02",
@@ -498,11 +541,57 @@
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
+                  "alternativesNote": null,
                   "hotelOptions": [],
                   "selectedHotelId": null
-                }
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T10:43",
+                    "departAt": "2026-10-25T11:03",
+                    "kmFromPrev": 141
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:12",
+                    "departAt": "2026-10-25T11:42",
+                    "kmFromPrev": 11
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T12:28",
+                    "departAt": "2026-10-25T12:38",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T13:41",
+                    "departAt": "2026-10-25T14:41",
+                    "kmFromPrev": 86
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 11,
+                    "arriveAt": "2026-10-25T14:44",
+                    "departAt": null,
+                    "kmFromPrev": 5
+                  }
+                ]
               }
             ],
+            "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null
           },
@@ -533,42 +622,13 @@
             "verified": true,
             "replaceable": true,
             "alternatives": [],
+            "alternativesNote": "Других вариантов в это время поблизости нет.",
             "hotelOptions": [],
             "selectedHotelId": null
           },
           {
             "id": "d2s04",
             "seq": 9,
-            "day": 2,
-            "kind": "rest",
-            "sign": "rest",
-            "placeId": "pl_tst_rest_490",
-            "townId": null,
-            "name": "Площадка отдыха, Р-999, 490 км",
-            "note": null,
-            "lat": 57.998191256534085,
-            "lon": 58.3147166966967,
-            "arriveAt": "2026-10-25T12:14",
-            "departAt": "2026-10-25T12:34",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 41,
-            "kmAt": 490,
-            "dwellMin": 20,
-            "tags": [
-              "wc",
-              "walk"
-            ],
-            "costRub": 0,
-            "reason": "Разминка 20 минут: собаке погулять.",
-            "verified": true,
-            "replaceable": true,
-            "alternatives": [],
-            "hotelOptions": [],
-            "selectedHotelId": null
-          },
-          {
-            "id": "d2s05",
-            "seq": 10,
             "day": 2,
             "kind": "fuel",
             "sign": "fuel",
@@ -578,10 +638,10 @@
             "note": null,
             "lat": 58.001808743465915,
             "lon": 58.654093123123126,
-            "arriveAt": "2026-10-25T12:48",
-            "departAt": "2026-10-25T12:58",
+            "arriveAt": "2026-10-25T12:28",
+            "departAt": "2026-10-25T12:38",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 21,
+            "kmFromPrev": 61,
             "kmAt": 510,
             "dwellMin": 10,
             "tags": [
@@ -591,27 +651,215 @@
             "reason": "Через 500 км в баке останется меньше 20% — заправимся здесь.",
             "verified": true,
             "replaceable": true,
-            "alternatives": [],
+            "alternatives": [
+              {
+                "id": "alt_d2s04_pl_tst_fuel_470",
+                "placeId": "pl_tst_fuel_470",
+                "name": "АЗС «Тест», Р-999, 470 км",
+                "deltaMin": 0,
+                "deltaRub": 0,
+                "shiftMin": 0,
+                "units": {
+                  "deltaKm": 0.0,
+                  "regionCode": "RU-TST",
+                  "checkRub": null,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "АЗС «Тест», Р-999, 470 км",
+                  "placeId": "pl_tst_fuel_470",
+                  "priceRub": "61.00",
+                  "regionName": "Тестовая область"
+                },
+                "stop": {
+                  "id": "d2s04",
+                  "seq": 9,
+                  "day": 2,
+                  "kind": "fuel",
+                  "sign": "fuel",
+                  "placeId": "pl_tst_fuel_470",
+                  "townId": null,
+                  "name": "АЗС «Тест», Р-999, 470 км",
+                  "note": null,
+                  "lat": 58.001808743465915,
+                  "lon": 57.975341321321324,
+                  "arriveAt": "2026-10-25T11:59",
+                  "departAt": "2026-10-25T12:09",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 21,
+                  "kmAt": 470,
+                  "dwellMin": 10,
+                  "tags": [
+                    "24h"
+                  ],
+                  "costRub": 2300,
+                  "reason": "Через 500 км в баке останется меньше 20% — заправимся здесь.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T10:06",
+                    "departAt": "2026-10-25T10:26",
+                    "kmFromPrev": 91
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:12",
+                    "departAt": "2026-10-25T11:42",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T11:59",
+                    "departAt": "2026-10-25T12:09",
+                    "kmFromPrev": 21
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T13:41",
+                    "departAt": "2026-10-25T14:41",
+                    "kmFromPrev": 126
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 11,
+                    "arriveAt": "2026-10-25T14:44",
+                    "departAt": null,
+                    "kmFromPrev": 5
+                  }
+                ]
+              },
+              {
+                "id": "alt_d2s04_pl_tst_fuel_550",
+                "placeId": "pl_tst_fuel_550",
+                "name": "АЗС «Тест», Р-999, 550 км",
+                "deltaMin": 0,
+                "deltaRub": 0,
+                "shiftMin": 0,
+                "units": {
+                  "deltaKm": 0.0,
+                  "regionCode": "RU-TST",
+                  "checkRub": null,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "АЗС «Тест», Р-999, 550 км",
+                  "placeId": "pl_tst_fuel_550",
+                  "priceRub": "61.00",
+                  "regionName": "Тестовая область"
+                },
+                "stop": {
+                  "id": "d2s04",
+                  "seq": 9,
+                  "day": 2,
+                  "kind": "fuel",
+                  "sign": "fuel",
+                  "placeId": "pl_tst_fuel_550",
+                  "townId": null,
+                  "name": "АЗС «Тест», Р-999, 550 км",
+                  "note": null,
+                  "lat": 58.001808743465915,
+                  "lon": 59.33284787787788,
+                  "arriveAt": "2026-10-25T12:58",
+                  "departAt": "2026-10-25T13:08",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 101,
+                  "kmAt": 550,
+                  "dwellMin": 10,
+                  "tags": [
+                    "24h"
+                  ],
+                  "costRub": 2690,
+                  "reason": "Через 500 км в баке останется меньше 20% — заправимся здесь.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T10:06",
+                    "departAt": "2026-10-25T10:26",
+                    "kmFromPrev": 91
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:12",
+                    "departAt": "2026-10-25T11:42",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T12:58",
+                    "departAt": "2026-10-25T13:08",
+                    "kmFromPrev": 101
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T13:41",
+                    "departAt": "2026-10-25T14:41",
+                    "kmFromPrev": 46
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 11,
+                    "arriveAt": "2026-10-25T14:44",
+                    "departAt": null,
+                    "kmFromPrev": 5
+                  }
+                ]
+              }
+            ],
+            "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null
           },
           {
-            "id": "d2s06",
-            "seq": 11,
+            "id": "d2s05",
+            "seq": 10,
             "day": 2,
             "kind": "food",
             "sign": "food",
-            "placeId": "pl_tst_cafe_535",
+            "placeId": "pl_tst_cafe_595",
             "townId": null,
-            "name": "Кафе «Тестовое», Р-999, 535 км",
+            "name": "Кафе «Тестовое», Р-999, 595 км",
             "note": null,
             "lat": 58.001808743465915,
-            "lon": 59.07831484484485,
-            "arriveAt": "2026-10-25T13:17",
-            "departAt": "2026-10-25T14:17",
+            "lon": 60.09644697697698,
+            "arriveAt": "2026-10-25T13:41",
+            "departAt": "2026-10-25T14:41",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 26,
-            "kmAt": 535,
+            "kmFromPrev": 86,
+            "kmAt": 595,
             "dwellMin": 60,
             "tags": [
               "parking"
@@ -622,9 +870,9 @@
             "replaceable": true,
             "alternatives": [
               {
-                "id": "alt_d2s06_pl_tst_cafe_595",
-                "placeId": "pl_tst_cafe_595",
-                "name": "Кафе «Тестовое», Р-999, 595 км",
+                "id": "alt_d2s05_pl_tst_cafe_535",
+                "placeId": "pl_tst_cafe_535",
+                "name": "Кафе «Тестовое», Р-999, 535 км",
                 "deltaMin": 0,
                 "deltaRub": 0,
                 "shiftMin": 0,
@@ -634,26 +882,28 @@
                   "checkRub": 550,
                   "adultRub": null,
                   "childRub": null,
-                  "name": "Кафе «Тестовое», Р-999, 595 км",
-                  "placeId": "pl_tst_cafe_595"
+                  "name": "Кафе «Тестовое», Р-999, 535 км",
+                  "placeId": "pl_tst_cafe_535",
+                  "priceRub": "61.00",
+                  "regionName": "Тестовая область"
                 },
                 "stop": {
-                  "id": "d2s06",
-                  "seq": 11,
+                  "id": "d2s05",
+                  "seq": 10,
                   "day": 2,
                   "kind": "food",
                   "sign": "food",
-                  "placeId": "pl_tst_cafe_595",
+                  "placeId": "pl_tst_cafe_535",
                   "townId": null,
-                  "name": "Кафе «Тестовое», Р-999, 595 км",
+                  "name": "Кафе «Тестовое», Р-999, 535 км",
                   "note": null,
                   "lat": 58.001808743465915,
-                  "lon": 60.09644697697698,
-                  "arriveAt": "2026-10-25T14:01",
-                  "departAt": "2026-10-25T15:01",
+                  "lon": 59.07831484484485,
+                  "arriveAt": "2026-10-25T12:57",
+                  "departAt": "2026-10-25T13:57",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 86,
-                  "kmAt": 595,
+                  "kmFromPrev": 26,
+                  "kmAt": 535,
                   "dwellMin": 60,
                   "tags": [
                     "parking"
@@ -663,17 +913,63 @@
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
+                  "alternativesNote": null,
                   "hotelOptions": [],
                   "selectedHotelId": null
-                }
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T10:06",
+                    "departAt": "2026-10-25T10:26",
+                    "kmFromPrev": 91
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:12",
+                    "departAt": "2026-10-25T11:42",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T12:28",
+                    "departAt": "2026-10-25T12:38",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T12:57",
+                    "departAt": "2026-10-25T13:57",
+                    "kmFromPrev": 26
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 11,
+                    "arriveAt": "2026-10-25T14:44",
+                    "departAt": null,
+                    "kmFromPrev": 65
+                  }
+                ]
               }
             ],
+            "alternativesNote": "Нашли только один вариант в это время.",
             "hotelOptions": [],
             "selectedHotelId": null
           },
           {
-            "id": "d2s07",
-            "seq": 12,
+            "id": "d2s06",
+            "seq": 11,
             "day": 2,
             "kind": "finish",
             "sign": "city",
@@ -683,10 +979,10 @@
             "note": null,
             "lat": 58.0,
             "lon": 60.17111,
-            "arriveAt": "2026-10-25T15:04",
+            "arriveAt": "2026-10-25T14:44",
             "departAt": null,
             "tz": "Europe/Moscow",
-            "kmFromPrev": 65,
+            "kmFromPrev": 5,
             "kmAt": 599,
             "dwellMin": 0,
             "tags": [],
@@ -695,6 +991,7 @@
             "verified": true,
             "replaceable": false,
             "alternatives": [],
+            "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null
           }
@@ -799,11 +1096,12 @@
             {
               "regionCode": "RU-TST",
               "regionName": "Тестовая область",
-              "km": 604.34,
+              "km": 603.82,
               "priceRub": "61.00"
             }
           ],
-          "asOf": "2026-10"
+          "asOf": "2026-10",
+          "tripKm": 604
         },
         "tolls": [],
         "nights": [
@@ -835,11 +1133,18 @@
           {
             "day": 2,
             "meal": "lunch",
-            "stopId": "d2s06",
+            "stopId": "d2s05",
             "checkRub": 550
           }
         ],
         "tickets": [
+          {
+            "stopId": "d1s03",
+            "placeId": "pl_tst_park_long",
+            "name": "Парк-усадьба «Долгая»",
+            "adultRub": 0,
+            "childRub": 0
+          },
           {
             "stopId": "d2s03",
             "placeId": "pl_tst_viewpoint",
@@ -927,5 +1232,5 @@
     },
     "engineVersion": "0.1.0"
   },
-  "text": "Тестовск → Конечный · 604 км · 2 дня\nДень 1 · 301 км\n08:00 Тестовск\n09:06 Площадка отдыха, Р-999, 90 км\n10:39 Площадка отдыха, Р-999, 190 км\n12:16 Кафе «Тестовое», Р-999, 295 км\n13:20 Серединск\nДень 2 · 303 км\n09:00 Серединск\n10:06 Площадка отдыха, Р-999, 390 км\n11:12 Смотровая на Тесте\n12:14 Площадка отдыха, Р-999, 490 км\n12:48 АЗС «Тест», Р-999, 510 км\n13:17 Кафе «Тестовое», Р-999, 535 км\n15:04 Конечный\nИтого ≈ 11 500 ₽ на 2 чел."
+  "text": "Тестовск → Конечный · 604 км · 2 дня\nДень 1 · 301 км\n08:00 Тестовск\n09:06 Площадка отдыха, Р-999, 90 км\n10:17 Парк-усадьба «Долгая»\n14:28 Кафе «Тестовое», Р-999, 175 км\n17:00 Серединск\nДень 2 · 303 км\n09:00 Серединск\n10:06 Площадка отдыха, Р-999, 390 км\n11:12 Смотровая на Тесте\n12:28 АЗС «Тест», Р-999, 510 км\n13:41 Кафе «Тестовое», Р-999, 595 км\n14:44 Конечный\nИтого ≈ 11 500 ₽ на 2 чел."
 }

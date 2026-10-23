@@ -429,3 +429,126 @@ Open questions for the Architect / Manager:
   (motorway exits add 9 min per stop); confirm this is the intended behaviour for a 10 h budget.
 - Architect sign-off of 10 world coordinates (DEV-008 acceptance 2) and Manager review of the G01–G12
   expectations (DEV-018 acceptance 6) are pending.
+
+---
+
+# Sprint 1 rework (Manager verdict 2026-10-23, A§16) — R-01 … R-14
+
+Final state: `make check` → ruff `All checks passed!`, mypy `Success: no issues found in 52 source files`,
+`Ran 268 tests` / `OK`; `tools/stdlib_coverage.py --fail-under 85` → `TOTAL 4719 124 97.4%`. Alternatives
+coverage gate (G01, G02, G03, G06, G07, G08): `G01 10/10, G02 6/8, G03 6/9, G06 10/13, G07 5/5, G08 4/6;
+total 41/51 = 80%` (baseline 23 %).
+
+## R-01 Breaks and rests (A§16.2, D-17)
+- Execution order (first pass and re-run): 6 fuel → 8 lunch → 9 sights → 8b → 7 rests → 10 → final repair
+  (`schedule.run_stages`, engine inlines it to keep the progress events in place).
+- `rest.plan_rests_day`: gaps between breaks (start + stops with dwell ≥ 15) longer than R; step 1 upgrades
+  a range fuel stop with a cafe in `[max(G, R−60), R+15]` to coffee; step 2 admissible candidates (unused,
+  inside the day, detour ≤ `rest.max_detour_min` 10, ≥ G after b0, ≥ min(G, gap − R) before b1) in
+  `[R−30, R]`, else `[max(G, R−60), R+15]`; else a virtual break. Tie: closer to R, then id.
+- Config: `rest.max_detour_min = 10`, `rest.min_gap_min = 60` (seed 0002 regenerated).
+- Driving for `rest.generic` = arrival at the rest − arrival at the previous break (incl. detours), rounded
+  to 15 min. A short sight used as a rest keeps `sight.default`.
+- New `PlannedStop.pool` / `StopState.pool` (`rest|fuel|food|sight`) records the stage pool (needed by the
+  repair, the alternatives and `break_spacing`).
+- Decisions: (a) the stage-6 coffee upgrade (A§6.7) is removed — coffee only where stage 7 needs a break;
+  (b) the G lower bound also applies to step 1 (`max(G, R−60)`), so `break_spacing` holds for coffee too;
+  (c) `day_ok` (stage 9 and the lunch probes) plans the rest reserve on a copy with `strict=False` (rests are
+  placed even if they would break a lunch/sight), so a lunch or sight that only fits without its rests is
+  rejected; the real stage 7 is strict (never breaks hours/lunch → virtual break instead). Without (c) the
+  first lunch of G06 sat at 14:29 and every later rest was rejected.
+- (d) Feasibility budget of `day_ok` = `max(day_budget_min, drive + auto + fixed stop time)`: the budget limits
+  optional content only; without the fixed term G12 could never get a lunch.
+- Invariants `break_spacing` (stage-7 stop ≥ G − 1 min after the previous break, detour ≤ 10) and
+  `rest_reason`. An upper bound is not asserted: virtual breaks are not visible in the plan.
+- First run: all new rest tests passed at once; G11 keeps no rest (rules: the only areas are 44 or 117 min
+  after the start/virtual break, or < min(G, gap − R) before the lunch) — consistent with A§16.2.
+
+## R-02 Lunch after sights (D-18)
+- `sights.plan_lunches` (stage 8 with `day_ok`) and `plan_lunch_after_sights` (8b). 8b simulates the drops on
+  a copy (lowest sight_score, tie later km); if no lunch fits even with every stage-9 sight dropped, nothing
+  is dropped ("no feasible food place").
+- Invariant `lunch_present` (opt-out `expect.noLunchDays`, unused now: G12 got its lunch after (d)).
+
+## R-03 Vias (D-21)
+- Ready-route vias produce no stop (`corridor.place_fixed`); user vias: reason `via.user`, dwell 30, `city`,
+  never replaceable. Template `via.user`/`alternatives.*` added to `reasons.ru.json` and `TEMPLATE_KEYS`.
+
+## R-04 Repair, STOP_CLOSED, over budget (D-20)
+- `checks.py` (new): `in_window`, `covers_lunch_window`, `closed_sights`, `lunch_out_of_window`,
+  `day_valid`, `mandatory_min`, `budget_limit`, `over_budget`.
+- `DAY_OVER_BUDGET` iff `duration > max(budget, mandatory_min)`; G04 now has no warning (Q-E closed).
+- `schedule.final_repair`: per day, repeat until clean: drop a closed sight (fixed → `STOP_CLOSED`, detail
+  `place=<id>`), drop a lunch out of window and re-plan 8b once, re-plan the day's rests
+  (`remove_rests` + `plan_rests_day`); every change re-checks, so the invariants hold by construction.
+
+## R-05 Alternatives (D-19)
+- Any position, any kind from the stop's stage pool; `Alternative.day_patch` (`StopTime`), `ScheduledStop.
+  alternatives_note_ru` (`alternatives.none/one`), codec `dayPatch` / `alternativesNote`; `shift_min` is the
+  arrival change of the next stop in the new order; `delta_rub` per A§16.6 (exact per-stop cost, fuel stops 0,
+  + Δdetour × consumption × price(region of c)); `AltUnits.price_rub` + `region_name_ru`.
+- `Planner.replace_stop` rebuilds the day with the same `trial_day` → equals `day_patch` (tested for every
+  alternative of the G03-like plan).
+- `recompute`: an alternative in a region the trip did not cross (and Δkm > 0) adds that region; a non-sight
+  stop replaced by a sight adds its ticket. `_units_after_replace` bakes exactly the same rules.
+- **Deviation (needs Architect OK):** a candidate within `CLUSTER_KM = 2 km` of the replaced stop (same town)
+  takes the replaced stop's slot, its km clamped to the neighbours. With strict km order, same-town candidates
+  landed after the lunch of that town and arrived +50…+115 min later (the main reason for 0–1 alternatives).
+- World enrichment in `gen_worlds.py` (`EXTRA_SIGHTS` 68, `EXTRA_CAFES` 36): second-choice sights/cafés in
+  the towns of the golden trips; «Ботик Петра I» renamed «…Петра Первого» (Latin «I» broke `russian_text`).
+- Invariants: `alternatives` (no kind restriction; day patch covers the day, keeps the seqs, matches the
+  rendered alternative) and `alternatives_note`; gate test `AlternativesGateTest` (aggregate ≥ 70 %).
+
+## R-06 Cost patch (A§16.9)
+- `recompute_cost` rejects `dog` changes and `children` 0 ↔ > 0 (`InvalidInput("crew","replan_required")`);
+  after any crew change `_recrew_day` re-renders stop `cost_rub` (tickets, lunch, rooms), hotel options
+  (rooms, crew price) and the alternatives' cost and `delta_rub`.
+
+## R-07 Template fit (A§16.4)
+- `template_fits` requires a crew-passing lodging in each night town; `passes` moved to `day_split` (imported
+  by `overnight`, no cycle); the `template_no_hotel` path is gone (asserted).
+
+## R-08 `.limit`
+- `OvernightChoice.day_start_km`; `.limit` dkm = `day_start_km + daily_km − km_at` → G03 «На 33 км раньше
+  вашего предела…».
+
+## R-09 Cost presentation (A§16.7)
+- `FuelUnits.trip_km` (= `TripPlan.km`, codec `tripKm`) is shown in the fuel formula (+ replaced Δkm offline);
+  `PriceRepository.defaults_as_of()` (fake: world `asOf`) replaces the oldest-fuel stand-in;
+  `PlanContext.default_check_at(km)` is the one default check for lunch stops and the food line.
+  `fuel.evening` already won over `fuel.last` (only `fuel.range` becomes `last`), now tested. Invariant
+  `formula_km`.
+
+## R-10 Coupling
+- `PlanContext.region_info(code)`; `grep -n "ctx\._" verst_planner/engine.py` prints nothing (test
+  `test_layering.test_engine_uses_public_context`).
+
+## R-11 Goldens
+- First run after R-01…R-10 (old expectations): `FAILED (failures=11)` — 10 snapshots + G02 `costTotalRub`.
+- Every expectation re-derived by hand (costWorkings in each case), then run again before regenerating:
+  `FAILED (failures=10)` — snapshot mismatches only; all expectations and invariants passed. Then
+  `make golden-update` and `python3 -m tests.golden.export_contracts`.
+- `costTotalRub` (±5 %) now in every non-error case; `warnings` exact everywhere (G05 `["NO_LODGING"]`, G11
+  `["FUEL_GAP"]`, G04/G07 `[]`); line tolerances: fuel 5 %, others 0 % (G02 food 11 250 / tickets 3 700 exact);
+  G06 `kmRange` [814, 840] (832); G07/G08 food [1, 1]. Totals: G01 16 500, G02 33 800, G03 16 200, G04 8 900,
+  G05 11 500, G06 17 700, G07 21 600, G08 5 700, G11 3 000, G12 3 900.
+- Disclosure: the plans' structure (which sights/lunches) was visible to me from debugging runs while I wrote
+  the workings; each pick in the workings is justified by the stage rule and world values, and where the rule
+  is within detour noise (G01 day-2 lunch) the alternative total is stated.
+
+## R-12 Hygiene
+- Generators run in memory (`VERST_GEN_IN_MEMORY=1`, `GENERATED` / `TEXT` globals); tests
+  `test_worlds.test_generator_matches_committed_json` and the contract's `test_generator_matches_committed_json`.
+- Contract: 34 cases (+ `replaced_new_region_priced`, `replaced_rest_by_sight`, `trip_km_formula`) and an
+  expected `fuelFormulaKm` per case.
+
+## R-13
+- `test_engine.test_engine_state_size_1500km`: 1 981 km round trip → 101 710 bytes (limit 400 KB).
+
+## Open for the Architect / Manager
+- The `CLUSTER_KM` slot rule (R-05 deviation above).
+- Removing the stage-6 coffee upgrade, `strict=False` reserve and the fixed-stop term in the feasibility
+  budget (R-01 c/d) are interpretations of A§16.2/16.5 — please confirm.
+- Per case, G03 (67 %) and G08 (67 %) are below 70 % (G01 100, G02 75, G06 77, G07 100); the gate is applied
+  to the six cases together (80 %). If the gate is meant per case, G03 needs more Р-22 roadside cafés/fuel, G08 more Суздаль
+  sights.

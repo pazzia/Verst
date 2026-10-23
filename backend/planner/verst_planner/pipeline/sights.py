@@ -1,13 +1,19 @@
-"""Stage 9: sights within the day's time budget and opening hours (A§6.9, SPEC §7.2 step 9)."""
+"""Stage 9: sights within the day's time budget and opening hours (A§6.9, SPEC §7.2 step 9), and stage 8b:
+lunch for days that still have none after the sights (A§16.2).
+
+Feasibility (`day_ok`) is evaluated on a copy of the day with its rests planned, so sights can never push
+rests out of the budget (A§16.2); the budget rule is A§16.5 (`max(day_budget_min, mandatory_min)`).
+"""
 
 from __future__ import annotations
 
-from verst_planner.domain.enums import Meal, Mood, Source, StopKind, Tag
+from verst_planner.domain.enums import Mood, Source, StopKind, Tag
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop
-from verst_planner.explain import ru
+from verst_planner.explain.reasons import sight_reason
 from verst_planner.pipeline import Corridor, PlanContext
-from verst_planner.pipeline.meals import in_window, sights_still_open
-from verst_planner.pipeline.timeline import Profile, Slot, day_duration_min, insert_stop, local, schedule_day
+from verst_planner.pipeline.meals import best_lunch, lunch_candidates, needs_lunch, plan_meals
+from verst_planner.pipeline.rest import RestPool, day_ok, rest_pool
+from verst_planner.pipeline.timeline import Profile, insert_stop
 
 NOTABLE = frozenset({Tag.KREMLIN, Tag.MONASTERY, Tag.MUSEUM, Tag.VIEW})
 
@@ -24,18 +30,9 @@ def sight_score(c: Candidate, inp: NormalizedInput) -> float:
     )
 
 
-def sight_reason(
-    dwell: int, inp: NormalizedInput, source: Source
-) -> tuple[str, dict[str, str | int | float]]:
-    if source is Source.OSM:
-        return "sight.osm", {}
-    key = "sight.dog_waits" if inp.crew.dog else "sight.default"
-    return key, {"dwell": ru.duration_phrase(dwell)}
-
-
 def make_sight_stop(c: Candidate, inp: NormalizedInput, ctx: PlanContext) -> PlannedStop:
     dwell = c.place.dwell_min or ctx.cfg.dwell_min.sight_default
-    key, params = sight_reason(dwell, inp, c.place.source)
+    key, params = sight_reason(dwell, inp.crew, c.place.source)
     return PlannedStop(
         kind=StopKind.SIGHT,
         km_at=c.km_at,
@@ -49,29 +46,12 @@ def make_sight_stop(c: Candidate, inp: NormalizedInput, ctx: PlanContext) -> Pla
         reason_key=key,
         reason_params=params,
         region_code=c.region_code,
+        pool="sight",
     )
 
 
-def day_ok(
-    day: DayPlan, inp: NormalizedInput, ctx: PlanContext, profile: Profile, budget: int | None = None
-) -> bool:
-    """Within the time budget, every sight open for its whole visit, lunch (if any) in its window."""
-    slots = schedule_day(day, profile)
-    limit = budget if budget is not None else ctx.cfg.day_budget_min.of(inp.mood)
-    if day_duration_min(day, slots) > limit + 1e-6:
-        return False
-    if not sights_still_open(day, slots, ctx):
-        return False
-    return not lunch_out_of_window(day, slots, ctx)
-
-
-def lunch_out_of_window(day: DayPlan, slots: list[Slot], ctx: PlanContext) -> bool:
-    return any(
-        s.meal is Meal.LUNCH
-        and slot.arrive is not None
-        and not in_window(local(slot.arrive, ctx.tz_of(s.region_code, s.point)), ctx.cfg.lunch_window)
-        for s, slot in zip(day.stops, slots, strict=True)
-    )
+def _used(days: list[DayPlan]) -> set[str]:
+    return {s.place.id for d in days for s in d.stops if s.place is not None}
 
 
 def plan_sights(
@@ -82,7 +62,8 @@ def plan_sights(
         return
     profile = ctx.profile_for(corridor.route)
     max_n = ctx.cfg.sights.max_per_day.of(inp.mood)
-    used = {s.place.id for d in days for s in d.stops if s.place is not None}
+    used = _used(days)
+    rests = RestPool(rest_pool(corridor))
     for day in days:
         n = sum(1 for s in day.stops if s.kind is StopKind.SIGHT and s.fixed)
         pool = [
@@ -100,8 +81,80 @@ def plan_sights(
                 continue
             stop = make_sight_stop(c, inp, ctx)
             i = insert_stop(day, stop)
-            if day_ok(day, inp, ctx, profile):
+            if day_ok(day, inp, ctx, profile, rests, used | {c.place.id}):
                 n += 1
                 used.add(c.place.id)
             else:
                 day.stops.pop(i)
+
+
+def droppable_sights(day: DayPlan) -> list[int]:
+    """Stage-9 sights (never fixed template sights, user vias or short sights used as rests)."""
+    return [
+        i for i, s in enumerate(day.stops) if s.kind is StopKind.SIGHT and s.pool == "sight" and not s.fixed
+    ]
+
+
+def lowest_sight(day: DayPlan) -> int:
+    """The droppable sight with the lowest score (tie: the later one)."""
+    return min(droppable_sights(day), key=lambda i: (day.stops[i].score, -day.stops[i].km_at))
+
+
+def plan_lunches(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
+    """Stage 8 with the lunch probes checked by `day_ok` (rests reserved)."""
+    profile = ctx.profile_for(corridor.route)
+    rests = RestPool(rest_pool(corridor))
+    used = _used(days)
+    plan_meals(days, corridor, inp, ctx, ok=lambda d: day_ok(d, inp, ctx, profile, rests, used))
+
+
+def lunch_after_sights_day(
+    day: DayPlan,
+    corridor: Corridor,
+    inp: NormalizedInput,
+    ctx: PlanContext,
+    profile: Profile,
+    used: set[str],
+    rests: RestPool,
+) -> None:
+    """Stage 8b for one day: plan the lunch; if none fits, drop stage-9 sights (lowest score first, tie:
+    later km) one at a time until a lunch fits (A§16.2). The drops are simulated on a copy first: when no
+    lunch fits even with every droppable sight gone (no feasible food place on the day's corridor), the
+    sights are kept and the day goes without a lunch stop (it is still costed, A§7.1)."""
+
+    def cands(d: DayPlan) -> list[tuple[float, PlannedStop]]:
+        if not needs_lunch(d, ctx, profile):
+            return []
+        return lunch_candidates(
+            d, corridor, inp, ctx, profile, used, ok=lambda x: day_ok(x, inp, ctx, profile, rests, used)
+        )
+
+    if not needs_lunch(day, ctx, profile):
+        return
+    trial = DayPlan(day.day, day.km_start, day.km_end, day.start_at, list(day.stops), day.tz)
+    dropped: list[PlannedStop] = []
+    found = cands(trial)
+    while not found and droppable_sights(trial) and needs_lunch(trial, ctx, profile):
+        dropped.append(trial.stops.pop(lowest_sight(trial)))
+        found = cands(trial)
+    if not found:
+        return
+    day.stops[:] = trial.stops
+    for s in dropped:
+        if s.place is not None:
+            used.discard(s.place.id)
+    best = best_lunch(found)
+    insert_stop(day, best)
+    assert best.place is not None
+    used.add(best.place.id)
+
+
+def plan_lunch_after_sights(
+    days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext
+) -> None:
+    """Stage 8b over every day still without a lunch that now overlaps the lunch window."""
+    profile = ctx.profile_for(corridor.route)
+    used = _used(days)
+    rests = RestPool(rest_pool(corridor))
+    for day in days:
+        lunch_after_sights_day(day, corridor, inp, ctx, profile, used, rests)

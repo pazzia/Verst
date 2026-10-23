@@ -38,9 +38,6 @@
     "overnightFallbacks": [
       "no_hotel"
     ],
-    "warningsContain": [
-      "NO_LODGING"
-    ],
     "mustExcludePlaceIds": [
       "pl_tst_hotel_nodog"
     ],
@@ -62,8 +59,18 @@
       "all"
     ],
     "costWorkings": [
-      "split: 600 km, N = 2, T = 300, window [285, 315] and widened [285, 315] (both capped by 600 − 315): no town with a dog-friendly lodging → F1/F2 fail; F3 (3 days) also has no passing town → F4: Серединск (300) without a hotel, fallback no_hotel, NO_LODGING, no nearest passing lodging",
-      "lodging: lodging_default_night(30 000) = 3 500 (edge world defaults) × 1 room = 3 500 «(средняя цена)»"
-    ]
+      "route: Тестовск → Конечный 600 km on Р-999 + detours ≈ 4 km → ≈ 604 km; fuel 604 × 8 / 100 × 61.00 = 2 947.5 → 2 950",
+      "lodging: the only lodging (Гостиница «Серединская») has no dogs_allowed → NO_HOTEL, lodging_default_night(population < 100 000) = 3 500",
+      "food (2 people): day 1 lunch Кафе «Тестовое» 550 + dinner at Серединск (no food place in the town → food_default_check = 550); breakfast after a NO_HOTEL night = 0.6 × 550 = 330; day 2 lunch 550; finish 14:44 → no dinner → 2 × 1 980 = 3 960",
+      "tickets: Парк-усадьба «Долгая» and Смотровая на Тесте free → 0",
+      "subtotal 2 950 + 0 + 3 500 + 3 960 + 0 = 10 410; reserve 1 040 (1 041); total round_to(11 450, 100) = 11 500"
+    ],
+    "warnings": [
+      "NO_LODGING"
+    ],
+    "costTotalRub": {
+      "value": 11500,
+      "tolerancePct": 5
+    }
   }
 }

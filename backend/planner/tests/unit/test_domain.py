@@ -42,6 +42,7 @@ class EnumTest(unittest.TestCase):
                 "DAY_OVER_BUDGET",
                 "TOLLS_UNAVOIDABLE",
                 "UNVERIFIED_PLACES",
+                "STOP_CLOSED",
             ],
             StageKey: ["split", "lodging", "hours", "fuel", "cost"],
             CostKey: ["fuel", "tolls", "lodging", "food", "tickets", "reserve"],

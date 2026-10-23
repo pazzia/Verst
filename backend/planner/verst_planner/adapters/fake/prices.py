@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 from verst_planner.adapters.fake.world import FakeWorld
 from verst_planner.domain.enums import FuelType
 from verst_planner.domain.errors import NotFound
@@ -37,3 +39,7 @@ class FakePriceRepository:
 
     def lodging_default_night(self, town_population: int) -> int:
         return _by_population(self.world.lodging_night_by_population, town_population)
+
+    def defaults_as_of(self) -> date:
+        """The world's `asOf` (A§16.7)."""
+        return self.world.as_of

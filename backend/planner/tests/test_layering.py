@@ -122,6 +122,13 @@ class LayeringTest(unittest.TestCase):
                     self.assertTrue(allowed(name, rule), f"{mod} must not import {name}")
         self.assertGreater(checked, 50)
 
+    def test_engine_uses_public_context(self) -> None:
+        """A§16.1 #4 (R-10): `engine.py` reaches `PlanContext` only through its public API."""
+        import re
+
+        src = (PKG / "engine.py").read_text(encoding="utf-8")
+        self.assertEqual(re.findall(r"ctx\._\w+", src), [])
+
     def test_detects_violations(self) -> None:
         self.assertFalse(allowed("verst_planner.cost.model", RULES["verst_planner.pipeline"]))
         self.assertFalse(allowed("verst_planner.geo.index", RULES["verst_planner.domain"]))

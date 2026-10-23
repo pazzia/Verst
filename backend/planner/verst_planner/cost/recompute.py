@@ -19,6 +19,7 @@ from verst_planner.domain.model import (
     CostResult,
     CostUnits,
     Crew,
+    FuelRegionUnit,
     NightUnit,
 )
 
@@ -74,19 +75,23 @@ def recompute(
     fuel_t = units.fuel.fuel_type
     lines: list[CostLine] = []
 
-    # ---- fuel: sum km_r x consumption / 100 x price_r (replaced stops shift their detour km)
-    km_by_region = {r.region_code: dec(r.km) for r in units.fuel.regions}
+    # ---- fuel: sum km_r x consumption / 100 x price_r (replaced stops shift their detour km; an alternative
+    # in a region the trip did not cross adds that region with the alternative's price, A§16.6)
+    regions = list(units.fuel.regions)
+    km_by_region = {r.region_code: dec(r.km) for r in regions}
     for alt in ov.replaced.values():
         if alt.region_code in km_by_region:
             km_by_region[alt.region_code] += dec(alt.delta_km)
-        elif units.fuel.regions:
-            first = units.fuel.regions[0].region_code
-            km_by_region[first] += dec(alt.delta_km)
+        elif alt.price_rub is not None and alt.delta_km > 0:
+            regions.append(FuelRegionUnit(alt.region_code, alt.region_name_ru, 0.0, alt.price_rub))
+            km_by_region[alt.region_code] = dec(alt.delta_km)
+        elif regions:
+            km_by_region[regions[0].region_code] += dec(alt.delta_km)
     cons = dec(units.fuel.consumption_l_per_100km)
     fuel_exact = ZERO
     litres = ZERO
     fuel_rows: list[CostBreakdownRow] = []
-    for r in units.fuel.regions:
+    for r in regions:
         km = max(ZERO, km_by_region[r.region_code])
         cost = km * cons / 100 * r.price_rub
         fuel_exact += cost
@@ -96,18 +101,19 @@ def recompute(
                 r.region_name_ru, km, units.fuel.consumption_l_per_100km, r.price_rub, round_to(cost, step)
             )
         )
-    total_km = sum(km_by_region.values(), ZERO)
+    total_km = sum((max(ZERO, k) for k in km_by_region.values()), ZERO)
+    shown_km = total_km  # the formula shows TripPlan.km (A§16.7) when the units carry it
+    if units.fuel.trip_km is not None:
+        shown_km = dec(units.fuel.trip_km) + sum((dec(a.delta_km) for a in ov.replaced.values()), ZERO)
     avg = fuel_exact / litres if litres > 0 else ZERO
-    single = units.fuel.regions[0].price_rub if units.fuel.regions else ZERO
+    single = regions[0].price_rub if regions else ZERO
     fuel_rub = round_to(fuel_exact, step)
     lines.append(
         CostLine(
             CostKey.FUEL,
             fm.title(CostKey.FUEL, fuel_t, units.reserve_frac),
             fuel_rub,
-            fm.fuel_formula(
-                total_km, units.fuel.consumption_l_per_100km, avg, len(units.fuel.regions), single
-            ),
+            fm.fuel_formula(shown_km, units.fuel.consumption_l_per_100km, avg, len(regions), single),
             units.fuel.as_of,
             tuple(fuel_rows),
         )
@@ -211,6 +217,19 @@ def recompute(
             paid += 1
             ticket_rows.append(
                 fm.ticket_row(name, crew.adults, adult, crew.children, child, round_to(cost, step))
+            )
+        ticket_exact += cost
+    ticketed = {t.stop_id for t in units.tickets}
+    for sid, alt in ov.replaced.items():
+        if sid in ticketed or alt.adult_rub is None:
+            continue  # a non-sight stop replaced by a sight (rest pool, A§16.6) adds its ticket
+        adult = alt.adult_rub
+        child = alt.child_rub if alt.child_rub is not None else adult
+        cost = dec(crew.adults * adult + crew.children * child)
+        if cost > 0:
+            paid += 1
+            ticket_rows.append(
+                fm.ticket_row(alt.name_ru, crew.adults, adult, crew.children, child, round_to(cost, step))
             )
         ticket_exact += cost
     tickets_rub = round_to(ticket_exact, step)

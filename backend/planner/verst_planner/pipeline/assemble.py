@@ -69,6 +69,7 @@ class StopView:
     hotel_options: tuple[HotelOption, ...] = ()
     note: str | None = None
     alternatives: tuple[Alternative, ...] = ()
+    alternatives_note: str | None = None
 
 
 def render_stop(
@@ -123,6 +124,7 @@ def render_stop(
         alternatives=v.alternatives,
         hotel_options=v.hotel_options,
         selected_hotel_id=s.place.id if s.kind is StopKind.OVERNIGHT and s.place is not None else None,
+        alternatives_note_ru=v.alternatives_note,
     )
 
 
@@ -263,6 +265,7 @@ def stop_state(s: PlannedStop, sid: str) -> StopState:
         meal=s.meal,
         litres=round(s.litres, 3),
         coffee=s.coffee,
+        pool=s.pool,
     )
 
 

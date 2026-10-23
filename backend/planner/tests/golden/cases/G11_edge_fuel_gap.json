@@ -37,14 +37,20 @@
       450,
       465
     ],
-    "warningsContain": [
-      "FUEL_GAP"
-    ],
     "invariants": [
       "all"
     ],
     "costWorkings": [
-      "full 30 / 8 × 100 = 375 km, trigger 300: no station in [300, 340], [200, 300] or [300, 365] (stations at 40, 80, 420) → FUEL_GAP at km 300; virtual refuel at 340 → next trigger 640 > 450"
-    ]
+      "route: Тестовск → Пустошь 450 km on Р-998 + detours ≈ 3 km = 453 km; fuel 453 × 8 / 100 × 61.00 = 2 210.6 → 2 210 (the FUEL_GAP is a warning, fuel is still costed by distance)",
+      "food: 1 adult; lunch Кафе «Северное» (km 330, ≈ 12:00, 24/7) 500; finish 14:32 → no dinner → 500",
+      "subtotal 2 210 + 500 = 2 710; reserve 270 (271); total round_to(2 980, 100) = 3 000"
+    ],
+    "warnings": [
+      "FUEL_GAP"
+    ],
+    "costTotalRub": {
+      "value": 3000,
+      "tolerancePct": 5
+    }
   }
 }

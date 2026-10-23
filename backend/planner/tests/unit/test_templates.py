@@ -30,6 +30,7 @@ DOC_PARAMS: dict[str, dict[str, str | int | float]] = {
     "stage.fuel": {"consumption": "8"},
     "warning.FUEL_GAP": {"km": 300},
     "warning.DAY_OVER_BUDGET": {"day": 2},
+    "warning.STOP_CLOSED": {"name": "Ясная Поляна"},
 }
 
 EMPTY_ALLOWED = {"crew_suffix.none"}

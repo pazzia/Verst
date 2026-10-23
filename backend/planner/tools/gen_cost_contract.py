@@ -7,6 +7,7 @@ A§7.2 written from the architecture text (it does not import verst_planner).
 import copy
 import json
 import math
+import os
 from decimal import ROUND_HALF_UP
 from decimal import Decimal as D
 from pathlib import Path
@@ -85,15 +86,26 @@ def expected(units, crew, reserve_on, budget, overrides):
     hotel_by_stop = overrides.get("hotelByStop", {})
     replaced = overrides.get("replaced", {})
     # fuel
-    kms = {g["regionCode"]: D(str(g["km"])) for g in units["fuel"]["regions"]}
+    regions = list(units["fuel"]["regions"])
+    kms = {g["regionCode"]: D(str(g["km"])) for g in regions}
     for alt in replaced.values():
-        code = alt["regionCode"] if alt["regionCode"] in kms else next(iter(kms))
-        kms[code] += D(str(alt["deltaKm"]))
+        if alt["regionCode"] in kms:
+            kms[alt["regionCode"]] += D(str(alt["deltaKm"]))
+        elif alt.get("priceRub") is not None and alt["deltaKm"] > 0:
+            # A§16.6: a region the trip did not cross joins with the alternative's price
+            regions.append(region(alt["regionCode"], alt.get("regionName", ""), 0.0, alt["priceRub"]))
+            kms[alt["regionCode"]] = D(str(alt["deltaKm"]))
+        else:
+            kms[regions[0]["regionCode"]] += D(str(alt["deltaKm"]))
     cons = D(str(units["fuel"]["consumption"]))
     fuel = sum(
-        (max(D(0), kms[g["regionCode"]]) * cons / 100 * D(g["priceRub"]) for g in units["fuel"]["regions"]),
+        (max(D(0), kms[g["regionCode"]]) * cons / 100 * D(g["priceRub"]) for g in regions),
         D(0),
     )
+    if units["fuel"].get("tripKm") is not None:  # A§16.7: the formula shows TripPlan.km
+        shown_km = D(units["fuel"]["tripKm"]) + sum((D(str(a["deltaKm"])) for a in replaced.values()), D(0))
+    else:
+        shown_km = sum((max(D(0), k) for k in kms.values()), D(0))
     tolls = sum((D(t["rub"]) for t in units["tolls"]), D(0))
     rooms = math.ceil(crew["adults"] / 2)
     lodging = D(0)
@@ -136,6 +148,12 @@ def expected(units, crew, reserve_on, budget, overrides):
             a = alt["adultRub"] or 0
             c = alt["childRub"] if alt["childRub"] is not None else a
         tickets += crew["adults"] * a + crew["children"] * c
+    ticketed = {t["stopId"] for t in units["tickets"]}
+    for sid, alt in replaced.items():  # a rest stop replaced by a sight (rest pool) adds its ticket
+        if sid not in ticketed and alt["adultRub"] is not None:
+            a = alt["adultRub"]
+            c = alt["childRub"] if alt["childRub"] is not None else a
+            tickets += crew["adults"] * a + crew["children"] * c
     lines = {
         "fuel": r(fuel, 10),
         "tolls": r(tolls, 10),
@@ -165,6 +183,7 @@ def expected(units, crew, reserve_on, budget, overrides):
         "remainingRub": remaining,
         "overBudget": over,
         "hintKeys": hints,
+        "fuelFormulaKm": int(shown_km.quantize(D(1), ROUND_HALF_UP)) if regions else None,
     }
 
 
@@ -409,8 +428,38 @@ case(
     units=mod(tickets=[ticket("d1s02", "pl_k", "Кремль", 1005, 1005)]),
 )
 
-OUT.parent.mkdir(parents=True, exist_ok=True)
-OUT.write_text(
+def alt(region_code, delta, check=None, adult=None, child=None, price=None, region_name=""):
+    return {
+        "deltaKm": delta,
+        "regionCode": region_code,
+        "checkRub": check,
+        "adultRub": adult,
+        "childRub": child,
+        "name": "Замена",
+        "placeId": "pl_alt",
+        "priceRub": price,
+        "regionName": region_name,
+    }
+
+
+case(
+    "replaced_new_region_priced",
+    "A§16.6: an alternative in a region the trip did not cross adds that region at its price",
+    overrides={"replaced": {"d1s04": alt("RU-VLA", 6.5, price="63.10", region_name="Владимирская область")}},
+)
+case(
+    "replaced_rest_by_sight",
+    "A§16.6: a rest stop (no ticket unit) replaced by a short sight from the rest pool adds its ticket",
+    overrides={"replaced": {"d2s02": alt("RU-YAR", 0.8, adult=250, child=100)}},
+)
+case(
+    "trip_km_formula",
+    "A§16.7: the fuel formula shows tripKm (Σ day km) plus the replaced detours",
+    units=mod(fuel={**BASE["fuel"], "tripKm": 748}),
+    overrides={"replaced": {"d1s04": alt("RU-YAR", 2.6)}},
+)
+
+TEXT = (
     json.dumps(
         {
             "version": 1,
@@ -421,7 +470,9 @@ OUT.write_text(
         ensure_ascii=False,
         indent=1,
     )
-    + "\n",
-    encoding="utf-8",
+    + "\n"
 )
-print(len(cases), "cases")
+if not os.environ.get("VERST_GEN_IN_MEMORY"):  # tests compare TEXT with the committed file (A§16.10)
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(TEXT, encoding="utf-8")
+    print(len(cases), "cases")

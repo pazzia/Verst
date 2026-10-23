@@ -8,6 +8,7 @@ from typing import Any
 from verst_planner.cost.recompute import recompute
 from verst_planner.domain.codec import alt_units_from_json, units_from_json
 from verst_planner.domain.model import CostOverrides, Crew
+from verst_planner.explain import ru
 
 CASES = Path(__file__).resolve().parent / "cost_recompute_cases.json"
 
@@ -48,6 +49,34 @@ class CostRecomputeContractTest(unittest.TestCase):
                 self.assertEqual(res.over_budget, exp["overBudget"])
                 self.assertEqual(list(res.hint_keys), exp["hintKeys"])
                 self.assertEqual(res.lines[-1].enabled, case["reserveOn"])
+                if exp["fuelFormulaKm"] is not None:  # the km shown in the fuel formula (A§16.7)
+                    km = ru.fmt_km(exp["fuelFormulaKm"])
+                    self.assertTrue(res.lines[0].formula_ru.startswith(f"{km} км"), res.lines[0].formula_ru)
+
+    def test_generator_matches_committed_json(self) -> None:
+        """A§16.10: `tools/gen_cost_contract.py` reproduces the committed cases byte for byte."""
+        text = generated("gen_cost_contract.py")["TEXT"]
+        self.assertEqual(text, CASES.read_text(encoding="utf-8"))
+
+
+def generated(script: str) -> dict[str, Any]:
+    """Run a fixture generator in memory (`VERST_GEN_IN_MEMORY=1`) and return its globals."""
+    import contextlib
+    import io
+    import os
+    import runpy
+
+    path = Path(__file__).resolve().parents[2] / "tools" / script
+    old = os.environ.get("VERST_GEN_IN_MEMORY")
+    os.environ["VERST_GEN_IN_MEMORY"] = "1"
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            return runpy.run_path(str(path), run_name="generator")
+    finally:
+        if old is None:
+            del os.environ["VERST_GEN_IN_MEMORY"]
+        else:
+            os.environ["VERST_GEN_IN_MEMORY"] = old
 
 
 if __name__ == "__main__":

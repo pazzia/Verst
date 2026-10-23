@@ -127,9 +127,8 @@ class TimelineTest(unittest.TestCase):
         kinds1 = [s.kind.value for s in days[0].stops]
         self.assertEqual(kinds1[0], "start")
         self.assertEqual(kinds1[-1], "overnight")
-        self.assertEqual(kinds1.count("via"), 3)  # Сергиев Посад, Переславль, Ростов (Ярославль = overnight)
-        self.assertIn("sight", kinds1)  # the lavra
-        self.assertEqual([s.name_ru for s in days[2].stops if s.kind is StopKind.VIA], ["Владимир"])
+        self.assertEqual(kinds1, ["start", "sight", "overnight"])  # template vias are no stops (A§16.3)
+        self.assertEqual([s.kind for s in days[2].stops if s.kind is StopKind.VIA], [])
         self.assertEqual(days[2].stops[-1].kind, StopKind.FINISH)
 
 

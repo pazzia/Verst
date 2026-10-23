@@ -130,6 +130,20 @@ class ResolveTest(unittest.TestCase):
         self.assertEqual(pts.fixed_after, [1, 4])  # after via Сергиев Посад and via Ярославль
         self.assertEqual(pts.fixed_stops[0].dwell_min, 90)
 
+    def test_template_vias_are_not_stops(self) -> None:
+        # A§16.3 (D-21): the 8 via towns of the Golden Ring route the car but produce no VIA stop/row
+        from tests.helpers import make_planner
+
+        planner, _ = make_planner()
+        plan = planner.plan(trip(destination=None, ready_route_id="rr_golden_ring"))
+        kinds = [s.kind for d in plan.days_list for s in d.stops]
+        self.assertNotIn(StopKind.VIA, kinds)
+        self.assertIn("pl_sps_lavra", {s.place_id for d in plan.days_list for s in d.stops})
+        # a user via still is a stop
+        plan = planner.plan(trip(destination="t_suzdal", vias=("t_vladimir",)))
+        vias = [s for d in plan.days_list for s in d.stops if s.kind is StopKind.VIA]
+        self.assertEqual([v.name_ru for v in vias], ["Владимир"])
+
 
 class BaseRouteTest(unittest.TestCase):
     def test_route_and_tolls_warning(self) -> None:

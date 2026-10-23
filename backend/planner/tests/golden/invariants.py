@@ -12,6 +12,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from verst_planner.adapters.fake import FakeWorld
+from verst_planner.config import PlannerConfig
 from verst_planner.cost.recompute import recompute
 from verst_planner.domain import codec
 from verst_planner.domain.enums import OvernightFallback, StopKind, Tag, WarningCode
@@ -141,7 +142,9 @@ def unique_places(run: GoldenRun) -> None:
 
 
 def alternatives(run: GoldenRun) -> None:
+    """A§16.6: ≤ 3 per stop, within ±45 min, unused places; each day patch covers the whole new day."""
     for d in run.plan.days_list:
+        ids = [x.id for x in d.stops]
         for s in d.stops:
             assert len(s.alternatives) <= 3
             assert s.replaceable == (
@@ -149,9 +152,35 @@ def alternatives(run: GoldenRun) -> None:
             )
             for a in s.alternatives:
                 assert a.place_id != s.place_id
-                assert a.stop.kind is s.kind
                 assert s.arrive_at is not None and a.stop.arrive_at is not None
                 assert abs((a.stop.arrive_at - s.arrive_at).total_seconds()) / 60 <= ALT_WINDOW_MIN
+                order = [p.stop_id for p in a.day_patch]
+                assert sorted(order) == sorted(ids), f"{a.id}: day patch does not cover the day"
+                assert [p.seq for p in a.day_patch] == [x.seq for x in d.stops], f"{a.id}: seq"
+                patched = next(p for p in a.day_patch if p.stop_id == s.id)
+                assert patched.arrive_at == a.stop.arrive_at, f"{a.id}: patch ≠ rendered alternative"
+
+
+def alternatives_note(run: GoldenRun) -> None:
+    """A§16.6: a replaceable stop with fewer than two alternatives explains it; others carry no note."""
+    from verst_planner.explain.templates import ReasonTemplates
+
+    t = ReasonTemplates.default()
+    for d in run.plan.days_list:
+        for s in d.stops:
+            if not s.replaceable:
+                expected = None
+            else:
+                expected = {0: t.render("alternatives.none"), 1: t.render("alternatives.one")}.get(
+                    len(s.alternatives)
+                )
+            assert s.alternatives_note_ru == expected, f"{s.id}: note {s.alternatives_note_ru!r}"
+
+
+def alternatives_share(plan: TripPlan) -> tuple[int, int]:
+    """(replaceable stops with ≥ 2 alternatives, replaceable stops)."""
+    rep = [s for d in plan.days_list for s in d.stops if s.replaceable]
+    return sum(1 for s in rep if len(s.alternatives) >= 2), len(rep)
 
 
 def _not_fixed(s: Any, run: GoldenRun) -> bool:
@@ -247,6 +276,93 @@ def russian_text(run: GoldenRun) -> None:
         assert not LATIN.search(t), f"Latin letters in {t!r}"
 
 
+def _cfg(run: GoldenRun) -> PlannerConfig:
+    return PlannerConfig.from_dict(run.case.get("config") or {})
+
+
+def _drives(run: GoldenRun) -> list[tuple[Any, Any, float]]:
+    """(rendered stop, stop state, driving minutes since the previous break) for every stop after START.
+
+    Driving = arrival − departure of the previous break − dwell of the non-break stops in between, from the
+    rendered (minute-rounded) times.
+    """
+    min_dwell = _cfg(run).rest.break_min_dwell
+    out = []
+    for d, ds in zip(run.plan.days_list, run.plan.engine_state.days, strict=True):
+        prev = d.stops[0].depart_at
+        between = 0
+        for s, st in zip(d.stops[1:], ds.stops[1:], strict=True):
+            assert s.arrive_at is not None and prev is not None
+            drive = (s.arrive_at - prev).total_seconds() / 60 - between
+            out.append((s, st, drive))
+            if s.kind in (StopKind.OVERNIGHT, StopKind.FINISH):
+                break
+            if s.dwell_min >= min_dwell:
+                prev, between = s.depart_at, 0
+            else:
+                between += s.dwell_min
+    return out
+
+
+def _rest_stage(s: Any, st: Any) -> bool:
+    """Stops placed by stage 7: rest-pool stops and range fuel stops upgraded to coffee."""
+    return bool(st.pool == "rest" or (s.kind is StopKind.FUEL and st.coffee))
+
+
+def break_spacing(run: GoldenRun) -> None:
+    """A§16.2: a stage-7 stop is at least `rest.min_gap_min` of driving after the previous break and has a
+    detour of at most `rest.max_detour_min` (1 min tolerance for the minute rounding of rendered times)."""
+    rc = _cfg(run).rest
+    for s, st, drive in _drives(run):
+        if _rest_stage(s, st):
+            gap = f"{s.id} {s.name_ru}: {drive:.0f} min after the previous break"
+            assert drive >= rc.min_gap_min - 1, gap
+            if st.pool == "rest":
+                assert st.detour_min <= rc.max_detour_min, f"{s.id}: detour {st.detour_min} min"
+
+
+def rest_reason(run: GoldenRun) -> None:
+    """`rest.generic` names the driving since the previous break, rounded to 15 min (A§16.2)."""
+    from verst_planner.explain import ru
+    from verst_planner.explain.templates import ReasonTemplates
+    from verst_planner.pipeline.rest import rounded_drive
+
+    t = ReasonTemplates.default()
+    for s, st, drive in _drives(run):
+        if st.reason_key != "rest.generic":
+            continue
+        params = dict(st.reason_params)
+        ok = {
+            t.render("rest.generic", **{**params, "drive": ru.duration_genitive(rounded_drive(x))})
+            for x in (drive - 1, drive, drive + 1)
+        }
+        assert s.reason_ru in ok, f"{s.id}: {s.reason_ru!r} after {drive:.0f} min of driving"
+
+
+def lunch_present(run: GoldenRun) -> None:
+    """A§16.2 (D-18): every day whose schedule overlaps the lunch window has a lunch stop, unless the case
+    names it in `expect.noLunchDays` (no feasible food place on that day's corridor, justified there)."""
+    lo, hi = _cfg(run).lunch_window
+    exempt = set(run.case["expect"].get("noLunchDays", []))
+    for d in run.plan.days_list:
+        w_lo = d.start_at.replace(hour=lo.hour, minute=lo.minute)
+        w_hi = d.start_at.replace(hour=hi.hour, minute=hi.minute)
+        overlaps = d.start_at < w_hi and d.end_at > w_lo
+        has = any(s.kind is StopKind.FOOD for s in d.stops)
+        if overlaps and d.day not in exempt:
+            assert has, f"day {d.day} ({d.start_at:%H:%M}-{d.end_at:%H:%M}) has no lunch"
+
+
+def formula_km(run: GoldenRun) -> None:
+    """A§16.7: the fuel formula shows `TripPlan.km` (Σ day km); exact region km stay in the units."""
+    from verst_planner.explain import ru
+
+    fuel = run.plan.cost.lines[0]
+    km = ru.fmt_km(run.plan.km)
+    assert fuel.formula_ru.startswith(f"{km} км"), f"{fuel.formula_ru!r} ≠ {km} км"
+    assert run.plan.cost.units.fuel.trip_km == run.plan.km
+
+
 ALL: dict[str, Callable[[GoldenRun], None]] = {
     "day_cap": day_cap,
     "dog_lodging": dog_lodging,
@@ -263,4 +379,9 @@ ALL: dict[str, Callable[[GoldenRun], None]] = {
     "determinism": determinism,
     "events": events,
     "russian_text": russian_text,
+    "break_spacing": break_spacing,
+    "rest_reason": rest_reason,
+    "lunch_present": lunch_present,
+    "alternatives_note": alternatives_note,
+    "formula_km": formula_km,
 }

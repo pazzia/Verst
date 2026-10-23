@@ -66,6 +66,8 @@ class PlanContext:
     ready_route: ReadyRoute | None = None
     fuel_warnings: list[PlanWarning] = field(default_factory=list)
     rerun: int = 0
+    corridor_towns: list[TownCandidate] = field(default_factory=list)
+    """Corridor towns (set once the corridor is built) for the default meal check near a km."""
     _regions: dict[tuple[float, float], RegionInfo] = field(default_factory=dict)
     _region_by_code: dict[str, RegionInfo] = field(default_factory=dict)
     _hours: dict[str, OpeningHours | None] = field(default_factory=dict)
@@ -89,6 +91,18 @@ class PlanContext:
             self._regions[key] = hit
             self._region_by_code.setdefault(hit.code, hit)
         return hit
+
+    def region_info(self, code: str) -> RegionInfo | None:
+        """A region seen by `region_at` during this plan (None if it was never located)."""
+        return self._region_by_code.get(code)
+
+    def default_check_at(self, km: float) -> int:
+        """`food_default_check` of the corridor town nearest to route km `km` (A§7.1, A§16.7): the lunch
+        stop without `avg_check_rub` and the food line use the same default."""
+        if not self.corridor_towns:
+            return self.ports.prices.food_default_check(0)
+        near = min(self.corridor_towns, key=lambda t: (abs(t.km_at - km), t.town.id))
+        return self.ports.prices.food_default_check(near.town.population)
 
     def tz_of(self, region_code: str, p: LatLon) -> str:
         info = self._region_by_code.get(region_code)

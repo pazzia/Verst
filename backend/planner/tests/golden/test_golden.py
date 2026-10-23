@@ -236,6 +236,31 @@ class GoldenTest(unittest.TestCase):
             self.check_snapshot(case, plan)
 
 
+GATE_CASES = ("G01", "G02", "G03", "G06", "G07", "G08")
+GATE_SHARE = 0.70
+
+
+class AlternativesGateTest(unittest.TestCase):
+    def test_alternatives_coverage_gate(self) -> None:
+        """A§16.6: ≥ 70 % of the replaceable stops of the central-world calm/more_stops goldens have ≥ 2
+        alternatives (the share per case is printed)."""
+        from tests.golden.invariants import alternatives_share
+
+        ok = total = 0
+        rows = []
+        for path in sorted(CASES.glob("G*.json")):
+            case = load_case(path)
+            if case["id"] not in GATE_CASES:
+                continue
+            plan, *_ = run_case(case)
+            k, n = alternatives_share(plan)
+            rows.append(f"{case['id']} {k}/{n}")
+            ok, total = ok + k, total + n
+        share = ok / total
+        print(f"\nalternatives coverage: {', '.join(rows)}; total {ok}/{total} = {share:.0%}")
+        self.assertGreaterEqual(share, GATE_SHARE)
+
+
 def _soft(s: str) -> str:
     """Compare formula text ignoring the kind of space (U+202F / U+00A0 / ' ')."""
     return s.replace(" ", " ").replace(" ", " ")

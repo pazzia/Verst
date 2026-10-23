@@ -28,6 +28,9 @@
   "start.default": "Выезд в {time}.",
   "finish.home": "Дома к {part_of_day}.",
   "finish.default": "Финиш.",
+  "via.user": "Заезд по вашей просьбе.",
+  "alternatives.none": "Других вариантов в это время поблизости нет.",
+  "alternatives.one": "Нашли только один вариант в это время.",
   "stage.route": "Прокладываем дорогу",
   "stage.split": "Делим путь на {n} {days_word} по ≈ {km} км",
   "stage.split_ring": "Делим кольцо на {n} {days_word} по ≈ {km} км",
@@ -45,5 +48,6 @@
   "warning.FUEL_GAP": "На участке {km} км мало заправок — заправьтесь заранее",
   "warning.DAY_OVER_BUDGET": "День {day} получился длинным — можно убрать остановку",
   "warning.TOLLS_UNAVOIDABLE": "Без платных дорог не проехать — платный участок учтён в расчёте",
-  "warning.UNVERIFIED_PLACES": "Часть мест по открытым данным — не проверены"
+  "warning.UNVERIFIED_PLACES": "Часть мест по открытым данным — не проверены",
+  "warning.STOP_CLOSED": "«{name}» в этот день закрыт — убрали из маршрута"
 }

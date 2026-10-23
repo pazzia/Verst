@@ -39,6 +39,7 @@
           "verified": true,
           "replaceable": false,
           "alternatives": [],
+          "alternativesNote": null,
           "hotelOptions": [],
           "selectedHotelId": null
         },
@@ -68,6 +69,7 @@
           "verified": true,
           "replaceable": false,
           "alternatives": [],
+          "alternativesNote": null,
           "hotelOptions": [],
           "selectedHotelId": null
         },
@@ -97,6 +99,7 @@
           "verified": true,
           "replaceable": true,
           "alternatives": [],
+          "alternativesNote": "Других вариантов в это время поблизости нет.",
           "hotelOptions": [],
           "selectedHotelId": null
         },
@@ -128,6 +131,7 @@
           "verified": true,
           "replaceable": false,
           "alternatives": [],
+          "alternativesNote": null,
           "hotelOptions": [],
           "selectedHotelId": null
         },
@@ -155,6 +159,7 @@
           "verified": true,
           "replaceable": false,
           "alternatives": [],
+          "alternativesNote": null,
           "hotelOptions": [],
           "selectedHotelId": null
         }
@@ -258,7 +263,8 @@
             "priceRub": "61.00"
           }
         ],
-        "asOf": "2026-10"
+        "asOf": "2026-10",
+        "tripKm": 201
       },
       "tolls": [],
       "nights": [],

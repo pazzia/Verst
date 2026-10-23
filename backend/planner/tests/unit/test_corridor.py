@@ -165,8 +165,8 @@ class CorridorTest(unittest.TestCase):
         corridor = build_corridor(route, inp, ctx)
         fixed = place_fixed(pts, corridor, inp, ctx)
         names = [(s.kind.value, s.name_ru, round(s.km_at)) for s in fixed]
-        self.assertEqual(len(fixed), 8 + 2)  # 8 vias + lavra + Ipatiev
-        self.assertIn(("via", "Ярославль", 263), names)
+        # ready-route vias are routing waypoints only (A§16.3): just the lavra and the Ipatiev monastery
+        self.assertEqual([k for k, _n, _km in names], ["sight", "sight"])
         lavra = next(s for s in fixed if s.place and s.place.id == "pl_sps_lavra")
         self.assertAlmostEqual(lavra.km_at, 72, delta=1.5)
         ipatiev = next(s for s in fixed if s.place and s.place.id == "pl_kos_ipatiev")

@@ -111,7 +111,8 @@ class EngineTest(unittest.TestCase):
         self.assertFalse(off.cost.reserve_on)
         self.assertLess(off.cost.total_rub, plan.cost.total_rub)
         bigger = planner.recompute_cost(plan, CostPatch(crew=Crew(4, 1, True, (5,)), budget_rub=None))
-        self.assertEqual(bigger.days_list, plan.days_list)
+        self.assertEqual(len(bigger.days_list), len(plan.days_list))
+        self.assertEqual(bigger.engine_state, plan.engine_state)
         self.assertGreater(bigger.cost.total_rub, plan.cost.total_rub)
         self.assertIsNone(bigger.cost.budget_rub)
         self.assertEqual(bigger.input.crew.adults, 4)
@@ -134,6 +135,37 @@ class EngineTest(unittest.TestCase):
         with self.assertRaises(NotFound):
             planner.recompute_cost(plan, CostPatch(hotel_choice=(night.id, "pl_nope")))
 
+    def test_patch_dog_change_rejected(self) -> None:
+        from verst_planner.domain.errors import InvalidInput
+
+        planner, _ = make_planner()
+        plan = planner.plan(trip(**G03))  # 2 adults + 1 child + dog
+        for crew in (Crew(2, 1, False, (5,)), Crew(2, 0, True), Crew(3, 0, True)):
+            with self.subTest(crew=crew), self.assertRaises(InvalidInput) as cm:
+                planner.recompute_cost(plan, CostPatch(crew=crew))
+            self.assertEqual((cm.exception.field, cm.exception.reason), ("crew", "replan_required"))
+        planner.recompute_cost(plan, CostPatch(crew=Crew(3, 2, True, (5, 9))))  # 1 → 2 children is fine
+
+    def test_patch_crew_updates_stop_costs(self) -> None:
+        planner, _ = make_planner()
+        plan = planner.plan(trip(**G03))
+        patched = planner.recompute_cost(plan, CostPatch(crew=Crew(4, 1, True, (5,))))
+        stops = [s for d in patched.days_list for s in d.stops]
+        lines = {x.key.value: x for x in patched.cost.lines}
+        night = next(s for s in stops if s.kind is StopKind.OVERNIGHT)
+        self.assertEqual(night.cost_rub, lines["lodging"].rub)  # one night: 2 rooms × price
+        for h in night.hotel_options:
+            self.assertEqual((h.rooms, h.price_crew_rub), (2, 2 * h.price_night_rub))
+        food_stops = sum(s.cost_rub for s in stops if s.kind is StopKind.FOOD)
+        lunch_units = [m for m in patched.cost.units.meals if m.meal.value == "lunch" and m.stop_id]
+        self.assertEqual(food_stops, sum(round(4.5 * m.check_rub / 10 + 1e-9) * 10 for m in lunch_units))
+        for s in stops:
+            if s.kind is StopKind.SIGHT and s.place_id:
+                t = next(x for x in patched.cost.units.tickets if x.stop_id == s.id)
+                self.assertEqual(s.cost_rub, round((4 * t.adult_rub + t.child_rub) / 10 + 1e-9) * 10)
+        old = {s.id: s.cost_rub for d in plan.days_list for s in d.stops}
+        self.assertGreater(sum(s.cost_rub for s in stops), sum(old.values()))
+
     def test_determinism(self) -> None:
         a, _ = make_planner()
         b, _ = make_planner()
@@ -144,6 +176,18 @@ class EngineTest(unittest.TestCase):
         ):
             with self.subTest(case=str(kw)[:40]):
                 self.assertEqual(as_json(a.plan(trip(**kw))), as_json(b.plan(trip(**kw))))  # type: ignore[arg-type]
+
+    def test_engine_state_size_1500km(self) -> None:
+        # A§16.1 #2 / A§16.9: the server-only EngineState of a 1,500 km trip stays ≤ 400 KB of JSON
+        import json
+
+        from verst_planner.domain import codec
+
+        planner, _ = make_planner()
+        plan = planner.plan(trip(destination="t_volgograd", round_trip=True, daily_km=600))
+        self.assertGreaterEqual(plan.km, 1500)
+        size = len(json.dumps(codec.engine_state_to_json(plan.engine_state), ensure_ascii=False).encode())
+        self.assertLessEqual(size, 400 * 1024, f"{size} bytes")
 
     def test_perf_1500km(self) -> None:
         planner, _ = make_planner()

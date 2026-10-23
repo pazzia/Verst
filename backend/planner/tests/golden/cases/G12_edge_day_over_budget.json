@@ -40,7 +40,15 @@
       "all"
     ],
     "costWorkings": [
-      "200 km at 90 km/h × 1.1 = 147 min + two fixed sights of 240 min = 627 min (Средний is the finish of this one-way template) > calm 540 → the day is bad; no droppable (non-fixed) sight → auto stops removed, stages 6–9 re-run once (rerun = 1) → still over → DAY_OVER_BUDGET for day 1"
-    ]
+      "route: Тестовск → Средний 200 km + detours ≈ 1 km = 201 km; fuel 201 × 8 / 100 × 61.00 = 980.9 → 980",
+      "the two fixed 4-hour stops make the day 08:00–19:27 (687 min) > max(540, mandatory 200 drive + 60 lunch) → DAY_OVER_BUDGET on day 1; nothing droppable, the single re-run happens (rerun = 1)",
+      "food (2 people): lunch Кафе «Тестовое», Р-999, 115 км (≈ 13:25) 550; finish 19:27 > 19:00 and not the origin → dinner at Средний (no food place → default 550) → 2 × 1 100 = 2 200",
+      "tickets: Большой краеведческий музей 2 × 200 = 400; Парк-усадьба «Долгая» free",
+      "subtotal 980 + 2 200 + 400 = 3 580; reserve 360 (358); total round_to(3 940, 100) = 3 900"
+    ],
+    "costTotalRub": {
+      "value": 3900,
+      "tolerancePct": 5
+    }
   }
 }

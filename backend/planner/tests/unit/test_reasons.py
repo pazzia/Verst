@@ -113,6 +113,24 @@ class ReasonsTest(unittest.TestCase):
         alone = overnight_reason(choice(pick, [], 265.0), 263, self.inp(Crew(2, 0, False)), self.cfg, self.t)  # type: ignore[arg-type]
         self.assertTrue(alone.text.startswith("Как раз на вашей дневной норме."))
 
+    def test_limit_distance_to_daily_cap(self) -> None:
+        # A§16.8: no other town considered and the pick is before the target → distance to the user's
+        # limit (day start + daily km), not to the even-split target. G03: Тамбов at km 467 on a 500-km day.
+        tam = make_town("t_tambov", 52.72, 41.45, name_ru="Тамбов", name_prep_ru="Тамбове")
+        pick = ScoredTown(tam, 467.0, 20.0, 4.0, 2, 1, 3)
+        c = choice(pick, [], 490.0)
+        c.day_start_km = 0.0
+        inp = normalize_input(trip(crew=Crew(2, 1, True), daily_km=500), self.ctx)
+        res = overnight_reason(c, 473, inp, self.cfg, self.t)  # type: ignore[arg-type]
+        self.assertEqual(
+            res.text,
+            "На 33 км раньше вашего предела: здесь больше отелей, куда пускают с собакой. "
+            "Ваши 500 км в день не превышены.",
+        )
+        c.day_start_km = 100.0  # a later day: the limit is km 600
+        res = overnight_reason(c, 367, inp, self.cfg, self.t)  # type: ignore[arg-type]
+        self.assertTrue(res.text.startswith("На 133 км раньше вашего предела"))
+
     def test_no_hotel_text(self) -> None:
         pick = ScoredTown(RST, 300.0, 5.0, 0.0, 1, 0, 0)
         c = choice(pick, [], 300.0, OvernightFallback.NO_HOTEL, hotel=False)
@@ -144,6 +162,18 @@ class ReasonsTest(unittest.TestCase):
             "Золотое кольцо",
         )  # type: ignore[arg-type]
         self.assertTrue(tpl.text.startswith("Ночёвка из готового маршрута «Золотое кольцо»."))
+
+    def test_user_via_reason(self) -> None:
+        from tests.helpers import make_planner
+        from verst_planner.domain.enums import SignType
+
+        planner, _ = make_planner()
+        plan = planner.plan(trip(destination="t_suzdal", vias=("t_vladimir",)))
+        via = next(s for d in plan.days_list for s in d.stops if s.kind is StopKind.VIA)
+        self.assertEqual(via.reason_ru, "Заезд по вашей просьбе.")
+        self.assertEqual(self.t.raw("via.user"), "Заезд по вашей просьбе.")
+        self.assertEqual((via.dwell_min, via.sign, via.replaceable), (30, SignType.CITY, False))
+        self.assertEqual(via.alternatives, ())
 
     def test_start_finish_reasons(self) -> None:
         inp = sample_normalized()

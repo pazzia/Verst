@@ -62,6 +62,28 @@ class DaySplitTest(unittest.TestCase):
         self.assertFalse(split.fixed)
         self.assertEqual(split.n_days, 4)  # ceil(745 / 200)
 
+    def test_template_rejected_when_night_town_fails_crew(self) -> None:
+        # A§16.4: with a dog, a template night town without a dog-friendly lodging makes the template unfit
+        from verst_planner.domain.enums import Tag
+        from verst_planner.domain.model import Crew
+
+        ctx, _ = make_ctx()
+        inp = normalize_input(
+            trip(destination=None, ready_route_id="rr_golden_ring", crew=Crew(2, 0, True)), ctx
+        )
+        pts = resolve_points(inp, ctx)
+        route = build_base_route(pts, inp, ctx)
+        corridor = build_corridor(route, inp, ctx)
+        rr = ctx.ready_route
+        self.assertTrue(template_fits(rr, corridor, inp, ctx))  # type: ignore[arg-type]
+        suzdal = next(t for t in corridor.towns if t.town.id == "t_suzdal")
+        suzdal.lodgings = [h for h in suzdal.lodgings if Tag.DOGS_ALLOWED not in h.place.tags]
+        self.assertTrue(suzdal.lodgings)  # lodgings exist, none passes the dog filter
+        self.assertFalse(template_fits(rr, corridor, inp, ctx))  # type: ignore[arg-type]
+        split = split_days(route, corridor, inp, rr, ctx)  # type: ignore[arg-type]
+        self.assertFalse(split.fixed)
+        self.assertEqual(split.n_days, 3)  # ceil(745 / 300): the engine split runs
+
     def test_template_rejected_when_too_few_days_allowed(self) -> None:
         # 600 km/day: every template day fits, but 3 days > ceil(745 / 540) = 2
         ctx, inp, _route, corridor = self._golden(600)

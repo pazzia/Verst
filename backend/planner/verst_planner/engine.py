@@ -6,6 +6,7 @@ import dataclasses
 import statistics
 from collections.abc import Sequence
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 from verst_planner import ENGINE_VERSION
 from verst_planner.config import PlannerConfig
@@ -20,10 +21,11 @@ from verst_planner.cost.model import (
     food_cost,
     fuel_stop_cost,
     overnight_cost,
+    people_weight,
     sight_cost,
-    ticket_prices,
 )
-from verst_planner.cost.recompute import recompute
+from verst_planner.cost.money import round_to
+from verst_planner.cost.recompute import recompute, rooms_for
 from verst_planner.domain.enums import (
     Meal,
     PlaceType,
@@ -34,9 +36,10 @@ from verst_planner.domain.enums import (
     Tag,
     WarningCode,
 )
-from verst_planner.domain.errors import NotFound
+from verst_planner.domain.errors import InvalidInput, NotFound
 from verst_planner.domain.model import (
     UNSET,
+    Alternative,
     AltUnits,
     Candidate,
     CostPatch,
@@ -48,7 +51,6 @@ from verst_planner.domain.model import (
     DayState,
     EngineState,
     FuelRegionUnit,
-    FuelUnits,
     HotelOption,
     MealUnit,
     NightUnit,
@@ -77,36 +79,36 @@ from verst_planner.pipeline.alternatives import (
     Pools,
     alternatives_for_day,
     build_alternatives,
+    day_patch,
     family,
+    lunch_check,
+    trial_day,
 )
 from verst_planner.pipeline.assemble import (
     Sched,
     StopView,
     engine_state,
     hotel_option,
-    km_from_prev_row,
     region_km,
     render_day,
     stop_state,
     title,
 )
 from verst_planner.pipeline.base_route import build_base_route, toll_warnings
+from verst_planner.pipeline.checks import budget_limit, covers_lunch_window
 from verst_planner.pipeline.corridor import build_corridor, place_fixed
 from verst_planner.pipeline.day_split import split_days
-from verst_planner.pipeline.meals import covers_lunch_window, plan_meals
 from verst_planner.pipeline.overnight import choose_overnights
 from verst_planner.pipeline.resolve import normalize_input, resolve_points
 from verst_planner.pipeline.rest import plan_rests
 from verst_planner.pipeline.schedule import ScheduledDay, assign_ids, schedule_with_rerun
-from verst_planner.pipeline.sights import plan_sights
+from verst_planner.pipeline.sights import plan_lunch_after_sights, plan_lunches, plan_sights
 from verst_planner.pipeline.timeline import (
     Profile,
     build_day_plans,
     day_duration_min,
-    insert_index,
     local,
     local_minute,
-    schedule_day,
 )
 from verst_planner.ports import (
     Clock,
@@ -150,8 +152,7 @@ class Planner:
         if s.kind is StopKind.SIGHT and s.place is not None:
             return sight_cost(s.place, crew)
         if s.kind is StopKind.FOOD and s.place is not None:
-            check = s.place.avg_check_rub or self.ports.prices.food_default_check(0)
-            return food_cost(check, crew, self.cfg)
+            return food_cost(lunch_check(s, ctx), crew, self.cfg)
         if s.kind is StopKind.OVERNIGHT:
             if s.place is not None and s.place.price_night_rub is not None:
                 return overnight_cost(s.place.price_night_rub, crew)
@@ -175,6 +176,7 @@ class Planner:
         warnings: list[PlanWarning] = list(toll_warnings(route, inp, ctx))
         cancel.check()  # before stage 3
         corridor = build_corridor(route, inp, ctx)
+        ctx.corridor_towns = corridor.towns
         split = split_days(route, corridor, inp, pts.template, ctx)
         ring = pts.template is not None and inp.round_trip
         sink.emit(
@@ -215,12 +217,14 @@ class Planner:
             )
         )
         cancel.check()  # before stage 6
+        # execution order A§16.2: 6 fuel → 8 lunch → 9 sights → 8b lunch → 7 rests → 10 schedule/repair
         ctx.fuel_warnings = fuel_stage.plan_fuel(days, corridor, inp, ctx)
-        plan_rests(days, corridor, inp, ctx)
-        plan_meals(days, corridor, inp, ctx)
+        plan_lunches(days, corridor, inp, ctx)
         sink.emit(StageEvent(StageKey.HOURS, t.render("stage.hours"), 0.65))
         cancel.check()  # before stage 9
         plan_sights(days, corridor, inp, ctx)
+        plan_lunch_after_sights(days, corridor, inp, ctx)
+        plan_rests(days, corridor, inp, ctx)
         cancel.check()  # before stage 10
         sched, sched_warnings = schedule_with_rerun(days, corridor, inp, ctx)
         assign_ids(sched)
@@ -283,7 +287,10 @@ class Planner:
         reasons: list[OvernightReason] = []
         days: list[DayResult] = []
         for sd in sched:
-            views: dict[int, StopView] = {i: StopView(alternatives=a) for i, a in sd.alternatives.items()}
+            views: dict[int, StopView] = {
+                i: StopView(alternatives=a, alternatives_note=sd.alternatives_note.get(i))
+                for i, a in sd.alternatives.items()
+            }
             if sd.plan.stops[-1].kind is StopKind.OVERNIGHT:
                 c = choices[sd.plan.day - 1]
                 day_km = round_half_up(
@@ -349,7 +356,11 @@ class Planner:
 
     # ------------------------------------------------------------------------------------------ replace
     def replace_stop(self, plan: TripPlan, stop_id: str, alternative_id: str) -> TripPlan:
-        """Swap in an alternative and re-schedule only that day from `EngineState` (no routing call)."""
+        """Swap in an alternative and re-schedule only that day from `EngineState` (no routing call).
+
+        The new day is built exactly as stage 11 built the alternative (`trial_day`), so it equals the
+        alternative's `day_patch` (A§16.6); then that day's alternatives and the cost are recomputed.
+        """
         found = next(
             (
                 (di, si)
@@ -376,80 +387,62 @@ class Planner:
         places = self.ports.places.get_places(sorted(place_ids))
         towns = self.ports.places.get_towns(sorted({t for t, _k in state.town_kms}))
         town_cands = [TownCandidate(towns[t], km, 0.0, 0, []) for t, km in state.town_kms if t in towns]
+        ctx.corridor_towns = town_cands
         stops = [_planned_from_state(st, r, places) for st, r in zip(ds.stops, old_day.stops, strict=True)]
-        old_planned = stops[si]
+        day = DayPlan(ds.day, ds.km_start, ds.km_end, ds.start_at, stops, ds.tz)
         cand = _candidate_for(alt.place_id, alt.stop.km_at, state, places)
-        new = dataclasses.replace(
-            old_planned,
-            km_at=cand.km_at,
-            name_ru=cand.place.name_ru,
-            point=cand.place.point,
-            place=cand.place,
-            detour_km=cand.detour_km,
-            detour_min=cand.detour_min,
-            dwell_min=alt.stop.dwell_min,
-            region_code=cand.region_code,
-            score=0.0,
-            reason_params=dict(old_planned.reason_params),
-        )
-        if new.kind is StopKind.FUEL:
-            new.litres = max(
-                0.0,
-                old_planned.litres
-                + (cand.km_at - old_planned.km_at + cand.detour_km - old_planned.detour_km)
-                * inp.vehicle.consumption_l_per_100km
-                / 100,
-            )
-        rest = [s for k, s in enumerate(stops) if k != si]
-        ids = [r.id for k, r in enumerate(old_day.stops) if k != si]
-        day = DayPlan(ds.day, ds.km_start, ds.km_end, ds.start_at, rest, ds.tz)
-        j = insert_index(day, new)
-        rest.insert(j, new)
-        ids.insert(j, stop_id)
-        slots = schedule_day(day, profile)
+        trial = trial_day(day, si, cand, inp, ctx, profile, town_cands)
+        old_ids = [r.id for r in old_day.stops]
+        seq0 = old_day.stops[0].seq
+        patch = day_patch(trial, old_ids, si, seq0, ctx)
+        ids = [p.stop_id for p in patch]
         rendered_by_id = {r.id: r for r in old_day.stops}
         rendered_by_id[stop_id] = alt.stop
-        seq0 = old_day.stops[0].seq
-        row = km_from_prev_row(rest)
-        new_stops: list[ScheduledStop] = []
-        for k, (s, slot, sid) in enumerate(zip(rest, slots, ids, strict=True)):
-            base = rendered_by_id[sid]
-            tz = base.tz
-            new_stops.append(
-                dataclasses.replace(
-                    base,
-                    id=sid,
-                    seq=seq0 + k,
-                    day=ds.day,
-                    arrive_at=_lm(slot.arrive, tz),
-                    depart_at=_lm(slot.depart, tz),
-                    km_from_prev=row[k],
-                    km_at=round_half_up(s.km_at),
-                    alternatives=(),
-                )
+        new_stops = [
+            dataclasses.replace(
+                rendered_by_id[p.stop_id],
+                seq=p.seq,
+                day=ds.day,
+                arrive_at=p.arrive_at,
+                depart_at=p.depart_at,
+                km_from_prev=p.km_from_prev,
+                km_at=round_half_up(s.km_at),
+                alternatives=(),
+                alternatives_note_ru=None,
             )
+            for p, s in zip(patch, trial.plan.stops, strict=True)
+        ]
         # alternatives of that day, from the persisted candidate pools
-        sd = ScheduledDay(day, slots, ds.budget_min, ids=ids, seq0=seq0)
+        sd = ScheduledDay(trial.plan, trial.slots, ds.budget_min, ids=ids, seq0=seq0)
         used = {r.place_id for d in plan.days_list for r in d.stops if r.place_id} - {old_rendered.place_id}
         used.add(alt.place_id)
-        pools = _pools(state, places)
         fills = _fills_after_replace(plan, stop_id, cand.km_at)
-        alts = alternatives_for_day(
-            sd, pools, {u for u in used if u}, inp, ctx, profile, fills, state.profile_km[-1], town_cands
+        alts, notes = alternatives_for_day(
+            sd,
+            _pools(state, places),
+            {u for u in used if u},
+            inp,
+            ctx,
+            profile,
+            fills,
+            state.profile_km[-1],
+            town_cands,
         )
         new_stops = [
-            dataclasses.replace(s, alternatives=alts.get(k, ())) if family(rest[k]) else s
+            dataclasses.replace(s, alternatives=alts.get(k, ()), alternatives_note_ru=notes.get(k))
+            if family(trial.plan.stops[k])
+            else s
             for k, s in enumerate(new_stops)
         ]
-        duration = day_duration_min(day, slots)
-        over = duration > ds.budget_min + 1e-6
+        duration = day_duration_min(trial.plan, trial.slots)
+        over = duration > budget_limit(trial.plan, profile, ds.budget_min) + 1e-6
         new_day = DayResult(
             day=ds.day,
-            km=round_half_up(ds.km_end - ds.km_start + sum(s.detour_km for s in rest)),
-            drive_min=round_half_up(sum(x.drive_min for x in slots)),
+            km=round_half_up(ds.km_end - ds.km_start + sum(s.detour_km for s in trial.plan.stops)),
+            drive_min=round_half_up(sum(x.drive_min for x in trial.slots)),
             tz=old_day.tz,
             start_at=old_day.start_at,
-            end_at=_lm(slots[-1].arrive, old_day.tz) or old_day.end_at,
+            end_at=_lm(trial.slots[-1].arrive, old_day.tz) or old_day.end_at,
             stops=tuple(new_stops),
             over_budget=over,
         )
@@ -463,7 +456,8 @@ class Planner:
                     WarningCode.DAY_OVER_BUDGET, ds.day, f"minutes={round_half_up(duration)}", day=ds.day
                 )
             )
-        units = self._units_after_replace(plan.cost.units, stop_id, alt.units, new, inp, ctx)
+        trip_km = sum(d.km for d in days_list)
+        units = _units_after_replace(plan.cost.units, stop_id, alt.units, trip_km)
         cost = self._with_hints(recompute(units, inp.crew, inp.reserve_on, inp.budget_rub))
         region_kms = tuple((r.region_code, r.km) for r in units.fuel.regions)
         new_state = dataclasses.replace(
@@ -477,7 +471,7 @@ class Planner:
                     ds.start_at,
                     ds.tz,
                     ds.budget_min,
-                    tuple(stop_state(s, sid) for s, sid in zip(rest, ids, strict=True)),
+                    tuple(stop_state(s, sid) for s, sid in zip(trial.plan.stops, ids, strict=True)),
                 )
                 if k == di
                 else x
@@ -487,52 +481,20 @@ class Planner:
         return dataclasses.replace(
             plan,
             days_list=days_list,
-            km=sum(d.km for d in days_list),
+            km=trip_km,
             cost=cost,
             warnings=tuple(warnings),
             engine_state=new_state,
         )
-
-    def _units_after_replace(
-        self,
-        u: CostUnits,
-        stop_id: str,
-        alt_units: AltUnits,
-        new: PlannedStop,
-        inp: NormalizedInput,
-        ctx: PlanContext,
-    ) -> CostUnits:
-        regions = list(u.fuel.regions)
-        codes = [r.region_code for r in regions]
-        if alt_units.region_code in codes:
-            k = codes.index(alt_units.region_code)
-            r = regions[k]
-            regions[k] = FuelRegionUnit(
-                r.region_code, r.region_name_ru, round(r.km + alt_units.delta_km, 3), r.price_rub
-            )
-        elif regions:
-            r = regions[0]
-            regions[0] = FuelRegionUnit(
-                r.region_code, r.region_name_ru, round(r.km + alt_units.delta_km, 3), r.price_rub
-            )
-        meals = tuple(
-            MealUnit(m.day, m.meal, m.stop_id, alt_units.check_rub)
-            if m.stop_id == stop_id and alt_units.check_rub is not None
-            else m
-            for m in u.meals
-        )
-        tickets = [x for x in u.tickets if x.stop_id != stop_id]
-        if new.kind is StopKind.SIGHT and new.place is not None:
-            adult, child = ticket_prices(new.place)
-            tickets.append(TicketUnit(stop_id, new.place.id, new.place.name_ru, adult, child))
-        fuel = FuelUnits(u.fuel.consumption_l_per_100km, u.fuel.fuel_type, tuple(regions), u.fuel.as_of)
-        return dataclasses.replace(u, fuel=fuel, meals=meals, tickets=tuple(tickets))
 
     # ------------------------------------------------------------------------------------------ cost patch
     def recompute_cost(self, plan: TripPlan, patch: CostPatch) -> TripPlan:
         """PATCH /v1/trips/{id}: crew, budget, reserve or hotel choice — cost only, no re-planning."""
         inp = plan.input
         crew = patch.crew or inp.crew
+        if crew.dog != inp.crew.dog or (crew.children > 0) != (inp.crew.children > 0):
+            # the lodging filters change (US-05): only a re-plan may pick other hotels (A§16.9)
+            raise InvalidInput("crew", "replan_required")
         budget = inp.budget_rub if patch.budget_rub is UNSET else patch.budget_rub
         assert budget is None or isinstance(budget, int)
         reserve_on = inp.reserve_on if patch.reserve_on is None else patch.reserve_on
@@ -567,10 +529,113 @@ class Planner:
         new_inp = dataclasses.replace(inp, crew=crew, budget_rub=budget, reserve_on=reserve_on)
         units = dataclasses.replace(units, child_ages=crew.child_ages)
         cost = self._with_hints(recompute(units, crew, reserve_on, budget))
+        if crew != inp.crew:
+            days_list = tuple(_recrew_day(d, units, new_inp, self.cfg) for d in days_list)
         return dataclasses.replace(plan, cost=cost, input=new_inp, days_list=days_list)
 
 
 # ---------------------------------------------------------------------------------------------- helpers
+
+
+def _units_after_replace(u: CostUnits, stop_id: str, alt: AltUnits, trip_km: int) -> CostUnits:
+    """Bake a replace into the units so that `recompute(units')` equals
+    `recompute(units, replaced={stop_id: alt})` (A§7.3, A§16.6); `trip_km` is the new formula km."""
+    regions = list(u.fuel.regions)
+    codes = [r.region_code for r in regions]
+    if alt.region_code in codes:
+        k = codes.index(alt.region_code)
+        r = regions[k]
+        regions[k] = FuelRegionUnit(
+            r.region_code, r.region_name_ru, round(r.km + alt.delta_km, 3), r.price_rub
+        )
+    elif alt.price_rub is not None and alt.delta_km > 0:
+        regions.append(
+            FuelRegionUnit(alt.region_code, alt.region_name_ru, round(alt.delta_km, 3), alt.price_rub)
+        )
+    elif regions:
+        r = regions[0]
+        regions[0] = FuelRegionUnit(
+            r.region_code, r.region_name_ru, round(r.km + alt.delta_km, 3), r.price_rub
+        )
+    meals = tuple(
+        MealUnit(m.day, m.meal, m.stop_id, alt.check_rub)
+        if m.stop_id == stop_id and alt.check_rub is not None
+        else m
+        for m in u.meals
+    )
+    had_ticket = any(x.stop_id == stop_id for x in u.tickets)
+    tickets = [x for x in u.tickets if x.stop_id != stop_id]
+    if had_ticket or alt.adult_rub is not None:
+        adult = alt.adult_rub or 0
+        child = alt.child_rub if alt.child_rub is not None else adult
+        tickets.append(TicketUnit(stop_id, alt.place_id, alt.name_ru, adult, child))
+    fuel = dataclasses.replace(u.fuel, regions=tuple(regions), trip_km=trip_km)
+    return dataclasses.replace(u, fuel=fuel, meals=meals, tickets=tuple(tickets))
+
+
+def _recrew_day(d: DayResult, units: CostUnits, inp: NormalizedInput, cfg: PlannerConfig) -> DayResult:
+    """A§16.9: after a crew change, re-render every stop's `cost_rub` (tickets, the lunch, the rooms),
+    the hotel options' rooms and crew price, and the alternatives' costs, so Road ahead agrees with the
+    Waybill."""
+    crew = inp.crew
+    tickets = {t.stop_id: t for t in units.tickets}
+    lunches = {m.stop_id: m.check_rub for m in units.meals if m.meal is Meal.LUNCH and m.stop_id}
+    nights = {n.stop_id: n for n in units.nights}
+    rooms = rooms_for(crew)
+    cons = Decimal(repr(units.fuel.consumption_l_per_100km))
+
+    def ticket_cost(adult: int, child: int) -> int:
+        return round_to(Decimal(crew.adults * adult + crew.children * child), 10)
+
+    def exact(sid: str, au: AltUnits | None) -> Decimal:
+        """Unrounded stop cost (tickets or the crew's lunch) of the stop or of an alternative."""
+        if au is not None:
+            if au.adult_rub is not None:
+                child = au.child_rub if au.child_rub is not None else au.adult_rub
+                return Decimal(crew.adults * au.adult_rub + crew.children * child)
+            if au.check_rub is not None:
+                return Decimal(repr(people_weight(crew, cfg))) * au.check_rub
+            return Decimal(0)
+        if sid in tickets:
+            t = tickets[sid]
+            return Decimal(crew.adults * t.adult_rub + crew.children * t.child_rub)
+        if sid in lunches:
+            return Decimal(repr(people_weight(crew, cfg))) * lunches[sid]
+        return Decimal(0)
+
+    def alt_cost(a: Alternative) -> int:
+        au = a.units
+        if au.adult_rub is not None:
+            return ticket_cost(au.adult_rub, au.child_rub if au.child_rub is not None else au.adult_rub)
+        if au.check_rub is not None:
+            return food_cost(au.check_rub, crew, cfg)
+        return a.stop.cost_rub
+
+    out = []
+    for s in d.stops:
+        cost = s.cost_rub
+        if s.id in tickets:
+            cost = ticket_cost(tickets[s.id].adult_rub, tickets[s.id].child_rub)
+        elif s.id in lunches:
+            cost = food_cost(lunches[s.id], crew, cfg)
+        elif s.id in nights:
+            cost = overnight_cost(nights[s.id].price_night_rub, crew)
+        options = tuple(
+            dataclasses.replace(h, rooms=rooms, price_crew_rub=rooms * h.price_night_rub)
+            for h in s.hotel_options
+        )
+        alts = []
+        for a in s.alternatives:
+            au = a.units
+            fuel = Decimal(repr(au.delta_km)) * cons / 100 * (au.price_rub or Decimal(0))
+            delta = round_to(exact(s.id, au) - exact(s.id, None) + fuel, 10)
+            alts.append(
+                dataclasses.replace(
+                    a, delta_rub=delta, stop=dataclasses.replace(a.stop, cost_rub=alt_cost(a))
+                )
+            )
+        out.append(dataclasses.replace(s, cost_rub=cost, hotel_options=options, alternatives=tuple(alts)))
+    return dataclasses.replace(d, stops=tuple(out))
 
 
 def _lm(dt: datetime | None, tz: str) -> datetime | None:
@@ -614,6 +679,7 @@ def _planned_from_state(st: StopState, r: ScheduledStop, places: dict[str, Place
         region_code=st.region_code,
         litres=st.litres,
         coffee=st.coffee,
+        pool=st.pool,
     )
 
 
@@ -651,7 +717,7 @@ def _fills_after_replace(plan: TripPlan, stop_id: str, new_km: float) -> list[fl
     out = []
     for d, ds in zip(plan.days_list, plan.engine_state.days, strict=True):
         for r, st in zip(d.stops, ds.stops, strict=True):
-            if st.kind is StopKind.FUEL:
+            if st.kind is StopKind.FUEL and st.pool in ("fuel", ""):
                 out.append(new_km if r.id == stop_id else st.km_at)
     return out
 
@@ -711,7 +777,7 @@ def _cost_input(
     prices = ctx.ports.prices
     regions = []
     for code, km in region_kms:
-        info = ctx._region_by_code.get(code)
+        info = ctx.region_info(code)
         regions.append(
             RegionKm(code, info.name_ru if info else code, km, prices.fuel_price(code, inp.vehicle.fuel_type))
         )
@@ -737,12 +803,7 @@ def _cost_input(
     day_inputs = []
     for i, d in enumerate(days):
         lunch = next((j for j, s in enumerate(d.stops) if s.meal is Meal.LUNCH), None)
-        mid = (d.km_start + d.km_end) / 2
-        near = (
-            min(corridor.towns, key=lambda t: (abs(t.km_at - mid), t.town.id)).town
-            if corridor.towns
-            else None
-        )
+        ref_km = d.stops[lunch].km_at if lunch is not None else (d.km_start + d.km_end) / 2
         last = i == len(days) - 1
         arrive = d.slots[-1].arrive
         plan = DayPlan(d.day, d.km_start, d.km_end, d.start_at, d.stops, d.tz)
@@ -752,7 +813,7 @@ def _cost_input(
                 lunch_overlap=covers_lunch_window(plan, d.slots, ctx),
                 lunch_stop_id=d.ids[lunch] if lunch is not None else None,
                 lunch_place=d.stops[lunch].place if lunch is not None else None,
-                lunch_default_check=prices.food_default_check(near.population if near else 0),
+                lunch_default_check=ctx.default_check_at(ref_km),
                 finish_arrival_local=local(arrive, d.tz) if last and arrive is not None else None,
                 finish_is_origin=inp.round_trip,
                 finish_check_rub=_town_check(d.stops[-1].town, corridor, ctx),
@@ -764,8 +825,16 @@ def _cost_input(
         for j, s in enumerate(d.stops)
         if s.kind is StopKind.SIGHT and s.place is not None
     )
-    defaults_as_of = min((r.price.as_of for r in regions), default=ctx.clock.now().date())
-    return CostInput(tuple(regions), tuple(tolls), tuple(nights), tuple(day_inputs), sights, defaults_as_of)
+    trip_km = sum(round_half_up(d.km_end - d.km_start + sum(s.detour_km for s in d.stops)) for d in days)
+    return CostInput(
+        tuple(regions),
+        tuple(tolls),
+        tuple(nights),
+        tuple(day_inputs),
+        sights,
+        prices.defaults_as_of(),
+        trip_km,
+    )
 
 
 __all__ = ["Planner"]

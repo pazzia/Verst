@@ -60,7 +60,9 @@
     "widen_before_min": 60,
     "widen_after_min": 15,
     "min_remaining_drive_min": 30,
-    "break_min_dwell": 15
+    "break_min_dwell": 15,
+    "max_detour_min": 10,
+    "min_gap_min": 60
   },
   "dwell_min": {
     "coffee": 15,

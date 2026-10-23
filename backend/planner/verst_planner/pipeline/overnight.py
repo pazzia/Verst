@@ -9,7 +9,6 @@ from zoneinfo import ZoneInfo
 from verst_planner.domain.enums import OvernightFallback, Tag, WarningCode
 from verst_planner.domain.model import (
     Candidate,
-    Crew,
     NormalizedInput,
     OvernightChoice,
     PlanWarning,
@@ -20,7 +19,7 @@ from verst_planner.explain import ru
 from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.polyline import interpolate
 from verst_planner.pipeline import Corridor, PlanContext, round_half_up
-from verst_planner.pipeline.day_split import EPS, DaySplit
+from verst_planner.pipeline.day_split import EPS, DaySplit, passes
 from verst_planner.pipeline.timeline import Profile
 
 PARKING_TAGS = frozenset({Tag.PARKING, Tag.PARKING_GUARDED})
@@ -36,19 +35,6 @@ class OvernightResult:
     @property
     def n_days(self) -> int:
         return len(self.choices) + 1
-
-
-def passes(h: Candidate, crew: Crew, ctx: PlanContext) -> bool:
-    """Crew filters (A§6.5). OSM lodgings without `dogs_allowed` never pass the dog filter (SPEC §9)."""
-    p = h.place
-    if p.price_night_rub is None:
-        return False
-    if crew.dog and Tag.DOGS_ALLOWED not in p.tags:
-        return False  # also covers SPEC §9: OSM lodging without dog info is never dog-friendly
-    need_family = (
-        crew.children > 0 and crew.adults + crew.children >= ctx.cfg.overnight_score.family_room_min_people
-    )
-    return not (need_family and Tag.FAMILY_ROOM not in p.tags)
 
 
 def h_fit(passing: list[Candidate], ctx: PlanContext) -> float:
@@ -263,6 +249,7 @@ def _try_split(
                 ntc = _town_of(corridor, nearest) if nearest else None
                 choice.nearest_town = ntc.town if ntc else None
                 warnings.append(_no_lodging(ctx, choice, "no_hotel", corridor))
+        choice.day_start_km = prev
         choices.append(choice)
         prev = choice.km_at
     return choices, warnings
@@ -341,12 +328,8 @@ def _from_template(split: DaySplit, scorer: _Scorer) -> OvernightResult:
     for d, tc in enumerate(split.nights, start=1):
         st = scorer.score(tc, tc.km_at, prev, d)
         choice = _choice(d, tc, scorer, [st], OvernightFallback.TEMPLATE, st.score, tc.km_at)
-        if choice.hotel is None:
-            choice.nearest = _nearest_passing(scorer.corridor, tc.km_at, scorer.inp, scorer.ctx)
-            if choice.nearest is not None:
-                ntc = _town_of(scorer.corridor, choice.nearest)
-                choice.nearest_town = ntc.town if ntc else None
-            warnings.append(_no_lodging(scorer.ctx, choice, "template_no_hotel", scorer.corridor))
+        assert choice.hotel is not None  # `template_fits` requires a passing lodging (A§16.4)
+        choice.day_start_km = prev
         choices.append(choice)
         prev = tc.km_at
     return OvernightResult(choices, warnings)

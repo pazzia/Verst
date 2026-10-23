@@ -3372,6 +3372,2082 @@
    "verifiedAt": "2026-09-15"
   },
   {
+   "id": "pl_sps_pyatnitskoe",
+   "type": "sight",
+   "nameRu": "Пятницкое подворье",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": -0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_toys",
+   "type": "sight",
+   "nameRu": "Музей игрушки",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.9,
+    "dyKm": -0.4
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "dwellMin": 60,
+   "rating": 4.3,
+   "openingHours": "Tu-Su 10:00-17:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 150,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_gremyachiy",
+   "type": "sight",
+   "nameRu": "Гремячий ключ",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 1.6,
+    "dyKm": 1.1
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_nikitsky",
+   "type": "sight",
+   "nameRu": "Никитский монастырь",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.8,
+    "dyKm": 1.4
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_botik",
+   "type": "sight",
+   "nameRu": "Музей-усадьба «Ботик Петра Первого»",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": -1.6,
+    "dyKm": -1.2
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "museum",
+    "view"
+   ],
+   "dwellMin": 60,
+   "rating": 4.2,
+   "openingHours": "We-Su 10:00-17:00",
+   "ticketAdultRub": 350,
+   "ticketChildRub": 150,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_blue_stone",
+   "type": "sight",
+   "nameRu": "Синий камень",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": -1.8,
+    "dyKm": 0.9
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_yakovlevsky",
+   "type": "sight",
+   "nameRu": "Спасо-Яковлевский монастырь",
+   "anchor": {
+    "node": "RST",
+    "dxKm": -1.1,
+    "dyKm": -0.8
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 60,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 08:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_nero",
+   "type": "sight",
+   "nameRu": "Набережная озера Неро",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.3,
+    "dyKm": -0.6
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_finift",
+   "type": "sight",
+   "nameRu": "Музей ростовской финифти",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-17:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_ilya",
+   "type": "sight",
+   "nameRu": "Церковь Ильи Пророка",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.5,
+    "dyKm": 0.4
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.4,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_embankment",
+   "type": "sight",
+   "nameRu": "Волжская набережная",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.9,
+    "dyKm": 0.2
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_tolchkovo",
+   "type": "sight",
+   "nameRu": "Церковь Иоанна Предтечи в Толчкове",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": -1.4,
+    "dyKm": 1.2
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "We-Su 10:00-17:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_rows",
+   "type": "sight",
+   "nameRu": "Торговые ряды",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.4,
+    "dyKm": -0.3
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_jewel",
+   "type": "sight",
+   "nameRu": "Музей ювелирного искусства",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.7,
+    "dyKm": 0.3
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 150,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_snow",
+   "type": "sight",
+   "nameRu": "Терем Снегурочки",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": -0.5,
+    "dyKm": 0.6
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-18:00",
+   "ticketAdultRub": 300,
+   "ticketChildRub": 250,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_chintz",
+   "type": "sight",
+   "nameRu": "Музей ивановского ситца",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": 0.4,
+    "dyKm": 0.5
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_ship",
+   "type": "sight",
+   "nameRu": "Дом-корабль",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": -0.6,
+    "dyKm": 0.3
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_trade",
+   "type": "sight",
+   "nameRu": "Торговая площадь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_rizopolozhensky",
+   "type": "sight",
+   "nameRu": "Ризоположенский монастырь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.5,
+    "dyKm": -0.6
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 08:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_pokrovsky",
+   "type": "sight",
+   "nameRu": "Покровский монастырь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": -0.9,
+    "dyKm": 1.0
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 08:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_dmitrievsky",
+   "type": "sight",
+   "nameRu": "Дмитриевский собор",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.5,
+    "dyKm": -0.3
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.5,
+   "openingHours": "Mo-Su 10:00-17:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_view",
+   "type": "sight",
+   "nameRu": "Смотровая у Успенского собора",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.3,
+    "dyKm": -0.5
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_chambers",
+   "type": "sight",
+   "nameRu": "Палаты",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.7,
+    "dyKm": -0.4
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "dwellMin": 60,
+   "rating": 4.3,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_pok_park",
+   "type": "sight",
+   "nameRu": "Покровский парк",
+   "anchor": {
+    "node": "POK",
+    "dxKm": 0.4,
+    "dyKm": -0.5
+   },
+   "townId": "t_pokrov",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_pok_monastery",
+   "type": "sight",
+   "nameRu": "Свято-Введенский монастырь",
+   "anchor": {
+    "node": "POK",
+    "dxKm": -1.0,
+    "dyKm": 1.2
+   },
+   "townId": "t_pokrov",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gor_houses",
+   "type": "sight",
+   "nameRu": "Купеческие дома Гороховца",
+   "anchor": {
+    "node": "GOR",
+    "dxKm": 0.3,
+    "dyKm": 0.6
+   },
+   "townId": "t_gorokhovets",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gor_nikolsky",
+   "type": "sight",
+   "nameRu": "Никольский монастырь",
+   "anchor": {
+    "node": "GOR",
+    "dxKm": -0.6,
+    "dyKm": 0.8
+   },
+   "townId": "t_gorokhovets",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_pokrovka",
+   "type": "sight",
+   "nameRu": "Большая Покровская",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.4,
+    "dyKm": -0.6
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 60,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_museum",
+   "type": "sight",
+   "nameRu": "Художественный музей",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.8,
+    "dyKm": 0.2
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 60,
+   "rating": 4.2,
+   "openingHours": "Tu-Su 11:00-19:00",
+   "ticketAdultRub": 300,
+   "ticketChildRub": 150,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_monument",
+   "type": "sight",
+   "nameRu": "Монумент Матери-покровительнице",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_embankment",
+   "type": "sight",
+   "nameRu": "Красная площадь и набережная",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_nikitsky",
+   "type": "sight",
+   "nameRu": "Никитский монастырь Каширы",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": 0.5,
+    "dyKm": 0.6
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_oka_view",
+   "type": "sight",
+   "nameRu": "Смотровая на Оку",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": -0.4,
+    "dyKm": -0.7
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mih_museum",
+   "type": "sight",
+   "nameRu": "Михайловский краеведческий музей",
+   "anchor": {
+    "node": "MIH",
+    "dxKm": 0.3,
+    "dyKm": 0.4
+   },
+   "townId": "t_mikhailov",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 3.8,
+   "openingHours": "Tu-Su 09:00-17:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_ceramics",
+   "type": "sight",
+   "nameRu": "Музей скопинской керамики",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.4,
+    "dyKm": -0.3
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Tu-Su 09:00-17:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_cathedral",
+   "type": "sight",
+   "nameRu": "Никольский собор Скопина",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": -0.3,
+    "dyKm": 0.5
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 30,
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_garden",
+   "type": "sight",
+   "nameRu": "Сад Мичурина",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.8,
+    "dyKm": 0.6
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_bogolyubsky",
+   "type": "sight",
+   "nameRu": "Боголюбский собор",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": -0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_embankment",
+   "type": "sight",
+   "nameRu": "Набережная Тамбова",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.6,
+    "dyKm": -0.4
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_vladychny",
+   "type": "sight",
+   "nameRu": "Владычный монастырь",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.6,
+    "dyKm": 0.4
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_kremlin",
+   "type": "sight",
+   "nameRu": "Соборная гора",
+   "anchor": {
+    "node": "SER",
+    "dxKm": -0.4,
+    "dyKm": 0.5
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_museum",
+   "type": "sight",
+   "nameRu": "Серпуховский историко-художественный музей",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.3,
+    "dyKm": -0.4
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 60,
+   "rating": 4.2,
+   "openingHours": "We-Su 10:00-17:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_gingerbread",
+   "type": "sight",
+   "nameRu": "Музей «Тульский пряник»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_tula",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_belousov",
+   "type": "sight",
+   "nameRu": "Белоусовский парк",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": -0.8,
+    "dyKm": -0.6
+   },
+   "townId": "t_tula",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_samovar",
+   "type": "sight",
+   "nameRu": "Музей «Тульские самовары»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.3,
+    "dyKm": 0.4
+   },
+   "townId": "t_tula",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_chapel",
+   "type": "sight",
+   "nameRu": "Часовня Пятницкого колодца",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.4,
+    "dyKm": 0.6
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_fedorovsky",
+   "type": "sight",
+   "nameRu": "Фёдоровский монастырь",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.9,
+    "dyKm": -1.3
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_rampart",
+   "type": "sight",
+   "nameRu": "Земляной вал Переславля",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_iron",
+   "type": "sight",
+   "nameRu": "Музей утюга",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.4,
+    "dyKm": 0.2
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_gostiny",
+   "type": "sight",
+   "nameRu": "Гостиный двор Ростова",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_avraamiev",
+   "type": "sight",
+   "nameRu": "Авраамиев монастырь",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.8,
+    "dyKm": -0.5
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_tower",
+   "type": "sight",
+   "nameRu": "Власьевская башня",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_fire_tower",
+   "type": "sight",
+   "nameRu": "Пожарная каланча",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.3,
+    "dyKm": -0.4
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_park",
+   "type": "sight",
+   "nameRu": "Центральный парк Костромы",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.1,
+    "dyKm": -0.2
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_alexandrovsky",
+   "type": "sight",
+   "nameRu": "Александровский монастырь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": -0.4,
+    "dyKm": 0.8
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_kamenka",
+   "type": "sight",
+   "nameRu": "Набережная Каменки",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.1,
+    "dyKm": 0.2
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_cathedral_square",
+   "type": "sight",
+   "nameRu": "Соборная площадь Владимира",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.4,
+    "dyKm": -0.4
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_water_tower",
+   "type": "sight",
+   "nameRu": "Старая водонапорная башня",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.6,
+    "dyKm": -0.3
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "museum",
+    "view"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "openingHours": "Tu-Su 10:00-17:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_rozhdestvenskaya",
+   "type": "sight",
+   "nameRu": "Рождественская улица",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.5,
+    "dyKm": -0.2
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_fedorovsky",
+   "type": "sight",
+   "nameRu": "Набережная Фёдоровского",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.6,
+    "dyKm": 0.3
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_park",
+   "type": "sight",
+   "nameRu": "Парк Победы Чебоксар",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.4,
+    "dyKm": 0.6
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_park",
+   "type": "sight",
+   "nameRu": "Городской парк Скопина",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.2,
+    "dyKm": 0.2
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_station",
+   "type": "sight",
+   "nameRu": "Вокзал Мичуринска",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.3,
+    "dyKm": -0.2
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_park",
+   "type": "sight",
+   "nameRu": "Парк культуры Тамбова",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.3,
+    "dyKm": 0.4
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_museum",
+   "type": "sight",
+   "nameRu": "Тамбовский краеведческий музей",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.4,
+    "dyKm": -0.2
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_park",
+   "type": "sight",
+   "nameRu": "Парк «Питомник»",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_embankment",
+   "type": "sight",
+   "nameRu": "Набережная Упы",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_tula",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_lefty",
+   "type": "sight",
+   "nameRu": "Музей «Тульский левша»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_tula",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_cafe_dvorik",
+   "type": "food",
+   "nameRu": "Кафе «Русский дворик»",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": -0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_cafe_bliny",
+   "type": "food",
+   "nameRu": "Блинная у лавры",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.7,
+    "dyKm": 0.3
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_cafe_sloboda",
+   "type": "food",
+   "nameRu": "Кафе «Переславская слобода»",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.6,
+    "dyKm": -0.5
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_cafe_yam",
+   "type": "food",
+   "nameRu": "Трактир «Ямской двор»",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.3,
+    "dyKm": 0.6
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_cafe_podvorie",
+   "type": "food",
+   "nameRu": "Кафе «Русское подворье»",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.5,
+    "dyKm": -0.2
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_cafe_veliky",
+   "type": "food",
+   "nameRu": "Трапезная «Ростов Великий»",
+   "anchor": {
+    "node": "RST",
+    "dxKm": -0.4,
+    "dyKm": 0.4
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 750,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_cafe_nero",
+   "type": "food",
+   "nameRu": "Кафе «Неро»",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.2,
+    "dyKm": -0.7
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "view",
+    "kids_menu"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_cafe_terrace",
+   "type": "food",
+   "nameRu": "Кафе «Волжская терраса»",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.8,
+    "dyKm": 0.1
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "view",
+    "kids_menu"
+   ],
+   "avgCheckRub": 900,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_cafe_sobranie",
+   "type": "food",
+   "nameRu": "Ресторан «Собрание»",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.4,
+    "dyKm": 0.5
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 1000,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_cafe_sloboda",
+   "type": "food",
+   "nameRu": "Кафе «Ипатьевская слобода»",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": -0.7,
+    "dyKm": 0.4
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_cafe_rows",
+   "type": "food",
+   "nameRu": "Кафе в Торговых рядах",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.4,
+    "dyKm": -0.2
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_cafe_sitets",
+   "type": "food",
+   "nameRu": "Кафе «Ситец»",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": 0.3,
+    "dyKm": 0.4
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_cafe_station",
+   "type": "food",
+   "nameRu": "Столовая «Текстиль»",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": -0.4,
+    "dyKm": 0.2
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-20:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_kremlin",
+   "type": "food",
+   "nameRu": "Трапезная «Кремлёвская»",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.2,
+    "dyKm": -0.3
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 900,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 11:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_pushkarka",
+   "type": "food",
+   "nameRu": "Кафе «Пушкарская слобода»",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.6,
+    "dyKm": 0.3
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "parking",
+    "view"
+   ],
+   "avgCheckRub": 1000,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_cafe_dmitrievsky",
+   "type": "food",
+   "nameRu": "Кафе «Дмитриевское»",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.4,
+    "dyKm": -0.3
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_cafe_georgievskaya",
+   "type": "food",
+   "nameRu": "Кафе на Георгиевской",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.6,
+    "dyKm": -0.5
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "view"
+   ],
+   "avgCheckRub": 750,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_pok_cafe_park",
+   "type": "food",
+   "nameRu": "Кафе «Покровское подворье»",
+   "anchor": {
+    "node": "POK",
+    "dxKm": 0.3,
+    "dyKm": -0.3
+   },
+   "townId": "t_pokrov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gor_cafe_kupets",
+   "type": "food",
+   "nameRu": "Кафе «Купеческое»",
+   "anchor": {
+    "node": "GOR",
+    "dxKm": 0.2,
+    "dyKm": 0.4
+   },
+   "townId": "t_gorokhovets",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_cafe_pokrovka",
+   "type": "food",
+   "nameRu": "Кафе на Покровке",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.4,
+    "dyKm": -0.5
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_cafe_volga",
+   "type": "food",
+   "nameRu": "Ресторан «Волжский откос»",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.6,
+    "dyKm": 0.4
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "view",
+    "parking"
+   ],
+   "avgCheckRub": 1000,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_cafe_bay",
+   "type": "food",
+   "nameRu": "Кафе у залива",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.5,
+    "dyKm": 0.3
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "view",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_cafe_chuvash",
+   "type": "food",
+   "nameRu": "Кафе «Чувашское подворье»",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.2,
+    "dyKm": 0.4
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_cafe_oka",
+   "type": "food",
+   "nameRu": "Кафе «Ока»",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": -0.3,
+    "dyKm": -0.4
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mih_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Михайловская застава»",
+   "anchor": {
+    "node": "MIH",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_mikhailov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Скопинское»",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_cafe_lake",
+   "type": "food",
+   "nameRu": "Столовая «Городище»",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.5,
+    "dyKm": 0.2
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-20:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_cafe_garden",
+   "type": "food",
+   "nameRu": "Кафе «Яблоневый сад»",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.6,
+    "dyKm": 0.4
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_cafe_tsna",
+   "type": "food",
+   "nameRu": "Кафе на Цне",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.5,
+    "dyKm": -0.3
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_cafe_vladychny",
+   "type": "food",
+   "nameRu": "Кафе «Владычное»",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.5,
+    "dyKm": 0.3
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_cafe_oka",
+   "type": "food",
+   "nameRu": "Кафе «Окская пристань»",
+   "anchor": {
+    "node": "SER",
+    "dxKm": -0.3,
+    "dyKm": -0.5
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "view",
+    "parking"
+   ],
+   "avgCheckRub": 750,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 11:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_cafe_samovar",
+   "type": "food",
+   "nameRu": "Кафе «Самовар»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.3,
+    "dyKm": 0.3
+   },
+   "townId": "t_tula",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_cafe_kremlin",
+   "type": "food",
+   "nameRu": "Кафе у кремля",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.4,
+    "dyKm": 0.2
+   },
+   "townId": "t_tula",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_ogurets",
+   "type": "food",
+   "nameRu": "Кафе «Огурец»",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.1,
+    "dyKm": -0.2
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_gostiny",
+   "type": "food",
+   "nameRu": "Кафе в Гостином дворе",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.2,
+    "dyKm": 0.1
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 850,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_cafe_station",
+   "type": "food",
+   "nameRu": "Кафе «Вокзальное»",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.3,
+    "dyKm": -0.1
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
    "id": "pl_m8_fuel_022",
    "type": "fuel",
    "nameRu": "Лукойл, М-8, 22 км",

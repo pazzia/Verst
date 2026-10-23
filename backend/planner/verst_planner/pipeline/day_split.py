@@ -6,8 +6,9 @@ import itertools
 import math
 from dataclasses import dataclass
 
+from verst_planner.domain.enums import Tag
 from verst_planner.domain.errors import InvalidInput
-from verst_planner.domain.model import NormalizedInput, ReadyRoute, Route, TownCandidate
+from verst_planner.domain.model import Candidate, Crew, NormalizedInput, ReadyRoute, Route, TownCandidate
 from verst_planner.pipeline import Corridor, PlanContext
 
 EPS = 1e-9
@@ -26,6 +27,19 @@ def n_days_for(total_km: float, daily_km: int) -> int:
     return max(1, math.ceil(total_km / daily_km - EPS))
 
 
+def passes(h: Candidate, crew: Crew, ctx: PlanContext) -> bool:
+    """Crew filters (A§6.5). OSM lodgings without `dogs_allowed` never pass the dog filter (SPEC §9)."""
+    p = h.place
+    if p.price_night_rub is None:
+        return False
+    if crew.dog and Tag.DOGS_ALLOWED not in p.tags:
+        return False  # also covers SPEC §9: OSM lodging without dog info is never dog-friendly
+    need_family = (
+        crew.children > 0 and crew.adults + crew.children >= ctx.cfg.overnight_score.family_room_min_people
+    )
+    return not (need_family and Tag.FAMILY_ROOM not in p.tags)
+
+
 def template_nights(template: ReadyRoute, corridor: Corridor) -> list[TownCandidate] | None:
     """The projection of each suggested night town, in order (first pass after the previous night)."""
     out: list[TownCandidate] = []
@@ -42,11 +56,14 @@ def template_nights(template: ReadyRoute, corridor: Corridor) -> list[TownCandid
 
 def template_fits(template: ReadyRoute, corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> bool:
     """[D-3]: every night town within 25 km of the route, every day ≤ 105 % of daily km and the number of
-    days ≤ ceil(total / (90 % of daily km))."""
+    days ≤ ceil(total / (90 % of daily km)); A§16.4: every night town has a lodging passing the crew
+    filters (else the engine split runs and may still pick that town)."""
     nights = template_nights(template, corridor)
     if nights is None:
         return False
     if any(t.lateral_km > ctx.cfg.corridor_km.town for t in nights):
+        return False
+    if any(not any(passes(h, inp.crew, ctx) for h in t.lodgings) for t in nights):
         return False
     total = corridor.route.km_total
     bounds = [0.0, *[t.km_at for t in nights], total]

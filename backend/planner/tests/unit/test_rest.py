@@ -5,19 +5,23 @@ from zoneinfo import ZoneInfo
 from tests.helpers import line_north, make_ctx, make_place, make_route, trip
 from verst_planner.domain.enums import Mood, PlaceType, RoadClass, StopKind, Tag
 from verst_planner.domain.model import Candidate, Crew, DayPlan, LatLon, NormalizedInput, PlannedStop
+from verst_planner.explain import ru
 from verst_planner.geo.index import PolylineIndex
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.resolve import normalize_input
 from verst_planner.pipeline.rest import plan_rests
+from verst_planner.pipeline.sights import plan_sights
 
 MSK = ZoneInfo("Europe/Moscow")
 # 66 km/h × drive-time factor 1.1 → exactly one driving minute per km
 ROUTE = make_route(line_north(52.0, 38.0, 600), speed_kmh=66, cum_km=[float(i) for i in range(601)])
 
 
-def place_at(pid: str, ptype: PlaceType, km: float, tags: set[Tag], **kw: object) -> Candidate:
+def place_at(
+    pid: str, ptype: PlaceType, km: float, tags: set[Tag], detour_min: int = 0, **kw: object
+) -> Candidate:
     p = make_place(pid, ptype, ROUTE.points[round(km)].lat, 38.002, tags, **kw)  # type: ignore[arg-type]
-    return Candidate(p, km, 0.2, 0.52, 0, RoadClass.TRUNK, "RU-MOS")
+    return Candidate(p, km, 0.2, 0.52, detour_min, RoadClass.TRUNK, "RU-MOS")
 
 
 def rests_every(step: int, until: int, tags: set[Tag] | None = None) -> list[Candidate]:
@@ -142,6 +146,113 @@ class RestTest(unittest.TestCase):
         plan_rests([d], corridor([], sights=[view]), inp, ctx)
         self.assertEqual(rest_kms(d), [])  # closed at the 09:52 ETA → virtual break instead
         self.assertEqual(d.stops[1].kind, StopKind.FINISH)
+
+
+class BreaksTest(unittest.TestCase):
+    """A§16.2 (D-17): rests fill only long gaps between breaks."""
+
+    def test_min_gap_after_any_break(self) -> None:
+        # more_stops: R = 90, G = 60. A sight (break) at km 100; the only rest area 40 min after it is
+        # inside the old widened window [R - 60, R + 15] but closer than G to the break → not used.
+        ctx, inp = setup(mood=Mood.MORE_STOPS)
+        sight = PlannedStop(StopKind.SIGHT, 50.0, "музей", LatLon(52, 38), dwell_min=30, fixed=True)
+        d = day(200, [sight])
+        plan_rests([d], corridor([place_at("r090", PlaceType.REST, 90, {Tag.WC})]), inp, ctx)
+        self.assertEqual(rest_kms(d), [])
+        # the same area 70 min after the break is admissible (window [60, 90])
+        ctx, inp = setup(mood=Mood.MORE_STOPS)
+        d = day(200, [sight])
+        plan_rests([d], corridor([place_at("r120", PlaceType.REST, 120, {Tag.WC})]), inp, ctx)
+        self.assertEqual(rest_kms(d), [120])
+        # a lunch (break) right after the window: a candidate 10 min before it is still admissible
+        # (need_after = min(G, gap - R) = 10), one 5 min before it is not
+        lunch = PlannedStop(StopKind.FOOD, 100.0, "обед", LatLon(52, 38), dwell_min=60, fixed=True)
+        for km, kept in ((90, [90]), (95, [])):
+            with self.subTest(km=km):
+                ctx, inp = setup(mood=Mood.MORE_STOPS)
+                d = day(140, [lunch])
+                plan_rests([d], corridor([place_at(f"r{km}", PlaceType.REST, km, {Tag.WC})]), inp, ctx)
+                self.assertEqual(rest_kms(d), kept)
+
+    def test_rest_detour_cap(self) -> None:
+        ctx, inp = setup(mood=Mood.CALM)
+        far = place_at("r_far", PlaceType.REST, 115, {Tag.WC, Tag.VIEW}, detour_min=27)
+        near = place_at("r_near", PlaceType.REST, 100, {Tag.WC}, detour_min=10)
+        d = day(200)
+        plan_rests([d], corridor([far]), inp, ctx)
+        self.assertEqual(rest_kms(d), [])  # 27 min > rest.max_detour_min (10): virtual break
+        d = day(200)
+        plan_rests([d], corridor([far, near]), inp, ctx)
+        self.assertEqual([s.place.id for s in d.stops if s.place], ["r_near"])
+        # G06 (Москва → Казань without tolls): the М-12 coffee 6.4 km off the М-7 is no longer chosen
+        from tests.golden.test_golden import CASES, load_case, run_case
+
+        plan, *_ = run_case(load_case(next(CASES.glob("G06_*.json"))))
+        ids = {s.place_id for d2 in plan.days_list for s in d2.stops}
+        self.assertNotIn("pl_m12_fuel_490", ids)
+        for ds in plan.engine_state.days:
+            for st in ds.stops:
+                if st.pool == "rest":
+                    self.assertLessEqual(st.detour_min, 10, st.place_id)
+
+    def test_fuel_stop_upgraded_to_coffee(self) -> None:
+        ctx, inp = setup(mood=Mood.CALM)
+        cafe = make_place("f_cafe", PlaceType.FUEL, 52.9, 38.0, {Tag.CAFE_AT_FUEL})
+        fuel = PlannedStop(
+            StopKind.FUEL, 110.0, "АЗС", LatLon(52, 38), place=cafe, dwell_min=10, auto=True, pool="fuel"
+        )
+        d = day(300, [fuel])
+        plan_rests([d], corridor(rests_every(2, 300)), inp, ctx)
+        upgraded = next(s for s in d.stops if s.kind is StopKind.FUEL)
+        self.assertEqual((upgraded.coffee, upgraded.dwell_min), (True, 15))
+        # no extra stop in the first gap; the next rest is R = 120 min after the coffee
+        self.assertEqual(rest_kms(d), [110, 230])
+        # a fuel stop without a cafe is not upgraded and does not count as a break
+        ctx, inp = setup(mood=Mood.CALM)
+        plain = PlannedStop(
+            StopKind.FUEL,
+            110.0,
+            "АЗС",
+            LatLon(52, 38),
+            place=make_place("f_plain", PlaceType.FUEL),
+            dwell_min=10,
+            auto=True,
+            pool="fuel",
+        )
+        d = day(300, [plain])
+        plan_rests([d], corridor(rests_every(2, 300)), inp, ctx)
+        self.assertEqual(rest_kms(d), [110, 120, 240])
+        self.assertFalse(d.stops[1].coffee)
+
+    def test_rest_reason_drive_since_break(self) -> None:
+        ctx, inp = setup(mood=Mood.CALM)
+        sight = PlannedStop(StopKind.SIGHT, 100.0, "музей", LatLon(52, 38), dwell_min=30, fixed=True)
+        d = day(300, [sight])
+        plan_rests([d], corridor(rests_every(2, 300)), inp, ctx)
+        rest = next(s for s in d.stops if s.auto)
+        self.assertEqual(rest.km_at, 220)
+        self.assertEqual(rest.reason_key, "rest.generic")
+        self.assertEqual(rest.reason_params["drive"], ru.duration_genitive(120))  # not 220 since the start
+        self.assertEqual(
+            ctx.templates.render(rest.reason_key, **rest.reason_params),
+            "Разминка 20 минут после двух часов за рулём.",
+        )
+
+    def test_sights_reserve_rest_time(self) -> None:
+        # calm: budget 540, R = 120, 480 min of driving. A 40-min sight at km 240 is a break, but the day
+        # still needs rests at km 120 and 360: 480 + 40 + 2 × 20 = 560 > 540 → stage 9 rejects it (it
+        # would fit at 520 if the rests were ignored); without rest areas (virtual breaks) it fits.
+        from tests.unit.test_sights import sight as sight_cand
+
+        ctx, inp = setup(mood=Mood.CALM)
+        cand = sight_cand("s_short", 240, dwell=40)
+        rests = rests_every(2, 480)
+        d = day(480)
+        plan_sights([d], corridor(rests, sights=[cand]), inp, ctx)
+        self.assertEqual([s.kind for s in d.stops if s.kind is StopKind.SIGHT], [])
+        d = day(480)
+        plan_sights([d], corridor([], sights=[cand]), inp, ctx)
+        self.assertEqual([s.place.id for s in d.stops if s.kind is StopKind.SIGHT and s.place], ["s_short"])
 
 
 if __name__ == "__main__":

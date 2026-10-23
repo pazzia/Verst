@@ -76,7 +76,9 @@ def overnight_reason(
             key = "overnight.shift.later" if choice.km_at > other.km_at else "overnight.shift.earlier"
             shift = t.render(key, other_prep=ru.prepositional(other.town), dkm=dkm)
         elif choice.km_at < choice.target_km:
-            shift = t.render("overnight.shift.limit", dkm=dkm)
+            # distance to the user's limit `day_start_km + daily_km`, not to the even-split target (A§16.8)
+            limit_dkm = _round(choice.day_start_km + inp.daily_km - choice.km_at)
+            shift = t.render("overnight.shift.limit", dkm=limit_dkm)
         else:
             shift = ""
         if not shift:
@@ -90,6 +92,14 @@ def overnight_reason(
     if day_km <= inp.daily_km:
         text += t.render("overnight.cap_ok", daily_km=inp.daily_km)
     return OvernightText(text, candidates)
+
+
+def sight_reason(dwell: int, crew: Crew, source: Source) -> tuple[str, dict[str, str | int | float]]:
+    """Reason key and params of a sight stop (also a short sight used as a rest, A§16.2)."""
+    if source is Source.OSM:
+        return "sight.osm", {}
+    key = "sight.dog_waits" if crew.dog else "sight.default"
+    return key, {"dwell": ru.duration_phrase(dwell)}
 
 
 def stop_reason(
@@ -109,7 +119,7 @@ def stop_reason(
             return t.render("finish.home", part_of_day=ru.part_of_day(local_time.time()))
         return t.render("finish.default")
     if s.kind is StopKind.VIA:
-        return ""
+        return t.render("via.user")
     if s.place is not None and s.place.source is Source.OSM and s.kind is StopKind.SIGHT:
         return t.render("sight.osm")
     if s.kind is StopKind.SIGHT and s.fixed:
