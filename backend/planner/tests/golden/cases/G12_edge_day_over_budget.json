@@ -1,0 +1,46 @@
+{
+  "id": "G12",
+  "slug": "edge_day_over_budget",
+  "titleRu": "«Тестовый марафон»: два места по 4 часа, спокойно",
+  "world": "edge_cases_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 58.0,
+      "lon": 50.0,
+      "label": "Тестовск"
+    },
+    "readyRouteId": "rr_tst_marathon",
+    "crew": {
+      "adults": 2,
+      "children": 0,
+      "dog": false
+    },
+    "mood": "calm",
+    "dailyKm": 300,
+    "startAt": "2026-10-24T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 1,
+    "nights": 0,
+    "warnings": [
+      "DAY_OVER_BUDGET"
+    ],
+    "rerun": 1,
+    "overBudgetDays": [
+      1
+    ],
+    "mustIncludePlaceIds": [
+      "pl_tst_museum_long",
+      "pl_tst_park_long"
+    ],
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "200 km at 90 km/h × 1.1 = 147 min + two fixed sights of 240 min = 627 min (Средний is the finish of this one-way template) > calm 540 → the day is bad; no droppable (non-fixed) sight → auto stops removed, stages 6–9 re-run once (rerun = 1) → still over → DAY_OVER_BUDGET for day 1"
+    ]
+  }
+}

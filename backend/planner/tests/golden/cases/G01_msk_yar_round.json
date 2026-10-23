@@ -1,0 +1,67 @@
+{
+  "id": "G01",
+  "slug": "msk_yar_round",
+  "titleRu": "Москва → Ярославль → Москва, 300 км/день, двое взрослых",
+  "world": "central_russia_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва"
+    },
+    "destination": {
+      "lat": 57.6261,
+      "lon": 39.8845,
+      "label": "Ярославль"
+    },
+    "roundTrip": true,
+    "crew": {
+      "adults": 2,
+      "children": 0,
+      "dog": false
+    },
+    "dailyKm": 300,
+    "startAt": "2026-10-24T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 2,
+    "nights": 1,
+    "kmRange": [
+      526,
+      560
+    ],
+    "maxDayKm": 315,
+    "overnightTownIds": [
+      "t_yaroslavl"
+    ],
+    "overnightFallbacks": [
+      "none"
+    ],
+    "warnings": [],
+    "mustIncludePlaceIds": [
+      "pl_yar_hotel_strelka"
+    ],
+    "costLinesRub": {
+      "lodging": {
+        "value": 6000,
+        "tolerancePct": 0
+      },
+      "tolls": {
+        "value": 0,
+        "tolerancePct": 0
+      }
+    },
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "split: 263 × 2 = 526 km, N = ceil(526 / 300) = 2, T = 263; window [max(0.7·263, 526 − 315), min(1.05·263, 315)] = [215, 278.2]: Ростов (204) is outside, Ярославль (263) is the only town → night Ярославль, fallback none",
+      "hotel (no crew filters): hotel_score = rating + 0.5·guarded + 0.3·[≤ 2 km] − price/10000: У Стрелки 4.6 + 0.3 − 0.6 = 4.30; Волжская 4.5 + 0.3 − 0.7 = 4.10; Которосль 4.2 + 0.3 − 0.48 = 4.02; хостел 3.6 + 0.3 − 0.25 = 3.65 → У Стрелки 6 000 ₽, rooms ceil(2/2) = 1 → lodging 6 000",
+      "fuel: full tank 50 / 8 × 100 = 625 km, trigger 500 ≥ 526 − 62.5 → no fuel stop, no FUEL_GAP",
+      "tolls: М-8 is free → 0"
+    ]
+  }
+}

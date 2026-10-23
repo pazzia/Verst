@@ -1,0 +1,69 @@
+{
+  "id": "G05",
+  "slug": "edge_no_dog_lodging",
+  "titleRu": "Тестовск → Конечный, с собакой, единственная гостиница без собак",
+  "world": "edge_cases_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 58.0,
+      "lon": 50.0,
+      "label": "Тестовск"
+    },
+    "destination": {
+      "lat": 58.0,
+      "lon": 60.17111,
+      "label": "Конечный"
+    },
+    "crew": {
+      "adults": 2,
+      "children": 0,
+      "dog": true
+    },
+    "dailyKm": 300,
+    "startAt": "2026-10-24T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 2,
+    "nights": 1,
+    "kmRange": [
+      595,
+      615
+    ],
+    "overnightTownIds": [
+      "t_tst_seredinsk"
+    ],
+    "overnightFallbacks": [
+      "no_hotel"
+    ],
+    "warningsContain": [
+      "NO_LODGING"
+    ],
+    "mustExcludePlaceIds": [
+      "pl_tst_hotel_nodog"
+    ],
+    "costLinesRub": {
+      "lodging": {
+        "value": 3500,
+        "tolerancePct": 0
+      }
+    },
+    "costFormulaContains": {
+      "lodging": "(средняя цена)"
+    },
+    "costBreakdownContains": {
+      "lodging": [
+        "(средняя цена)"
+      ]
+    },
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "split: 600 km, N = 2, T = 300, window [285, 315] and widened [285, 315] (both capped by 600 − 315): no town with a dog-friendly lodging → F1/F2 fail; F3 (3 days) also has no passing town → F4: Серединск (300) without a hotel, fallback no_hotel, NO_LODGING, no nearest passing lodging",
+      "lodging: lodging_default_night(30 000) = 3 500 (edge world defaults) × 1 room = 3 500 «(средняя цена)»"
+    ]
+  }
+}

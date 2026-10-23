@@ -1,0 +1,80 @@
+{
+  "id": "mini_world",
+  "asOf": "2026-10-01",
+  "regions": [
+    {"code": "RU-MOS", "nameRu": "Московская область", "tz": "Europe/Moscow"},
+    {"code": "RU-SAM", "nameRu": "Самарская область", "tz": "Europe/Samara"}
+  ],
+  "nodes": [
+    {"id": "N0", "lat": 56.000, "lon": 38.000, "region": "RU-MOS"},
+    {"id": "N1", "lat": 56.200, "lon": 38.000, "region": "RU-MOS"},
+    {"id": "N2", "lat": 56.450, "lon": 38.000, "region": "RU-MOS"},
+    {"id": "N3", "lat": 56.900, "lon": 38.000, "region": "RU-MOS"},
+    {"id": "M1", "lat": 56.450, "lon": 37.900, "region": "RU-MOS"},
+    {"id": "N4", "lat": 56.900, "lon": 38.500, "region": "RU-SAM"},
+    {"id": "N5", "lat": 56.900, "lon": 39.000, "region": "RU-SAM"},
+    {"id": "N6", "lat": 57.200, "lon": 39.000, "region": "RU-SAM"}
+  ],
+  "edges": [
+    {"from": "N0", "to": "N1", "km": 24, "speedKmh": 90, "roadClass": "trunk", "ref": "М-8", "toll": false},
+    {"from": "N1", "to": "N2", "km": 30, "speedKmh": 90, "roadClass": "trunk", "ref": "М-8", "toll": false},
+    {"from": "N2", "to": "N3", "km": 53, "speedKmh": 90, "roadClass": "trunk", "ref": "М-8", "toll": false},
+    {"from": "N0", "to": "M1", "km": 52, "speedKmh": 110, "roadClass": "motorway", "ref": "М-12", "toll": true},
+    {"from": "M1", "to": "N3", "km": 52, "speedKmh": 110, "roadClass": "motorway", "ref": "М-12", "toll": false},
+    {"from": "N3", "to": "N4", "km": 32, "speedKmh": 70, "roadClass": "primary", "ref": "Р-1", "toll": false},
+    {"from": "N4", "to": "N5", "km": 32, "speedKmh": 70, "roadClass": "primary", "ref": "Р-1", "toll": false},
+    {"from": "N5", "to": "N6", "km": 35, "speedKmh": 60, "roadClass": "secondary", "ref": null, "toll": false}
+  ],
+  "towns": [
+    {"id": "t_alpha", "nameRu": "Альфа", "namePrepRu": "Альфе", "node": "N0", "population": 1200000, "quality": 2, "eveningWalk": true},
+    {"id": "t_beta", "nameRu": "Бета", "namePrepRu": "Бете", "node": "N2", "population": 90000, "quality": 3, "eveningWalk": false},
+    {"id": "t_gamma", "nameRu": "Гамма", "namePrepRu": null, "node": "N5", "population": 20000, "quality": 1, "eveningWalk": false}
+  ],
+  "places": [
+    {"id": "pl_alpha_hotel", "type": "lodging", "nameRu": "Отель Альфа", "anchor": {"node": "N0", "dxKm": 0.5, "dyKm": 0.2},
+     "townId": "t_alpha", "tags": ["dogs_allowed", "parking"], "priceNightRub": 4000, "rating": 4.2, "verifiedAt": "2026-09-10"},
+    {"id": "pl_beta_hotel", "type": "lodging", "nameRu": "Отель Бета", "anchor": {"node": "N2", "dxKm": 0.8, "dyKm": 0.1},
+     "townId": "t_beta", "tags": ["family_room", "parking"], "priceNightRub": 5000, "rating": 4.5, "verifiedAt": "2026-09-01"},
+    {"id": "pl_beta_hotel_dog", "type": "lodging", "nameRu": "Гостевой дом Бета", "anchor": {"node": "N2", "dxKm": -1.0, "dyKm": 0.5},
+     "townId": "t_beta", "tags": ["dogs_allowed"], "priceNightRub": 6000, "rating": 4.0, "verifiedAt": "2026-08-20", "breakfastIncluded": false},
+    {"id": "pl_fuel_1", "type": "fuel", "nameRu": "АЗС у Беты", "anchor": {"edge": ["N1", "N2"], "km": 10, "lateralKm": 0.2},
+     "tags": ["cafe_at_fuel", "24h", "wc"], "rating": 4.0, "verifiedAt": "2026-09-01"},
+    {"id": "pl_fuel_2", "type": "fuel", "nameRu": "АЗС на трассе", "anchor": {"edge": ["N2", "N3"], "km": 30, "lateralKm": -0.5},
+     "tags": [], "rating": 3.5, "verifiedAt": "2026-09-01"},
+    {"id": "pl_fuel_m", "type": "fuel", "nameRu": "АЗС на М-12", "anchor": {"edge": ["N0", "M1"], "km": 25, "lateralKm": 0.3},
+     "tags": ["24h"], "rating": 4.1, "verifiedAt": "2026-09-01"},
+    {"id": "pl_food_1", "type": "food", "nameRu": "Кафе Ёлка", "anchor": {"edge": ["N1", "N2"], "km": 15, "lateralKm": 1.0},
+     "tags": ["kids_menu", "parking"], "avgCheckRub": 600, "rating": 4.4, "openingHours": "Mo-Su 10:00-22:00", "verifiedAt": "2026-09-05"},
+    {"id": "pl_rest_1", "type": "rest", "nameRu": "Стоянка с площадкой", "anchor": {"edge": ["N2", "N3"], "km": 10, "lateralKm": 0.1},
+     "tags": ["playground", "wc"], "rating": 3.8, "verifiedAt": "2026-09-01"},
+    {"id": "pl_sight_1", "type": "sight", "nameRu": "Музей Беты", "anchor": {"node": "N2", "dxKm": 1.0, "dyKm": 0.5},
+     "townId": "t_beta", "tags": ["museum"], "openingHours": "Tu-Su 10:00-18:00", "dwellMin": 60, "ticketAdultRub": 300,
+     "ticketChildRub": 150, "rating": 4.6, "verifiedAt": "2026-09-01"},
+    {"id": "pl_sight_far", "type": "sight", "nameRu": "Дальняя усадьба", "anchor": {"edge": ["N2", "N3"], "km": 25, "lateralKm": 14.9},
+     "tags": ["view"], "rating": 4.0, "verifiedAt": "2026-09-01"},
+    {"id": "pl_sight_far2", "type": "sight", "nameRu": "Совсем дальняя усадьба", "anchor": {"edge": ["N2", "N3"], "km": 25, "lateralKm": 15.1},
+     "tags": ["view"], "rating": 4.0, "verifiedAt": "2026-09-01"},
+    {"id": "pl_draft_sight", "type": "sight", "nameRu": "Черновик", "lat": 56.2, "lon": 38.01,
+     "tags": [], "rating": 5.0, "status": "draft", "source": "osm"}
+  ],
+  "regionPrices": [
+    {"region": "RU-MOS", "fuelType": "ai95", "priceRub": "60.00", "asOf": "2026-09-01"},
+    {"region": "RU-MOS", "fuelType": "ai95", "priceRub": "61.20", "asOf": "2026-10-01"},
+    {"region": "RU", "fuelType": "ai92", "priceRub": "56.50", "asOf": "2026-10-01"},
+    {"region": "RU", "fuelType": "ai95", "priceRub": "62.00", "asOf": "2026-10-01"},
+    {"region": "RU", "fuelType": "dt", "priceRub": "70.10", "asOf": "2026-10-01"}
+  ],
+  "tollSegments": [
+    {"id": "ts_m12", "roadRef": "М-12", "nameRu": "М-12 Альфа — М1", "edge": ["N0", "M1"], "fromKm": 0, "toKm": 52,
+     "tariffDayRub": "300", "tariffNightRub": "200", "asOf": "2026-10-01"}
+  ],
+  "readyRoutes": [
+    {"id": "rr_mini", "hubTownId": "t_alpha", "titleRu": "Мини-кольцо", "subtitleRu": "2 дня", "kmTotal": 200, "kmSign": 100,
+     "ring": "weekend", "roundTrip": true, "daysMin": 1, "daysMax": 2, "sort": 10,
+     "points": [{"seq": 1, "role": "via", "townId": "t_beta"}, {"seq": 2, "role": "stop", "placeId": "pl_sight_1"},
+                {"seq": 3, "role": "via", "townId": "t_gamma"}],
+     "suggestedNights": ["t_beta"]}
+  ],
+  "defaults": {"foodCheckByPopulation": [[1000000, 900], [100000, 700], [0, 550]],
+               "lodgingNightByPopulation": [[1000000, 7000], [100000, 5000], [0, 4000]]}
+}

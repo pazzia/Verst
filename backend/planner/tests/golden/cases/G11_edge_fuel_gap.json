@@ -1,0 +1,50 @@
+{
+  "id": "G11",
+  "slug": "edge_fuel_gap",
+  "titleRu": "Тестовск → Пустошь, 300 км без заправок, бак 30 л",
+  "world": "edge_cases_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 58.0,
+      "lon": 50.0,
+      "label": "Тестовск"
+    },
+    "destination": {
+      "lat": 62.06967,
+      "lon": 50.0,
+      "label": "Пустошь"
+    },
+    "crew": {
+      "adults": 1,
+      "children": 0,
+      "dog": false
+    },
+    "dailyKm": 500,
+    "vehicle": {
+      "consumption": 8.0,
+      "fuelType": "ai95",
+      "tankL": 30
+    },
+    "startAt": "2026-10-24T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 1,
+    "nights": 0,
+    "kmRange": [
+      450,
+      465
+    ],
+    "warningsContain": [
+      "FUEL_GAP"
+    ],
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "full 30 / 8 × 100 = 375 km, trigger 300: no station in [300, 340], [200, 300] or [300, 365] (stations at 40, 80, 420) → FUEL_GAP at km 300; virtual refuel at 340 → next trigger 640 > 450"
+    ]
+  }
+}

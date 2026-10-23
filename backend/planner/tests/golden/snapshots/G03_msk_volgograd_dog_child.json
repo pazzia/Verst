@@ -1,0 +1,1319 @@
+{
+  "id": "trp_golden",
+  "title": "Москва → Волгоград",
+  "km": 988,
+  "days": 2,
+  "nights": 1,
+  "roundTrip": false,
+  "daysList": [
+    {
+      "day": 1,
+      "km": 472,
+      "driveMin": 365,
+      "tz": "Europe/Moscow",
+      "startAt": "2026-10-24T07:00",
+      "endAt": "2026-10-24T15:25",
+      "overBudget": false,
+      "stops": [
+        {
+          "id": "d1s01",
+          "seq": 1,
+          "day": 1,
+          "kind": "start",
+          "sign": "city",
+          "placeId": null,
+          "townId": null,
+          "name": "Москва",
+          "note": null,
+          "lat": 55.7558,
+          "lon": 37.6173,
+          "arriveAt": null,
+          "departAt": "2026-10-24T07:00",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 0,
+          "kmAt": 0,
+          "dwellMin": 0,
+          "tags": [],
+          "costRub": 0,
+          "reason": "Выезд в 07:00.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s02",
+          "seq": 2,
+          "day": 1,
+          "kind": "rest",
+          "sign": "rest",
+          "placeId": "pl_r22_rest_160",
+          "townId": null,
+          "name": "Площадка отдыха, Р-22, 160 км",
+          "note": null,
+          "lat": 54.475059296604464,
+          "lon": 38.65465181887274,
+          "arriveAt": "2026-10-24T08:57",
+          "departAt": "2026-10-24T09:17",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 160,
+          "kmAt": 160,
+          "dwellMin": 20,
+          "tags": [
+            "playground",
+            "wc"
+          ],
+          "costRub": 0,
+          "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s02_pl_r22_rest_195",
+              "placeId": "pl_r22_rest_195",
+              "name": "Площадка отдыха, Р-22, 195 км",
+              "deltaMin": -3,
+              "deltaRub": 0,
+              "shiftMin": -3,
+              "units": {
+                "deltaKm": -0.0,
+                "regionCode": "RU-RYA",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 195 км",
+                "placeId": "pl_r22_rest_195"
+              },
+              "stop": {
+                "id": "d1s02",
+                "seq": 2,
+                "day": 1,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_195",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 195 км",
+                "note": null,
+                "lat": 54.23829524885008,
+                "lon": 39.00273454476361,
+                "arriveAt": "2026-10-24T09:21",
+                "departAt": "2026-10-24T09:41",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 195,
+                "kmAt": 195,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc",
+                  "view",
+                  "walk"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            },
+            {
+              "id": "alt_d1s02_pl_r22_rest_125",
+              "placeId": "pl_r22_rest_125",
+              "name": "Площадка отдыха, Р-22, 125 км",
+              "deltaMin": 0,
+              "deltaRub": 0,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": -0.0,
+                "regionCode": "RU-MOS",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 125 км",
+                "placeId": "pl_r22_rest_125"
+              },
+              "stop": {
+                "id": "d1s02",
+                "seq": 2,
+                "day": 1,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_125",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 125 км",
+                "note": null,
+                "lat": 54.71874979430463,
+                "lon": 38.320870908399975,
+                "arriveAt": "2026-10-24T08:31",
+                "departAt": "2026-10-24T08:51",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 125,
+                "kmAt": 125,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc",
+                  "walk"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            }
+          ],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s03",
+          "seq": 3,
+          "day": 1,
+          "kind": "sight",
+          "sign": "tourist",
+          "placeId": "pl_skp_lake",
+          "townId": "t_skopin",
+          "name": "Скопинское городище",
+          "note": null,
+          "lat": 53.82721748693183,
+          "lon": 39.55853113919763,
+          "arriveAt": "2026-10-24T10:30",
+          "departAt": "2026-10-24T11:00",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 96,
+          "kmAt": 254,
+          "dwellMin": 30,
+          "tags": [
+            "view",
+            "walk",
+            "free_entry"
+          ],
+          "costRub": 0,
+          "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s04",
+          "seq": 4,
+          "day": 1,
+          "kind": "rest",
+          "sign": "rest",
+          "placeId": "pl_r22_rest_300",
+          "townId": null,
+          "name": "Площадка отдыха, Р-22, 300 км",
+          "note": null,
+          "lat": 53.62782759132162,
+          "lon": 40.03281574559489,
+          "arriveAt": "2026-10-24T11:39",
+          "departAt": "2026-10-24T11:59",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 47,
+          "kmAt": 300,
+          "dwellMin": 20,
+          "tags": [
+            "playground",
+            "wc",
+            "view"
+          ],
+          "costRub": 0,
+          "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s04_pl_r22_rest_335",
+              "placeId": "pl_r22_rest_335",
+              "name": "Площадка отдыха, Р-22, 335 км",
+              "deltaMin": 0,
+              "deltaRub": 0,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-LIP",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 335 км",
+                "placeId": "pl_r22_rest_335"
+              },
+              "stop": {
+                "id": "d1s04",
+                "seq": 4,
+                "day": 1,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_335",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 335 км",
+                "note": null,
+                "lat": 53.319372408678376,
+                "lon": 39.98588425440511,
+                "arriveAt": "2026-10-24T12:04",
+                "departAt": "2026-10-24T12:24",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 82,
+                "kmAt": 335,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc",
+                  "walk"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            },
+            {
+              "id": "alt_d1s04_pl_r22_rest_265",
+              "placeId": "pl_r22_rest_265",
+              "name": "Площадка отдыха, Р-22, 265 км",
+              "deltaMin": 3,
+              "deltaRub": 0,
+              "shiftMin": 3,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-RYA",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 265 км",
+                "placeId": "pl_r22_rest_265"
+              },
+              "stop": {
+                "id": "d1s04",
+                "seq": 4,
+                "day": 1,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_265",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 265 км",
+                "note": null,
+                "lat": 53.79137270161303,
+                "lon": 39.70039300406018,
+                "arriveAt": "2026-10-24T11:12",
+                "departAt": "2026-10-24T11:32",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 12,
+                "kmAt": 265,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc",
+                  "walk"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            }
+          ],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s05",
+          "seq": 5,
+          "day": 1,
+          "kind": "food",
+          "sign": "food",
+          "placeId": "pl_r22_cafe_445",
+          "townId": null,
+          "name": "Кафе «У дороги», Р-22",
+          "note": null,
+          "lat": 52.77908825492522,
+          "lon": 41.14700147865068,
+          "arriveAt": "2026-10-24T13:51",
+          "departAt": "2026-10-24T14:51",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 146,
+          "kmAt": 445,
+          "dwellMin": 60,
+          "tags": [
+            "kids_menu",
+            "parking"
+          ],
+          "costRub": 1250,
+          "reason": "Обед, есть детское меню.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s05_pl_mch_cafe",
+              "placeId": "pl_mch_cafe",
+              "name": "Кафе «Антоновка»",
+              "deltaMin": -3,
+              "deltaRub": 130,
+              "shiftMin": -3,
+              "units": {
+                "deltaKm": -0.383,
+                "regionCode": "RU-TAM",
+                "checkRub": 550,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Кафе «Антоновка»",
+                "placeId": "pl_mch_cafe"
+              },
+              "stop": {
+                "id": "d1s05",
+                "seq": 5,
+                "day": 1,
+                "kind": "food",
+                "sign": "food",
+                "placeId": "pl_mch_cafe",
+                "townId": "t_michurinsk",
+                "name": "Кафе «Антоновка»",
+                "note": null,
+                "lat": 52.895504371732954,
+                "lon": 40.49377807477859,
+                "arriveAt": "2026-10-24T13:11",
+                "departAt": "2026-10-24T14:11",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 99,
+                "kmAt": 398,
+                "dwellMin": 60,
+                "tags": [
+                  "parking"
+                ],
+                "costRub": 1380,
+                "reason": "Обед, парковка у входа.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            },
+            {
+              "id": "alt_d1s05_pl_r22_cafe_395",
+              "placeId": "pl_r22_cafe_395",
+              "name": "Кафе «Придорожное», Р-22",
+              "deltaMin": 0,
+              "deltaRub": 750,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": -0.0,
+                "regionCode": "RU-TAM",
+                "checkRub": 800,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Кафе «Придорожное», Р-22",
+                "placeId": "pl_r22_cafe_395"
+              },
+              "stop": {
+                "id": "d1s05",
+                "seq": 5,
+                "day": 1,
+                "kind": "food",
+                "sign": "food",
+                "placeId": "pl_r22_cafe_395",
+                "townId": null,
+                "name": "Кафе «Придорожное», Р-22",
+                "note": null,
+                "lat": 52.91564931183047,
+                "lon": 40.465007178718515,
+                "arriveAt": "2026-10-24T13:10",
+                "departAt": "2026-10-24T14:10",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 96,
+                "kmAt": 395,
+                "dwellMin": 60,
+                "tags": [
+                  "parking"
+                ],
+                "costRub": 2000,
+                "reason": "Обед, парковка у входа.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            }
+          ],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s06",
+          "seq": 6,
+          "day": 1,
+          "kind": "fuel",
+          "sign": "fuel",
+          "placeId": "pl_r22_fuel_457",
+          "townId": null,
+          "name": "Башнефть, Р-22, 457 км",
+          "note": null,
+          "lat": 52.74893173318609,
+          "lon": 41.31421886995503,
+          "arriveAt": "2026-10-24T15:04",
+          "departAt": "2026-10-24T15:14",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 13,
+          "kmAt": 457,
+          "dwellMin": 10,
+          "tags": [
+            "24h"
+          ],
+          "costRub": 2220,
+          "reason": "Заправиться вечером, чтобы утром сразу ехать.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s07",
+          "seq": 7,
+          "day": 1,
+          "kind": "overnight",
+          "sign": "hotel",
+          "placeId": "pl_tam_hotel_derzhavinskaya",
+          "townId": "t_tambov",
+          "name": "Тамбов",
+          "note": null,
+          "lat": 52.72572185866479,
+          "lon": 41.44340133694521,
+          "arriveAt": "2026-10-24T15:25",
+          "departAt": null,
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 11,
+          "kmAt": 467,
+          "dwellMin": 0,
+          "tags": [
+            "dogs_allowed",
+            "family_room",
+            "parking_guarded"
+          ],
+          "costRub": 5200,
+          "reason": "На 23 км раньше вашего предела: здесь больше отелей, куда пускают с собакой. Ваши 500 км в день не превышены.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "hotelOptions": [
+            {
+              "placeId": "pl_tam_hotel_derzhavinskaya",
+              "name": "Державинская",
+              "tags": [
+                "dogs_allowed",
+                "family_room",
+                "parking_guarded"
+              ],
+              "priceNightRub": 5200,
+              "rooms": 1,
+              "priceCrewRub": 5200,
+              "verified": true
+            },
+            {
+              "placeId": "pl_tam_hotel_tambov",
+              "name": "Гостиница «Тамбов»",
+              "tags": [
+                "dogs_allowed",
+                "family_room",
+                "parking"
+              ],
+              "priceNightRub": 4500,
+              "rooms": 1,
+              "priceCrewRub": 4500,
+              "verified": true
+            }
+          ],
+          "selectedHotelId": "pl_tam_hotel_derzhavinskaya"
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "km": 516,
+      "driveMin": 378,
+      "tz": "Europe/Moscow",
+      "startAt": "2026-10-25T09:00",
+      "endAt": "2026-10-25T17:18",
+      "overBudget": false,
+      "stops": [
+        {
+          "id": "d2s01",
+          "seq": 8,
+          "day": 2,
+          "kind": "start",
+          "sign": "city",
+          "placeId": null,
+          "townId": "t_tambov",
+          "name": "Тамбов",
+          "note": null,
+          "lat": 52.72572185866479,
+          "lon": 41.44340133694521,
+          "arriveAt": null,
+          "departAt": "2026-10-25T09:00",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 0,
+          "kmAt": 467,
+          "dwellMin": 0,
+          "tags": [],
+          "costRub": 0,
+          "reason": "Выезд в 09:00.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d2s02",
+          "seq": 9,
+          "day": 2,
+          "kind": "rest",
+          "sign": "rest",
+          "placeId": "pl_r22_rest_615",
+          "townId": null,
+          "name": "Площадка отдыха, Р-22, 615 км",
+          "note": null,
+          "lat": 51.48683545147724,
+          "lon": 42.0372236278291,
+          "arriveAt": "2026-10-25T10:50",
+          "departAt": "2026-10-25T11:10",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 148,
+          "kmAt": 615,
+          "dwellMin": 20,
+          "tags": [
+            "playground",
+            "wc",
+            "view",
+            "walk"
+          ],
+          "costRub": 0,
+          "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d2s02_pl_r22_rest_650",
+              "placeId": "pl_r22_rest_650",
+              "name": "Площадка отдыха, Р-22, 650 км",
+              "deltaMin": 0,
+              "deltaRub": 0,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-VOR",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 650 км",
+                "placeId": "pl_r22_rest_650"
+              },
+              "stop": {
+                "id": "d2s02",
+                "seq": 9,
+                "day": 2,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_650",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 650 км",
+                "note": null,
+                "lat": 51.19818028934048,
+                "lon": 42.20147141424127,
+                "arriveAt": "2026-10-25T11:16",
+                "departAt": "2026-10-25T11:36",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 183,
+                "kmAt": 650,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            },
+            {
+              "id": "alt_d2s02_pl_r22_rest_580",
+              "placeId": "pl_r22_rest_580",
+              "name": "Площадка отдыха, Р-22, 580 км",
+              "deltaMin": 3,
+              "deltaRub": 0,
+              "shiftMin": 3,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-VOR",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 580 км",
+                "placeId": "pl_r22_rest_580"
+              },
+              "stop": {
+                "id": "d2s02",
+                "seq": 9,
+                "day": 2,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_580",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 580 км",
+                "note": null,
+                "lat": 51.7787289320844,
+                "lon": 41.88964349545857,
+                "arriveAt": "2026-10-25T10:26",
+                "departAt": "2026-10-25T10:46",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 113,
+                "kmAt": 580,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            }
+          ],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d2s03",
+          "seq": 10,
+          "day": 2,
+          "kind": "food",
+          "sign": "food",
+          "placeId": "pl_r22_cafe_745",
+          "townId": null,
+          "name": "Кафе «Придорожное», Р-22",
+          "note": null,
+          "lat": 50.45014741859743,
+          "lon": 42.77542167927936,
+          "arriveAt": "2026-10-25T12:45",
+          "departAt": "2026-10-25T13:45",
+          "tz": "Europe/Volgograd",
+          "kmFromPrev": 131,
+          "kmAt": 745,
+          "dwellMin": 60,
+          "tags": [
+            "kids_menu",
+            "parking"
+          ],
+          "costRub": 1750,
+          "reason": "Обед, есть детское меню.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d2s03_pl_r22_cafe_695",
+              "placeId": "pl_r22_cafe_695",
+              "name": "Кафе «Ямщик», Р-22",
+              "deltaMin": 3,
+              "deltaRub": -250,
+              "shiftMin": 3,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-VGG",
+                "checkRub": 600,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Кафе «Ямщик», Р-22",
+                "placeId": "pl_r22_cafe_695"
+              },
+              "stop": {
+                "id": "d2s03",
+                "seq": 10,
+                "day": 2,
+                "kind": "food",
+                "sign": "food",
+                "placeId": "pl_r22_cafe_695",
+                "townId": null,
+                "name": "Кафе «Ямщик», Р-22",
+                "note": null,
+                "lat": 50.8372802875826,
+                "lon": 42.459364162681815,
+                "arriveAt": "2026-10-25T12:10",
+                "departAt": "2026-10-25T13:10",
+                "tz": "Europe/Volgograd",
+                "kmFromPrev": 81,
+                "kmAt": 695,
+                "dwellMin": 60,
+                "tags": [
+                  "parking"
+                ],
+                "costRub": 1500,
+                "reason": "Обед, парковка у входа.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            }
+          ],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d2s04",
+          "seq": 11,
+          "day": 2,
+          "kind": "rest",
+          "sign": "rest",
+          "placeId": "pl_r22_rest_755",
+          "townId": null,
+          "name": "Площадка отдыха, Р-22, 755 км",
+          "note": null,
+          "lat": 50.38248370178327,
+          "lon": 42.863421679279355,
+          "arriveAt": "2026-10-25T13:53",
+          "departAt": "2026-10-25T14:13",
+          "tz": "Europe/Volgograd",
+          "kmFromPrev": 11,
+          "kmAt": 755,
+          "dwellMin": 20,
+          "tags": [
+            "playground",
+            "wc",
+            "walk"
+          ],
+          "costRub": 0,
+          "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d2s04_pl_r22_rest_790",
+              "placeId": "pl_r22_rest_790",
+              "name": "Площадка отдыха, Р-22, 790 км",
+              "deltaMin": 3,
+              "deltaRub": 0,
+              "shiftMin": 3,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-VGG",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 790 км",
+                "placeId": "pl_r22_rest_790"
+              },
+              "stop": {
+                "id": "d2s04",
+                "seq": 11,
+                "day": 2,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_790",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 790 км",
+                "note": null,
+                "lat": 50.14217293538487,
+                "lon": 43.16497832072064,
+                "arriveAt": "2026-10-25T14:20",
+                "departAt": "2026-10-25T14:40",
+                "tz": "Europe/Volgograd",
+                "kmFromPrev": 46,
+                "kmAt": 790,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            }
+          ],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d2s05",
+          "seq": 12,
+          "day": 2,
+          "kind": "rest",
+          "sign": "rest",
+          "placeId": "pl_r22_rest_895",
+          "townId": null,
+          "name": "Площадка отдыха, Р-22, 895 км",
+          "note": null,
+          "lat": 49.37975568665457,
+          "lon": 43.97630873159323,
+          "arriveAt": "2026-10-25T15:55",
+          "departAt": "2026-10-25T16:15",
+          "tz": "Europe/Volgograd",
+          "kmFromPrev": 141,
+          "kmAt": 895,
+          "dwellMin": 20,
+          "tags": [
+            "playground",
+            "wc",
+            "walk"
+          ],
+          "costRub": 0,
+          "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d2s05_pl_r22_rest_930",
+              "placeId": "pl_r22_rest_930",
+              "name": "Площадка отдыха, Р-22, 930 км",
+              "deltaMin": 0,
+              "deltaRub": 0,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-VGG",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 930 км",
+                "placeId": "pl_r22_rest_930"
+              },
+              "stop": {
+                "id": "d2s05",
+                "seq": 12,
+                "day": 2,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_930",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 930 км",
+                "note": null,
+                "lat": 49.10113237304692,
+                "lon": 44.19163082064558,
+                "arriveAt": "2026-10-25T16:21",
+                "departAt": "2026-10-25T16:41",
+                "tz": "Europe/Volgograd",
+                "kmFromPrev": 176,
+                "kmAt": 930,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc",
+                  "view"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            },
+            {
+              "id": "alt_d2s05_pl_r22_rest_860",
+              "placeId": "pl_r22_rest_860",
+              "name": "Площадка отдыха, Р-22, 860 км",
+              "deltaMin": 0,
+              "deltaRub": 0,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": -0.0,
+                "regionCode": "RU-VGG",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, Р-22, 860 км",
+                "placeId": "pl_r22_rest_860"
+              },
+              "stop": {
+                "id": "d2s05",
+                "seq": 12,
+                "day": 2,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_r22_rest_860",
+                "townId": null,
+                "name": "Площадка отдыха, Р-22, 860 км",
+                "note": null,
+                "lat": 49.6532965521514,
+                "lon": 43.746399477362,
+                "arriveAt": "2026-10-25T15:30",
+                "departAt": "2026-10-25T15:50",
+                "tz": "Europe/Volgograd",
+                "kmFromPrev": 106,
+                "kmAt": 860,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "hotelOptions": [],
+                "selectedHotelId": null
+              }
+            }
+          ],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d2s06",
+          "seq": 13,
+          "day": 2,
+          "kind": "finish",
+          "sign": "city",
+          "placeId": null,
+          "townId": null,
+          "name": "Волгоград",
+          "note": null,
+          "lat": 48.708,
+          "lon": 44.5133,
+          "arriveAt": "2026-10-25T17:18",
+          "departAt": null,
+          "tz": "Europe/Volgograd",
+          "kmFromPrev": 85,
+          "kmAt": 980,
+          "dwellMin": 0,
+          "tags": [],
+          "costRub": 0,
+          "reason": "Финиш.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "hotelOptions": [],
+          "selectedHotelId": null
+        }
+      ]
+    }
+  ],
+  "cost": {
+    "lines": [
+      {
+        "key": "fuel",
+        "title": "Бензин АИ-95",
+        "rub": 4840,
+        "formula": "989 км × 8 л/100 × ≈ 61,20 ₽ (средняя по 7 регионам)",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "Москва",
+            "formula": "20 км × 8 л/100 × 62,50 ₽ = 100 ₽",
+            "rub": 100
+          },
+          {
+            "label": "Московская область",
+            "formula": "130 км × 8 л/100 × 61,80 ₽ = 640 ₽",
+            "rub": 640
+          },
+          {
+            "label": "Рязанская область",
+            "formula": "173 км × 8 л/100 × 61,20 ₽ = 850 ₽",
+            "rub": 850
+          },
+          {
+            "label": "Липецкая область",
+            "formula": "50 км × 8 л/100 × 60,80 ₽ = 240 ₽",
+            "rub": 240
+          },
+          {
+            "label": "Тамбовская область",
+            "formula": "192 км × 8 л/100 × 60,50 ₽ = 930 ₽",
+            "rub": 930
+          },
+          {
+            "label": "Воронежская область",
+            "formula": "121 км × 8 л/100 × 61,00 ₽ = 590 ₽",
+            "rub": 590
+          },
+          {
+            "label": "Волгоградская область",
+            "formula": "302 км × 8 л/100 × 61,30 ₽ = 1 480 ₽",
+            "rub": 1480
+          }
+        ]
+      },
+      {
+        "key": "tolls",
+        "title": "Платные дороги",
+        "rub": 0,
+        "formula": "платных дорог нет",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": []
+      },
+      {
+        "key": "lodging",
+        "title": "Ночёвки",
+        "rub": 5200,
+        "formula": "Тамбов, 1 × 5 200",
+        "asOf": "2026-09",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "Ночь 1: Тамбов",
+            "formula": "1 × 5 200",
+            "rub": 5200
+          }
+        ]
+      },
+      {
+        "key": "food",
+        "title": "Питание",
+        "rub": 4630,
+        "formula": "2,5 чел. × 3 приёма × ≈ 620 (в среднем)",
+        "asOf": "2026-09",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "День 1",
+            "formula": "обед 500 + ужин 650",
+            "rub": 2880
+          },
+          {
+            "label": "День 2",
+            "formula": "обед 700",
+            "rub": 1750
+          }
+        ]
+      },
+      {
+        "key": "tickets",
+        "title": "Билеты",
+        "rub": 0,
+        "formula": "вход свободный",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": []
+      },
+      {
+        "key": "reserve",
+        "title": "Резерв 10%",
+        "rub": 1470,
+        "formula": "на пробки и «давай заедем»",
+        "asOf": "2026-09",
+        "enabled": true,
+        "breakdown": []
+      }
+    ],
+    "reserveOn": true,
+    "subtotalRub": 14670,
+    "totalRub": 16100,
+    "perPersonRub": 5400,
+    "budgetRub": 60000,
+    "remainingRub": 43900,
+    "overBudget": false,
+    "hints": [],
+    "hintKeys": [],
+    "pricesAsOf": "2026-09",
+    "units": {
+      "fuel": {
+        "consumption": 8.0,
+        "fuelType": "ai95",
+        "regions": [
+          {
+            "regionCode": "RU-MOW",
+            "regionName": "Москва",
+            "km": 20.0,
+            "priceRub": "62.50"
+          },
+          {
+            "regionCode": "RU-MOS",
+            "regionName": "Московская область",
+            "km": 130.0,
+            "priceRub": "61.80"
+          },
+          {
+            "regionCode": "RU-RYA",
+            "regionName": "Рязанская область",
+            "km": 173.098,
+            "priceRub": "61.20"
+          },
+          {
+            "regionCode": "RU-LIP",
+            "regionName": "Липецкая область",
+            "km": 50.0,
+            "priceRub": "60.80"
+          },
+          {
+            "regionCode": "RU-TAM",
+            "regionName": "Тамбовская область",
+            "km": 192.364,
+            "priceRub": "60.50"
+          },
+          {
+            "regionCode": "RU-VOR",
+            "regionName": "Воронежская область",
+            "km": 120.78,
+            "priceRub": "61.00"
+          },
+          {
+            "regionCode": "RU-VGG",
+            "regionName": "Волгоградская область",
+            "km": 302.34,
+            "priceRub": "61.30"
+          }
+        ],
+        "asOf": "2026-10"
+      },
+      "tolls": [],
+      "nights": [
+        {
+          "stopId": "d1s07",
+          "day": 1,
+          "townName": "Тамбов",
+          "selectedPlaceId": "pl_tam_hotel_derzhavinskaya",
+          "priceNightRub": 5200,
+          "options": [
+            {
+              "placeId": "pl_tam_hotel_derzhavinskaya",
+              "priceNightRub": 5200,
+              "breakfastIncluded": true
+            },
+            {
+              "placeId": "pl_tam_hotel_tambov",
+              "priceNightRub": 4500,
+              "breakfastIncluded": true
+            }
+          ],
+          "defaultPrice": false,
+          "breakfastIncluded": true,
+          "breakfastCheckRub": 390
+        }
+      ],
+      "meals": [
+        {
+          "day": 1,
+          "meal": "lunch",
+          "stopId": "d1s05",
+          "checkRub": 500
+        },
+        {
+          "day": 1,
+          "meal": "dinner",
+          "stopId": "d1s07",
+          "checkRub": 650
+        },
+        {
+          "day": 2,
+          "meal": "lunch",
+          "stopId": "d2s03",
+          "checkRub": 700
+        }
+      ],
+      "tickets": [
+        {
+          "stopId": "d1s03",
+          "placeId": "pl_skp_lake",
+          "name": "Скопинское городище",
+          "adultRub": 0,
+          "childRub": 0
+        }
+      ],
+      "reserveFrac": "0.10",
+      "lineStep": 10,
+      "totalStep": 100,
+      "childAges": [
+        5
+      ],
+      "assumedChildAge": 8,
+      "childFoodWeightUnder7": "0.50",
+      "asOf": {
+        "fuel": "2026-10",
+        "tolls": "2026-10",
+        "lodging": "2026-09",
+        "food": "2026-09",
+        "tickets": "2026-10",
+        "reserve": "2026-09"
+      },
+      "moodJustDrive": false
+    }
+  },
+  "reasons": {
+    "overnights": [
+      {
+        "day": 1,
+        "townId": "t_tambov",
+        "town": "Тамбов",
+        "text": "На 23 км раньше вашего предела: здесь больше отелей, куда пускают с собакой. Ваши 500 км в день не превышены.",
+        "candidates": [
+          "Тамбов"
+        ],
+        "fallback": "none"
+      }
+    ]
+  },
+  "warnings": [],
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва",
+      "placeId": null,
+      "townId": null
+    },
+    "destination": {
+      "lat": 48.708,
+      "lon": 44.5133,
+      "label": "Волгоград",
+      "placeId": null,
+      "townId": null
+    },
+    "vias": [],
+    "readyRouteId": null,
+    "roundTrip": false,
+    "crew": {
+      "adults": 2,
+      "children": 1,
+      "dog": true,
+      "childAges": [
+        5
+      ]
+    },
+    "dailyKm": 500,
+    "budget": 60000,
+    "vehicle": {
+      "consumption": 8.0,
+      "fuelType": "ai95",
+      "tankL": 50.0
+    },
+    "startAt": "2026-10-24T07:00",
+    "tz": "Europe/Moscow",
+    "mood": "calm",
+    "avoidTolls": false,
+    "reserveOn": true,
+    "simplify": false
+  },
+  "engineVersion": "0.1.0"
+}

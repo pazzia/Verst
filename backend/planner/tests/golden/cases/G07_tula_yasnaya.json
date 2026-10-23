@@ -1,0 +1,56 @@
+{
+  "id": "G07",
+  "slug": "tula_yasnaya",
+  "titleRu": "Тула · Ясная Поляна, 2 взрослых + 2 детей, 300 км/день",
+  "world": "central_russia_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва"
+    },
+    "readyRouteId": "rr_tula_yasnaya",
+    "crew": {
+      "adults": 2,
+      "children": 2,
+      "dog": false
+    },
+    "dailyKm": 300,
+    "startAt": "2026-10-24T09:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 2,
+    "nights": 1,
+    "kmRange": [
+      414,
+      435
+    ],
+    "overnightTownIds": [
+      "t_tula"
+    ],
+    "overnightFallbacks": [
+      "template"
+    ],
+    "mustIncludePlaceIds": [
+      "pl_tul_yasnaya",
+      "pl_tul_hotel_kremlin"
+    ],
+    "costLinesRub": {
+      "lodging": {
+        "value": 5500,
+        "tolerancePct": 0
+      }
+    },
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "template fit: Тула km 183, total 414 → days 183 / 231 ≤ 315, 2 ≤ ceil(414 / 270) = 2",
+      "Ясная Поляна is a fixed stop on day 2 (Sunday 25.10, Tu-Su 09:00–17:00): ≈ 09:15 + 120 min → open",
+      "hotel (4 people → family room): Тульский кремль-отель 4.5 + 0.3 − 0.55 = 4.25 > Пряничный двор 4.4 + 0.3 − 0.48 = 4.22 → 5 500 × 1 room"
+    ]
+  }
+}

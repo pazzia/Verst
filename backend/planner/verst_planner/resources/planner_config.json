@@ -1,0 +1,91 @@
+{
+  "snap_max_km": 2.0,
+  "too_short_km": 20.0,
+  "max_days": 14,
+  "corridor_km": {
+    "sight": 15,
+    "food": 15,
+    "fuel": 15,
+    "rest": 15,
+    "fuel_motorway": 5,
+    "rest_motorway": 5,
+    "town": 25,
+    "lodging_from_town": 10
+  },
+  "detour": {
+    "winding": 1.3,
+    "speed_kmh": 40,
+    "access_min": 2,
+    "motorway_exit_min": 5,
+    "on_road_km": 0.3
+  },
+  "drive_time_factor": 1.10,
+  "day_start_first": "08:00",
+  "day_start_next": "09:00",
+  "day_budget_min": {"calm": 540, "more_stops": 600, "just_drive": 600},
+  "split": {
+    "window_lo": 0.70,
+    "window_hi": 1.05,
+    "hard_cap": 1.05,
+    "widened_lo": 0.40,
+    "widened_hi": 1.30,
+    "template_hi": 1.05,
+    "template_lo": 0.90
+  },
+  "overnight_score": {
+    "w_h": 3.0,
+    "w_q": 2.0,
+    "w_e": 1.5,
+    "w_km": 2.0,
+    "w_detour": 1.0,
+    "h_cap": 5,
+    "h_no_parking_weight": 0.5,
+    "family_room_min_people": 3
+  },
+  "overnight_eta_allowance_min": {"calm": 120, "more_stops": 150, "just_drive": 30},
+  "fuel": {
+    "usable_frac": 0.8,
+    "start_frac": 1.0,
+    "lookahead_km": 40,
+    "lookback_km": 100,
+    "coincide_km": 2,
+    "evening_next_day_km": 60,
+    "evening_window_km": 40,
+    "skip_near_finish_frac": 0.10,
+    "coffee_after_drive_min": 60
+  },
+  "rest_interval_min": {"calm": 120, "more_stops": 90, "just_drive": 180},
+  "rest": {
+    "window_before_min": 30,
+    "widen_before_min": 60,
+    "widen_after_min": 15,
+    "min_remaining_drive_min": 30,
+    "break_min_dwell": 15
+  },
+  "dwell_min": {
+    "coffee": 15,
+    "fuel": 10,
+    "fuel_coffee": 15,
+    "rest": 20,
+    "lunch": 60,
+    "sight_default": 60,
+    "via": 30
+  },
+  "lunch_window": ["12:00", "14:30"],
+  "lunch_sweet_spot": ["12:30", "13:30"],
+  "sights": {
+    "max_per_day": {"calm": 2, "more_stops": 4, "just_drive": 0},
+    "min_score": 2.0
+  },
+  "alternatives": {"window_min": 45, "max": 3},
+  "cost": {
+    "reserve_frac": 0.10,
+    "line_step": 10,
+    "total_step": 100,
+    "child_food_weight_under7": 0.5,
+    "assumed_child_age": 8,
+    "breakfast_price_frac": 0.6,
+    "dinner_last_day_after": "19:00"
+  },
+  "toll_night": ["00:00", "06:00"]
+}

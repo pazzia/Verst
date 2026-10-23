@@ -1,0 +1,91 @@
+{
+  "id": "G02",
+  "slug": "golden_ring",
+  "titleRu": "Золотое кольцо, 2 взрослых + ребёнок + собака, 300 км/день, бюджет 40 000",
+  "world": "central_russia_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва"
+    },
+    "readyRouteId": "rr_golden_ring",
+    "crew": {
+      "adults": 2,
+      "children": 1,
+      "dog": true
+    },
+    "dailyKm": 300,
+    "budget": 40000,
+    "startAt": "2026-11-07T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 3,
+    "nights": 2,
+    "kmRange": [
+      745,
+      775
+    ],
+    "overnightTownIds": [
+      "t_yaroslavl",
+      "t_suzdal"
+    ],
+    "overnightFallbacks": [
+      "template",
+      "template"
+    ],
+    "warnings": [],
+    "mustIncludePlaceIds": [
+      "pl_sps_lavra",
+      "pl_kos_ipatiev",
+      "pl_yar_hotel_strelka",
+      "pl_suz_hotel_pushkarskaya"
+    ],
+    "costTotalRub": {
+      "value": 32300,
+      "tolerancePct": 5
+    },
+    "costLinesRub": {
+      "lodging": {
+        "value": 12000,
+        "tolerancePct": 0
+      },
+      "tolls": {
+        "value": 0,
+        "tolerancePct": 0
+      },
+      "fuel": {
+        "value": 3750,
+        "tolerancePct": 5
+      },
+      "food": {
+        "value": 9900,
+        "tolerancePct": 5
+      },
+      "tickets": {
+        "value": 3700,
+        "tolerancePct": 15
+      }
+    },
+    "costFormulaContains": {
+      "lodging": "Ярославль + Суздаль, 2 × 6 000",
+      "food": "3 чел. × 5 приёмов"
+    },
+    "remainingIsBudgetMinusTotal": true,
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "template fit [D-3]: nights Ярославль km 263, Суздаль km 523, total 745 → days 263 / 260 / 222 ≤ 315 and 3 ≤ ceil(745 / 270) = 3 → template nights, fallback template",
+      "hotels (dog + family room, 3 people): Ярославль У Стрелки 4.6 + 0.3 − 0.6 = 4.30 > Волжская 4.5 + 0.3 − 0.7 = 4.10 → 6 000; Суздаль only Пушкарская слобода passes → 6 000",
+      "lodging: 2 nights × ceil(2/2) = 1 room × 6 000 = 12 000",
+      "fuel by region (10-km buckets to the nearest node): МОВ 24, МО 159.5, ЯО 196.5, КО 91.5, ИО 90.5, ВО 183 = 745 km; 0.08 × (24·62.50 + 159.5·61.80 + 196.5·61.90 + 91.5·62.20 + 90.5·61.60 + 183·61.40) = 0.08 × 46 022.75 = 3 681.8; + ≈ 13 km of detours × 0.08 × 61.8 ≈ 64 → ≈ 3 746 → 3 750",
+      "food [D-6/D-16]: 3 people (child age unknown → 8 → weight 1) × 5 meals: day 1 lunch Трапезная у кремля (Ростов, highest lunch_score 4.5 + 2 kids + 1 parking − 0.6 = 6.9) 700 + dinner Ярославль median(600, 700, 950) = 700; day 2 lunch Сбитенная (Кострома) 700 + dinner Суздаль median_low(700, 800) = 700; day 3 lunch Кафе «Придорожное», М-7 500 (kids, parking, ETA in 12:30–13:30); breakfasts at the hotels are included; day 3 finishes at home → no dinner. 3 × 3 300 = 9 900",
+      "tickets (calm: ≤ 2 sights a day incl. fixed): day 1 Лавра (free) — Плещеево/Горицкий would push the Ростов lunch past 14:30, Ростовский кремль the day past 540 min; day 2 Ипатьевский 2·500 + 250 = 1 250 + Костромская слобода 2·300 + 150 = 750; day 3 (Monday: Золотые ворота closed) Музей шоколада 2·350 + 250 = 950 + Музей деревянного зодчества 2·300 + 150 = 750 → 3 700",
+      "subtotal 3 750 + 0 + 12 000 + 9 900 + 3 700 = 29 350; reserve 10 % = 2 935 → 2 940; total 32 290 → 32 300; remaining 40 000 − 32 300 = 7 700"
+    ]
+  }
+}

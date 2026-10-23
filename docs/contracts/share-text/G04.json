@@ -1,0 +1,697 @@
+{
+  "plan": {
+    "id": "trp_golden",
+    "title": "Москва → Казань",
+    "km": 799,
+    "days": 1,
+    "nights": 0,
+    "roundTrip": false,
+    "daysList": [
+      {
+        "day": 1,
+        "km": 799,
+        "driveMin": 533,
+        "tz": "Europe/Moscow",
+        "startAt": "2026-10-24T06:00",
+        "endAt": "2026-10-24T16:58",
+        "overBudget": true,
+        "stops": [
+          {
+            "id": "d1s01",
+            "seq": 1,
+            "day": 1,
+            "kind": "start",
+            "sign": "city",
+            "placeId": null,
+            "townId": null,
+            "name": "Москва",
+            "note": null,
+            "lat": 55.7558,
+            "lon": 37.6173,
+            "arriveAt": null,
+            "departAt": "2026-10-24T06:00",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 0,
+            "kmAt": 0,
+            "dwellMin": 0,
+            "tags": [],
+            "costRub": 0,
+            "reason": "Выезд в 06:00.",
+            "verified": true,
+            "replaceable": false,
+            "alternatives": [],
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s02",
+            "seq": 2,
+            "day": 1,
+            "kind": "fuel",
+            "sign": "fuel",
+            "placeId": "pl_m7e_fuel_060",
+            "townId": null,
+            "name": "Роснефть, М-7, 60 км",
+            "note": null,
+            "lat": 56.18925417927754,
+            "lon": 41.32918587951045,
+            "arriveAt": "2026-10-24T08:48",
+            "departAt": "2026-10-24T09:03",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 256,
+            "kmAt": 253,
+            "dwellMin": 15,
+            "tags": [
+              "wc",
+              "cafe_at_fuel"
+            ],
+            "costRub": 0,
+            "reason": "Разминка 15 минут после 2 ч 45 мин за рулём.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d1s02_pl_m12_fuel_220",
+                "placeId": "pl_m12_fuel_220",
+                "name": "Башнефть, М-12, 220 км",
+                "deltaMin": -5,
+                "deltaRub": 0,
+                "shiftMin": -5,
+                "units": {
+                  "deltaKm": -3.721,
+                  "regionCode": "RU-VLA",
+                  "checkRub": null,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Башнефть, М-12, 220 км",
+                  "placeId": "pl_m12_fuel_220"
+                },
+                "stop": {
+                  "id": "d1s02",
+                  "seq": 2,
+                  "day": 1,
+                  "kind": "fuel",
+                  "sign": "fuel",
+                  "placeId": "pl_m12_fuel_220",
+                  "townId": null,
+                  "name": "Башнефть, М-12, 220 км",
+                  "note": null,
+                  "lat": 56.19340634486311,
+                  "lon": 40.84121916489103,
+                  "arriveAt": "2026-10-24T08:26",
+                  "departAt": "2026-10-24T08:41",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 221,
+                  "kmAt": 220,
+                  "dwellMin": 15,
+                  "tags": [
+                    "wc",
+                    "cafe_at_fuel",
+                    "24h"
+                  ],
+                  "costRub": 0,
+                  "reason": "Разминка 15 минут после 3 ч за рулём.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                }
+              }
+            ],
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s03",
+            "seq": 3,
+            "day": 1,
+            "kind": "rest",
+            "sign": "rest",
+            "placeId": "pl_m12_rest_280",
+            "townId": null,
+            "name": "Площадка отдыха, М-12, 280 км",
+            "note": null,
+            "lat": 56.16279409996515,
+            "lon": 41.71366814448287,
+            "arriveAt": "2026-10-24T09:31",
+            "departAt": "2026-10-24T09:51",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 29,
+            "kmAt": 280,
+            "dwellMin": 20,
+            "tags": [
+              "wc",
+              "view",
+              "walk"
+            ],
+            "costRub": 0,
+            "reason": "Разминка 20 минут после 3 ч за рулём.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d1s03_pl_m12_rest_330",
+                "placeId": "pl_m12_rest_330",
+                "name": "Площадка отдыха, М-12, 330 км",
+                "deltaMin": 0,
+                "deltaRub": 0,
+                "shiftMin": 0,
+                "units": {
+                  "deltaKm": -0.0,
+                  "regionCode": "RU-NIZ",
+                  "checkRub": null,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Площадка отдыха, М-12, 330 км",
+                  "placeId": "pl_m12_rest_330"
+                },
+                "stop": {
+                  "id": "d1s03",
+                  "seq": 3,
+                  "day": 1,
+                  "kind": "rest",
+                  "sign": "rest",
+                  "placeId": "pl_m12_rest_330",
+                  "townId": null,
+                  "name": "Площадка отдыха, М-12, 330 км",
+                  "note": null,
+                  "lat": 56.130063042892004,
+                  "lon": 42.43990328408856,
+                  "arriveAt": "2026-10-24T10:01",
+                  "departAt": "2026-10-24T10:21",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 79,
+                  "kmAt": 330,
+                  "dwellMin": 20,
+                  "tags": [
+                    "playground",
+                    "wc"
+                  ],
+                  "costRub": 0,
+                  "reason": "Разминка 20 минут после 3 ч за рулём.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                }
+              }
+            ],
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s04",
+            "seq": 4,
+            "day": 1,
+            "kind": "rest",
+            "sign": "rest",
+            "placeId": "pl_m12_rest_530",
+            "townId": null,
+            "name": "Площадка отдыха, М-12, 530 км",
+            "note": null,
+            "lat": 55.96240969066033,
+            "lon": 45.328814322885336,
+            "arriveAt": "2026-10-24T12:30",
+            "departAt": "2026-10-24T12:50",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 251,
+            "kmAt": 530,
+            "dwellMin": 20,
+            "tags": [
+              "playground",
+              "wc"
+            ],
+            "costRub": 0,
+            "reason": "Разминка 20 минут после 2 ч 30 мин за рулём.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d1s04_pl_m12_rest_480",
+                "placeId": "pl_m12_rest_480",
+                "name": "Площадка отдыха, М-12, 480 км",
+                "deltaMin": 0,
+                "deltaRub": 0,
+                "shiftMin": 0,
+                "units": {
+                  "deltaKm": 0.0,
+                  "regionCode": "RU-NIZ",
+                  "checkRub": null,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Площадка отдыха, М-12, 480 км",
+                  "placeId": "pl_m12_rest_480"
+                },
+                "stop": {
+                  "id": "d1s04",
+                  "seq": 4,
+                  "day": 1,
+                  "kind": "rest",
+                  "sign": "rest",
+                  "placeId": "pl_m12_rest_480",
+                  "townId": null,
+                  "name": "Площадка отдыха, М-12, 480 км",
+                  "note": null,
+                  "lat": 56.01959030933968,
+                  "lon": 44.610385677114664,
+                  "arriveAt": "2026-10-24T12:00",
+                  "departAt": "2026-10-24T12:20",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 201,
+                  "kmAt": 480,
+                  "dwellMin": 20,
+                  "tags": [
+                    "wc",
+                    "walk"
+                  ],
+                  "costRub": 0,
+                  "reason": "Разминка 20 минут после 3 ч за рулём.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                }
+              }
+            ],
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s05",
+            "seq": 5,
+            "day": 1,
+            "kind": "food",
+            "sign": "food",
+            "placeId": "pl_m12_cafe_535",
+            "townId": null,
+            "name": "Кафе «У дороги», М-12",
+            "note": null,
+            "lat": 55.96459030933968,
+            "lon": 45.402385677114665,
+            "arriveAt": "2026-10-24T13:02",
+            "departAt": "2026-10-24T14:02",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 6,
+            "kmAt": 535,
+            "dwellMin": 60,
+            "tags": [
+              "kids_menu",
+              "parking"
+            ],
+            "costRub": 500,
+            "reason": "Обед, парковка у входа.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [],
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s06",
+            "seq": 6,
+            "day": 1,
+            "kind": "fuel",
+            "sign": "fuel",
+            "placeId": "pl_m12_fuel_535",
+            "townId": null,
+            "name": "Нефтьмагистраль, М-12, 535 км",
+            "note": null,
+            "lat": 55.95740969066033,
+            "lon": 45.40081432288534,
+            "arriveAt": "2026-10-24T14:11",
+            "departAt": "2026-10-24T14:21",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 1,
+            "kmAt": 535,
+            "dwellMin": 10,
+            "tags": [
+              "wc"
+            ],
+            "costRub": 2560,
+            "reason": "Через 500 км в баке останется меньше 20% — заправимся здесь.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d1s06_pl_m12_fuel_580",
+                "placeId": "pl_m12_fuel_580",
+                "name": "Лукойл, М-12, 580 км",
+                "deltaMin": 0,
+                "deltaRub": 220,
+                "shiftMin": 0,
+                "units": {
+                  "deltaKm": -0.0,
+                  "regionCode": "RU-CU",
+                  "checkRub": null,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Лукойл, М-12, 580 км",
+                  "placeId": "pl_m12_fuel_580"
+                },
+                "stop": {
+                  "id": "d1s06",
+                  "seq": 6,
+                  "day": 1,
+                  "kind": "fuel",
+                  "sign": "fuel",
+                  "placeId": "pl_m12_fuel_580",
+                  "townId": null,
+                  "name": "Лукойл, М-12, 580 км",
+                  "note": null,
+                  "lat": 55.919590309339675,
+                  "lon": 46.05038567711466,
+                  "arriveAt": "2026-10-24T14:38",
+                  "departAt": "2026-10-24T14:48",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 46,
+                  "kmAt": 580,
+                  "dwellMin": 10,
+                  "tags": [
+                    "wc",
+                    "24h"
+                  ],
+                  "costRub": 2780,
+                  "reason": "Через 500 км в баке останется меньше 20% — заправимся здесь.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                }
+              }
+            ],
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s07",
+            "seq": 7,
+            "day": 1,
+            "kind": "finish",
+            "sign": "city",
+            "placeId": null,
+            "townId": null,
+            "name": "Казань",
+            "note": null,
+            "lat": 55.7963,
+            "lon": 49.1088,
+            "arriveAt": "2026-10-24T16:58",
+            "departAt": null,
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 256,
+            "kmAt": 790,
+            "dwellMin": 0,
+            "tags": [],
+            "costRub": 0,
+            "reason": "Финиш.",
+            "verified": true,
+            "replaceable": false,
+            "alternatives": [],
+            "hotelOptions": [],
+            "selectedHotelId": null
+          }
+        ]
+      }
+    ],
+    "cost": {
+      "lines": [
+        {
+          "key": "fuel",
+          "title": "Бензин АИ-95",
+          "rub": 3890,
+          "formula": "799 км × 8 л/100 × ≈ 60,90 ₽ (средняя по 6 регионам)",
+          "asOf": "2026-10",
+          "enabled": true,
+          "breakdown": [
+            {
+              "label": "Москва",
+              "formula": "10 км × 8 л/100 × 62,50 ₽ = 50 ₽",
+              "rub": 50
+            },
+            {
+              "label": "Московская область",
+              "formula": "70 км × 8 л/100 × 61,80 ₽ = 350 ₽",
+              "rub": 350
+            },
+            {
+              "label": "Владимирская область",
+              "formula": "296 км × 8 л/100 × 61,40 ₽ = 1 450 ₽",
+              "rub": 1450
+            },
+            {
+              "label": "Нижегородская область",
+              "formula": "250 км × 8 л/100 × 60,90 ₽ = 1 220 ₽",
+              "rub": 1220
+            },
+            {
+              "label": "Чувашская Республика",
+              "formula": "93 км × 8 л/100 × 59,80 ₽ = 450 ₽",
+              "rub": 450
+            },
+            {
+              "label": "Республика Татарстан",
+              "formula": "80 км × 8 л/100 × 58,90 ₽ = 380 ₽",
+              "rub": 380
+            }
+          ]
+        },
+        {
+          "key": "tolls",
+          "title": "Платные дороги",
+          "rub": 3500,
+          "formula": "М-12: 3 500 ₽",
+          "asOf": "2026-10",
+          "enabled": true,
+          "breakdown": [
+            {
+              "label": "М-12",
+              "formula": "М-12, днём",
+              "rub": 800
+            },
+            {
+              "label": "М-12",
+              "formula": "М-12, днём",
+              "rub": 1000
+            },
+            {
+              "label": "М-12",
+              "formula": "М-12, днём",
+              "rub": 1100
+            },
+            {
+              "label": "М-12",
+              "formula": "М-12, днём",
+              "rub": 600
+            }
+          ]
+        },
+        {
+          "key": "lodging",
+          "title": "Ночёвки",
+          "rub": 0,
+          "formula": "без ночёвок",
+          "asOf": "2026-10",
+          "enabled": true,
+          "breakdown": []
+        },
+        {
+          "key": "food",
+          "title": "Питание",
+          "rub": 500,
+          "formula": "1 чел. × 1 приём × 500",
+          "asOf": "2026-09",
+          "enabled": true,
+          "breakdown": [
+            {
+              "label": "День 1",
+              "formula": "обед 500",
+              "rub": 500
+            }
+          ]
+        },
+        {
+          "key": "tickets",
+          "title": "Билеты",
+          "rub": 0,
+          "formula": "вход свободный",
+          "asOf": "2026-10",
+          "enabled": true,
+          "breakdown": []
+        },
+        {
+          "key": "reserve",
+          "title": "Резерв 10%",
+          "rub": 790,
+          "formula": "на пробки и «давай заедем»",
+          "asOf": "2026-10",
+          "enabled": true,
+          "breakdown": []
+        }
+      ],
+      "reserveOn": true,
+      "subtotalRub": 7890,
+      "totalRub": 8700,
+      "perPersonRub": 8700,
+      "budgetRub": null,
+      "remainingRub": null,
+      "overBudget": false,
+      "hints": [],
+      "hintKeys": [],
+      "pricesAsOf": "2026-10",
+      "units": {
+        "fuel": {
+          "consumption": 8.0,
+          "fuelType": "ai95",
+          "regions": [
+            {
+              "regionCode": "RU-MOW",
+              "regionName": "Москва",
+              "km": 10.0,
+              "priceRub": "62.50"
+            },
+            {
+              "regionCode": "RU-MOS",
+              "regionName": "Московская область",
+              "km": 70.0,
+              "priceRub": "61.80"
+            },
+            {
+              "regionCode": "RU-VLA",
+              "regionName": "Владимирская область",
+              "km": 295.801,
+              "priceRub": "61.40"
+            },
+            {
+              "regionCode": "RU-NIZ",
+              "regionName": "Нижегородская область",
+              "km": 250.0,
+              "priceRub": "60.90"
+            },
+            {
+              "regionCode": "RU-CU",
+              "regionName": "Чувашская Республика",
+              "km": 93.12,
+              "priceRub": "59.80"
+            },
+            {
+              "regionCode": "RU-TA",
+              "regionName": "Республика Татарстан",
+              "km": 80.0,
+              "priceRub": "58.90"
+            }
+          ],
+          "asOf": "2026-10"
+        },
+        "tolls": [
+          {
+            "segmentId": "ts_m12_1",
+            "roadRef": "М-12",
+            "rub": 800,
+            "night": false,
+            "asOf": "2026-10"
+          },
+          {
+            "segmentId": "ts_m12_2",
+            "roadRef": "М-12",
+            "rub": 1000,
+            "night": false,
+            "asOf": "2026-10"
+          },
+          {
+            "segmentId": "ts_m12_3",
+            "roadRef": "М-12",
+            "rub": 1100,
+            "night": false,
+            "asOf": "2026-10"
+          },
+          {
+            "segmentId": "ts_m12_4",
+            "roadRef": "М-12",
+            "rub": 600,
+            "night": false,
+            "asOf": "2026-10"
+          }
+        ],
+        "nights": [],
+        "meals": [
+          {
+            "day": 1,
+            "meal": "lunch",
+            "stopId": "d1s05",
+            "checkRub": 500
+          }
+        ],
+        "tickets": [],
+        "reserveFrac": "0.10",
+        "lineStep": 10,
+        "totalStep": 100,
+        "childAges": null,
+        "assumedChildAge": 8,
+        "childFoodWeightUnder7": "0.50",
+        "asOf": {
+          "fuel": "2026-10",
+          "tolls": "2026-10",
+          "lodging": "2026-10",
+          "food": "2026-09",
+          "tickets": "2026-10",
+          "reserve": "2026-10"
+        },
+        "moodJustDrive": true
+      }
+    },
+    "reasons": {
+      "overnights": []
+    },
+    "warnings": [
+      {
+        "code": "DAY_OVER_BUDGET",
+        "day": 1,
+        "message": "День 1 получился длинным — можно убрать остановку",
+        "detail": "minutes=658"
+      }
+    ],
+    "input": {
+      "origin": {
+        "lat": 55.7558,
+        "lon": 37.6173,
+        "label": "Москва",
+        "placeId": null,
+        "townId": null
+      },
+      "destination": {
+        "lat": 55.7963,
+        "lon": 49.1088,
+        "label": "Казань",
+        "placeId": null,
+        "townId": null
+      },
+      "vias": [],
+      "readyRouteId": null,
+      "roundTrip": false,
+      "crew": {
+        "adults": 1,
+        "children": 0,
+        "dog": false,
+        "childAges": null
+      },
+      "dailyKm": 900,
+      "budget": null,
+      "vehicle": {
+        "consumption": 8.0,
+        "fuelType": "ai95",
+        "tankL": 50.0
+      },
+      "startAt": "2026-10-24T06:00",
+      "tz": "Europe/Moscow",
+      "mood": "just_drive",
+      "avoidTolls": false,
+      "reserveOn": true,
+      "simplify": false
+    },
+    "engineVersion": "0.1.0"
+  },
+  "text": "Москва → Казань · 799 км · 1 день\nДень 1 · 799 км\n06:00 Москва\n08:48 Роснефть, М-7, 60 км\n09:31 Площадка отдыха, М-12, 280 км\n12:30 Площадка отдыха, М-12, 530 км\n13:02 Кафе «У дороги», М-12\n14:11 Нефтьмагистраль, М-12, 535 км\n16:58 Казань\nИтого ≈ 8 700 ₽ на 1 чел."
+}

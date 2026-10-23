@@ -1,0 +1,431 @@
+# Developer notes — Sprint 1
+
+Running log per task: status, files, commands run with their final result lines, deviations from
+`docs/architecture.md` (A§n). Deviations are also collected at the end.
+
+## DEV-001 — Repo scaffold
+
+Status: done.
+Files: `.gitignore`, `.editorconfig`, `Makefile`, `backend/planner/pyproject.toml`,
+`backend/planner/verst_planner/__init__.py` (+ empty subpackages), `backend/planner/tests/**/__init__.py`,
+`tests/unit/test_smoke.py`, placeholders `backend/api/.gitkeep`, `backend/migrations/.gitkeep`,
+`android/.gitkeep`, `infra/.gitkeep`, `admin/.gitkeep`, `docs/contracts/.gitkeep`.
+
+Commands:
+- `make test-planner` → `Ran 1 test` / `OK`
+- `python3 -m unittest discover -s backend/planner -t backend/planner` → `OK`
+- `make lint-planner typecheck-planner` → `All checks passed!` / `Success: no issues found in 8 source files`
+- `git status --porcelain | grep -c '^??'` → only new paths, no `__pycache__`.
+
+Deviation: `docs/design/.gitkeep` is **not** created. The Manager decided the canonical design folder is
+`design/` (A§2 also lists `design/` at the root); a second empty `docs/design/` would invite misplaced files.
+
+## DEV-002 — Domain model, enums, errors, JSON codec
+
+Status: done.
+Files: `verst_planner/domain/{enums,model,errors,codec}.py`, `tests/helpers.py`, `tests/unit/test_domain.py`,
+`tests/unit/test_codec.py`.
+Commands: `python3 -m unittest tests.unit.test_domain tests.unit.test_codec -v` → `OK`;
+`python3 -c "…print(len(Tag))"` → `18`.
+
+Deviations / decisions:
+- A§3.1 rule 2 read as: `domain` imports only `domain`; `geo` imports only `domain` + `geo` (geo signatures
+  take `LatLon`/`Route`, so geo cannot be import-free). `Corridor` (A§4.6) therefore lives in
+  `verst_planner.pipeline` (it holds a `geo.PolylineIndex`).
+- `NormalizedInput` gains `tz: str` (origin tz) so the wire `input` carries `startAt` + `tz`.
+- Working-state extensions: `PlannedStop.litres`, `PlannedStop.coffee` (A§6.7 records litres / coffee upgrade);
+  `OvernightChoice.nearest`, `.nearest_town`, `.region_code`, `.detour_km`, `.detour_min`.
+- `Alternative.units: AltUnits` (A§7.4 says each alternative carries its units); `HotelPrice.breakfast_included`
+  (A§7.4 text); `CostUnits.as_of` (line freshness so offline recompute keeps `asOf`); `CostResult.hints_ru`
+  (rendered hints for `CostDTO.hints`; `hintKeys` is also emitted).
+- `EngineState` extended with `days: tuple[DayState]` (per-day scheduling inputs), `candidates`
+  (corridor candidates without place bodies) and `rerun` (debug counter used by G12). `replace_stop` needs them
+  to re-schedule a day and rebuild its alternatives without routing (A§6.11); place bodies are re-read through
+  `PlaceRepository.get_places`.
+- `plan_to_json(plan, public=True, trip_id=None)`: emits `id` = `trip_id` (API owns ids); API-only fields
+  `saved/shareSlug/createdAt/shareText` are added by the API. Warnings also carry `detail`; stops carry `day`
+  and `tz` (needed for the round trip).
+- Codec rejects unknown request keys with `InvalidInput("<path>", "unknown_field")` (DTO `extra="forbid"`).
+
+## DEV-003 — Geometry
+
+Status: done. Files: `verst_planner/geo/{distance,polyline,index,bearing}.py`, `tests/unit/test_geo.py`.
+Command: `python3 -m unittest tests.unit.test_geo -v` → `Ran 13 tests` / `OK`.
+Notes: `PolylineIndex.project_all` returns `seg_idx` as the dense polyline segment index (so `road_class` comes
+from the `RouteDetail` covering it). The brute-force test compares against the same simplified segments
+(the zig-zag keeps all 300 vertices, asserted). Extra helpers: `geo.polyline.min_at`, `PolylineIndex.nearest`,
+`road_ref_at`.
+
+## DEV-004 — Opening-hours parser
+
+Status: done. Files: `verst_planner/hours.py`, `tests/unit/test_hours.py` (29 `is_open` table cases + 10 rejects).
+Command: `python3 -m unittest tests.unit.test_hours -v` → `OK`.
+Semantics: closing time itself is closed for `is_open`; `covers(start, end)` accepts `end == closing`; a rule
+naming a day replaces that day's intervals (and their past-midnight spill).
+
+## DEV-005 — Config, reason templates, Russian helpers
+
+Status: done. Files: `verst_planner/config.py`, `resources/planner_config.json`, `resources/reasons.ru.json`,
+`resources/strings.ru.json`, `explain/{templates,ru}.py`, tests `test_config/test_templates/test_ru`.
+Command: `python3 -m unittest tests.unit.test_config tests.unit.test_templates tests.unit.test_ru -v` → `OK`.
+
+Deviations / decisions:
+- `reasons.ru.json` has exactly the A§8.1 keys. Every other Russian UI string the engine needs (month names,
+  duration phrases, cost line titles and formula fragments, share-text lines, the «Ближайшая подходящая …»
+  nearest-lodging text of A§6.5, «Точка на карте», «Ночёвка у трассы …») lives in a second resource
+  `resources/strings.ru.json`, read by `explain.ru.text()`. Reason: backlog rule "every user-visible string in
+  Russian lives in resources" + "reasons JSON contains exactly the keys of A§8.1".
+- `ru.duration_genitive` added for `rest.generic` («после двух часов за рулём»); `ru.capitalize_first` for
+  `sight.default` («Полтора часа на осмотр.»).
+- `part_of_day`: < 12 «обеду», 12–17 «ужину», ≥ 17 «вечеру» (A§8.1 gives only the two ends).
+- Config percentages used in money maths (`cost.reserve_frac`, `child_food_weight_under7`,
+  `breakfast_price_frac`) are `Decimal`; per-mood maps are `MoodInts` with `.of(mood)`.
+- Ruff: `tests/**` ignore RUF001/RUF003 (Cyrillic confusables in fixtures). Code under `verst_planner` keeps no
+  Russian literals; ruff format is applied.
+
+## DEV-006 — Ports, events, cancel token
+
+Status: done. Files: `verst_planner/ports.py`, `verst_planner/events.py`, `tests/unit/test_events.py`.
+Command: `python3 -m unittest tests.unit.test_events -v` → `OK`. Extra: `events.event_to_json` (SSE payloads
+of A§10.4, used by the CLI `--events`).
+
+## DEV-007 — Fake adapters and world loader
+
+Status: done. Files: `verst_planner/adapters/fake/{__init__,world,routing,geocoding,places,prices,tolls,regions,clock}.py`,
+`tests/unit/data/mini_world.json` (8 nodes, 3 towns, 12 places, 1 toll segment, 2 regions),
+`tests/unit/test_fake_{world,routing,repos}.py`.
+Command: `python3 -m unittest tests.unit.test_fake_world tests.unit.test_fake_routing tests.unit.test_fake_repos -v`
+→ `Ran 21 tests` / `OK`. Protocol conformance: explicit port annotations in the tests pass
+`mypy --strict tests/unit/test_fake_routing.py tests/unit/test_fake_repos.py`; `adapters/fake/__init__._conformance`
+repeats them inside the package so the DoD mypy run covers it.
+
+Decisions (A§5.2 left open):
+- Snapping: nearest node (only nodes with edges) when it is no farther than the nearest edge point + 0.5 km,
+  else the edge point (virtual split, partial edges both ways, direct link when two points share an edge).
+  Snap > 2 km → `Unreachable(point_index, snap_km)`.
+- Polyline: each traversed (partial) edge is cut into `max(1, round(km))` pieces.
+- `FakeTollRepository`: one hit per pass (an out-and-back over a segment pays twice); endpoints matched by
+  nearest `km_at`.
+- Spy counters (`FakeRouting.calls`, `FakePlaceRepository.calls[...]`, `FakeRegionLocator.calls`) for the tests.
+- Corridor distance uses the local equirectangular point–segment distance (same metric as anchors and
+  `PolylineIndex`), so the 14.9 / 15.1 km boundary is exact.
+
+## DEV-008 — Fixture worlds
+
+Status: done (Architect spot check of coordinates pending, as per the backlog).
+Files: `fixtures/worlds/central_russia_v1.json` (46 nodes, 47 edges, 41 towns, 322 places: 82 fuel, 81 food,
+78 rest, 48 lodging, 33 sights; 16 regions; 4 М-12 toll segments; 3 ready routes),
+`fixtures/worlds/edge_cases_v1.json` (14 nodes, 7 towns, 51 places, regions RU + RU-TST, `rr_tst_marathon`),
+`tests/unit/test_worlds.py`.
+Command: `python3 -m unittest tests.unit.test_worlds -v` → `Ran 7 tests` / `OK`.
+Routing results: Москва→Ярославль 263 km; Москва→Казань М-7 814 km (avoidTolls), М-12 790 km; Москва→Волгоград
+980 km; Москва→Тула 183 km; Golden Ring loop 745 km (= `kmSign`).
+
+How the worlds support the golden trips:
+- G01: Ростов at km 204 is outside the day-1 window [215, 278]; Ярославль (263) is the only town in it.
+- G02: template day lengths 263 / 260 / 222 km (≤ 315); Ярославль and Суздаль each have a dog + family hotel
+  at 6 000 ₽ that wins `hotel_score` («Ярославль + Суздаль, 2 × 6 000»).
+- G03: window [455, 514.5]; Тамбов (467) has 2 dog + family hotels; Котовск (483) has 3 lodgings, none
+  dog-friendly. The only fuel station in the evening window [427, 467] is at km 457; М-4/Р-22 stations have no
+  `cafe_at_fuel` and rest areas (with playgrounds) are every 35 km so rest windows never pick a coffee stop.
+- G04/G06: М-12 joins the network only in Moscow and Kazan, so no other trip can pick up its tolls.
+- G05/G09–G12: straight synthetic corridors in «Тестовая область» (details in `test_worlds.test_edge_world_shapes`).
+Deviation: М-4 is modelled toll-free in v1 (real М-4 has toll sections); keeps G03's cost about lodging/fuel.
+Sprint-2 G18 (night tariff on М-4) will add the М-4 segments.
+The JSON is generated by a one-off script with hand-chosen values (coordinates, edge km, prices, places) plus
+regularly spaced roadside POIs; the JSON files are the source of truth.
+
+## Manager copy requirements (design/decisions.md round 2, copy-ru.md §13 R-1…R-4)
+
+Applied while on DEV-008 (Manager instruction, mid-task):
+- R-1 `strings.ru.json`: `cost.title.fuel` = «Бензин {fuel_type}» (+ `fuel_type.ai92/ai95/dt` = АИ-92/АИ-95/ДТ),
+  `cost.title.food` = «Питание», `cost.title.reserve` = «Резерв {pct}%», `cost.reserve` = «на пробки и «давай
+  заедем»» (the «10%» moved to the title; `cost.reserve.pct` removed). «Платные дороги» was already right.
+- R-2 `reasons.ru.json`: `rest.generic`/`rest.who` use `{min} {min_word}`; `ru.minutes_word(n)`.
+- R-3 `ReasonTemplates.render` capitalises the first character of every rendered template (fragments that
+  start with a space or comma are unaffected).
+- R-4 `ru.fmt_price` («62,40») and `ru.fmt_consumption_setting` («8,0»). Note a conflict: A§7.2 and the DEV-005
+  acceptance test want `fmt_consumption(8) == "8"` in cost formulas («745 км × 8 л/100 × …»). Both are kept:
+  formulas use `fmt_consumption`, the Drive stage line («Считаем бензин: 8,0 л на 100 км») uses
+  `fmt_consumption_setting`; fuel prices in formulas always show kopecks («62,40 ₽»).
+Tests: `test_templates.test_rendered_reasons_are_capitalised`, `test_templates.test_rest_minutes_plural`,
+`test_ru.test_decimal_comma_in_user_numbers`.
+`DAY_OVER_BUDGET` key unchanged.
+
+## Task order note
+
+DEV-014's `replace_stop` tests need a working `Planner` with cost, so the order after DEV-013 is:
+DEV-015 (cost) → DEV-016 (reasons/share) → DEV-014 (alternatives, assemble, engine plan + replace) → DEV-017.
+Each task's own test files and acceptance commands are unchanged.
+
+## DEV-009 — Stages 0–3
+
+Status: done. Files: `pipeline/{__init__,resolve,base_route,corridor}.py`, `tests/unit/test_resolve.py`,
+`tests/unit/test_corridor.py` (+ `tests/helpers.make_ctx/trip/town_point`).
+Command: `python3 -m unittest tests.unit.test_resolve tests.unit.test_corridor -v` → `Ran 19 tests` / `OK`.
+Decisions / deviations:
+- `PlanContext` carries the ports (`Ports`), memoised `region_at` (key = coords rounded to 2 decimals, A§5.3.5),
+  parsed opening hours, the 1-km `Profile` cache, `fuel_warnings`, `rerun` counter, and `stop_cost`
+  (per-stop cost injected by the engine from `cost.model`; A§3.1 forbids `pipeline → cost`).
+- `normalize_input` also rejects `adults + children > 8` (Manager decision OI-07), user vias together with a
+  ready route, and an unknown ready route (`NotFound`). `round_trip=None` → the template's `round_trip`.
+- `base_route.toll_warnings` returns TOLLS_UNAVOIDABLE separately (A§6.1 gives `build_base_route -> Route`).
+- `corridor.place_fixed` builds VIA stops at waypoint km and projects template `stop` sights onto the pass
+  between their neighbouring waypoints.
+- Lodgings are projected with radius `town + lodging_from_town` (35 km) so a town's own hotels are always found.
+
+## DEV-010 — Stages 4–5
+
+Status: done. Files: `pipeline/{day_split,overnight}.py`, `tests/unit/test_day_split.py`,
+`tests/unit/test_overnight.py`.
+Command: `python3 -m unittest tests.unit.test_day_split tests.unit.test_overnight -v` → `Ran 18 tests` / `OK`.
+Decisions:
+- `N > max_days` → `InvalidInput("dailyKm", "too_many_days")` (A§6.4 does not say what happens).
+- Day-start estimate for the ETA in the E term: day 1 = `start_at`, day d = 09:00 local on start date + d−1.
+- Extra-day (F3) success: the choice for the first failing day is marked `extra_day` and one NO_LODGING
+  (detail `extra_day`) is raised for it.
+- Template night town without a passing lodging: fallback stays `template`, hotel `None`, NO_LODGING
+  (detail `template_no_hotel`) — never a non-passing hotel.
+- NO_LODGING message = SPEC text + «. Ближайшая подходящая: …» when a nearest passing lodging exists; the
+  detail carries `nearest=<place id>`.
+
+## DEV-011 — Timeline and stage 6 fuel
+
+Status: done. Files: `pipeline/{timeline,fuel}.py`, `tests/unit/test_timeline.py`, `tests/unit/test_fuel.py`.
+Command: `python3 -m unittest tests.unit.test_timeline tests.unit.test_fuel -v` → `Ran 15 tests` / `OK`.
+Decisions / deviations:
+- `build_day_plans(route, overnights, fixed, inp, ctx, pts, profile)` — two extra parameters (start/finish
+  labels from the resolved waypoints; the shared profile).
+- The plan schedules on the same 1-km resampled profile that `EngineState` persists, so `replace_stop`
+  re-schedules identically.
+- `fuel.range` reason param `km` = distance from the previous fill to the 20 % point (always positive);
+  the last fill of a round trip gets `fuel.last`. FUEL_GAP detail is `km=<trigger>` (used by the golden
+  `fuel_range` invariant to model the virtual refuel).
+- A via at the overnight town is merged into the OVERNIGHT stop.
+
+## DEV-012 — Stages 7–8
+
+Status: done. Files: `pipeline/{rest,meals}.py`, `tests/unit/test_rest.py`, `tests/unit/test_meals.py`.
+Command: `python3 -m unittest tests.unit.test_rest tests.unit.test_meals -v` → `Ran 12 tests` / `OK`.
+Decisions:
+- Rest windows are measured on a per-day drive clock (driving + detours, no dwell). Ties → the candidate
+  closest to R (later km), then id; with that rule 6 h of driving gives 2 / 3 / 1 rests (calm / more_stops /
+  just_drive) as the acceptance requires.
+- Fixed an off-by-equality bug: a break exactly R minutes after the previous one no longer triggers another
+  rest (strict `>`); window bounds get a 1e-6 km tolerance (inverse-profile float noise).
+- Lunch candidates must also keep every sight of the day open (cheap check, avoids a re-run).
+Full suite at this point: `python3 -m unittest discover` → `Ran 153 tests` / `OK`.
+
+## DEV-013 — Stages 9–10
+
+Status: done. Files: `pipeline/{sights,schedule}.py`, `tests/unit/test_sights.py`, `tests/unit/test_schedule.py`.
+Command: `python3 -m unittest tests.unit.test_sights tests.unit.test_schedule -v` → `Ran 15 tests` / `OK`.
+Decisions:
+- Sights are inserted greedily by score; a sight stays only if the day is within budget, every sight's whole
+  visit is inside its hours and the lunch stop (if any) still arrives in 12:00–14:30.
+- Re-run: the bad days drop non-fixed, non-auto sights (lowest score, tie → later km); then all auto stops
+  go, day starts are re-derived, stages 6–9 run once more (`ctx.rerun += 1`, fuel warnings replaced). Stage
+  modules are called through their module attribute so the `plan_fuel` spy works.
+- `PlanContext.warning(code, day_no, detail, /, **params)` is positional-only (the DAY_OVER_BUDGET template
+  itself has a `day` parameter).
+- Output rounding helpers (`stop_km_from_prev`, `day_km`, `drive_minutes`) live in `schedule.py` (A§6.10) and
+  are used by assemble.
+
+## DEV-015 — Cost model, recompute, contract (done before DEV-014, see task order note)
+
+Status: done. Files: `verst_planner/cost/{money,formulas,recompute,model}.py`, `tests/unit/test_cost.py`,
+`tests/contract/cost_recompute_cases.json` (31 cases), `tests/contract/test_cost_recompute_contract.py`.
+Command: `python3 -m unittest tests.unit.test_cost tests.contract.test_cost_recompute_contract -v` →
+`Ran 19 tests` / `OK`.
+Design (A§3.1 forbids `cost → pipeline/ports/geo`):
+- `cost.model.CostInput` holds trip facts as domain data (region km with prices, toll hits with local entry
+  time, nights with hotel/options/default price/town check, per-day lunch facts, sights). The pipeline fills
+  it; `build_units` applies every SPEC §8 rule ([D-6] meals, breakfast after nights whose hotel has none,
+  toll night window, rooms [D-15], ages [D-14], `as_of`) and `recompute` (the reference algorithm, also run
+  offline) produces the `CostResult`. `compute_cost = recompute(build_units(...))`, so server and offline agree
+  by construction.
+- Breakfast is a property of `NightUnit` (it changes with the hotel override), not a `MealUnit`.
+- Tolls are aggregated per road in the formula («М-12: 3 500 ₽»), one breakdown row per hit («М-12, днём»).
+- `CostUnits.mood_just_drive` added (offline hint rule needs the mood).
+- Fuel prices in formulas always show kopecks («62,00 ₽», copy review R-4); the multi-region average is
+  rounded to 0,10 ₽ first (A§7.1).
+- Contract expected values come from an independent naive implementation of A§7.2 in the generator script
+  (not from `recompute`); both agree on all 31 cases. Canvas case: 3 720 / 0 / 12 000 / 12 600 / 3 000,
+  reserve 3 130, total 34 500, per person 11 500, remaining 5 500.
+
+## DEV-016 — Explanations and share text (done before DEV-014)
+
+Status: done. Files: `explain/{reasons,share}.py`, `tests/unit/test_reasons.py`, `tests/unit/test_share.py`.
+Command: `python3 -m unittest tests.unit.test_reasons tests.unit.test_share -v` → `Ran 9 tests` / `OK`.
+Decisions:
+- Overnight reason: template → `overnight.template`; no hotel → `overnight.no_hotel`; widened →
+  `overnight.widened`; otherwise `other` = the considered town closest to the target; `dkm < 10` →
+  `overnight.on_target`; else shift (`later`/`earlier`, or `limit` when there is no other town before the
+  target) + dominant factor (ties: hotels, then quality); `overnight.cap_ok` appended when day km ≤ daily km.
+- VIA stops have an empty reason (they are user/template waypoints, not engine choices; no A§8.1 key).
+- Share text = A§8.2 exactly; START lines use the departure time, all others the arrival.
+
+## DEV-014 — Stage 11 alternatives, assemble, `Planner.plan` / `replace_stop`
+
+Status: done. Files: `pipeline/{alternatives,assemble}.py`, `verst_planner/engine.py` (plan + replace; events,
+cancel and `recompute_cost` are also in place for DEV-017), `tests/unit/test_alternatives.py`,
+`tests/unit/test_replace.py`, `tests/helpers.make_planner`.
+Command: `python3 -m unittest tests.unit.test_alternatives tests.unit.test_replace -v` → `Ran 13 tests` / `OK`.
+Decisions / deviations:
+- An alternative must keep the stop's neighbours (same index after insertion) and the same place type as the
+  stop (a coffee stop gets coffee stops, a rest area rest areas). With that, `shift_min` (defined as the
+  arrival shift of the next stop) equals `delta_min` and the offline shift is exact; A§6.11 defines `shift`
+  via the rejoin time, which differs from the later-stop shift when the alternative is at another km.
+- Fuel alternatives keep every gap between fills within the full-tank range (skipped when a FUEL_GAP exists).
+- `replace_stop` rebuilds the day from `EngineState` (stop states now also carry reason key/params, meal,
+  litres, coffee; `town_kms` persists the corridor towns), re-reads place bodies with
+  `PlaceRepository.get_places`, keeps the other stops' rendered fields, re-renders times/km, recomputes that
+  day's alternatives from the persisted candidates, and folds the alternative's `AltUnits` into
+  `cost.units` before `recompute` (server cost == offline `recompute(units, …, replaced={…})`, tested).
+- `CostInput` is built in `engine.py` (A§3.1: pipeline may not import cost). `defaults_as_of` = the oldest fuel
+  price date (the ports expose no defaults date).
+Full suite: `python3 -m unittest discover` → OK (see DEV-017 for the count).
+
+## DEV-017 — `Planner` facade, events, cancellation, CLI
+
+Status: done (acceptance 2 is re-run after DEV-018 creates the G01 case file, see DEV-018).
+Files: `verst_planner/engine.py`, `verst_planner/cli.py` (`plan`, `share`, `export-config`),
+`verst_planner/__init__.py` (re-exports `Planner`, `TripInput`, `TripPlan`), `tests/unit/test_engine.py`,
+`tests/unit/test_cli.py`.
+Command: `python3 -m unittest tests.unit.test_engine tests.unit.test_cli -v` → `Ran 14 tests` / `OK`.
+Performance: Москва → Волгоград → Москва, 1 981 km, planned in 0.108 s (budget < 1.0 s).
+Decisions:
+- Event order exactly A§8.3; the pre-stage-2 `cancel.check()` runs before the first `stage` event, so a sink
+  that cancels on the first event stops the plan after one routing call (`test_cancel_before_corridor`).
+- Final `stop` events are emitted after assembly (they carry the final ids `d{day}s{nn}`).
+- `stage.fuel` shows consumption with one decimal («Считаем бензин: 8,0 л на 100 км», copy review R-4).
+- `recompute_cost` changes cost (and, for a hotel choice, the overnight stop's selected hotel, tags and
+  cost); the input's crew/budget/reserve are updated to the patch; days and engine state are untouched.
+- `export-config` is used by DEV-021 to generate `0002_app_config.sql`.
+Full suite: `python3 -m unittest discover` → `Ran 223 tests` / `OK`.
+
+## DEV-018 — Golden trips, invariants, contracts, layering
+
+Status: done (Manager review of the expectations pending, as per the backlog).
+Files: `tests/golden/{__init__,test_golden,invariants,export_contracts}.py`, `tests/golden/cases/G01…G12_*.json`,
+`tests/golden/snapshots/G01…G08, G11, G12` (error cases G09/G10 have none), `tests/test_layering.py`,
+`docs/contracts/plan-response.example.json` (G02), `docs/contracts/share-text/G01…G08.json`.
+Commands:
+- `python3 -m unittest tests.golden.test_golden -v` → `Ran 12 tests` / `OK` (each runs the 15 A§13.3
+  invariants as subTests + the expectation groups + the snapshot).
+- `python3 -m unittest tests.test_layering -v` → `Ran 3 tests` / `OK`; appending `import pydantic` to
+  `verst_planner/hours.py` made it fail («non-stdlib import pydantic»), reverted.
+- `ls backend/planner/tests/golden/cases | wc -l` → `12`; all cases load; G02 and G03 (the cases with
+  `costTotalRub`) have 7 and 8 `costWorkings` lines.
+- `python3 -m tests.golden.export_contracts` twice → identical sha1 of all 9 contract files
+  (`git diff --stat -- docs/contracts` prints nothing; the files are new/untracked until the Manager commits).
+- Editing `"km": 545 → 546` in the G01 snapshot → `snapshot mismatch` with the unified diff and
+  `G01_msk_yar_round.actual.json` written; reverted → `OK` and the `.actual.json` removed.
+- DEV-017 acceptance 2: `python3 -m verst_planner.cli plan --world fixtures/worlds/central_russia_v1.json
+  --input tests/golden/cases/G01_msk_yar_round.json --events > /dev/null` → exit 0, 21 JSON lines on stderr.
+
+Initial failing run (cases written before any snapshot existed), recorded per acceptance 6:
+`FAILED (failures=2, errors=10)` — 10 × missing snapshot (expected), plus:
+1. G03 `costTotalRub` 16 100 vs hand 17 100 (−5.8 %). Investigation: fuel (4 840) and lodging (5 200) matched my
+   working exactly; my food/tickets working was wrong — I had assumed a 700 ₽ day-1 lunch and the Мичурин
+   museum without doing the ETA analysis. Re-derived by hand (in the case file): at the meals stage
+   «У дороги» (500 ₽) scores 6.7 vs «Ямщик» 6.5; the free Скопинское городище outranks the museum, and the
+   museum would push lunch past 14:30 → food 4 630, tickets 0, total 16 100. Expectation corrected, tolerance
+   kept at 5 %.
+2. G06 `kmRange` 843 vs [814, 840]. Investigation: per A§6.8 the day-2 narrow rest window [60, 90] min contains
+   only a coffee station on the parallel М-12, 6.4 km off the М-7 (detour 16.6 km); the rest area at km 487
+   arrives at 58.9 min, just outside. The engine follows A§; my range had not allowed for the detour →
+   range re-derived as [814, 850]. Raised to the Architect (see open questions).
+One engine bug was found while reviewing the actual plans before generating snapshots: G07 placed the fixed
+Ясная Поляна on the return pass (km 216, after Щёкино) because `project_all` merges two passes closer than
+2·radius + 5 km. Fixed with `PolylineIndex.nearest_in_range` (test `test_nearest_in_range_splits_close_passes`);
+Ясная Поляна is now at km 198, 09:17–11:17 on Sunday (open Tu-Su 09–17).
+Disclosure: while debugging stage 11 I had printed G02's plan (total 32 300) before writing the case; the
+G02 `costWorkings` are a full derivation from the world data and the A§ rules (region km × price, hotel
+scores, lunch scores at their ETAs, sight selection by budget/hours, D-6 meals) and reach the same value.
+
+Decisions:
+- `OvernightReason.fallback` added (wire `reasons.overnights[].fallback`) — the golden cases assert fallbacks
+  and the client needs the no-hotel state; route refs are checked through a recording routing wrapper (they
+  are not in the plan payload).
+- `fuel_range` models FUEL_GAP virtual refuels from the warning `detail` (`km=<trigger>`), so G11 runs the full
+  invariant list. `alternatives` checks `replaceable == (kind replaceable and not a template stop)`.
+- Expectation keys beyond A§13.2 used by the runner: `maxDayKm`, `warningsContain`, `stopKmRange`,
+  `costFormulaContains`, `costBreakdownContains`, `remainingIsBudgetMinusTotal`, `roadRefs`, `viaBeforeFinish`,
+  `rerun`, `overBudgetDays`, `errorPointIndex`.
+- G04 plans to ≈ 10 h on the road (just_drive budget 600 min) and raises DAY_OVER_BUDGET — consistent with the
+  hand estimate (483 min driving + stops with motorway exits ≈ 605 min); its case does not pin warnings.
+Full suite: `make check` → `Ran 239 tests` / `OK`; ruff `All checks passed!`; mypy `Success`.
+
+## DEV-019 — Sandbox coverage tool, Makefile, README check
+
+Status: done. Files: `backend/planner/tools/stdlib_coverage.py` (Makefile `coverage-planner` already from DEV-001);
+also `tools/gen_worlds.py` and `tools/gen_cost_contract.py` (the generators of the fixture worlds and of the
+cost contract — re-running them reproduces the committed JSON byte-for-byte; ruff per-file ignores for
+Cyrillic text/wide tables).
+Commands:
+- `make coverage-planner` → per-file table, `TOTAL 4389 129 97.1%`, `tests: 239 run, 0 failures, 0 errors`,
+  exit 0 (≈ 18 s under tracing).
+- `cd backend/planner && python3 tools/stdlib_coverage.py --fail-under 101` → `FAIL: total coverage 97.1% is
+  below --fail-under 101.0%`, exit 1.
+- `make check` → exit 0 (`All checks passed!` / `Success: no issues found in 51 source files` / `Ran 239 tests` /
+  `OK`).
+- README «Run the tests», verbatim from the repo root: all five commands exit 0; `make golden-update` exit 0
+  with snapshots unchanged; the README CLI example exits 0 (37 KB JSON, 30 event lines).
+Rules of the tool: executable = `ast` statements minus `if TYPE_CHECKING:` blocks, `...` bodies, docstrings
+and `# pragma: no cover` lines (a marked compound statement excludes its block); a compound statement counts
+when any line of its header ran; `try:` headers are not counted (they emit no line event). The tracer is
+installed before test discovery so import-time lines count.
+
+## DEV-021 — SQL DDL and seed skeleton (written, not executed)
+
+Status: done. Files: `backend/migrations/sql/0001_initial.sql` (A§9.2 block, verbatim),
+`backend/migrations/seed/0001_regions.sql` (the 16 regions of DEV-008, `geom` NULL, upsert),
+`backend/migrations/seed/0002_app_config.sql` (generated by `python3 -m verst_planner.cli export-config`:
+`planner` and `reasons_ru` rows, upsert). `backend/migrations/.gitkeep` removed (the folder has content now).
+Command: `diff <(python3 -c "import re;s=open('docs/architecture.md').read();print(re.search(r'\`\`\`sql\n(CREATE
+EXTENSION.*?)\`\`\`',s,re.S).group(1),end='')") backend/migrations/sql/0001_initial.sql` → no output.
+The JSON inside `0002_app_config.sql` parses back to 22 planner keys and 47 template keys.
+Execution against PostGIS is DEV-B02 (BLOCKED-ON-NETWORK).
+
+## Summary — Sprint 1 developer scope (DEV-001…DEV-019, DEV-021; DEV-020 skipped as instructed)
+
+Final state: `make check` → ruff `All checks passed!`, mypy `Success: no issues found in 51 source files`,
+`Ran 239 tests` / `OK` (no skips); `make coverage-planner` → `TOTAL 4389 129 97.1%`; no TODO/TBD/FIXME.
+
+Deviations from A§ (all listed above with reasons, collected here):
+1. Layering rule 2 read as domain → domain only, geo → domain + geo; `Corridor` lives in `pipeline`.
+2. Model extensions: `NormalizedInput.tz`; `PlannedStop.litres/coffee`; `OvernightChoice.nearest*/region/detour`;
+   `Alternative.units`; `HotelPrice.breakfast_included`; `CostUnits.as_of`, `.mood_just_drive`;
+   `CostResult.hints_ru`; `OvernightReason.fallback`; `EngineState.days/candidates/rerun/town_kms`, `StopState`
+   with reason/meal/litres/coffee — all needed by replace/offline recompute/golden checks.
+3. `strings.ru.json` holds the non-template Russian strings (reasons JSON = exactly the A§8.1 keys).
+4. `pipeline → cost` forbidden: per-stop cost injected via `PlanContext.stop_cost`; `CostInput` built in
+   `engine.py`; `cost.model` works on domain data only.
+5. Stage signatures: `build_day_plans(…, pts, profile)`, `choose_overnights(…, profile=None)`,
+   `build_base_route` + separate `toll_warnings`.
+6. Alternatives keep their neighbours and place type; `shift_min` = arrival shift of later stops.
+7. Fixed template stops are placed with `PolylineIndex.nearest_in_range` (pass grouping merges close passes).
+8. Normalisation also enforces adults + children ≤ 8 (Manager OI-07), rejects vias with a ready route, and
+   `N > max_days` → `InvalidInput("dailyKm", "too_many_days")`.
+9. М-4 modelled toll-free in `central_russia_v1` (Sprint-2 G18 adds the segments).
+10. `docs/design/.gitkeep` not created (canonical design folder is `design/`).
+11. Copy review R-1…R-4 applied (Manager instruction); `fmt_consumption` («8») kept for formulas per A§7.2,
+    one-decimal form («8,0») for the Drive stage line.
+
+Open questions for the Architect / Manager:
+- Q-A (A§6.8): the narrow rest window takes any candidate even with a large detour (G06 day 2: a coffee 6.4 km
+  off the route on the parallel М-12, 27 min detour, while a rest area arrives 1 min before the window).
+  Proposal: widen when the best narrow candidate's detour exceeds its dwell, or cap rest-pool lateral at 5 km.
+- Q-B (A§6.1 order): meals run before sights, so a day whose sights move the schedule into 12:00–14:30 gets no
+  lunch stop (G07 day 1, G08); the lunch is still costed. Proposal: run `plan_meals` once more after stage 9
+  for days without a lunch that now overlap the window.
+- Q-C (A§6.11): pools are small after a round trip uses each roadside place once and fixed long stops push
+  candidates outside ±45 min, so many stops have 0–1 alternatives (SPEC asks for 2–3). Proposal: allow places
+  used on the other pass of a round trip, or widen the window for rest stops.
+- Q-D: `CostLine.as_of` uses the oldest fuel price date as the "defaults" date because the ports expose none;
+  a `PriceRepository.defaults_as_of()` port method would make it exact.
+- Q-E: G04 (Москва → Казань, just_drive, 790 km) ends at 16:58 and raises DAY_OVER_BUDGET by a few minutes
+  (motorway exits add 9 min per stop); confirm this is the intended behaviour for a 10 h budget.
+- Architect sign-off of 10 world coordinates (DEV-008 acceptance 2) and Manager review of the G01–G12
+  expectations (DEV-018 acceptance 6) are pending.
