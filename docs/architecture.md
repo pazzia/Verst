@@ -2032,6 +2032,7 @@ for each replaceable stop s (kinds SIGHT, FOOD, FUEL, REST; not fixed; template 
 3. *extended:* candidates with `detour_min ≤ rest.extended_detour_min` (15), unused, with drive since b0 ∈ `[max(45, R − 60), R + 30]`;
 4. *roadside break:* insert `PlannedStop(kind=REST, place=None, name_ru=«Остановка у дороги», km_at=x, dwell_min=break_min_dwell (15), detour 0, auto=True, pool="rest", reason_key="rest.roadside")`. Template `rest.roadside` = «Сделайте остановку на 15 минут — подходящей площадки рядом нет.». It is not replaceable, has no `alternativesNote`, and is rendered with sign `rest`, `placeId` null and `verified` true.
 Invariant `break_spacing` gains an upper bound: driving between consecutive breaks (dwell ≥ 15 min, start, overnight, finish) is ≤ R + 30 min.
+*Closed gaps (approved, round 2):* a gap closed by a break that stage 7 itself placed after R (widened window ≤ R + 15, extended ≤ R + 30, or a coffee upgrade) is marked accepted and is not re-examined. Without this, the loop would insert a second (roadside) break just before the late one. The upper bound R + 30 still holds. The lower bound for stage-7 stops is `min(G, 45)`, because the extended window starts at 45 min.
 
 **16.11.2 Readings of §16.2/§16.5, confirmed.**
 - (a) Coffee upgrades happen only in stage 7.
@@ -2045,11 +2046,18 @@ Invariant `break_spacing` gains an upper bound: driving between consecutive brea
 - Displacement `|clamped − true| ≤ cluster_km` is asserted.
 
 **16.11.4 Offline recompute rules (authoritative for the Android `CostCalculator`).** `CostOverrides.replaced[stop_id] = AltUnits` applies, in this order:
-1. *Fuel km:* the region of `AltUnits.region_code` gets `+ delta_km`. If the trip has no such region and `delta_km > 0`, append `FuelRegionUnit(region_code, region_name_ru, delta_km, price_rub)` using `AltUnits.price_rub`/`region_name_ru`. A region whose km drops to ≤ 0 is kept with 0 km.
+1. *Fuel km:* the region of `AltUnits.region_code` gets `+ delta_km`. If the trip has no such region and `delta_km > 0`, append `FuelRegionUnit(region_code, region_name_ru, delta_km, price_rub)` using `AltUnits.price_rub`/`region_name_ru`; if it has no such region and `delta_km ≤ 0`, nothing changes. A region whose km drops to ≤ 0 is kept with 0 km.
 2. *Fuel formula km:* `FuelUnits.trip_km + Σ AltUnits.trip_km_delta`, where `trip_km_delta: int` is computed server-side as `round(day km of the trial day) − round(day km of the current day)`. This makes offline formula km equal the server's `TripPlan.km` after a replace. Exact `delta_km` is never used for the displayed km.
 3. *Meals:* a `MealUnit` with `stop_id` = the replaced stop takes `AltUnits.check_rub` when not null.
-4. *Tickets:* the replaced stop's `TicketUnit` is removed; if the alternative is a sight (`adult_rub` not null), a `TicketUnit(stop_id, place_id, name_ru, adult_rub, child_rub)` is added (this covers a rest/coffee replaced by a short sight); `free_entry` sights carry 0/0.
+4. *Tickets:* the replaced stop's `TicketUnit` is removed; if the alternative is a sight (`adult_rub` not null), a `TicketUnit(stop_id, place_id, name_ru, adult_rub, child_rub ?? adult_rub)` is added (this covers a rest/coffee replaced by a short sight); `free_entry` sights carry 0/0.
 5. Lines, reserve, total, per person and remaining then follow §7.2 unchanged.
 The contract file `tests/contract/cost_recompute_cases.json` must contain ≥ 1 case per rule (≥ 35 cases).
 
 **16.11.5 Alternatives coverage gate.** On G01, G02, G03, G06, G07, G08: aggregate ≥ 70 % **and** each case ≥ 60 % of replaceable stops with ≥ 2 alternatives. Plus a fixture-independent unit test on a controlled mini world (one candidate per pool and position) so the gate cannot be met by fixture tuning alone.
+
+### 16.12 Sprint 1 closure (2026-10-24, commit adc1103)
+
+Accepted. Carried to Sprint 2 (non-blocking):
+- **S2-01 Golden tie hygiene.** G06's day-1 lunch is decided by an exact score tie (5.1 vs 5.1) broken by km. Adjust the fixture (e.g. a rating ±0.05) so no golden pick depends on a tie-break. Add a golden check that reports any stage pick whose best two scores differ by < 0.05.
+- **S2-02 Parallel-road candidates.** Places on a parallel road (М-12 next to М-7) enter the corridor by lateral distance, and the straight-line detour estimate understates their real access. Sprint 2 (with GraphHopper): compute detours for the top 3 candidates of each stage pick by a routing matrix call, with the straight-line estimate as fallback.
+- **S2-03 Fuel workings.** Hand workings keep the nearest-node region split; the fuel line keeps its ±5 % tolerance (engine: 10-km buckets, §7.1). No change needed unless field trips show region error.
