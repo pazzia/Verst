@@ -477,6 +477,8 @@ class AltUnits:
     price_rub: Decimal | None = None
     """Fuel price in `region_code`, so a replace into a region the trip did not cross adds its unit."""
     region_name_ru: str = ""
+    trip_km_delta: int = 0
+    """`round(day km of the trial day) - round(day km of the current day)` (A§16.11.4 rule 2)."""
 
 
 @dataclass(frozen=True, slots=True)

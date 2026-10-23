@@ -238,12 +238,13 @@ class GoldenTest(unittest.TestCase):
 
 GATE_CASES = ("G01", "G02", "G03", "G06", "G07", "G08")
 GATE_SHARE = 0.70
+GATE_CASE_SHARE = 0.60  # A§16.11.5: each case too
 
 
 class AlternativesGateTest(unittest.TestCase):
     def test_alternatives_coverage_gate(self) -> None:
-        """A§16.6: ≥ 70 % of the replaceable stops of the central-world calm/more_stops goldens have ≥ 2
-        alternatives (the share per case is printed)."""
+        """A§16.6/16.11.5: ≥ 70 % of the replaceable stops of the central-world calm/more_stops goldens have
+        ≥ 2 alternatives, and ≥ 60 % in each of those cases (the share per case is printed)."""
         from tests.golden.invariants import alternatives_share
 
         ok = total = 0
@@ -254,7 +255,9 @@ class AlternativesGateTest(unittest.TestCase):
                 continue
             plan, *_ = run_case(case)
             k, n = alternatives_share(plan)
-            rows.append(f"{case['id']} {k}/{n}")
+            rows.append(f"{case['id']} {k}/{n} = {k / n:.0%}")
+            with self.subTest(case=case["id"]):
+                self.assertGreaterEqual(k / n, GATE_CASE_SHARE)
             ok, total = ok + k, total + n
         share = ok / total
         print(f"\nalternatives coverage: {', '.join(rows)}; total {ok}/{total} = {share:.0%}")

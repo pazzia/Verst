@@ -120,7 +120,8 @@
                 "name": "Земляной вал Переславля",
                 "placeId": "pl_prs_rampart",
                 "priceRub": "61.90",
-                "regionName": "Ярославская область"
+                "regionName": "Ярославская область",
+                "tripKmDelta": -4
               },
               "stop": {
                 "id": "d1s03",
@@ -208,7 +209,8 @@
                 "name": "Никитский монастырь",
                 "placeId": "pl_prs_nikitsky",
                 "priceRub": "61.90",
-                "regionName": "Ярославская область"
+                "regionName": "Ярославская область",
+                "tripKmDelta": -4
               },
               "stop": {
                 "id": "d1s03",
@@ -295,7 +297,8 @@
                 "name": "Горицкий монастырь",
                 "placeId": "pl_prs_goritsky",
                 "priceRub": "61.90",
-                "regionName": "Ярославская область"
+                "regionName": "Ярославская область",
+                "tripKmDelta": -1
               },
               "stop": {
                 "id": "d1s03",
@@ -414,7 +417,8 @@
                 "name": "Кафе «Русское подворье»",
                 "placeId": "pl_rst_cafe_podvorie",
                 "priceRub": "61.90",
-                "regionName": "Ярославская область"
+                "regionName": "Ярославская область",
+                "tripKmDelta": 1
               },
               "stop": {
                 "id": "d1s04",
@@ -501,7 +505,8 @@
                 "name": "Кафе «Неро»",
                 "placeId": "pl_rst_cafe_nero",
                 "priceRub": "61.90",
-                "regionName": "Ярославская область"
+                "regionName": "Ярославская область",
+                "tripKmDelta": 1
               },
               "stop": {
                 "id": "d1s04",
@@ -588,7 +593,8 @@
                 "name": "Трапезная «Ростов Великий»",
                 "placeId": "pl_rst_cafe_veliky",
                 "priceRub": "61.90",
-                "regionName": "Ярославская область"
+                "regionName": "Ярославская область",
+                "tripKmDelta": 1
               },
               "stop": {
                 "id": "d1s04",
@@ -866,7 +872,8 @@
                 "name": "Кафе «Ситец»",
                 "placeId": "pl_iva_cafe_sitets",
                 "priceRub": "61.60",
-                "regionName": "Ивановская область"
+                "regionName": "Ивановская область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d2s04",
@@ -960,7 +967,8 @@
                 "name": "Кафе «Текстиль»",
                 "placeId": "pl_iva_cafe_center",
                 "priceRub": "61.60",
-                "regionName": "Ивановская область"
+                "regionName": "Ивановская область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d2s04",
@@ -1084,7 +1092,8 @@
                 "name": "Нефтьмагистраль, Р-132, 215 км",
                 "placeId": "pl_gr_fuel_215",
                 "priceRub": "61.60",
-                "regionName": "Ивановская область"
+                "regionName": "Ивановская область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d2s05",
@@ -1294,7 +1303,8 @@
                 "name": "Смотровая у Успенского собора",
                 "placeId": "pl_vla_view",
                 "priceRub": "61.40",
-                "regionName": "Владимирская область"
+                "regionName": "Владимирская область",
+                "tripKmDelta": -2
               },
               "stop": {
                 "id": "d3s02",
@@ -1382,7 +1392,8 @@
                 "name": "Ризоположенский монастырь",
                 "placeId": "pl_suz_rizopolozhensky",
                 "priceRub": "61.40",
-                "regionName": "Владимирская область"
+                "regionName": "Владимирская область",
+                "tripKmDelta": -2
               },
               "stop": {
                 "id": "d3s02",
@@ -1469,7 +1480,8 @@
                 "name": "Соборная площадь Владимира",
                 "placeId": "pl_vla_cathedral_square",
                 "priceRub": "61.40",
-                "regionName": "Владимирская область"
+                "regionName": "Владимирская область",
+                "tripKmDelta": -2
               },
               "stop": {
                 "id": "d3s02",
@@ -1588,7 +1600,8 @@
                 "name": "Покровский парк",
                 "placeId": "pl_pok_park",
                 "priceRub": "61.40",
-                "regionName": "Владимирская область"
+                "regionName": "Владимирская область",
+                "tripKmDelta": 1
               },
               "stop": {
                 "id": "d3s03",
@@ -1676,7 +1689,8 @@
                 "name": "Свято-Введенский монастырь",
                 "placeId": "pl_pok_monastery",
                 "priceRub": "61.40",
-                "regionName": "Владимирская область"
+                "regionName": "Владимирская область",
+                "tripKmDelta": 3
               },
               "stop": {
                 "id": "d3s03",
@@ -1795,7 +1809,8 @@
                 "name": "Кафе «Покровское подворье»",
                 "placeId": "pl_pok_cafe_park",
                 "priceRub": "61.40",
-                "regionName": "Владимирская область"
+                "regionName": "Владимирская область",
+                "tripKmDelta": 1
               },
               "stop": {
                 "id": "d3s04",
@@ -1882,7 +1897,8 @@
                 "name": "Кафе «Придорожное», М-7",
                 "placeId": "pl_m7w_cafe_060",
                 "priceRub": "61.80",
-                "regionName": "Московская область"
+                "regionName": "Московская область",
+                "tripKmDelta": 1
               },
               "stop": {
                 "id": "d3s04",
@@ -1969,7 +1985,8 @@
                 "name": "Кафе «У дороги», М-12",
                 "placeId": "pl_m12_cafe_115",
                 "priceRub": "61.40",
-                "regionName": "Владимирская область"
+                "regionName": "Владимирская область",
+                "tripKmDelta": 27
               },
               "stop": {
                 "id": "d3s04",

@@ -87,7 +87,8 @@
                   "name": "Площадка отдыха, М-12, 280 км",
                   "placeId": "pl_m12_rest_280",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -182,7 +183,8 @@
                   "name": "Площадка отдыха, М-12, 180 км",
                   "placeId": "pl_m12_rest_180",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -276,7 +278,8 @@
                   "name": "Башнефть, М-12, 220 км",
                   "placeId": "pl_m12_fuel_220",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -403,7 +406,8 @@
                   "name": "Площадка отдыха, М-12, 430 км",
                   "placeId": "pl_m12_rest_430",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s03",
@@ -498,7 +502,8 @@
                   "name": "Площадка отдыха, М-12, 530 км",
                   "placeId": "pl_m12_rest_530",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s03",
@@ -592,7 +597,8 @@
                   "name": "Башнефть, М-12, 490 км",
                   "placeId": "pl_m12_fuel_490",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s03",
@@ -717,7 +723,8 @@
                   "name": "Башнефть, М-12, 490 км",
                   "placeId": "pl_m12_fuel_490",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s04",
@@ -811,7 +818,8 @@
                   "name": "Лукойл, М-12, 580 км",
                   "placeId": "pl_m12_fuel_580",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s04",
@@ -937,7 +945,8 @@
                   "name": "Кафе «Привал», М-12",
                   "placeId": "pl_m12_cafe_595",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s05",

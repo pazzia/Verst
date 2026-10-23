@@ -86,7 +86,8 @@
                 "name": "Площадка отдыха, Р-999, 40 км",
                 "placeId": "pl_tst_rest_040",
                 "priceRub": "61.00",
-                "regionName": "Тестовая область"
+                "regionName": "Тестовая область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d1s02",
@@ -172,7 +173,8 @@
                 "name": "Площадка отдыха, Р-999, 140 км",
                 "placeId": "pl_tst_rest_140",
                 "priceRub": "61.00",
-                "regionName": "Тестовая область"
+                "regionName": "Тестовая область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d1s02",
@@ -419,7 +421,8 @@
                 "name": "Площадка отдыха, Р-999, 340 км",
                 "placeId": "pl_tst_rest_340",
                 "priceRub": "61.00",
-                "regionName": "Тестовая область"
+                "regionName": "Тестовая область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d2s02",
@@ -512,7 +515,8 @@
                 "name": "Площадка отдыха, Р-999, 440 км",
                 "placeId": "pl_tst_rest_440",
                 "priceRub": "61.00",
-                "regionName": "Тестовая область"
+                "regionName": "Тестовая область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d2s02",
@@ -667,7 +671,8 @@
                 "name": "АЗС «Тест», Р-999, 470 км",
                 "placeId": "pl_tst_fuel_470",
                 "priceRub": "61.00",
-                "regionName": "Тестовая область"
+                "regionName": "Тестовая область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d2s04",
@@ -760,7 +765,8 @@
                 "name": "АЗС «Тест», Р-999, 550 км",
                 "placeId": "pl_tst_fuel_550",
                 "priceRub": "61.00",
-                "regionName": "Тестовая область"
+                "regionName": "Тестовая область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d2s04",
@@ -884,7 +890,8 @@
                 "name": "Кафе «Тестовое», Р-999, 535 км",
                 "placeId": "pl_tst_cafe_535",
                 "priceRub": "61.00",
-                "regionName": "Тестовая область"
+                "regionName": "Тестовая область",
+                "tripKmDelta": 0
               },
               "stop": {
                 "id": "d2s05",

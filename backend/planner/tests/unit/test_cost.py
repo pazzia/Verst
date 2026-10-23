@@ -282,7 +282,7 @@ class CostTest(unittest.TestCase):
         offline = recompute(
             plan.cost.units, plan.input.crew, True, None, CostOverrides(replaced={stop.id: alt.units})
         )
-        shown = round(plan.km + alt.units.delta_km)
+        shown = plan.km + alt.units.trip_km_delta
         self.assertTrue(offline.lines[0].formula_ru.startswith(f"{shown} км ×"))
         replaced = planner.replace_stop(plan, stop.id, alt.id)
         self.assertTrue(replaced.cost.lines[0].formula_ru.startswith(f"{replaced.km} км ×"))

@@ -69,7 +69,7 @@
     ],
     "costWorkings": [
       "route: Москва → Казань on М-12 790 km + detours of 4 motorway stops (≈ 1 km each) → ≈ 794 km; one 10-h day: 790 > 600 min of budget, but duration ≤ mandatory_min (driving + auto stops) → no DAY_OVER_BUDGET (A§16.5)",
-      "fuel: 794 km × 8 l/100 ≈ 63.5 l at ≈ 60.90 ₽ (МО 61.80 … Татарстан 58.90) → ≈ 3 870 ₽",
+      "fuel by region (8 l/100): Владимирская 289 + 1 = 290 km × 61.40 = 1 424; Нижегородская 247 + 1 = 248 km × 60.90 = 1 208; Чувашия 96 + 2 = 98 km × 59.80 = 469; Татарстан 77 km × 58.90 = 363; Московская 72 km × 61.80 = 356; Москва 9 km × 62.50 = 45 → Σ 3 866 → 3 870 (±5 %)",
       "tolls: М-12 four segments by day (06:00 start, entry after 06:00): 800 + 1 000 + 1 100 + 600 = 3 500",
       "food: 1 adult; lunch at a М-12 roadside café in the window (≈ 14:00, check 500–800, Кафе «Обжорка» 700); finish 16:30 < 19:00 → no dinner → 700",
       "subtotal 3 870 + 3 500 + 0 + 700 + 0 = 8 070; reserve 810 (807); total round_to(8 880, 100) = 8 900"

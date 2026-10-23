@@ -86,7 +86,8 @@
                   "name": "Высоцкий монастырь",
                   "placeId": "pl_ser_vysotsky",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s02",
@@ -173,7 +174,8 @@
                   "name": "Парк «Питомник»",
                   "placeId": "pl_ser_park",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d1s02",
@@ -261,7 +263,8 @@
                   "name": "Владычный монастырь",
                   "placeId": "pl_ser_vladychny",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -380,7 +383,8 @@
                   "name": "Тульский кремль",
                   "placeId": "pl_tul_kremlin",
                   "priceRub": "61.70",
-                  "regionName": "Тульская область"
+                  "regionName": "Тульская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d1s03",
@@ -468,7 +472,8 @@
                   "name": "Набережная Упы",
                   "placeId": "pl_tul_embankment",
                   "priceRub": "61.70",
-                  "regionName": "Тульская область"
+                  "regionName": "Тульская область",
+                  "tripKmDelta": -2
                 },
                 "stop": {
                   "id": "d1s03",
@@ -588,7 +593,8 @@
                   "name": "Пряничная",
                   "placeId": "pl_tul_cafe_pryanik",
                   "priceRub": "61.70",
-                  "regionName": "Тульская область"
+                  "regionName": "Тульская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s04",
@@ -675,7 +681,8 @@
                   "name": "Кафе у кремля",
                   "placeId": "pl_tul_cafe_kremlin",
                   "priceRub": "61.70",
-                  "regionName": "Тульская область"
+                  "regionName": "Тульская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s04",
@@ -921,7 +928,8 @@
                   "name": "Музей «Тульские самовары»",
                   "placeId": "pl_tul_samovar",
                   "priceRub": "61.70",
-                  "regionName": "Тульская область"
+                  "regionName": "Тульская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d2s03",
@@ -1007,7 +1015,8 @@
                   "name": "Музей «Тульский левша»",
                   "placeId": "pl_tul_lefty",
                   "priceRub": "61.70",
-                  "regionName": "Тульская область"
+                  "regionName": "Тульская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s03",
@@ -1125,7 +1134,8 @@
                   "name": "Кафе «Владычное»",
                   "placeId": "pl_ser_cafe_vladychny",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s04",
@@ -1212,7 +1222,8 @@
                   "name": "Кафе «Окская пристань»",
                   "placeId": "pl_ser_cafe_oka",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s04",

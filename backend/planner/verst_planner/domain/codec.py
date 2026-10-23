@@ -346,6 +346,7 @@ def alt_units_to_json(u: AltUnits) -> Json:
         "placeId": u.place_id,
         "priceRub": None if u.price_rub is None else dec_to_str(u.price_rub),
         "regionName": u.region_name_ru,
+        "tripKmDelta": u.trip_km_delta,
     }
 
 
@@ -360,6 +361,7 @@ def alt_units_from_json(d: Mapping[str, Any]) -> AltUnits:
         place_id=d["placeId"],
         price_rub=None if d.get("priceRub") is None else _dec(d["priceRub"]),
         region_name_ru=d.get("regionName", ""),
+        trip_km_delta=int(d.get("tripKmDelta", 0)),
     )
 
 

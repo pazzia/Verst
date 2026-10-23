@@ -19,6 +19,7 @@
   "fuel.last": "Последняя заправка до дома.",
   "rest.generic": "Разминка {min} {min_word} после {drive} за рулём.",
   "rest.who": "Разминка {min} {min_word}: {who}.",
+  "rest.roadside": "Сделайте остановку на 15 минут — подходящей площадки рядом нет.",
   "lunch.kids": "Обед, есть детское меню.",
   "lunch.parking": "Обед, парковка у входа.",
   "lunch.default": "Обед в {town_prep}.",

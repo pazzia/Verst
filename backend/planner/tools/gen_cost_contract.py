@@ -2,6 +2,23 @@
 
 Expected numbers come from `expected()` below — an independent, deliberately naive implementation of
 A§7.2 written from the architecture text (it does not import verst_planner).
+
+Offline replace rules (A§16.11.4, authoritative for the Android `CostCalculator`); every rule has at least
+one case below. `CostOverrides.replaced[stop_id] = AltUnits` applies, in this order:
+1. Fuel km: the region of `AltUnits.region_code` gets `+ delta_km`. If the trip has no such region and
+   `delta_km > 0`, append `FuelRegionUnit(region_code, region_name_ru, delta_km, price_rub)` using
+   `AltUnits.price_rub` / `region_name_ru`. A region whose km drops to <= 0 is kept with 0 km.
+   (cases: replaced_fuel_same_region, replaced_new_region_priced, replaced_fuel_other_region,
+   replaced_region_drops_to_zero)
+2. Fuel formula km: `FuelUnits.trip_km + Σ AltUnits.trip_km_delta`; the exact `delta_km` is never used for
+   the displayed km. (cases: trip_km_formula, trip_km_two_replaces)
+3. Meals: a `MealUnit` with `stop_id` = the replaced stop takes `AltUnits.check_rub` when not null.
+   (cases: replaced_lunch, replaced_lunch_null_check)
+4. Tickets: the replaced stop's `TicketUnit` is removed; if the alternative is a sight (`adult_rub` not
+   null) a `TicketUnit(stop_id, place_id, name_ru, adult_rub, child_rub ?? adult_rub)` is added (this
+   covers a rest/coffee replaced by a short sight); `free_entry` sights carry 0/0.
+   (cases: replaced_sight, replaced_sight_free, replaced_rest_by_sight, replaced_sight_by_rest)
+5. Lines, reserve, total, per person and remaining then follow A§7.2 unchanged.
 """
 
 import copy
@@ -88,22 +105,19 @@ def expected(units, crew, reserve_on, budget, overrides):
     # fuel
     regions = list(units["fuel"]["regions"])
     kms = {g["regionCode"]: D(str(g["km"])) for g in regions}
-    for alt in replaced.values():
+    for alt in replaced.values():  # rule 1
         if alt["regionCode"] in kms:
             kms[alt["regionCode"]] += D(str(alt["deltaKm"]))
         elif alt.get("priceRub") is not None and alt["deltaKm"] > 0:
-            # A§16.6: a region the trip did not cross joins with the alternative's price
             regions.append(region(alt["regionCode"], alt.get("regionName", ""), 0.0, alt["priceRub"]))
             kms[alt["regionCode"]] = D(str(alt["deltaKm"]))
-        else:
-            kms[regions[0]["regionCode"]] += D(str(alt["deltaKm"]))
     cons = D(str(units["fuel"]["consumption"]))
     fuel = sum(
         (max(D(0), kms[g["regionCode"]]) * cons / 100 * D(g["priceRub"]) for g in regions),
         D(0),
     )
-    if units["fuel"].get("tripKm") is not None:  # A§16.7: the formula shows TripPlan.km
-        shown_km = D(units["fuel"]["tripKm"]) + sum((D(str(a["deltaKm"])) for a in replaced.values()), D(0))
+    if units["fuel"].get("tripKm") is not None:  # rule 2
+        shown_km = D(units["fuel"]["tripKm"] + sum(a.get("tripKmDelta", 0) for a in replaced.values()))
     else:
         shown_km = sum((max(D(0), k) for k in kms.values()), D(0))
     tolls = sum((D(t["rub"]) for t in units["tolls"]), D(0))
@@ -140,20 +154,20 @@ def expected(units, crew, reserve_on, budget, overrides):
             c = replaced[m["stopId"]]["checkRub"]
         checks.append(c)
     food = people * sum((D(c) for c in checks), D(0))
-    tickets = D(0)
+    tickets = D(0)  # rule 4
+    ticket_list = []
     for t in units["tickets"]:
-        a, c = t["adultRub"], t["childRub"]
-        if t["stopId"] in replaced:
-            alt = replaced[t["stopId"]]
-            a = alt["adultRub"] or 0
-            c = alt["childRub"] if alt["childRub"] is not None else a
-        tickets += crew["adults"] * a + crew["children"] * c
+        alt = replaced.get(t["stopId"])
+        if alt is None:
+            ticket_list.append((t["adultRub"], t["childRub"]))
+        elif alt["adultRub"] is not None:
+            ticket_list.append((alt["adultRub"], alt["childRub"] if alt["childRub"] is not None else alt["adultRub"]))
     ticketed = {t["stopId"] for t in units["tickets"]}
-    for sid, alt in replaced.items():  # a rest stop replaced by a sight (rest pool) adds its ticket
+    for sid, alt in replaced.items():
         if sid not in ticketed and alt["adultRub"] is not None:
-            a = alt["adultRub"]
-            c = alt["childRub"] if alt["childRub"] is not None else a
-            tickets += crew["adults"] * a + crew["children"] * c
+            ticket_list.append((alt["adultRub"], alt["childRub"] if alt["childRub"] is not None else alt["adultRub"]))
+    for a, c in ticket_list:
+        tickets += crew["adults"] * a + crew["children"] * c
     lines = {
         "fuel": r(fuel, 10),
         "tolls": r(tolls, 10),
@@ -171,7 +185,7 @@ def expected(units, crew, reserve_on, budget, overrides):
     if over:
         if cheaper:
             hints.append("cheaper_overnight")
-        if lines["tickets"] > 0 or units["tickets"]:
+        if lines["tickets"] > 0 or ticket_list:
             hints.append("fewer_sights")
         if not units["moodJustDrive"]:
             hints.append("just_drive")
@@ -382,7 +396,7 @@ case(
 )
 case(
     "replaced_fuel_other_region",
-    "fuel alternative in a region not on the trip → first region",
+    "rule 1: a fuel alternative in a region not on the trip with deltaKm <= 0 changes no km",
     overrides={
         "replaced": {
             "d1s04": {
@@ -428,8 +442,9 @@ case(
     units=mod(tickets=[ticket("d1s02", "pl_k", "Кремль", 1005, 1005)]),
 )
 
-def alt(region_code, delta, check=None, adult=None, child=None, price=None, region_name=""):
+def alt(region_code, delta, check=None, adult=None, child=None, price=None, region_name="", trip_delta=0):
     return {
+        "tripKmDelta": trip_delta,
         "deltaKm": delta,
         "regionCode": region_code,
         "checkRub": check,
@@ -454,9 +469,47 @@ case(
 )
 case(
     "trip_km_formula",
-    "A§16.7: the fuel formula shows tripKm (Σ day km) plus the replaced detours",
+    "rule 2: the fuel formula shows tripKm + tripKmDelta (3), not tripKm + deltaKm (2.6)",
     units=mod(fuel={**BASE["fuel"], "tripKm": 748}),
-    overrides={"replaced": {"d1s04": alt("RU-YAR", 2.6)}},
+    overrides={"replaced": {"d1s04": alt("RU-YAR", 2.6, trip_delta=3)}},
+)
+case(
+    "trip_km_two_replaces",
+    "rule 2: two replaces add both tripKmDelta values (+3 − 1)",
+    units=mod(fuel={**BASE["fuel"], "tripKm": 748}),
+    overrides={
+        "replaced": {
+            "d1s04": alt("RU-YAR", 2.6, trip_delta=3),
+            "d2s03": alt("RU-YAR", -1.3, check=700, trip_delta=-1),
+        }
+    },
+)
+case(
+    "replaced_fuel_same_region",
+    "rule 1: the detour change goes to the alternative's own region",
+    overrides={"replaced": {"d1s04": alt("RU-YAR", 12.0)}},
+)
+case(
+    "replaced_region_drops_to_zero",
+    "rule 1: a region whose km drops below 0 is kept with 0 km",
+    units=mod(
+        fuel={
+            **BASE["fuel"],
+            "regions": [region("RU-YAR", "Ярославская область", 740.0, "62.00"), region("RU-KOS", "Костромская область", 4.0, "62.20")],
+        }
+    ),
+    overrides={"replaced": {"d1s04": alt("RU-KOS", -6.0)}},
+)
+case(
+    "replaced_lunch_null_check",
+    "rule 3: an alternative without a check keeps the meal's check",
+    overrides={"replaced": {"d1s03": alt("RU-YAR", 0.5)}},
+)
+case(
+    "replaced_sight_by_rest",
+    "rule 4: a sight replaced by a rest area loses its ticket (no fewer_sights hint without tickets)",
+    budget=20000,
+    overrides={"replaced": {"d1s02": alt("RU-YAR", -0.4)}},
 )
 
 TEXT = (

@@ -12,7 +12,7 @@ from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, Plan
 from verst_planner.explain.reasons import sight_reason
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.meals import best_lunch, lunch_candidates, needs_lunch, plan_meals
-from verst_planner.pipeline.rest import RestPool, day_ok, rest_pool
+from verst_planner.pipeline.rest import RestPool, day_ok
 from verst_planner.pipeline.timeline import Profile, insert_stop
 
 NOTABLE = frozenset({Tag.KREMLIN, Tag.MONASTERY, Tag.MUSEUM, Tag.VIEW})
@@ -63,7 +63,7 @@ def plan_sights(
     profile = ctx.profile_for(corridor.route)
     max_n = ctx.cfg.sights.max_per_day.of(inp.mood)
     used = _used(days)
-    rests = RestPool(rest_pool(corridor))
+    rests = RestPool.of(corridor)
     for day in days:
         n = sum(1 for s in day.stops if s.kind is StopKind.SIGHT and s.fixed)
         pool = [
@@ -103,7 +103,7 @@ def lowest_sight(day: DayPlan) -> int:
 def plan_lunches(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
     """Stage 8 with the lunch probes checked by `day_ok` (rests reserved)."""
     profile = ctx.profile_for(corridor.route)
-    rests = RestPool(rest_pool(corridor))
+    rests = RestPool.of(corridor)
     used = _used(days)
     plan_meals(days, corridor, inp, ctx, ok=lambda d: day_ok(d, inp, ctx, profile, rests, used))
 
@@ -155,6 +155,6 @@ def plan_lunch_after_sights(
     """Stage 8b over every day still without a lunch that now overlaps the lunch window."""
     profile = ctx.profile_for(corridor.route)
     used = _used(days)
-    rests = RestPool(rest_pool(corridor))
+    rests = RestPool.of(corridor)
     for day in days:
         lunch_after_sights_day(day, corridor, inp, ctx, profile, used, rests)

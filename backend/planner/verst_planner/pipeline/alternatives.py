@@ -49,8 +49,6 @@ from verst_planner.pipeline.timeline import (
 )
 
 POOLS = ("rest", "fuel", "food", "sight")
-CLUSTER_KM = 2.0
-"""A candidate this close to the replaced stop (same town) takes its slot in the day (dev-notes R-05)."""
 
 
 @dataclass(slots=True)
@@ -70,7 +68,7 @@ class Pools:
 
 def family(s: PlannedStop) -> str | None:
     """Which stage pool a stop's alternatives come from (None: not replaceable)."""
-    if s.kind not in ReplaceableKinds or s.fixed:
+    if s.kind not in ReplaceableKinds or s.fixed or s.place is None:  # a roadside break has no place
         return None
     if s.pool in POOLS:
         return s.pool
@@ -148,10 +146,19 @@ def trial_day(
     new = make_alternative_stop(fam, c, old, inp, ctx, towns)
     rest = [*day.stops[:i], *day.stops[i + 1 :]]
     plan = DayPlan(day.day, day.km_start, day.km_end, day.start_at, rest, day.tz)
-    if abs(c.km_at - old.km_at) <= CLUSTER_KM:
-        # same town cluster: take the replaced stop's slot (km clamped to the neighbours, ≤ 2 km)
+    cluster = ctx.cfg.alternatives.cluster_km
+    if abs(c.km_at - old.km_at) <= cluster:
+        # A§16.11.3 same-town slot rule: the candidate takes the replaced stop's slot; its km is clamped
+        # to the neighbours for ordering and scheduling only (point, detour and region stay its own)
         j = i
         new.km_at = min(max(c.km_at, rest[i - 1].km_at), rest[i].km_at)
+        assert abs(new.km_at - c.km_at) <= cluster + 1e-9, "slot rule moved the candidate too far"
+        assert (new.point, new.detour_km, new.detour_min, new.region_code) == (
+            c.place.point,
+            c.detour_km,
+            c.detour_min,
+            c.region_code,
+        )
     else:
         j = insert_index(plan, new)
     rest.insert(j, new)
@@ -241,6 +248,11 @@ def _exact_cost(s: PlannedStop, inp: NormalizedInput, ctx: PlanContext) -> Decim
     if s.meal is Meal.LUNCH:
         return food_people(inp, ctx) * lunch_check(s, ctx)
     return Decimal(0)
+
+
+def _day_km(d: DayPlan) -> int:
+    """Rounded day km as rendered: `round(km_end - km_start + Σ detour_km)` (A§6.10)."""
+    return round_half_up(d.km_end - d.km_start + sum(s.detour_km for s in d.stops))
 
 
 def _round10(x: Decimal) -> int:
@@ -379,7 +391,9 @@ def alternatives_for_day(
                 ctx,
                 sid=ids[i],
             )
-            units = alt_units(t.stop, old, inp, ctx)
+            units = dataclasses.replace(
+                alt_units(t.stop, old, inp, ctx), trip_km_delta=_day_km(t.plan) - _day_km(day)
+            )
             alts.append(
                 Alternative(
                     id=f"alt_{rendered.id}_{place.id}",

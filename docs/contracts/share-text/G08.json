@@ -87,7 +87,8 @@
                   "name": "Площадка отдыха, М-7, 125 км",
                   "placeId": "pl_m7w_rest_125",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -203,7 +204,8 @@
                   "name": "Площадка отдыха, М-7, 35 км",
                   "placeId": "pl_m7w_rest_035",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -318,7 +320,8 @@
                   "name": "Роснефть, М-7, 65 км",
                   "placeId": "pl_m7w_fuel_065",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -492,7 +495,8 @@
                   "name": "Смотровая у Успенского собора",
                   "placeId": "pl_vla_view",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s04",
@@ -608,7 +612,8 @@
                   "name": "Старая водонапорная башня",
                   "placeId": "pl_vla_water_tower",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s04",
@@ -723,7 +728,8 @@
                   "name": "Соборная площадь Владимира",
                   "placeId": "pl_vla_cathedral_square",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s04",
@@ -870,7 +876,8 @@
                   "name": "Смотровая у Успенского собора",
                   "placeId": "pl_vla_view",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s05",
@@ -986,7 +993,8 @@
                   "name": "Старая водонапорная башня",
                   "placeId": "pl_vla_water_tower",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s05",
@@ -1101,7 +1109,8 @@
                   "name": "Соборная площадь Владимира",
                   "placeId": "pl_vla_cathedral_square",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s05",
@@ -1248,7 +1257,8 @@
                   "name": "Ризоположенский монастырь",
                   "placeId": "pl_suz_rizopolozhensky",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s06",
@@ -1395,7 +1405,8 @@
                   "name": "Трапезная «Кремлёвская»",
                   "placeId": "pl_suz_cafe_kremlin",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s07",
@@ -1510,7 +1521,8 @@
                   "name": "Кафе «Огурец»",
                   "placeId": "pl_suz_cafe_ogurets",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s07",
@@ -1656,7 +1668,8 @@
                   "name": "Ризоположенский монастырь",
                   "placeId": "pl_suz_rizopolozhensky",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d1s08",

@@ -25,7 +25,7 @@ from verst_planner.cost.model import (
     sight_cost,
 )
 from verst_planner.cost.money import round_to
-from verst_planner.cost.recompute import recompute, rooms_for
+from verst_planner.cost.recompute import effective_tickets, recompute, rooms_for
 from verst_planner.domain.enums import (
     Meal,
     PlaceType,
@@ -42,6 +42,7 @@ from verst_planner.domain.model import (
     Alternative,
     AltUnits,
     Candidate,
+    CostOverrides,
     CostPatch,
     CostResult,
     CostUnits,
@@ -62,7 +63,6 @@ from verst_planner.domain.model import (
     PlanWarning,
     ScheduledStop,
     StopState,
-    TicketUnit,
     TollHit,
     Town,
     TownCandidate,
@@ -457,7 +457,7 @@ class Planner:
                 )
             )
         trip_km = sum(d.km for d in days_list)
-        units = _units_after_replace(plan.cost.units, stop_id, alt.units, trip_km)
+        units = _units_after_replace(plan.cost.units, stop_id, alt.units)
         cost = self._with_hints(recompute(units, inp.crew, inp.reserve_on, inp.budget_rub))
         region_kms = tuple((r.region_code, r.km) for r in units.fuel.regions)
         new_state = dataclasses.replace(
@@ -537,25 +537,19 @@ class Planner:
 # ---------------------------------------------------------------------------------------------- helpers
 
 
-def _units_after_replace(u: CostUnits, stop_id: str, alt: AltUnits, trip_km: int) -> CostUnits:
+def _units_after_replace(u: CostUnits, stop_id: str, alt: AltUnits) -> CostUnits:
     """Bake a replace into the units so that `recompute(units')` equals
-    `recompute(units, replaced={stop_id: alt})` (A§7.3, A§16.6); `trip_km` is the new formula km."""
+    `recompute(units, replaced={stop_id: alt})` (A§16.11.4 rules 1-4)."""
     regions = list(u.fuel.regions)
     codes = [r.region_code for r in regions]
     if alt.region_code in codes:
         k = codes.index(alt.region_code)
         r = regions[k]
-        regions[k] = FuelRegionUnit(
-            r.region_code, r.region_name_ru, round(r.km + alt.delta_km, 3), r.price_rub
-        )
+        km = max(0.0, round(r.km + alt.delta_km, 3))
+        regions[k] = FuelRegionUnit(r.region_code, r.region_name_ru, km, r.price_rub)
     elif alt.price_rub is not None and alt.delta_km > 0:
         regions.append(
             FuelRegionUnit(alt.region_code, alt.region_name_ru, round(alt.delta_km, 3), alt.price_rub)
-        )
-    elif regions:
-        r = regions[0]
-        regions[0] = FuelRegionUnit(
-            r.region_code, r.region_name_ru, round(r.km + alt.delta_km, 3), r.price_rub
         )
     meals = tuple(
         MealUnit(m.day, m.meal, m.stop_id, alt.check_rub)
@@ -563,14 +557,10 @@ def _units_after_replace(u: CostUnits, stop_id: str, alt: AltUnits, trip_km: int
         else m
         for m in u.meals
     )
-    had_ticket = any(x.stop_id == stop_id for x in u.tickets)
-    tickets = [x for x in u.tickets if x.stop_id != stop_id]
-    if had_ticket or alt.adult_rub is not None:
-        adult = alt.adult_rub or 0
-        child = alt.child_rub if alt.child_rub is not None else adult
-        tickets.append(TicketUnit(stop_id, alt.place_id, alt.name_ru, adult, child))
+    tickets = tuple(effective_tickets(u, CostOverrides(replaced={stop_id: alt})))
+    trip_km = None if u.fuel.trip_km is None else u.fuel.trip_km + alt.trip_km_delta
     fuel = dataclasses.replace(u.fuel, regions=tuple(regions), trip_km=trip_km)
-    return dataclasses.replace(u, fuel=fuel, meals=meals, tickets=tuple(tickets))
+    return dataclasses.replace(u, fuel=fuel, meals=meals, tickets=tickets)
 
 
 def _recrew_day(d: DayResult, units: CostUnits, inp: NormalizedInput, cfg: PlannerConfig) -> DayResult:

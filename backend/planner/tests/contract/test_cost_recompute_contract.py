@@ -22,7 +22,7 @@ def load() -> list[dict[str, Any]]:
 
 class CostRecomputeContractTest(unittest.TestCase):
     def test_case_count(self) -> None:
-        self.assertGreaterEqual(len(load()), 25)
+        self.assertGreaterEqual(len(load()), 35)  # A§16.11.4: ≥ 1 case per rule, ≥ 35
         names = [c["name"] for c in load()]
         self.assertEqual(len(names), len(set(names)))
 

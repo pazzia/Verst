@@ -41,9 +41,11 @@
       "all"
     ],
     "costWorkings": [
-      "route: Тестовск → Пустошь 450 km on Р-998 + detours ≈ 3 km = 453 km; fuel 453 × 8 / 100 × 61.00 = 2 210.6 → 2 210 (the FUEL_GAP is a warning, fuel is still costed by distance)",
-      "food: 1 adult; lunch Кафе «Северное» (km 330, ≈ 12:00, 24/7) 500; finish 14:32 → no dinner → 500",
-      "subtotal 2 210 + 500 = 2 710; reserve 270 (271); total round_to(2 980, 100) = 3 000"
+      "route: Тестовск → Пустошь 450 km on Р-998, one day (more_stops, R = 90 min, ≈ 0.73 driving min per km)",
+      "fuel (one region): Тестовая область 453 + 1 = 454 km × 0.08 × 61.00 = 2 217 → 2 220",
+      "rests (A§16.11.1): areas only at km 60 / 160 / 260 / 360. From the start: km 60 is 44 min (< G), km 160 is 117 min (outside [60, 105]) → step 3 extended window [max(45, 30), 120] takes km 160; from it km 260 is 74 min ∈ [60, 90] → step 2; lunch Кафе «Северное» (km 330, 24/7) 51 min later; finish 90 min after the lunch → every stretch ≤ R + 30 = 120 min (was 242 min without a break)",
+      "food: 1 adult, lunch 500; finish 15:12 → no dinner → 500",
+      "subtotal 2 220 + 500 = 2 720; reserve 270 (272); total round_to(2 990, 100) = 3 000"
     ],
     "warnings": [
       "FUEL_GAP"

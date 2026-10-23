@@ -7,7 +7,9 @@ stops, rests, vias). `plan_rests` fills only the gaps between consecutive breaks
 1. a range fuel stop in the window with a cafe becomes a coffee stop (no extra stop);
 2. else the best admissible rest-pool candidate (detour ≤ `rest.max_detour_min`, at least
    `rest.min_gap_min` after the previous break) in `[R - 30, R]`, widened to `[max(G, R - 60), R + 15]`;
-3. else a virtual break at the point where the clock reaches `R` (no stop).
+3. else an extended window: detour ≤ `rest.extended_detour_min` (15), driving since the previous break in
+   `[max(45, R - 60), R + 30]` (A§16.11.1);
+4. else a roadside break (`label.roadside_break`, 15 min, no place) where the clock reaches `R`.
 
 A candidate is only inserted when every sight of the day stays open and the lunch stays in its window.
 """
@@ -19,14 +21,17 @@ import dataclasses
 from dataclasses import dataclass
 
 from verst_planner.domain.enums import PlaceType, StopKind, Tag
-from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop
+from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop, Route
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import sight_reason
+from verst_planner.geo.polyline import interpolate
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.checks import day_valid, lunch_out_of_window, over_budget, sights_still_open
 from verst_planner.pipeline.timeline import Profile, eta_if_inserted, insert_stop, local, schedule_day
 
 MAX_REST_SIGHT_DWELL = 30
+EXTENDED_MIN_DRIVE = 45  # A§16.11.1 step 3: driving since b0 in [max(45, R - 60), R + 30]
+EXTENDED_AFTER = 30
 ROUND_DRIVE_MIN = 15
 EPS = 1e-6
 
@@ -184,10 +189,15 @@ class RestPool:
     """The rest pool sorted by km, sliced by bisect."""
 
     cands: list[Candidate]
+    route: Route | None = None  # for the position of a roadside break
     kms: list[float] = dataclasses.field(default_factory=list)
 
     def __post_init__(self) -> None:
         self.kms = [c.km_at for c in self.cands]
+
+    @classmethod
+    def of(cls, corridor: Corridor) -> RestPool:
+        return cls(rest_pool(corridor), corridor.route)
 
     def between(self, lo: float, hi: float) -> list[Candidate]:
         return self.cands[bisect.bisect_left(self.kms, lo) : bisect.bisect_right(self.kms, hi)]
@@ -195,7 +205,7 @@ class RestPool:
 
 @dataclass(slots=True)
 class _Gap:
-    i0: int  # index of the break stop b0 (-1 for a virtual break)
+    i0: int  # index of the break stop b0
     t0: float  # clock at b0 (arrival)
     km0: float
     t1: float  # clock at b1 (arrival) or at the day end
@@ -203,15 +213,18 @@ class _Gap:
 
 
 def _first_long_gap(
-    day: DayPlan, clock: DriveClock, virtual: list[float], r: float, min_dwell: int
+    day: DayPlan, clock: DriveClock, r: float, min_dwell: int, accepted: set[tuple[int, int]]
 ) -> _Gap | None:
-    marks = sorted(
-        [(clock.t_arr[i], day.stops[i].km_at, i) for i, s in enumerate(day.stops) if is_break(s, min_dwell)]
-        + [(clock.at(km), km, -1) for km in virtual]
-    )
+    """The first gap between consecutive breaks longer than R, skipping gaps closed by a break this stage
+    placed after R (widened/extended windows end at R + 15 / R + 30, `accepted` holds those pairs)."""
+    marks = [
+        (clock.t_arr[i], day.stops[i].km_at, i) for i, s in enumerate(day.stops) if is_break(s, min_dwell)
+    ]
     for j, (t0, km0, i0) in enumerate(marks):
         t1 = marks[j + 1][0] if j + 1 < len(marks) else clock.t_arr[-1]
         km1 = marks[j + 1][1] if j + 1 < len(marks) else day.km_end
+        if j + 1 < len(marks) and (id(day.stops[i0]), id(day.stops[marks[j + 1][2]])) in accepted:
+            continue
         if t1 - t0 > r + EPS:  # a break exactly R after the previous one is on time
             return _Gap(i0, t0, km0, t1, km1)
     return None
@@ -219,7 +232,7 @@ def _first_long_gap(
 
 def _upgrade_fuel(
     day: DayPlan, gap: _Gap, clock: DriveClock, r: float, ctx: PlanContext, profile: Profile, strict: bool
-) -> bool:
+) -> PlannedStop | None:
     """Step 1: a range fuel stop with a cafe inside the window becomes a coffee stop (15 min)."""
     lo, hi = (
         max(float(ctx.cfg.rest.min_gap_min), r - ctx.cfg.rest.widen_before_min),
@@ -235,14 +248,14 @@ def _upgrade_fuel(
         if lo - EPS <= d0 <= hi + EPS and (best is None or abs(d0 - r) < best[0]):
             best = (abs(d0 - r), k)
     if best is None:
-        return False
+        return None
     k = best[1]
     old = day.stops[k]
     day.stops[k] = dataclasses.replace(old, coffee=True, dwell_min=ctx.cfg.dwell_min.fuel_coffee)
     if not strict or day_valid(day, ctx, profile):
-        return True
+        return day.stops[k]
     day.stops[k] = old
-    return False
+    return None
 
 
 def plan_rests_day(
@@ -263,70 +276,109 @@ def plan_rests_day(
     rc = ctx.cfg.rest
     r = float(ctx.cfg.rest_interval_min.of(inp.mood))
     g = float(rc.min_gap_min)
-    virtual: list[float] = []
     added: list[PlannedStop] = []
     taken = set(used)
+    accepted: set[tuple[int, int]] = set()
     for _guard in range(200):
         clock = DriveClock.of(day, profile)
-        gap = _first_long_gap(day, clock, virtual, r, rc.break_min_dwell)
+        gap = _first_long_gap(day, clock, r, rc.break_min_dwell, accepted)
         if gap is None:
             break
         x = clock.km_of(gap.t0 + r, gap.km0, gap.km1)
         if clock.t_arr[-1] - (gap.t0 + r) < rc.min_remaining_drive_min:
             break
-        if _upgrade_fuel(day, gap, clock, r, ctx, profile, strict):
+        b0 = day.stops[gap.i0]
+        coffee = _upgrade_fuel(day, gap, clock, r, ctx, profile, strict)
+        if coffee is not None:
+            accepted.add((id(b0), id(coffee)))
             continue
         need_after = min(g, gap.t1 - gap.t0 - r)
 
-        def admissible(
-            c: Candidate, gap: _Gap = gap, clock: DriveClock = clock, need_after: float = need_after
-        ) -> float | None:
-            """Driving since b0 when `c` is admissible, else None."""
+        def drive_since(c: Candidate, gap: _Gap = gap, clock: DriveClock = clock) -> float | None:
+            """Driving since b0 at arrival for an unused candidate inside the day, else None."""
             if c.place.id in taken or not (day.km_start < c.km_at < day.km_end):
                 return None
-            if c.detour_min > rc.max_detour_min:
-                return None
-            at = clock.at(c.km_at)
-            d0 = at + c.detour_min / 2 - gap.t0
-            if d0 < g - EPS or gap.t1 - at < need_after - EPS:
-                return None
-            return d0
+            return clock.at(c.km_at) + c.detour_min / 2 - gap.t0
 
-        span = pool.between(gap.km0, gap.km1)
-        scored = [(c, d0) for c in span if (d0 := admissible(c)) is not None]
-        cands = [(c, d0) for c, d0 in scored if r - rc.window_before_min - EPS <= d0 <= r + EPS]
-        if not cands:
-            lo = max(g, r - rc.widen_before_min)
-            cands = [(c, d0) for c, d0 in scored if lo - EPS <= d0 <= r + rc.widen_after_min + EPS]
+        def admissible(
+            c: Candidate,
+            d0: float,
+            gap: _Gap = gap,
+            clock: DriveClock = clock,
+            need_after: float = need_after,
+        ) -> bool:
+            if c.detour_min > rc.max_detour_min or d0 < g - EPS:
+                return False
+            return gap.t1 - clock.at(c.km_at) >= need_after - EPS
+
+        span = [(c, d0) for c in pool.between(gap.km0, gap.km1) if (d0 := drive_since(c)) is not None]
+        scored = [(c, d0) for c, d0 in span if admissible(c, d0)]
+        windows = [
+            [(c, d0) for c, d0 in scored if r - rc.window_before_min - EPS <= d0 <= r + EPS],
+            [
+                (c, d0)
+                for c, d0 in scored
+                if max(g, r - rc.widen_before_min) - EPS <= d0 <= r + rc.widen_after_min + EPS
+            ],
+            # step 3 (A§16.11.1): extended window and detour
+            [
+                (c, d0)
+                for c, d0 in span
+                if c.detour_min <= rc.extended_detour_min
+                and max(float(EXTENDED_MIN_DRIVE), r - rc.widen_before_min) - EPS
+                <= d0
+                <= r + EXTENDED_AFTER + EPS
+            ],
+        ]
         chosen = None
-        for c, d0 in sorted(
-            cands, key=lambda cd: (-round(rest_score(cd[0], inp), 9), abs(cd[1] - r), cd[0].place.id)
-        ):
-            stop = make_rest_stop(c, inp, ctx, d0)
-            if _open_at_eta(day, stop, ctx, profile) and (
-                not strict or _keeps_day_valid(day, stop, ctx, profile)
+        for cands in windows:
+            for c, d0 in sorted(
+                cands, key=lambda cd: (-round(rest_score(cd[0], inp), 9), abs(cd[1] - r), cd[0].place.id)
             ):
-                chosen = stop
+                stop = make_rest_stop(c, inp, ctx, d0)
+                if _open_at_eta(day, stop, ctx, profile) and (
+                    not strict or _keeps_day_valid(day, stop, ctx, profile)
+                ):
+                    chosen = stop
+                    break
+            if chosen is not None:
                 break
-        if chosen is None:
-            virtual.append(x)
-            continue
+        if chosen is None:  # step 4: a roadside break at x, never a gap left unfilled
+            chosen = roadside_break(x, pool, ctx)
         insert_stop(day, chosen)
-        assert chosen.place is not None
-        taken.add(chosen.place.id)
+        accepted.add((id(b0), id(chosen)))
+        if chosen.place is not None:
+            taken.add(chosen.place.id)
         added.append(chosen)
     return added
+
+
+def roadside_break(km: float, pool: RestPool, ctx: PlanContext) -> PlannedStop:
+    """A§16.11.1 step 4: a 15-min stop on the road where no place fits (`label.roadside_break`)."""
+    assert pool.route is not None
+    point = interpolate(pool.route, km)
+    return PlannedStop(
+        kind=StopKind.REST,
+        km_at=km,
+        name_ru=ru.text("label.roadside_break"),
+        point=point,
+        dwell_min=ctx.cfg.rest.break_min_dwell,
+        auto=True,
+        reason_key="rest.roadside",
+        region_code=ctx.region_at(point).code,
+        pool="rest",
+    )
 
 
 def plan_rests(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
     """Stage 7 over every day (runs after lunch and sights, A§16.2)."""
     profile = ctx.profile_for(corridor.route)
     used = {s.place.id for d in days for s in d.stops if s.place is not None}
-    pool = RestPool(rest_pool(corridor))
+    pool = RestPool.of(corridor)
     for day in days:
         for s in plan_rests_day(day, pool, used, inp, ctx, profile):
-            assert s.place is not None
-            used.add(s.place.id)
+            if s.place is not None:
+                used.add(s.place.id)
 
 
 def day_ok(

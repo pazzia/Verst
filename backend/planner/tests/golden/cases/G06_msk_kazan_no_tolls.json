@@ -45,7 +45,8 @@
       "М-7"
     ],
     "mustIncludePlaceIds": [
-      "pl_nnv_hotel_volga"
+      "pl_nnv_hotel_volga",
+      "pl_m7e_cafe_135"
     ],
     "costLinesRub": {
       "tolls": {
@@ -62,14 +63,14 @@
     ],
     "costWorkings": [
       "route: Москва → Казань on М-7 814 km (avoid tolls) + detours ≈ 18 km → ≈ 832 km ∈ [814, 840]; the М-12 coffee 6.4 km off the route (27 min) is no longer a rest (rest.max_detour_min = 10)",
-      "fuel: 832 km × 8 l/100 ≈ 66.6 l at ≈ 60.80 ₽ → ≈ 4 050 ₽",
+      "fuel by region (8 l/100): Владимирская 284 + 5 = 289 km × 61.40 = 1 419; Нижегородская 267 + 8 = 275 km × 60.90 = 1 338; Чувашия 110 + 5 = 115 km × 59.80 = 549; Татарстан 76 + 1 = 77 km × 58.90 = 362; Московская 69 km × 61.80 = 341; Москва 8 km × 62.50 = 40 → Σ 4 049 → 4 050 (±5 %)",
       "lodging (2 adults, no filters): Нижний Новгород «Волга» 4.7 + 0.5 + 0.3 − 0.72 = 4.78 > Кремлёвская 4.25 → 7 200",
-      "food (2 people): day 1 lunch at a М-7 roadside café (500–800; Кафе «Привал» 700) + dinner Нижний median_low(700, 800, 1000, 1000) = 800; breakfast included; day 2 lunch Чебоксары, Чувашская кухня 650 (kids + parking 4.4 + 1 = 5.4 > Кафе у залива 4.1 + 0.5 = 4.6); finish ≈ 18:50 < 19:00 → no dinner → 2 × 2 150 = 4 300",
-      "tickets: Золотые ворота 2 × 250 = 500 (Покрова на Нерли, Старый Гороховец, Набережная Фёдоровского, Чебоксарский залив, Монумент are free) → 500",
-      "subtotal 4 050 + 0 + 7 200 + 4 300 + 500 = 16 050; reserve 1 610 (1 605 half up); total round_to(17 660, 100) = 17 700"
+      "food (2 people): day 1 lunch picked by stage 8 on the bare day; feasible candidates at their ETA (lunch_score = rating + 1·parking + 0.5·view + 0.5·[12:30–13:30] − detour/5): Кафе «Привал», М-7 (12:25) 4.1 + 1 + 0 + 0 − 0 = 5.1; Трапезная Гороховца (12:39) 4.2 + 1 + 0.5 − 3/5 = 5.1; «Купеческое» (12:38) 4.0 + 1 + 0.5 − 3/5 = 4.9; «Блинная», М-12 (13:01) 3.95 + 1 + 0.5 − 38/5 = −2.15; «Домашняя кухня», М-12 (12:12) 3.8 + 1 − 35/5 = −2.2 → tie 5.1 broken by the lower km (322 < 337) → Кафе «Привал» 700; dinner Нижний median_low(700, 800, 1000, 1000) = 800; breakfast included; day 2 lunch Чебоксары Чувашская кухня 650; finish 18:49 < 19:00 → no dinner → 2 × 2 150 = 4 300",
+      "tickets: Золотые ворота 2 × 250 = 500 and Дмитриевский собор 2 × 250 = 500 (Старый Гороховец, Набережная Фёдоровского, Чебоксарский залив, Монумент are free) → 1 000",
+      "subtotal 4 050 + 0 + 7 200 + 4 300 + 1 000 = 16 550; reserve 1 660 (1 655 half up); total round_to(18 210, 100) = 18 200"
     ],
     "costTotalRub": {
-      "value": 17700,
+      "value": 18200,
       "tolerancePct": 5
     }
   }

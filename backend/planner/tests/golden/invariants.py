@@ -148,7 +148,10 @@ def alternatives(run: GoldenRun) -> None:
         for s in d.stops:
             assert len(s.alternatives) <= 3
             assert s.replaceable == (
-                s.kind in ReplaceableKinds and s.kind is not StopKind.VIA and _not_fixed(s, run)
+                s.kind in ReplaceableKinds
+                and s.kind is not StopKind.VIA
+                and s.place_id is not None
+                and _not_fixed(s, run)
             )
             for a in s.alternatives:
                 assert a.place_id != s.place_id
@@ -310,15 +313,20 @@ def _rest_stage(s: Any, st: Any) -> bool:
 
 
 def break_spacing(run: GoldenRun) -> None:
-    """A§16.2: a stage-7 stop is at least `rest.min_gap_min` of driving after the previous break and has a
-    detour of at most `rest.max_detour_min` (1 min tolerance for the minute rounding of rendered times)."""
-    rc = _cfg(run).rest
+    """A§16.2/16.11.1: driving between consecutive breaks (dwell ≥ 15, start, overnight, finish) is ≤ R + 30;
+    a stage-7 stop is ≥ `rest.min_gap_min` after the previous break (except a roadside or extended-window
+    break) and a rest-pool place has a detour ≤ `rest.extended_detour_min` (1 min rounding tolerance)."""
+    cfg = _cfg(run)
+    rc = cfg.rest
+    upper = cfg.rest_interval_min.of(run.plan.input.mood) + 30  # A§16.11.1
     for s, st, drive in _drives(run):
+        if s.dwell_min >= rc.break_min_dwell or s.kind in (StopKind.OVERNIGHT, StopKind.FINISH):
+            assert drive <= upper + 1, f"{s.id} {s.name_ru}: {drive:.0f} min of driving without a break"
         if _rest_stage(s, st):
             gap = f"{s.id} {s.name_ru}: {drive:.0f} min after the previous break"
-            assert drive >= rc.min_gap_min - 1, gap
+            assert drive >= min(rc.min_gap_min, 45) - 1, gap
             if st.pool == "rest":
-                assert st.detour_min <= rc.max_detour_min, f"{s.id}: detour {st.detour_min} min"
+                assert st.detour_min <= rc.extended_detour_min, f"{s.id}: detour {st.detour_min} min"
 
 
 def rest_reason(run: GoldenRun) -> None:

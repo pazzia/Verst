@@ -4,7 +4,7 @@ from functools import cache
 
 from tests.helpers import make_planner, trip
 from verst_planner.adapters.fake import FakeWorld
-from verst_planner.domain.enums import StopKind
+from verst_planner.domain.enums import Mood, StopKind
 from verst_planner.domain.model import Crew, ReplaceableKinds, TripPlan
 from verst_planner.hours import parse
 
@@ -152,6 +152,66 @@ class AlternativesTest(unittest.TestCase):
         self.assertEqual(alt.shift_min, 0)  # same dwell and detour: the finish after the rest does not move
         # the museum is now reached 20 min earlier (08:00 + 110 min), before the rest
         self.assertEqual(alt.day_patch[1].arrive_at, d.start_at.replace(tzinfo=None, hour=9, minute=50))
+
+    def test_coverage_on_mini_world(self) -> None:
+        # A§16.11.5: a controlled corridor with one candidate before and one after each replaceable stop
+        # (rest, lunch, sight, range fuel) → every replaceable stop gets ≥ 2 alternatives, independent of
+        # the central world fixture.
+        from tests.unit.test_rest import ROUTE, day, place_at, setup
+        from tests.unit.test_sights import sight
+        from verst_planner.domain.enums import PlaceType, Tag
+        from verst_planner.domain.model import Candidate
+        from verst_planner.geo.index import PolylineIndex
+        from verst_planner.pipeline import Corridor
+        from verst_planner.pipeline.alternatives import Pools, alternatives_for_day
+        from verst_planner.pipeline.meals import make_lunch_stop
+        from verst_planner.pipeline.rest import make_rest_stop
+        from verst_planner.pipeline.schedule import ScheduledDay
+        from verst_planner.pipeline.sights import make_sight_stop
+        from verst_planner.pipeline.timeline import schedule_day
+
+        def food(pid: str, km: float) -> Candidate:
+            return place_at(pid, PlaceType.FOOD, km, {Tag.PARKING}, avg_check_rub=700)
+
+        def fuel(pid: str, km: float) -> Candidate:
+            return place_at(pid, PlaceType.FUEL, km, {Tag.WC})
+
+        rests = [place_at(f"r{k}", PlaceType.REST, k, {Tag.WC}) for k in (90, 100, 110)]
+        foods = [food(f"f{k}", k) for k in (240, 250, 255)]
+        sights = [sight(f"s{k}", k) for k in (259, 260, 270)]
+        fuels = [fuel(f"g{k}", k) for k in (330, 340, 350)]
+        cor = Corridor(ROUTE, PolylineIndex(ROUTE), sights, foods, fuels, rests, [], [])
+        ctx, inp = setup(mood=Mood.CALM)
+        from verst_planner.domain.model import PlannedStop
+
+        stops = [
+            make_rest_stop(rests[1], inp, ctx, 100.0),
+            make_lunch_stop(foods[1], inp, ctx, [], 0.0),
+            make_sight_stop(sights[1], inp, ctx),
+            PlannedStop(
+                StopKind.FUEL,
+                340.0,
+                "АЗС",
+                fuels[1].place.point,
+                place=fuels[1].place,
+                dwell_min=10,
+                auto=True,
+                reason_key="fuel.range",
+                reason_params={"km": 340},
+                region_code="RU-MOS",
+                pool="fuel",
+            ),
+        ]
+        d = day(420, stops)
+        profile = ctx.profile_for(ROUTE)
+        sd = ScheduledDay(d, schedule_day(d, profile), 600, ids=[f"d1s0{k}" for k in range(1, 7)])
+        used = {"r100", "f250", "s260", "g340"}
+        alts, notes = alternatives_for_day(sd, Pools.of(cor), used, inp, ctx, profile, None, 420.0)
+        self.assertEqual(sorted(alts), [1, 2, 3, 4])
+        for i, got in alts.items():
+            with self.subTest(stop=d.stops[i].name_ru):
+                self.assertGreaterEqual(len(got), 2)
+                self.assertNotIn(i, notes)
 
     def test_note_when_fewer_than_two(self) -> None:
         none = "Других вариантов в это время поблизости нет."

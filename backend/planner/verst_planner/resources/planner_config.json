@@ -62,7 +62,8 @@
     "min_remaining_drive_min": 30,
     "break_min_dwell": 15,
     "max_detour_min": 10,
-    "min_gap_min": 60
+    "min_gap_min": 60,
+    "extended_detour_min": 15
   },
   "dwell_min": {
     "coffee": 15,
@@ -79,7 +80,7 @@
     "max_per_day": {"calm": 2, "more_stops": 4, "just_drive": 0},
     "min_score": 2.0
   },
-  "alternatives": {"window_min": 45, "max": 3},
+  "alternatives": {"window_min": 45, "max": 3, "cluster_km": 2.0},
   "cost": {
     "reserve_frac": 0.10,
     "line_step": 10,

@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import unittest
 from datetime import datetime
@@ -92,9 +93,22 @@ class ReplaceTest(unittest.TestCase):
 
         plan = sample_plan()
         alt = AltUnits(
-            6.5, "RU-VLA", 700, None, None, "Кафе «Клязьма»", "pl_v", Decimal("62.40"), "Владимирская область"
+            6.5,
+            "RU-VLA",
+            700,
+            None,
+            None,
+            "Кафе «Клязьма»",
+            "pl_v",
+            Decimal("62.40"),
+            "Владимирская область",
+            7,
         )
-        units = _units_after_replace(plan.cost.units, "d1s02", alt, 262)
+        base = dataclasses.replace(
+            plan.cost.units, fuel=dataclasses.replace(plan.cost.units.fuel, trip_km=255)
+        )
+        plan = dataclasses.replace(plan, cost=dataclasses.replace(plan.cost, units=base))
+        units = _units_after_replace(plan.cost.units, "d1s02", alt)
         self.assertEqual(
             [(r.region_code, r.km) for r in units.fuel.regions],
             [("RU-MOS", 120.5), ("RU-YAR", 134.5), ("RU-VLA", 6.5)],
@@ -104,7 +118,42 @@ class ReplaceTest(unittest.TestCase):
         offline = recompute(plan.cost.units, crew, True, None, CostOverrides(replaced={"d1s02": alt}))
         self.assertEqual([x.rub for x in baked.lines], [x.rub for x in offline.lines])
         self.assertIn("Владимирская область", [b.label_ru for b in baked.lines[0].breakdown])
-        self.assertTrue(baked.lines[0].formula_ru.startswith("262 км"))
+        self.assertTrue(baked.lines[0].formula_ru.startswith("262 км"))  # 255 + trip_km_delta 7
+        self.assertEqual(baked.lines[0].formula_ru, offline.lines[0].formula_ru)
+
+    def test_offline_formula_km_matches_server(self) -> None:
+        # A§16.11.4 rule 2: offline formula km = trip_km + Σ trip_km_delta = the server's TripPlan.km
+        from tests.golden.test_golden import CASES, load_case, run_case
+        from verst_planner.cost.recompute import recompute
+        from verst_planner.domain.model import CostOverrides
+        from verst_planner.explain import ru
+
+        checked = 0
+        for cid in ("G01", "G02", "G03", "G04", "G05", "G06", "G07", "G08"):
+            case = load_case(next(CASES.glob(f"{cid}_*.json")))
+            plan, *_ = run_case(case)
+            planner, _f = make_planner(case["world"])
+            for d in plan.days_list:
+                for s in d.stops:
+                    for alt in s.alternatives:
+                        server = planner.replace_stop(plan, s.id, alt.id)
+                        offline = recompute(
+                            plan.cost.units,
+                            plan.input.crew,
+                            True,
+                            None,
+                            CostOverrides(replaced={s.id: alt.units}),
+                        )
+                        with self.subTest(case=cid, alt=alt.id):
+                            self.assertEqual(
+                                plan.cost.units.fuel.trip_km + alt.units.trip_km_delta, server.km
+                            )
+                            self.assertTrue(
+                                offline.lines[0].formula_ru.startswith(f"{ru.fmt_km(server.km)} км")
+                            )
+                            self.assertEqual(offline.lines[0].formula_ru, server.cost.lines[0].formula_ru)
+                        checked += 1
+        self.assertGreater(checked, 100)
 
     def test_replace_recomputes_cost_and_survives_json(self) -> None:
         di, stop = first_with_alternatives(self.plan)

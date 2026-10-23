@@ -88,7 +88,8 @@
                   "name": "Гремячий ключ",
                   "placeId": "pl_sps_gremyachiy",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s02",
@@ -183,7 +184,8 @@
                   "name": "Часовня Пятницкого колодца",
                   "placeId": "pl_sps_chapel",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -276,7 +278,8 @@
                   "name": "Пятницкое подворье",
                   "placeId": "pl_sps_pyatnitskoe",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 2
                 },
                 "stop": {
                   "id": "d1s02",
@@ -402,7 +405,8 @@
                   "name": "Музей-усадьба «Ботик Петра Первого»",
                   "placeId": "pl_prs_botik",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s03",
@@ -496,7 +500,8 @@
                   "name": "Музей утюга",
                   "placeId": "pl_prs_iron",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s03",
@@ -589,7 +594,8 @@
                   "name": "Фёдоровский монастырь",
                   "placeId": "pl_prs_fedorovsky",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 4
                 },
                 "stop": {
                   "id": "d1s03",
@@ -715,7 +721,8 @@
                   "name": "Кафе «Русское подворье»",
                   "placeId": "pl_rst_cafe_podvorie",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s04",
@@ -809,7 +816,8 @@
                   "name": "Трапезная «Ростов Великий»",
                   "placeId": "pl_rst_cafe_veliky",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s04",
@@ -902,7 +910,8 @@
                   "name": "Кафе «Неро»",
                   "placeId": "pl_rst_cafe_nero",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s04",
@@ -1028,7 +1037,8 @@
                   "name": "Музей ростовской финифти",
                   "placeId": "pl_rst_finift",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s05",
@@ -1121,7 +1131,8 @@
                   "name": "Набережная озера Неро",
                   "placeId": "pl_rst_nero",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 2
                 },
                 "stop": {
                   "id": "d1s05",
@@ -1216,7 +1227,8 @@
                   "name": "Авраамиев монастырь",
                   "placeId": "pl_rst_avraamiev",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 2
                 },
                 "stop": {
                   "id": "d1s05",
@@ -1451,7 +1463,8 @@
                   "name": "Набережная озера Неро",
                   "placeId": "pl_rst_nero",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s02",
@@ -1560,7 +1573,8 @@
                   "name": "Авраамиев монастырь",
                   "placeId": "pl_rst_avraamiev",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d2s02",
@@ -1668,7 +1682,8 @@
                   "name": "Гостиный двор Ростова",
                   "placeId": "pl_rst_gostiny",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d2s02",
@@ -1809,7 +1824,8 @@
                   "name": "Музей утюга",
                   "placeId": "pl_prs_iron",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d2s03",
@@ -1916,7 +1932,8 @@
                   "name": "Фёдоровский монастырь",
                   "placeId": "pl_prs_fedorovsky",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 4
                 },
                 "stop": {
                   "id": "d2s03",
@@ -2024,7 +2041,8 @@
                   "name": "Синий камень",
                   "placeId": "pl_prs_blue_stone",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 5
                 },
                 "stop": {
                   "id": "d2s03",
@@ -2167,7 +2185,8 @@
                   "name": "Музей утюга",
                   "placeId": "pl_prs_iron",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -3
                 },
                 "stop": {
                   "id": "d2s04",
@@ -2274,7 +2293,8 @@
                   "name": "Фёдоровский монастырь",
                   "placeId": "pl_prs_fedorovsky",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s04",
@@ -2382,7 +2402,8 @@
                   "name": "Синий камень",
                   "placeId": "pl_prs_blue_stone",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d2s04",
@@ -2523,7 +2544,8 @@
                   "name": "Трактир «Ямской двор»",
                   "placeId": "pl_prs_cafe_yam",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d2s05",
@@ -2630,7 +2652,8 @@
                   "name": "Кафе «Ботик»",
                   "placeId": "pl_prs_cafe_kids",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d2s05",
@@ -2738,7 +2761,8 @@
                   "name": "Кафе «Переславская слобода»",
                   "placeId": "pl_prs_cafe_sloboda",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d2s05",
@@ -2878,7 +2902,8 @@
                   "name": "Музей-усадьба «Ботик Петра Первого»",
                   "placeId": "pl_prs_botik",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -2
                 },
                 "stop": {
                   "id": "d2s06",
@@ -2986,7 +3011,8 @@
                   "name": "Музей утюга",
                   "placeId": "pl_prs_iron",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -3
                 },
                 "stop": {
                   "id": "d2s06",
@@ -3093,7 +3119,8 @@
                   "name": "Фёдоровский монастырь",
                   "placeId": "pl_prs_fedorovsky",
                   "priceRub": "61.90",
-                  "regionName": "Ярославская область"
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d2s06",
@@ -3233,7 +3260,8 @@
                   "name": "Площадка отдыха, М-8, 85 км",
                   "placeId": "pl_m8_rest_085",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s07",
@@ -3341,7 +3369,8 @@
                   "name": "Часовня Пятницкого колодца",
                   "placeId": "pl_sps_chapel",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s07",
@@ -3448,7 +3477,8 @@
                   "name": "Роснефть, М-8, 54 км",
                   "placeId": "pl_m8_fuel_054",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s07",

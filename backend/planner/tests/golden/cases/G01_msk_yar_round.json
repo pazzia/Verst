@@ -42,7 +42,9 @@
     ],
     "warnings": [],
     "mustIncludePlaceIds": [
-      "pl_yar_hotel_strelka"
+      "pl_yar_hotel_strelka",
+      "pl_rst_cafe_kremlin",
+      "pl_prs_cafe_lake"
     ],
     "costLinesRub": {
       "lodging": {
@@ -59,12 +61,12 @@
     ],
     "costWorkings": [
       "route: Москва → Ярославль 263 km (М-8 chain edges) × 2 = 526 km + detours of the off-route stops (2 · lateral · 1.3 each, ≈ 16 km) → ≈ 542 km",
-      "fuel: 542 km × 8 l/100 ≈ 43.4 l at 61.80–62.50 ₽ (Москва 62.50, МО 61.80, ЯО 61.90; ЯО carries ≈ 60 % of the km) → ≈ 2 690 ₽ (±5 %)",
+      "fuel by region (route km split at the nearest world node's region + each stop's detour in its region, 8 l/100): Ярославская 314 + 15 = 329 km × 0.08 × 61.90 = 1 631; Московская 190 + 1 = 191 km × 0.08 × 61.80 = 946; Москва 22 km × 0.08 × 62.50 = 110 → Σ 2 687 → 2 690 (±5 %)",
       "tolls: М-8 has no toll segments → 0",
       "lodging (2 adults, no filters, 1 room): hotel_score Стрелка 4.6 + 0.3 − 0.60 = 4.30 > Волга 4.5 + 0.3 − 0.70 = 4.10 > Которосль 4.2 + 0.3 − 0.48 = 4.02 → 6 000",
-      "food (2 people): day 1 lunch in Ростов at ≈ 13:10 — lunch_score Трапезная у кремля 4.5 + 1 (parking) + 0.5 (12:30–13:30) = 6.0 > Подворье 5.7 > «Ростов Великий» 5.6 → 700; dinner Ярославль = median_low(600, 700, 900, 950, 1000) = 900; day 2: breakfast included at Стрелка; lunch in Переславль ≈ 13:00, Ресторан «Плещеево» 850 (view + parking) or Слобода 700 (score within detour noise); no last-day dinner (finish = origin) → 2 × (700 + 900 + 850) = 4 900 (Слобода: 4 600)",
+      "food (2 people): day 1 lunch in Ростов at 13:09 — lunch_score = rating + 2·kids·children + 1·parking + 0.5·view + 0.5·[12:30–13:30] − detour/5: Трапезная у кремля 4.5 + 1 + 0.5 − 0 = 6.0 > «Русское подворье» 4.2 + 1 + 0.5 = 5.7 > «Ростов Великий» 4.1 + 1 + 0.5 = 5.6 → 700; dinner Ярославль median_low(600, 700, 900, 950, 1000) = 900; day 2: no feasible lunch on the bare day (stage 8), so stage 8b after the sights; feasible candidates at their ETA: Ресторан «Плещеево» (12:55) 4.4 + 1 + 0.5 + 0.5 − 4/5 = 5.6; Кафе «Ботик» (12:15) 4.3 + 0 + 0 + 0 − 0 = 4.3; «Переславская слобода» (14:02) 4.2 + 1 + 0 − 5/5 = 4.2 → Ресторан «Плещеево» 850; breakfast included at Стрелка; no last-day dinner (finish = origin) → 2 × (700 + 900 + 850) = 4 900",
       "tickets: paid sights among the 7 chosen (more_stops, ≤ 4/day, budget 600): Ростовский кремль 400 and Горицкий монастырь 300 (lavra, Никитский, Спасо-Яковлевский, Земляной вал, Плещеево are free) → 2 × 700 = 1 400",
-      "subtotal 2 690 + 0 + 6 000 + 4 900 + 1 400 = 14 990; reserve round_to(1 499, 10) = 1 500; total round_to(16 490, 100) = 16 500 (with the 700 lunch: 16 200, still within 5 %)"
+      "subtotal 2 690 + 0 + 6 000 + 4 900 + 1 400 = 14 990; reserve round_to(1 499, 10) = 1 500; total round_to(16 490, 100) = 16 500"
     ],
     "costTotalRub": {
       "value": 16500,

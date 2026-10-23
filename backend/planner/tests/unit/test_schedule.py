@@ -94,7 +94,8 @@ class ScheduleTest(unittest.TestCase):
         self.assertEqual((warnings, sched[0].over_budget, ctx.rerun), ([], False, 0))
 
     def test_fixed_overflow_warns(self) -> None:
-        # only fixed/user stops can push a day over max(budget, mandatory): 400 + 2 × 120 = 640 > 540
+        # only fixed/user stops can push a day over max(budget, mandatory): 400 + 2 × 120 + a 15-min
+        # roadside break (200 min from F2 to the finish > R = 120, empty pool) = 655 > max(540, 415)
         ctx, inp = setup(Mood.CALM)
         d = day(
             400,
@@ -102,7 +103,7 @@ class ScheduleTest(unittest.TestCase):
         )
         sched, warnings = schedule_with_rerun([d], corridor([]), inp, ctx)
         self.assertEqual(
-            [(w.code, w.day, w.detail) for w in warnings], [(WarningCode.DAY_OVER_BUDGET, 1, "minutes=640")]
+            [(w.code, w.day, w.detail) for w in warnings], [(WarningCode.DAY_OVER_BUDGET, 1, "minutes=655")]
         )
         self.assertTrue(sched[0].over_budget)
 

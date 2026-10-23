@@ -88,7 +88,8 @@
                   "name": "Площадка отдыха, М-4, 90 км",
                   "placeId": "pl_r22_rest_090",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -190,7 +191,8 @@
                   "name": "Площадка отдыха, Р-22, 160 км",
                   "placeId": "pl_r22_rest_160",
                   "priceRub": "61.20",
-                  "regionName": "Рязанская область"
+                  "regionName": "Рязанская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -324,7 +326,8 @@
                   "name": "Городской парк Скопина",
                   "placeId": "pl_skp_park",
                   "priceRub": "61.20",
-                  "regionName": "Рязанская область"
+                  "regionName": "Рязанская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d1s03",
@@ -426,7 +429,8 @@
                   "name": "Никольский собор Скопина",
                   "placeId": "pl_skp_cathedral",
                   "priceRub": "61.20",
-                  "regionName": "Рязанская область"
+                  "regionName": "Рязанская область",
+                  "tripKmDelta": -2
                 },
                 "stop": {
                   "id": "d1s03",
@@ -560,7 +564,8 @@
                   "name": "Дом-музей Мичурина",
                   "placeId": "pl_mch_michurin",
                   "priceRub": "60.50",
-                  "regionName": "Тамбовская область"
+                  "regionName": "Тамбовская область",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d1s04",
@@ -660,7 +665,8 @@
                   "name": "Вокзал Мичуринска",
                   "placeId": "pl_mch_station",
                   "priceRub": "60.50",
-                  "regionName": "Тамбовская область"
+                  "regionName": "Тамбовская область",
+                  "tripKmDelta": -2
                 },
                 "stop": {
                   "id": "d1s04",
@@ -761,7 +767,8 @@
                   "name": "Боголюбский собор",
                   "placeId": "pl_mch_bogolyubsky",
                   "priceRub": "60.50",
-                  "regionName": "Тамбовская область"
+                  "regionName": "Тамбовская область",
+                  "tripKmDelta": -2
                 },
                 "stop": {
                   "id": "d1s04",
@@ -1085,7 +1092,8 @@
                   "name": "Площадка отдыха, Р-22, 650 км",
                   "placeId": "pl_r22_rest_650",
                   "priceRub": "61.00",
-                  "regionName": "Воронежская область"
+                  "regionName": "Воронежская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s03",
@@ -1179,7 +1187,8 @@
                   "name": "Площадка отдыха, Р-22, 580 км",
                   "placeId": "pl_r22_rest_580",
                   "priceRub": "61.00",
-                  "regionName": "Воронежская область"
+                  "regionName": "Воронежская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s03",
@@ -1305,7 +1314,8 @@
                   "name": "Кафе «Ямщик», Р-22",
                   "placeId": "pl_r22_cafe_695",
                   "priceRub": "61.30",
-                  "regionName": "Волгоградская область"
+                  "regionName": "Волгоградская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s04",
@@ -1398,7 +1408,8 @@
                   "name": "Кафе «У дороги», Р-22",
                   "placeId": "pl_r22_cafe_795",
                   "priceRub": "61.30",
-                  "regionName": "Волгоградская область"
+                  "regionName": "Волгоградская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s04",
@@ -1524,7 +1535,8 @@
                   "name": "Площадка отдыха, Р-22, 930 км",
                   "placeId": "pl_r22_rest_930",
                   "priceRub": "61.30",
-                  "regionName": "Волгоградская область"
+                  "regionName": "Волгоградская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s05",
@@ -1619,7 +1631,8 @@
                   "name": "Площадка отдыха, Р-22, 860 км",
                   "placeId": "pl_r22_rest_860",
                   "priceRub": "61.30",
-                  "regionName": "Волгоградская область"
+                  "regionName": "Волгоградская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s05",

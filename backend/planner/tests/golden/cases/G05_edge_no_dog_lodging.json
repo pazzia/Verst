@@ -59,10 +59,12 @@
       "all"
     ],
     "costWorkings": [
-      "route: Тестовск → Конечный 600 km on Р-999 + detours ≈ 4 km → ≈ 604 km; fuel 604 × 8 / 100 × 61.00 = 2 947.5 → 2 950",
-      "lodging: the only lodging (Гостиница «Серединская») has no dogs_allowed → NO_HOTEL, lodging_default_night(population < 100 000) = 3 500",
-      "food (2 people): day 1 lunch Кафе «Тестовое» 550 + dinner at Серединск (no food place in the town → food_default_check = 550); breakfast after a NO_HOTEL night = 0.6 × 550 = 330; day 2 lunch 550; finish 14:44 → no dinner → 2 × 1 980 = 3 960",
-      "tickets: Парк-усадьба «Долгая» and Смотровая на Тесте free → 0",
+      "route: Тестовск → Конечный 599 km on Р-999 (more_stops, dog → R = 90), night at Серединск km 300",
+      "fuel (one region): Тестовая область 599 + 4 = 603.9 km × 0.08 × 61.00 = 2 947 → 2 950",
+      "lodging: the only lodging (Гостиница «Серединская») has no dogs_allowed → NO_HOTEL, lodging_default_night(population < 100 000) = 3 500; warning NO_LODGING (exact list [NO_LODGING])",
+      "breaks: day 1 rest km 90 (66 min), Парк-усадьба «Долгая» 4 h, lunch km 175 at 14:28, overnight 92 min after the lunch; day 2 rest km 390 (66 min), Смотровая km 450, fuel 10 min (no break), lunch km 595: 109 min of driving since the sight — x = R lies 3 min before the finish, drive(x → day end) < 30 min, so no stop is added and 109 ≤ R + 30 = 120 holds",
+      "food (2 people): day 1 lunch Кафе «Тестовое» 550 + dinner at Серединск (no food place → food_default_check = 550); breakfast after a NO_HOTEL night 0.6 × 550 = 330; day 2 lunch 550; finish 14:44 → no dinner → 2 × 1 980 = 3 960",
+      "tickets: Парк-усадьба «Долгая» and Смотровая на Тесте are free → 0",
       "subtotal 2 950 + 0 + 3 500 + 3 960 + 0 = 10 410; reserve 1 040 (1 041); total round_to(11 450, 100) = 11 500"
     ],
     "warnings": [

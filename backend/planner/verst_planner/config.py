@@ -96,6 +96,7 @@ class RestCfg:
     break_min_dwell: int
     max_detour_min: int
     min_gap_min: int
+    extended_detour_min: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -119,6 +120,7 @@ class SightsCfg:
 class AlternativesCfg:
     window_min: int
     max: int
+    cluster_km: float
 
 
 @dataclass(frozen=True, slots=True)

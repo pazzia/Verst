@@ -552,3 +552,64 @@ total 41/51 = 80%` (baseline 23 %).
 - Per case, G03 (67 %) and G08 (67 %) are below 70 % (G01 100, G02 75, G06 77, G07 100); the gate is applied
   to the six cases together (80 %). If the gate is meant per case, G03 needs more Р-22 roadside cafés/fuel, G08 more Суздаль
   sights.
+
+---
+
+# Round 2 (A§16.11) — R2-01 … R2-05
+
+Final state: `make check` → ruff `All checks passed!`, mypy `Success: no issues found in 52 source files`,
+`Ran 273 tests` / `OK`; `python3 tools/stdlib_coverage.py --fail-under 85` → `TOTAL 4730 120 97.5%`.
+
+## R2-01 Break upper bound (A§16.11.1)
+- Virtual breaks removed. After steps 1–2: step 3 extended window (detour ≤ `rest.extended_detour_min` = 15,
+  driving since b0 ∈ [max(45, R − 60), R + 30]); step 4 roadside break: `PlannedStop(REST, place=None,
+  «Остановка у дороги», 15 min, pool rest, reason rest.roadside)` at the km where the clock reaches R
+  (`rest.roadside_break`, point interpolated on the route, `RestPool.of(corridor)` carries the route).
+  Rendered sign `rest`, `placeId` null, `verified` true, not replaceable (`family()` → None, render rule
+  `replaceable` needs a place), no alternatives note.
+- Gap detection: a gap closed by a break this stage placed after R (widened ≤ R + 15, extended ≤ R + 30,
+  coffee upgrade) is recorded in `accepted` and not re-opened — without it the extended pick at 117 min in
+  G11 triggered a second roadside break 27 min before it.
+- `break_spacing` now asserts driving between breaks (dwell ≥ 15, start, overnight, finish) ≤ R + 30 + 1;
+  its lower bound for stage-7 stops is min(G, 45) (the extended window starts at 45) and the detour bound is
+  `extended_detour_min`.
+- Tests: `test_rest.test_no_gap_over_R_plus_30`, `test_roadside_break_when_no_place`,
+  `test_extended_window_before_roadside` → ok. Updated: tests that expected "no stop" for an empty pool now
+  expect roadside breaks; three tests pin `rest_interval_min` high to keep their minute arithmetic
+  (`test_visit_must_fit_hours`, `test_sight_dropped_for_lunch`); `test_fixed_overflow_warns` 640 → 655
+  (+ one roadside break).
+- Goldens: G11 day 1 is now 117 / 74 / 51 / 90 min between breaks (was 242); G05 day 2 sight → lunch is 109 min
+  (x = R lies within 30 min of the finish, so §16.2's "remaining drive" rule adds nothing) ≤ 120. No golden
+  needed a roadside break.
+
+## R2-02 Formula km after replace (A§16.11.4)
+- `AltUnits.trip_km_delta` (codec `tripKmDelta`) = rounded trial-day km − rounded current-day km; recompute
+  shows `trip_km + Σ trip_km_delta`. Rule 1 no longer pushes a delta into the first region (missing region
+  with Δ ≤ 0 → no change); baked units clamp a region at 0 km. Rule 4 via `recompute.effective_tickets`
+  (replaced ticket removed, sight alternative adds its own; the `fewer_sights` hint uses the effective list);
+  `_units_after_replace` reuses it.
+- `test_replace.test_offline_formula_km_matches_server` (every alternative of G01–G08, > 100 replaces) → ok.
+- Contract: 39 cases (+ trip_km_two_replaces, replaced_fuel_same_region, replaced_region_drops_to_zero,
+  replaced_lunch_null_check, replaced_sight_by_rest); the rule list of A§16.11.4 is the generator docstring
+  with the cases per rule; `test_case_count` requires ≥ 35.
+
+## R2-03 Slot rule hygiene (A§16.11.3, 16.11.5)
+- `alternatives.cluster_km` (2.0) in config/seed; `trial_day` asserts the clamp moves ≤ cluster_km and the
+  candidate keeps its point, detour and region.
+- `test_alternatives.test_coverage_on_mini_world`: controlled corridor (one candidate before and after each
+  rest / lunch / sight / range fuel stop) → every replaceable stop has ≥ 2 alternatives.
+- Gate per case ≥ 60 % + aggregate ≥ 70 %: `G01 10/10 = 100%, G02 6/8 = 75%, G03 6/9 = 67%, G06 10/14 = 71%,
+  G07 5/5 = 100%, G08 4/6 = 67%; total 41/52 = 79%`.
+
+## R2-04 Goldens
+- G05 and G11 re-derived by hand (breaks, fuel, food); G01 day-2 and G06 day-1 lunches written as the
+  numeric lunch_score of every feasible candidate at its ETA (incl. −detour/5); winners pinned in
+  `mustIncludePlaceIds` (`pl_prs_cafe_lake`, `pl_m7e_cafe_135`; the G06 tie 5.1/5.1 is broken by the lower
+  km). Every fuel working is region by region (route km split at the nearest world node's region + stop
+  detours, km × 0.08 × price) — G08 gives 1 130 against the engine's 1 140 (10-km buckets), within ±5 %.
+- G06 total 17 700 → 18 200 (Дмитриевский собор is back on day 1 after the rest change: tickets 1 000).
+- First failing run with the new expectations: `FAILED (failures=9)` — snapshot mismatches only (G12's
+  snapshot was unchanged); then `make golden-update`, `python3 -m tests.golden.export_contracts`, seed
+  `0002_app_config.sql` regenerated (`extended_detour_min`, `cluster_km`, `rest.roadside`).
+- Totals: G01 16 500, G02 33 800, G03 16 200, G04 8 900, G05 11 500, G06 18 200, G07 21 600, G08 5 700,
+  G11 3 000, G12 3 900.

@@ -11,7 +11,7 @@ from verst_planner.pipeline import fuel as fuel_stage
 from verst_planner.pipeline import rest as rest_stage
 from verst_planner.pipeline import sights as sights_stage
 from verst_planner.pipeline.checks import closed_sights, lunch_out_of_window, over_budget
-from verst_planner.pipeline.rest import RestPool, remove_rests, rest_pool
+from verst_planner.pipeline.rest import RestPool, remove_rests
 from verst_planner.pipeline.timeline import Profile, Slot, day_duration_min, refresh_day_starts, schedule_day
 
 REPAIR_GUARD = 100
@@ -102,7 +102,7 @@ def final_repair(
     fixed one), re-plan a lunch that left its window (stage 8b, once), then re-plan the day's rests. Every
     change is followed by a fresh check, so `hours_open`, `lunch_window` and `break_spacing` hold."""
     profile = ctx.profile_for(corridor.route)
-    pool = RestPool(rest_pool(corridor))
+    pool = RestPool.of(corridor)
     warnings: list[PlanWarning] = []
     for day in days:
         lunch_replanned = False

@@ -31,6 +31,7 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "fuel.last",
     "rest.generic",
     "rest.who",
+    "rest.roadside",
     "lunch.kids",
     "lunch.parking",
     "lunch.default",

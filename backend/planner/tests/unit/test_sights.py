@@ -77,7 +77,10 @@ class SightsTest(unittest.TestCase):
         self.assertEqual(sight_ids(d), ["s_tusu"])
 
     def test_visit_must_fit_hours(self) -> None:
-        ctx, inp = setup(config={"day_budget_min": {"more_stops": 900}})
+        # no rest reserve here (R = 900): this test is about opening hours only
+        ctx, inp = setup(
+            config={"day_budget_min": {"more_stops": 900}, "rest_interval_min": {"more_stops": 900}}
+        )
         d = day(600)
         # 08:00 + 510 min = 16:30; closes 17:00; dwell 60 → the visit would end at 17:30
         plan_sights([d], corridor([sight("s_late", 510, hours="Mo-Su 09:00-17:00")]), inp, ctx)

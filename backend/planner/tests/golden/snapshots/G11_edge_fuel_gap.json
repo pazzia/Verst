@@ -1,18 +1,18 @@
 {
   "id": "trp_golden",
   "title": "Тестовск → Пустошь",
-  "km": 453,
+  "km": 454,
   "days": 1,
   "nights": 0,
   "roundTrip": false,
   "daysList": [
     {
       "day": 1,
-      "km": 453,
+      "km": 454,
       "driveMin": 332,
       "tz": "Europe/Moscow",
       "startAt": "2026-10-24T08:00",
-      "endAt": "2026-10-24T14:32",
+      "endAt": "2026-10-24T15:12",
       "overBudget": false,
       "stops": [
         {
@@ -47,6 +47,66 @@
           "id": "d1s02",
           "seq": 2,
           "day": 1,
+          "kind": "rest",
+          "sign": "rest",
+          "placeId": "pl_tst_n_rest_160",
+          "townId": null,
+          "name": "Площадка отдыха, Р-998, 160 км",
+          "note": null,
+          "lat": 59.438361829025844,
+          "lon": 50.00352490431939,
+          "arriveAt": "2026-10-24T09:57",
+          "departAt": "2026-10-24T10:17",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 160,
+          "kmAt": 160,
+          "dwellMin": 20,
+          "tags": [
+            "wc"
+          ],
+          "costRub": 0,
+          "reason": "Разминка 20 минут после двух часов за рулём.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [],
+          "alternativesNote": "Других вариантов в это время поблизости нет.",
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s03",
+          "seq": 3,
+          "day": 1,
+          "kind": "rest",
+          "sign": "rest",
+          "placeId": "pl_tst_n_rest_260",
+          "townId": null,
+          "name": "Площадка отдыха, Р-998, 260 км",
+          "note": null,
+          "lat": 60.33734381709742,
+          "lon": 50.003621850998044,
+          "arriveAt": "2026-10-24T11:31",
+          "departAt": "2026-10-24T11:51",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 101,
+          "kmAt": 260,
+          "dwellMin": 20,
+          "tags": [
+            "wc"
+          ],
+          "costRub": 0,
+          "reason": "Разминка 20 минут после 1 ч 15 мин за рулём.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [],
+          "alternativesNote": "Других вариантов в это время поблизости нет.",
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s04",
+          "seq": 4,
+          "day": 1,
           "kind": "food",
           "sign": "food",
           "placeId": "pl_tst_n_cafe_330",
@@ -55,10 +115,10 @@
           "note": null,
           "lat": 60.96663127236581,
           "lon": 49.996274764439164,
-          "arriveAt": "2026-10-24T12:02",
-          "departAt": "2026-10-24T13:02",
+          "arriveAt": "2026-10-24T12:42",
+          "departAt": "2026-10-24T13:42",
           "tz": "Europe/Moscow",
-          "kmFromPrev": 330,
+          "kmFromPrev": 71,
           "kmAt": 330,
           "dwellMin": 60,
           "tags": [
@@ -74,8 +134,8 @@
           "selectedHotelId": null
         },
         {
-          "id": "d1s03",
-          "seq": 3,
+          "id": "d1s05",
+          "seq": 5,
           "day": 1,
           "kind": "finish",
           "sign": "city",
@@ -85,7 +145,7 @@
           "note": null,
           "lat": 62.06967,
           "lon": 50.0,
-          "arriveAt": "2026-10-24T14:32",
+          "arriveAt": "2026-10-24T15:12",
           "departAt": null,
           "tz": "Europe/Moscow",
           "kmFromPrev": 123,
@@ -109,15 +169,15 @@
       {
         "key": "fuel",
         "title": "Бензин АИ-95",
-        "rub": 2210,
-        "formula": "453 км × 8 л/100 × 61,00 ₽",
+        "rub": 2220,
+        "formula": "454 км × 8 л/100 × 61,00 ₽",
         "asOf": "2026-10",
         "enabled": true,
         "breakdown": [
           {
             "label": "Тестовая область",
-            "formula": "453 км × 8 л/100 × 61,00 ₽ = 2 210 ₽",
-            "rub": 2210
+            "formula": "454 км × 8 л/100 × 61,00 ₽ = 2 220 ₽",
+            "rub": 2220
           }
         ]
       },
@@ -174,7 +234,7 @@
       }
     ],
     "reserveOn": true,
-    "subtotalRub": 2710,
+    "subtotalRub": 2720,
     "totalRub": 3000,
     "perPersonRub": 3000,
     "budgetRub": null,
@@ -191,12 +251,12 @@
           {
             "regionCode": "RU-TST",
             "regionName": "Тестовая область",
-            "km": 453.239,
+            "km": 454.272,
             "priceRub": "61.00"
           }
         ],
         "asOf": "2026-10",
-        "tripKm": 453
+        "tripKm": 454
       },
       "tolls": [],
       "nights": [],
@@ -204,7 +264,7 @@
         {
           "day": 1,
           "meal": "lunch",
-          "stopId": "d1s02",
+          "stopId": "d1s04",
           "checkRub": 500
         }
       ],

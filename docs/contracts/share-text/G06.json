@@ -10,10 +10,10 @@
       {
         "day": 1,
         "km": 432,
-        "driveMin": 371,
+        "driveMin": 374,
         "tz": "Europe/Moscow",
         "startAt": "2026-10-24T08:00",
-        "endAt": "2026-10-24T17:46",
+        "endAt": "2026-10-24T17:54",
         "overBudget": false,
         "stops": [
           {
@@ -87,7 +87,8 @@
                   "name": "Площадка отдыха, М-7, 125 км",
                   "placeId": "pl_m7w_rest_125",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -146,28 +147,35 @@
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:34",
-                    "departAt": "2026-10-24T12:34",
-                    "kmFromPrev": 10
+                    "arriveAt": "2026-10-24T11:26",
+                    "departAt": "2026-10-24T12:11",
+                    "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:19",
-                    "departAt": "2026-10-24T15:19",
-                    "kmFromPrev": 126
+                    "arriveAt": "2026-10-24T13:16",
+                    "departAt": "2026-10-24T13:36",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:33",
-                    "departAt": "2026-10-24T16:18",
-                    "kmFromPrev": 16
+                    "arriveAt": "2026-10-24T14:27",
+                    "departAt": "2026-10-24T15:27",
+                    "kmFromPrev": 61
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:46",
+                    "arriveAt": "2026-10-24T15:41",
+                    "departAt": "2026-10-24T16:26",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:54",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
@@ -189,7 +197,8 @@
                   "name": "Площадка отдыха, М-7, 35 км",
                   "placeId": "pl_m7w_rest_035",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -247,28 +256,35 @@
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:37",
-                    "departAt": "2026-10-24T12:37",
-                    "kmFromPrev": 10
+                    "arriveAt": "2026-10-24T11:29",
+                    "departAt": "2026-10-24T12:14",
+                    "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:22",
-                    "departAt": "2026-10-24T15:22",
-                    "kmFromPrev": 126
+                    "arriveAt": "2026-10-24T13:19",
+                    "departAt": "2026-10-24T13:39",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:36",
-                    "departAt": "2026-10-24T16:21",
-                    "kmFromPrev": 16
+                    "arriveAt": "2026-10-24T14:30",
+                    "departAt": "2026-10-24T15:30",
+                    "kmFromPrev": 61
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:49",
+                    "arriveAt": "2026-10-24T15:44",
+                    "departAt": "2026-10-24T16:29",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:57",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
@@ -290,7 +306,8 @@
                   "name": "Роснефть, М-7, 65 км",
                   "placeId": "pl_m7w_fuel_065",
                   "priceRub": "61.80",
-                  "regionName": "Московская область"
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d1s02",
@@ -348,28 +365,35 @@
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:32",
-                    "departAt": "2026-10-24T12:32",
-                    "kmFromPrev": 10
+                    "arriveAt": "2026-10-24T11:24",
+                    "departAt": "2026-10-24T12:09",
+                    "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:17",
-                    "departAt": "2026-10-24T15:17",
-                    "kmFromPrev": 126
+                    "arriveAt": "2026-10-24T13:14",
+                    "departAt": "2026-10-24T13:34",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:31",
-                    "departAt": "2026-10-24T16:16",
-                    "kmFromPrev": 16
+                    "arriveAt": "2026-10-24T14:25",
+                    "departAt": "2026-10-24T15:25",
+                    "kmFromPrev": 61
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:44",
+                    "arriveAt": "2026-10-24T15:39",
+                    "departAt": "2026-10-24T16:24",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:52",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
@@ -408,108 +432,6 @@
             "replaceable": true,
             "alternatives": [
               {
-                "id": "alt_d1s03_pl_vla_view",
-                "placeId": "pl_vla_view",
-                "name": "Смотровая у Успенского собора",
-                "deltaMin": 4,
-                "deltaRub": -490,
-                "shiftMin": 4,
-                "units": {
-                  "deltaKm": 1.252,
-                  "regionCode": "RU-VLA",
-                  "checkRub": null,
-                  "adultRub": 0,
-                  "childRub": 0,
-                  "name": "Смотровая у Успенского собора",
-                  "placeId": "pl_vla_view",
-                  "priceRub": "61.40",
-                  "regionName": "Владимирская область"
-                },
-                "stop": {
-                  "id": "d1s03",
-                  "seq": 3,
-                  "day": 1,
-                  "kind": "sight",
-                  "sign": "tourist",
-                  "placeId": "pl_vla_view",
-                  "townId": "t_vladimir",
-                  "name": "Смотровая у Успенского собора",
-                  "note": null,
-                  "lat": 56.12447814133521,
-                  "lon": 40.41143547994549,
-                  "arriveAt": "2026-10-24T10:56",
-                  "departAt": "2026-10-24T11:26",
-                  "tz": "Europe/Moscow",
-                  "kmFromPrev": 108,
-                  "kmAt": 187,
-                  "dwellMin": 30,
-                  "tags": [
-                    "view",
-                    "walk",
-                    "free_entry"
-                  ],
-                  "costRub": 0,
-                  "reason": "Полчаса на осмотр.",
-                  "verified": true,
-                  "replaceable": true,
-                  "alternatives": [],
-                  "alternativesNote": null,
-                  "hotelOptions": [],
-                  "selectedHotelId": null
-                },
-                "dayPatch": [
-                  {
-                    "stopId": "d1s01",
-                    "seq": 1,
-                    "arriveAt": null,
-                    "departAt": "2026-10-24T08:00",
-                    "kmFromPrev": 0
-                  },
-                  {
-                    "stopId": "d1s02",
-                    "seq": 2,
-                    "arriveAt": "2026-10-24T09:10",
-                    "departAt": "2026-10-24T09:30",
-                    "kmFromPrev": 80
-                  },
-                  {
-                    "stopId": "d1s03",
-                    "seq": 3,
-                    "arriveAt": "2026-10-24T10:56",
-                    "departAt": "2026-10-24T11:26",
-                    "kmFromPrev": 108
-                  },
-                  {
-                    "stopId": "d1s04",
-                    "seq": 4,
-                    "arriveAt": "2026-10-24T11:38",
-                    "departAt": "2026-10-24T12:38",
-                    "kmFromPrev": 11
-                  },
-                  {
-                    "stopId": "d1s05",
-                    "seq": 5,
-                    "arriveAt": "2026-10-24T14:23",
-                    "departAt": "2026-10-24T15:23",
-                    "kmFromPrev": 126
-                  },
-                  {
-                    "stopId": "d1s06",
-                    "seq": 6,
-                    "arriveAt": "2026-10-24T15:37",
-                    "departAt": "2026-10-24T16:22",
-                    "kmFromPrev": 16
-                  },
-                  {
-                    "stopId": "d1s07",
-                    "seq": 7,
-                    "arriveAt": "2026-10-24T17:50",
-                    "departAt": null,
-                    "kmFromPrev": 90
-                  }
-                ]
-              },
-              {
                 "id": "alt_d1s03_pl_vla_water_tower",
                 "placeId": "pl_vla_water_tower",
                 "name": "Старая водонапорная башня",
@@ -525,7 +447,8 @@
                   "name": "Старая водонапорная башня",
                   "placeId": "pl_vla_water_tower",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s03",
@@ -543,7 +466,7 @@
                   "departAt": "2026-10-24T11:26",
                   "tz": "Europe/Moscow",
                   "kmFromPrev": 108,
-                  "kmAt": 188,
+                  "kmAt": 187,
                   "dwellMin": 30,
                   "tags": [
                     "view",
@@ -583,42 +506,299 @@
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:37",
-                    "departAt": "2026-10-24T12:37",
-                    "kmFromPrev": 10
+                    "arriveAt": "2026-10-24T11:29",
+                    "departAt": "2026-10-24T12:14",
+                    "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:22",
-                    "departAt": "2026-10-24T15:22",
-                    "kmFromPrev": 126
+                    "arriveAt": "2026-10-24T13:19",
+                    "departAt": "2026-10-24T13:39",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:36",
-                    "departAt": "2026-10-24T16:21",
-                    "kmFromPrev": 16
+                    "arriveAt": "2026-10-24T14:30",
+                    "departAt": "2026-10-24T15:30",
+                    "kmFromPrev": 61
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:49",
+                    "arriveAt": "2026-10-24T15:44",
+                    "departAt": "2026-10-24T16:29",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:57",
+                    "departAt": null,
+                    "kmFromPrev": 90
+                  }
+                ]
+              }
+            ],
+            "alternativesNote": "Нашли только один вариант в это время.",
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s04",
+            "seq": 4,
+            "day": 1,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_vla_dmitrievsky",
+            "townId": "t_vladimir",
+            "name": "Дмитриевский собор",
+            "note": null,
+            "lat": 56.126286884801125,
+            "lon": 40.41465913324249,
+            "arriveAt": "2026-10-24T11:26",
+            "departAt": "2026-10-24T12:11",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 1,
+            "kmAt": 187,
+            "dwellMin": 45,
+            "tags": [
+              "museum"
+            ],
+            "costRub": 500,
+            "reason": "45 мин на осмотр.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d1s04_pl_vla_view",
+                "placeId": "pl_vla_view",
+                "name": "Смотровая у Успенского собора",
+                "deltaMin": -14,
+                "deltaRub": -500,
+                "shiftMin": -14,
+                "units": {
+                  "deltaKm": 0.453,
+                  "regionCode": "RU-VLA",
+                  "checkRub": null,
+                  "adultRub": 0,
+                  "childRub": 0,
+                  "name": "Смотровая у Успенского собора",
+                  "placeId": "pl_vla_view",
+                  "priceRub": "61.40",
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
+                },
+                "stop": {
+                  "id": "d1s04",
+                  "seq": 4,
+                  "day": 1,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_vla_view",
+                  "townId": "t_vladimir",
+                  "name": "Смотровая у Успенского собора",
+                  "note": null,
+                  "lat": 56.12447814133521,
+                  "lon": 40.41143547994549,
+                  "arriveAt": "2026-10-24T11:27",
+                  "departAt": "2026-10-24T11:57",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 1,
+                  "kmAt": 187,
+                  "dwellMin": 30,
+                  "tags": [
+                    "view",
+                    "walk",
+                    "free_entry"
+                  ],
+                  "costRub": 0,
+                  "reason": "Полчаса на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T08:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T09:10",
+                    "departAt": "2026-10-24T09:30",
+                    "kmFromPrev": 80
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T10:55",
+                    "departAt": "2026-10-24T11:25",
+                    "kmFromPrev": 108
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T11:27",
+                    "departAt": "2026-10-24T11:57",
+                    "kmFromPrev": 1
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T13:02",
+                    "departAt": "2026-10-24T13:22",
+                    "kmFromPrev": 76
+                  },
+                  {
+                    "stopId": "d1s06",
+                    "seq": 6,
+                    "arriveAt": "2026-10-24T14:13",
+                    "departAt": "2026-10-24T15:13",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d1s07",
+                    "seq": 7,
+                    "arriveAt": "2026-10-24T15:27",
+                    "departAt": "2026-10-24T16:12",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:40",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
                 ]
               },
               {
-                "id": "alt_d1s03_pl_vla_cathedral_square",
+                "id": "alt_d1s04_pl_vla_water_tower",
+                "placeId": "pl_vla_water_tower",
+                "name": "Старая водонапорная башня",
+                "deltaMin": -15,
+                "deltaRub": -200,
+                "shiftMin": -15,
+                "units": {
+                  "deltaKm": 0.031,
+                  "regionCode": "RU-VLA",
+                  "checkRub": null,
+                  "adultRub": 150,
+                  "childRub": 80,
+                  "name": "Старая водонапорная башня",
+                  "placeId": "pl_vla_water_tower",
+                  "priceRub": "61.40",
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
+                },
+                "stop": {
+                  "id": "d1s04",
+                  "seq": 4,
+                  "day": 1,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_vla_water_tower",
+                  "townId": "t_vladimir",
+                  "name": "Старая водонапорная башня",
+                  "note": null,
+                  "lat": 56.126286884801125,
+                  "lon": 40.41627095989099,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T11:56",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 1,
+                  "kmAt": 188,
+                  "dwellMin": 30,
+                  "tags": [
+                    "view",
+                    "museum"
+                  ],
+                  "costRub": 300,
+                  "reason": "Полчаса на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T08:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T09:10",
+                    "departAt": "2026-10-24T09:30",
+                    "kmFromPrev": 80
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T10:55",
+                    "departAt": "2026-10-24T11:25",
+                    "kmFromPrev": 108
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T11:26",
+                    "departAt": "2026-10-24T11:56",
+                    "kmFromPrev": 1
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T13:01",
+                    "departAt": "2026-10-24T13:21",
+                    "kmFromPrev": 75
+                  },
+                  {
+                    "stopId": "d1s06",
+                    "seq": 6,
+                    "arriveAt": "2026-10-24T14:12",
+                    "departAt": "2026-10-24T15:12",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d1s07",
+                    "seq": 7,
+                    "arriveAt": "2026-10-24T15:26",
+                    "departAt": "2026-10-24T16:11",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:39",
+                    "departAt": null,
+                    "kmFromPrev": 90
+                  }
+                ]
+              },
+              {
+                "id": "alt_d1s04_pl_vla_cathedral_square",
                 "placeId": "pl_vla_cathedral_square",
                 "name": "Соборная площадь Владимира",
-                "deltaMin": 4,
-                "deltaRub": -490,
-                "shiftMin": 4,
+                "deltaMin": -14,
+                "deltaRub": -500,
+                "shiftMin": -14,
                 "units": {
-                  "deltaKm": 1.026,
+                  "deltaKm": 0.227,
                   "regionCode": "RU-VLA",
                   "checkRub": null,
                   "adultRub": 0,
@@ -626,11 +806,12 @@
                   "name": "Соборная площадь Владимира",
                   "placeId": "pl_vla_cathedral_square",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
-                  "id": "d1s03",
-                  "seq": 3,
+                  "id": "d1s04",
+                  "seq": 4,
                   "day": 1,
                   "kind": "sight",
                   "sign": "tourist",
@@ -640,10 +821,10 @@
                   "note": null,
                   "lat": 56.12538251306817,
                   "lon": 40.41304730659399,
-                  "arriveAt": "2026-10-24T10:57",
-                  "departAt": "2026-10-24T11:27",
+                  "arriveAt": "2026-10-24T11:27",
+                  "departAt": "2026-10-24T11:57",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 108,
+                  "kmFromPrev": 1,
                   "kmAt": 187,
                   "dwellMin": 30,
                   "tags": [
@@ -677,35 +858,42 @@
                   {
                     "stopId": "d1s03",
                     "seq": 3,
-                    "arriveAt": "2026-10-24T10:57",
-                    "departAt": "2026-10-24T11:27",
+                    "arriveAt": "2026-10-24T10:55",
+                    "departAt": "2026-10-24T11:25",
                     "kmFromPrev": 108
                   },
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:38",
-                    "departAt": "2026-10-24T12:38",
-                    "kmFromPrev": 11
+                    "arriveAt": "2026-10-24T11:27",
+                    "departAt": "2026-10-24T11:57",
+                    "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:23",
-                    "departAt": "2026-10-24T15:23",
-                    "kmFromPrev": 126
+                    "arriveAt": "2026-10-24T13:02",
+                    "departAt": "2026-10-24T13:22",
+                    "kmFromPrev": 76
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:37",
-                    "departAt": "2026-10-24T16:22",
-                    "kmFromPrev": 16
+                    "arriveAt": "2026-10-24T14:13",
+                    "departAt": "2026-10-24T15:13",
+                    "kmFromPrev": 61
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:50",
+                    "arriveAt": "2026-10-24T15:27",
+                    "departAt": "2026-10-24T16:12",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:40",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
@@ -717,74 +905,75 @@
             "selectedHotelId": null
           },
           {
-            "id": "d1s04",
-            "seq": 4,
+            "id": "d1s05",
+            "seq": 5,
             "day": 1,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "pl_vla_nerl",
+            "kind": "rest",
+            "sign": "rest",
+            "placeId": "pl_m7e_rest_075",
             "townId": null,
-            "name": "Церковь Покрова на Нерли",
+            "name": "Площадка отдыха, М-7, 75 км",
             "note": null,
-            "lat": 56.142565575994354,
-            "lon": 40.559723531607304,
-            "arriveAt": "2026-10-24T11:34",
-            "departAt": "2026-10-24T12:34",
+            "lat": 56.21037739966983,
+            "lon": 41.55851412048955,
+            "arriveAt": "2026-10-24T13:16",
+            "departAt": "2026-10-24T13:36",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 10,
-            "kmAt": 197,
-            "dwellMin": 60,
+            "kmFromPrev": 75,
+            "kmAt": 262,
+            "dwellMin": 20,
             "tags": [
-              "view",
-              "walk",
-              "free_entry"
+              "wc",
+              "walk"
             ],
             "costRub": 0,
-            "reason": "Час на осмотр.",
+            "reason": "Разминка 20 минут после часа за рулём.",
             "verified": true,
             "replaceable": true,
             "alternatives": [
               {
-                "id": "alt_d1s04_pl_vla_dmitrievsky",
-                "placeId": "pl_vla_dmitrievsky",
-                "name": "Дмитриевский собор",
-                "deltaMin": -15,
-                "deltaRub": 500,
-                "shiftMin": -15,
+                "id": "alt_d1s05_pl_m7e_rest_030",
+                "placeId": "pl_m7e_rest_030",
+                "name": "Площадка отдыха, М-7, 30 км",
+                "deltaMin": -3,
+                "deltaRub": 0,
+                "shiftMin": -3,
                 "units": {
-                  "deltaKm": 0.043,
+                  "deltaKm": -0.0,
                   "regionCode": "RU-VLA",
                   "checkRub": null,
-                  "adultRub": 250,
-                  "childRub": 100,
-                  "name": "Дмитриевский собор",
-                  "placeId": "pl_vla_dmitrievsky",
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Площадка отдыха, М-7, 30 км",
+                  "placeId": "pl_m7e_rest_030",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
-                  "id": "d1s04",
-                  "seq": 4,
+                  "id": "d1s05",
+                  "seq": 5,
                   "day": 1,
-                  "kind": "sight",
-                  "sign": "tourist",
-                  "placeId": "pl_vla_dmitrievsky",
-                  "townId": "t_vladimir",
-                  "name": "Дмитриевский собор",
+                  "kind": "rest",
+                  "sign": "rest",
+                  "placeId": "pl_m7e_rest_030",
+                  "townId": null,
+                  "name": "Площадка отдыха, М-7, 30 км",
                   "note": null,
-                  "lat": 56.126286884801125,
-                  "lon": 40.41465913324249,
-                  "arriveAt": "2026-10-24T11:26",
-                  "departAt": "2026-10-24T12:11",
+                  "lat": 56.157780495067016,
+                  "lon": 40.86818587951045,
+                  "arriveAt": "2026-10-24T12:37",
+                  "departAt": "2026-10-24T12:57",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 1,
-                  "kmAt": 187,
-                  "dwellMin": 45,
+                  "kmFromPrev": 30,
+                  "kmAt": 217,
+                  "dwellMin": 20,
                   "tags": [
-                    "museum"
+                    "playground",
+                    "wc"
                   ],
-                  "costRub": 500,
-                  "reason": "45 мин на осмотр.",
+                  "costRub": 0,
+                  "reason": "Разминка 20 минут после получаса за рулём.",
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
@@ -824,68 +1013,77 @@
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:04",
-                    "departAt": "2026-10-24T15:04",
-                    "kmFromPrev": 135
+                    "arriveAt": "2026-10-24T12:37",
+                    "departAt": "2026-10-24T12:57",
+                    "kmFromPrev": 30
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:18",
-                    "departAt": "2026-10-24T16:03",
-                    "kmFromPrev": 16
+                    "arriveAt": "2026-10-24T14:24",
+                    "departAt": "2026-10-24T15:24",
+                    "kmFromPrev": 106
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:31",
+                    "arriveAt": "2026-10-24T15:38",
+                    "departAt": "2026-10-24T16:23",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:51",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
                 ]
               },
               {
-                "id": "alt_d1s04_pl_vla_chambers",
-                "placeId": "pl_vla_chambers",
-                "name": "Палаты",
-                "deltaMin": 1,
-                "deltaRub": 400,
-                "shiftMin": 1,
+                "id": "alt_d1s05_pl_m7e_rest_120",
+                "placeId": "pl_m7e_rest_120",
+                "name": "Площадка отдыха, М-7, 120 км",
+                "deltaMin": 0,
+                "deltaRub": 0,
+                "shiftMin": 0,
                 "units": {
-                  "deltaKm": 0.364,
+                  "deltaKm": -0.0,
                   "regionCode": "RU-VLA",
                   "checkRub": null,
-                  "adultRub": 200,
-                  "childRub": 100,
-                  "name": "Палаты",
-                  "placeId": "pl_vla_chambers",
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Площадка отдыха, М-7, 120 км",
+                  "placeId": "pl_m7e_rest_120",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
-                  "id": "d1s04",
-                  "seq": 4,
+                  "id": "d1s05",
+                  "seq": 5,
                   "day": 1,
-                  "kind": "sight",
-                  "sign": "tourist",
-                  "placeId": "pl_vla_chambers",
-                  "townId": "t_vladimir",
-                  "name": "Палаты",
+                  "kind": "rest",
+                  "sign": "rest",
+                  "placeId": "pl_m7e_rest_120",
+                  "townId": null,
+                  "name": "Площадка отдыха, М-7, 120 км",
                   "note": null,
-                  "lat": 56.12538251306817,
-                  "lon": 40.41788278653948,
-                  "arriveAt": "2026-10-24T11:27",
-                  "departAt": "2026-10-24T12:27",
+                  "lat": 56.237930680028,
+                  "lon": 42.24923059150883,
+                  "arriveAt": "2026-10-24T13:53",
+                  "departAt": "2026-10-24T14:13",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 1,
-                  "kmAt": 188,
-                  "dwellMin": 60,
+                  "kmFromPrev": 120,
+                  "kmAt": 307,
+                  "dwellMin": 20,
                   "tags": [
                     "playground",
-                    "museum"
+                    "wc",
+                    "view"
                   ],
-                  "costRub": 400,
-                  "reason": "Час на осмотр.",
+                  "costRub": 0,
+                  "reason": "Разминка 20 минут после 1 ч 45 мин за рулём.",
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
@@ -918,76 +1116,83 @@
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:27",
-                    "departAt": "2026-10-24T12:27",
+                    "arriveAt": "2026-10-24T11:26",
+                    "departAt": "2026-10-24T12:11",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:20",
-                    "departAt": "2026-10-24T15:20",
-                    "kmFromPrev": 135
+                    "arriveAt": "2026-10-24T13:53",
+                    "departAt": "2026-10-24T14:13",
+                    "kmFromPrev": 120
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:34",
-                    "departAt": "2026-10-24T16:19",
+                    "arriveAt": "2026-10-24T14:27",
+                    "departAt": "2026-10-24T15:27",
                     "kmFromPrev": 16
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:47",
+                    "arriveAt": "2026-10-24T15:41",
+                    "departAt": "2026-10-24T16:26",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:54",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
                 ]
               },
               {
-                "id": "alt_d1s04_pl_vla_view",
-                "placeId": "pl_vla_view",
-                "name": "Смотровая у Успенского собора",
-                "deltaMin": -29,
+                "id": "alt_d1s05_pl_m7e_fuel_060",
+                "placeId": "pl_m7e_fuel_060",
+                "name": "Роснефть, М-7, 60 км",
+                "deltaMin": -5,
                 "deltaRub": 0,
-                "shiftMin": 34,
+                "shiftMin": -5,
                 "units": {
-                  "deltaKm": 0.497,
+                  "deltaKm": -0.0,
                   "regionCode": "RU-VLA",
                   "checkRub": null,
-                  "adultRub": 0,
-                  "childRub": 0,
-                  "name": "Смотровая у Успенского собора",
-                  "placeId": "pl_vla_view",
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Роснефть, М-7, 60 км",
+                  "placeId": "pl_m7e_fuel_060",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
-                  "id": "d1s04",
-                  "seq": 3,
+                  "id": "d1s05",
+                  "seq": 5,
                   "day": 1,
-                  "kind": "sight",
-                  "sign": "tourist",
-                  "placeId": "pl_vla_view",
-                  "townId": "t_vladimir",
-                  "name": "Смотровая у Успенского собора",
+                  "kind": "fuel",
+                  "sign": "fuel",
+                  "placeId": "pl_m7e_fuel_060",
+                  "townId": null,
+                  "name": "Роснефть, М-7, 60 км",
                   "note": null,
-                  "lat": 56.12447814133521,
-                  "lon": 40.41143547994549,
-                  "arriveAt": "2026-10-24T10:56",
-                  "departAt": "2026-10-24T11:26",
+                  "lat": 56.18925417927754,
+                  "lon": 41.32918587951045,
+                  "arriveAt": "2026-10-24T13:03",
+                  "departAt": "2026-10-24T13:18",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 108,
-                  "kmAt": 187,
-                  "dwellMin": 30,
+                  "kmFromPrev": 60,
+                  "kmAt": 247,
+                  "dwellMin": 15,
                   "tags": [
-                    "view",
-                    "walk",
-                    "free_entry"
+                    "wc",
+                    "cafe_at_fuel"
                   ],
                   "costRub": 0,
-                  "reason": "Полчаса на осмотр.",
+                  "reason": "Разминка 15 минут после 45 мин за рулём.",
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
@@ -1011,37 +1216,44 @@
                     "kmFromPrev": 80
                   },
                   {
-                    "stopId": "d1s04",
+                    "stopId": "d1s03",
                     "seq": 3,
-                    "arriveAt": "2026-10-24T10:56",
-                    "departAt": "2026-10-24T11:26",
+                    "arriveAt": "2026-10-24T10:55",
+                    "departAt": "2026-10-24T11:25",
                     "kmFromPrev": 108
                   },
                   {
-                    "stopId": "d1s03",
+                    "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:29",
-                    "departAt": "2026-10-24T11:59",
+                    "arriveAt": "2026-10-24T11:26",
+                    "departAt": "2026-10-24T12:11",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T13:50",
-                    "departAt": "2026-10-24T14:50",
-                    "kmFromPrev": 135
+                    "arriveAt": "2026-10-24T13:03",
+                    "departAt": "2026-10-24T13:18",
+                    "kmFromPrev": 60
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:04",
-                    "departAt": "2026-10-24T15:49",
-                    "kmFromPrev": 16
+                    "arriveAt": "2026-10-24T14:22",
+                    "departAt": "2026-10-24T15:22",
+                    "kmFromPrev": 76
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:17",
+                    "arriveAt": "2026-10-24T15:36",
+                    "departAt": "2026-10-24T16:21",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:49",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
@@ -1053,8 +1265,8 @@
             "selectedHotelId": null
           },
           {
-            "id": "d1s05",
-            "seq": 5,
+            "id": "d1s06",
+            "seq": 6,
             "day": 1,
             "kind": "food",
             "sign": "food",
@@ -1064,10 +1276,10 @@
             "note": null,
             "lat": 56.22332074854343,
             "lon": 42.479666551348316,
-            "arriveAt": "2026-10-24T14:19",
-            "departAt": "2026-10-24T15:19",
+            "arriveAt": "2026-10-24T14:27",
+            "departAt": "2026-10-24T15:27",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 126,
+            "kmFromPrev": 61,
             "kmAt": 322,
             "dwellMin": 60,
             "tags": [
@@ -1080,7 +1292,7 @@
             "replaceable": true,
             "alternatives": [
               {
-                "id": "alt_d1s05_pl_m7e_cafe_080",
+                "id": "alt_d1s06_pl_m7e_cafe_080",
                 "placeId": "pl_m7e_cafe_080",
                 "name": "Кафе «У дороги», М-7",
                 "deltaMin": 3,
@@ -1095,11 +1307,12 @@
                   "name": "Кафе «У дороги», М-7",
                   "placeId": "pl_m7e_cafe_080",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
-                  "id": "d1s05",
-                  "seq": 5,
+                  "id": "d1s06",
+                  "seq": 6,
                   "day": 1,
                   "kind": "food",
                   "sign": "food",
@@ -1109,10 +1322,10 @@
                   "note": null,
                   "lat": 56.21562301370492,
                   "lon": 41.63534745382289,
-                  "arriveAt": "2026-10-24T13:35",
-                  "departAt": "2026-10-24T14:35",
+                  "arriveAt": "2026-10-24T13:43",
+                  "departAt": "2026-10-24T14:43",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 71,
+                  "kmFromPrev": 6,
                   "kmAt": 267,
                   "dwellMin": 60,
                   "tags": [
@@ -1152,28 +1365,35 @@
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:34",
-                    "departAt": "2026-10-24T12:34",
-                    "kmFromPrev": 10
+                    "arriveAt": "2026-10-24T11:26",
+                    "departAt": "2026-10-24T12:11",
+                    "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T13:35",
-                    "departAt": "2026-10-24T14:35",
-                    "kmFromPrev": 71
+                    "arriveAt": "2026-10-24T13:16",
+                    "departAt": "2026-10-24T13:36",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:36",
-                    "departAt": "2026-10-24T16:21",
-                    "kmFromPrev": 71
+                    "arriveAt": "2026-10-24T13:43",
+                    "departAt": "2026-10-24T14:43",
+                    "kmFromPrev": 6
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:49",
+                    "arriveAt": "2026-10-24T15:44",
+                    "departAt": "2026-10-24T16:29",
+                    "kmFromPrev": 71
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:57",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
@@ -1185,8 +1405,8 @@
             "selectedHotelId": null
           },
           {
-            "id": "d1s06",
-            "seq": 6,
+            "id": "d1s07",
+            "seq": 7,
             "day": 1,
             "kind": "sight",
             "sign": "tourist",
@@ -1196,8 +1416,8 @@
             "note": null,
             "lat": 56.20742623039774,
             "lon": 42.70067446610615,
-            "arriveAt": "2026-10-24T15:33",
-            "departAt": "2026-10-24T16:18",
+            "arriveAt": "2026-10-24T15:41",
+            "departAt": "2026-10-24T16:26",
             "tz": "Europe/Moscow",
             "kmFromPrev": 16,
             "kmAt": 337,
@@ -1213,7 +1433,7 @@
             "replaceable": true,
             "alternatives": [
               {
-                "id": "alt_d1s06_pl_gor_nikolsky",
+                "id": "alt_d1s07_pl_gor_nikolsky",
                 "placeId": "pl_gor_nikolsky",
                 "name": "Никольский монастырь",
                 "deltaMin": 1,
@@ -1228,11 +1448,12 @@
                   "name": "Никольский монастырь",
                   "placeId": "pl_gor_nikolsky",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 1
                 },
                 "stop": {
-                  "id": "d1s06",
-                  "seq": 6,
+                  "id": "d1s07",
+                  "seq": 7,
                   "day": 1,
                   "kind": "sight",
                   "sign": "tourist",
@@ -1242,8 +1463,8 @@
                   "note": null,
                   "lat": 56.20923497386366,
                   "lon": 42.68291064067262,
-                  "arriveAt": "2026-10-24T15:32",
-                  "departAt": "2026-10-24T16:17",
+                  "arriveAt": "2026-10-24T15:40",
+                  "departAt": "2026-10-24T16:25",
                   "tz": "Europe/Moscow",
                   "kmFromPrev": 15,
                   "kmAt": 335,
@@ -1287,35 +1508,42 @@
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:34",
-                    "departAt": "2026-10-24T12:34",
-                    "kmFromPrev": 10
+                    "arriveAt": "2026-10-24T11:26",
+                    "departAt": "2026-10-24T12:11",
+                    "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:19",
-                    "departAt": "2026-10-24T15:19",
-                    "kmFromPrev": 126
+                    "arriveAt": "2026-10-24T13:16",
+                    "departAt": "2026-10-24T13:36",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:32",
-                    "departAt": "2026-10-24T16:17",
-                    "kmFromPrev": 15
+                    "arriveAt": "2026-10-24T14:27",
+                    "departAt": "2026-10-24T15:27",
+                    "kmFromPrev": 61
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:47",
+                    "arriveAt": "2026-10-24T15:40",
+                    "departAt": "2026-10-24T16:25",
+                    "kmFromPrev": 15
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:55",
                     "departAt": null,
                     "kmFromPrev": 91
                   }
                 ]
               },
               {
-                "id": "alt_d1s06_pl_gor_houses",
+                "id": "alt_d1s07_pl_gor_houses",
                 "placeId": "pl_gor_houses",
                 "name": "Купеческие дома Гороховца",
                 "deltaMin": 0,
@@ -1330,11 +1558,12 @@
                   "name": "Купеческие дома Гороховца",
                   "placeId": "pl_gor_houses",
                   "priceRub": "61.40",
-                  "regionName": "Владимирская область"
+                  "regionName": "Владимирская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
-                  "id": "d1s06",
-                  "seq": 6,
+                  "id": "d1s07",
+                  "seq": 7,
                   "day": 1,
                   "kind": "sight",
                   "sign": "tourist",
@@ -1344,8 +1573,8 @@
                   "note": null,
                   "lat": 56.20742623039774,
                   "lon": 42.69744467966369,
-                  "arriveAt": "2026-10-24T15:33",
-                  "departAt": "2026-10-24T16:18",
+                  "arriveAt": "2026-10-24T15:41",
+                  "departAt": "2026-10-24T16:26",
                   "tz": "Europe/Moscow",
                   "kmFromPrev": 16,
                   "kmAt": 336,
@@ -1388,28 +1617,35 @@
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-10-24T11:34",
-                    "departAt": "2026-10-24T12:34",
-                    "kmFromPrev": 10
+                    "arriveAt": "2026-10-24T11:26",
+                    "departAt": "2026-10-24T12:11",
+                    "kmFromPrev": 1
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-10-24T14:19",
-                    "departAt": "2026-10-24T15:19",
-                    "kmFromPrev": 126
+                    "arriveAt": "2026-10-24T13:16",
+                    "departAt": "2026-10-24T13:36",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d1s06",
                     "seq": 6,
-                    "arriveAt": "2026-10-24T15:33",
-                    "departAt": "2026-10-24T16:18",
-                    "kmFromPrev": 16
+                    "arriveAt": "2026-10-24T14:27",
+                    "departAt": "2026-10-24T15:27",
+                    "kmFromPrev": 61
                   },
                   {
                     "stopId": "d1s07",
                     "seq": 7,
-                    "arriveAt": "2026-10-24T17:46",
+                    "arriveAt": "2026-10-24T15:41",
+                    "departAt": "2026-10-24T16:26",
+                    "kmFromPrev": 16
+                  },
+                  {
+                    "stopId": "d1s08",
+                    "seq": 8,
+                    "arriveAt": "2026-10-24T17:54",
                     "departAt": null,
                     "kmFromPrev": 90
                   }
@@ -1421,8 +1657,8 @@
             "selectedHotelId": null
           },
           {
-            "id": "d1s07",
-            "seq": 7,
+            "id": "d1s08",
+            "seq": 8,
             "day": 1,
             "kind": "overnight",
             "sign": "hotel",
@@ -1432,7 +1668,7 @@
             "note": null,
             "lat": 56.33413497386366,
             "lon": 44.023721905943795,
-            "arriveAt": "2026-10-24T17:46",
+            "arriveAt": "2026-10-24T17:54",
             "departAt": null,
             "tz": "Europe/Moscow",
             "kmFromPrev": 90,
@@ -1501,7 +1737,7 @@
         "stops": [
           {
             "id": "d2s01",
-            "seq": 8,
+            "seq": 9,
             "day": 2,
             "kind": "start",
             "sign": "city",
@@ -1529,7 +1765,7 @@
           },
           {
             "id": "d2s02",
-            "seq": 9,
+            "seq": 10,
             "day": 2,
             "kind": "sight",
             "sign": "tourist",
@@ -1561,7 +1797,7 @@
           },
           {
             "id": "d2s03",
-            "seq": 10,
+            "seq": 11,
             "day": 2,
             "kind": "rest",
             "sign": "rest",
@@ -1602,11 +1838,12 @@
                   "name": "Площадка отдыха, М-7, 255 км",
                   "placeId": "pl_m7e_rest_255",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s03",
-                  "seq": 10,
+                  "seq": 11,
                   "day": 2,
                   "kind": "rest",
                   "sign": "rest",
@@ -1639,70 +1876,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T09:55",
                     "departAt": "2026-10-25T10:15",
                     "kmFromPrev": 19
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:28",
                     "departAt": "2026-10-25T11:38",
                     "kmFromPrev": 86
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:23",
                     "departAt": "2026-10-25T12:43",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T13:57",
                     "departAt": "2026-10-25T14:57",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:01",
                     "departAt": "2026-10-25T15:46",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:51",
                     "departAt": "2026-10-25T16:21",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:36",
                     "departAt": "2026-10-25T17:56",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:46",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -1725,11 +1962,12 @@
                   "name": "Роснефть, М-7, 300 км",
                   "placeId": "pl_m7e_fuel_300",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s03",
-                  "seq": 10,
+                  "seq": 11,
                   "day": 2,
                   "kind": "fuel",
                   "sign": "fuel",
@@ -1761,70 +1999,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:50",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:26",
                     "departAt": "2026-10-25T11:36",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:21",
                     "departAt": "2026-10-25T12:41",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T13:55",
                     "departAt": "2026-10-25T14:55",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T14:59",
                     "departAt": "2026-10-25T15:44",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:49",
                     "departAt": "2026-10-25T16:19",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:34",
                     "departAt": "2026-10-25T17:54",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:44",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -1838,7 +2076,7 @@
           },
           {
             "id": "d2s04",
-            "seq": 11,
+            "seq": 12,
             "day": 2,
             "kind": "fuel",
             "sign": "fuel",
@@ -1879,11 +2117,12 @@
                   "name": "Роснефть, М-7, 300 км",
                   "placeId": "pl_m7e_fuel_300",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s04",
-                  "seq": 11,
+                  "seq": 12,
                   "day": 2,
                   "kind": "fuel",
                   "sign": "fuel",
@@ -1915,70 +2154,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T10:58",
                     "departAt": "2026-10-25T11:08",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 91
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:00",
                     "departAt": "2026-10-25T15:00",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:04",
                     "departAt": "2026-10-25T15:49",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:54",
                     "departAt": "2026-10-25T16:24",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:39",
                     "departAt": "2026-10-25T17:59",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:49",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -2001,11 +2240,12 @@
                   "name": "Татнефть, М-7, 380 км",
                   "placeId": "pl_m7e_fuel_380",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s04",
-                  "seq": 11,
+                  "seq": 12,
                   "day": 2,
                   "kind": "fuel",
                   "sign": "fuel",
@@ -2036,70 +2276,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T12:03",
                     "departAt": "2026-10-25T12:13",
                     "kmFromPrev": 81
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:23",
                     "departAt": "2026-10-25T12:43",
                     "kmFromPrev": 11
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T13:57",
                     "departAt": "2026-10-25T14:57",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:01",
                     "departAt": "2026-10-25T15:46",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:51",
                     "departAt": "2026-10-25T16:21",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:36",
                     "departAt": "2026-10-25T17:56",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:46",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -2113,7 +2353,7 @@
           },
           {
             "id": "d2s05",
-            "seq": 12,
+            "seq": 13,
             "day": 2,
             "kind": "rest",
             "sign": "rest",
@@ -2155,11 +2395,12 @@
                   "name": "Площадка отдыха, М-7, 435 км",
                   "placeId": "pl_m7e_rest_435",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s05",
-                  "seq": 12,
+                  "seq": 13,
                   "day": 2,
                   "kind": "rest",
                   "sign": "rest",
@@ -2191,70 +2432,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T13:01",
                     "departAt": "2026-10-25T13:21",
                     "kmFromPrev": 96
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T13:57",
                     "departAt": "2026-10-25T14:57",
                     "kmFromPrev": 43
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:01",
                     "departAt": "2026-10-25T15:46",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:51",
                     "departAt": "2026-10-25T16:21",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:36",
                     "departAt": "2026-10-25T17:56",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:46",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -2277,11 +2518,12 @@
                   "name": "Площадка отдыха, М-7, 345 км",
                   "placeId": "pl_m7e_rest_345",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s05",
-                  "seq": 12,
+                  "seq": 13,
                   "day": 2,
                   "kind": "rest",
                   "sign": "rest",
@@ -2313,70 +2555,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T11:48",
                     "departAt": "2026-10-25T12:08",
                     "kmFromPrev": 6
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:00",
                     "departAt": "2026-10-25T15:00",
                     "kmFromPrev": 133
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:04",
                     "departAt": "2026-10-25T15:49",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:54",
                     "departAt": "2026-10-25T16:24",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:39",
                     "departAt": "2026-10-25T17:59",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:49",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -2399,11 +2641,12 @@
                   "name": "Башнефть, М-7, 420 км",
                   "placeId": "pl_m7e_fuel_420",
                   "priceRub": "60.90",
-                  "regionName": "Нижегородская область"
+                  "regionName": "Нижегородская область",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s05",
-                  "seq": 12,
+                  "seq": 13,
                   "day": 2,
                   "kind": "fuel",
                   "sign": "fuel",
@@ -2435,70 +2678,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:50",
                     "departAt": "2026-10-25T13:05",
                     "kmFromPrev": 81
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T13:55",
                     "departAt": "2026-10-25T14:55",
                     "kmFromPrev": 58
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T14:59",
                     "departAt": "2026-10-25T15:44",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:49",
                     "departAt": "2026-10-25T16:19",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:34",
                     "departAt": "2026-10-25T17:54",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:44",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -2512,7 +2755,7 @@
           },
           {
             "id": "d2s06",
-            "seq": 13,
+            "seq": 14,
             "day": 2,
             "kind": "food",
             "sign": "food",
@@ -2553,11 +2796,12 @@
                   "name": "Кафе «У дороги», М-7",
                   "placeId": "pl_m7e_cafe_465",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s06",
-                  "seq": 13,
+                  "seq": 14,
                   "day": 2,
                   "kind": "food",
                   "sign": "food",
@@ -2589,70 +2833,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T13:50",
                     "departAt": "2026-10-25T14:50",
                     "kmFromPrev": 76
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:04",
                     "departAt": "2026-10-25T15:49",
                     "kmFromPrev": 13
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:54",
                     "departAt": "2026-10-25T16:24",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:39",
                     "departAt": "2026-10-25T17:59",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:49",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -2675,11 +2919,12 @@
                   "name": "Кафе «Чувашское подворье»",
                   "placeId": "pl_chb_cafe_chuvash",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s06",
-                  "seq": 13,
+                  "seq": 14,
                   "day": 2,
                   "kind": "food",
                   "sign": "food",
@@ -2710,70 +2955,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:01",
                     "departAt": "2026-10-25T15:01",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:05",
                     "departAt": "2026-10-25T15:50",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:55",
                     "departAt": "2026-10-25T16:25",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:40",
                     "departAt": "2026-10-25T18:00",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:50",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -2796,11 +3041,12 @@
                   "name": "Кафе у залива",
                   "placeId": "pl_chb_cafe_bay",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s06",
-                  "seq": 13,
+                  "seq": 14,
                   "day": 2,
                   "kind": "food",
                   "sign": "food",
@@ -2832,70 +3078,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:01",
                     "departAt": "2026-10-25T15:01",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:05",
                     "departAt": "2026-10-25T15:50",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:55",
                     "departAt": "2026-10-25T16:25",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:40",
                     "departAt": "2026-10-25T18:00",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:50",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -2909,7 +3155,7 @@
           },
           {
             "id": "d2s07",
-            "seq": 14,
+            "seq": 15,
             "day": 2,
             "kind": "sight",
             "sign": "tourist",
@@ -2953,11 +3199,12 @@
                   "name": "Красная площадь и набережная",
                   "placeId": "pl_chb_embankment",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": -1
                 },
                 "stop": {
                   "id": "d2s07",
-                  "seq": 14,
+                  "seq": 15,
                   "day": 2,
                   "kind": "sight",
                   "sign": "tourist",
@@ -2989,70 +3236,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:00",
                     "departAt": "2026-10-25T15:00",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:03",
                     "departAt": "2026-10-25T15:48",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:52",
                     "departAt": "2026-10-25T16:22",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:37",
                     "departAt": "2026-10-25T17:57",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:47",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -3075,11 +3322,12 @@
                   "name": "Парк Победы Чебоксар",
                   "placeId": "pl_chb_park",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s07",
-                  "seq": 14,
+                  "seq": 15,
                   "day": 2,
                   "kind": "sight",
                   "sign": "tourist",
@@ -3112,70 +3360,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:00",
                     "departAt": "2026-10-25T15:00",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:04",
                     "departAt": "2026-10-25T15:34",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:39",
                     "departAt": "2026-10-25T16:09",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:24",
                     "departAt": "2026-10-25T17:44",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:34",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -3189,7 +3437,7 @@
           },
           {
             "id": "d2s08",
-            "seq": 15,
+            "seq": 16,
             "day": 2,
             "kind": "sight",
             "sign": "tourist",
@@ -3230,11 +3478,12 @@
                   "name": "Парк Победы Чебоксар",
                   "placeId": "pl_chb_park",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s08",
-                  "seq": 15,
+                  "seq": 16,
                   "day": 2,
                   "kind": "sight",
                   "sign": "tourist",
@@ -3267,70 +3516,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:00",
                     "departAt": "2026-10-25T15:00",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:04",
                     "departAt": "2026-10-25T15:49",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:54",
                     "departAt": "2026-10-25T16:24",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:39",
                     "departAt": "2026-10-25T17:59",
                     "kmFromPrev": 94
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:49",
                     "departAt": null,
                     "kmFromPrev": 57
@@ -3344,7 +3593,7 @@
           },
           {
             "id": "d2s09",
-            "seq": 16,
+            "seq": 17,
             "day": 2,
             "kind": "rest",
             "sign": "rest",
@@ -3385,11 +3634,12 @@
                   "name": "Площадка отдыха, М-7, 525 км",
                   "placeId": "pl_m7e_rest_525",
                   "priceRub": "59.80",
-                  "regionName": "Чувашская Республика"
+                  "regionName": "Чувашская Республика",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s09",
-                  "seq": 16,
+                  "seq": 17,
                   "day": 2,
                   "kind": "rest",
                   "sign": "rest",
@@ -3422,70 +3672,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:00",
                     "departAt": "2026-10-25T15:00",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:04",
                     "departAt": "2026-10-25T15:49",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:54",
                     "departAt": "2026-10-25T16:24",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T17:06",
                     "departAt": "2026-10-25T17:26",
                     "kmFromPrev": 49
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:49",
                     "departAt": null,
                     "kmFromPrev": 102
@@ -3508,11 +3758,12 @@
                   "name": "Площадка отдыха, М-7, 615 км",
                   "placeId": "pl_m7e_rest_615",
                   "priceRub": "58.90",
-                  "regionName": "Республика Татарстан"
+                  "regionName": "Республика Татарстан",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s09",
-                  "seq": 16,
+                  "seq": 17,
                   "day": 2,
                   "kind": "rest",
                   "sign": "rest",
@@ -3544,70 +3795,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:00",
                     "departAt": "2026-10-25T15:00",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:04",
                     "departAt": "2026-10-25T15:49",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:54",
                     "departAt": "2026-10-25T16:24",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T18:17",
                     "departAt": "2026-10-25T18:37",
                     "kmFromPrev": 139
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:49",
                     "departAt": null,
                     "kmFromPrev": 12
@@ -3630,11 +3881,12 @@
                   "name": "Площадка отдыха, М-12, 780 км",
                   "placeId": "pl_m12_rest_780",
                   "priceRub": "58.90",
-                  "regionName": "Республика Татарстан"
+                  "regionName": "Республика Татарстан",
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d2s09",
-                  "seq": 16,
+                  "seq": 17,
                   "day": 2,
                   "kind": "rest",
                   "sign": "rest",
@@ -3666,70 +3918,70 @@
                 "dayPatch": [
                   {
                     "stopId": "d2s01",
-                    "seq": 8,
+                    "seq": 9,
                     "arriveAt": null,
                     "departAt": "2026-10-25T09:00",
                     "kmFromPrev": 0
                   },
                   {
                     "stopId": "d2s02",
-                    "seq": 9,
+                    "seq": 10,
                     "arriveAt": "2026-10-25T09:03",
                     "departAt": "2026-10-25T09:33",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s03",
-                    "seq": 10,
+                    "seq": 11,
                     "arriveAt": "2026-10-25T10:35",
                     "departAt": "2026-10-25T10:55",
                     "kmFromPrev": 64
                   },
                   {
                     "stopId": "d2s04",
-                    "seq": 11,
+                    "seq": 12,
                     "arriveAt": "2026-10-25T11:31",
                     "departAt": "2026-10-25T11:41",
                     "kmFromPrev": 41
                   },
                   {
                     "stopId": "d2s05",
-                    "seq": 12,
+                    "seq": 13,
                     "arriveAt": "2026-10-25T12:26",
                     "departAt": "2026-10-25T12:46",
                     "kmFromPrev": 51
                   },
                   {
                     "stopId": "d2s06",
-                    "seq": 13,
+                    "seq": 14,
                     "arriveAt": "2026-10-25T14:00",
                     "departAt": "2026-10-25T15:00",
                     "kmFromPrev": 88
                   },
                   {
                     "stopId": "d2s07",
-                    "seq": 14,
+                    "seq": 15,
                     "arriveAt": "2026-10-25T15:04",
                     "departAt": "2026-10-25T15:49",
                     "kmFromPrev": 1
                   },
                   {
                     "stopId": "d2s08",
-                    "seq": 15,
+                    "seq": 16,
                     "arriveAt": "2026-10-25T15:54",
                     "departAt": "2026-10-25T16:24",
                     "kmFromPrev": 2
                   },
                   {
                     "stopId": "d2s09",
-                    "seq": 16,
+                    "seq": 17,
                     "arriveAt": "2026-10-25T18:22",
                     "departAt": "2026-10-25T18:42",
                     "kmFromPrev": 142
                   },
                   {
                     "stopId": "d2s10",
-                    "seq": 17,
+                    "seq": 18,
                     "arriveAt": "2026-10-25T18:53",
                     "departAt": null,
                     "kmFromPrev": 10
@@ -3743,7 +3995,7 @@
           },
           {
             "id": "d2s10",
-            "seq": 17,
+            "seq": 18,
             "day": 2,
             "kind": "finish",
             "sign": "city",
@@ -3794,7 +4046,7 @@
             },
             {
               "label": "Владимирская область",
-              "formula": "284 км × 8 л/100 × 61,40 ₽ = 1 400 ₽",
+              "formula": "285 км × 8 л/100 × 61,40 ₽ = 1 400 ₽",
               "rub": 1400
             },
             {
@@ -3861,13 +4113,18 @@
         {
           "key": "tickets",
           "title": "Билеты",
-          "rub": 500,
-          "formula": "1 место × 2 взр.",
+          "rub": 1000,
+          "formula": "2 места × 2 взр.",
           "asOf": "2026-09",
           "enabled": true,
           "breakdown": [
             {
               "label": "Золотые ворота",
+              "formula": "2 × 250",
+              "rub": 500
+            },
+            {
+              "label": "Дмитриевский собор",
               "formula": "2 × 250",
               "rub": 500
             }
@@ -3876,7 +4133,7 @@
         {
           "key": "reserve",
           "title": "Резерв 10%",
-          "rub": 1610,
+          "rub": 1660,
           "formula": "на пробки и «давай заедем»",
           "asOf": "2026-09",
           "enabled": true,
@@ -3884,9 +4141,9 @@
         }
       ],
       "reserveOn": true,
-      "subtotalRub": 16050,
-      "totalRub": 17700,
-      "perPersonRub": 8900,
+      "subtotalRub": 16550,
+      "totalRub": 18200,
+      "perPersonRub": 9100,
       "budgetRub": null,
       "remainingRub": null,
       "overBudget": false,
@@ -3913,7 +4170,7 @@
             {
               "regionCode": "RU-VLA",
               "regionName": "Владимирская область",
-              "km": 284.014,
+              "km": 284.838,
               "priceRub": "61.40"
             },
             {
@@ -3941,7 +4198,7 @@
         "tolls": [],
         "nights": [
           {
-            "stopId": "d1s07",
+            "stopId": "d1s08",
             "day": 1,
             "townName": "Нижний Новгород",
             "selectedPlaceId": "pl_nnv_hotel_volga",
@@ -3972,13 +4229,13 @@
           {
             "day": 1,
             "meal": "lunch",
-            "stopId": "d1s05",
+            "stopId": "d1s06",
             "checkRub": 700
           },
           {
             "day": 1,
             "meal": "dinner",
-            "stopId": "d1s07",
+            "stopId": "d1s08",
             "checkRub": 800
           },
           {
@@ -3998,13 +4255,13 @@
           },
           {
             "stopId": "d1s04",
-            "placeId": "pl_vla_nerl",
-            "name": "Церковь Покрова на Нерли",
-            "adultRub": 0,
-            "childRub": 0
+            "placeId": "pl_vla_dmitrievsky",
+            "name": "Дмитриевский собор",
+            "adultRub": 250,
+            "childRub": 100
           },
           {
-            "stopId": "d1s06",
+            "stopId": "d1s07",
             "placeId": "pl_gor_old_town",
             "name": "Старый Гороховец",
             "adultRub": 0,
@@ -4105,5 +4362,5 @@
     },
     "engineVersion": "0.1.0"
   },
-  "text": "Москва → Казань · 832 км · 2 дня\nДень 1 · 432 км\n08:00 Москва\n09:10 Площадка отдыха, М-7, 80 км\n10:55 Золотые ворота\n11:34 Церковь Покрова на Нерли\n14:19 Кафе «Привал», М-7\n15:33 Старый Гороховец\n17:46 Нижний Новгород\nДень 2 · 400 км\n09:00 Нижний Новгород\n09:03 Набережная Фёдоровского\n10:35 Площадка отдыха, М-7, 300 км\n11:31 Газпромнефть, М-7, 340 км\n12:26 Площадка отдыха, М-7, 390 км\n14:00 Чувашская кухня\n15:04 Чебоксарский залив\n15:54 Монумент Матери-покровительнице\n17:39 Площадка отдыха, М-7, 570 км\n18:49 Казань\nИтого ≈ 17 700 ₽ на 2 чел."
+  "text": "Москва → Казань · 832 км · 2 дня\nДень 1 · 432 км\n08:00 Москва\n09:10 Площадка отдыха, М-7, 80 км\n10:55 Золотые ворота\n11:26 Дмитриевский собор\n13:16 Площадка отдыха, М-7, 75 км\n14:27 Кафе «Привал», М-7\n15:41 Старый Гороховец\n17:54 Нижний Новгород\nДень 2 · 400 км\n09:00 Нижний Новгород\n09:03 Набережная Фёдоровского\n10:35 Площадка отдыха, М-7, 300 км\n11:31 Газпромнефть, М-7, 340 км\n12:26 Площадка отдыха, М-7, 390 км\n14:00 Чувашская кухня\n15:04 Чебоксарский залив\n15:54 Монумент Матери-покровительнице\n17:39 Площадка отдыха, М-7, 570 км\n18:49 Казань\nИтого ≈ 18 200 ₽ на 2 чел."
 }

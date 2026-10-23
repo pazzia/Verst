@@ -95,6 +95,9 @@ class MealsTest(unittest.TestCase):
         self.assertEqual(next(s for s in d.stops if s.meal).reason_key, "lunch.parking")
 
 
+NO_RESTS = {"rest_interval_min": {"calm": 900}}  # keep the minute arithmetic free of rest breaks
+
+
 class LunchAfterSightsTest(unittest.TestCase):
     """Stage 8b (A§16.2, D-18)."""
 
@@ -117,7 +120,7 @@ class LunchAfterSightsTest(unittest.TestCase):
         # calm (budget 540): 300 min of driving + sights A (km 50, 2 h, 4.9) and B (km 100, 2 h, 4.5) = 540.
         # Stage 8 finds no lunch (the café at km 140 is reached at 10:20). With A and B the café is reached at
         # 14:20, but 540 + 60 > max(540, mandatory 360): B (lower score) is dropped, A stays, lunch at 12:20.
-        ctx, inp = setup(mood=Mood.CALM)
+        ctx, inp = setup(mood=Mood.CALM, config=NO_RESTS)
         cor = corridor(
             [food("f140", 140, set())],
             sights=[sight("A", 50, rating=4.9, dwell=120), sight("B", 100, rating=4.5, dwell=120)],
@@ -133,7 +136,7 @@ class LunchAfterSightsTest(unittest.TestCase):
         assert slot.arrive is not None
         self.assertEqual(local(slot.arrive, "Europe/Moscow").time(), time(12, 20))
         # no feasible food place at all: the sights are kept and no lunch is planned
-        ctx, inp = setup(mood=Mood.CALM)
+        ctx, inp = setup(mood=Mood.CALM, config=NO_RESTS)
         cor = corridor(
             [food("f010", 10, set())], sights=[sight("A", 50, dwell=120), sight("B", 100, dwell=120)]
         )

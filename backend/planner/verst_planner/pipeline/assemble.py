@@ -120,7 +120,7 @@ def render_stop(
         cost_rub=ctx.stop_cost(s, inp),
         verified=s.place is None or s.place.source is not Source.OSM,
         reason_ru=reason,
-        replaceable=s.kind in ReplaceableKinds and not s.fixed,
+        replaceable=s.kind in ReplaceableKinds and not s.fixed and s.place is not None,
         alternatives=v.alternatives,
         hotel_options=v.hotel_options,
         selected_hotel_id=s.place.id if s.kind is StopKind.OVERNIGHT and s.place is not None else None,

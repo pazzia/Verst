@@ -13,6 +13,7 @@ from verst_planner.cost import formulas as fm
 from verst_planner.cost.money import ZERO, dec, round_to
 from verst_planner.domain.enums import CostKey, Meal
 from verst_planner.domain.model import (
+    AltUnits,
     CostBreakdownRow,
     CostLine,
     CostOverrides,
@@ -21,6 +22,7 @@ from verst_planner.domain.model import (
     Crew,
     FuelRegionUnit,
     NightUnit,
+    TicketUnit,
 )
 
 HINT_ORDER = ("cheaper_overnight", "fewer_sights", "just_drive")
@@ -63,6 +65,30 @@ def _selected(n: NightUnit, overrides: CostOverrides) -> tuple[int, bool, str | 
     return n.price_night_rub, n.breakfast_included, n.selected_place_id
 
 
+def effective_tickets(units: CostUnits, ov: CostOverrides) -> list[TicketUnit]:
+    """The ticket units after the replaces (A§16.11.4 rule 4), in stop order of the units."""
+    out: list[TicketUnit] = []
+    for t in units.tickets:
+        alt = ov.replaced.get(t.stop_id)
+        if alt is None:
+            out.append(t)
+        elif alt.adult_rub is not None:
+            out.append(_alt_ticket(t.stop_id, alt))
+    ticketed = {t.stop_id for t in units.tickets}
+    out += [
+        _alt_ticket(sid, a)
+        for sid, a in ov.replaced.items()
+        if sid not in ticketed and a.adult_rub is not None
+    ]
+    return out
+
+
+def _alt_ticket(stop_id: str, alt: AltUnits) -> TicketUnit:
+    adult = alt.adult_rub or 0
+    child = alt.child_rub if alt.child_rub is not None else adult
+    return TicketUnit(stop_id, alt.place_id, alt.name_ru, adult, child)
+
+
 def recompute(
     units: CostUnits,
     crew: Crew,
@@ -75,8 +101,9 @@ def recompute(
     fuel_t = units.fuel.fuel_type
     lines: list[CostLine] = []
 
-    # ---- fuel: sum km_r x consumption / 100 x price_r (replaced stops shift their detour km; an alternative
-    # in a region the trip did not cross adds that region with the alternative's price, A§16.6)
+    # ---- fuel: sum km_r x consumption / 100 x price_r. A§16.11.4 rule 1: the alternative's region gets
+    # + delta_km; a region the trip did not cross is appended at the alternative's price when delta_km > 0;
+    # a region whose km drops to <= 0 is kept with 0 km.
     regions = list(units.fuel.regions)
     km_by_region = {r.region_code: dec(r.km) for r in regions}
     for alt in ov.replaced.values():
@@ -85,8 +112,6 @@ def recompute(
         elif alt.price_rub is not None and alt.delta_km > 0:
             regions.append(FuelRegionUnit(alt.region_code, alt.region_name_ru, 0.0, alt.price_rub))
             km_by_region[alt.region_code] = dec(alt.delta_km)
-        elif regions:
-            km_by_region[regions[0].region_code] += dec(alt.delta_km)
     cons = dec(units.fuel.consumption_l_per_100km)
     fuel_exact = ZERO
     litres = ZERO
@@ -102,9 +127,9 @@ def recompute(
             )
         )
     total_km = sum((max(ZERO, k) for k in km_by_region.values()), ZERO)
-    shown_km = total_km  # the formula shows TripPlan.km (A§16.7) when the units carry it
+    shown_km = total_km  # rule 2: the formula shows TripPlan.km (A§16.7) when the units carry it
     if units.fuel.trip_km is not None:
-        shown_km = dec(units.fuel.trip_km) + sum((dec(a.delta_km) for a in ov.replaced.values()), ZERO)
+        shown_km = dec(units.fuel.trip_km + sum(a.trip_km_delta for a in ov.replaced.values()))
     avg = fuel_exact / litres if litres > 0 else ZERO
     single = regions[0].price_rub if regions else ZERO
     fuel_rub = round_to(fuel_exact, step)
@@ -201,35 +226,20 @@ def recompute(
         )
     )
 
-    # ---- tickets: sum adults x adult + children x (child ?? adult)
+    # ---- tickets: sum adults x adult + children x (child ?? adult). Rule 4: a replaced stop's ticket is
+    # removed; an alternative that is a sight (adult_rub not null) brings its own ticket.
+    tickets = effective_tickets(units, ov)
     ticket_exact = ZERO
     paid = 0
     ticket_rows = []
-    for t in units.tickets:
-        adult, child, name = t.adult_rub, t.child_rub, t.name_ru
-        if t.stop_id in ov.replaced:
-            alt = ov.replaced[t.stop_id]
-            adult = alt.adult_rub or 0
-            child = alt.child_rub if alt.child_rub is not None else adult
-            name = alt.name_ru
-        cost = dec(crew.adults * adult + crew.children * child)
+    for t in tickets:
+        cost = dec(crew.adults * t.adult_rub + crew.children * t.child_rub)
         if cost > 0:
             paid += 1
             ticket_rows.append(
-                fm.ticket_row(name, crew.adults, adult, crew.children, child, round_to(cost, step))
-            )
-        ticket_exact += cost
-    ticketed = {t.stop_id for t in units.tickets}
-    for sid, alt in ov.replaced.items():
-        if sid in ticketed or alt.adult_rub is None:
-            continue  # a non-sight stop replaced by a sight (rest pool, A§16.6) adds its ticket
-        adult = alt.adult_rub
-        child = alt.child_rub if alt.child_rub is not None else adult
-        cost = dec(crew.adults * adult + crew.children * child)
-        if cost > 0:
-            paid += 1
-            ticket_rows.append(
-                fm.ticket_row(alt.name_ru, crew.adults, adult, crew.children, child, round_to(cost, step))
+                fm.ticket_row(
+                    t.name_ru, crew.adults, t.adult_rub, crew.children, t.child_rub, round_to(cost, step)
+                )
             )
         ticket_exact += cost
     tickets_rub = round_to(ticket_exact, step)
@@ -268,7 +278,7 @@ def recompute(
     if over:
         if cheaper:
             hints.append("cheaper_overnight")
-        if tickets_rub > 0 or units.tickets:
+        if tickets_rub > 0 or tickets:
             hints.append("fewer_sights")
         if not units.mood_just_drive:
             hints.append("just_drive")

@@ -217,7 +217,6 @@ class WorldsTest(unittest.TestCase):
         dwell = [w.places[p.place_id].dwell_min for p in rr.points if p.place_id]
         self.assertEqual(dwell, [240, 240])
 
-
     def test_generator_matches_committed_json(self) -> None:
         """A§16.10: `tools/gen_worlds.py` reproduces both committed worlds byte for byte."""
         from tests.contract.test_cost_recompute_contract import generated
@@ -227,6 +226,7 @@ class WorldsTest(unittest.TestCase):
         for name, text in out.items():
             with self.subTest(world=name):
                 self.assertEqual(text, (WORLDS / f"{name}.json").read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()
