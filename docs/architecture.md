@@ -545,11 +545,11 @@ WHERE s.status='live' AND s.vehicle_class = 1 AND ST_DWithin(s.geom::geography, 
 | `overnight_eta_allowance_min` | `{"calm":120,"more_stops":150,"just_drive":30}` | §6.5 |
 | `fuel` | `{"usable_frac":0.8,"start_frac":1.0,"lookahead_km":40,"lookback_km":100,"coincide_km":2,"evening_next_day_km":60,"evening_window_km":40,"skip_near_finish_frac":0.10,"coffee_after_drive_min":60}` | §6.7 |
 | `rest_interval_min` | `{"calm":120,"more_stops":90,"just_drive":180}` | §6.8 |
-| `rest` | `{"window_before_min":30,"widen_before_min":60,"widen_after_min":15,"min_remaining_drive_min":30,"break_min_dwell":15,"max_detour_min":10,"min_gap_min":60}` | §6.8, §16.2 |
+| `rest` | `{"window_before_min":30,"widen_before_min":60,"widen_after_min":15,"min_remaining_drive_min":30,"break_min_dwell":15,"max_detour_min":10,"min_gap_min":60,"extended_detour_min":15}` | §6.8, §16.2, §16.11.1 |
 | `dwell_min` | `{"coffee":15,"fuel":10,"fuel_coffee":15,"rest":20,"lunch":60,"sight_default":60,"via":30}` | §6.6 (SPEC §7.4) |
 | `lunch_window` | `["12:00","14:30"]`, `lunch_sweet_spot` `["12:30","13:30"]` | §6.8 |
 | `sights` | `{"max_per_day":{"calm":2,"more_stops":4,"just_drive":0},"min_score":2.0}` | §6.9 |
-| `alternatives` | `{"window_min":45,"max":3}` | §6.11 |
+| `alternatives` | `{"window_min":45,"max":3,"cluster_km":2.0}` | §6.11, §16.11.3 |
 | `cost` | `{"reserve_frac":0.10,"line_step":10,"total_step":100,"child_food_weight_under7":0.5,"assumed_child_age":8,"breakfast_price_frac":0.6,"dinner_last_day_after":"19:00"}` | §7 |
 | `toll_night` | `["00:00","06:00"]` (used when a segment has no own night window) | §7.2 |
 
@@ -756,6 +756,8 @@ coincide(c)   = any existing stop (overnight hotel/town, fixed, via, sight, food
 (`continue_with_virtual_refuel` sets `remaining = full` at `trigger + lookahead_km` so the walk terminates.) A fuel stop is upgraded to coffee (`dwell = fuel_coffee (15)`, counts as a break) when it has `cafe_at_fuel` and driving since the last break ≥ `coffee_after_drive_min (60)` at its ETA. Each fuel stop records `litres = (km since last fill + detour_km) · consumption / 100` for its informational `cost_rub` (§7.1).
 
 ### 6.8 Stages 7–8: rest and meals
+
+**Amended §16.2/§16.11:** the stage-6 coffee upgrade of §6.7 is removed; coffee upgrades happen only in stage 7. Virtual breaks are removed (§16.11.1).
 
 Rest (per day, iterative) — **superseded by §16.2**:
 ```
@@ -2023,3 +2025,31 @@ for each replaceable stop s (kinds SIGHT, FOOD, FUEL, REST; not fixed; template 
 ### 16.10 Fixture/tooling hygiene
 - `tools/gen_worlds.py` is the source of the worlds. `tests/unit/test_worlds.test_generator_matches_committed_json` regenerates in memory and compares byte-for-byte with the committed files. The same applies to `gen_cost_contract.py`.
 - Golden line tolerances: `fuel` ±5 %; all other lines are integer world prices → tolerance 0. Every non-error case pins `costTotalRub` (±5 %, SPEC §17) and `warnings` exactly.
+
+### 16.11 Second review (2026-10-23, rework 382961d)
+
+**16.11.1 Upper bound on break gaps** (SPEC 7.2.7 "a break every R hours"). The rest stage never leaves a gap unfilled. When steps 1–2 of §16.2 find nothing:
+3. *extended:* candidates with `detour_min ≤ rest.extended_detour_min` (15), unused, with drive since b0 ∈ `[max(45, R − 60), R + 30]`;
+4. *roadside break:* insert `PlannedStop(kind=REST, place=None, name_ru=«Остановка у дороги», km_at=x, dwell_min=break_min_dwell (15), detour 0, auto=True, pool="rest", reason_key="rest.roadside")`. Template `rest.roadside` = «Сделайте остановку на 15 минут — подходящей площадки рядом нет.». It is not replaceable, has no `alternativesNote`, and is rendered with sign `rest`, `placeId` null and `verified` true.
+Invariant `break_spacing` gains an upper bound: driving between consecutive breaks (dwell ≥ 15 min, start, overnight, finish) is ≤ R + 30 min.
+
+**16.11.2 Readings of §16.2/§16.5, confirmed.**
+- (a) Coffee upgrades happen only in stage 7.
+- (b) The fit check (`day_ok`, stage 9 and lunch probes) plans rests on a copy non-strictly (rests are placed even where they would break a lunch or sight), so content that only fits without its rests is rejected. The real stage 7 is strict.
+- (c) Two formulas:
+  - the feasibility limit for optional content is `max(day_budget_min, mandatory_min + fixed_min)`, where `fixed_min` is the dwell + detour of fixed and user stops;
+  - the warning `DAY_OVER_BUDGET` uses `max(day_budget_min, mandatory_min)` without `fixed_min`.
+
+**16.11.3 Same-town slot rule for alternatives (approved with conditions).** A candidate with `|c.km_at − s.km_at| ≤ alternatives.cluster_km` (config, default 2.0) takes the replaced stop's slot.
+- Its `km_at` is clamped to its neighbours for ordering and scheduling only; `point`, `detour_km`, `detour_min` and `region_code` stay the candidate's true values.
+- Displacement `|clamped − true| ≤ cluster_km` is asserted.
+
+**16.11.4 Offline recompute rules (authoritative for the Android `CostCalculator`).** `CostOverrides.replaced[stop_id] = AltUnits` applies, in this order:
+1. *Fuel km:* the region of `AltUnits.region_code` gets `+ delta_km`. If the trip has no such region and `delta_km > 0`, append `FuelRegionUnit(region_code, region_name_ru, delta_km, price_rub)` using `AltUnits.price_rub`/`region_name_ru`. A region whose km drops to ≤ 0 is kept with 0 km.
+2. *Fuel formula km:* `FuelUnits.trip_km + Σ AltUnits.trip_km_delta`, where `trip_km_delta: int` is computed server-side as `round(day km of the trial day) − round(day km of the current day)`. This makes offline formula km equal the server's `TripPlan.km` after a replace. Exact `delta_km` is never used for the displayed km.
+3. *Meals:* a `MealUnit` with `stop_id` = the replaced stop takes `AltUnits.check_rub` when not null.
+4. *Tickets:* the replaced stop's `TicketUnit` is removed; if the alternative is a sight (`adult_rub` not null), a `TicketUnit(stop_id, place_id, name_ru, adult_rub, child_rub)` is added (this covers a rest/coffee replaced by a short sight); `free_entry` sights carry 0/0.
+5. Lines, reserve, total, per person and remaining then follow §7.2 unchanged.
+The contract file `tests/contract/cost_recompute_cases.json` must contain ≥ 1 case per rule (≥ 35 cases).
+
+**16.11.5 Alternatives coverage gate.** On G01, G02, G03, G06, G07, G08: aggregate ≥ 70 % **and** each case ≥ 60 % of replaceable stops with ≥ 2 alternatives. Plus a fixture-independent unit test on a controlled mini world (one candidate per pool and position) so the gate cannot be met by fixture tuning alone.
