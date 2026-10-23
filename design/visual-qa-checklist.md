@@ -178,7 +178,7 @@ Version 1.0.0 · 2026-10-23 · Use against every build that claims a screen is d
 | P-12 | Sheet entry: 40 dp → 0, 600 ms decelerate |
 | P-13 | Pro plate (14, 715) 362 × 44 dashed yellow; Pro sheet flow |
 | P-14 | Buttons (14, 768) and (200, 768), 176 × 56; saved state |
-| P-15 | Reference numbers 3 720 / 0 / 12 000 / 12 600 / 3 000 / 3 130 / ≈ 34 500 / ≈ 5 500 with the fixture (OI-06) |
+| P-15 | Reference numbers 3 720 / 0 / 12 000 / 9 000 / 3 000 / 2 770 / ≈ 30 500 / ≈ 9 500 with the fixture (OI-06, D-16: 5 meals) |
 | P-16 | TalkBack = 5.6 §7 (formula spoken in words) |
 
 ## 8. Screen 5.7 Exit

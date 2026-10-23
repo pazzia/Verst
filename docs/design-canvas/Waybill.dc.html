@@ -92,14 +92,15 @@ class Component extends DCLogic {
   renderVals() {
     const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     const items = [
-      ['Бензин АИ-95', '745 км × 8 л/100 × 62 ₽', 3720],
+      ['Бензин АИ-95', '745 км × 8 л/100 × 62,40 ₽', 3720],
+      ['Платные дороги', 'нет платных участков', 0],
       ['Ночёвки', 'Ярославль + Суздаль, 2 × 6 000', 12000],
-      ['Питание', '3 чел. × 7 приёмов × 600', 12600],
+      ['Питание', '3 чел. × 5 приёмов × 600', 9000],
       ['Билеты', 'кремли и музеи на троих', 3000]
     ];
     const base = items.reduce((s, i) => s + i[2], 0);
     const on = this.state.reserve;
-    const res = Math.round(base * 0.1);
+    const res = Math.round(base * 0.1 / 10) * 10;
     const total = Math.round((on ? base + res : base) / 100) * 100;
     return {
       lines: items.map((i) => ({ name: i[0], calc: i[1], sum: fmt(i[2]) })),

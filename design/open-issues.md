@@ -78,6 +78,8 @@ New-state pairs designed here: `color.accent.redText` on #0B1218 5.51, on #16161
 | OI-34 | FIXED | The Exit sign's distance format is not defined | «800 м» below 1 km (to 100 m), «1,2 км» above (components §12.1) |
 | OI-35 | FIXED | SPEC «Settings (gear icon on the dashboard)» has no place in the Instruments mockup, nor do the mood chips | Mood chips N1–N2 and the «Машина и выезд» plate N3 in the empty band y 529–703 (5.3) + sheet D-4 |
 | OI-36 | FIXED | MapLibre draws labels from server-side SDF glyphs, not from the APK fonts, so the map would fall back to Noto Sans | Generate PBF glyph ranges (Latin + Cyrillic) for IBM Plex Sans Condensed 400/600 on the Planetiler/tile server and reference them in the style JSON |
+| OI-37 | DECIDE | The engine share text (architecture §8.2) has no dates, crew line or per-person amount; the earlier design draft had them | Ship the engine format now (D-11 updated); add `share.dates` / `share.crew` / `share.per_person` to `strings.ru.json` in a later sprint if wanted |
+| OI-38 | DECIDE | Engine cost-line titles differ from the approved Waybill (copy-ru.md §13 R-1) | Developer changes `strings.ru.json`: «Питание», «Резерв {pct}%», «Бензин {fuel_type}», reserve sub-line without «10%» |
 
 ## 4. Designed missing states and screens
 
@@ -90,7 +92,7 @@ All of these use only existing tokens and components.
 │ Мои поездки                         [×]  │ type.title.lg
 │ 3 сохранённые · открываются без сети     │ type.body.sm text.secondary
 │┌────────────────────────────────────────┐│
-││ ↗ Золотое кольцо              ≈ 34 500 ₽ ││ row min-h 64, fill dash.controlAlt, radius 10
+││ ↗ Золотое кольцо              ≈ 30 500 ₽ ││ row min-h 64, fill dash.controlAlt, radius 10
 ││   7–9 ноября · 3 дня · 2 взр · 1 реб · пёс│ type.body.sm text.secondary
 │└────────────────────────────────────────┘│ gap 8
 ││ ↑ Москва → Ярославль          ≈ 18 200 ₽ ││
@@ -103,7 +105,7 @@ All of these use only existing tokens and components.
 - Delete: long-press or TalkBack action «Удалить» → `NaviDialog` «Удалить поездку «Золотое кольцо»?» / «Она пропадёт с этого телефона» / primary «Удалить» (yellow) / secondary «Оставить». After deleting: toast «Поездка удалена» + «Вернуть» (6 s).
 - At ≥ 45 trips: a line under the subtitle «Сохранено 45 из 50 — удалите старые, чтобы освободить место» in `color.accent.redText`.
 - Order: by start date, upcoming first, then past (past rows show meta in `color.text.muted`).
-- TalkBack: pane «Мои поездки»; row «Золотое кольцо, 7–9 ноября, 3 дня, примерно 34 500 рублей. Открыть».
+- TalkBack: pane «Мои поездки»; row «Золотое кольцо, 7–9 ноября, 3 дня, примерно 30 500 рублей. Открыть».
 
 ### D-2 Location rationale and denial — 5.1 §4.9.
 
@@ -189,7 +191,7 @@ All of these use only existing tokens and components.
 Оставить как есть                                  text button 44, text.secondary
 ```
 - Each alternative row shows the mini sign of its kind at 0.7 scale (service 35 × 43) at the left, a name `type.title.sm`, tags `type.body.sm` `color.text.secondary`, and the delta `type.body.mdStrong` `color.text.primary` (no colour coding: green is reserved for the turn signal; the signs «+»/«−» carry the meaning).
-- After «Заменить»: the sheet closes, the row updates, a row flash plays, toast «Заменили. Путевой лист: ≈ 34 800 ₽» + «Вернуть» (6 s). Server confirm failure: toast «Замену сохраним на сервере, когда появится сеть».
+- After «Заменить»: the sheet closes, the row updates, a row flash plays, toast «Заменили. Путевой лист: ≈ 30 800 ₽» + «Вернуть» (6 s). Server confirm failure: toast «Замену сохраним на сервере, когда появится сеть».
 - No alternatives (offline, not cached): the «заменить» button is disabled (components §2.6).
 
 ### D-7 Report an error — `BottomSheet` from D-5
@@ -212,23 +214,21 @@ Success toast «Спасибо, проверим». Offline: «Отправим,
 ### D-10 «Забронировали?» — 5.7 §4.
 
 ### D-11 Share text (SPEC US-14)
+The format is the engine contract (architecture §8.2, `strings.ru.json` `share.*`), so the app and the server produce identical text offline:
 ```
-Золотое кольцо · 3 дня, 745 км
-7–9 ноября, из Москвы. Экипаж: 2 взрослых, 1 ребёнок, собака.
-
+Золотое кольцо · 745 км · 3 дня
 День 1 · 265 км
-08:00 Москва — старт
+08:00 Москва
 09:15 Троице-Сергиева лавра
 12:00 Обед · Переславль-Залесский
 14:30 Ростовский кремль
 15:50 АЗС перед Ярославлем
 16:30 Ночёвка · Ярославль
 …
-Примерно 34 500 ₽ на всех (≈ 11 500 ₽ на человека).
-Маршрут целиком: https://verst.app/s/<slug>
-Собрано в «Версте»
+Итого ≈ 30 500 ₽ на 3 чел.
+https://verst.app/s/<slug>
 ```
-Plain text; thin spaces are replaced by normal spaces for messengers that strip U+202F.
+Plain text; thin spaces are replaced by normal spaces for messengers that strip U+202F. (Supersedes the earlier draft with dates, crew line and per-person amount; those can be added to `share.*` later if the Manager wants them — OI-37.)
 
 ### D-12 Loading, empty and error states per screen
 Defined in each screen file §4 (5.1 loading / empty / offline / error; 5.2 suggestions loading / no results / error / offline; 5.4 slow / warning / error codes / offline; 5.5 price refresh / offline / warning / storage full; 5.6 over budget / no budget / saved / sync failure; 5.7 link loading / error / offline / booked).
