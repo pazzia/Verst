@@ -28,6 +28,7 @@ Conventions:
 13. Testing strategy and golden trips
 14. Sandbox vs. network
 15. Decision log, SPEC deviations, traceability
+16. Sprint 1 review amendments (2026-10-23) — overrides the sections that point to it
 
 ---
 
@@ -162,7 +163,7 @@ verst/
 
 Dependency rules (enforced by tests):
 1. `verst_planner` imports **only** the Python standard library and itself. `tests/test_layering.py` parses every module with `ast` and fails on any other top-level import. (DEV-018)
-2. Inside `verst_planner`: `domain` and `geo` import nothing else from the package; `pipeline` may import `domain, geo, hours, config, ports, events, explain`; `cost` imports `domain, config, explain.ru`; `engine` imports all; `adapters.fake` imports `domain, geo, ports` only.
+2. Inside `verst_planner`: `domain` imports nothing else from the package; `geo` imports only `domain` (amended §16.1, the `Corridor` working type therefore lives in `pipeline`); `pipeline` may import `domain, geo, hours, config, ports, events, explain`; `cost` imports `domain, config, explain.ru`; `engine` imports all; `adapters.fake` imports `domain, geo, ports` only.
 3. `verst_api.routers` → `services` → (`verst_planner`, `adapters`, `db`). Routers never import adapters or db directly; services never import FastAPI. Enforced by `verst_api/tests/test_layering.py` (same AST approach).
 4. Pydantic models exist only in `verst_api.schemas`. The planner exchanges stdlib dataclasses; `verst_planner.domain.codec` converts them to/from camelCase JSON dicts; API schemas validate the same shape and a contract test asserts `PlanResponse.model_validate(codec.plan_to_json(plan))` succeeds for every golden snapshot.
 
@@ -195,7 +196,7 @@ class StopKind(StrEnum):   START="start"; SIGHT="sight"; FOOD="food"; FUEL="fuel
 class SignType(StrEnum):   CITY="city"; TOURIST="tourist"; FUEL="fuel"; FOOD="food"; REST="rest"; HOTEL="hotel"
 class Meal(StrEnum):       BREAKFAST="breakfast"; LUNCH="lunch"; DINNER="dinner"
 class OvernightFallback(StrEnum): NONE="none"; TEMPLATE="template"; WIDENED="widened"; EXTRA_DAY="extra_day"; NO_HOTEL="no_hotel"
-class WarningCode(StrEnum):NO_LODGING="NO_LODGING"; FUEL_GAP="FUEL_GAP"; DAY_OVER_BUDGET="DAY_OVER_BUDGET"
+class WarningCode(StrEnum):NO_LODGING="NO_LODGING"; FUEL_GAP="FUEL_GAP"; DAY_OVER_BUDGET="DAY_OVER_BUDGET"; STOP_CLOSED="STOP_CLOSED"  # §16.5
                            TOLLS_UNAVOIDABLE="TOLLS_UNAVOIDABLE"; UNVERIFIED_PLACES="UNVERIFIED_PLACES"
 class StageKey(StrEnum):   SPLIT="split"; LODGING="lodging"; HOURS="hours"; FUEL="fuel"; COST="cost"
 class CostKey(StrEnum):    FUEL="fuel"; TOLLS="tolls"; LODGING="lodging"; FOOD="food"; TICKETS="tickets"; RESERVE="reserve"
@@ -412,6 +413,7 @@ class PriceRepository(Protocol):
     # latest as_of for (region, fuel); falls back to region "RU"; raises NotFound if "RU" missing
     def food_default_check(self, town_population: int) -> int: ...          # from config table
     def lodging_default_night(self, town_population: int) -> int: ...
+    def defaults_as_of(self) -> date: ...                                  # §16.7: date of the food/lodging defaults
 
 class TollRepository(Protocol):
     def segments_on_route(self, route: Route) -> list[TollHit]: ...        # sorted by km_from
@@ -543,7 +545,7 @@ WHERE s.status='live' AND s.vehicle_class = 1 AND ST_DWithin(s.geom::geography, 
 | `overnight_eta_allowance_min` | `{"calm":120,"more_stops":150,"just_drive":30}` | §6.5 |
 | `fuel` | `{"usable_frac":0.8,"start_frac":1.0,"lookahead_km":40,"lookback_km":100,"coincide_km":2,"evening_next_day_km":60,"evening_window_km":40,"skip_near_finish_frac":0.10,"coffee_after_drive_min":60}` | §6.7 |
 | `rest_interval_min` | `{"calm":120,"more_stops":90,"just_drive":180}` | §6.8 |
-| `rest` | `{"window_before_min":30,"widen_before_min":60,"widen_after_min":15,"min_remaining_drive_min":30,"break_min_dwell":15}` | §6.8 |
+| `rest` | `{"window_before_min":30,"widen_before_min":60,"widen_after_min":15,"min_remaining_drive_min":30,"break_min_dwell":15,"max_detour_min":10,"min_gap_min":60}` | §6.8, §16.2 |
 | `dwell_min` | `{"coffee":15,"fuel":10,"fuel_coffee":15,"rest":20,"lunch":60,"sight_default":60,"via":30}` | §6.6 (SPEC §7.4) |
 | `lunch_window` | `["12:00","14:30"]`, `lunch_sweet_spot` `["12:30","13:30"]` | §6.8 |
 | `sights` | `{"max_per_day":{"calm":2,"more_stops":4,"just_drive":0},"min_score":2.0}` | §6.9 |
@@ -592,11 +594,13 @@ CostPatch(crew: Crew | None = None, budget_rub: int | None | Unset = UNSET, rese
 
 `cancel.check()` is called before stages 2, 3, 5, 6, 9, 10, 12. Events are emitted per §8.3.
 
+**Amended §16.2:** the stages are *executed* in the order 6 → 8 → 9 → 8b → 7 → 10 (rests last); the table keeps SPEC numbering. Approved signature changes (§16.1): `build_day_plans(route, overnights, fixed, inp, ctx, pts, profile)`, `choose_overnights(split, corridor, inp, ctx, profile=None)`, `build_base_route(...) -> Route` plus `toll_warnings(route, inp, ctx) -> list[PlanWarning]`.
+
 ### 6.2 Stages 0–2: normalize, resolve, base route
 
 `normalize_input` validates (raises `InvalidInput(field, reason)`): Russia bbox (`41.0 ≤ lat ≤ 82.0` and (`19.0 ≤ lon ≤ 180.0` or `−180.0 ≤ lon ≤ −168.0`)); `daily_km ∈ {150,200,…,900}`; crew limits; `len(vias) ≤ 3`; `destination` or `ready_route_id` present (both allowed: destination then ignored → `InvalidInput("destination","conflicts_with_ready_route")`); `start_at` within `[now − 1 day, now + 365 days]`. Defaults: `start_at` = next Saturday strictly after today (origin tz) at `day_start_first`; `round_trip`; `mood` [D-1]; tz of origin via `RegionLocator`.
 
-`resolve_points` builds the ordered waypoint list: origin, vias, destination (or the ready route's `via` points resolved to town coordinates; `stop` points become fixed `PlannedStop(kind=SIGHT, fixed=True)` placed later by projection), plus origin again when `round_trip`. Missing labels are filled with `GeocodingPort.reverse` (fallback «Точка на карте»).
+`resolve_points` builds the ordered waypoint list: origin, vias, destination (or the ready route's `via` points resolved to town coordinates; `stop` points become fixed `PlannedStop(kind=SIGHT, fixed=True)` placed later by projection), plus origin again when `round_trip`. **Amended §16.3:** ready-route `via` points are routing waypoints only and produce no stop; only user vias become `VIA` stops. Missing labels are filled with `GeocodingPort.reverse` (fallback «Точка на карте»).
 
 `build_base_route` calls `RoutingPort.route(RouteRequest(points, avoid_tolls))`, then:
 - for each `i`: `haversine(points[i], route.snapped[i]) > snap_max_km` → `Unreachable(i)`;
@@ -650,6 +654,8 @@ template_fits(t):                    # [D-3] SPEC "±10%" bounded by US-06 "neve
        and max(kms) <= template_hi(1.05) · daily_km
        and len(kms) <= ceil(total / (template_lo(0.90) · daily_km))
 ```
+**Amended §16.4:** `template_fits` additionally requires every template night town to have ≥ 1 lodging that passes the crew filters (§6.5); otherwise the engine split is used.
+
 Invariant (asserted in tests): for every non-template day, `day_km ≤ 1.05 · daily_km` (SPEC US-06), measured on `km_at` boundaries.
 
 ### 6.5 Stage 5: overnight choice (SPEC §7.3)
@@ -751,7 +757,7 @@ coincide(c)   = any existing stop (overnight hotel/town, fixed, via, sight, food
 
 ### 6.8 Stages 7–8: rest and meals
 
-Rest (per day, iterative):
+Rest (per day, iterative) — **superseded by §16.2**:
 ```
 R = rest_interval_min[mood]
 loop:
@@ -798,6 +804,8 @@ Opening hours (`hours.py`): supported OSM subset — `24/7`; rules separated by 
 
 ### 6.10 Stage 10: schedule with the single re-run rule
 
+**Amended by §16.5** (over-budget rule, final repair, `STOP_CLOSED`).
+
 ```
 def schedule_with_rerun(days, corridor, inp, ctx):
     sched = [schedule_day(d) for d in days]
@@ -815,6 +823,8 @@ def schedule_with_rerun(days, corridor, inp, ctx):
 Output rounding: `km_at`, `km_from_prev` = round-half-up of `km_at − prev.km_at + (prev.detour_km + s.detour_km)/2`; day `km` = round(`km_end − km_start + Σ detour_km of its stops`); trip `km` = Σ day km; `drive_min` = Σ driving minutes (rounded); times rounded to the minute (half-up) at render.
 
 ### 6.11 Stage 11: alternatives
+
+**Superseded by §16.6** (no neighbour/type restriction, per-alternative day patch, shortfall note, `delta_rub` definition).
 
 ```
 for stop in all days where stop.kind ∈ {SIGHT, FOOD, FUEL, REST} and not stop.fixed:
@@ -851,7 +861,7 @@ All money arithmetic uses `decimal.Decimal` with `ROUND_HALF_UP`; integers only 
 
 | Line | Computation (exact, before rounding) | Formula string (ru) | Breakdown rows |
 | --- | --- | --- | --- |
-| `fuel` | `Σ_r km_r × consumption / 100 × price(r, fuel_type)`; `km_r` = trip km (incl. detours) attributed to region `r` | one region: `«745 км × 8 л/100 × 62 ₽»`; several: `«745 км × 8 л/100 × ≈ 61,40 ₽ (средняя по 3 регионам)»`, where the shown price = `Σ cost_r / Σ litres_r` rounded to 0.10 ₽ | one per region: `«Ярославская область: 310 км × 8 л/100 × 61,90 ₽ = 1 540 ₽»` |
+| `fuel` | `Σ_r km_r × consumption / 100 × price(r, fuel_type)`; `km_r` = trip km (incl. detours) attributed to region `r` | one region: `«745 км × 8 л/100 × 62,00 ₽»`; several: `«745 км × 8 л/100 × ≈ 61,40 ₽ (средняя по 3 регионам)»` (prices always with kopecks; the km shown is `TripPlan.km`, §16.7), where the shown price = `Σ cost_r / Σ litres_r` rounded to 0.10 ₽ | one per region: `«Ярославская область: 310 км × 8 л/100 × 61,90 ₽ = 1 540 ₽»` |
 | `tolls` | `Σ_hits tariff(segment, entry_local_time)`; night tariff when the entry time is in the segment's night window (else `toll_night` config) | `«М-12: 800 ₽ + М-11: 1 200 ₽»`; none: `«платных дорог нет»` | one per hit, with «днём»/«ночью» |
 | `lodging` | `Σ_nights rooms × price_night_rub(selected hotel)`; `rooms = ceil(adults / 2)`, children share; NO_HOTEL night → `lodging_default_night(population)` | equal prices & rooms=1: `«Ярославль + Суздаль, 2 × 6 000»`; else `«Ярославль 6 000 + Суздаль 2 номера × 4 500»`; default price suffix `«(средняя цена)»` | one per night |
 | `food` | `people × Σ_meals check(meal)`; `people = adults + Σ child_weight` (child_weight 0.5 if age < 7 else 1; unknown age ⇒ `assumed_child_age` = 8 ⇒ 1) | uniform check: `«3 чел. × 7 приёмов × 600»`; else `«3 чел. × 7 приёмов × ≈ 640 (в среднем)»`; avg rounded to 10 | one per day: `«День 1: обед 650 + ужин 700»` |
@@ -862,7 +872,7 @@ Meal counting [D-6]: for each day `d`: **lunch** = 1 if the day's driving schedu
 
 Fuel region attribution: the planner samples the route every 10 km (`RegionLocator.locate`, memoised), assigns each 10 km bucket to the sample at its midpoint, and adds each stop's `detour_km` to the stop's region. Result is stored in `EngineState.region_km`.
 
-Per-stop `cost_rub` (shown on Road ahead rows): sight = its ticket total; food = `people × check`; overnight = `rooms × price_night`; fuel = informational `litres × price(region)` (not summed — the fuel line is distance-based); rest/start/finish/via = 0. All rounded to 10 ₽.
+Per-stop `cost_rub` (shown on Road ahead rows): sight = its ticket total; food = `people × check`; overnight = `rooms × price_night`; fuel = informational `litres × price(region)` (not summed — the fuel line is distance-based); rest/start/finish/via = 0. All rounded to 10 ₽. A food stop without `avg_check_rub` uses the same default as the food line (nearest town's population), §16.7.
 
 ### 7.2 Totals and rounding (SPEC §8 Rules)
 
@@ -939,6 +949,8 @@ Templates live in `verst_planner/resources/reasons.ru.json` (defaults, also the 
 | `sight.default` | `{dwell} на осмотр.` | dwell («полтора часа») |
 | `sight.dog_waits` | `{dwell} на осмотр. Собака ждёт с одним из взрослых.` | dwell |
 | `sight.osm` | `По открытым данным.` | — |
+| `via.user` (§16.3) | `Заезд по вашей просьбе.` | — |
+| `alternatives.none` / `alternatives.one` (§16.6) | `Других вариантов в это время поблизости нет.` / `Нашли только один вариант в это время.` | — |
 | `start.default` / `finish.home` / `finish.default` | `Выезд в {time}.` / `Дома к {part_of_day}.` / `Финиш.` | time, part_of_day |
 | `stage.route` / `stage.split` / `stage.split_ring` | `Прокладываем дорогу` / `Делим путь на {n} {days_word} по ≈ {km} км` / `Делим кольцо на {n} {days_word} по ≈ {km} км` | n, days_word, km |
 | `stage.lodging.dog` / `.family` / `.default` / `.none` | `Ищем отели, куда пустят с собакой` / `Ищем отели с семейными номерами` / `Ищем, где удобно переночевать` / `Ищем остановки по пути` | — |
@@ -946,9 +958,9 @@ Templates live in `verst_planner/resources/reasons.ru.json` (defaults, also the 
 | `stage.fuel` | `Считаем бензин: {consumption} л на 100 км` | consumption |
 | `stage.cost` | `Считаем, сколько стоит поездка` | — |
 | `hint.cheaper_overnight` / `hint.fewer_sights` / `hint.just_drive` | `Выберите ночёвку дешевле` / `Уберите пару платных мест` / `Попробуйте режим «Просто доехать»` | — |
-| `warning.NO_LODGING` / `FUEL_GAP` / `DAY_OVER_BUDGET` / `TOLLS_UNAVOIDABLE` / `UNVERIFIED_PLACES` | SPEC §12 text / `На участке {km} км мало заправок — заправьтесь заранее` / `День {day} получился длинным — можно убрать остановку` / `Без платных дорог не проехать — платный участок учтён в расчёте` / `Часть мест по открытым данным — не проверены` | km, day |
+| `warning.NO_LODGING` / `FUEL_GAP` / `DAY_OVER_BUDGET` / `TOLLS_UNAVOIDABLE` / `UNVERIFIED_PLACES` | SPEC §12 text / `На участке {km} км мало заправок — заправьтесь заранее` / `День {day} получился длинным — можно убрать остановку` / `Без платных дорог не проехать — платный участок учтён в расчёте` / `Часть мест по открытым данным — не проверены`; `warning.STOP_CLOSED` (§16.5): `«{name}» в этот день закрыт — убрали из маршрута` | km, day, name |
 
-Overnight reason selection: `other` = the considered town closest to the target (if it is not the pick); `dkm = round(|pick.km_at − other.km_at|)` (or `|pick − T|` for `.limit`). Dominant factor = argmax over `(w_h·ΔH, w_q·ΔQ, w_e·ΔE)` between pick and other → `.hotels` / `.quality` / `.evening`; if `dkm < 10` → `overnight.on_target`. Append `overnight.cap_ok` when the day km ≤ `daily_km`. Russian helpers in `explain/ru.py`: `plural(n, one, few, many)`, `prepositional(town)` (uses `Town.name_prep_ru`, falls back to the nominative), `duration_phrase(min)` (30 → «полчаса», 60 → «час», 90 → «полтора часа», 120 → «два часа», else «{h} ч {m} мин»), `part_of_day(time)` (< 12 «обеду» … ≥ 17 «вечеру»).
+Overnight reason selection: `other` = the considered town closest to the target (if it is not the pick); `dkm = round(|pick.km_at − other.km_at|)`; for `.limit` (no other town considered, pick before the cap) `dkm = round(day_start_km + daily_km − pick.km_at)`, i.e. distance to the user's limit, not to the even-split target (§16.8). Dominant factor = argmax over `(w_h·ΔH, w_q·ΔQ, w_e·ΔE)` between pick and other → `.hotels` / `.quality` / `.evening`; if `dkm < 10` → `overnight.on_target`. Append `overnight.cap_ok` when the day km ≤ `daily_km`. Russian helpers in `explain/ru.py`: `plural(n, one, few, many)`, `prepositional(town)` (uses `Town.name_prep_ru`, falls back to the nominative), `duration_phrase(min)` (30 → «полчаса», 60 → «час», 90 → «полтора часа», 120 → «два часа», else «{h} ч {m} мин»), `part_of_day(time)` (< 12 «обеду» … ≥ 17 «вечеру»).
 
 ### 8.2 Share text (`explain/share.py`)
 
@@ -1309,15 +1321,16 @@ class PlanResponse(BaseModel):      # mirrors codec.plan_to_json; SPEC §12 fiel
     warnings: list[WarningDTO] (+); input: TripInputDTO (+); engineVersion: str (+)
     saved: bool (+); shareSlug: str | None (+); createdAt: datetime (+); shareText: str (+)
 class DayDTO:   day: int; km: int; driveMin: int; tz: str (SPEC §12 "tz per day"); startAt: str; endAt: str; overBudget: bool; stops: list[StopDTO]
-class StopDTO:  id; seq; kind; sign; placeId | None; townId | None; name; note | None; lat; lon;
+class StopDTO:  id; seq; kind; sign; placeId | None; townId | None; name; note | None; lat; lon; alternativesNote | None (§16.6);
                 arriveAt | None; departAt | None; kmFromPrev; kmAt; dwellMin; tags: list[str]; costRub;
                 reason; verified: bool; replaceable: bool; alternatives: list[AlternativeDTO];
                 hotelOptions: list[HotelOptionDTO]; selectedHotelId | None
-class AlternativeDTO: id; placeId; name; deltaMin; deltaRub; shiftMin; units: AltUnitsDTO; stop: StopDTO (alternatives=[])
+class AlternativeDTO: id; placeId; name; deltaMin; deltaRub; shiftMin; units: AltUnitsDTO; stop: StopDTO (alternatives=[]);
+                dayPatch: list[{stopId, arriveAt | None, departAt | None, kmFromPrev, seq}]   # §16.6: the day re-timed with this alternative
 class CostDTO:  lines: list[CostLineDTO]; reserveOn; subtotalRub; totalRub; perPersonRub; budgetRub | None;
                 remainingRub | None; overBudget; hints: list[str] (rendered ru); pricesAsOf: str; units: CostUnitsDTO
 class CostLineDTO: key; title; rub; formula; asOf; enabled; breakdown: list[{label, formula, rub}]
-class ReasonsDTO: overnights: list[{day, townId | None, town, text, candidates: list[str]}]
+class ReasonsDTO: overnights: list[{day, townId | None, town, text, candidates: list[str], fallback}]   # fallback added §16.1
 class WarningDTO: code; day | None; message
 class TripPatchDTO: crew: CrewDTO | None; budgetRub: int | None; reserveOn: bool | None; hotelChoice: {stopId, placeId} | None
 ```
@@ -1731,6 +1744,11 @@ One JSON file per case in `backend/planner/tests/golden/cases/`, file name `Gnn_
 | `determinism` | planning the same input twice gives identical JSON |
 | `events` | first event is `stage split`; progress non-decreasing; one non-provisional `stop` event per final stop, in order |
 | `russian_text` | every `*_ru`/reason/formula string contains no Latin letters except road refs and units |
+| `break_spacing` (§16.2) | consecutive breaks (stops with dwell ≥ 15 min, day start) are ≥ `rest.min_gap_min` driving minutes apart, except lunch/sight/overnight following a user or template stop |
+| `rest_reason` (§16.2) | the `drive` value in a `rest.generic` reason equals driving since the previous break ±15 min |
+| `lunch_present` (§16.2) | a day overlapping 12:00–14:30 has a lunch stop unless the case lists it in `expect.noLunchDays` |
+| `alternatives_note` (§16.6) | every replaceable stop has ≥ 2 alternatives or a non-empty `alternativesNote` |
+| `formula_km` (§16.7) | the km in the fuel formula equals `TripPlan.km` |
 
 ### 13.4 The 20 golden trips
 
@@ -1808,6 +1826,11 @@ G01–G12 are Sprint 1 (G01–G05 are the Manager's mandatory set). SPEC §17 co
 | D-13 | Tolls when `avoidTolls` impossible | route kept, toll costed, warning `TOLLS_UNAVOIDABLE` |
 | D-14 | Children ages | optional `childAges`; unknown age counts as ≥ 7 (food weight 1, child ticket) — conservative estimate |
 | D-15 | Rooms rule | `ceil(adults / 2)` rooms (SPEC), children share; dog adds no cost in MVP |
+| D-17 | Rest placement (Q-A, review 2026-10-23) | Rests are planned last, between existing breaks; candidates need `detour_min ≤ 10`; breaks ≥ 60 driving minutes apart; an existing fuel stop in the window is upgraded to coffee (§16.2) |
+| D-18 | Lunch after sights (Q-B) | lunch planned before and again after sights; a family day overlapping 12:00–14:30 drops optional sights before it drops lunch (§16.2) |
+| D-19 | Alternatives (Q-C) | any pool member within ±45 min at any position; offline exactness via a per-alternative day patch; < 2 → explicit note (§16.6) |
+| D-20 | Day time budget (Q-E) | the budget caps optional content; `DAY_OVER_BUDGET` only when the day exceeds `max(budget, mandatory minutes)` (§16.5) |
+| D-21 | Template vias | routing waypoints only, no stop rows (§16.3) |
 | D-16 | Meals vs. Waybill canvas (Q-4, decided by Manager 2026-10-23) | Follow SPEC §8: breakfast at the hotel included, lunch + dinner on the road, first day after breakfast at home → 5 meals for the 3-day Golden Ring; the canvas «7 приёмов» example is illustrative only and is corrected by DES-004 |
 
 ### 15.2 SPEC deviations and extensions (for CEO/Manager visibility)
@@ -1824,6 +1847,7 @@ G01–G12 are Sprint 1 (G01–G05 are the Manager's mandatory set). SPEC §17 co
 | X-8 | `TripInput` adds `reserveOn`, `simplify`, `crew.childAges` | SPEC §5.4 «Упростить маршрут», §8 child rules |
 | X-9 | Errors add `UNAUTHORIZED` 401, `NOT_FOUND` 404, `LIMIT_REACHED` 409, `INTERNAL` 500 | completeness |
 | X-10 | Design token `hill` #3C3346 used by the canvas but missing from SPEC §6 | canvas is the visual source of truth; to be added to SPEC §6 (DES-001) |
+| X-12 | Warning `STOP_CLOSED`; DTO fields `alternativesNote`, `dayPatch`, `reasons.overnights[].fallback`; port method `PriceRepository.defaults_as_of()` | review amendments §16 |
 | X-11 | Python 3.12 target, but sandbox verification on 3.13; the planner must run on both (no 3.13-only syntax) | environment |
 
 ### 15.3 Traceability (SPEC → design)
@@ -1885,3 +1909,117 @@ G01–G12 are Sprint 1 (G01–G05 are the Manager's mandatory set). SPEC §17 co
 | Q-6 | Ask children's ages in the Instruments mirror? | Not in MVP UI; API accepts optional `childAges`; unknown age counts as ≥ 7 (conservative cost) |
 | Q-7 | Travelpayouts marker/program ids | Until provided, partner links open unwrapped (no attribution) and are logged; booking UX unchanged |
 | Q-8 | Keep «Пример расчёта» wording until the 3 field trips confirm ±15 % | Yes (copy key `waybill.footnote` switches by feature flag `cost_confirmed`) |
+
+---
+
+## 16. Sprint 1 review amendments (2026-10-23)
+
+These amendments come from the tech-lead review of DEV-001…021. They take precedence over the sections that point here.
+
+### 16.1 Approved implementation deviations (from `docs/dev-notes.md`)
+
+| # | Deviation | Verdict |
+| --- | --- | --- |
+| 1 | `geo` may import `domain`; `Corridor` lives in `pipeline` | Approved (§3.1 rule 2 amended) |
+| 2 | Model extensions: `NormalizedInput.tz`; `PlannedStop.litres/coffee`; `OvernightChoice.nearest/nearest_town/region_code/detour_km/detour_min`; `Alternative.units`; `HotelPrice.breakfast_included`; `CostUnits.as_of/mood_just_drive`; `CostResult.hints_ru`; `OvernightReason.fallback`; `EngineState.days/candidates/rerun/town_kms` and `StopState` | Approved. `EngineState` is server-only; budget: ≤ 400 KB JSON for a 1,500 km trip (test added, §16.9) |
+| 3 | Non-template Russian strings in `resources/strings.ru.json` | Approved |
+| 4 | `pipeline → cost` forbidden; per-stop cost injected through `PlanContext.stop_cost`; `CostInput` built in `engine.py` | Approved. `engine.py` must use a public `PlanContext.region_info(code)` instead of `ctx._region_by_code` |
+| 5 | Stage signature changes | Approved (§6.1 amended) |
+| 6 | Alternatives keep neighbours and place type; `shift_min` = arrival shift of the next stop | **Rejected**, replaced by §16.6 |
+| 7 | Fixed template stops placed with `PolylineIndex.nearest_in_range` | Approved |
+| 8 | `adults + children ≤ 8` (Manager OI-07), vias rejected with a ready route, `N > max_days` → `InvalidInput("dailyKm","too_many_days")` | Approved (§6.2) |
+| 9 | М-4 toll-free in `central_russia_v1` | Approved for Sprint 1; G18 (Sprint 2) adds the М-4 segments |
+| 10 | No `docs/design/.gitkeep` | Approved |
+| 11 | Copy review R-1…R-4; formulas «8 л/100», settings/Drive «8,0», prices with kopecks | Approved (§7.1 amended) |
+| — | Other recorded decisions: hours semantics (closing minute closed, `covers` accepts end == closing); fake snapping rule; one toll hit per pass; F3 marks the first failing day; template night without passing hotel; via at the overnight town merged into it; rest clock on driving minutes | Approved, except the template night case (superseded by §16.4) |
+
+### 16.2 Breaks, rests and lunch (replaces the rest part of §6.8; D-17, D-18)
+
+Execution order per plan (and in the single re-run): **6 fuel → 8 lunch → 9 sights → 8b lunch for days still without one → 7 rests → 10 schedule/re-run → final repair (§16.5)**.
+
+*Breaks* are the day start and every stop with `dwell_min ≥ break_min_dwell` (15): sights, lunch, coffee fuel stops, rests, vias.
+
+```
+plan_rests(day):                                   # runs after lunch and sights
+  R = rest_interval_min[mood]; G = rest.min_gap_min (60)
+  loop:
+    clock = DriveClock.of(day)                     # driving minutes incl. detours, no dwell
+    find the first gap between consecutive breaks b0, b1 (b1 = day end if none) with drive(b0→b1) > R
+    if none: break
+    x = km where drive since b0 = R
+    if drive(x → day end) < min_remaining_drive_min: break
+    admissible(c) = c in rest pool, unused, inside the day, c.detour_min ≤ rest.max_detour_min (10),
+                    drive(b0 → c) ≥ G and drive(c → b1) ≥ min(G, drive(b0 → b1) − R)
+    1. an existing FUEL stop f with drive(b0→f) ∈ [R − 60, R + 15] and not coffee:
+         upgrade f to coffee (dwell fuel_coffee = 15) if f has cafe_at_fuel → continue
+    2. cands = admissible with drive(b0→c) ∈ [R − 30, R]; else ∈ [max(G, R − 60), R + 15]
+    3. no cands → virtual break at x (no stop), continue
+    insert argmax rest_score (tie: closer to R, then id)
+```
+- The rest pool is unchanged (§6.8). A short sight used as a rest keeps its own reason (`sight.default`).
+- `rest.generic` gets `drive` = driving since `b0`, rounded to 15 min.
+
+Sights and the rest reserve: `day_ok(day)` (stage 9 and the lunch probes) evaluates the budget on a **copy** of the day after running `plan_rests` on it, so sights can never push rests out of the budget. Runtime gate: the 1,500 km perf test stays < 1.0 s.
+
+Lunch 8b: for each day overlapping the lunch window without a lunch stop, run the lunch selection of §6.8. If no candidate is feasible and the day has non-fixed sights, drop sights in ascending `sight_score` (tie: later km) one at a time and retry, until a lunch fits or no droppable sight is left. A missing lunch is acceptable only when the day's corridor has no feasible food place at all. Dinner and breakfast stay cost-only (D-5).
+
+### 16.3 Vias (D-21)
+
+- Ready-route `via` points: routing waypoints only. No `VIA` stop, no dwell, no row. The towns appear through their sights, lunch and overnights.
+- User vias (Navigator «+ заехать по пути»): `VIA` stop, dwell `dwell_min.via` (30), sign `city`, reason `via.user`, never replaceable.
+
+### 16.4 Template nights with the crew filter
+
+`template_fits` = the §6.4 rule **and** every night town has ≥ 1 lodging passing `passes(h, crew)`. If it fails, the engine split (§6.5) runs and may still pick the template town. The `template_no_hotel` path is removed.
+
+### 16.5 Day budget, final repair, `STOP_CLOSED` (D-20)
+
+- `mandatory_min(day)` = driving + detours + dwell of all `auto` stops (fuel, coffee, rests, lunch). The time budget limits optional content: sights added by stage 9 must fit `day_budget_min[mood]`.
+- A day is over budget iff `duration > max(day_budget_min[mood], mandatory_min) + 1e-6`. It can then only be caused by fixed or user stops (template sights, user vias). In that case raise `DAY_OVER_BUDGET` and set `DayResult.over_budget = true`. A long drive the user asked for through `dailyKm` (G04) raises no warning.
+- **Final repair**, after the re-run (or after the first pass when there is no re-run), one pass per day in stop order:
+  1. a non-fixed sight not open for its whole visit → drop it and reschedule;
+  2. a fixed sight not open → drop it, warning `STOP_CLOSED` (`name`), reschedule;
+  3. a lunch out of window → drop it, then run lunch 8b once for that day;
+  4. run `plan_rests` for the day again (breaks may have moved).
+  After the repair, invariants `hours_open`, `lunch_window` and `break_spacing` must hold by construction.
+- `STOP_CLOSED` is a warning in `warnings[]`, never an HTTP error. The message comes from `warning.STOP_CLOSED`.
+
+### 16.6 Alternatives (replaces §6.11; D-19)
+
+```
+for each replaceable stop s (kinds SIGHT, FOOD, FUEL, REST; not fixed; template sights excluded):
+  pool = the stage pool of s: rest pool for stops inserted by stage 7 (rests, coffee fuel, short sights),
+         food for lunch, fuel for range fuel stops, sights for stage-9 sights
+  for c in pool by stage score desc, unused anywhere in the trip, inside the day:
+      day' = day with s removed and c inserted at its km position (ANY position; order may change)
+      re-plan nothing else; schedule day'
+      keep c iff |arrive'(c) − arrive(s)| ≤ 45 min (SPEC 7.2.11)
+             and every sight of day' open, lunch in window, duration' ≤ max(budget, duration(day)),
+             fuel: every gap between fills ≤ full range (skip when FUEL_GAP)
+      stop after 3 kept alternatives
+  alternatives_note_ru = None if ≥ 2 kept; else render `alternatives.none` (0) / `alternatives.one` (1)
+```
+- `Alternative.day_patch: tuple[StopTime, ...]`, `StopTime(stop_id: str, seq: int, arrive_at, depart_at, km_from_prev: int)`. It covers every stop of the day in the new order, with the alternative carrying the replaced stop's id. Offline replace applies the patch verbatim: no client-side shift arithmetic. `shift_min` stays for display only: the arrival shift of the first stop after the replaced one in the new order (0 if none).
+- `delta_min` = change of the day's end time. `delta_rub` = `round_to(Δ stop cost excl. fuel stops + Δ detour_km × consumption / 100 × price(region of c), 10)`. Fuel stops have Δ stop cost 0: the fuel line is distance-based, so only the detour changes it. Test: for every alternative of every golden trip, `recompute(units, replaced={s: alt.units})` changes Σ of the 5 base lines by `delta_rub ± 10`.
+- `Planner.replace_stop` reproduces exactly the day of the alternative's `day_patch` (test: equal arrive/depart/km for all stops). It then recomputes that day's alternatives.
+- Coverage gate (golden, central world, moods calm/more_stops: G01, G02, G03, G06, G07, G08): ≥ 70 % of replaceable stops have ≥ 2 alternatives. The world fixture is enriched if needed (more rest areas, cafés and sights within ±45 min of the planned ones). The golden runner prints the share per case.
+
+### 16.7 Cost presentation and defaults date
+
+- Fuel formula km = `TripPlan.km` (Σ day km). Exact region km stay in `units` and the breakdown. Invariant `formula_km`.
+- `PriceRepository.defaults_as_of() -> date` (fake: `world.asOf`; Pg: `core.app_config['planner'].updated_at` date) replaces the "oldest fuel price" stand-in for lodging/food/tickets defaults.
+- A food stop's `cost_rub` and the food line use the same default check (nearest town by population at the lunch ETA, §7.1).
+- Fuel reasons: `fuel.evening` takes precedence over `fuel.last`.
+
+### 16.8 Reasons
+- `.limit` dkm per §8.1 (distance to `day_start_km + daily_km`).
+- VIA reason `via.user` (§16.3).
+
+### 16.9 Cost patch (`Planner.recompute_cost`)
+- Reject with `InvalidInput("crew", "replan_required")` when the patch changes `dog`, or changes `children` between 0 and > 0. These change the lodging filters (US-05 invariant).
+- After any crew change, re-render every stop's `cost_rub` (tickets, meals, rooms) and every `HotelOption.price_crew_rub`/`rooms`, so Road ahead rows agree with the Waybill.
+- `EngineState` size test: the JSON of a 1,500 km trip is ≤ 400 KB.
+
+### 16.10 Fixture/tooling hygiene
+- `tools/gen_worlds.py` is the source of the worlds. `tests/unit/test_worlds.test_generator_matches_committed_json` regenerates in memory and compares byte-for-byte with the committed files. The same applies to `gen_cost_contract.py`.
+- Golden line tolerances: `fuel` ±5 %; all other lines are integer world prices → tolerance 0. Every non-error case pins `costTotalRub` (±5 %, SPEC §17) and `warnings` exactly.
