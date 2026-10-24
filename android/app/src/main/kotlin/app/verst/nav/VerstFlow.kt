@@ -61,6 +61,8 @@ data class DriveUi(
     val days: Int = 0,
     val done: Boolean = false,
     val error: EngineErrorDto? = null,
+    /** 5.4 flying signs: the engine's `stop` events in arrival order. */
+    val signs: List<app.verst.core.model.dto.StopEventDto> = emptyList(),
 )
 
 /** Plate toasts of 5.5/5.6/D-6 (components §16 `PlateToast`); the screen picks the copy by type. */
@@ -71,6 +73,9 @@ sealed interface Toast {
     data object StorageFull : Toast
     data object EngineFailed : Toast
     data object NeedInternet : Toast
+
+    /** «Отметили: ночёвка в … забронирована» + «Вернуть» (stop id). */
+    data class Booked(val stopId: String) : Toast
     data object TripDeleted : Toast
 }
 
@@ -201,17 +206,66 @@ class VerstFlow(
     var bookedDialog by mutableStateOf(false)
         private set
 
-    /** Overnight stop ids marked «Забронировали» for the current trip (persisted with a saved trip). */
-    val booked = mutableStateListOf<String>()
+    /** 5.7 §8: per overnight stop, the hotel marked «Забронировали» (persisted with a saved trip). */
+    val booked = mutableStateMapOf<String, String>()
+    private var undoBooked: String? = null
+
+    /** OI-39: the origin's genitive from the engine («Москвы»), the nominative until known. */
+    var originGen by mutableStateOf(DefaultOrigin.label)
+        private set
 
     /** Trips whose Waybill stamp has played (motion.stamp once per trip version, 5.6 §3.1). */
     private val stampShown = mutableSetOf<String>()
+
+    // ---- DEV-127 debug panel (plain list, not part of visual QA)
+    var debugGolden by mutableStateOf(false)
+        private set
+    var debugSlowSec by mutableStateOf(0)
+    /** null = no forced error; else the engine code the next plan returns. */
+    var debugForceError: String? by mutableStateOf(null)
+    val debugWorld: String get() = gateway.world
+
+    fun openDebug() = push(Route.Debug)
+
+    fun setWorld(id: String) {
+        if (gateway.world == id) return
+        gateway.world = id
+        origin = if (id == app.verst.core.model.DefaultWorld) DefaultOrigin else GeoPoint("Тестовск", 58.0, 50.0)
+        originGen = origin.label
+        known.clear()
+        rowKm.clear()
+        popular = emptyList()
+        destination = null
+        loadRoutes()
+        loadOriginForms()
+    }
+
+    fun setGoldenClock(on: Boolean) {
+        debugGolden = on
+        known.clear()
+        scope.launch { gateway.setClock(if (on) "golden" else "system") }
+    }
+
+    fun setOffline(on: Boolean) {
+        connectivity.online = !on
+    }
+
+    /** «Сбросить данные»: saved trips, the current trip and the draft. */
+    fun resetData() {
+        clearSaved()
+        result = null
+        booked.clear()
+        destination = null
+        known.clear()
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+    }
 
     val adults: Int get() = 1 + (if (frontAdult) 1 else 0) + seats.count { it == Seat.ADULT }
     val children: Int get() = seats.count { it == Seat.CHILD }
 
     init {
         loadRoutes()
+        loadOriginForms()
         scope.launch {
             val trips = withContext(io) { runCatching { store.load() }.getOrDefault(emptyList()) }
             saved.clear()
@@ -377,6 +431,8 @@ class VerstFlow(
     fun pick(s: SuggestionDto) {
         if (editingFrom) {
             origin = GeoPoint(s.name, s.lat, s.lon)
+            originGen = s.nameGenRu ?: s.name
+            if (s.nameGenRu == null) loadOriginForms()
             rowKm.clear()
             editingFrom = false
             loadRoutes()
@@ -481,16 +537,27 @@ class VerstFlow(
             val pending = ArrayDeque<Pair<String, Float>>() // stage text, engine progress at that stage
             var days = 0
             var finished: EngineResult<PlanResultDto>? = null
+            val forced = debugForceError
+            val slowMs = debugSlowSec * 1000L
             val engine = launch {
+                if (forced != null) {
+                    delay(STEP_GAP_MS)
+                    finished = EngineResult.Err(EngineErrorDto(forced, "debug: forced"))
+                    return@launch
+                }
                 finished = gateway.plan(id, request) { ev ->
                     when (ev.event) {
                         "stage" -> ev.text?.let { t ->
                             if (pending.none { it.first == t } && t !in drive.lines) pending.addLast(t to (ev.progress ?: 0.0).toFloat())
                         }
-                        "stop" -> days = maxOf(days, ev.day ?: 0) // days as the engine splits them, not the estimate
+                        "stop" -> {
+                            days = maxOf(days, ev.day ?: 0) // days as the engine splits them, not the estimate
+                            ev.stop?.let { st -> drive = drive.copy(signs = drive.signs + st) }
+                        }
                     }
                     Unit
                 }
+                if (slowMs > 0) delay(slowMs) // debug «Задержать готовность плана»
             }
             // Pacer: reveal one step per 400 ms while the engine works (or until the queue is empty); the bar
             // follows the revealed step, so it never runs ahead of the text.
@@ -527,12 +594,12 @@ class VerstFlow(
         bearing: String,
         savedId: String?,
         fromSaved: Boolean,
-        bookedStops: List<String> = emptyList(),
+        bookedStops: Map<String, String> = emptyMap(),
     ) {
         result = r
         tripSession += 1
         booked.clear()
-        booked.addAll(bookedStops)
+        booked.putAll(bookedStops)
         resultRequest = request
         resultBearing = bearing
         this.savedId = savedId
@@ -640,7 +707,7 @@ class VerstFlow(
     fun selectHotel(stopId: String, placeId: String) {
         val r = result ?: return
         val stop = r.trip.daysList.flatMap { it.stops }.firstOrNull { it.id == stopId } ?: return
-        if (stop.selectedHotelId == placeId || stopId in booked || costBusy) return
+        if (stop.selectedHotelId == placeId || costBusy) return
         costBusy = true
         localCost(r) { trip -> CostApply.apply(r.trip, LocalCost.hotel(trip, stopId, placeId), r.trip.cost.reserveOn, stopId to placeId) }
         scope.launch {
@@ -666,21 +733,53 @@ class VerstFlow(
 
     fun needInternet() = showToast(Toast.NeedInternet)
 
-    /** Sheet dismissed (button, ×, back) → «Забронировали?» unless this night is already booked. */
+    private fun selectedHotel(stopId: String): String? =
+        result?.trip?.daysList?.flatMap { it.stops }?.firstOrNull { it.id == stopId }?.let { it.selectedHotelId ?: it.hotelOptions.firstOrNull()?.placeId }
+
+    /** The selected hotel of [stopId] is the booked one (Road «Забронировано», 5.7 booked CTA). */
+    fun isBooked(stopId: String): Boolean = booked[stopId] != null && booked[stopId] == selectedHotel(stopId)
+
+    /** Sheet dismissed (button, ×, back) → «Забронировали?» unless the selected hotel is already booked. */
     fun closePartner() {
         partnerOpen = false
         val sid = exitStopId ?: return
-        if (sid !in booked) bookedDialog = true
+        if (!isBooked(sid)) bookedDialog = true
     }
 
+    /** «Да, забронировали» marks the selected hotel (moving the mark, one per night) + toast with «Вернуть». */
     fun answerBooked(yes: Boolean) {
         bookedDialog = false
         val sid = exitStopId ?: return
-        if (yes && sid !in booked) {
-            booked.add(sid)
-            savedCurrent = false
-            // A saved trip keeps its booking at once.
-            if (savedId != null) save(silent = true)
+        val pid = selectedHotel(sid) ?: return
+        if (yes) {
+            undoBooked = booked[sid] ?: ""
+            booked[sid] = pid
+            persistBooking()
+            showToast(Toast.Booked(sid))
+        }
+    }
+
+    /** «Вернуть» on the booked toast: the previous mark (or none). */
+    fun undoBooking() {
+        val sid = exitStopId ?: return
+        val prev = undoBooked ?: return
+        undoBooked = null
+        if (prev.isEmpty()) booked.remove(sid) else booked[sid] = prev
+        persistBooking()
+        dismissToast()
+    }
+
+    private fun persistBooking() {
+        savedCurrent = false
+        if (savedId != null) save(silent = true) // a saved trip keeps its booking at once
+    }
+
+    /** The origin's name forms from the engine (OI-39). */
+    private fun loadOriginForms() {
+        val o = origin
+        scope.launch {
+            val r = gateway.reverse(o)
+            if (r is EngineResult.Ok && o == origin) r.value?.nameGenRu?.let { originGen = it }
         }
     }
 
@@ -742,7 +841,7 @@ class VerstFlow(
         toast = t
         toastJob?.cancel()
         toastJob = scope.launch {
-            delay(if (t is Toast.Replaced || t is Toast.TripDeleted) 6_000 else 3_000)
+            delay(if (t is Toast.Replaced || t is Toast.TripDeleted || t is Toast.Booked) 6_000 else 3_000)
             toast = null
             if (t is Toast.Replaced) undoTrip = null
             if (t is Toast.TripDeleted) lastDeleted = null
@@ -760,7 +859,7 @@ class VerstFlow(
     fun save(silent: Boolean = false) {
         val r = result ?: return
         val id = savedId ?: UUID.randomUUID().toString()
-        when (val up = SavedTrips.upsert(saved.toList(), SavedTrips.entry(id, now(), r, resultBearing, booked.toList()))) {
+        when (val up = SavedTrips.upsert(saved.toList(), SavedTrips.entry(id, now(), r, resultBearing, booked.toMap()))) {
             SavedTrips.Upsert.LimitReached -> limitDialog = true
             is SavedTrips.Upsert.Saved -> {
                 saved.clear()
@@ -839,7 +938,7 @@ class VerstFlow(
     fun openSaved(id: String) {
         val s = saved.firstOrNull { it.id == id } ?: return
         tripsSheet = false
-        showTrip(SavedTrips.result(s), request = null, bearing = s.bearing8, savedId = s.id, fromSaved = true, bookedStops = s.bookedStops)
+        showTrip(SavedTrips.result(s), request = null, bearing = s.bearing8, savedId = s.id, fromSaved = true, bookedStops = s.bookedHotels)
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
         push(Route.Road)
     }

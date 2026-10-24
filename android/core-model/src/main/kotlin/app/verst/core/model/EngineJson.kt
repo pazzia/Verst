@@ -2,6 +2,7 @@ package app.verst.core.model
 
 import app.verst.core.model.dto.EngineErrorDto
 import app.verst.core.model.dto.EstimateDto
+import app.verst.core.model.dto.PlaceNameDto
 import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.ReadyRouteDto
@@ -60,6 +61,7 @@ object EngineJson {
         }
 
     fun estimate(envelope: String) = decode(envelope, EstimateDto.serializer())
+    fun placeName(envelope: String) = decode(envelope, PlaceNameDto.serializer().nullable)
     fun kmList(envelope: String) = decode(envelope, ListSerializer(Int.serializer().nullable))
 
     fun trip(text: String): TripDto = json.decodeFromString(TripDto.serializer(), text)

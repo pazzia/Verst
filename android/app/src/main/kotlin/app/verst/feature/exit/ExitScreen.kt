@@ -58,7 +58,6 @@ import app.verst.core.ui.components.ExitScene
 import app.verst.core.ui.components.Icon
 import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.Phases
-import app.verst.core.ui.components.SecondaryButton
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.components.dashboardSurface
 import app.verst.core.ui.components.naviPanel
@@ -81,14 +80,21 @@ data class ExitUi(
     /** 1-based night number and the trip's night count («НОЧЁВКА 1 ИЗ 2»). */
     val night: Int,
     val nights: Int,
-    val booked: Boolean,
+    /** The hotel marked as booked for this night (one per night), or null. */
+    val bookedPlaceId: String?,
     val offline: Boolean,
     /** Prepositional town for «Отметим ночёвку в Ярославле…». */
     val townPrep: String,
     val partnerOpen: Boolean = false,
     val dialogOpen: Boolean = false,
     val toast: Toast? = null,
-)
+    val canUndo: Boolean = false,
+) {
+    val selectedId: String? get() = stop.selectedHotelId ?: stop.hotelOptions.firstOrNull()?.placeId
+
+    /** The selected option is the booked one: the CTA re-opens the booking. */
+    val booked: Boolean get() = bookedPlaceId != null && bookedPlaceId == selectedId
+}
 
 interface ExitActions {
     fun back()
@@ -97,6 +103,7 @@ interface ExitActions {
     fun closePartner()
     fun answer(booked: Boolean)
     fun needInternet()
+    fun undoBooking()
 }
 
 private val DashH = 434.dp
@@ -121,7 +128,13 @@ fun ExitScreen(ui: ExitUi, a: ExitActions) {
                 BookCta(ui, a, Modifier.align(Alignment.BottomCenter).padding(start = 14.dp, end = 14.dp, bottom = 24.dp))
             }
             val t = ui.toast
-            if (t != null) PlateToast(toastText(t), bottom = 24.dp + DesignTokens.size.ctaBookH + 16.dp)
+            if (t != null) {
+                val text = if (t is Toast.Booked) stringResource(R.string.exit_booked_toast, ui.townPrep) else toastText(t)
+                PlateToast(
+                    text, bottom = 24.dp + DesignTokens.size.ctaBookH + 16.dp,
+                    action = if (t is Toast.Booked && ui.canUndo) stringResource(R.string.common_undo) else null, onAction = a::undoBooking,
+                )
+            }
             if (ui.partnerOpen) MockPartnerSheet(ui, maxHeight, a)
             if (ui.dialogOpen) BookedDialog(ui, a)
         }
@@ -130,12 +143,12 @@ fun ExitScreen(ui: ExitUi, a: ExitActions) {
 
 private fun selectedOption(s: StopDto): HotelOptionDto? = s.hotelOptions.firstOrNull { it.placeId == s.selectedHotelId } ?: s.hotelOptions.firstOrNull()
 
-/** components §12.1 distance: to 100 m below 1 km («800 м»), to 0,1 km above («1,2 км»). */
+/** components §12.1 distance (OI-41 `exitDistanceM`): to 100 m below 1 km («800 м»), to 0,1 km above («1,2 км»). */
 @Composable
-private fun distanceText(km: Double): String = if (km < 0.95) {
-    stringResource(R.string.exit_sign_distance_m, maxOf(100, ((km * 1000) / 100).roundToInt() * 100))
-} else {
-    stringResource(R.string.exit_sign_distance_km, "%.1f".format(java.util.Locale.ROOT, km).replace('.', ','))
+private fun distanceText(m: Int): String? = when {
+    m <= 0 -> null
+    m < 950 -> stringResource(R.string.exit_sign_distance_m, maxOf(100, (m / 100.0).roundToInt() * 100))
+    else -> stringResource(R.string.exit_sign_distance_km, "%.1f".format(java.util.Locale.ROOT, m / 1000.0).replace('.', ','))
 }
 
 /** components §12.1 ExitSign with `motion.exitNear` (scale 0.7 → 1, (−21, −14) → 0, α 0.6 → 1, 2200 ms). */
@@ -147,8 +160,9 @@ private fun ExitSign(ui: ExitUi, modifier: Modifier) {
         if (!reduced) near.animateTo(1f, tween(DesignTokens.motion.exitNear.durationMs, easing = DesignTokens.motion.exitNear.easing))
     }
     val m = DesignTokens.motion.exitNear
-    val dist = distanceText(selectedOption(ui.stop)?.distanceKm ?: 0.0)
-    val cd = stringResource(R.string.cd_exit_sign, ui.stop.name, dist)
+    val dist = distanceText(selectedOption(ui.stop)?.exitDistanceM ?: 0)
+    // Unknown distance: «ночёвка» on the plate and TalkBack without «через …» (5.7 §8).
+    val cd = stringResource(R.string.cd_exit_sign, ui.stop.name, dist ?: "").let { if (dist == null) it.substringBefore(" через") else it }
     Box(
         modifier
             .width(198.dp)
@@ -183,7 +197,7 @@ private fun ExitSign(ui: ExitUi, modifier: Modifier) {
                     Icon(R.drawable.ic_service_hotel, C.sign.black, 24.dp)
                 }
                 Spacer(Modifier.width(8.dp))
-                Txt(dist, T.sign.lgBold, C.sign.white, Modifier.testTag("exit.distance"), maxLines = 1)
+                Txt(dist ?: stringResource(R.string.exit_sign_no_distance), T.sign.lgBold, C.sign.white, Modifier.testTag("exit.distance"), maxLines = 1)
             }
         }
     }
@@ -258,7 +272,7 @@ private fun Panel(ui: ExitUi, a: ExitActions, modifier: Modifier) {
         val group = stringResource(R.string.cd_exit_group)
         Column(Modifier.selectableGroup().semantics { contentDescription = group }, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             s.hotelOptions.forEachIndexed { i, o ->
-                HotelOption(o, selected = o.placeId == (s.selectedHotelId ?: s.hotelOptions.first().placeId), booked = ui.booked, index = i) { a.select(o.placeId) }
+                HotelOption(o, selected = o.placeId == ui.selectedId, booked = o.placeId == ui.bookedPlaceId, index = i) { a.select(o.placeId) }
             }
         }
     }
@@ -278,7 +292,7 @@ private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, i
             .clip(shape)
             .background(if (selected) C.navi.field else C.navi.screen)
             .border(DesignTokens.stroke.w1, if (selected) C.accent.yellow else C.navi.fieldBorder, shape)
-            .selectable(selected, enabled = !booked || selected, role = Role.RadioButton, onClick = onClick)
+            .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("exit.option.$index")
             .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -292,8 +306,8 @@ private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, i
             Txt(o.name, T.title.sm, C.text.primary, maxLines = 1)
             if (tags.isNotEmpty()) Txt(tags, T.body.sm, C.navi.labelSecondary, maxLines = 2)
         }
-        if (selected && booked) {
-            Txt(stringResource(R.string.exit_booked_price), T.body.smStrong, C.accent.yellow, maxLines = 1)
+        if (booked) {
+            Txt(stringResource(R.string.exit_booked_badge), T.body.smStrong, C.accent.yellow, maxLines = 1)
         } else {
             Txt(stringResource(R.string.common_estimate_rub, price), T.title.sm, C.accent.yellow, maxLines = 1)
         }
@@ -304,10 +318,21 @@ private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, i
 @Composable
 private fun BookCta(ui: ExitUi, a: ExitActions, modifier: Modifier) {
     if (ui.booked) {
-        SecondaryButton(stringResource(R.string.exit_book_open), a::book, modifier.fillMaxWidth().testTag("exit.book"))
+        // 5.7 §4 Booked: the CTA box with the SecondaryButton look, «Открыть бронирование», arrow upRight.
+        val shape = RoundedCornerShape(DesignTokens.radius.r12)
+        Row(
+            modifier.fillMaxWidth().height(DesignTokens.size.ctaBookH).clip(shape).background(C.dash.control)
+                .border(DesignTokens.stroke.w1, C.dash.outline, shape).clickable(role = Role.Button, onClick = a::book)
+                .testTag("exit.book").padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Txt(stringResource(R.string.exit_book_open), T.cta.lg, C.text.primary, Modifier.weight(1f), maxLines = 1)
+            Icon(R.drawable.ic_arrow_up_right, C.text.secondary, 22.dp)
+        }
         return
     }
-    val cd = stringResource(R.string.cd_exit_book)
+    // Mock build: no real brand anywhere (OI-40) — «демо-партнёр, без оплаты».
+    val cd = stringResource(R.string.cd_exit_book_mock)
     Row(
         modifier
             .fillMaxWidth()
@@ -325,7 +350,7 @@ private fun BookCta(ui: ExitUi, a: ExitActions, modifier: Modifier) {
             if (ui.offline) {
                 Txt(stringResource(R.string.common_need_internet), T.body.smMedium, C.accent.redText, maxLines = 1)
             } else {
-                Txt(stringResource(R.string.exit_book_partner), T.body.smMedium, C.text.onLight, maxLines = 1)
+                Txt(stringResource(R.string.exit_book_partner_mock), T.body.smMedium, C.text.onLight, maxLines = 1)
             }
         }
         if (!ui.offline) Icon(R.drawable.ic_arrow_up_right, C.text.onLight, 22.dp)
@@ -343,10 +368,8 @@ private fun BoxScope.MockPartnerSheet(ui: ExitUi, windowH: Dp, a: ExitActions) {
     val nights = 1
     val nightsWord = pluralStringResource(R.plurals.plural_night, nights)
     val date = s.arriveAt?.takeIf { it.length >= 10 }?.let { java.time.LocalDate.parse(it.substring(0, 10)) }
-    // Dates as «07.11» until the deck's genitive months land (Designer, in progress).
-    fun fmt(d: java.time.LocalDate) = "%02d.%02d".format(d.dayOfMonth, d.monthValue)
-    val inDate = date?.let(::fmt) ?: ""
-    val outDate = date?.plusDays(1)?.let(::fmt) ?: ""
+    val inDate = date?.let { shortDate(it) } ?: ""
+    val outDate = date?.plusDays(1)?.let { shortDate(it) } ?: ""
     val crew = ui.trip.input.crew
     val guests = buildList {
         add(stringResource(R.string.waybill_crew_adults, crew.adults))
@@ -355,9 +378,9 @@ private fun BoxScope.MockPartnerSheet(ui: ExitUi, windowH: Dp, a: ExitActions) {
     }.joinToString(stringResource(R.string.common_join_comma))
     val total = RuFormat.thousands(o.priceCrewRub * nights)
     val pane = stringResource(R.string.cd_mock_partner, o.name, inDate, outDate, total)
-    BottomSheet(stringResource(R.string.mock_partner_title), a::closePartner, "partner", windowH) {
-        Column(Modifier.semantics { paneTitle = pane }, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Txt(stringResource(R.string.mock_partner_line), T.label.md, C.navi.label)
+    BottomSheet(stringResource(R.string.mock_partner_title), a::closePartner, "partner", windowH, badge = stringResource(R.string.mock_partner_badge)) {
+        Column(Modifier.semantics { paneTitle = pane }, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Txt(stringResource(R.string.mock_partner_line), T.body.sm, C.navi.label, Modifier.padding(top = 4.dp).testTag("partner.line"))
             Column(Modifier.fillMaxWidth().naviPanel().padding(6.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Txt(stringResource(R.string.mock_partner_hotel, o.name, s.name), T.title.sm, C.text.primary)
                 Txt(stringResource(R.string.mock_partner_dates, inDate, outDate, nights, nightsWord), T.body.md, C.navi.text)
@@ -384,4 +407,27 @@ private fun BoxScope.BookedDialog(ui: ExitUi, a: ExitActions) = NaviDialog(
     "booked",
     { a.answer(true) },
     { a.answer(false) },
+)
+
+
+/** «7 нояб.» (`common_date_day` + `common_month_short_*`). */
+@Composable
+fun shortDate(d: java.time.LocalDate): String = stringResource(R.string.common_date_day, d.dayOfMonth.toString(), monthShort(d.monthValue))
+
+@Composable
+private fun monthShort(m: Int): String = stringResource(
+    when (m) {
+        1 -> R.string.common_month_short_01
+        2 -> R.string.common_month_short_02
+        3 -> R.string.common_month_short_03
+        4 -> R.string.common_month_short_04
+        5 -> R.string.common_month_short_05
+        6 -> R.string.common_month_short_06
+        7 -> R.string.common_month_short_07
+        8 -> R.string.common_month_short_08
+        9 -> R.string.common_month_short_09
+        10 -> R.string.common_month_short_10
+        11 -> R.string.common_month_short_11
+        else -> R.string.common_month_short_12
+    },
 )

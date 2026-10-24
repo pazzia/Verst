@@ -105,7 +105,7 @@ fun WaybillScreen(ui: WaybillUi, a: WaybillActions) {
             Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp)) {
                 val back = stringResource(R.string.common_back_road)
                 BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), a::back, Modifier.padding(top = 8.dp).testTag("waybill.back"))
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(12.dp)) // N-11: sheet top 64 (back link 8 + 44), clip at 50
                 // motion.sheetSlide: 40 dp up + fade in over 600 ms on entry (at rest under reduced motion).
                 val reduced = LocalReducedMotion.current
                 val slide = remember { Animatable(if (reduced) 1f else 0f) }
@@ -348,10 +348,14 @@ private fun SaveButton(saved: Boolean, onClick: () -> Unit, modifier: Modifier) 
             .testTag("waybill.save"),
         contentAlignment = Alignment.Center,
     ) {
-        Txt(
-            stringResource(if (saved) R.string.waybill_saved else R.string.waybill_save), T.button.md,
-            if (saved) C.text.secondary else C.text.primary, maxLines = 1, align = TextAlign.Center,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Txt(
+                stringResource(if (saved) R.string.waybill_saved else R.string.waybill_save), T.button.md,
+                if (saved) C.text.secondary else C.text.primary, maxLines = 1, align = TextAlign.Center,
+            )
+            // N-09: the check is drawn after «Сохранено» (the font has no «✓»).
+            if (saved) GlyphIcon(Glyph.CHECK, C.text.secondary, 16.dp, Modifier.padding(start = 6.dp))
+        }
     }
 }
 

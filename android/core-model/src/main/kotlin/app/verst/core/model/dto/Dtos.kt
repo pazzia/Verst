@@ -29,6 +29,9 @@ data class SuggestionDto(
     val lat: Double,
     val lon: Double,
     val id: String? = null,
+    /** OI-39: «Ярославля» / «Ярославле» for towns (null for places). */
+    val nameGenRu: String? = null,
+    val namePrepRu: String? = null,
 ) {
     /** Key of the row's engine road km («lat,lon»). */
     val pointKey: String get() = "$lat,$lon"
@@ -73,7 +76,8 @@ data class HotelOptionDto(
     val rooms: Int = 1,
     val priceCrewRub: Int = 0,
     val verified: Boolean = true,
-    val distanceKm: Double = 0.0,
+    /** OI-41: route (motorway exit) → hotel, metres; 0 = unknown. */
+    val exitDistanceM: Int = 0,
 )
 
 /** One D-6 alternative of a stop (A§6.11, A§16.6): the stop it would become and its deltas. */
@@ -196,9 +200,15 @@ data class PlanResultDto(
     val pricesYear: String? = null,
     /** townId → prepositional name («Ярославле») for 5.7 copy. */
     val townPrepRu: Map<String, String> = emptyMap(),
+    /** townId → genitive name («Ярославля»). */
+    val townGenRu: Map<String, String> = emptyMap(),
     @Transient val tripJson: String = "",
 )
 
 /** `mobile.estimate`: the engine's km and days of a trip input before Road ahead (equal to its plan). */
 @Serializable
 data class EstimateDto(val km: Int, val days: Int)
+
+/** `mobile.reverse`: the town at a point with its name forms (OI-39). */
+@Serializable
+data class PlaceNameDto(val name: String, val subtitle: String = "", val nameGenRu: String? = null, val namePrepRu: String? = null)

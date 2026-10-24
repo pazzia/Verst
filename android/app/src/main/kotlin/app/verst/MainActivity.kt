@@ -123,7 +123,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
         Route.Windshield -> WindshieldScreen(
             WindshieldUi(
                 flow.origin.label, flow.windshield, flow.selectedRoute, flow.adults, flow.children, flow.dog,
-                trips = SavedTrips.ordered(flow.saved), tripsSheet = flow.tripsSheet,
+                trips = SavedTrips.ordered(flow.saved), tripsSheet = flow.tripsSheet, originGen = flow.originGen,
             ),
             onSelect = { flow.selectedRoute = it },
             onStart = flow::openReadyRoute,
@@ -137,6 +137,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 override fun pick(id: String) = flow.openSaved(id)
                 override fun delete(id: String) = flow.askDelete(id)
             },
+            onDebug = flow::openDebug,
         )
         Route.Navigator -> NavigatorScreen(
             NavigatorUi(
@@ -167,6 +168,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 budgetIndex = flow.budgetIndex,
                 mood = flow.mood,
                 days = flow.figures?.figures?.days,
+                originGen = flow.originGen,
             ),
             object : InstrumentsActions {
                 override fun back() {
@@ -201,7 +203,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 LaunchedEffect(Unit) { flow.back() }
             } else {
                 RoadScreen(
-                    RoadUi(r.trip, flow.resultBearing, flow.openedFromSaved, flow.savedCurrent, flow.replace, flow.toast, flow.canUndo, flow.booked.toSet(), r.townPrepRu),
+                    RoadUi(r.trip, flow.resultBearing, flow.openedFromSaved, flow.savedCurrent, flow.replace, flow.toast, flow.canUndo,
+                        r.trip.daysList.flatMap { it.stops }.filter { flow.isBooked(it.id) }.map { it.id }.toSet(), r.townPrepRu),
                     object : RoadActions {
                         override fun back() {
                             flow.back()
@@ -228,8 +231,9 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 val nights = r.trip.daysList.flatMap { it.stops }.filter { it.kind == "overnight" }
                 ExitScreen(
                     ExitUi(
-                        r.trip, stop, nights.indexOfFirst { it.id == stop.id } + 1, nights.size, stop.id in flow.booked,
+                        r.trip, stop, nights.indexOfFirst { it.id == stop.id } + 1, nights.size, flow.booked[stop.id],
                         !flow.connectivity.online, r.townPrepRu[stop.townId] ?: stop.name, flow.partnerOpen, flow.bookedDialog, flow.toast,
+                        canUndo = flow.toast is app.verst.nav.Toast.Booked,
                     ),
                     object : ExitActions {
                         override fun back() {
@@ -240,6 +244,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun closePartner() = flow.closePartner()
                         override fun answer(booked: Boolean) = flow.answerBooked(booked)
                         override fun needInternet() = flow.needInternet()
+                        override fun undoBooking() = flow.undoBooking()
                     },
                 )
             }

@@ -102,7 +102,7 @@ fun NavigatorScreen(
     var inputFocused by remember { mutableStateOf(false) }
     val pick: (SuggestionDto) -> Unit = {
         keyboard?.hide()
-        focus.clearFocus()
+        focus.clearFocus(force = true) // S-26: after a pick КУДА loses focus (no yellow border, no caret)
         inputFocused = false
         onPick(it)
     }
@@ -155,7 +155,7 @@ private fun Panel(
     ) {
         Txt(stringResource(R.string.navigator_header), T.label.md, C.navi.label)
         if (ui.editingFrom) {
-            Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from", onFocus = onFocus)
+            Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from", onFocus = onFocus, autoFocus = true)
             ValueField(stringResource(R.string.navigator_to_label), ui.destination?.name ?: stringResource(R.string.navigator_to_hint), square = true)
         } else {
             ValueField(
@@ -165,7 +165,7 @@ private fun Panel(
                 action = stringResource(R.string.navigator_change),
                 onAction = onEditFrom,
             )
-            Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus)
+            Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus, autoFocus = ui.destination == null)
         }
         val q = ui.query.trim()
         val picked = !ui.editingFrom && ui.destination != null && ui.query == ui.destination.name
@@ -187,9 +187,10 @@ private fun Panel(
 }
 
 @Composable
-private fun Input(caption: String, value: String, onChange: (String) -> Unit, round: Boolean, tag: String, onFocus: (Boolean) -> Unit) {
+private fun Input(caption: String, value: String, onChange: (String) -> Unit, round: Boolean, tag: String, onFocus: (Boolean) -> Unit, autoFocus: Boolean) {
     val fr = remember { FocusRequester() }
-    LaunchedEffect(tag) { fr.requestFocus() }
+    var focused by remember { mutableStateOf(false) }
+    LaunchedEffect(tag) { if (autoFocus) fr.requestFocus() }
     val shape = RoundedCornerShape(DesignTokens.radius.r10)
     Row(
         Modifier
@@ -197,7 +198,7 @@ private fun Input(caption: String, value: String, onChange: (String) -> Unit, ro
             .defaultMinSize(minHeight = 56.dp)
             .clip(shape)
             .background(C.navi.field)
-            .border(DesignTokens.stroke.w2, C.accent.yellow, shape)
+            .border(if (focused) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (focused) C.accent.yellow else C.navi.fieldBorder, shape)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -212,7 +213,7 @@ private fun Input(caption: String, value: String, onChange: (String) -> Unit, ro
                 textStyle = T.field.lg.copy(color = C.text.primary),
                 cursorBrush = SolidColor(C.accent.yellow),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                modifier = Modifier.fillMaxWidth().focusRequester(fr).onFocusChanged { onFocus(it.isFocused) }.testTag(tag),
+                modifier = Modifier.fillMaxWidth().focusRequester(fr).onFocusChanged { focused = it.isFocused; onFocus(it.isFocused) }.testTag(tag),
                 decorationBox = { inner ->
                     Box {
                         if (value.isEmpty()) Txt(stringResource(R.string.navigator_to_hint), T.field.lg, C.navi.hint)

@@ -25,8 +25,9 @@ data class SavedTripDto(
     val pricesMonthRu: String? = null,
     val pricesYear: String? = null,
     val townPrepRu: Map<String, String> = emptyMap(),
-    /** Overnight stop ids the crew marked «Забронировали» (D-10). */
-    val bookedStops: List<String> = emptyList(),
+    val townGenRu: Map<String, String> = emptyMap(),
+    /** D-10 / 5.7 §8: per overnight stop id, the hotel the crew marked «Забронировали» (one per night). */
+    val bookedHotels: Map<String, String> = emptyMap(),
     val trip: JsonObject,
 )
 
@@ -79,13 +80,13 @@ object SavedTrips {
         return Upsert.Saved(next, next.size, next.size >= WARN_FROM)
     }
 
-    fun entry(id: String, now: Long, r: PlanResultDto, bearing8: String, booked: List<String> = emptyList()): SavedTripDto {
+    fun entry(id: String, now: Long, r: PlanResultDto, bearing8: String, booked: Map<String, String> = emptyMap()): SavedTripDto {
         val t = r.trip
         return SavedTripDto(
             id = id, savedAt = now, title = t.title, km = t.km, days = t.days, totalRub = t.cost.totalRub,
             startAt = t.input.startAt, adults = t.input.crew.adults, children = t.input.crew.children,
             dog = t.input.crew.dog, bearing8 = bearing8, shareText = r.shareText, pricesMonthRu = r.pricesMonthRu,
-            pricesYear = r.pricesYear, townPrepRu = r.townPrepRu, bookedStops = booked,
+            pricesYear = r.pricesYear, townPrepRu = r.townPrepRu, townGenRu = r.townGenRu, bookedHotels = booked,
             trip = EngineJson.json.parseToJsonElement(r.tripJson) as JsonObject,
         )
     }
@@ -97,6 +98,7 @@ object SavedTrips {
         pricesMonthRu = s.pricesMonthRu,
         pricesYear = s.pricesYear,
         townPrepRu = s.townPrepRu,
+        townGenRu = s.townGenRu,
         tripJson = s.trip.toString(),
     )
 

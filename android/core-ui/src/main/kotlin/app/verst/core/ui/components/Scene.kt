@@ -120,6 +120,8 @@ fun WindshieldScene(
     road: RoadSpec = WindshieldRoad,
     sunCenterY: Float = 300f,
     gantry: Boolean = false,
+    /** N-01: leg top in dp of the screen (min(286, sign plate bottom − 4)); legs end at y 386 of the frame. */
+    gantryTop: Float = 286f,
     laneCycleMs: Int = DesignTokens.motion.lane.idle.durationMs,
     posts: PostSpec? = WindshieldPosts,
     overlay: Boolean = false,
@@ -140,8 +142,10 @@ fun WindshieldScene(
         if (posts != null && !reduced) drawPosts(posts, t, k * dp, dy)
         if (gantry) {
             // §9.3: two legs 8 × 100 at x 34 and W − 42, y 286, under the sign.
-            drawRect(C.interior.pole, Offset(34f * dp, 286f * dy), Size(8f * dp, 100f * dy))
-            drawRect(C.interior.pole, Offset(size.width - 42f * dp, 286f * dy), Size(8f * dp, 100f * dy))
+            val top = minOf(gantryTop * dp, 286f * dy)
+            val h = 386f * dy - top
+            drawRect(C.interior.pole, Offset(34f * dp, top), Size(8f * dp, h))
+            drawRect(C.interior.pole, Offset(size.width - 42f * dp, top), Size(8f * dp, h))
         }
         drawInterior(dp, k)
     }

@@ -8,6 +8,7 @@ import app.verst.core.model.PlanRequest
 import app.verst.core.model.EngineArgs
 import app.verst.core.model.dto.EngineErrorDto
 import app.verst.core.model.dto.EstimateDto
+import app.verst.core.model.dto.PlaceNameDto
 import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.ReadyRouteDto
@@ -32,6 +33,15 @@ interface PlannerGateway {
     /** The engine's km/days of [request] before Road ahead (= its plan); cancelling the caller cancels it. */
     suspend fun estimate(requestId: String, request: PlanRequest): EngineResult<EstimateDto>
 
+    /** DEV-127: the fixture world every call uses (`central_russia_v1` / `edge_cases_v1`). */
+    var world: String
+
+    /** DEV-127: `mobile.set_clock` — "system" or "golden". */
+    suspend fun setClock(spec: String): EngineResult<Unit>
+
+    /** The town at [point] with its name forms (OI-39), or null. */
+    suspend fun reverse(point: GeoPoint): EngineResult<PlaceNameDto?>
+
     /** Base-route km from [origin] to each point (suggestion rows); null where unreachable. */
     suspend fun estimatePoints(origin: GeoPoint, points: List<GeoPoint>): EngineResult<List<Int?>>
 
@@ -42,7 +52,10 @@ interface PlannerGateway {
     suspend fun patchCost(tripJson: String, patchJson: String): EngineResult<PlanResultDto>
 }
 
-class ChaquopyPlannerGateway(private val host: EngineHost, private val world: String = DefaultWorld) : PlannerGateway {
+class ChaquopyPlannerGateway(private val host: EngineHost, override var world: String = DefaultWorld) : PlannerGateway {
+
+    override suspend fun setClock(spec: String): EngineResult<Unit> =
+        run({ env -> EngineJson.decode(env, kotlinx.serialization.json.JsonObject.serializer()).let { if (it is EngineResult.Err) it else EngineResult.Ok(Unit) } }, "set_clock", spec)
 
     /** Waits for the engine; `Failed` (or > 30 s starting) becomes an engine error so the screen can show it. */
     private suspend fun ready(): EngineErrorDto? {
@@ -67,6 +80,8 @@ class ChaquopyPlannerGateway(private val host: EngineHost, private val world: St
         run(EngineJson::suggestions, "suggest", world, query, near?.lat, near?.lon, 6)
 
     override suspend fun popular() = run(EngineJson::suggestions, "popular", world, 6)
+
+    override suspend fun reverse(point: GeoPoint) = run(EngineJson::placeName, "reverse", world, point.lat, point.lon)
 
     override suspend fun estimatePoints(origin: GeoPoint, points: List<GeoPoint>) =
         run(EngineJson::kmList, "estimate_points", world, origin.lat, origin.lon, EngineArgs.points(points))

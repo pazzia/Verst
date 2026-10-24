@@ -9,9 +9,11 @@ import app.verst.core.model.PlanRequest
 import app.verst.core.model.TripFigures
 import app.verst.core.model.dto.EstimateDto
 import app.verst.core.model.dto.PlanEventDto
+import app.verst.core.model.dto.PlaceNameDto
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.ReadyRouteDto
 import app.verst.core.model.dto.SuggestionDto
+import app.verst.core.model.SavedTrips
 import app.verst.data.MemoryTripStore
 import app.verst.engine.PlannerGateway
 import java.io.File
@@ -46,6 +48,11 @@ class VerstFlowTest {
         /** What `estimate` answers; the plan answers [planned] (its km wins once it exists). */
         var estimateKm = 540
 
+        override var world: String = "central_russia_v1"
+        val hotelPatches = mutableListOf<String>()
+        override suspend fun setClock(spec: String): EngineResult<Unit> = EngineResult.Ok(Unit)
+        override suspend fun reverse(point: GeoPoint): EngineResult<PlaceNameDto?> =
+            EngineResult.Ok(PlaceNameDto("Москва", "город · Москва", "Москвы", "Москве"))
         override suspend fun readyRoutes(origin: GeoPoint) = EngineResult.Ok(emptyList<ReadyRouteDto>())
         override suspend fun suggest(query: String, near: GeoPoint?) = EngineResult.Ok(listOf(yar))
         override suspend fun popular() = EngineResult.Ok(listOf(yar))
@@ -64,6 +71,10 @@ class VerstFlowTest {
             return EngineResult.Ok(planned.copy(trip = t.copy(km = t.km + 1, cost = t.cost.copy(totalRub = t.cost.totalRub + 100))))
         }
         override suspend fun patchCost(tripJson: String, patchJson: String): EngineResult<PlanResultDto> {
+            if ("hotelChoice" in patchJson) {
+                hotelPatches += patchJson
+                return EngineResult.Ok(planned)
+            }
             patches += patchJson
             val c = planned.trip.cost
             return EngineResult.Ok(planned.copy(trip = planned.trip.copy(cost = c.copy(reserveOn = false, totalRub = c.totalRub - 1000))))
@@ -161,4 +172,96 @@ class VerstFlowTest {
         flow.save()
         assertEquals(1, flow.saved.size)
     }
+
+    @Test
+    fun exitBookingDeleteAndLimit() = runTest {
+        val gw = FakeGateway()
+        val store = MemoryTripStore()
+        val flow = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        assertEquals("Москвы", flow.originGen) // OI-39: the engine's genitive, not a Kotlin map
+        flow.openNavigator()
+        flow.pick(yar)
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        val night = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.size >= 2 }
+
+        // Exit: a hotel choice is local first (selection + total), then the engine's patch.
+        flow.openExit(night.id)
+        assertEquals(Route.Exit, flow.top)
+        val other = night.hotelOptions[1]
+        flow.selectHotel(night.id, other.placeId)
+        Snapshot.sendApplyNotifications()
+        val local = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == night.id }
+        assertEquals(other.placeId, local.selectedHotelId) // before the engine answers
+        settle()
+        assertEquals(1, gw.hotelPatches.size)
+        assertTrue(gw.hotelPatches.single().contains(other.placeId))
+
+        // Booking: CTA → mock partner sheet → dismissal → «Забронировали?» → yes → booked + toast with undo.
+        flow.book()
+        assertTrue(flow.partnerOpen)
+        flow.closePartner()
+        assertTrue(flow.bookedDialog)
+        flow.answerBooked(true)
+        val booked = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == night.id }
+        assertEquals(booked.selectedHotelId ?: booked.hotelOptions.first().placeId, flow.booked[night.id])
+        assertTrue(flow.isBooked(night.id))
+        assertTrue(flow.toast is Toast.Booked)
+        flow.undoBooking()
+        assertNull(flow.booked[night.id])
+        flow.book(); flow.closePartner(); flow.answerBooked(true)
+        // Offline (debug): the CTA only says «Нужен интернет».
+        flow.setOffline(true)
+        flow.book()
+        assertEquals(Toast.NeedInternet, flow.toast)
+        flow.setOffline(false)
+
+        // Save keeps the booking; delete with undo; the 50-trip limit opens the dialog.
+        flow.save()
+        settle()
+        assertEquals(1, store.load().single().bookedHotels.size)
+        while (flow.back()) Unit
+        flow.askDelete(flow.saved.single().id)
+        flow.confirmDelete()
+        assertTrue(flow.saved.isEmpty())
+        assertTrue(flow.canUndoDelete)
+        flow.undoDelete()
+        assertEquals(1, flow.saved.size)
+        val full = (1..SavedTrips.LIMIT).map { flow.saved.single().copy(id = "t$it") }
+        flow.clearSaved()
+        flow.saved.addAll(full)
+        flow.openTrips()
+        flow.openSaved("t1")
+        flow.save() // updates t1 in place even at the limit
+        assertFalse(flow.limitDialog)
+        flow.resetData()
+        flow.saved.addAll(full)
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        flow.save()
+        assertTrue(flow.limitDialog)
+        flow.limitToTrips()
+        assertTrue(flow.tripsSheet)
+        assertEquals(Route.Windshield, flow.top)
+    }
+
+    @Test
+    fun reserveIsLocalFirstThenEngine() = runTest {
+        val gw = FakeGateway()
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        val before = flow.result!!.trip.cost
+        flow.toggleReserve()
+        // Local CostCalculator before the engine answers: reserve off, total without the reserve line.
+        val local = flow.result!!.trip.cost
+        assertFalse(local.reserveOn)
+        assertEquals(before.subtotalRub.let { s -> ((s + 50) / 100) * 100 }, local.totalRub)
+        settle()
+        assertEquals(1, gw.patches.size)
+    }
 }
+

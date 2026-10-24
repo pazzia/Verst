@@ -1,6 +1,27 @@
 package app.verst.feature.instruments
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.IntOffset
+import app.verst.core.ui.components.LocalReducedMotion
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.selection.toggleable
@@ -62,7 +83,6 @@ import app.verst.core.ui.components.Txt
 import app.verst.core.ui.components.dashboardSurface
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.ScreenRoot
-import app.verst.feature.common.genitive
 import app.verst.nav.Seat
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
@@ -83,6 +103,8 @@ data class InstrumentsUi(
     val mood: Mood?,
     /** The engine's days of this trip; null while it is computed. */
     val days: Int? = null,
+    /** OI-39: the origin in the genitive from the engine. */
+    val originGen: String = origin,
 )
 
 interface InstrumentsActions {
@@ -112,27 +134,34 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 Column(
                     Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Row(Modifier.fillMaxWidth().padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    // N-04 / 5.3 §2.2 rhythm: chip at 232, summary 282, wells 322 (175 × 197 at L14/R14), mood 535.
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Txt(stringResource(R.string.instruments_hint), T.body.mdTight, C.text.secondary, Modifier.weight(1f).padding(end = 8.dp))
                         ToggleChip(
                             stringResource(if (ui.frontAdult) R.string.instruments_front_adult else R.string.instruments_front_none),
                             ui.frontAdult, a::front, role = Role.Switch,
                         )
                     }
-                    Txt(summary(ui), T.title.lgNum, C.text.primary, maxLines = 2)
-                    // S-13: both wells the same height (175 × 197 at 390).
-                    Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Txt(summary(ui), T.title.lgNum, C.text.primary, Modifier.padding(top = 6.dp), maxLines = 2)
+                    // The wells sit 6 dp wider on each side than the 20 dp text column (L14 / R14).
+                    Row(
+                        Modifier.padding(top = 14.dp).layout { m, c ->
+                            val extra = 12.dp.roundToPx()
+                            val p = m.measure(c.copy(minWidth = c.maxWidth + extra, maxWidth = c.maxWidth + extra))
+                            layout(c.maxWidth, p.height) { p.place(-extra / 2, 0) }
+                        }.height(197.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
                         KmWell(ui, a, Modifier.weight(1f).fillMaxHeight())
                         BudgetWell(ui, a, Modifier.weight(1f).fillMaxHeight())
                     }
-                    Txt(stringResource(R.string.instruments_mood_label), T.label.md, C.text.muted)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Txt(stringResource(R.string.instruments_mood_label), T.label.md, C.text.muted, Modifier.padding(top = 16.dp))
+                    Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         ToggleChip(stringResource(R.string.instruments_mood_calm), ui.mood == Mood.CALM, { a.mood(Mood.CALM) })
                         ToggleChip(stringResource(R.string.instruments_mood_more), ui.mood == Mood.MORE_STOPS, { a.mood(Mood.MORE_STOPS) })
                     }
-                    ToggleChip(stringResource(R.string.instruments_mood_drive), ui.mood == Mood.JUST_DRIVE, { a.mood(Mood.JUST_DRIVE) })
+                    ToggleChip(stringResource(R.string.instruments_mood_drive), ui.mood == Mood.JUST_DRIVE, { a.mood(Mood.JUST_DRIVE) }, Modifier.padding(top = 8.dp))
                     Spacer(Modifier.height(16.dp))
                 }
                 // 5.3 §1: content scrolls under a 16 dp fade above the caption row.
@@ -151,7 +180,7 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                     val km = ui.tripKm
                     val meta = when {
                         km == null -> " " // the engine's number arrives within a moment; never a guessed one
-                        ui.roundTrip -> stringResource(R.string.instruments_ready_meta_ring, genitive(ui.origin), RuFormat.thousands(km))
+                        ui.roundTrip -> stringResource(R.string.instruments_ready_meta_ring, ui.originGen, RuFormat.thousands(km))
                         else -> stringResource(R.string.common_km, RuFormat.thousands(km))
                     }
                     Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp).testTag("instruments.meta"), maxLines = 1)
@@ -224,7 +253,16 @@ private fun DogToggle(on: Boolean, onClick: () -> Unit, modifier: Modifier) {
             .semantics { contentDescription = cd }
             .testTag("instruments.dog"),
     ) {
-        Canvas(Modifier.matchParentSize()) {
+        // motion.dogWag: ±6° about the body's bottom centre, 600 ms each way, while the dog is on.
+        val reduced = LocalReducedMotion.current
+        val wag = if (on && !reduced) {
+            rememberInfiniteTransition(label = "wag").animateFloat(
+                DesignTokens.motion.dogWag.fromDeg, DesignTokens.motion.dogWag.toDeg,
+                infiniteRepeatable(tween(DesignTokens.motion.dogWag.durationMs / 2, easing = DesignTokens.motion.dogWag.easing), RepeatMode.Reverse),
+                label = "wagDeg",
+            ).value
+        } else 0f
+        Canvas(Modifier.matchParentSize().graphicsLayer { rotationZ = wag; transformOrigin = TransformOrigin(28f / 56f, 40f / 52f) }) {
             val d = 1.dp.toPx()
             val body = Path().apply {
                 addRoundRect(
@@ -236,9 +274,10 @@ private fun DogToggle(on: Boolean, onClick: () -> Unit, modifier: Modifier) {
                 )
             }
             if (on) {
-                for ((x, deg) in listOf(6f to -18f, 41f to 18f)) {
-                    rotate(deg, Offset((x + 4.5f) * d, 1f * d)) {
-                        drawRoundRect(C.crew.dog, Offset(x * d, -6 * d), Size(9 * d, 14 * d), CornerRadius(5 * d))
+                // N-05: ears relative to the body: (+6, −6) at −18° and (+17, −6) at +18°.
+                for ((x, deg) in listOf(18f to -18f, 29f to 18f)) {
+                    rotate(deg, Offset((x + 4.5f) * d, 15 * d)) {
+                        drawRoundRect(C.crew.dog, Offset(x * d, 8 * d), Size(9 * d, 14 * d), CornerRadius(5 * d))
                     }
                 }
                 drawPath(body, C.crew.dog)
@@ -333,7 +372,21 @@ private fun KmWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier)
                     Modifier.size(DesignTokens.size.drumW, DesignTokens.size.drumH).clip(RoundedCornerShape(DesignTokens.radius.r3))
                         .background(if (last) C.sign.white else C.dash.face),
                     contentAlignment = Alignment.Center,
-                ) { Txt(d.toString(), T.odometer, if (last) C.text.onLight else C.text.primary) }
+                ) {
+                    // motion.odometerRoll: only changed drums roll (300 ms decelerate); instant under reduced motion.
+                    val reduced = LocalReducedMotion.current
+                    AnimatedContent(
+                        d,
+                        transitionSpec = {
+                            if (reduced) EnterTransition.None togetherWith ExitTransition.None else {
+                                val up = targetState > initialState
+                                val spec = tween<IntOffset>(DesignTokens.motion.odometerRoll.durationMs, easing = DesignTokens.motion.odometerRoll.easing)
+                                slideInVertically(spec) { h -> if (up) h else -h } togetherWith slideOutVertically(spec) { h -> if (up) -h else h }
+                            }
+                        },
+                        label = "drum$i",
+                    ) { digit -> Txt(digit.toString(), T.odometer, if (last) C.text.onLight else C.text.primary) }
+                }
             }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -360,7 +413,18 @@ private fun KmWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier)
 private fun BudgetWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier) {
     val preset = BudgetPresets[ui.budgetIndex]
     Well(stringResource(R.string.instruments_budget_label), modifier, gap = 6.dp) {
-        Gauge(ui.budgetIndex, Modifier.size(DesignTokens.size.gaugeW, DesignTokens.size.gaugeH))
+        val reduced = LocalReducedMotion.current
+        val angle by animateFloatAsState(
+            -90f + 36f * ui.budgetIndex,
+            if (reduced) snap() else spring(DesignTokens.motion.needle.dampingRatio, DesignTokens.motion.needle.stiffness),
+            label = "needle",
+        )
+        Box(Modifier.size(DesignTokens.size.gaugeW, DesignTokens.size.gaugeH)) {
+            Gauge(angle, Modifier.matchParentSize())
+            // N-06: E (red text) and F, baseline-left at (8, 46) / (114, 46) of the gauge box.
+            Txt(stringResource(R.string.instruments_gauge_empty), T.caption.bold, C.accent.redText, Modifier.offset(x = 8.dp, y = 34.dp))
+            Txt(stringResource(R.string.instruments_gauge_full), T.caption.bold, C.text.primary, Modifier.offset(x = 114.dp, y = 34.dp))
+        }
         Txt(
             if (preset == null) stringResource(R.string.instruments_budget_any) else stringResource(R.string.instruments_budget_value, RuFormat.thousands(preset)),
             T.title.lgNum, C.text.primary, maxLines = 1,
@@ -377,7 +441,7 @@ private fun BudgetWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modif
  * 4 × 48 (radius 2) rotated −90° + 36° · preset, hub d 16 at (65, 60).
  */
 @Composable
-private fun Gauge(preset: Int, modifier: Modifier) {
+private fun Gauge(angle: Float, modifier: Modifier) {
     Canvas(modifier) {
         val d = size.width / 130f
         val c = Offset(65 * d, 58 * d)
@@ -386,7 +450,7 @@ private fun Gauge(preset: Int, modifier: Modifier) {
         val box = Size(2 * r, 2 * r)
         drawArc(C.dash.controlAlt, 180f, 180f, false, tl, box, style = Stroke(8 * d, cap = StrokeCap.Butt))
         drawArc(C.accent.red, 180f, 48.8f, false, tl, box, style = Stroke(8 * d, cap = StrokeCap.Butt))
-        rotate(-90f + 36f * preset, c) {
+        rotate(angle, c) {
             drawRoundRect(C.accent.yellow, Offset(c.x - 2 * d, c.y - 48 * d), Size(4 * d, 48 * d), CornerRadius(2 * d))
         }
         drawCircle(C.sign.white, 8 * d, Offset(65 * d, 60 * d))
