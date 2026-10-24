@@ -96,7 +96,7 @@ class ScreensScreenshotTest {
         )
     }
 
-    private fun windshield(data: WindshieldData) = WindshieldUi("Москва", data, 0, 2, 1, true)
+    private fun windshield(data: WindshieldData) = WindshieldUi("Москва", data, 0, 2, 1, true, originGen = "Москвы") // the engine's `reverse` form (OI-39)
 
     @Test
     fun windshieldDefault() {
