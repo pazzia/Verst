@@ -1,0 +1,417 @@
+{
+ "screen": "5.5-road-ahead",
+ "notes": "Row positions depend on text wrapping (5.5 §2.3 formula), so itinerary signs are checked with `present` regions over the sign column; R-08 exact geometry is the connector of row 1 (fixed position). g02-day2 is scrolled to the day 2 hotel row for R-13.",
+ "points": [
+  {
+   "item": "R-01",
+   "state": "g02-top",
+   "x": 200,
+   "y": 25,
+   "hex": "#2B2850",
+   "size": "390x844"
+  },
+  {
+   "item": "R-01",
+   "state": "g02-top",
+   "x": 2,
+   "y": 70,
+   "hex": "#8E4A6B",
+   "size": "390x844"
+  },
+  {
+   "item": "R-01",
+   "state": "g02-top",
+   "x": 2,
+   "y": 97,
+   "hex": "#D9655A",
+   "size": "390x844"
+  },
+  {
+   "item": "R-01",
+   "state": "g02-top",
+   "x": 2,
+   "y": 118,
+   "hex": "#F29A5E",
+   "size": "390x844"
+  },
+  {
+   "item": "R-01",
+   "state": "g02-top",
+   "x": 195,
+   "y": 140,
+   "hex": "#161618",
+   "size": "390x844"
+  },
+  {
+   "item": "R-02",
+   "state": "g02-top",
+   "kind": "present",
+   "region": [
+    290,
+    12,
+    88,
+    44
+   ],
+   "hex": "#E9E2F2",
+   "min_px": 20,
+   "size": "390x844"
+  },
+  {
+   "item": "R-03",
+   "state": "g02-top",
+   "x": 21.5,
+   "y": 80,
+   "hex": "#1E4FA3",
+   "size": "390x844"
+  },
+  {
+   "item": "R-03",
+   "state": "g02-top",
+   "x": 24,
+   "y": 80,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "R-03",
+   "state": "g02-top",
+   "kind": "text",
+   "region": [
+    35,
+    62,
+    200,
+    30
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-04",
+   "state": "g02-top",
+   "x": 25,
+   "y": 197,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "R-04",
+   "state": "g02-top",
+   "kind": "text",
+   "region": [
+    20,
+    150,
+    250,
+    29
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-05",
+   "state": "g02-top",
+   "x": 22,
+   "y": 600,
+   "hex": "#3A3A3F",
+   "size": "390x844"
+  },
+  {
+   "item": "R-05",
+   "state": "g02-top",
+   "x": 15.5,
+   "y": 600,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "R-05",
+   "state": "g02-top",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 600,
+   "seed": 22,
+   "match": [
+    "#3A3A3F",
+    "#F4F4F0",
+    "#FFD23F",
+    "#141416"
+   ],
+   "expect": [
+    14,
+    60
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "R-06",
+   "state": "g02-top",
+   "kind": "present",
+   "region": [
+    39,
+    268,
+    14,
+    480
+   ],
+   "hex": "#FFD23F",
+   "min_px": 100,
+   "size": "390x844"
+  },
+  {
+   "item": "R-07",
+   "state": "g02-top",
+   "kind": "text",
+   "region": [
+    72,
+    268.4,
+    47,
+    19.5
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-08",
+   "state": "g02-top",
+   "x": 67,
+   "y": 337.4,
+   "hex": "#55565C",
+   "size": "390x844"
+  },
+  {
+   "item": "R-09",
+   "state": "g02-top",
+   "x": 73,
+   "y": 320,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "R-09",
+   "state": "g02-top",
+   "x": 75.5,
+   "y": 320,
+   "hex": "#141416",
+   "size": "390x844"
+  },
+  {
+   "item": "R-09",
+   "state": "g02-top",
+   "x": 79.5,
+   "y": 311,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "R-10",
+   "state": "g02-top",
+   "kind": "present",
+   "region": [
+    78,
+    380,
+    56,
+    370
+   ],
+   "hex": "#6B3E26",
+   "min_px": 600,
+   "size": "390x844"
+  },
+  {
+   "item": "R-11",
+   "state": "g02-top",
+   "kind": "present",
+   "region": [
+    81,
+    380,
+    50,
+    370
+   ],
+   "hex": "#1E4FA3",
+   "min_px": 400,
+   "size": "390x844"
+  },
+  {
+   "item": "R-12",
+   "state": "g02-top",
+   "kind": "present",
+   "region": [
+    144,
+    380,
+    200,
+    370
+   ],
+   "hex": "#FFD23F",
+   "min_px": 20,
+   "size": "390x844"
+  },
+  {
+   "item": "R-13",
+   "state": "g02-day2",
+   "kind": "present",
+   "region": [
+    249,
+    300,
+    125,
+    450
+   ],
+   "hex": "#1E4FA3",
+   "min_px": 200,
+   "size": "390x844"
+  },
+  {
+   "item": "R-14",
+   "state": "g02-top",
+   "x": 22,
+   "y": 788,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "R-14",
+   "state": "g02-top",
+   "x": 195,
+   "y": 834,
+   "hex": "#161618",
+   "size": "390x844"
+  },
+  {
+   "item": "R-14",
+   "state": "g02-top",
+   "kind": "text",
+   "region": [
+    34,
+    766,
+    190,
+    44
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-16",
+   "state": "no-lodging-over-budget",
+   "kind": "present",
+   "region": [
+    20,
+    255,
+    350,
+    70
+   ],
+   "hex": "#FFD23F",
+   "min_px": 100,
+   "size": "390x844"
+  },
+  {
+   "item": "R-16",
+   "state": "no-lodging-over-budget",
+   "kind": "present",
+   "region": [
+    34,
+    766,
+    250,
+    15
+   ],
+   "hex": "#B3261E",
+   "min_px": 20,
+   "size": "390x844"
+  },
+  {
+   "item": "R-16",
+   "state": "offline",
+   "kind": "present",
+   "region": [
+    20,
+    255,
+    350,
+    60
+   ],
+   "hex": "#E6604A",
+   "min_px": 10,
+   "size": "390x844"
+  },
+  {
+   "item": "R-15",
+   "state": "stop-menu",
+   "kind": "text",
+   "region": [
+    0,
+    300,
+    390,
+    544
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-15",
+   "state": "replace-sheet",
+   "kind": "text",
+   "region": [
+    0,
+    300,
+    390,
+    544
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-15",
+   "state": "report-sheet",
+   "kind": "text",
+   "region": [
+    0,
+    300,
+    390,
+    544
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-16",
+   "state": "saved-toast",
+   "kind": "text",
+   "region": [
+    18,
+    600,
+    354,
+    140
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-16",
+   "state": "limit-45",
+   "kind": "text",
+   "region": [
+    18,
+    600,
+    354,
+    140
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "R-13",
+   "state": "booked-row",
+   "kind": "present",
+   "region": [
+    249,
+    300,
+    125,
+    450
+   ],
+   "hex": "#1E4FA3",
+   "min_px": 200,
+   "size": "390x844"
+  },
+  {
+   "item": "R-15",
+   "state": "replace-none-note",
+   "kind": "text",
+   "region": [
+    0,
+    300,
+    390,
+    544
+   ],
+   "size": "390x844"
+  }
+ ],
+ "justified": {
+  "R-17": "frame timing: Macrobenchmark / JankStats on the emulator (DEV-130)",
+  "R-18": "semantics/touch: XScreenSemanticsTest (build/tests/failures.txt), not visual"
+ }
+}

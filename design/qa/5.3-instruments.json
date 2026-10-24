@@ -1,0 +1,319 @@
+{
+ "screen": "5.3-instruments",
+ "notes": "The sky bands under the mirror are always in the mirror shadow (0 10 24 black 45 %), so only band 1 and the surface below the shadow are sampled. Gauge sample points derived from the arc centre (288.5, 410) and radius 53 (components §6). In crew-full the right seat is filled, so the bench colour must be absent inside it.",
+ "points": [
+  {
+   "item": "I-01",
+   "state": "default",
+   "x": 250,
+   "y": 30,
+   "hex": "#2B2850",
+   "size": "390x844"
+  },
+  {
+   "item": "I-01",
+   "state": "default",
+   "x": 195,
+   "y": 309,
+   "hex": "#161618",
+   "size": "390x844"
+  },
+  {
+   "item": "I-02",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    16,
+    10,
+    106,
+    32
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "I-03",
+   "state": "default",
+   "x": 22.5,
+   "y": 140,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "I-03",
+   "state": "default",
+   "x": 195,
+   "y": 30,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "I-04",
+   "state": "default",
+   "x": 50,
+   "y": 200,
+   "hex": "#3A3A42",
+   "size": "390x844"
+  },
+  {
+   "item": "I-05",
+   "state": "default",
+   "x": 89.7,
+   "y": 156,
+   "hex": "#E9E2F2",
+   "size": "390x844"
+  },
+  {
+   "item": "I-05",
+   "state": "default",
+   "x": 195,
+   "y": 165,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "I-05",
+   "state": "default",
+   "x": 300,
+   "y": 175,
+   "hex": "#2A2A30",
+   "size": "390x844"
+  },
+  {
+   "item": "I-06",
+   "state": "default",
+   "x": 311,
+   "y": 112,
+   "hex": "#C99A5B",
+   "size": "390x844"
+  },
+  {
+   "item": "I-07",
+   "state": "default",
+   "x": 207,
+   "y": 248,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "I-08",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    20,
+    276,
+    250,
+    26
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "I-09",
+   "state": "default",
+   "x": 16,
+   "y": 400,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "I-09",
+   "state": "default",
+   "x": 25,
+   "y": 400,
+   "hex": "#0F0F11",
+   "size": "390x844"
+  },
+  {
+   "item": "I-10",
+   "state": "default",
+   "x": 47,
+   "y": 375,
+   "hex": "#000000",
+   "size": "390x844"
+  },
+  {
+   "item": "I-10",
+   "state": "default",
+   "x": 132.5,
+   "y": 361.5,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "I-10",
+   "state": "default",
+   "x": 50.5,
+   "y": 361.5,
+   "hex": "#1C1C1F",
+   "size": "390x844"
+  },
+  {
+   "item": "I-11",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    46,
+    404,
+    111,
+    32
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "I-12",
+   "state": "default",
+   "x": 52,
+   "y": 452,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "I-12",
+   "state": "default",
+   "x": 60,
+   "y": 486.9,
+   "hex": "#0E0E10",
+   "size": "390x844"
+  },
+  {
+   "item": "I-12",
+   "state": "km-150",
+   "x": 60,
+   "y": 486.9,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "I-13",
+   "state": "default",
+   "x": 288.5,
+   "y": 357,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "I-13",
+   "state": "default",
+   "x": 238.7,
+   "y": 391.9,
+   "hex": "#D8402B",
+   "size": "390x844"
+  },
+  {
+   "item": "I-13",
+   "state": "default",
+   "x": 288.5,
+   "y": 412,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "I-13",
+   "state": "default",
+   "x": 281.1,
+   "y": 387.2,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "I-14",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    223.5,
+    385,
+    130,
+    15
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "I-15",
+   "state": "default",
+   "x": 26,
+   "y": 573,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "I-15",
+   "state": "default",
+   "x": 25,
+   "y": 681,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "I-16",
+   "state": "default",
+   "x": 274,
+   "y": 770,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "I-16",
+   "state": "default",
+   "x": 320,
+   "y": 730.5,
+   "hex": "#D8402B",
+   "size": "390x844"
+  },
+  {
+   "item": "I-16",
+   "state": "default",
+   "x": 298,
+   "y": 762,
+   "hex": "#1C1C1F",
+   "size": "390x844"
+  },
+  {
+   "item": "I-05",
+   "state": "crew-full",
+   "kind": "absent",
+   "region": [
+    255,
+    150,
+    90,
+    40
+   ],
+   "hex": "#2A2A30",
+   "size": "390x844"
+  },
+  {
+   "item": "I-17",
+   "state": "third-row",
+   "kind": "text",
+   "region": [
+    20,
+    54,
+    350,
+    260
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "I-18",
+   "state": "settings-sheet",
+   "kind": "text",
+   "region": [
+    20,
+    400,
+    350,
+    400
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "I-13",
+   "state": "budget-any",
+   "x": 288.5,
+   "y": 357,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  }
+ ],
+ "justified": {
+  "I-19": "persistence: DataStoreDefaults test (restart)",
+  "I-20": "semantics/touch: XScreenSemanticsTest (build/tests/failures.txt), not visual"
+ }
+}

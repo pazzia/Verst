@@ -232,3 +232,50 @@ Plain text; thin spaces are replaced by normal spaces for messengers that strip 
 
 ### D-12 Loading, empty and error states per screen
 Defined in each screen file §4 (5.1 loading / empty / offline / error; 5.2 suggestions loading / no results / error / offline; 5.4 slow / warning / error codes / offline; 5.5 price refresh / offline / warning / storage full; 5.6 over budget / no budget / saved / sync failure; 5.7 link loading / error / offline / booked).
+
+## 5. Mock build (Sprint 2, DES-104) — D-13…D-16
+
+Design numbering D-13…D-16 continues the D-list above; it is unrelated to the architecture decision log (A§15 "D-16" = 5 meals). Copy: copy-ru.md §14. Components: existing only.
+
+### D-13 `MockPartnerSheet` (5.7 «Забронировать ночь» in the mock build)
+
+```
+┌─────────────────── ▬ ───────────────────┐   BottomSheet (components §16)
+│ Бронирование ночи                   [×]  │   type.title.lg            mock_partner_title
+│ Яндекс Путешествия · демо                │   type.label.md navi.label mock_partner_line (not uppercase: brand + «демо»)
+│┌ NaviPanel look (bezel 6, radius 16) ───┐│
+││ У Стрелки, в центре, Ярославль          ││  type.title.sm            mock_partner_hotel
+││ 7 нояб. — 8 нояб. · 1 ночь              ││  type.body.md navi.text   mock_partner_dates
+││ Гости: 2 взр., 1 реб., собака           ││  type.body.md navi.text   mock_partner_guests
+││ ≈ 6 000 ₽ за 1 ночь                     ││  type.title.sm accent.yellow mock_partner_price
+│└─────────────────────────────────────────┘│
+│ Это демо-сборка: настоящего бронирования │   type.body.md text.secondary  mock_partner_note
+│ нет. В рабочей версии здесь откроется    │
+│ Яндекс Путешествия с этими датами.       │
+│ [ Вернуться в Версту                    ] │   YellowButton h 56, mock_partner_back
+└──────────────────────────────────────────┘
+```
+- Opens with `motion.bottomSheetIn` from the Book CTA; the CTA shows no spinner (no link to build).
+- Dismissal by the button, «×», system back or drag → the «Забронировали?» `NaviDialog` (5.7 §4) exactly as after a real partner return.
+- Values come from the trip: hotel = the selected `HotelOption`, dates = overnight date → +1 day, guests = crew, price = the option price × nights.
+- TalkBack: pane `cd_mock_partner`; focus starts on the title.
+- No partner logo and no partner brand colours, so the demo sheet cannot be mistaken for the real partner page: the line «Яндекс Путешествия · демо» is plain text in `color.navi.label`.
+
+### D-14 «точка на карте» without a map
+
+Tapping the D11 dashed button shows a `PlateToast` above the navigator panel's bottom edge (16 dp above it) with `mock_map_unavailable`: «Карта появится в следующей версии — пока введите город или адрес». 3 s, no action; the КУДА field keeps focus. The button itself stays enabled and unchanged (state `map-unavailable-plate`). TalkBack announces the plate politely. The map picker D-3 is not built.
+
+### D-15 Engine starting and failed (5.1)
+
+| State | Visual |
+| --- | --- |
+| `engine-starting` | Identical to 5.1 §4.3 loading (shimmer rows, caption placeholders, start disabled). The sign's content description is `engine_starting_cd` «Готовим маршруты рядом». If cached ready routes exist they are shown at once (no shimmer) and the sign is fully interactive while the engine starts; ПОЕХАЛИ waits for `Ready` (disabled for ≤ 2 s, then enabled) |
+| `engine-failed` | The sign shows the header and a message block instead of rows: `engine_failed_title` «Планировщик не запустился» (`type.title.sm`, `color.sign.white`) + `engine_failed_text` «Сохранённые поездки на месте — попробуйте запустить ещё раз» (`type.caption.md`, `color.sign.blueText`) + a 44 dp row button `common_retry` «Повторить» (`type.sign.lg`, `color.accent.yellow`, arrow `right`), exactly like the 5.1 §4.8 error layout. Caption: label «КУДА ЕДЕМ?» / title «Выберите в навигаторе» is **not** used — the navigator needs the engine too — so the caption shows label «НЕ ПОЛУЧИЛОСЬ», title «Мои поездки работают» (if saved trips exist) or «Попробуйте ещё раз», meta `engine_failed_text`; start disabled. «Повторить» restarts `EngineHost` and returns to `engine-starting` |
+| Engine error after an edit | `common_engine_error` toast «Сохранили. Планировщик не ответил — суммы пересчитаны на телефоне» (M§6.3) |
+
+### D-16 Build line, GPS indicator, location and share text in the mock build
+
+- **Build line (D-4 settings sheet footer):** below «Политика конфиденциальности ↗», `mock_build_line` «Сборка {n} · {sha} · демо-данные», `type.body.sm`, `color.text.muted`, centred, min-h 44 (long-press 2 s → `DebugRoute`; no visual hint, no TalkBack action). This is the only place «демо» appears in the app chrome; the launcher label stays «Верста» (DES-103).
+- **GPS indicator (5.2 header right): hidden** in the mock build. Location is never requested, so «GPS ●/○» would be false information. The header shows only «НАВИГАТОР · ВСЯ РОССИЯ».
+- **«ВЫ: <город>» (5.1 D5):** opens Navigator with ОТКУДА focused; TalkBack `cd_windshield_you_are_mock` «Старт: {city}. Изменить». The location rationale toast (5.1 §4.9) is not shown.
+- **Share text:** the mock build has no share link (no server). The text ends with one extra line `mock_share_note` «Посчитано в демо-сборке «Версты», цены примерные» instead of the link. Reason: the recipient sees fixture prices and must not take them as a real quote. Decided by the Designer; the Manager can drop the line in "Round 3".

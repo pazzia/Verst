@@ -7,7 +7,8 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | Rule | Detail |
 | --- | --- |
 | Keys | Android string resource names, `snake_case`, prefixed by screen: `common_`, `windshield_`, `navigator_`, `picker_`, `instruments_`, `settings_`, `drive_`, `road_`, `stopmenu_`, `replace_`, `report_`, `waybill_`, `pro_`, `exit_`, `trips_`, `error_`. TalkBack-only strings start with `cd_`. Engine strings keep their JSON keys (§10, §11) |
-| Placeholders | Android `%1$s`, `%1$d` in `strings.xml`; written here as `{name}` for readability, in the order shown |
+| Placeholders | Written here as `{name}`; `design/tools/gen_strings.py` numbers them by first appearance (`%1$s`, `%2$d`…; a repeated name reuses its number). Integer counts `{n}` `{k}` `{d}` `{a}` `{c}` `{h}` `{m}` `{min}` `{nights}` `{adults}` `{children}` become `%n$d`; everything else `%n$s` (amounts, km and times arrive pre-formatted with U+202F) |
+| Generator typography | The generator also inserts U+00A0 between a number or placeholder and a unit (км, м, мин, ч, л, ₽), after «≈» and «№», and U+202F inside digit groups («30 500»), so the deck can be typed with plain spaces. Literal spaces at the ends of a text are kept only when the cell is wrapped in straight double quotes |
 | Plurals | ICU via `<plurals>` with `one` / `few` / `many` / `other` (SPEC 16). Listed in §9; a string that needs one names it as `[plural: key]` |
 | Typography | «ёлочки» quotes; «ё» always; «—» (em dash) with spaces; «→» between towns; «·» (middle dot) as a separator; «≈» + U+00A0 before estimates; U+202F thousands separator («30 500»); U+00A0 between number and unit («745 км», «6 000 ₽»); 24-hour time |
 | Uppercase | Uppercase labels are stored in uppercase (not transformed in code) |
@@ -18,6 +19,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 
 | Key | Text | Notes |
 | --- | --- | --- |
+| `app_name` | Верста | launcher label (DES-103); the same in the demo build — the build line carries «демо» |
 | `common_go` | ПОЕХАЛИ | start button label |
 | `common_go_wait` | ЖДЁМ | start button while validating |
 | `common_back_to_windshield` | К лобовому | back link |
@@ -41,6 +43,8 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `common_storage_full_body` | Удалите старую поездку, чтобы сохранить эту | |
 | `common_storage_full_open` | Мои поездки | |
 | `common_undo` | Вернуть | toast action |
+| `common_join_dot` | " · " | separator; a text cell in straight double quotes is literal (spaces kept) |
+| `common_join_comma` | ", " | separator |
 | `cd_back` | Назад: {label} | |
 | `cd_start_disabled_destination` | Поехали — сначала выберите, куда | |
 | `cd_start_disabled_offline` | Поехали — нужен интернет | |
@@ -88,8 +92,17 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `cd_windshield_you_are` | Старт: {city}. Определить по геопозиции | |
 | `cd_windshield_caption` | Выбран маршрут: {name}. {meta} | live region |
 | `cd_windshield_my_trips` | Мои поездки, {n} {saved}. Открыть список | [plural: `plural_saved`] |
-| `cd_direction_n` … `cd_direction_nw` | на север · на северо-восток · на восток · на юго-восток · на юг · на юго-запад · на запад · на северо-запад | 8 keys `cd_direction_n`, `_ne`, `_e`, `_se`, `_s`, `_sw`, `_w`, `_nw` |
-| `windshield_crew_short` | {a} взр · {c} реб · пёс | built from parts: `crew_adults_short` «{a} взр», `crew_children_short` «{c} реб», `crew_dog_short` «пёс», joined with « · » |
+| `cd_direction_n` | на север |  |
+| `cd_direction_ne` | на северо-восток |  |
+| `cd_direction_e` | на восток |  |
+| `cd_direction_se` | на юго-восток |  |
+| `cd_direction_s` | на юг |  |
+| `cd_direction_sw` | на юго-запад |  |
+| `cd_direction_w` | на запад |  |
+| `cd_direction_nw` | на северо-запад |  |
+| `crew_adults_short` | {a} взр | joined with `common_join_dot` |
+| `crew_children_short` | {c} реб | omitted when 0 |
+| `crew_dog_short` | пёс | only with the dog |
 
 ## 3. 5.2 Navigator and map picker
 
@@ -110,8 +123,9 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `navigator_my_location` | Моё местоположение | first row when editing ОТКУДА |
 | `navigator_recent` | НЕДАВНО ИСКАЛИ | OI-04 |
 | `navigator_popular` | ЧАСТО ИЩУТ | OI-04, chips from config |
-| `navigator_type_city` / `_street` / `_place` | Г · У · М | badges |
-| `navigator_sub_city` / `_street` / `_place` | город · {region} / улица · {city} / место · {region} | suggestion sub-line |
+| `navigator_type_city` | Г | badge |
+| `navigator_type_street` | У | badge |
+| `navigator_type_place` | М | badge |
 | `navigator_route_label` | МАРШРУТ | caption |
 | `navigator_route_title` | {from} → {to} | vias inserted with « → » |
 | `navigator_route_no_to` | {from} → ? | |
@@ -125,12 +139,11 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `navigator_outside_text` | Можно доехать до границы: выберите город в России, например {city} | |
 | `navigator_outside_row` | не по России | disabled row label |
 | `navigator_outside_meta` | выберите город или место в России | caption meta |
-| `error_too_short` | Слишком близко для поездки на машине | = SPEC §12 `TOO_SHORT` |
-| `error_unreachable` | Не нашли дорогу на машине до этой точки | = SPEC §12 `UNREACHABLE` |
 | `navigator_found_cd` | Найдено {n} {variants} | [plural: `plural_variant`], live |
 | `cd_navigator_clear` | Очистить | |
 | `cd_navigator_via_remove` | Удалить заезд {n} | |
-| `cd_navigator_move_up` / `_down` | Переместить выше / Переместить ниже | custom actions |
+| `cd_navigator_move_up` | Переместить выше | custom action |
+| `cd_navigator_move_down` | Переместить ниже | custom action |
 | `cd_navigator_map` | Точка на карте, откроется карта | |
 | `picker_cancel` | Отмена | back link |
 | `picker_label` | ТОЧКА НА КАРТЕ | |
@@ -141,7 +154,8 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `picker_my_place` | моё место | key |
 | `picker_offline` | Карта работает только с интернетом | |
 | `cd_picker_map` | Карта. Двигайте карту, чтобы поставить точку | |
-| `cd_picker_zoom_in` / `_out` | Приблизить / Отдалить | |
+| `cd_picker_zoom_in` | Приблизить |  |
+| `cd_picker_zoom_out` | Отдалить |  |
 
 ## 4. 5.3 Instruments and settings
 
@@ -158,9 +172,12 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `instruments_third_row` | + третий ряд | |
 | `instruments_dog_on` | пёс | |
 | `instruments_dog_off` | + пёс | |
-| `instruments_summary` | {adults} {adults_word}[ · {children} {children_word}][ · собака] | [plural: `plural_adult`, `plural_child`] |
+| `instruments_summary_adults` | {n} {adults_word} | [plural: `plural_adult`] |
+| `instruments_summary_children` | {n} {children_word} | [plural: `plural_child`], omitted when 0 |
+| `instruments_summary_dog` | собака | only with the dog; parts joined with `common_join_dot` |
 | `instruments_km_label` | ЗА ДЕНЬ, КМ | |
-| `instruments_drive_time` | ≈ {h} ч {m} мин за рулём | `{m}` part omitted when 0: `instruments_drive_time_h` «≈ {h} ч за рулём» |
+| `instruments_drive_time` | ≈ {h} ч {m} мин за рулём | minutes rounded to 10 |
+| `instruments_drive_time_h` | ≈ {h} ч за рулём | when minutes = 0 |
 | `instruments_days_ring` | {n} {days} на кольцо | [plural: `plural_day`] |
 | `instruments_days_oneway` | {n} {days} в пути | [plural: `plural_day`] |
 | `instruments_budget_label` | БЮДЖЕТ | |
@@ -179,13 +196,18 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `cd_instruments_dog_on` | Собака едет. Нажмите, чтобы убрать | |
 | `cd_instruments_dog_off` | Собаки нет. Нажмите, чтобы взять | |
 | `cd_instruments_km` | {km} километров в день | |
-| `cd_instruments_km_less` / `_more` | Меньше на 50 км / Больше на 50 км | |
-| `cd_instruments_budget` | Бюджет до {amount} рублей / Бюджет не важен | two keys `_value`, `_any` |
-| `cd_instruments_budget_less` / `_more` | Уменьшить бюджет / Увеличить бюджет | |
+| `cd_instruments_km_less` | Меньше на 50 км |  |
+| `cd_instruments_km_more` | Больше на 50 км |  |
+| `cd_instruments_budget_value` | Бюджет до {amount} рублей |  |
+| `cd_instruments_budget_any` | Бюджет не важен |  |
+| `cd_instruments_budget_less` | Уменьшить бюджет |  |
+| `cd_instruments_budget_more` | Увеличить бюджет |  |
 | `settings_title` | Машина и выезд | sheet |
 | `settings_consumption` | РАСХОД, Л НА 100 КМ | |
 | `settings_fuel` | ТОПЛИВО | |
-| `settings_fuel_92` / `_95` / `_dt` | АИ-92 / АИ-95 / ДТ | |
+| `settings_fuel_92` | АИ-92 |  |
+| `settings_fuel_95` | АИ-95 |  |
+| `settings_fuel_dt` | ДТ |  |
 | `settings_tank` | БАК, Л | |
 | `settings_start` | ВЫЕЗД | |
 | `settings_today` | сегодня | day chip |
@@ -199,7 +221,6 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | --- | --- | --- |
 | `drive_header` | СТРОИМ ДОРОГУ · {km} КМ | `{km}` with «≈ » when straight-line |
 | `drive_header_days` | {n} {DAYS} | uppercase [plural: `plural_day_upper`] |
-| `drive_steps` | engine `stage.*` (§10) | streamed |
 | `drive_done` | Дорога готова — смотреть знаки | CTA |
 | `drive_slow` | Строим дольше обычного… | 20 s |
 | `drive_wait` | Подождать | |
@@ -211,7 +232,10 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `drive_retry_in` | Попробовать через {m}:{ss} | `RATE_LIMITED` countdown |
 | `drive_offline` | Чтобы построить дорогу, нужен интернет. | |
 | `drive_offline_sub` | Сохранённые поездки открываются без сети — на лобовом, в «Мои поездки». | |
-| `drive_sign_night` / `_fuel` / `_food` / `_rest` | ночёвка · заправка · обед · отдых | second line of flying service signs |
+| `drive_sign_night` | ночёвка | second line of flying service signs |
+| `drive_sign_fuel` | заправка |  |
+| `drive_sign_food` | обед |  |
+| `drive_sign_rest` | отдых |  |
 | `cd_drive_cancel` | Отменить построение | |
 | `cd_drive_step_done` | Готово: {text} | live |
 | `cd_drive_step_now` | Сейчас: {text} | live |
@@ -227,7 +251,8 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `road_chip_pace` | до {km} км в день | |
 | `road_intro` | Знаки по пути — как увидите их на трассе. Любой можно заменить. | |
 | `road_day` | День {n} | |
-| `road_day_meta` | {km} км · ≈ {h} ч за рулём | last day: `road_day_meta_home` «{km} км · домой» |
+| `road_day_meta` | {km} км · ≈ {h} ч за рулём |  |
+| `road_day_meta_home` | {km} км · домой | last day of a round trip |
 | `road_day_navigator` | в навигатор ↗ | |
 | `road_day_navigator_off` | в навигатор | offline, disabled |
 | `road_start` | старт | |
@@ -248,12 +273,16 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `road_offline_plate` | Без сети: бронирование и навигатор недоступны | |
 | `road_replaced_toast` | Заменили. Путевой лист: ≈ {amount} ₽ | + `common_undo` |
 | `road_replace_sync_later` | Замену сохраним на сервере, когда появится сеть | |
-| `cd_road_save` / `cd_road_saved` | Сохранить офлайн / Сохранено офлайн | toolbar |
+| `cd_road_save` | Сохранить офлайн | toolbar |
+| `cd_road_saved` | Сохранено офлайн | toolbar, saved |
 | `cd_road_share` | Поделиться поездкой | |
 | `cd_road_day` | День {n}, {km} километров, примерно {h} {hours} за рулём | [plural: `plural_hour`] |
 | `cd_road_day_navigator` | Открыть день {n} в навигаторе | |
 | `cd_road_row` | {ahead}, {time}, {name}. {note}. {cost}. | SPEC 16: «Через 70 км, 09:15, Троице-Сергиева лавра» |
-| `cd_road_kind_fuel` / `_food` / `_rest` / `_night` | Заправка: · Обед: · Отдых: · Ночёвка: | row prefix |
+| `cd_road_kind_fuel` | Заправка: {text} | row prefix |
+| `cd_road_kind_food` | Обед: {text} |  |
+| `cd_road_kind_rest` | Отдых: {text} |  |
+| `cd_road_kind_night` | Ночёвка: {text} |  |
 | `cd_road_warning` | Внимание: {text} | |
 | `cd_road_swap` | Заменить: {name} | |
 | `cd_road_hotel` | Выбрать отель в {town_prep} | |
@@ -261,7 +290,9 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `cd_road_action_report` | Сообщить об ошибке | custom action |
 | `cd_road_waybill` | Путевой лист, сколько стоит: примерно {amount} рублей | |
 | `stopmenu_navigator` | ОТКРЫТЬ В НАВИГАТОРЕ ОТСЮДА | D-5 |
-| `stopmenu_yandex_navi` / `_yandex_maps` / `_2gis` | Яндекс Навигатор / Яндекс Карты / 2ГИС | app names (no logos) |
+| `stopmenu_yandex_navi` | Яндекс Навигатор | app names, no logos |
+| `stopmenu_yandex_maps` | Яндекс Карты |  |
+| `stopmenu_2gis` | 2ГИС |  |
 | `stopmenu_none` | Навигатор не установлен | |
 | `stopmenu_install` | Установить Яндекс Навигатор из RuStore | |
 | `stopmenu_last` | последний раз | |
@@ -293,8 +324,12 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `waybill_subtitle` | легкового автомобиля | |
 | `waybill_number` | № | handwritten number follows |
 | `waybill_route` | Маршрут | |
-| `waybill_crew` | Экипаж | value: «2 взр., 1 реб., собака» from `waybill_crew_value` «{a} взр., {c} реб., собака» |
-| `waybill_mileage` | Пробег, км | value: «{km} за {n} {days}» [plural: `plural_day_gen`] |
+| `waybill_crew` | Экипаж |  |
+| `waybill_crew_adults` | {a} взр. | value parts joined with «, » |
+| `waybill_crew_children` | {c} реб. | omitted when 0 |
+| `waybill_crew_dog` | собака | only with the dog |
+| `waybill_mileage` | Пробег, км |  |
+| `waybill_mileage_value` | {km} за {n} {days} | [plural: `plural_day_gen`] |
 | `waybill_table_item` | СТАТЬЯ И РАСЧЁТ | |
 | `waybill_table_rub` | ₽ | |
 | `waybill_line_fuel` | Бензин {fuel_type} | «Бензин АИ-95»; diesel: «Дизель» (engine `cost.title.fuel.dt`) — see review R-1 |
@@ -315,9 +350,13 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `waybill_saved` | Сохранено ✓ | |
 | `waybill_share` | Отправить экипажу | |
 | `waybill_sync_failed` | Не удалось синхронизировать расчёт — повторим позже | toast |
-| `waybill_stamp` | ВЕРСТА / В ПУТЬ / ГОТОВЫ | decorative, not read |
+| `waybill_stamp_top` | ВЕРСТА | decorative, not read |
+| `waybill_stamp_mid` | В ПУТЬ |  |
+| `waybill_stamp_bottom` | ГОТОВЫ |  |
 | `cd_waybill_heading` | Путевой лист легкового автомобиля, номер {n} | |
-| `cd_waybill_line` | {name}, {amount} рублей. Расчёт: {formula_spoken}. {expand} | expand: «Раскрыть подробности» / «Свернуть подробности» |
+| `cd_waybill_line` | {name}, {amount} рублей. Расчёт: {formula_spoken}. {expand} |  |
+| `cd_waybill_expand` | Раскрыть подробности |  |
+| `cd_waybill_collapse` | Свернуть подробности |  |
 | `cd_waybill_reserve` | Резерв 10 процентов, на пробки и «давай заедем», {amount} рублей | |
 | `cd_waybill_total` | Итого примерно {amount} рублей | |
 | `cd_waybill_ready` | Путевой лист готов: итого примерно {amount} рублей | announcement |
@@ -343,7 +382,8 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `exit_header` | НОЧЁВКА {k} ИЗ {n} | |
 | `exit_header_km` | КМ {km} · {time} | |
 | `exit_sign_centre` | центр | exit sign |
-| `exit_sign_distance_m` / `_km` | {m} м / {km} км | «800 м», «1,2 км» |
+| `exit_sign_distance_m` | {m} м | «800 м» |
+| `exit_sign_distance_km` | {km} км | «1,2 км» |
 | `exit_turn` | поворотник | decorative |
 | `exit_book` | Забронировать ночь | |
 | `exit_book_partner` | через Яндекс Путешествия | |
@@ -354,7 +394,10 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `exit_return_body` | Отметим ночёвку в {town_prep} как забронированную | |
 | `exit_return_yes` | Да, забронировали | |
 | `exit_return_no` | Ещё нет | |
-| `exit_tag_dogs` / `_family` / `_parking` / `_parking_guarded` | можно с собакой / семейный номер / парковка / охраняемая парковка | decisions.md OI-30 |
+| `exit_tag_dogs` | можно с собакой | decisions.md OI-30 |
+| `exit_tag_family` | семейный номер |  |
+| `exit_tag_parking` | парковка |  |
+| `exit_tag_parking_guarded` | охраняемая парковка |  |
 | `cd_exit_sign` | Указатель: съезд на {town}, центр, гостиница через {distance_spoken} | |
 | `cd_exit_heading` | Ночёвка {k} из {n}, километр {km}, приезд в {time}. {town} | |
 | `cd_exit_group` | Где ночуем | radio group |
@@ -397,20 +440,22 @@ Engine plurals (`strings.ru.json`): `plural.day`, `plural.minute`, `plural.meal`
 
 ## 10. API errors (SPEC §12) — client strings, same text as the server `message`
 
-| Key | Code | Text |
-| --- | --- | --- |
-| `error_invalid_input` | `INVALID_INPUT` | Проверьте параметры поездки |
-| `error_unreachable` | `UNREACHABLE` | Не нашли дорогу на машине до этой точки |
-| `error_too_short` | `TOO_SHORT` | Слишком близко для поездки на машине |
-| `error_no_lodging` | `NO_LODGING` | Не нашли ночёвку с вашими условиями — показали ближайшую подходящую (= engine `warning.NO_LODGING`) |
-| `error_rate_limited` | `RATE_LIMITED` | Слишком много запросов, подождите минуту |
-| `error_upstream` | `UPSTREAM` | Сервис маршрутов временно недоступен |
-| `error_network` | (client) | Нет связи с сервером. Проверьте интернет и попробуйте ещё раз |
+| Key | Code | Text | Notes |
+| --- | --- | --- | --- |
+| `error_invalid_input` | `INVALID_INPUT` | Проверьте параметры поездки |  |
+| `error_unreachable` | `UNREACHABLE` | Не нашли дорогу на машине до этой точки |  |
+| `error_too_short` | `TOO_SHORT` | Слишком близко для поездки на машине |  |
+| `error_no_lodging` | `NO_LODGING` | Не нашли ночёвку с вашими условиями — показали ближайшую подходящую | = engine `warning.NO_LODGING` |
+| `error_rate_limited` | `RATE_LIMITED` | Слишком много запросов, подождите минуту |  |
+| `error_upstream` | `UPSTREAM` | Сервис маршрутов временно недоступен |  |
+| `error_network` | (client) | Нет связи с сервером. Проверьте интернет и попробуйте ещё раз |  |
 
 
-## 11. Engine reason templates — `reasons.ru.json` (review of the DEV-005 draft)
+<!-- BEGIN engine tables (design/tools/gen_copy_engine.py) -->
 
-Every key of `backend/planner/verst_planner/resources/reasons.ru.json` (47 keys). "Example" renders the template with the Golden-Ring data; "max" is the length of the worst case (longest town «Переславле-Залесском», 120 km shift, 900 km/day, dog; the three `overnight.shift.*` rows include the appended `overnight.cap_ok`). The limit is 140 characters: the longest rendered reason is 124 characters, so **all pass**. Tone: calm, second person, no jargon — matches the deck. Findings R-2…R-5 are in §13.
+## 11. Engine reason templates — `reasons.ru.json`
+
+Every key of `backend/planner/verst_planner/resources/reasons.ru.json` (52 keys), regenerated by `design/tools/gen_copy_engine.py`. "Example" renders the template with the Golden-Ring data (first letter capitalised, as the renderer does); "max" is the worst case («Переславле-Залесском», 120 km shift, 900 km/day, dog; the `overnight.shift.*` rows include the appended `overnight.cap_ok`). Limit 140 characters; the longest rendered reason is 124 characters — **all pass**.
 
 | Key | Template | Params | Where it shows | Example | max | Review |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -419,30 +464,34 @@ Every key of `backend/planner/verst_planner/resources/reasons.ru.json` (47 keys)
 | `overnight.shift.evening` | {shift}: вечером можно прогуляться по центру. | shift | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Не в Ростове Великом, а на 55 км дальше: вечером можно прогуляться по центру. Ваши 300 км в день не превышены. | 116 | OK |
 | `overnight.on_target` | Как раз на вашей дневной норме. | — | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Как раз на вашей дневной норме. | 31 | OK |
 | `overnight.cap_ok` |  Ваши {daily_km} км в день не превышены. | daily_km | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Ваши 300 км в день не превышены. | 32 | appended; starts with a space by design |
-| `overnight.shift.later` | Не в {other_prep}, а на {dkm} км дальше | dkm, other_prep | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Не в Ростове Великом, а на 55 км дальше | 45 | fragment (no final punctuation) — only used as `{shift}` |
+| `overnight.shift.later` | Не в {other_prep}, а на {dkm} км дальше | dkm, other_prep | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Не в Ростове Великом, а на 55 км дальше | 45 | fragment — only used as `{shift}` |
 | `overnight.shift.earlier` | Не в {other_prep}, а на {dkm} км раньше | dkm, other_prep | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Не в Ростове Великом, а на 55 км раньше | 45 | fragment — only used as `{shift}` |
 | `overnight.shift.limit` | На {dkm} км раньше вашего предела | dkm | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | На 55 км раньше вашего предела | 31 | fragment — only used as `{shift}` |
 | `overnight.widened` | Ночёвку с вашими условиями нашли только на {dkm} км {dir} цели дня. | dir, dkm | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Ночёвку с вашими условиями нашли только на 55 км дальше цели дня. | 66 | OK |
 | `overnight.no_hotel` | Не нашли отель с вашими условиями — заложили среднюю цену, уточните при бронировании. | — | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Не нашли отель с вашими условиями — заложили среднюю цену, уточните при бронировании. | 85 | OK |
 | `overnight.template` | Ночёвка из готового маршрута «{route}». | route | Exit reason sentence (5.7 D7), Road-ahead hotel-row note | Ночёвка из готового маршрута «Золотое кольцо». | 56 | OK |
 | `crew_suffix.dog` | , куда пускают с собакой | — | suffix inside overnight.shift.hotels | , куда пускают с собакой | 24 | OK |
-| `crew_suffix.family` |  с семейными номерами | — | suffix inside overnight.shift.hotels | с семейными номерами | 20 | OK |
+| `crew_suffix.family` |  с семейными номерами | — | suffix inside overnight.shift.hotels | С семейными номерами | 20 | OK |
 | `crew_suffix.none` | (empty) | — | suffix inside overnight.shift.hotels | (empty) | 0 | empty by design |
 | `fuel.evening` | Заправиться вечером, чтобы утром сразу ехать. | — | Road-ahead fuel-row note | Заправиться вечером, чтобы утром сразу ехать. | 45 | OK |
 | `fuel.range` | Через {km} км в баке останется меньше 20% — заправимся здесь. | km | Road-ahead fuel-row note | Через 40 км в баке останется меньше 20% — заправимся здесь. | 60 | OK |
 | `fuel.coincide` | Заправка рядом с остановкой — без лишнего съезда. | — | Road-ahead fuel-row note | Заправка рядом с остановкой — без лишнего съезда. | 49 | OK |
 | `fuel.last` | Последняя заправка до дома. | — | Road-ahead fuel-row note | Последняя заправка до дома. | 27 | OK |
-| `rest.generic` | Разминка {min} минут после {drive} за рулём. | drive, min | Road-ahead rest-row note | Разминка 20 минут после двух часов за рулём. | 48 | R-2: «{min} минут» is a fixed plural; use `{min} {min_word}` with `plural.minute` |
-| `rest.who` | Разминка {min} минут: {who}. | min, who | Road-ahead rest-row note | Разминка 20 минут: ребёнку побегать, собаке погулять. | 53 | R-2: same fixed plural |
+| `rest.generic` | Разминка {min} {min_word} после {drive} за рулём. | drive, min, min_word | Road-ahead rest-row note | Разминка 20 минут после двух часов за рулём. | 48 | OK — R-2 resolved (`{min_word}`) |
+| `rest.who` | Разминка {min} {min_word}: {who}. | min, min_word, who | Road-ahead rest-row note | Разминка 20 минут: ребёнку побегать, собаке погулять. | 53 | OK — R-2 resolved |
+| `rest.roadside` | Сделайте остановку на 15 минут — подходящей площадки рядом нет. | — | Road-ahead rest-row note | Сделайте остановку на 15 минут — подходящей площадки рядом нет. | 63 | OK |
 | `lunch.kids` | Обед, есть детское меню. | — | Road-ahead lunch-row note | Обед, есть детское меню. | 24 | OK |
 | `lunch.parking` | Обед, парковка у входа. | — | Road-ahead lunch-row note | Обед, парковка у входа. | 23 | OK |
 | `lunch.default` | Обед в {town_prep}. | town_prep | Road-ahead lunch-row note | Обед в Иванове. | 28 | OK |
-| `sight.default` | {dwell} на осмотр. | dwell | Road-ahead sight-row note | Полтора часа на осмотр. | 23 | R-3: `{dwell}` starts the sentence — the renderer must capitalise the first letter («Полтора часа на осмотр.») |
-| `sight.dog_waits` | {dwell} на осмотр. Собака ждёт с одним из взрослых. | dwell | Road-ahead sight-row note | Полтора часа на осмотр. Собака ждёт с одним из взрослых. | 56 | R-3: capitalise the first letter |
+| `sight.default` | {dwell} на осмотр. | dwell | Road-ahead sight-row note | Полтора часа на осмотр. | 23 | OK — R-3 resolved (renderer capitalises the first letter) |
+| `sight.dog_waits` | {dwell} на осмотр. Собака ждёт с одним из взрослых. | dwell | Road-ahead sight-row note | Полтора часа на осмотр. Собака ждёт с одним из взрослых. | 56 | OK — R-3 resolved |
 | `sight.osm` | По открытым данным. | — | Road-ahead sight-row note | По открытым данным. | 19 | OK |
 | `start.default` | Выезд в {time}. | time | Road-ahead start-row note | Выезд в 08:00. | 14 | OK |
 | `finish.home` | Дома к {part_of_day}. | part_of_day | Road-ahead finish-row note | Дома к вечеру. | 14 | OK; `part_of_day` gives «обеду / ужину / вечеру» |
 | `finish.default` | Финиш. | — | Road-ahead finish-row note | Финиш. | 6 | OK |
+| `via.user` | Заезд по вашей просьбе. | — | Road-ahead via-row note | Заезд по вашей просьбе. | 23 | OK |
+| `alternatives.none` | Других вариантов в это время поблизости нет. | — | Replace sheet D-6 body / note | Других вариантов в это время поблизости нет. | 44 | OK — the replace sheet shows this engine text (state `replace-none-note`); no UI duplicate |
+| `alternatives.one` | Нашли только один вариант в это время. | — | Replace sheet D-6 body / note | Нашли только один вариант в это время. | 38 | OK |
 | `stage.route` | Прокладываем дорогу | — | Drive step line (5.4 D5) | Прокладываем дорогу | 19 | OK |
 | `stage.split` | Делим путь на {n} {days_word} по ≈ {km} км | days_word, km, n | Drive step line (5.4 D5) | Делим путь на 3 дня по ≈ 40 км | 31 | OK |
 | `stage.split_ring` | Делим кольцо на {n} {days_word} по ≈ {km} км | days_word, km, n | Drive step line (5.4 D5) | Делим кольцо на 3 дня по ≈ 40 км | 33 | OK |
@@ -451,20 +500,21 @@ Every key of `backend/planner/verst_planner/resources/reasons.ru.json` (47 keys)
 | `stage.lodging.default` | Ищем, где удобно переночевать | — | Drive step line (5.4 D5) | Ищем, где удобно переночевать | 29 | OK |
 | `stage.lodging.none` | Ищем остановки по пути | — | Drive step line (5.4 D5) | Ищем остановки по пути | 22 | OK |
 | `stage.hours` | Сверяем часы работы | — | Drive step line (5.4 D5) | Сверяем часы работы | 19 | OK |
-| `stage.fuel` | Считаем бензин: {consumption} л на 100 км | consumption | Drive step line (5.4 D5) | Считаем бензин: 8,0 л на 100 км | 32 | R-4: `{consumption}` must use a decimal comma («8,0») |
+| `stage.fuel` | Считаем бензин: {consumption} л на 100 км | consumption | Drive step line (5.4 D5) | Считаем бензин: 8,0 л на 100 км | 32 | OK — R-4 resolved (`fmt_consumption`, «8,0») |
 | `stage.cost` | Считаем, сколько стоит поездка | — | Drive step line (5.4 D5) | Считаем, сколько стоит поездка | 30 | OK |
-| `hint.cheaper_overnight` | Выберите ночёвку дешевле | — | Waybill over-budget hints (long form, sheet / tooltip) | Выберите ночёвку дешевле | 24 | OK |
-| `hint.fewer_sights` | Уберите пару платных мест | — | Waybill over-budget hints (long form, sheet / tooltip) | Уберите пару платных мест | 25 | OK |
-| `hint.just_drive` | Попробуйте режим «Просто доехать» | — | Waybill over-budget hints (long form, sheet / tooltip) | Попробуйте режим «Просто доехать» | 33 | OK |
+| `hint.cheaper_overnight` | Выберите ночёвку дешевле | — | Waybill over-budget hints (long form) | Выберите ночёвку дешевле | 24 | OK |
+| `hint.fewer_sights` | Уберите пару платных мест | — | Waybill over-budget hints (long form) | Уберите пару платных мест | 25 | OK |
+| `hint.just_drive` | Попробуйте режим «Просто доехать» | — | Waybill over-budget hints (long form) | Попробуйте режим «Просто доехать» | 33 | OK |
 | `warning.NO_LODGING` | Не нашли ночёвку с вашими условиями — показали ближайшую подходящую | — | Road-ahead plates / day lines, Drive warning step | Не нашли ночёвку с вашими условиями — показали ближайшую подходящую | 67 | OK |
 | `warning.FUEL_GAP` | На участке {km} км мало заправок — заправьтесь заранее | km | Road-ahead plates / day lines, Drive warning step | На участке 40 км мало заправок — заправьтесь заранее | 53 | OK |
-| `warning.DAY_OVER_BUDGET` | День {day} получился длинным — можно убрать остановку | day | Road-ahead plates / day lines, Drive warning step | День 2 получился длинным — можно убрать остановку | 49 | R-5: the key says "budget" but the text is about time; OK for the user, rename the key in v2 (`DAY_TOO_LONG`) |
+| `warning.DAY_OVER_BUDGET` | День {day} получился длинным — можно убрать остановку | day | Road-ahead plates / day lines, Drive warning step | День 2 получился длинным — можно убрать остановку | 49 | R-5: key says "budget", text is about time; rename to `DAY_TOO_LONG` at the next contract version |
 | `warning.TOLLS_UNAVOIDABLE` | Без платных дорог не проехать — платный участок учтён в расчёте | — | Road-ahead plates / day lines, Drive warning step | Без платных дорог не проехать — платный участок учтён в расчёте | 63 | OK |
 | `warning.UNVERIFIED_PLACES` | Часть мест по открытым данным — не проверены | — | Road-ahead plates / day lines, Drive warning step | Часть мест по открытым данным — не проверены | 44 | OK |
+| `warning.STOP_CLOSED` | «{name}» в этот день закрыт — убрали из маршрута | name | Road-ahead plates / day lines, Drive warning step | «Ипатьевский монастырь» в этот день закрыт — убрали из маршрута | 78 | OK — shown as a day line on 5.5 (day-level warning) |
 
 ## 12. Engine UI strings — `strings.ru.json`
 
-Shown to the user through the cost formulas, labels, share text and notes. Reviewed for consistency with the approved canvases.
+Shown to the user through cost formulas, labels, suggestion sub-lines, share text and notes; the app never duplicates them.
 
 | Key | Text | Review |
 | --- | --- | --- |
@@ -473,7 +523,7 @@ Shown to the user through the cost formulas, labels, share text and notes. Revie
 | `plural.minute` | минута, минуты, минут | OK |
 | `plural.meal` | приём, приёма, приёмов | OK |
 | `plural.seat` | место, места, мест | OK |
-| `plural.region_prep` | регионам, регионам, регионам | OK (dative plural is the same for all forms) |
+| `plural.region_prep` | регионам, регионам, регионам | OK |
 | `duration.30` | полчаса | OK |
 | `duration.60` | час | OK |
 | `duration.90` | полтора часа | OK |
@@ -485,7 +535,7 @@ Shown to the user through the cost formulas, labels, share text and notes. Revie
 | `duration.hm` | {h} ч {m} мин | OK |
 | `duration.h` | {h} ч | OK |
 | `duration.m` | {m} мин | OK |
-| `part_of_day.morning` | обеду | «Дома к обеду» — OK |
+| `part_of_day.morning` | обеду | OK |
 | `part_of_day.afternoon` | ужину | OK |
 | `part_of_day.evening` | вечеру | OK |
 | `who.child` | ребёнку побегать | OK |
@@ -493,7 +543,7 @@ Shown to the user through the cost formulas, labels, share text and notes. Revie
 | `who.dog` | собаке погулять | OK |
 | `who.join` | ,  | OK |
 | `label.map_point` | Точка на карте | OK |
-| `label.roadside_night` | Ночёвка у трассы {road_ref}, {km} км | OK — shown as the overnight name when no town fits |
+| `label.roadside_night` | Ночёвка у трассы {road_ref}, {km} км | OK |
 | `label.roadside_night_noref` | Ночёвка у трассы, {km} км | OK |
 | `label.trip_title` | {origin} → {destination} | OK |
 | `label.round_title` | {origin} → {destination} → {origin} | OK |
@@ -502,15 +552,18 @@ Shown to the user through the cost formulas, labels, share text and notes. Revie
 | `warning.nearest` | Ближайшая подходящая: {name}, {town}, {dkm} км от ночёвки | used on Exit; Road ahead uses `note.nearest` |
 | `note.nearest` | Ближайшая подходящая: {name}, {town}, {dkm} км | OK |
 | `note.unverified` | не проверено | OK |
-| `cost.title.fuel` | Бензин | R-1: the Waybill shows «Бензин АИ-95» — append the fuel type: «Бензин {fuel_type}» |
+| `cost.title.fuel` | Бензин {fuel_type} | OK — R-1 resolved |
+| `fuel_type.ai92` | АИ-92 | OK |
+| `fuel_type.ai95` | АИ-95 | OK |
+| `fuel_type.dt` | ДТ | OK |
 | `cost.title.fuel.dt` | Дизель | OK |
 | `cost.title.tolls` | Платные дороги | OK |
 | `cost.title.lodging` | Ночёвки | OK |
-| `cost.title.food` | Еда | R-1: the approved Waybill says «Питание» |
+| `cost.title.food` | Питание | OK — R-1 resolved |
 | `cost.title.tickets` | Билеты | OK |
-| `cost.title.reserve` | Запас | R-1: the approved Waybill says «Резерв 10%» |
+| `cost.title.reserve` | Резерв {pct}% | OK — R-1 resolved |
 | `cost.fuel.one` | {km} км × {cons} л/100 × {price} ₽ | OK |
-| `cost.fuel.many` | {km} км × {cons} л/100 × ≈ {price} ₽ (средняя по {n} {regions_word}) | R-6: «(средняя по 3 регионам)» — OK; keep under 40 characters on the Waybill formula line (wraps otherwise) |
+| `cost.fuel.many` | {km} км × {cons} л/100 × ≈ {price} ₽ (средняя по {n} {regions_word}) | R-6: long, wraps to 2 lines on the Waybill (allowed) |
 | `cost.fuel.row` | {km} км × {cons} л/100 × {price} ₽ = {rub} | OK |
 | `cost.fuel.none` | без поездки по дорогам | OK |
 | `cost.tolls.item` | {road}: {rub} | OK |
@@ -539,26 +592,71 @@ Shown to the user through the cost formulas, labels, share text and notes. Revie
 | `cost.food.meal_join` |  +  | OK |
 | `cost.tickets.formula` | {n} {seats_word} × ({adults} взр. + {children} реб.) | OK |
 | `cost.tickets.formula_adults` | {n} {seats_word} × {adults} взр. | OK |
-| `cost.tickets.none` | вход свободный | = `road_free` |
+| `cost.tickets.none` | вход свободный | same text as `road_free` |
 | `cost.tickets.row` | {adults} × {adult} | OK |
 | `cost.tickets.row_children` | {adults} × {adult} + {children} × {child} | OK |
-| `cost.reserve` | 10% на пробки и «давай заедем» | R-1: label and sub-line are split on the Waybill: «Резерв 10%» / «на пробки и «давай заедем»»; keep `cost.reserve.pct` for the label, drop the «10% » prefix from the sub-line |
-| `cost.reserve.pct` | {pct}% на пробки и «давай заедем» | OK |
+| `cost.reserve` | на пробки и «давай заедем» | OK — R-1 resolved |
 | `share.header` | {title} · {km} км · {days} {days_word} | OK |
 | `share.day` | День {day} · {km} км | OK |
 | `share.stop` | {time} {name} | OK |
 | `share.total` | Итого ≈ {total} на {people} чел. | D-11 follows this format |
+| `label.roadside_break` | Остановка у дороги | OK |
+| `suggest.sub.city` | город · {region} | OK — the Navigator suggestion sub-line comes from the engine; no UI duplicate |
+| `suggest.sub.place` | место · {region} | OK — as above |
+
+<!-- END engine tables -->
 
 ## 13. Review findings for the Developer (DEV-005) and the Manager
 
 | ID | File · key | Finding | Requested change |
 | --- | --- | --- | --- |
-| R-1 | `strings.ru.json` `cost.title.food`, `cost.title.reserve`, `cost.title.fuel`, `cost.reserve` | Line titles differ from the approved Waybill: «Еда» vs «Питание», «Запас» vs «Резерв 10%», «Бензин» vs «Бензин АИ-95»; the reserve sub-line repeats «10%» | `cost.title.food` → «Питание»; `cost.title.reserve` → «Резерв {pct}%»; `cost.title.fuel` → «Бензин {fuel_type}» (АИ-92 / АИ-95; diesel keeps «Дизель»); `cost.reserve` → «на пробки и «давай заедем»» |
-| R-2 | `reasons.ru.json` `rest.generic`, `rest.who` | «{min} минут» is a fixed plural: 21 → «21 минут» | add `{min_word}` from `plural.minute`: «Разминка {min} {min_word} …» |
-| R-3 | `sight.default`, `sight.dog_waits` | The sentence starts with `{dwell}` («полтора часа»), lowercase | the renderer capitalises the first character of every rendered reason (one rule in `explain/`, covers future templates) |
-| R-4 | `stage.fuel` | `{consumption}` must be «8,0», not «8.0» | format decimals with a comma in `explain/ru.py` |
+| R-1 (resolved by DEV) | `strings.ru.json` `cost.title.food`, `cost.title.reserve`, `cost.title.fuel`, `cost.reserve` | Line titles differ from the approved Waybill: «Еда» vs «Питание», «Запас» vs «Резерв 10%», «Бензин» vs «Бензин АИ-95»; the reserve sub-line repeats «10%» | `cost.title.food` → «Питание»; `cost.title.reserve` → «Резерв {pct}%»; `cost.title.fuel` → «Бензин {fuel_type}» (АИ-92 / АИ-95; diesel keeps «Дизель»); `cost.reserve` → «на пробки и «давай заедем»» |
+| R-2 (resolved by DEV) | `reasons.ru.json` `rest.generic`, `rest.who` | «{min} минут» is a fixed plural: 21 → «21 минут» | add `{min_word}` from `plural.minute`: «Разминка {min} {min_word} …» |
+| R-3 (resolved by DEV) | `sight.default`, `sight.dog_waits` | The sentence starts with `{dwell}` («полтора часа»), lowercase | the renderer capitalises the first character of every rendered reason (one rule in `explain/`, covers future templates) |
+| R-4 (resolved by DEV) | `stage.fuel` | `{consumption}` must be «8,0», not «8.0» | format decimals with a comma in `explain/ru.py` |
 | R-5 | `warning.DAY_OVER_BUDGET` | Key name suggests money, text is about a long day (time budget, SPEC 7.2 step 10) | text OK; rename the key to `DAY_TOO_LONG` when the API contract is next versioned. The design shows it as a day line (5.5, canvas `5.5-road-ahead-no-lodging-over-budget`) |
 | R-6 | `cost.fuel.many` | Long formula line | keep, the Waybill formula line wraps to 2 lines (allowed) |
-| R-7 | — | Missing engine strings the design needs: the NO_LODGING overnight note uses `note.nearest` (present); the Road-ahead day meta «≈ {h} ч за рулём» and «домой» are client strings (§6) | none |
+| R-7 | — | Engine text used directly by the UI (no client duplicate): `alternatives.none` (replace sheet), `suggest.sub.*` (Navigator sub-lines). Missing engine strings the design needs: the NO_LODGING overnight note uses `note.nearest` (present); the Road-ahead day meta «≈ {h} ч за рулём» and «домой» are client strings (§6) | none |
 
 D-16 applied: the Waybill example uses 5 meals («3 чел. × 5 приёмов × 600» = 9 000), and all reference totals are ≈ 30 500 ₽ (screens 5.5, 5.6, open-issues D-1, D-11, checklist P-15).
+
+## 14. Mock build (Sprint 2, DES-104)
+
+Keys for the on-device mock build (architecture-android-mvp M§9, ADR-0010). Specs are open-issues D-13…D-16 (design numbering; not the architecture decision D-16).
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `engine_starting_cd` | Готовим маршруты рядом | TalkBack of the 5.1 loading sign while `EngineStatus.Starting` (state `engine-starting`) |
+| `engine_failed_title` | Планировщик не запустился | 5.1 plate, state `engine-failed` (D-15) |
+| `engine_failed_text` | Сохранённые поездки на месте — попробуйте запустить ещё раз | under the title |
+| `common_engine_error` | Сохранили. Планировщик не ответил — суммы пересчитаны на телефоне | toast, M§6.3 |
+| `mock_partner_title` | Бронирование ночи | `MockPartnerSheet` title (D-13) |
+| `mock_partner_line` | Яндекс Путешествия · демо | partner line |
+| `mock_partner_hotel` | {hotel}, {town} | |
+| `mock_partner_dates` | {checkin} — {checkout} · {nights} {nights_word} | [plural: `plural_night`]; dates «7 нояб.» |
+| `mock_partner_guests` | Гости: {guests} | guests = `waybill_crew_*` parts |
+| `mock_partner_price` | ≈ {amount} ₽ за {nights} {nights_word} | [plural: `plural_night`] |
+| `mock_partner_note` | Это демо-сборка: настоящего бронирования нет. В рабочей версии здесь откроется Яндекс Путешествия с этими датами. | |
+| `mock_partner_back` | Вернуться в Версту | primary button; dismissal → «Забронировали?» |
+| `cd_mock_partner` | Бронирование ночи, демо. {hotel}, {checkin} — {checkout}, примерно {amount} рублей | pane description |
+| `mock_map_unavailable` | Карта появится в следующей версии — пока введите город или адрес | plate after tapping «точка на карте» (D-14) |
+| `mock_build_line` | Сборка {n} · {sha} · демо-данные | D-4 footer, long-press 2 s → debug panel (D-16) |
+| `mock_share_note` | Посчитано в демо-сборке «Версты», цены примерные | last line of the share text instead of the link (D-16) |
+| `cd_windshield_you_are_mock` | Старт: {city}. Изменить | «ВЫ: …» opens Navigator with focus ОТКУДА (no location in the mock) |
+| `debug_label_title` | Отладка | debug panel (not in visual QA) |
+| `debug_label_world` | Мир данных | |
+| `debug_label_clock` | Часы | |
+| `debug_clock_system` | системные | |
+| `debug_clock_golden` | как в эталонах | |
+| `debug_label_offline` | Имитировать отсутствие сети | |
+| `debug_label_slow` | Задержать готовность плана, с | |
+| `debug_label_force_error` | Вызвать ошибку планировщика | |
+| `debug_force_none` | нет | |
+| `debug_label_timings` | Время работы планировщика | |
+| `debug_label_parity` | Расхождения с эталонами | |
+| `debug_label_build` | Сборка | |
+| `debug_reset` | Сбросить данные | |
+| `debug_reset_title` | Сбросить все данные? | dialog |
+| `debug_reset_body` | Удалим сохранённые поездки и настройки на этом телефоне | |
+| `debug_reset_yes` | Сбросить | |
+| `debug_reset_no` | Отмена | |

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED from design/icons/arrow-up-right.svg by design/tools/gen_vectors.py. Do not edit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF141416"
+        android:fillType="nonZero"
+        android:pathData="M5.939 15.939L15.939 5.939L18.061 8.061L8.061 18.061ZM9 5.5L17 5.5L17 8.5L9 8.5ZM18.5 7L18.5 15L15.5 15L15.5 7ZM8.5 17A1.5 1.5 0 1 1 5.5 17A1.5 1.5 0 1 1 8.5 17ZM18.5 7A1.5 1.5 0 1 1 15.5 7A1.5 1.5 0 1 1 18.5 7ZM10.5 7A1.5 1.5 0 1 1 7.5 7A1.5 1.5 0 1 1 10.5 7ZM18.5 15A1.5 1.5 0 1 1 15.5 15A1.5 1.5 0 1 1 18.5 15Z" />
+</vector>

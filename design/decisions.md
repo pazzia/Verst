@@ -28,3 +28,14 @@ Decisions on `open-issues.md`. All Designer recommendations are accepted unless 
 | Copy fixes §13 | Developer: plural forms for minutes, capitalise first letter of rendered reasons, decimal comma in numbers; `DAY_OVER_BUDGET` renamed in the next API version (keep for now) |
 | OI-37 share text | Ship as is in MVP; dates, crew and per-person amount in v1.1 |
 | Reference total | Canvas example becomes ≈ 30 500 ₽ after D-16 and the tolls line |
+
+## Round 3 (Sprint 2, DES-101…106) — Manager, 2026-10-24
+
+| Issue | Decision |
+| --- | --- |
+| D-13 mock partner sheet | Accepted: «Яндекс Путешествия · демо», no logo |
+| D-14 «точка на карте» | Accepted: plate «карта появится в следующей версии» |
+| D-15 engine start failure | Accepted: «Повторить» plate on Windshield |
+| D-16 build line / GPS | Accepted: «Сборка n · sha · демо-данные»; GPS indicator hidden |
+| Share text demo note | Accepted: last line says prices are demo estimates |
+| QA palette layout | DEV-105 draws the palette exactly as `design/qa/theme.json` |
