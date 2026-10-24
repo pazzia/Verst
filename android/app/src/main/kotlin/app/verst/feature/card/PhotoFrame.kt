@@ -105,6 +105,8 @@ fun PhotoFrame(
     // offline: the 64 MB disk cache only (no network attempt), then «Фото загрузится, когда будет интернет»
     val painter = rememberAsyncImagePainter(
         ImageRequest.Builder(context).data(url).allowHardware(false)
+            // explicit size: the painter is drawn only once loaded, so Coil must not wait for a draw size
+            .size(1200, 800)
             .networkCachePolicy(if (offline) coil.request.CachePolicy.DISABLED else coil.request.CachePolicy.ENABLED)
             .build(),
     )

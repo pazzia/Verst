@@ -1187,3 +1187,98 @@ question for the Designer; D-7 «Сообщить об ошибке» not built.
 - Brand allow-list `tests/brand_allowlist.txt`: only `links.{navigator,maps,web}` values in engine output and
   `handoff_*` Android keys. The catalogue files and the composed world are deny-list scanned.
 - Coverage gate raised to 95 % (`make coverage-planner`).
+
+## S3-R2 — Sprint 3, round R2 (branch dev/S3-R2 from main 6a3c50e)
+Inputs merged: origin/des/sprint-3 @ 0beef17 (5.8–5.13, §8 in 5.1–5.5, components §17.5–§23, motion §2.4, copy §15,
+DesignTokens — `tools/sync_design_tokens.py` run) and origin/arch/sprint-3 M1 @ 0a8757f (API v2 + contracts on the
+sample catalogue). Default world is now `russia_v1`; `EngineHost` calls `load_catalogue` after the worlds
+(`EngineTimings.catalogueMs`; e2e asserts engine start ≤ 5 000 ms).
+
+### DEV-300 network, images, permissions
+- OkHttp 4.12.0 (UA `Verst/0.3 (Android; +https://github.com/pazzia/Verst)`), Coil 2.7.0 (`VerstApp` is the
+  `ImageLoaderFactory`, 64 MB `cacheDir/images`, cache headers ignored, offline = disk cache only).
+- `NetworkConnectivity` (default-network callback) feeds `Connectivity.network`; the debug «нет сети» is
+  `simulatedOffline` on top.
+- `PhotoFrame` (components §18): 3 : 2, crop (portrait bias −0.35) or contain on the mat (decided from the
+  decoded size), scrim + credit, «ФОТО РАЙОНА», the 7 vector placeholders, `photoFadeIn`.
+- Manifest: exactly INTERNET, ACCESS_NETWORK_STATE, ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION (a CI step diffs
+  the merged manifest), no `usesCleartextTraffic`. Decision: `network_security_config` allows cleartext only for
+  127.0.0.1 / localhost (MockWebServer in e2e S3-6).
+- «О данных» from the debug panel and from Road ahead's «Расстояния приблизительные · О данных».
+
+### DEV-301 location (5.12)
+- Rationale sheet «Откуда поедем?» («Разрешить» → coarse, «Выберу сам» → ОТКУДА input) on the first «Куда
+  угодно», the first «По городу» or a tap on «ВЫ: …»; never again once answered.
+- Fix → `geo_nearest`: the origin town names «ВЫ: <ГОРОД>», the trip starts at the fix itself. Outside Russia →
+  the state block, ПОЕХАЛИ disabled. Coarse → «примерно, по сети» + «Точнее» (fine dialog). Online → Nominatim
+  reverse «ул. Советская, 1 · вы здесь». Denied / blocked / off / timeout → the deck toasts with their actions.
+- Decision: the denied «plate» is the plate toast with «Выбрать» (6 s), not a persistent plate.
+
+### DEV-302 search (5.12 §2)
+- Typeahead = `geo_search` (offline, towns + places). An address-like query (digit, comma, ул/пр/пер/д/наб/пл/ш)
+  shows the helper line and «Найти адрес «…»»; the IME «Найти» submits too. Never per keystroke.
+- `NominatimClient`: `/search` (`countrycodes=ru`, `accept-language=ru`, `limit=5`) and `/reverse`, one shared
+  1 req/s bucket (a second call waits — no toast), 24 h in-memory cache, offline → the hint row, no request.
+  «© OpenStreetMap» under the rows. e2e journeys point it at a closed loopback port (no real traffic from CI).
+
+### DEV-303 budget fit (5.8)
+- `planOutcome` (v2 `outcome`): `no_fit` → Drive «Смотреть варианты» (auto-advance) → the no-fit screen (limit
+  sign, engine text, minimum plate, options, «Показать самый экономный вариант»). An option → Instruments with it
+  applied (raise → the exact «до 42 000 ₽», needle interpolated; shorten / cheaper → the ready route or a longer
+  pace) → ПОЕХАЛИ again. The minimum opens Road ahead over budget everywhere; Waybill «Подогнать под бюджет →»
+  re-plans the same request.
+- Road footer: «ПУТЕВОЙ ЛИСТ · ✓ В БЮДЖЕТЕ» / TightDot + «ЧУТЬ БОЛЬШЕ: +N ₽» / «ПЕРЕРАСХОД». Waybill lever lines,
+  «Сверх бюджета». Replace sheet: red dot + «не в бюджете» on `breaksBudget`. D-1 dots (yellow / red).
+  Instruments caption suffix from `estimate.outcome` (decision: an engine without the fitter answers `plan` over
+  budget — then no suffix, never a false «в бюджете»).
+- `CostCalculator` explicit rooms (`NightUnitDto.rooms`, `HotelPriceDto.rooms`, null = ceil(adults/2)); Kotlin
+  unit test now, the contract cases come with ARCH-301.
+- **BLOCKED by ARCH-301:** M1 has no fitter — the CEO case estimates `outcome=plan ≈ 58 400 ₽`. e2e S3-1 is
+  written (fitted ≤ 31 500, or no-fit → the Тула / cheaper option → a plan that fits) and runs once the engine
+  can fit; until then it is skipped by an explicit assumption with that reason in the log.
+
+### DEV-304 cards (5.9) / DEV-305 focus
+- Only sights and hotel nights are tappable (row tap + click semantics); fuel/rest/start/finish/food have no
+  click semantics (Robolectric test). Card = `poi_details`: kind line, PhotoFrame + credit (link to the file
+  page), hotel «Фото района» + the fictional note, description (6 lines, tap for more), facts, «Выбрать отель» /
+  «Заменить» / «Убрать эту точку», bar ODbL line.
+- Focus: the exact scroll offset (`roadScrollY`, also in last.json) is restored, then the row is brought into view
+  if needed; `returnToItem` = `dash.pressed` flash 1 200 ms (none under reduced motion).
+- Not built: the mini sign in the card title row (the shared BottomSheet header), TalkBack focus move, D-7.
+
+### DEV-306 «По городу» (5.10 / 5.11)
+- Windshield plate «По городу · пешком»; CityScene, street plate (+ house square), presets from `city_presets`
+  (unavailable hidden, «Свой маршрут» last), 18+ asked every time (children → «не с детьми» + toast; «Нет»
+  sends nothing), custom sheet (duration, interests, pace, budget, return), ПОШЛИ (walker + loading arc),
+  `NO_CITY` / `NOT_ENOUGH_POIS` plates. Walk result: city strip, WalkTitleSign, chips, ±15 % line, the walk
+  hand-off (parts), responsible plate, walking column, «Другой вариант», cost plate, save / share.
+- Decision: the caption start time is local now + rounding; the engine's `startAt` (town tz) shows on the result.
+- Decision: walk share text is composed on the phone (no engine share for walks) and carries the responsible line.
+
+### DEV-307 hand-off (5.13)
+- Engine `handoff` links (day `fromHere`, `fromStopId`, walk); R1's `NaviLinks` stays as the fallback when the
+  engine call fails. Day header link → day menu; stop menu first item `handoff_from_stop`; target line resolved
+  from the installed apps (navigator → maps → web; walk maps → web); truncated note; toasts after a web fallback,
+  offline without an app, all links failing. Robolectric `HandoffLauncherTest` (ShadowPackageManager).
+- Allow-list = `android:handoff_*` from `brand_allowlist.txt` (Python and Kotlin); `brand_handoff_keys.txt`
+  removed; the old `stopmenu_yandex_*` keys are neutral again in the mock overrides.
+
+### DEV-308 saved trips schema 2
+- `SavedTripDto.kind` (`trip` | `walk`), `walk` (the city_route result), `budgetStatus`; schema 1 reads as trips
+  and is written as 2 on the next save; schema 3+ is kept aside. «Мои поездки» shows walks with the walker plate.
+
+### DEV-309 journeys
+S3-1 (skipped until ARCH-301, see above), S3-2 + S3-3 card / focus / offline placeholder, S3-4 Ярославль walk →
+web pedestrian link, S3-5 Пермь synthetic route + «О данных», S3-6 address search on MockWebServer.
+`budgets_s3.json`: `cityRouteMs`, `ceoPlanMs` (when S3-1 runs).
+Photos: the M1 sample catalogue names files that do not exist on Commons, so on CI the sight cards show «Фото
+пока нет» / error placeholders; real photos come with the data run (ARCH-302).
+
+### Provisional copy (strings_pending_copy.xml)
+`card_per_night` «за ночь», `navigator_type_address` «У», `walk_distance_m` «%d м», `debug_mock_location`,
+`windshield_meta_round_trip` «туда и обратно». Deck keys replaced the R1 ones (`navigator_location_deny` →
+`loc_manual`, `navigator_location_failed` → `loc_timeout`, `stopmenu_web_fallback` → `handoff_web`).
+
+Fix found by run 52: Coil 2's `rememberAsyncImagePainter` resolves its size from the first draw. `PhotoFrame` draws
+the painter only once it has loaded, so a real URL stayed «loading» forever (it hit the hotel area photo in S3-2). The
+request now has an explicit 1200 × 800 size.
