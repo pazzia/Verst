@@ -428,31 +428,91 @@ class _ListenerSink:
 
 
 def _trip_result(plan: TripPlan) -> dict[str, Any]:
-    return {"trip": codec.plan_to_json(plan, public=False), "shareText": render_share_text(plan)}
+    """The private trip, its share text and the Waybill footnote month/year («октябрь», "2026")."""
+    month, year = ru.month_year_ru(plan.cost.prices_as_of).split(" ")
+    return {
+        "trip": codec.plan_to_json(plan, public=False),
+        "shareText": render_share_text(plan),
+        "pricesMonthRu": month,
+        "pricesYear": year,
+    }
+
+
+def _run_plan(w: _World, request_id: Any, input_json: Any, sink: Any) -> TripPlan:
+    """Decode the input and run `Planner.plan` under a cancel token registered for `request_id`."""
+    raw = _decode(input_json, "input")
+    if not isinstance(raw, dict):
+        raise _BadInput("input: not an object")
+    trip_input = _parse("input", lambda: codec.input_from_json(raw))
+    token = CancelToken()
+    rid = _str(request_id, "request_id")
+    with _LOCK:
+        if rid in _TOMBSTONES:
+            del _TOMBSTONES[rid]
+            raise PlanCancelled()
+        _CANCELS[rid] = token
+    try:
+        return w.planner.plan(trip_input, sink, token)
+    finally:
+        with _LOCK:
+            if _CANCELS.get(rid) is token:
+                del _CANCELS[rid]
 
 
 def plan(world: str, request_id: str, input_json: str, listener: Any = None) -> str:
     """Plan a trip; `listener.onEvent(json)` per progress event; cancellable by `cancel(request_id)`."""
+    return _envelope(
+        lambda: _trip_result(_run_plan(_world(world), request_id, input_json, _ListenerSink(listener)))
+    )
+
+
+def estimate(world: str, request_id: str, input_json: str) -> str:
+    """Pre-plan distance and days of a trip input (the same `TripInputDTO` as `plan`):
+    `{"km": int, "days": int}`.
+
+    One source of truth for every distance the app shows before Road ahead (Navigator caption, Instruments,
+    Drive header): it *is* the engine's plan of that input, run without events, so `km`/`days` equal the later
+    `plan(...).trip.km`/`.days` exactly (the engine is deterministic for a given input and clock).
+    Cancellable by `cancel(request_id)` like `plan`; errors as `plan`."""
 
     def run() -> dict[str, Any]:
         w = _world(world)
-        raw = _decode(input_json, "input")
-        if not isinstance(raw, dict):
-            raise _BadInput("input: not an object")
-        trip_input = _parse("input", lambda: codec.input_from_json(raw))
-        token = CancelToken()
-        rid = _str(request_id, "request_id")
-        with _LOCK:
-            if rid in _TOMBSTONES:
-                del _TOMBSTONES[rid]
-                raise PlanCancelled()
-            _CANCELS[rid] = token
-        try:
-            return _trip_result(w.planner.plan(trip_input, _ListenerSink(listener), token))
-        finally:
-            with _LOCK:
-                if _CANCELS.get(rid) is token:
-                    del _CANCELS[rid]
+        trip = _run_plan(w, request_id, input_json, _ListenerSink(None))
+        return {"km": trip.km, "days": trip.days}
+
+    return _envelope(run)
+
+
+def estimate_points(world: str, lat: float, lon: float, points_json: str) -> str:
+    """Road km of the engine's base route from (lat, lon) to each `{"lat", "lon"}` of `points_json` — the
+    Navigator suggestion rows, before a destination (and so a trip) exists; `null` where unreachable or
+    invalid (outside Russia). A too-short distance is still returned (the caption validates the chosen trip
+    with `estimate`)."""
+
+    def run() -> list[int | None]:
+        w = _world(world)
+        origin = _point(lat, lon)
+        if origin is None:
+            raise _BadInput("lat/lon required")
+        pts = _decode(points_json, "points")
+        if not isinstance(pts, list):
+            raise _BadInput("points: not a list")
+        out: list[int | None] = []
+        for p in pts:
+            dest = _point(p.get("lat"), p.get("lon")) if isinstance(p, dict) else None
+            if dest is None:
+                raise _BadInput("points: {lat, lon} objects required")
+            raw = {
+                "origin": {"lat": origin.lat, "lon": origin.lon},
+                "destination": {"lat": dest.lat, "lon": dest.lon},
+                "crew": {"adults": 1},
+                "dailyKm": 300,
+            }
+            try:
+                out.append(w.planner.estimate_km(codec.input_from_json(raw), check_too_short=False))
+            except (Unreachable, InvalidInput):
+                out.append(None)
+        return out
 
     return _envelope(run)
 
@@ -623,6 +683,11 @@ def selftest(world_texts: Sequence[str], out: Any = None) -> int:
             "dailyKm": 300,
             "startAt": "2026-10-24T08:00",
         }
+        check("estimate", estimate(wid, f"selftest-{wid}-estimate", json.dumps(trip_input)))
+        dest_pt = [{"lat": dest.point.lat, "lon": dest.point.lon}]
+        check(
+            "estimate_points", estimate_points(wid, origin.point.lat, origin.point.lon, json.dumps(dest_pt))
+        )
         planned = check("plan", plan(wid, f"selftest-{wid}", json.dumps(trip_input), _Recorder()))
         check("cancel", cancel(f"selftest-{wid}-idle"))  # leaves a tombstone for an id never planned
         if not planned["ok"]:

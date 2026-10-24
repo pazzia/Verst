@@ -10,10 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
@@ -24,16 +26,76 @@ import app.verst.core.ui.theme.DesignTokens.color as C
 /** Sky bands as (top dp, height dp, colour) in the 390-wide reference frame. */
 data class Band(val top: Float, val height: Float, val color: Color)
 
-/** Sky of 5.1 / 5.4 (S1–S5). */
+/** Sky of 5.1 (S1–S5). */
 val FullSky = listOf(
     Band(0f, 110f, C.sky.band1), Band(110f, 70f, C.sky.band2), Band(180f, 55f, C.sky.band3),
     Band(235f, 40f, C.sky.band4), Band(275f, 25f, C.sky.band5),
 )
 
+/** Sky of 5.4 Drive (S1–S5, S-17): 0–120, 120–190, 190–240, 240–276, 276–300. */
+val DriveSky = listOf(
+    Band(0f, 120f, C.sky.band1), Band(120f, 70f, C.sky.band2), Band(190f, 50f, C.sky.band3),
+    Band(240f, 36f, C.sky.band4), Band(276f, 24f, C.sky.band5),
+)
+
+/** Sky of the 5.5 strip (S1–S4, S-19): 0–50, 50–84, 84–110, 110–132 (band 2 skipped). */
+val RoadSky = listOf(Band(0f, 50f, C.sky.band1), Band(50f, 34f, C.sky.band3), Band(84f, 26f, C.sky.band4), Band(110f, 22f, C.sky.band5))
+
+/** Sky of the 5.2 strip (S1–S4): 0–46, 46–76, 76–94, 94–104; ground from 104. */
+val NavigatorSky = listOf(Band(0f, 46f, C.sky.band1), Band(46f, 30f, C.sky.band3), Band(76f, 18f, C.sky.band4), Band(94f, 10f, C.sky.band5))
+
 /**
- * Static windshield scene (components §9, DEV-SLICE: no lane motion yet): sky bands, sun, optional hills,
- * ground, the perspective road with edge lines and lane dashes, roof liner and A-pillars. Coordinates are dp of
- * the 390-wide frame; x scales with the width, y by k = min(1, height / `refHeight`) on short windows (5.1 §1).
+ * One row of components §9.1: the road plane (W wide, L long) rotated θ about its near edge, seen with
+ * perspective P from the top centre of its container (top, H). All values are dp of the 390-wide frame.
+ */
+data class RoadSpec(
+    val top: Float, val h: Float, val p: Float, val thetaDeg: Float, val w: Float, val l: Float,
+    val edge: Float, val lane: Float, val dash: Float = 70f, val period: Float = 160f,
+)
+
+val WindshieldRoad = RoadSpec(300f, 240f, 210f, 76f, 230f, 1000f, 6f, 8f)
+val DriveRoad = RoadSpec(300f, 260f, 210f, 76f, 240f, 1000f, 6f, 8f)
+val NavigatorRoad = RoadSpec(104f, 46f, 120f, 80f, 160f, 600f, 4f, 6f)
+
+/**
+ * components §9.1 closed form: s = P / (P + d·sinθ), x' = cx + x·s, y' = top + (H − d·cosθ)·s; every element is
+ * a quad of 4 projected corners (asphalt, both edge lines, lane dashes measured from the far end, phase 0),
+ * clipped at the container top. [kx] / [ky] are px per reference dp horizontally / vertically.
+ */
+fun DrawScope.drawRoad3D(r: RoadSpec, kx: Float, ky: Float, phase: Float = 0f) {
+    val th = Math.toRadians(r.thetaDeg.toDouble())
+    val sinT = kotlin.math.sin(th).toFloat()
+    val cosT = kotlin.math.cos(th).toFloat()
+    val cx = size.width / 2
+    fun pt(x: Float, d: Float): Offset {
+        val sc = r.p / (r.p + d * sinT)
+        return Offset(cx + x * sc * kx, (r.top + (r.h - d * cosT) * sc) * ky)
+    }
+    fun quad(x0: Float, x1: Float, d0: Float, d1: Float, color: Color) {
+        val a = pt(x0, d0)
+        val b = pt(x1, d0)
+        val c = pt(x1, d1)
+        val e = pt(x0, d1)
+        drawPath(Path().apply { moveTo(a.x, a.y); lineTo(b.x, b.y); lineTo(c.x, c.y); lineTo(e.x, e.y); close() }, color)
+    }
+    clipRect(top = r.top * ky, bottom = (r.top + r.h) * ky) {
+        val hw = r.w / 2
+        quad(-hw + r.edge, hw - r.edge, 0f, r.l, C.scene.road)
+        quad(-hw, -hw + r.edge, 0f, r.l, C.scene.roadEdge)
+        quad(hw - r.edge, hw, 0f, r.l, C.scene.roadEdge)
+        var u = phase
+        while (u < r.l) {
+            val u1 = minOf(u + r.dash, r.l)
+            quad(-r.lane / 2, r.lane / 2, r.l - u, r.l - u1, C.scene.roadEdge)
+            u += r.period
+        }
+    }
+}
+
+/**
+ * Static windshield scene (components §9, no lane motion yet): sky bands, sun, optional hills, ground, the
+ * projected road (§9.1), optional gantry legs (§9.3), roof liner and A-pillars. Coordinates are dp of the
+ * 390-wide frame; x scales with the width, y by k = min(1, height / `refHeight`) on short windows (5.1 §1).
  * Decorative: no semantics.
  */
 @Composable
@@ -43,61 +105,41 @@ fun WindshieldScene(
     hills: Boolean = true,
     sunX: Float = 236f,
     refHeight: Float = 540f,
+    sky: List<Band> = FullSky,
+    road: RoadSpec = WindshieldRoad,
+    sunCenterY: Float = 300f,
+    gantry: Boolean = false,
 ) {
     Canvas(modifier.fillMaxWidth().height(height).clearAndSetSemantics {}) {
         val k = size.width / 390.dp.toPx()
         val dp = 1.dp.toPx()
         val dy = dp * minOf(1f, size.height / (refHeight * dp))
-        val horizon = 300f * dy
-        for (b in FullSky) drawRect(b.color, Offset(0f, b.top * dy), Size(size.width, b.height * dy + 1f))
-        drawCircle(C.scene.sun, radius = 34f * dy, center = Offset((sunX + 34f) * k * dp, horizon))
-        if (hills) drawHills(k, dp, dy)
+        val horizon = road.top * dy
+        for (b in sky) drawRect(b.color, Offset(0f, b.top * dy), Size(size.width, b.height * dy + 1f))
+        drawCircle(C.scene.sun, radius = 34f * dy, center = Offset((sunX + 34f) * k * dp, sunCenterY * dy))
+        if (hills) drawHills(k * dp, dy)
         drawRect(C.scene.groundDay, Offset(0f, horizon), Size(size.width, size.height - horizon))
-        drawRoad(horizon, size.height, nearHalf = 115f * dp * k, farHalf = 6f * dp * k, dp = dp)
+        drawRoad3D(road, k * dp, dy)
+        if (gantry) {
+            // §9.3: two legs 8 × 100 at x 34 and W − 42, y 286, under the sign.
+            drawRect(C.interior.pole, Offset(34f * dp, 286f * dy), Size(8f * dp, 100f * dy))
+            drawRect(C.interior.pole, Offset(size.width - 42f * dp, 286f * dy), Size(8f * dp, 100f * dy))
+        }
         drawInterior(dp, k)
     }
 }
 
-private fun DrawScope.drawHills(k: Float, dp: Float, dy: Float) {
+/** §9 item 3 (S-05): the hills polyline, translated to y 272, x scaled by width / 390. */
+private fun DrawScope.drawHills(kx: Float, dy: Float) {
+    val pts = listOf(0f to 28f, 40f to 18f, 80f to 24f, 130f to 12f, 170f to 22f, 200f to 16f, 250f to 26f, 300f to 14f, 350f to 24f, 390f to 18f)
     val p = Path().apply {
-        moveTo(0f, 300f * dy)
-        lineTo(0f, 286f * dy)
-        cubicTo(60f * k * dp, 272f * dy, 110f * k * dp, 280f * dy, 160f * k * dp, 288f * dy)
-        cubicTo(220f * k * dp, 276f * dy, 300f * k * dp, 272f * dy, 390f * k * dp, 284f * dy)
-        lineTo(size.width, 300f * dy)
+        moveTo(0f, (272f + 28f) * dy)
+        for ((x, y) in pts) lineTo(x * kx, (272f + y) * dy)
+        lineTo(390f * kx, (272f + 40f) * dy)
+        lineTo(0f, (272f + 40f) * dy)
         close()
     }
     drawPath(p, C.sky.hills)
-}
-
-private fun DrawScope.drawRoad(top: Float, bottom: Float, nearHalf: Float, farHalf: Float, dp: Float) {
-    val cx = size.width / 2
-    val road = Path().apply {
-        moveTo(cx - farHalf, top)
-        lineTo(cx + farHalf, top)
-        lineTo(cx + nearHalf, bottom)
-        lineTo(cx - nearHalf, bottom)
-        close()
-    }
-    drawPath(road, C.scene.road)
-    val edge = 4f * dp
-    drawLine(C.scene.roadEdge, Offset(cx - farHalf + 1f, top), Offset(cx - nearHalf + edge, bottom), strokeWidth = edge * 0.8f)
-    drawLine(C.scene.roadEdge, Offset(cx + farHalf - 1f, top), Offset(cx + nearHalf - edge, bottom), strokeWidth = edge * 0.8f)
-    // Lane dashes: perspective-shortened toward the horizon.
-    val h = bottom - top
-    var t = 0.04f
-    while (t < 1f) {
-        val t2 = minOf(1f, t + 0.06f + 0.14f * t)
-        val w1 = 1.5f * dp + 6f * dp * t
-        val w2 = 1.5f * dp + 6f * dp * t2
-        val y1 = top + h * t * t
-        val y2 = top + h * t2 * t2
-        val dash = Path().apply {
-            moveTo(cx - w1 / 2, y1); lineTo(cx + w1 / 2, y1); lineTo(cx + w2 / 2, y2); lineTo(cx - w2 / 2, y2); close()
-        }
-        drawPath(dash, C.scene.roadEdge)
-        t = t2 + 0.05f + 0.12f * t2
-    }
 }
 
 private fun DrawScope.drawInterior(dp: Float, k: Float) {
@@ -116,23 +158,27 @@ private fun DrawScope.drawInterior(dp: Float, k: Float) {
     )
 }
 
-/** A short sky strip with the roof liner (5.2, 5.3, 5.5 headers). */
+/**
+ * A short sky strip with the roof liner (5.2, 5.3, 5.5 headers): the screen's [bands] (dp from the top), then
+ * optional ground from [groundTop] with the projected [road].
+ */
 @Composable
-fun SkyStrip(height: Dp, modifier: Modifier = Modifier, ground: Boolean = false, content: @Composable BoxScope.() -> Unit = {}) {
+fun SkyStrip(
+    height: Dp,
+    modifier: Modifier = Modifier,
+    bands: List<Band> = RoadSky,
+    groundTop: Float? = null,
+    road: RoadSpec? = null,
+    content: @Composable BoxScope.() -> Unit = {},
+) {
     Box(
         modifier.fillMaxWidth().height(height).drawBehind {
-            val n = if (ground) 4 else 3
-            val skyH = if (ground) size.height * 0.7f else size.height
-            val colors = listOf(C.sky.band1, C.sky.band3, C.sky.band4, C.sky.band5).take(n)
-            val weights = if (ground) listOf(0.45f, 0.25f, 0.18f, 0.12f) else listOf(0.45f, 0.3f, 0.25f)
-            var y = 0f
-            for ((i, c) in colors.withIndex()) {
-                val bh = skyH * weights[i]
-                drawRect(c, Offset(0f, y), Size(size.width, bh + 1f))
-                y += bh
-            }
-            if (ground) drawRect(C.scene.groundDay, Offset(0f, skyH), Size(size.width, size.height - skyH))
             val dp = 1.dp.toPx()
+            for (b in bands) drawRect(b.color, Offset(0f, b.top * dp), Size(size.width, b.height * dp + 1f))
+            if (groundTop != null) {
+                drawRect(C.scene.groundDay, Offset(0f, groundTop * dp), Size(size.width, size.height - groundTop * dp))
+                if (road != null) drawRoad3D(road, size.width / 390f, dp)
+            }
             drawPath(
                 Path().apply {
                     moveTo(0f, 0f); lineTo(size.width, 0f); lineTo(size.width, 14f * dp)
@@ -145,16 +191,19 @@ fun SkyStrip(height: Dp, modifier: Modifier = Modifier, ground: Boolean = false,
     )
 }
 
-/** components §10: dashboard surface with its curved top edge and rim. */
-fun Modifier.dashboardSurface(curve: Dp = 34.dp): Modifier = drawBehind {
+/**
+ * components §10 (S-03): `M0 (T+R) A(W/2) R 0 0 1 (W/2) T A(W/2) R 0 0 1 W (T+R) V bottom H0 Z` — the top half of
+ * an ellipse of half-width W/2 and half-height R, crest at T (the modifier's top). The rim is the same path 2 dp
+ * higher in `color.dash.control`; caps (Instruments, Road ahead) have no rim (S-30).
+ */
+fun Modifier.dashboardSurface(curve: Dp = 34.dp, rim: Boolean = true): Modifier = drawBehind {
     val c = curve.toPx()
-    val rim = 2.dp.toPx()
     fun shape(dy: Float) = Path().apply {
         moveTo(0f, c + dy)
-        quadraticTo(size.width / 2, -c * 0.15f + dy, size.width, c + dy)
+        arcTo(Rect(0f, dy, size.width, dy + 2 * c), 180f, 180f, false)
         lineTo(size.width, size.height); lineTo(0f, size.height); close()
     }
-    drawPath(shape(-rim), C.dash.control)
+    if (rim) drawPath(shape(-2.dp.toPx()), C.dash.control)
     drawPath(shape(0f), C.dash.raised)
 }
 

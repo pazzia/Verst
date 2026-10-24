@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.DeviceFontFamilyName
+import app.verst.core.ui.R
 
 /** A CSS-like box shadow. Draw with Paint.setShadowLayer (outer) or a clipped inset fill (inset). */
 @Immutable
@@ -41,16 +41,21 @@ private val CenteredLineHeight = LineHeightStyle(
 
 object DesignTokens {
     object font {
-        /** DES-100 pending: the system condensed sans until IBM Plex Sans Condensed is bundled */
-        @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
+        /** IBM Plex Sans Condensed (OFL-1.1), bundled in res/font */
         val plexSansCondensed: FontFamily = FontFamily(
-            Font(DeviceFontFamilyName("sans-serif-condensed"), FontWeight.Normal),
-            Font(DeviceFontFamilyName("sans-serif-condensed"), FontWeight.Medium),
-            Font(DeviceFontFamilyName("sans-serif-condensed"), FontWeight.SemiBold),
-            Font(DeviceFontFamilyName("sans-serif-condensed"), FontWeight.Bold),
+            Font(R.font.ibm_plex_sans_condensed_regular, FontWeight.Normal),
+            Font(R.font.ibm_plex_sans_condensed_medium, FontWeight.Medium),
+            Font(R.font.ibm_plex_sans_condensed_semibold, FontWeight.SemiBold),
+            Font(R.font.ibm_plex_sans_condensed_bold, FontWeight.Bold),
         )
-        val plexMono: FontFamily = FontFamily.Monospace
-        val marckScript: FontFamily = FontFamily.Cursive
+        /** IBM Plex Mono (OFL-1.1), bundled in res/font */
+        val plexMono: FontFamily = FontFamily(
+            Font(R.font.ibm_plex_mono_semibold, FontWeight.SemiBold),
+        )
+        /** Marck Script (OFL-1.1), bundled in res/font */
+        val marckScript: FontFamily = FontFamily(
+            Font(R.font.marck_script_regular, FontWeight.Normal),
+        )
     }
     object color {
         object dash {

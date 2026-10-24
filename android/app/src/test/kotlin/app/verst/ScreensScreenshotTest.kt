@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import app.verst.core.model.DefaultOrigin
@@ -21,7 +22,18 @@ import app.verst.feature.instruments.InstrumentsScreen
 import app.verst.feature.instruments.InstrumentsUi
 import app.verst.feature.navigator.NavigatorScreen
 import app.verst.feature.navigator.NavigatorUi
+import app.verst.core.model.SavedTrips
+import app.verst.core.model.dto.PlanResultDto
+import app.verst.core.model.dto.StopDto
+import app.verst.core.model.dto.TripDto
+import app.verst.feature.road.RoadActions
 import app.verst.feature.road.RoadScreen
+import app.verst.feature.road.RoadUi
+import app.verst.feature.waybill.WaybillActions
+import app.verst.feature.waybill.WaybillScreen
+import app.verst.feature.waybill.WaybillUi
+import app.verst.nav.ReplaceUi
+import app.verst.nav.Toast
 import app.verst.feature.windshield.WindshieldScreen
 import app.verst.feature.windshield.WindshieldUi
 import app.verst.nav.DriveAction
@@ -75,7 +87,7 @@ class ScreensScreenshotTest {
     @Config(qualifiers = "ru-rRU-w360dp-h640dp-port-xxhdpi")
     fun instrumentsShort() = shot("instruments", "default", 360, 640) {
         InstrumentsScreen(
-            InstrumentsUi("Москва → Ярославль", "Москва", false, 312, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 300, 2, null),
+            InstrumentsUi("Москва → Ярославль", "Москва", false, 265, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 300, 2, null, days = 1),
             noActions,
         )
     }
@@ -106,12 +118,22 @@ class ScreensScreenshotTest {
 
     @Test
     fun navigatorQuery() = shot("navigator", "default-query-yaro") {
-        NavigatorScreen(navigator("Яро", listOf(yaroslavl), null), {}, {}, {}, {}, {})
+        NavigatorScreen(navigator("Яро", listOf(yaroslavl), null).copy(rowKm = mapOf(yaroslavl.pointKey to 263)), {}, {}, {}, {}, {})
     }
 
     @Test
-    fun navigatorPicked() = shot("navigator", "destination-picked") {
-        NavigatorScreen(navigator("Ярославль", emptyList(), yaroslavl), {}, {}, {}, {}, {})
+    fun navigatorPicked() {
+        shot("navigator", "destination-picked") {
+            NavigatorScreen(navigator("Ярославль", emptyList(), yaroslavl).copy(tripKm = 265), {}, {}, {}, {}, {})
+        }
+        // The engine's km (estimate = plan), not ≈ 249 / ≈ 312; the copy uses U+00A0 before «км».
+        compose.onNodeWithTag("navigator.meta", useUnmergedTree = true).assertTextContains("265", substring = true)
+        compose.onNodeWithText("≈", substring = true, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun navigatorTooShort() = shot("navigator", "error-too-short") {
+        NavigatorScreen(navigator("Химки", emptyList(), yaroslavl.copy(name = "Химки")).copy(tripErrorCode = "TOO_SHORT"), {}, {}, {}, {}, {})
     }
 
     @Test
@@ -134,7 +156,7 @@ class ScreensScreenshotTest {
     fun instrumentsDefault() {
         shot("instruments", "default") {
             InstrumentsScreen(
-                InstrumentsUi("Золотое кольцо", "Москва", true, 745, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.CALM),
+                InstrumentsUi("Золотое кольцо", "Москва", true, 761, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.CALM, days = 3),
                 noActions,
             )
         }
@@ -174,18 +196,130 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("Попробовать ещё раз").assertExists()
     }
 
+    private fun snapshot(name: String): TripDto = EngineJson.trip(root.resolve("backend/planner/tests/golden/snapshots/$name.json").readText())
+
+    private fun result(name: String): PlanResultDto {
+        val text = root.resolve("backend/planner/tests/golden/snapshots/$name.json").readText()
+        return PlanResultDto(EngineJson.trip(text), "share", "октябрь", "2026", tripJson = text)
+    }
+
+    private val noRoad = object : RoadActions {
+        override fun back() {}
+        override fun waybill() {}
+        override fun save() {}
+        override fun share() {}
+        override fun replace(stop: StopDto) {}
+        override fun pick(altId: String?) {}
+        override fun confirmReplace() {}
+        override fun closeReplace() {}
+        override fun undo() {}
+    }
+
+    private val noWaybill = object : WaybillActions {
+        override fun back() {}
+        override fun toggleLine(key: String) {}
+        override fun toggleReserve() {}
+        override fun save() {}
+        override fun share() {}
+    }
+
     @Test
     fun roadG02() {
-        val trip = EngineJson.trip(root.resolve("backend/planner/tests/golden/snapshots/G02_golden_ring.json").readText())
-        shot("road", "g02-top") { RoadScreen(trip, "NE") {} }
+        shot("road", "g02-top") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE"), noRoad) }
         compose.onNodeWithTag("road.total").assertExists()
+        compose.onNodeWithTag("road.save").assertExists()
         compose.onNodeWithText("Дорога впереди").assertExists()
     }
 
     @Test
-    fun roadNoLodging() {
-        val trip = EngineJson.trip(root.resolve("backend/planner/tests/golden/snapshots/G05_edge_no_dog_lodging.json").readText())
-        shot("road", "no-lodging") { RoadScreen(trip, "E") {} }
+    fun roadNoLodging() = shot("road", "no-lodging") { RoadScreen(RoadUi(snapshot("G05_edge_no_dog_lodging"), "E"), noRoad) }
+
+    @Test
+    fun roadSavedFromTripsWithToast() = shot("road", "saved-toast") {
+        RoadScreen(RoadUi(snapshot("G01_msk_yar_round"), "NE", fromSaved = true, saved = true, toast = Toast.Saved), noRoad)
+    }
+
+    @Test
+    fun roadReplaceSheet() {
+        val trip = snapshot("G02_golden_ring")
+        val stop = trip.daysList.flatMap { it.stops }.first { it.alternatives.size >= 2 }
+        shot("road", "replace-sheet") { RoadScreen(RoadUi(trip, "NE", replace = ReplaceUi(stop, picked = stop.alternatives[1].id)), noRoad) }
+        compose.onNodeWithTag("replace.alt.1", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Варианты в то же время, ± 45 минут").assertExists()
+    }
+
+    @Test
+    fun roadReplaceSheetNone() {
+        val trip = snapshot("G02_golden_ring")
+        val stop = trip.daysList.flatMap { it.stops }.firstOrNull { it.replaceable && it.alternatives.isEmpty() && it.alternativesNote != null }
+            ?: trip.daysList.flatMap { it.stops }.first { it.replaceable }.let { it.copy(alternatives = emptyList(), alternativesNote = "Других вариантов в это время поблизости нет.") }
+        shot("road", "replace-none-note") { RoadScreen(RoadUi(trip, "NE", replace = ReplaceUi(stop)), noRoad) }
+    }
+
+    @Test
+    fun roadReplacedToast() = shot("road", "replaced-toast") {
+        RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", toast = Toast.Replaced(33_800), canUndo = true), noRoad)
+    }
+
+    private fun waybill(trip: TripDto, expanded: String? = null, saved: Boolean = false) =
+        WaybillUi(trip, 1, saved, expanded, monthRu = "октябрь", year = "2026")
+
+    @Test
+    fun waybillDefault() {
+        shot("waybill", "default") { WaybillScreen(waybill(snapshot("G02_golden_ring")), noWaybill) }
+        compose.onNodeWithTag("waybill.line.fuel", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("ПУТЕВОЙ ЛИСТ").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "ru-rRU-w360dp-h640dp-port-xxhdpi")
+    fun waybillShort() = shot("waybill", "default", 360, 640) { WaybillScreen(waybill(snapshot("G02_golden_ring")), noWaybill) }
+
+    @Test
+    fun waybillExpandedFuel() = shot("waybill", "line-expanded") {
+        WaybillScreen(waybill(snapshot("G02_golden_ring"), expanded = "fuel"), noWaybill)
+    }
+
+    @Test
+    fun waybillReserveOffOverBudget() {
+        val t = snapshot("G02_golden_ring")
+        val c = t.cost
+        val reserve = c.lines.first { it.key == "reserve" }.rub
+        val total = c.totalRub - reserve
+        val off = t.copy(cost = c.copy(reserveOn = false, totalRub = total, budgetRub = 30_000, remainingRub = 30_000 - total, overBudget = 30_000 < total))
+        shot("waybill", "reserve-off-over-budget") { WaybillScreen(waybill(off, saved = true), noWaybill) }
+        compose.onNodeWithText("Перерасход").assertExists()
+    }
+
+    @Test
+    fun waybillBudgetNone() {
+        val t = snapshot("G01_msk_yar_round")
+        shot("waybill", "budget-none") { WaybillScreen(waybill(t.copy(cost = t.cost.copy(budgetRub = null, remainingRub = null, overBudget = false))), noWaybill) }
+    }
+
+    private fun savedTrips() = listOf(
+        SavedTrips.entry("a", 1, result("G02_golden_ring"), "NE"),
+        SavedTrips.entry("b", 2, result("G01_msk_yar_round"), "NE"),
+    )
+
+    @Test
+    fun windshieldWithTrips() {
+        shot("windshield", "saved-trips") { WindshieldScreen(windshield(WindshieldData.Routes(routes)).copy(trips = savedTrips()), {}, {}, {}, {}) }
+        compose.onNodeWithTag("windshield.trips").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "ru-rRU-w360dp-h640dp-port-xxhdpi")
+    fun windshieldWithTripsShort() = shot("windshield", "saved-trips", 360, 640) {
+        WindshieldScreen(windshield(WindshieldData.Routes(routes)).copy(trips = savedTrips()), {}, {}, {}, {})
+    }
+
+    @Test
+    fun windshieldTripsSheet() {
+        shot("windshield", "trips-sheet") {
+            WindshieldScreen(windshield(WindshieldData.Routes(routes)).copy(trips = savedTrips(), tripsSheet = true), {}, {}, {}, {})
+        }
+        compose.onNodeWithTag("trips.row.1", useUnmergedTree = true).assertExists()
     }
 
     @Test

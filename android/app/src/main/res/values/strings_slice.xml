@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- DEV-SLICE: copy not in design/copy-ru.md yet (requested from the Designer). Remove when DES adds the keys. -->
-<resources>
-    <string name="slice_per_person">≈ %1$s ₽ на человека</string>
-</resources>

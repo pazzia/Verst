@@ -36,7 +36,7 @@ from verst_planner.domain.enums import (
     Tag,
     WarningCode,
 )
-from verst_planner.domain.errors import InvalidInput, NotFound
+from verst_planner.domain.errors import InvalidInput, NotFound, TooShort
 from verst_planner.domain.model import (
     UNSET,
     Alternative,
@@ -163,6 +163,24 @@ class Planner:
                 s.litres, self.ports.prices.fuel_price(s.region_code, inp.vehicle.fuel_type)
             )
         return 0
+
+    # ------------------------------------------------------------------------------------------ estimate
+    def estimate_km(self, raw: TripInput, check_too_short: bool = True) -> int:
+        """Road km of the base route (stages 0 to 2, no corridor): the pre-plan distance the app shows.
+
+        The same normalisation, point resolution, routing and snap check as `plan`, so a plan of the same
+        input has `km == estimate_km + round(Σ stop detours)` (± 1 for per-day rounding). Raises what `plan`
+        raises for these stages (`TooShort` only when `check_too_short`, `Unreachable`, `InvalidInput`)."""
+        ctx = self._ctx()
+        inp = normalize_input(raw, ctx)
+        pts = resolve_points(inp, ctx)
+        try:
+            route = build_base_route(pts, inp, ctx)
+        except TooShort as e:
+            if check_too_short:
+                raise
+            return round_half_up(e.road_km)
+        return round_half_up(route.km_total)
 
     # ------------------------------------------------------------------------------------------ plan
     def plan(self, raw: TripInput, sink: ProgressSink = NULL_SINK, cancel: CancelToken = NEVER) -> TripPlan:

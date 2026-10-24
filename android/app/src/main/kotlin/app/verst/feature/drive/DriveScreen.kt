@@ -25,6 +25,8 @@ import app.verst.core.ui.components.PrimaryCta
 import app.verst.core.ui.components.ProgressBar
 import app.verst.core.ui.components.StepLine
 import app.verst.core.ui.components.Txt
+import app.verst.core.ui.components.DriveRoad
+import app.verst.core.ui.components.DriveSky
 import app.verst.core.ui.components.WindshieldScene
 import app.verst.core.ui.components.dashboardSurface
 import app.verst.core.ui.components.naviPanel
@@ -61,9 +63,9 @@ fun DriveScreen(
     onDone: () -> Unit,
     onErrorAction: (DriveAction, String) -> Unit,
 ) {
-    ScreenRoot(C.dash.base) {
+    ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
-            WindshieldScene(maxHeight - DashHeight + 20.dp, hills = false, sunX = 161f, refHeight = 560f)
+            WindshieldScene(maxHeight - DashHeight + 20.dp, hills = false, sunX = 161f, refHeight = 560f, sky = DriveSky, road = DriveRoad, sunCenterY = 304f)
             val back = stringResource(if (ui.error != null) R.string.common_back_instruments else R.string.common_cancel)
             BackLink(
                 back, C.mirror.label,

@@ -1,6 +1,7 @@
 package app.verst.core.model
 
 import app.verst.core.model.dto.EngineErrorDto
+import app.verst.core.model.dto.EstimateDto
 import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.ReadyRouteDto
@@ -8,6 +9,8 @@ import app.verst.core.model.dto.SuggestionDto
 import app.verst.core.model.dto.TripDto
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -44,7 +47,20 @@ object EngineJson {
 
     fun readyRoutes(envelope: String) = decode(envelope, ListSerializer(ReadyRouteDto.serializer()))
     fun suggestions(envelope: String) = decode(envelope, ListSerializer(SuggestionDto.serializer()))
-    fun planResult(envelope: String) = decode(envelope, PlanResultDto.serializer())
+    /** `plan`/`replace_stop`/`patch_cost`: the DTO plus the private trip JSON verbatim ([PlanResultDto.tripJson]). */
+    fun planResult(envelope: String): EngineResult<PlanResultDto> =
+        when (val r = decode(envelope, JsonObject.serializer())) {
+            is EngineResult.Err -> r
+            is EngineResult.Ok -> try {
+                val raw = r.value["trip"] as? JsonObject ?: throw IllegalArgumentException("result without trip")
+                EngineResult.Ok(json.decodeFromJsonElement(PlanResultDto.serializer(), r.value).copy(tripJson = raw.toString()))
+            } catch (e: Exception) {
+                EngineResult.Err(EngineErrorDto("INTERNAL", "undecodable trip: $e"))
+            }
+        }
+
+    fun estimate(envelope: String) = decode(envelope, EstimateDto.serializer())
+    fun kmList(envelope: String) = decode(envelope, ListSerializer(Int.serializer().nullable))
 
     fun trip(text: String): TripDto = json.decodeFromString(TripDto.serializer(), text)
 
@@ -56,6 +72,14 @@ object EngineJson {
 }
 
 data class GeoPoint(val label: String, val lat: Double, val lon: Double)
+
+/** Bodies of `patch_cost` (A§16.9) and `estimate_points`. */
+object EngineArgs {
+    fun reservePatch(on: Boolean): String = buildJsonObject { put("reserveOn", on) }.toString()
+
+    fun points(points: List<GeoPoint>): String =
+        kotlinx.serialization.json.JsonArray(points.map { p -> buildJsonObject { put("lat", p.lat); put("lon", p.lon) } }).toString()
+}
 
 /** The default mock origin (D-16 «старт — Москва»; the most populous town of `central_russia_v1`). */
 val DefaultOrigin = GeoPoint("Москва", 55.7558, 37.6173)

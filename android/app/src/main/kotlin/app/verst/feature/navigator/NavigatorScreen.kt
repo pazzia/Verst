@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -50,11 +51,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.verst.core.model.GeoPoint
 import app.verst.core.model.RuFormat
-import app.verst.core.model.TripMath
 import app.verst.core.model.dto.SuggestionDto
 import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.PlaceholderPlate
+import app.verst.core.ui.components.NavigatorRoad
+import app.verst.core.ui.components.NavigatorSky
 import app.verst.core.ui.components.SkyStrip
 import app.verst.core.ui.components.StartButton
 import app.verst.core.ui.components.StartSize
@@ -66,9 +68,6 @@ import app.verst.feature.common.ScreenRoot
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
-/** Straight-line distance under which no car trip is offered (5.2 §4.4). */
-private const val TOO_SHORT_KM = 15
-
 data class NavigatorUi(
     val origin: GeoPoint,
     val editingFrom: Boolean,
@@ -79,6 +78,12 @@ data class NavigatorUi(
     val suggestFailed: Boolean,
     val destination: SuggestionDto?,
     val routeError: String?,
+    /** Engine base-route km per suggestion row (`estimate_points`); missing = not known yet (no number). */
+    val rowKm: Map<String, Int?> = emptyMap(),
+    /** The engine's km of the picked trip (`estimate`, = the later plan); null while it is computed. */
+    val tripKm: Int? = null,
+    /** TOO_SHORT / UNREACHABLE of the picked trip, known before planning. */
+    val tripErrorCode: String? = null,
 )
 
 /** 5.2 Navigator, simplified: ОТКУДА (changeable) and КУДА via the engine's `suggest`; no vias, no map. */
@@ -101,20 +106,23 @@ fun NavigatorScreen(
         inputFocused = false
         onPick(it)
     }
-    ScreenRoot(C.dash.base) {
+    ScreenRoot(C.dash.base, statusBar = C.sky.band1) {
         Column(Modifier.fillMaxSize().imePadding()) {
             // While typing (focused field + IME) the scene strip collapses so the results stay above the keyboard.
             val typing = inputFocused && WindowInsets.isImeVisible
             if (!typing) {
                 Box(Modifier.fillMaxWidth().height(150.dp)) {
-                    SkyStrip(150.dp, ground = true)
+                    SkyStrip(150.dp, bands = NavigatorSky, groundTop = 104f, road = NavigatorRoad)
                     Box(Modifier.fillMaxSize().padding(top = 132.dp).dashboardSurface(curve = 30.dp))
                 }
             }
             Column(Modifier.weight(1f).fillMaxWidth().background(C.dash.raised)) {
                 val back = stringResource(R.string.common_back_to_windshield)
-                BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp, top = 0.dp))
-                Panel(ui, typing, onQuery, pick, onEditFrom, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = 6.dp, bottom = 12.dp))
+                // S-11 / 5.2 D2–D3: back link touch box y 142–186 (a 38 dp band from 150), panel top at 188.
+                Box(Modifier.fillMaxWidth().height(if (typing) 44.dp else 38.dp)) {
+                    BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp).offset(y = if (typing) 0.dp else (-8).dp))
+                }
+                Panel(ui, typing, onQuery, pick, onEditFrom, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(bottom = if (typing) 12.dp else 28.dp))
                 // 5.2 §1: the caption row hides while typing (IME open on a focused field) and returns after a pick.
                 if (!typing) Caption(ui, onStart)
             }
@@ -165,7 +173,7 @@ private fun Panel(
             picked -> Unit
             q.length < 2 -> if (ui.popular.isNotEmpty()) {
                 Txt(stringResource(R.string.navigator_popular), T.label.md, C.navi.hint, Modifier.padding(top = 4.dp))
-                Rows(ui.popular.take(6), ui.origin, onPick)
+                Rows(ui.popular.take(6), ui.rowKm, onPick)
             }
             ui.searching && ui.suggestions.isEmpty() -> Skeleton()
             ui.suggestFailed -> Block(stringResource(R.string.navigator_suggest_error), null)
@@ -173,7 +181,7 @@ private fun Panel(
                 stringResource(R.string.navigator_no_results_title, q),
                 stringResource(R.string.navigator_no_results_text),
             )
-            else -> Rows(ui.suggestions, ui.origin, onPick)
+            else -> Rows(ui.suggestions, ui.rowKm, onPick)
         }
     }
 }
@@ -239,7 +247,7 @@ private fun ValueField(
             .clip(shape)
             .background(C.navi.field)
             .border(DesignTokens.stroke.w1, C.navi.fieldBorder, shape)
-            .padding(start = 12.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+            .padding(start = 12.dp, end = 8.dp, top = 3.dp, bottom = 3.dp), // D5: 50 high with the 44 dp «изменить»
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Marker(!square, if (square) C.accent.yellow else C.navi.label)
@@ -278,7 +286,7 @@ private fun Marker(round: Boolean, color: androidx.compose.ui.graphics.Color) {
 }
 
 @Composable
-private fun Rows(items: List<SuggestionDto>, origin: GeoPoint, onPick: (SuggestionDto) -> Unit) {
+private fun Rows(items: List<SuggestionDto>, rowKm: Map<String, Int?>, onPick: (SuggestionDto) -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
@@ -287,15 +295,15 @@ private fun Rows(items: List<SuggestionDto>, origin: GeoPoint, onPick: (Suggesti
     ) {
         items.forEachIndexed { i, s ->
             if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(C.navi.divider))
-            SuggestionRow(s, origin, i) { onPick(s) }
+            SuggestionRow(s, rowKm[s.pointKey], i) { onPick(s) }
         }
     }
 }
 
 @Composable
-private fun SuggestionRow(s: SuggestionDto, origin: GeoPoint, index: Int, onClick: () -> Unit) {
-    val km = TripMath.haversineKm(origin, GeoPoint(s.name, s.lat, s.lon)).toInt()
-    val kmText = stringResource(R.string.common_km_approx, RuFormat.thousands(km))
+private fun SuggestionRow(s: SuggestionDto, km: Int?, index: Int, onClick: () -> Unit) {
+    // The engine's road km to the place (before a trip exists); the trip itself adds its stop detours.
+    val kmText = km?.let { stringResource(R.string.common_km_approx, RuFormat.thousands(it)) } ?: ""
     Row(
         Modifier
             .fillMaxWidth()
@@ -352,9 +360,12 @@ private fun Block(title: String, text: String?) {
 @Composable
 private fun Caption(ui: NavigatorUi, onStart: () -> Unit) {
     val dest = ui.destination
-    val km = dest?.let { TripMath.haversineKm(ui.origin, GeoPoint(it.name, it.lat, it.lon)).toInt() }
-    val tooShort = km != null && km < TOO_SHORT_KM
-    val error = ui.routeError ?: if (tooShort) stringResource(R.string.error_too_short) else null
+    val km = if (dest != null) ui.tripKm else null
+    val error = ui.routeError ?: when (ui.tripErrorCode.takeIf { dest != null }) {
+        "TOO_SHORT" -> stringResource(R.string.error_too_short)
+        "UNREACHABLE" -> stringResource(R.string.error_unreachable)
+        else -> null
+    }
     val enabled = dest != null && error == null
     Row(
         Modifier.fillMaxWidth().padding(start = 22.dp, end = 20.dp, bottom = 26.dp),
@@ -369,11 +380,12 @@ private fun Caption(ui: NavigatorUi, onStart: () -> Unit) {
             )
             val meta = when {
                 error != null -> error
-                dest != null && km != null -> stringResource(R.string.common_km_approx, RuFormat.thousands(km)) +
+                dest != null && km != null -> stringResource(R.string.common_km, RuFormat.thousands(km)) +
                     stringResource(R.string.common_join_dot) + dest.subtitle
+                dest != null -> dest.subtitle
                 else -> stringResource(R.string.navigator_route_no_to_meta)
             }
-            Txt(meta, T.body.mdTight, if (error != null) C.accent.redText else C.text.secondary, Modifier.padding(top = 2.dp), maxLines = 2)
+            Txt(meta, T.body.mdTight, if (error != null) C.accent.redText else C.text.secondary, Modifier.padding(top = 2.dp).testTag("navigator.meta"), maxLines = 2)
         }
         StartButton(
             StartSize.S, stringResource(R.string.common_go), enabled,
