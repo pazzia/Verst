@@ -96,7 +96,8 @@ class RoundR1Test {
 
     private fun goldenRingRoad() {
         waitTag("windshield.route.0")
-        compose.onNodeWithText("Золотое кольцо").performClick()
+        val i = (flow.windshield as app.verst.nav.WindshieldData.Routes).routes.indexOfFirst { it.id == "rr_golden_ring" }
+        compose.onNodeWithTag("windshield.route.$i").performClick()
         compose.waitUntil(5_000) { flow.selected?.id == "rr_golden_ring" }
         compose.onNodeWithTag("windshield.start").performClick()
         waitTag("instruments.start")
@@ -133,6 +134,8 @@ class RoundR1Test {
         shot("41-road-focus-restored")
         compose.waitUntil(5_000) { flow.roadFocusId == null } // the highlight was shown and consumed
         // Waybill and back: the position stays (no highlight).
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.waitForIdle()
         val top = flow.roadTopId
         compose.onNodeWithTag("road.total").performClick()
         waitTag("waybill.sheet")

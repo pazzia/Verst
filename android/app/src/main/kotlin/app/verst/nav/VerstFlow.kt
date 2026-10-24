@@ -919,7 +919,7 @@ class VerstFlow(
         locationAsked = true
         locationPrompt = false
         when {
-            debugMockLocation != null || locator?.granted() == true -> locate()
+            debugMockLocation != null || locator?.granted() == true -> locate(fromRow = true)
             askLocationPermission != null -> askLocationPermission?.invoke()
             else -> showToast(Toast.LocationFailed)
         }
@@ -933,7 +933,7 @@ class VerstFlow(
     private var locateJob: Job? = null
 
     /** The phone's position → the nearest catalogue town (for now: the nearest fixture town) → the origin. */
-    fun locate() {
+    fun locate(fromRow: Boolean = false) {
         locateJob?.cancel()
         gps = GpsState.Waiting
         locateJob = scope.launch {
@@ -954,7 +954,7 @@ class VerstFlow(
                 rowKm.clear()
                 loadRoutes()
             }
-            if (editingFrom) {
+            if (fromRow && editingFrom) { // «Моё местоположение» picked: ОТКУДА is done
                 editingFrom = false
                 updateQuery("")
             }

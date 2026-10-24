@@ -53,11 +53,16 @@ class RealGpsTest {
         assertTrue("permission granted by run_e2e.sh", flow.locator?.granted() == true)
         waitTag("windshield.navi")
         compose.onNodeWithTag("windshield.navi").performClick()
+        // Granted and not asked yet: opening «Куда угодно» locates by itself.
+        compose.waitUntil(60_000) { flow.gps == GpsState.On || flow.gps == GpsState.Failed }
+        Log.i("VerstE2e", "auto gps ${flow.gps} origin=${flow.origin}")
+        assertTrue("auto gps ${flow.gps}", flow.gps == GpsState.On)
+        // «изменить» → «Моё местоположение» locates again and closes ОТКУДА.
         waitTag("navigator.change")
         compose.onNodeWithTag("navigator.change").performClick()
         waitTag("navigator.mylocation")
         compose.onNodeWithTag("navigator.mylocation").performClick()
-        compose.waitUntil(60_000) { flow.gps == GpsState.On || flow.gps == GpsState.Failed }
+        compose.waitUntil(60_000) { flow.gps == GpsState.On && !flow.editingFrom }
         Log.i("VerstE2e", "real gps ${flow.gps} origin=${flow.origin}")
         assertTrue("gps ${flow.gps}", flow.gps == GpsState.On)
         assertTrue(flow.origin.toString(), flow.origin.label == "Тула")

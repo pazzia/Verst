@@ -67,7 +67,9 @@ class ProcessDeathTest {
         // S3-R1: scroll down; the top visible row goes to last.json with the trip.
         val last = trip.daysList.last().stops.last()
         compose.onNodeWithTag("road.stop.${last.id}").performScrollTo()
-        Thread.sleep(800) // the top row is reported 250 ms after scrolling settles
+        // The top row is reported 250 ms after scrolling settles (composition time: advance the test clock).
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.waitUntil(5_000) { flow.roadTopId != null }
         val top = flow.roadTopId!!
         Thread.sleep(1_500) // last.json is written 300 ms after a change
         marker.writeText("${trip.title}|${trip.km}|${trip.cost.totalRub}|$top")
