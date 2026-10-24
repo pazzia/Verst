@@ -265,8 +265,9 @@ def main() -> int:
                 elif kind == "vf":
                     r = gf.font(VF_SIBLING[family][0], static, weight, VF_SIBLING[family][1])
                     if r is not None and family in RENAMED_FAMILY:
-                        note = (f"Derived from IBM Plex Sans (OFL 1.1, Reserved Font Name \u00abPlex\u00bb) by "
-                                f"instancing at {r[1].get('instancedAt')}; renamed per OFL \u00a73.")
+                        # no RFN in any name record, not even the description: the attribution is in NOTICE.txt
+                        note = (f"Static instance {r[1].get('instancedAt')} of an IBM Corp. font under OFL 1.1, "
+                                f"renamed per OFL \u00a73; see assets/licenses/NOTICE.txt.")
                         r = (rename(r[0], family, weight, note), {**r[1], "renamedTo": RENAMED_FAMILY[family][0]})
                 else:
                     p = npm.package(pkg)  # type: ignore[arg-type]
