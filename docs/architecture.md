@@ -1429,6 +1429,8 @@ Navigator templates (`core.app_config['navigator_links']`, also sent in `/v1/con
 
 ## 11. Android app architecture
 
+> **Sprint 2 (mock MVP on the phone):** the CEO build follows `docs/architecture-android-mvp.md` (ADR-0010: the planner runs on the device via Chaquopy; 3 modules, no Hilt/Room/network). This section stays the target for the server-backed release; the mock build keeps its ports so that migration is additive (architecture-android-mvp §14).
+
 ### 11.1 Toolchain and pinned versions (`android/gradle/libs.versions.toml`)
 
 These are the newest versions verified by the Architect to be mutually compatible with the preinstalled **Gradle 8.14**. They are a floor, not a ceiling: **when network access is enabled, DEV-A01 must re-verify each version against Google Maven / Maven Central, bump to the latest stable patch of the same line, and record the result in this table.**

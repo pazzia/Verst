@@ -1,0 +1,372 @@
+# Verst mock MVP: build, test, screenshot, lint, emulator journey, GitHub pre-release, ci-logs.
+# Design: docs/architecture-android-mvp.md §12. Diagnostics are readable WITHOUT Actions logs:
+#   * check-run annotations  GET /repos/pazzia/Verst/check-runs/{job_id}/annotations
+#   * branch ci-logs         git fetch origin +ci-logs:refs/remotes/origin/ci-logs --depth=1
+name: android
+
+on:
+  push:
+    # dev/** and ci-drill: the Developer's CI feedback loop (no release; release runs on main only).
+    branches: [main, "dev/**", ci-drill]
+    paths:
+      - "android/**"
+      - "backend/planner/verst_planner/**"
+      - "backend/planner/fixtures/**"
+      - "backend/planner/tests/golden/**"
+      - "backend/planner/tests/contract/**"
+      - "docs/contracts/**"
+      - "design/**"
+      - "tools/ci/**"
+      - ".github/workflows/android.yml"
+  pull_request:
+    paths:
+      - "android/**"
+      - "backend/planner/verst_planner/**"
+      - "design/**"
+      - "tools/ci/**"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Publish the GitHub pre-release mvp-mock-<run number> (main only)"
+        type: boolean
+        default: true
+      run_e2e:
+        description: "Run the emulator journey"
+        type: boolean
+        default: true
+      force_release:
+        description: "Publish even if the emulator journey failed or was skipped"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # releases + ci-logs branch
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true   # a newer push supersedes the run (saves billed minutes); its ci-logs job is cancelled too
+
+env:
+  VERST_BUILD_NUMBER: ${{ github.run_number }}
+  VERST_GIT_SHA: ${{ github.sha }}
+  JAVA_VERSION: "17"
+  PYTHON_VERSION: "3.12"   # must equal chaquopy.defaultConfig.version (bytecode compiled at build time)
+
+defaults:
+  run:
+    shell: bash   # bash -eo pipefail: `cmd | tee log` fails when cmd fails
+
+jobs:
+  # ------------------------------------------------------------------------------------------ build
+  build:
+    name: build · unit · screenshots · lint
+    runs-on: ubuntu-24.04   # pinned: ubuntu-latest migrates to Ubuntu 26 from 2026-10-19
+    timeout-minutes: 50
+    env:
+      LOGS: ${{ github.workspace }}/raw-logs   # full logs stay outside ci-out; gzipped copies go to ci-out/build/raw-logs
+      DIAG: ${{ github.workspace }}/ci-out/build
+      VERST_SCREENSHOTS_DIR: ${{ github.workspace }}/ci-out/screenshots
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Prepare
+        run: |
+          mkdir -p "$LOGS" "$DIAG" "$VERST_SCREENSHOTS_DIR"
+          { java -version; python3 --version; android/gradlew --version || echo "gradlew --version failed"; } 2>&1 | tee "$LOGS/toolchain.log"
+
+      - name: Assemble demo APK + androidTest APK
+        id: assemble
+        working-directory: android
+        run: ./gradlew :app:assembleDemo :app:assembleDemoAndroidTest --console=plain --stacktrace 2>&1 | tee "$LOGS/assemble.log"
+
+      - name: Diagnose assemble
+        if: ${{ !cancelled() && steps.assemble.outcome == 'failure' }}
+        run: python3 tools/ci/diagnose.py --out "$DIAG" gradle --log "$LOGS/assemble.log" --step assemble
+
+      - name: Unit, contract and screenshot tests
+        id: unit
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        working-directory: android
+        run: ./gradlew :core-model:test :core-ui:testDebugUnitTest :app:testDemoUnitTest --continue --console=plain --stacktrace 2>&1 | tee "$LOGS/unit.log"
+
+      - name: Diagnose tests
+        if: ${{ !cancelled() && steps.unit.outcome != 'skipped' }}
+        run: |
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 3 gradle --log "$LOGS/unit.log" --step unit
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 7 junit --root android
+
+      - name: Android Lint
+        id: lint
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        working-directory: android
+        run: ./gradlew :app:lintDemo :core-ui:lintDebug --continue --console=plain 2>&1 | tee "$LOGS/lint.log"
+
+      - name: Diagnose lint
+        if: ${{ !cancelled() && steps.lint.outcome != 'skipped' }}
+        run: |
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 2 gradle --log "$LOGS/lint.log" --step lint
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 8 lint --root android
+
+      - name: APK size budget (warn 45 MB, fail 60 MB)
+        id: apk
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: python3 tools/ci/diagnose.py --out "$DIAG" apk --apk android/app/build/outputs/apk/demo/app-demo.apk --warn-mb 45 --fail-mb 60
+
+      - name: Upload APKs
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: apks
+          path: |
+            android/app/build/outputs/apk/demo/app-demo.apk
+            android/app/build/outputs/apk/androidTest/demo/app-demo-androidTest.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Collect diagnostics
+        if: ${{ always() }}
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+        run: |
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 0 steps --job build --json "$STEPS_JSON"
+          mkdir -p "$DIAG/raw-logs"
+          for f in "$LOGS"/*.log; do [ -f "$f" ] && gzip -c "$f" > "$DIAG/raw-logs/$(basename "$f").gz"; done
+          for f in "$LOGS"/*.log; do
+            s=$(basename "$f" .log)
+            [ -f "$DIAG/logs/$s.log.txt" ] || python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 0 gradle --log "$f" --step "$s"
+          done
+          find android -path '*/build/reports/tests' -type d -prune -print0 | tar -czf "$DIAG/test-reports.tgz" --null -T - 2>/dev/null || true
+          python3 tools/ci/diagnose.py --out "$DIAG" summarize
+
+      - name: Upload diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-build
+          path: ci-out/
+          include-hidden-files: false
+          retention-days: 14
+
+  # -------------------------------------------------------------------------------------------- e2e
+  e2e:
+    name: emulator journey (real Python engine)
+    needs: build
+    if: ${{ needs.build.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.run_e2e) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      OUT: ${{ github.workspace }}/ci-out/e2e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: apks
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          mkdir -p "$OUT"
+          find apks -name '*.apk' -exec ls -l {} \;
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-34-google_apis-x86_64-v1
+
+      - name: Create AVD snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: echo "AVD snapshot created"
+
+      - name: Run journey
+        id: journey
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: bash tools/ci/run_e2e.sh "$(find apks -name app-demo.apk | head -1)" "$(find apks -name app-demo-androidTest.apk | head -1)" ci-out/e2e
+
+      - name: Diagnose journey
+        if: ${{ always() }}
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+        run: |
+          D="python3 tools/ci/diagnose.py --out $OUT"
+          $D --max-annotations 6 instrument --log "$OUT/instrument.txt"
+          $D --max-annotations 4 logcat --log "$OUT/logcat.txt"
+          $D --max-annotations 0 steps --job e2e --json "$STEPS_JSON"
+          rm -f "$OUT/logcat.txt"
+          $D summarize
+
+      - name: Upload diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-e2e
+          path: ci-out/
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------------------- release
+  release:
+    name: GitHub pre-release
+    needs: [build, e2e]
+    if: >-
+      ${{ !cancelled() && github.ref == 'refs/heads/main' && needs.build.result == 'success'
+          && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.release))
+          && (needs.e2e.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.force_release)) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: mvp-mock-${{ github.run_number }}
+      OUT: ${{ github.workspace }}/ci-out/release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: apks
+
+      - name: Prepare files and notes
+        env:
+          E2E_RESULT: ${{ needs.e2e.result }}
+          HEAD_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          mkdir -p "$OUT" dist
+          APK=$(find apks -name app-demo.apk | head -1)
+          cp "$APK" "dist/verst-$TAG.apk"
+          cp "$APK" "dist/verst-mock-latest.apk"
+          (cd dist && sha256sum "verst-$TAG.apk" > "verst-$TAG.apk.sha256")
+          SIZE=$(du -m "dist/verst-$TAG.apk" | cut -f1)
+          {
+            echo "Демо-сборка Версты №${{ github.run_number }} — всё работает на телефоне без интернета, на тестовых данных (города центральной России)."
+            echo
+            echo "**Как поставить:** откройте этот файл на телефоне → «Установить». Если Android спросит — разрешите установку из этого источника. Старую демо-сборку удалять не нужно: новая ставится поверх, сохранённые поездки остаются."
+            echo
+            echo "- Файл: \`verst-$TAG.apk\` (≈ ${SIZE} МБ), sha256 в \`verst-$TAG.apk.sha256\`"
+            echo "- Постоянная ссылка на последнюю сборку: https://github.com/${{ github.repository }}/releases/download/mvp-mock-latest/verst-mock-latest.apk"
+            echo "- Проверка на эмуляторе: ${E2E_RESULT}"
+            echo "- Коммит: ${{ github.sha }}"
+            echo
+            echo "Изменения: $(echo "${HEAD_MSG:-ручной запуск}" | head -1)"
+          } > dist/notes.md
+          cp dist/notes.md "$OUT/notes.md"
+
+      - name: Create pre-release ${{ env.TAG }}
+        id: create
+        run: |
+          gh release create "$TAG" "dist/verst-$TAG.apk" "dist/verst-$TAG.apk.sha256" \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
+            --title "Верста · демо-сборка ${{ github.run_number }}" --notes-file dist/notes.md 2>&1 | tee "$OUT/create.log"
+
+      - name: Move mvp-mock-latest
+        id: latest
+        run: |
+          gh release delete mvp-mock-latest --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
+          gh release create mvp-mock-latest dist/verst-mock-latest.apk \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
+            --title "Верста · последняя демо-сборка (№${{ github.run_number }})" --notes-file dist/notes.md 2>&1 | tee "$OUT/latest.log"
+
+      - name: Keep the newest 10 numbered pre-releases
+        run: |
+          gh release list --repo "${{ github.repository }}" --limit 200 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | test("^mvp-mock-[0-9]+$"))] | sort_by(.createdAt) | reverse | .[10:] | .[].tagName' \
+          | while read -r t; do gh release delete "$t" --repo "${{ github.repository }}" --yes --cleanup-tag; done
+
+      - name: Record release
+        if: ${{ always() }}
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+        run: |
+          gh release view "$TAG" --repo "${{ github.repository }}" --json tagName,url,assets > "$OUT/release.json" 2>/dev/null || echo '{}' > "$OUT/release.json"
+          python3 tools/ci/diagnose.py --out "$OUT" --max-annotations 0 steps --job release --json "$STEPS_JSON"
+          echo "::notice title=Release::https://github.com/${{ github.repository }}/releases/tag/$TAG"
+
+      - name: Upload diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-release
+          path: ci-out/
+          retention-days: 14
+
+  # --------------------------------------------------------------------------------------- ci-logs
+  ci-logs:
+    name: publish diagnostics to ci-logs
+    needs: [build, e2e, release]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: ci-logs-publish
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/ci
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true   # a run cancelled before any upload still publishes its job results
+        with:
+          pattern: diag-*
+          path: ci-in
+
+      - name: Assemble run directory
+        id: combine
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          RUN="${{ github.run_id }}-${{ github.run_attempt }}"
+          mkdir -p "run/$RUN" ci-in
+          for d in ci-in/*/; do [ -d "$d" ] && cp -R "$d." "run/$RUN/"; done
+          META=$(python3 tools/ci/combine_run.py "run/$RUN")
+          echo "run=$RUN" >> "$GITHUB_OUTPUT"
+          echo "meta=$META" >> "$GITHUB_OUTPUT"
+          cat "run/$RUN/summary.md"
+
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RUN_META_JSON: ${{ steps.combine.outputs.meta }}
+        run: |
+          bash tools/ci/publish_ci_logs.sh "${{ steps.combine.outputs.run }}" "run/${{ steps.combine.outputs.run }}"
+          echo "::notice title=ci-logs::runs/${{ steps.combine.outputs.run }} (git fetch origin +ci-logs:refs/remotes/origin/ci-logs --depth=1)"
