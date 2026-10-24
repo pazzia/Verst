@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import app.verst.core.ui.components.LocalReducedMotion
@@ -77,6 +78,8 @@ fun BoxScope.BottomSheet(
     badge: String? = null,
     /** TalkBack pane title when it differs from the visible title (D-13 `cd_mock_partner`). */
     pane: String = title,
+    /** 5.9 C2: the mini RoadSign before the title (cards). */
+    leading: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val close = stringResource(R.string.common_close)
@@ -126,6 +129,9 @@ fun BoxScope.BottomSheet(
                 .clip(RoundedCornerShape(2.dp)).background(C.dash.outline),
         )
         Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (leading != null) {
+                Box(Modifier.padding(end = 12.dp).testTag("$tag.sign")) { leading() }
+            }
             // With a badge the title keeps its natural width (it is short) and the spacer takes the rest.
             Txt(title, T.title.lg, C.text.primary, if (badge == null) Modifier.weight(1f) else Modifier, maxLines = 2)
             if (badge != null) {
@@ -145,6 +151,14 @@ fun BoxScope.BottomSheet(
         }
         Column(Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(rememberScrollState()), content = content)
     }
+}
+
+/** Lays the content out at [k] of its natural size (the 0.7 mini signs of D-6 and the 5.9 card title). */
+fun Modifier.scaled(k: Float): Modifier = layout { m, _ ->
+    val p = m.measure(androidx.compose.ui.unit.Constraints())
+    val w = (p.width * k).toInt()
+    val h = (p.height * k).toInt()
+    layout(w, h) { p.placeWithLayer((w - p.width) / 2, (h - p.height) / 2) { scaleX = k; scaleY = k } }
 }
 
 /** components §16 `PlateToast`: bottom-centred above [bottom], text + optional yellow action, polite live region. */

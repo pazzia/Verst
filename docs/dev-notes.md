@@ -1308,3 +1308,102 @@ G13 bundle counts in the Kotlin contract tests. Run 55: device parity count (G13
 ### Asks for the Architect
 - `city_presets`: add the town `tz` (or `startAt` per preset), so the 5.10 caption matches the engine's start.
 - Real data with Commons photos (ARCH-302 run): the sample names fail, so CI shows only the placeholder states.
+
+## S3-R3 — Sprint 3, round R3 (branch dev/S3-R3 from main e2e1bd2)
+Inputs merged: origin/des/S3-QA @ 536869f (R2 visual QA, pending copy into the deck, IME / stop-menu / highlight
+specs; `tools/sync_design_tokens.py` run: `color.overlay.returnFlash`, `motion.returnToItem.holdMs`).
+
+### R2 gaps closed
+- **5.9 C2 mini sign** in the card title row: `BottomSheet(leading = …)`; the row's RoadSign at 0.7 (shared
+  `Modifier.scaled`), bars the §21 bar sign (walk cards now carry the stop kind as the tag).
+- **TalkBack focus back to the row** (5.9 §5): the Road / walk rows are `focusable()` with a `FocusRequester`;
+  after the scroll restore the returned row requests focus. Compose then sends TYPE_VIEW_FOCUSED and TalkBack
+  follows it. e2e S3-3 and the D-7 journey assert `SemanticsProperties.Focused` on the row.
+- **D-7 «Сообщить об ошибке» (local)**:
+  - Entry points: the stop menu item (3), the row's TalkBack custom action and card C10 (not on hotel cards,
+    since the hotel is fictional).
+  - The sheet has 4 radio rows, a comment (NaviInput look, ≤ 280) and «ОТПРАВИТЬ», disabled until a reason is
+    picked.
+  - Decision: there is no feedback endpoint, so a report is appended to `files/reports/queue.json`
+    (`ReportDto`, schema 1, the newest 200, `sent = false`), written by the flow's one writer.
+  - Toast «Спасибо, проверим» online, «Отправим, когда появится сеть» offline. Event `feedback_sent` goes to
+    logcat (`VerstEvent`).
+  - Ask for the Architect: a feedback endpoint (or a `report` call that keeps the queue on the engine side).
+- **Waybill e2e shot** `62b-waybill-ceo-levers`, scrolled to the lever lines.
+- **Real Commons photos before the data run.** `CommonsPhotos` is a Kotlin port of `catalogue/photos.py`, with a
+  parity unit test on the Python output. The debug panel «Настоящие фото Commons» replaces each card's image
+  with 5 real files in turn, covering landscape JPEG, portrait JPEG, SVG→PNG and transparent PNG.
+  e2e `r3RealCommonsPhotosOnTheCards` opens 5 cards online (CI has internet) and requires ≥ 3 loaded
+  (screens 80-commons-0…4).
+
+### S3-QA findings (Android side)
+- P1-01 Navigator with the IME (5.12 §5):
+  - Fixed: the header with «GPS ●», the focused field and the helper line. Only the list scrolls, starting
+    at the top on a new query; the «Найти адрес» row comes first and «© OpenStreetMap» sits under the address
+    rows.
+  - The other field collapses to a 28 dp line (tap ОТКУДА = edit it).
+  - «Моё местоположение» moves into the list while ОТКУДА is being typed.
+  - Autofocus: КУДА after a hand-picked ОТКУДА, not after a GPS fix (`focusToField`).
+- P1-02: `walk_shorter` when the engine walk is ≥ 30 min shorter than `input.durationMin`.
+  `WalkRouteDto.shorterReason` / `startsTomorrow` are ready for the Architect's fields; until then «tomorrow»
+  comes from `startAt` + `tz`.
+- P1-03: free walk footer «Бесплатно · вход везде свободный».
+- P1-04: the city plate breaks only at a space or after a hyphen (U+200B after «-», `LineBreak.Heading`,
+  `Hyphens.None`). The plate grows to 120 dp on the measured longest piece, then the text scales to 80 %.
+  The sign column is `widthIn(min = 68)`.
+- P1-05: no credit under a placeholder. The hotel note is `card_hotel_fictional_nophoto` until the area photo is
+  on screen. The engine description of a fictional place («Демо: вымышленная гостиница») is not shown.
+- P1-07: `overlay.returnFlash` held 400 ms, then an 800 ms fade. Under reduced motion it is static for 400 ms.
+- Stop menu per components §22:
+  - `ActionItem` rows (min-h 52, pressed `dash.pressed`) with 1 dp `dash.control` dividers.
+  - The hand-off item is omitted for fuel / rest stops and for stops without coordinates.
+- P2-01: walk km without a trailing zero («≈ 6 км»).
+- P2-06: the fixture shots are consistent (small overrun ≈ 3 %; only a dearer alternative breaks the budget;
+  NO_CITY starts at «Толбухино»).
+- P2-08: HOURS_UNVERIFIED is a muted line, and only when a stop really has default hours.
+- 5.10 caption (P0-01, app side): `WalkStart` follows the engine windows (day 09:00 / museums 10:00 → end by
+  22:00, drinks 18:00 → end by 23:00, else tomorrow) in the town zone. It prefers a preset `startAt` when the
+  presets carry one. Decision: the zone is Moscow until `city_presets.town.tz` lands.
+- `strings_pending_copy.xml` now holds only `debug_real_photos` (the new debug label, for the Designer). Every R2
+  key reads from the deck.
+## S3-QA engine round (Architect, on main e2e1bd2)
+- **P0-01 walk start** (ADR-0013 "Daytime windows"): `city_route` → `startAt` (town local time), `startsTomorrow`,
+  `startNoteRu`; `city_presets` → `town.tz`, `now` (engine local), and per preset `startAt` + `startsTomorrow`.
+  Use these for `city_caption_meta_tomorrow` / `walk_header_tomorrow`; never the device clock. `geo_nearest` and
+  every `town` object now carry `tz`. Contracts `city_presets-late.json`, `city_route-tomorrow.json`.
+- **P1-02 shorter walk:** `shorter` (null or `{reason: places|budget, requestedMin, actualMin, messageRu}`) and
+  `requestedDurationMin`; contract `city_route-shorter.json` (8 h museums in Ярославль → 5 ч 30 мин).
+- **P1-06 no-lodging plate:** the `NO_LODGING` warning is one sentence per night and no longer repeats the
+  nearest hotel; the overnight stop's `note` («Ближайшая подходящая: …, N км») is the second line of the same
+  plate. A substitute is named only within `NEAREST_MAX_KM = 60` km along the route of the night stop (the
+  320 km «Волжский откос» case now names none). G01–G13 unchanged.
+- **Data run:** `data.yml` now also requests 50 random `Special:FilePath` card URLs (plus 400/500/960 px for
+  comparison) and fails under 95 % (`tools/data/check_photos.py`, `report/photos_check.json`).
+
+### S3-R3: Architect S3-QA engine round merged (arch/sprint-3 @ 7795e5f)
+- **Caption (P0-01).** It uses the engine's per-preset `startAt` + `startsTomorrow` from `city_presets`, for
+  ready presets at their default duration, so it never reads the device clock. A custom walk, or a changed
+  duration, uses `WalkStart` (the same windows) in `town.tz`.
+- **Walk header.** «Завтра: …» compares the `startAt` date with today in `tz`, so a saved walk reopened the next
+  day reads «Старт …». The engine's `startsTomorrow` is used only without a start time.
+- **Shorter walk (P1-02).** The engine's `shorter` decides. `reason = places` shows the deck `walk_shorter` with
+  the chip's whole hours; another reason shows the engine's `messageRu`.
+  Ask for the Designer: `walk_chip_duration` is `%d ч`, so «5 ч 30 мин» shows as «6 ч». A string parameter
+  would allow «5,5 ч».
+- **No-lodging plate (P1-06).** One plate per night. The `NO_LODGING` sentence is followed by the night's
+  `note` («Ближайшая подходящая: …») as a second line (`road.warning.nearest`). Duplicate plates are dropped.
+
+### S3-R3 CI
+- Runs 58–63 fixed, in order:
+  - a split `private set`, and a qualified BoxScope extension call;
+  - an NBSP assert;
+  - the card report without a place id, and the Navigator list getting no height above a ≈ 400 dp emulator
+    IME (fix: no back link while typing, tighter panel);
+  - a cross-module smart cast, and a duplicate SHORTER_THAN_ASKED plate.
+- Run 64 attempt 1: RealGpsTest timed out waiting for the emulator's `geo fix` («LocationOracle: no location»).
+  Nothing in R3 touches that path, and run 61 passed it. **Attempt 2 (40143628282-2) on d202218: green**:
+  main e2e 16 tests, process death × 2, real GPS.
+- Real Commons: 5 of 5 cards loaded on CI (landscape crop, portrait, the SVG coat of arms in contain mode,
+  Example.jpg, the flag as a hotel area photo).
+- Ask for the Designer: the Пермь synthetic route shows three identical «Не нашли ночёвку…» plates (one per
+  night). A day prefix (a key such as `road_warning_day` «Ночь {n}: …») would tell them apart.

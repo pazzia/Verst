@@ -17,7 +17,9 @@ import app.verst.platform.openAppSettings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Box
+import app.verst.feature.report.ReportSheet
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -146,6 +148,24 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
         // 5.12 location / address toasts above the caption row (start button + 16).
         PlateToast(toastText(t), bottom = 150.dp, action = app.verst.feature.common.toastAction(t), onAction = flow::toastAction)
     }
+    flow.report?.let { r ->
+        // D-7 over Road ahead or the walk (the screens draw the toast after «Отправить»)
+        // the comment field raises the IME: the sheet sits above it
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().imePadding()) {
+            val h = maxHeight
+            Box(Modifier.fillMaxSize()) {
+                ReportSheet(
+                    app.verst.feature.report.ReportUi(r.name, flow.reportReason, flow.reportComment), h,
+                    object : app.verst.feature.report.ReportActions {
+                        override fun close() = flow.closeReport()
+                        override fun reason(r: String) = flow.pickReportReason(r)
+                        override fun comment(t: String) = flow.setReportCommentText(t)
+                        override fun send() = flow.sendReport()
+                    },
+                )
+            }
+        }
+    }
     flow.deleteAsk?.let { d ->
         NaviDialog(
             stringResource(UiR.string.trips_delete_title, d.title), stringResource(UiR.string.trips_delete_body),
@@ -165,7 +185,8 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 @Composable
 private fun Screens(flow: VerstFlow, context: Context) {
     val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
-        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet
+        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
+        flow.report != null
     BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
@@ -205,6 +226,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 online = flow.connectivity.online,
                 addressQuery = flow.looksLikeAddress(flow.query),
                 addressState = flow.addressState,
+                focusTo = flow.focusToField,
                 addressResults = flow.addressResults,
             ),
             onBack = { flow.back() },
@@ -313,6 +335,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun closeStopMenu() = flow.closeStopMenu()
                         override fun navigatorFromStop() = flow.navigatorFromStop()
                         override fun stopMenuReplace() = flow.stopMenuReplace()
+                        override fun stopMenuReport() { flow.stopMenu?.let { flow.openReport(it) } }
+                        override fun reportStop(stop: app.verst.core.model.dto.StopDto) = flow.openReport(stop)
                         override fun topRow(id: String?, scrollY: Int) = flow.roadTop(id, scrollY)
                         override fun focusShown() = flow.roadFocusShown()
                     },
@@ -406,7 +430,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 ageGate = flow.ageGate != null,
                 building = flow.walkBuilding,
                 children = flow.children > 0,
-                startTime = remember(flow.cityPreset, flow.cityInterests.toList()) { walkStartTime(flow.cityPreset, flow.cityInterests) },
+                startTime = walkStart(flow).label,
+                startTomorrow = walkStart(flow).tomorrow,
             ),
             object : app.verst.feature.city.CityActions {
                 override fun back() {
@@ -465,21 +490,23 @@ private fun cardActions(flow: VerstFlow, context: Context) = object : app.verst.
     override fun openPage(url: String) {
         runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
     }
+    override fun report() = flow.reportFromCard()
 }
 
 /**
- * 5.10 caption «старт 11:00»: the engine's default start (ARCH-304 `rounded_start`): now rounded up to the next
- * quarter hour, no earlier than 18:00 for drink walks and 10:00 for museum walks. Device time — `city_presets`
- * carries no town tz yet (asked of the Architect); the walk result shows the engine's `startAt`.
+ * 5.10 caption: the engine's preset `startAt` when the presets carry it, else the same rule on the device
+ * ([app.verst.core.model.WalkStart]) in the town's zone (`town.tz`; Moscow until the data run brings it).
  */
-private fun walkStartTime(preset: String, interests: Collection<String>): String {
-    val now = java.time.LocalTime.now().withSecond(0).withNano(0)
-    var t = now.plusMinutes(((15 - now.minute % 15) % 15).toLong())
-    val earliest = when {
-        preset == "ryumochnye" || preset == "beer" || "bars" in interests -> 18
-        preset == "museums" -> 10
-        else -> 0
-    }
-    if (t.hour < earliest) t = java.time.LocalTime.of(earliest, 0)
-    return "%02d:%02d".format(t.hour, t.minute)
+private fun walkStart(flow: VerstFlow): app.verst.core.model.WalkStart.Start {
+    val p = flow.cityPresets
+    val zone = app.verst.core.model.WalkStart.zone(p?.town?.tz)
+    val now = java.time.ZonedDateTime.now(zone)
+    // the engine's per-preset start (S3-QA: `startAt` + `startsTomorrow`) for the ready presets; a custom walk
+    // (its own duration / interests) uses the same rule on the device
+    p?.presets?.firstOrNull { it.preset == flow.cityPreset && flow.cityPreset != "custom" && it.defaultDurationMin == flow.cityDurationMin }?.let { pr ->
+        val at = pr.startAt ?: return@let null
+        val s = app.verst.core.model.WalkStart.fromEngine(at, zone, now) ?: return@let null
+        s.copy(tomorrow = pr.startsTomorrow ?: s.tomorrow)
+    }?.let { return it }
+    return app.verst.core.model.WalkStart.of(flow.cityPreset, flow.cityInterests, flow.cityDurationMin, now)
 }

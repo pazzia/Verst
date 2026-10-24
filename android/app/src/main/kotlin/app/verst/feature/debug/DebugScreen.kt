@@ -71,11 +71,14 @@ fun DebugScreen(flow: VerstFlow) {
                 flow.debugForceError = if (it == none) null else it
             }
             // S3-R1: a fixed position instead of the phone's (e2e; on the emulator also `adb emu geo fix`).
-            Label(stringResource(AppR.string.debug_mock_location))
+            Label(stringResource(R.string.debug_mock_location))
             Choices(listOf(none) + MockPlaces.keys, flow.debugMockLocation?.label ?: none, "debug.mock") {
                 flow.debugMockLocation = MockPlaces[it]
                 if (flow.debugMockLocation != null) flow.locate()
             }
+            // S3-R3: real Commons files on the cards (ADR-0012 §6 URLs), before the data run brings them
+            Label(stringResource(AppR.string.debug_real_photos))
+            Choices(listOf("0", "1"), if (flow.debugRealPhotos) "1" else "0", "debug.photos") { flow.debugRealPhotos = it == "1" }
             flow.lastHandoff?.let { (h, target) ->
                 Txt("$target · ${h.navigator ?: h.maps ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
             }

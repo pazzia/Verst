@@ -138,6 +138,11 @@ def _numeric_duration(minutes: int) -> str:
     return text("duration.hm", h=h, m=m)
 
 
+def fmt_duration(minutes: int) -> str:
+    """Always numeric: 120 → «2 ч», 150 → «2 ч 30 мин», 45 → «45 мин»."""
+    return _numeric_duration(minutes)
+
+
 def duration_phrase(minutes: int) -> str:
     """30 → «полчаса», 60 → «час», 90 → «полтора часа», 120 → «два часа», else «2 ч 15 мин»."""
     if minutes in _NAMED_DURATIONS:

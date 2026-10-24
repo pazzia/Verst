@@ -71,6 +71,8 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     app.verst.nav.Toast.LocationOff -> stringResource(R.string.loc_off)
     app.verst.nav.Toast.AddressRate -> stringResource(R.string.addr_rate)
     app.verst.nav.Toast.CityKids -> stringResource(R.string.city_kids_toast)
+    app.verst.nav.Toast.ReportThanks -> stringResource(R.string.report_thanks)
+    app.verst.nav.Toast.ReportQueued -> stringResource(R.string.report_queued)
     is app.verst.nav.Toast.Booked -> stringResource(R.string.exit_booked_badge) // 5.7 renders its own copy with the town
 }
 

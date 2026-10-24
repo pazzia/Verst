@@ -78,6 +78,7 @@
     <string name="windshield_offline_meta">маршрут построим, когда появится сеть</string>
     <string name="windshield_no_routes_sign">Рядом пока нет готовых маршрутов</string>
     <string name="windshield_no_routes_footer">Наберите любой город в навигаторе ↓</string>
+    <string name="windshield_meta_round_trip">туда и обратно</string>
     <string name="windshield_no_routes_hint">маршрут построим из любой точки России</string>
     <string name="windshield_no_routes_label">КУДА ЕДЕМ?</string>
     <string name="windshield_no_routes_title">Выберите в навигаторе</string>
@@ -125,7 +126,7 @@
     <string name="navigator_recent">НЕДАВНО ИСКАЛИ</string>
     <string name="navigator_popular">ЧАСТО ИЩУТ</string>
     <string name="navigator_type_city">Г</string>
-    <string name="navigator_type_street">У</string>
+    <string name="navigator_type_address">У</string>
     <string name="navigator_type_place">М</string>
     <string name="navigator_route_label">МАРШРУТ</string>
     <string name="navigator_route_title">%1$s → %2$s</string>
@@ -457,6 +458,7 @@
     <string name="debug_reset_body">Удалим сохранённые поездки и настройки на этом телефоне</string>
     <string name="debug_reset_yes">Сбросить</string>
     <string name="debug_reset_no">Отмена</string>
+    <string name="debug_mock_location">Имитация местоположения</string>
     <string name="budget_nofit_title">Не помещается в бюджет</string>
     <string name="budget_nofit_sign">%1$s ₽</string>
     <string name="budget_nofit_min">Даже самый экономный вариант — ≈ %1$s ₽</string>
@@ -466,6 +468,7 @@
     <string name="budget_option_shorten_sub">%1$s · ≈ %2$s ₽</string>
     <string name="budget_option_cheaper">Ближе и дешевле: %1$s</string>
     <string name="budget_option_cheaper_sub">≈ %1$s ₽ · помещается в бюджет</string>
+    <string name="budget_option_cheaper_sub_over">≈ %1$s ₽ · дешевле, но больше бюджета</string>
     <string name="budget_option_raise">Поднять бюджет до %1$s ₽</string>
     <string name="budget_option_raise_sub">тот же маршрут, без изменений</string>
     <string name="budget_nofit_cta">Смотреть варианты</string>
@@ -495,6 +498,7 @@
     <string name="card_photo_area">Фото района: %1$s · Wikimedia Commons</string>
     <string name="card_area_plate">ФОТО РАЙОНА</string>
     <string name="card_hotel_fictional">Гостиница в демо-сборке вымышленная — на фото район, а не она</string>
+    <string name="card_hotel_fictional_nophoto">Гостиница в демо-сборке вымышленная</string>
     <string name="card_photo_none">Фото пока нет</string>
     <string name="card_photo_offline">Фото загрузится, когда будет интернет</string>
     <string name="card_photo_error">Фото не загрузилось</string>
@@ -517,6 +521,7 @@
     <string name="card_hours_unverified">часы уточняйте</string>
     <string name="card_ticket">билет ≈ %1$s ₽, детский ≈ %2$s ₽</string>
     <string name="card_ticket_free">вход свободный</string>
+    <string name="card_per_night">за ночь</string>
     <string name="card_price_estimate">цена примерная</string>
     <string name="card_heritage">объект культурного наследия</string>
     <string name="card_unverified">По открытым данным — может быть неточно</string>
@@ -569,6 +574,7 @@
     <string name="city_caption_label">ПРОГУЛКА</string>
     <string name="city_caption_title">%1$s · %2$d ч</string>
     <string name="city_caption_meta">%1$s · старт %2$s</string>
+    <string name="city_caption_meta_tomorrow">%1$s · старт завтра в %2$s</string>
     <string name="city_go">ПОШЛИ</string>
     <string name="city_building">Собираем прогулку…</string>
     <string name="city_no_city_title">Рядом нет города</string>
@@ -588,7 +594,10 @@
     <string name="walk_chip_km">≈ %1$s км пешком</string>
     <string name="walk_chip_back">с возвратом к старту</string>
     <string name="walk_header">Старт %1$s · финиш ≈ %2$s</string>
+    <string name="walk_header_tomorrow">Завтра: старт %1$s · финиш ≈ %2$s</string>
     <string name="walk_next">через %1$s · %2$d мин пешком</string>
+    <string name="walk_distance_m">%1$d м</string>
+    <string name="walk_shorter">Получилось %1$s ч вместо %2$s ч — больше открытых мест рядом нет</string>
     <string name="walk_start_row">старт</string>
     <string name="walk_finish_row">финиш</string>
     <string name="walk_hours_unverified">часы работы уточняйте</string>
@@ -599,6 +608,8 @@
     <string name="walk_footer_label">СКОЛЬКО СТОИТ ПРОГУЛКА</string>
     <string name="walk_footer_total">≈ %1$s ₽ на всех</string>
     <string name="walk_footer_per_person">≈ %1$s ₽ на человека</string>
+    <string name="walk_footer_free">Бесплатно</string>
+    <string name="walk_footer_free_sub">вход везде свободный</string>
     <string name="walk_saved_kind">прогулка</string>
     <string name="cd_city_preset">%1$s, %2$s. Выбрать</string>
     <string name="cd_city_preset_18">%1$s, только для взрослых, %2$s. Выбрать</string>

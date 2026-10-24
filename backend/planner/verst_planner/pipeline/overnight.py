@@ -163,6 +163,11 @@ def _choice(
     )
 
 
+# The farthest a passing hotel may be from the night stop, along the route, to be named as the nearest one
+# (≈ 45 min of driving; ADR-0011 notes / dev-notes S3-QA). Farther → no substitute is named.
+NEAREST_MAX_KM = 60.0
+
+
 def _nearest_passing(
     corridor: Corridor, target: float, inp: NormalizedInput, ctx: PlanContext
 ) -> Candidate | None:
@@ -173,15 +178,9 @@ def _nearest_passing(
 
 
 def _no_lodging(ctx: PlanContext, choice: OvernightChoice, reason: str, corridor: Corridor) -> PlanWarning:
+    """One sentence per night; the nearest passing hotel is the overnight stop's `note` only (S3-QA P1-06:
+    the app shows the warning and the note as one plate, so the warning must not repeat it)."""
     text = ctx.templates.render(f"warning.{WarningCode.NO_LODGING.value}")
-    if choice.nearest is not None:
-        town = choice.nearest_town.name_ru if choice.nearest_town else choice.nearest.place.name_ru
-        text += ". " + ru.text(
-            "warning.nearest",
-            name=choice.nearest.place.name_ru,
-            town=town,
-            dkm=round_half_up(abs(choice.nearest.km_at - choice.km_at)),
-        )
     detail = f"{reason}" + (f";nearest={choice.nearest.place.id}" if choice.nearest else "")
     return PlanWarning(WarningCode.NO_LODGING, choice.day, text, detail)
 
@@ -263,6 +262,8 @@ def _try_split(
                 else:
                     km = min(max(target, lo), hi)
                     choice = _road_point(d, km, target, corridor, ctx)
+                if nearest is not None and abs(nearest.km_at - choice.km_at) > NEAREST_MAX_KM:
+                    nearest = None  # S3-QA P1-06: a hotel 320 km away is no substitute
                 choice.nearest = nearest
                 ntc = _town_of(corridor, nearest) if nearest else None
                 choice.nearest_town = ntc.town if ntc else None

@@ -32,6 +32,9 @@ import app.verst.core.ui.R
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
+import app.verst.feature.common.scaled
+import app.verst.feature.city.BarSign
+import app.verst.core.ui.components.RoadSign
 import app.verst.feature.exit.tagLine
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
@@ -59,6 +62,8 @@ interface CardActions {
     fun replace() = Unit
     fun removeStop() = Unit
     fun openPage(url: String) = Unit
+    /** C10 → D-7. */
+    fun report() = Unit
 }
 
 /** 5.9 card in a `BottomSheet` (components §19). */
@@ -66,7 +71,7 @@ interface CardActions {
 fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
     val d = ui.details
     val name = d?.nameRu ?: ui.name
-    BottomSheet(name, a::close, "card", windowH, pane = stringResource(R.string.cd_card, name)) {
+    BottomSheet(name, a::close, "card", windowH, pane = stringResource(R.string.cd_card, name), leading = { CardMiniSign(ui) }) {
         Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.padding(top = 0.dp).testTag("card.kind"))
         Spacer(Modifier.height(12.dp))
         val img = d?.image
@@ -78,6 +83,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             else -> stringResource(R.string.card_photo_credit_short)
         }
         val town = d?.townName ?: ""
+        var photoShown by remember(img?.card) { mutableStateOf(false) }
         PhotoFrame(
             url = if (ui.loading) null else img?.card,
             placeholder = if (area) Placeholder.CITY else placeholderFor(d?.poiKind, ui.kind),
@@ -86,11 +92,17 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             offline = ui.offline,
             contentDescription = if (area) stringResource(R.string.cd_card_photo_area, town) else stringResource(R.string.cd_card_photo, name),
             onCredit = img?.page?.let { p -> { a.openPage(p) } },
+            onShown = { photoShown = it },
         )
         if (ui.kind == "hotel") {
-            Txt(stringResource(R.string.card_hotel_fictional), T.body.sm, C.text.secondary, Modifier.padding(top = 6.dp).testTag("card.fictional"))
+            // 5.9 §3: «на фото район, а не она» only while the area photo is on screen
+            Txt(
+                stringResource(if (photoShown) R.string.card_hotel_fictional else R.string.card_hotel_fictional_nophoto),
+                T.body.sm, C.text.secondary, Modifier.padding(top = 6.dp).testTag("card.fictional"),
+            )
         }
-        val desc = d?.descriptionRu
+        // the fictional status is said once (S3-QA P1-05): no engine «Демо: вымышленная гостиница» line
+        val desc = d?.descriptionRu?.takeUnless { d.isFictional }
         if (!desc.isNullOrBlank()) {
             var more by remember(desc) { mutableStateOf(false) }
             Txt(desc, T.body.md, C.text.note, Modifier.padding(top = 12.dp).clickable { more = !more }, maxLines = if (more) Int.MAX_VALUE else 6)
@@ -111,10 +123,25 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             Spacer(Modifier.height(16.dp))
             SecondaryButton(action.first, "card.action", action.second)
         }
+        // C10: text button «Сообщить об ошибке» (hug × 44) → D-7; not on hotels (the hotel is fictional)
+        if (ui.kind != "hotel") {
+            Spacer(Modifier.height(4.dp))
+            Box(
+                Modifier.height(44.dp).clickable(role = Role.Button, onClick = a::report).testTag("card.report"),
+                contentAlignment = Alignment.CenterStart,
+            ) { Txt(stringResource(R.string.card_report), T.body.smStrong, C.text.muted, maxLines = 1) }
+        }
         if (d?.attributionRu?.isNotEmpty() == true || ui.kind == "bar") {
             Txt(stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
         }
     }
+}
+
+/** 5.9 C2: the row's RoadSign at 0.7 (tourist 39 × 39, hotel service 35 × 43); bars get the §21 bar sign. */
+@Composable
+private fun CardMiniSign(ui: CardUi) {
+    if (ui.kind == "bar") BarSign(ui.tags.firstOrNull() ?: "bar")
+    else Box(Modifier.scaled(0.7f)) { RoadSign(ui.sign, ui.name, ui.tags) }
 }
 
 @Composable
@@ -161,7 +188,7 @@ private fun facts(ui: CardUi): List<String> {
             if (tags.isNotBlank()) out += tags
             out += if (ui.booked) stringResource(R.string.exit_booked_price)
             else stringResource(R.string.common_estimate_rub, RuFormat.thousands(h.priceCrewRub.takeIf { it > 0 } ?: h.priceNightRub)) +
-                " " + stringResource(app.verst.R.string.card_per_night)
+                " " + stringResource(R.string.card_per_night)
         }
         return out
     }

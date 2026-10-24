@@ -5,6 +5,8 @@ import android.util.AtomicFile
 import android.util.Log
 import app.verst.core.model.DefaultsDto
 import app.verst.core.model.LastTripDto
+import app.verst.core.model.ReportDto
+import app.verst.core.model.Reports
 import app.verst.core.model.SavedTripDto
 import app.verst.core.model.SavedTrips
 import java.io.File
@@ -28,6 +30,10 @@ interface TripStore {
     fun saveLast(last: LastTripDto?)
     fun loadDefaults(): DefaultsDto?
     fun saveDefaults(d: DefaultsDto)
+
+    /** D-7: the local report queue (`files/reports/queue.json`). */
+    fun appendReport(r: ReportDto) = Unit
+    fun loadReports(): List<ReportDto> = emptyList()
 }
 
 /**
@@ -40,6 +46,15 @@ class FileTripStore(context: Context, private val now: () -> Long = System::curr
     private val file = AtomicFile(File(dir, "saved.json"))
     private val last = AtomicFile(File(dir, "last.json"))
     private val defaults = AtomicFile(File(dir, "defaults.json"))
+    private val reports = AtomicFile(File(File(context.filesDir, "reports").apply { mkdirs() }, "queue.json"))
+
+    override fun loadReports(): List<ReportDto> = try {
+        Reports.decode(reports.readFully().toString(Charsets.UTF_8))
+    } catch (_: java.io.FileNotFoundException) {
+        emptyList()
+    }
+
+    override fun appendReport(r: ReportDto) = write(reports, Reports.encode(loadReports() + r))
 
     override fun load(): TripsLoad {
         val bytes = try {
@@ -116,6 +131,13 @@ class MemoryTripStore(initial: List<SavedTripDto> = emptyList()) : TripStore {
     fun seedLast(l: LastTripDto?) {
         last = l
     }
+
+    @Volatile var reports: List<ReportDto> = emptyList()
+        private set
+    override fun appendReport(r: ReportDto) {
+        reports = Reports.decode(Reports.encode(reports + r))
+    }
+    override fun loadReports() = reports
 
     @Volatile var defaults: DefaultsDto? = null
     override fun loadDefaults() = defaults

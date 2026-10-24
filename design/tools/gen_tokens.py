@@ -147,6 +147,7 @@ color['budget'] = O(
 color['overlay'] = O(
   scrim=c('#000000','Scrim behind bottom sheets and dialogs (new)', alpha=0.60),
   focus=c('#FFD23F','Keyboard focus ring, 2dp, offset 2dp'),
+  returnFlash=c('#FFD23F','Returned-row highlight on Road ahead / walk list (motion.returnToItem)', alpha=0.14),
 )
 
 F = O(
@@ -362,7 +363,7 @@ motion['screen'] = O(
   back=m(durationMs=300, easing='decelerate', infinite=False),
 )
 motion['photoFadeIn'] = m(durationMs=250, easing='standard', infinite=False)
-motion['returnToItem'] = m(durationMs=0, highlightMs=1200, easing='easeOut', infinite=False)
+motion['returnToItem'] = m(durationMs=0, highlightMs=1200, holdMs=400, easing='easeOut', infinite=False)
 motion['footsteps'] = m(durationMs=1800, easing='linear', periodDp=48, infinite=True)
 motion['lamps'] = m(durationMs=3200, easing='easeInOut', fromAlpha=0.7, toAlpha=1.0, infinite=True)
 motion['limitSignIn'] = m(durationMs=400, easing='decelerate', fromScale=0.8, infinite=False)

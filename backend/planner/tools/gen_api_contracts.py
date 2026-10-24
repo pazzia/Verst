@@ -155,6 +155,24 @@ call(
     ),
 )
 call(
+    "city_route-shorter",
+    "city_route",
+    world=R,
+    request_id="c-walk-8",
+    input_json=json.dumps({"start": YAR, "preset": "museums", "durationMin": 480, "crew": {"adults": 2}}),
+)
+# P0-01: late in the evening (the Developer's UTC emulator showed 22:45 MSK) → tomorrow at the opening.
+mobile.set_clock("2026-10-23T22:45:00+03:00")
+call("city_presets-late", "city_presets", world=R, lat=YAR["lat"], lon=YAR["lon"])
+call(
+    "city_route-tomorrow",
+    "city_route",
+    world=R,
+    request_id="c-walk-9",
+    input_json=json.dumps({"start": YAR, "preset": "overview", "durationMin": 240, "crew": {"adults": 2}}),
+)
+mobile.set_clock("golden")
+call(
     "city_route-error-adult",
     "city_route",
     world=R,

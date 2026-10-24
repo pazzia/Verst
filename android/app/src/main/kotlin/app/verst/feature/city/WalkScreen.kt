@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,6 +61,9 @@ import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.InfoChip
 import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.RoadSign
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.components.WalkerIcon
 import app.verst.core.ui.components.overheadPlate
@@ -111,11 +115,20 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
     val scroll = rememberScrollState()
     val rows = remember(w.id) { mutableStateMapOf<String, Int>() }
     var content by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val requesters = remember(w.id) { mutableMapOf<String, FocusRequester>() }
+    var highlight by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(ui.focusSeq) {
         val id = ui.focusId ?: return@LaunchedEffect
         val y = withTimeoutOrNull(2_000) { snapshotFlow { rows[id] }.filterNotNull().first() } ?: return@LaunchedEffect
         if (y < scroll.value || y > scroll.value + 400) scroll.scrollTo((y - 120).coerceAtLeast(0))
-        delay(DesignTokens.motion.returnToItem.highlightMs.toLong())
+        // 5.9 §5: TalkBack focus back to the row; returnFlash held 400 ms, then an 800 ms fade (S3-QA P1-07)
+        androidx.compose.runtime.withFrameNanos { }
+        runCatching { requesters[id]?.requestFocus() }
+        val m = DesignTokens.motion.returnToItem
+        highlight = id
+        delay(m.holdMs.toLong())
+        highlight = null
+        delay((m.highlightMs - m.holdMs).toLong())
         a.focusShown()
     }
     ScreenRoot(C.dash.raised, statusBar = C.city.sky) {
@@ -144,12 +157,12 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
                         val start = RuFormat.clock(w.startAt) ?: ""
                         val finish = RuFormat.clock(w.endAt) ?: ""
                         Txt(
-                            stringResource(R.string.walk_header, start, finish), T.title.sm, C.accent.yellow,
+                            stringResource(if (w.startsTomorrow()) R.string.walk_header_tomorrow else R.string.walk_header, start, finish), T.title.sm, C.accent.yellow,
                             Modifier.padding(start = 72.dp, end = 16.dp, bottom = 10.dp).semantics { heading() },
                         )
                         EndRow(stringResource(R.string.walk_start_row), w.start.label ?: w.townName ?: "", start)
                         w.stops.forEach { s ->
-                            WalkStopRow(s, w.people, s.id == ui.focusId, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y }) { a.stop(s) }
+                            WalkStopRow(s, w.people, s.id == highlight, requesters.getOrPut(s.id) { FocusRequester() }, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y }) { a.stop(s) }
                         }
                         val fin = w.finish
                         if (fin != null) EndRow(stringResource(R.string.walk_finish_row), fin.label ?: "", finish)
@@ -187,6 +200,14 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
             }
         }
         Txt(stringResource(R.string.walk_approx), T.body.sm, C.text.muted)
+        if (w.shorterThanAsked) {
+            // «places» → the deck sentence; another reason (budget) → the engine's own sentence
+            val sh = w.shorter
+            val engineText = sh?.messageRu?.takeIf { sh.reason != "places" }
+            val text = engineText
+                ?: stringResource(R.string.walk_shorter, hours(sh?.actualMin ?: w.durationMin), hours(sh?.requestedMin ?: w.requestedMin ?: 0))
+            Txt(text, T.body.sm, C.text.muted, Modifier.testTag("walk.shorter"))
+        }
         // L3a: the walk hand-off, one button per part when the engine split the walk
         val parts = ui.handoff?.parts.orEmpty()
         val label = if (ui.target == HandoffTarget.Maps || ui.target == HandoffTarget.MapsDryRun) stringResource(R.string.handoff_maps_walk) else stringResource(R.string.handoff_web)
@@ -214,6 +235,12 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         }
         for (warn in w.warnings) {
             val m = warn.messageRu ?: continue
+            if (warn.code == "SHORTER_THAN_ASKED") continue // said once, by the note under the ±15 % line (5.11 §9)
+            if (warn.code == "HOURS_UNVERIFIED") {
+                // S3-QA P2-08: only when a stop really has default hours, as a muted line (not a plate)
+                if (w.stops.any { !it.hoursVerified && it.poiId != null }) Txt(m, T.body.sm, C.text.muted, Modifier.testTag("walk.hours"))
+                continue
+            }
             Box(Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r10)).padding(horizontal = 12.dp, vertical = 10.dp)) {
                 Txt(m, T.body.md, C.text.secondary)
             }
@@ -221,11 +248,19 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
     }
 }
 
-private fun km(v: Double): String = if (v >= 10) v.roundToInt().toString() else String.format(java.util.Locale.forLanguageTag("ru-RU"), "%.1f", v)
+/** Whole hours, the same rounding as the duration chip (`walk_chip_duration`), so the note and the chip agree. */
+private fun hours(min: Int): String = ((min + 30) / 60).toString()
+
+/** One decimal below 10 km without a trailing zero («6», «5,8»); whole km from 10 (S3-QA P2-01). */
+private fun km(v: Double): String {
+    if (v >= 10) return v.roundToInt().toString()
+    val tenths = (v * 10).roundToInt()
+    return if (tenths % 10 == 0) (tenths / 10).toString() else "${tenths / 10},${tenths % 10}"
+}
 
 @Composable
 private fun distance(km: Double): String =
-    if (km < 1.0) stringResource(app.verst.R.string.walk_distance_m, (km * 1000 / 50).roundToInt() * 50) else stringResource(R.string.common_km, km(km))
+    if (km < 1.0) stringResource(R.string.walk_distance_m, (km * 1000 / 50).roundToInt() * 50) else stringResource(R.string.common_km, km(km))
 
 /** components §22 walk button / §2 `SecondaryButton`. */
 @Composable
@@ -282,7 +317,7 @@ private fun Modifier.walkColumn(): Modifier = drawBehind {
 @Composable
 private fun EndRow(kind: String, name: String, time: String) {
     Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 12.dp, end = 16.dp).semantics(mergeDescendants = true) {}) {
-        Box(Modifier.padding(start = 72.dp).width(68.dp), contentAlignment = Alignment.TopCenter) { RoadSign("city", name.substringBefore(","), emptyList()) }
+        Box(Modifier.padding(start = 72.dp).widthIn(min = 68.dp), contentAlignment = Alignment.TopCenter) { RoadSign("city", name.substringBefore(","), emptyList()) }
         Column(Modifier.weight(1f).padding(start = 4.dp)) {
             Row(Modifier.fillMaxWidth()) {
                 Txt(kind, T.body.sm, C.text.muted, Modifier.weight(1f))
@@ -294,26 +329,34 @@ private fun EndRow(kind: String, name: String, time: String) {
 }
 
 @Composable
-private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, content: () -> LayoutCoordinates?, onPlaced: (Int) -> Unit, onTap: () -> Unit) {
+private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, focusRequester: FocusRequester, content: () -> LayoutCoordinates?, onPlaced: (Int) -> Unit, onTap: () -> Unit) {
     val line = stringResource(R.string.walk_next, distance(s.walkKmFromPrev), s.walkMinFromPrev)
     val time = RuFormat.clock(s.arriveAt) ?: ""
     val cost = if (s.costRub > 0) stringResource(R.string.walk_footer_total, RuFormat.thousands(s.costRub)) else null
     val cd = listOfNotNull(line, time, s.nameRu, s.noteRu, cost).joinToString(", ")
     val tap by rememberUpdatedState(onTap)
     val reduced = LocalReducedMotion.current
+    val m = DesignTokens.motion.returnToItem
+    val glow by androidx.compose.animation.core.animateFloatAsState(
+        if (focused) 1f else 0f,
+        if (reduced || focused) androidx.compose.animation.core.snap() else androidx.compose.animation.core.tween(m.highlightMs - m.holdMs, easing = m.easing),
+        label = "focus",
+    )
     Row(
         Modifier.fillMaxWidth()
             .onGloballyPositioned { c -> content()?.let { root -> if (root.isAttached && c.isAttached) onPlaced(root.localPositionOf(c, Offset.Zero).y.roundToInt()) } }
-            .drawBehind { if (focused && !reduced) drawRect(C.dash.pressed) }
+            .drawBehind { if (glow > 0f) drawRect(C.overlay.returnFlash.copy(alpha = C.overlay.returnFlash.alpha * glow)) }
             .then(if (s.tappable) Modifier.pointerInput(s.id) { detectTapGestures(onTap = { tap() }) } else Modifier)
             .padding(top = 8.dp, bottom = 12.dp, end = 16.dp)
             .semantics(mergeDescendants = true) {
                 contentDescription = cd
                 if (s.tappable) onClick { onTap(); true }
             }
+            .focusRequester(focusRequester)
+            .focusable()
             .testTag("walk.stop.${s.id}"),
     ) {
-        Box(Modifier.padding(start = 72.dp).width(68.dp), contentAlignment = Alignment.TopCenter) {
+        Box(Modifier.padding(start = 72.dp).widthIn(min = 68.dp), contentAlignment = Alignment.TopCenter) {
             if (s.isBar) BarSign(s.kind) else RoadSign("tourist", s.nameRu, listOf(s.kind))
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -330,7 +373,7 @@ private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, content: 
 
 /** components §21 bar sign: the `service` look with `glass` (bar, рюмочная) or `mug` (pub, craft). */
 @Composable
-private fun BarSign(kind: String) {
+internal fun BarSign(kind: String) {
     Box(
         Modifier.size(35.dp, 43.dp).clip(RoundedCornerShape(4.dp)).background(C.sign.blue).padding(3.dp)
             .clip(RoundedCornerShape(3.dp)).background(C.sign.white),
@@ -354,9 +397,16 @@ private fun Footer(w: WalkRouteDto) {
         Column(Modifier.weight(1f)) {
             Txt(stringResource(R.string.walk_footer_label), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Txt(stringResource(R.string.walk_footer_total, RuFormat.thousands(total)), T.amount, C.text.onLight, maxLines = 1)
-                Spacer(Modifier.weight(1f))
-                Txt(stringResource(R.string.walk_footer_per_person, RuFormat.thousands(per)), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                if (total <= 0) {
+                    // 5.11 §9 (S3-QA P1-03): never «≈ 0 ₽»; no per-person line
+                    Txt(stringResource(R.string.walk_footer_free), T.amount, C.text.onLight, Modifier.testTag("walk.free"), maxLines = 1)
+                    Spacer(Modifier.weight(1f))
+                    Txt(stringResource(R.string.walk_footer_free_sub), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                } else {
+                    Txt(stringResource(R.string.walk_footer_total, RuFormat.thousands(total)), T.amount, C.text.onLight, maxLines = 1)
+                    Spacer(Modifier.weight(1f))
+                    Txt(stringResource(R.string.walk_footer_per_person, RuFormat.thousands(per)), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                }
             }
         }
     }
