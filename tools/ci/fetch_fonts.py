@@ -11,7 +11,10 @@ Run only by .github/workflows/fonts.yml (needs network and fontTools). Writes:
 Sources are tried in order per family; the first one whose files pass the family's glyph check wins:
   1. github.com/google/fonts at one pinned commit (static file, or a variable font instanced with fontTools)
   2. npm packages of the upstream project (IBM ships @ibm/plex-sans-condensed and the monolithic @ibm/plex)
-Run 1 (40091925830) showed google/fonts' IBM Plex Sans Condensed v1.3 has no Cyrillic, hence source 2.
+  3. a variable font of a sibling family cut at a fixed axis position (IBM Plex Sans v3 [wdth,wght] at
+     wdth 85 = Condensed), as architecture-android-mvp §10.2 allows for variable-only families
+Run 1 (40091925830) showed google/fonts' IBM Plex Sans Condensed v1.3 has no Cyrillic; run 2 (40092439867)
+found no npm static files and IBM Plex Sans v3.201 with Cyrillic and a wdth axis, hence source 3.
 
 Glyph rules (open-issues OI-12): the UI family needs А–я Ёё № ₽ ≈ « » — → ↓ ↑ · and U+00A0; Plex Mono is used
 only for odometer digits; Marck Script needs Cyrillic + digits (its «₽ ≈ →» are set in Plex per OI-12).
@@ -45,12 +48,14 @@ DIGITS = list("0123456789")
 UI = CYR + DIGITS + list("№₽≈«»—→↓↑·") + [" "]
 SOFT = [" "]
 
-# family → google/fonts dir, npm packages (searched for the file name), required glyphs, licence name
+# family → google/fonts dir, npm packages (searched for the file name), required glyphs
 FAMILIES = {
     "ibmplexsanscondensed": ("ofl/ibmplexsanscondensed", ["@ibm/plex-sans-condensed", "@ibm/plex"], UI),
     "ibmplexmono": ("ofl/ibmplexmono", ["@ibm/plex-mono", "@ibm/plex"], DIGITS),
     "marckscript": ("ofl/marckscript", [], CYR + DIGITS),
 }
+# family → (sibling google/fonts dir with a variable font, fixed axes) — source 3
+VF_SIBLING = {"ibmplexsanscondensed": ("ofl/ibmplexsans", {"wdth": 85})}
 # resource name → (family, static file name, weight for a variable-font fallback)
 FONTS = {
     "ibm_plex_sans_condensed_regular": ("ibmplexsanscondensed", "IBMPlexSansCondensed-Regular.ttf", 400),
@@ -90,6 +95,8 @@ def check(data: bytes, required: list[str]) -> dict:
         "version": font["name"].getDebugName(5),
         "usWeightClass": font["OS/2"].usWeightClass,
         "cyrillic": sum(1 for c in cmap if 0x400 <= c < 0x500),
+        "advance_n_o": [font["hmtx"][cmap[c]][0] if c in cmap else None for c in (0x6E, 0x43E)],
+        "unitsPerEm": font["head"].unitsPerEm,
         "missingGlyphs": [f"U+{ord(ch):04X}" for ch in required if ord(ch) not in cmap],
         "missingSoft": [f"U+{ord(ch):04X}" for ch in SOFT if ord(ch) not in cmap],
     }
@@ -111,9 +118,18 @@ class GoogleFonts:
     def file(self, folder: str, name: str) -> bytes:
         return get(f"{RAW}/{self.sha}/{folder}/{name}")
 
-    def font(self, folder: str, static: str, weight: int) -> tuple[bytes, dict] | None:
+    def axes(self, folder: str) -> dict:
+        from fontTools.ttLib import TTFont
+
+        var = next((n for n in self.names(folder) if n.endswith(".ttf") and "[" in n and "Italic" not in n), None)
+        if var is None:
+            return {}
+        vf = TTFont(io.BytesIO(self.file(folder, var)))
+        return {"file": var, "axes": {a.axisTag: [a.minValue, a.defaultValue, a.maxValue] for a in vf["fvar"].axes}}
+
+    def font(self, folder: str, static: str, weight: int, fixed: dict | None = None) -> tuple[bytes, dict] | None:
         names = self.names(folder)
-        if static in names:
+        if static in names and not fixed:
             return self.file(folder, static), {"source": f"google/fonts@{self.sha[:12]}:{folder}/{static}"}
         var = next((n for n in names if n.endswith(".ttf") and "[" in n and "Italic" not in n), None)
         if var is None:
@@ -124,6 +140,10 @@ class GoogleFonts:
         vf = TTFont(io.BytesIO(self.file(folder, var)))
         limits = {a.axisTag: a.defaultValue for a in vf["fvar"].axes}
         limits["wght"] = weight
+        for tag, value in (fixed or {}).items():
+            if tag not in limits:
+                return None
+            limits[tag] = value
         buf = io.BytesIO()
         instancer.instantiateVariableFont(vf, limits).save(buf)
         return buf.getvalue(), {"source": f"google/fonts@{self.sha[:12]}:{folder}/{var}", "instancedAt": limits}
@@ -136,6 +156,7 @@ class GoogleFonts:
 class Npm:
     def __init__(self):
         self.cache: dict[str, tuple[str, dict[str, bytes]] | None] = {}
+        self.report: dict[str, dict] = {}
 
     def package(self, name: str) -> tuple[str, dict[str, bytes]] | None:
         if name not in self.cache:
@@ -154,9 +175,9 @@ class Npm:
                             if base not in files or "complete" in low:
                                 files[base] = tar.extractfile(m).read()  # type: ignore[union-attr]
                 self.cache[name] = (f"npm:{name}@{ver}", files)
-                print(f"npm {name}@{ver}: {len(files)} files")
+                self.report[name] = {"version": ver, "ttf": sorted(k for k in files if k.endswith(".ttf"))[:40]}
             except Exception as e:  # noqa: BLE001 - reported in the lock
-                print(f"npm {name}: {e}")
+                self.report[name] = {"error": repr(e)[:300]}
                 self.cache[name] = None
         return self.cache[name]
 
@@ -173,6 +194,8 @@ def main() -> int:
     for family, (folder, packages, required) in FAMILIES.items():
         members = {r: v for r, v in FONTS.items() if v[0] == family}
         attempts = [("google", None)] + [("npm", p) for p in packages]
+        if family in VF_SIBLING:
+            attempts.append(("vf", None))
         done = False
         for kind, pkg in attempts:
             got: dict[str, tuple[bytes, dict]] = {}
@@ -180,6 +203,8 @@ def main() -> int:
             for res, (_, static, weight) in members.items():
                 if kind == "google":
                     r = gf.font(folder, static, weight)
+                elif kind == "vf":
+                    r = gf.font(VF_SIBLING[family][0], static, weight, VF_SIBLING[family][1])
                 else:
                     p = npm.package(pkg)  # type: ignore[arg-type]
                     r = (p[1][static], {"source": f"{p[0]}:{static}"}) if p and static in p[1] else None
@@ -203,6 +228,8 @@ def main() -> int:
                 lock["files"][res] = entries[res]
             if kind == "google":
                 licence = gf.licence(folder)
+            elif kind == "vf":
+                licence = gf.licence(VF_SIBLING[family][0])
             else:
                 p = npm.package(pkg)  # type: ignore[arg-type]
                 licence = next((v for k, v in (p[1] if p else {}).items() if k.upper().startswith(("LICENSE", "OFL"))), None)
@@ -218,6 +245,14 @@ def main() -> int:
             print(f"::error title=fonts::{family}: no source passes the glyph check")
             lock["ok"] = False
 
+    lock["chosen"] = chosen
+    lock["npm"] = npm.report
+    lock["vfAxes"] = {fam: gf.axes(d) for fam, (d, _) in VF_SIBLING.items()}
+    lock["referenceLatinCondensed"] = {}
+    try:  # Latin-only v1.3 Condensed, for the width comparison with the cut instance (not shipped)
+        lock["referenceLatinCondensed"] = check(gf.file("ofl/ibmplexsanscondensed", "IBMPlexSansCondensed-Regular.ttf"), [])
+    except Exception as e:  # noqa: BLE001
+        lock["referenceLatinCondensed"] = {"error": repr(e)[:200]}
     if "ibmplexsanscondensed" not in chosen:
         PROBE.mkdir(parents=True, exist_ok=True)
         report = {}
