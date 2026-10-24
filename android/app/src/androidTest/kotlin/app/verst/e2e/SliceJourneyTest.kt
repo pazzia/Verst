@@ -5,12 +5,14 @@ import android.util.Log
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -97,7 +99,7 @@ class SliceJourneyTest {
         compose.onNodeWithTag("navigator.to").performTextInput("Яро")
         waitTag("navigator.suggestion.0")
         shot("02-navigator-query")
-        compose.onNodeWithTag("navigator.suggestion.0").performClick()
+        compose.onNodeWithTag("navigator.suggestion.0").performScrollTo().assertIsDisplayed().performClick()
         waitTag("navigator.start", 10_000)
         compose.onNodeWithTag("navigator.start").assertIsEnabled()
         shot("03-navigator-picked")

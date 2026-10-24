@@ -103,16 +103,20 @@ fun NavigatorScreen(
     }
     ScreenRoot(C.dash.base) {
         Column(Modifier.fillMaxSize().imePadding()) {
-            Box(Modifier.fillMaxWidth().height(150.dp)) {
-                SkyStrip(150.dp, ground = true)
-                Box(Modifier.fillMaxSize().padding(top = 132.dp).dashboardSurface(curve = 30.dp))
+            // While typing (focused field + IME) the scene strip collapses so the results stay above the keyboard.
+            val typing = inputFocused && WindowInsets.isImeVisible
+            if (!typing) {
+                Box(Modifier.fillMaxWidth().height(150.dp)) {
+                    SkyStrip(150.dp, ground = true)
+                    Box(Modifier.fillMaxSize().padding(top = 132.dp).dashboardSurface(curve = 30.dp))
+                }
             }
             Column(Modifier.weight(1f).fillMaxWidth().background(C.dash.raised)) {
                 val back = stringResource(R.string.common_back_to_windshield)
                 BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp, top = 0.dp))
-                Panel(ui, onQuery, pick, onEditFrom, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = 6.dp, bottom = 12.dp))
+                Panel(ui, typing, onQuery, pick, onEditFrom, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = 6.dp, bottom = 12.dp))
                 // 5.2 §1: the caption row hides while typing (IME open on a focused field) and returns after a pick.
-                if (!(inputFocused && WindowInsets.isImeVisible)) Caption(ui, onStart)
+                if (!typing) Caption(ui, onStart)
             }
         }
     }
@@ -121,18 +125,24 @@ fun NavigatorScreen(
 @Composable
 private fun Panel(
     ui: NavigatorUi,
+    typing: Boolean,
     onQuery: (String) -> Unit,
     onPick: (SuggestionDto) -> Unit,
     onEditFrom: () -> Unit,
     onFocus: (Boolean) -> Unit,
     modifier: Modifier,
 ) {
+    val scroll = rememberScrollState()
+    // Keep the field and its results in view above the keyboard: scroll to the end when results change.
+    LaunchedEffect(typing, ui.suggestions, ui.searching, ui.popular.size) {
+        if (typing) scroll.animateScrollTo(scroll.maxValue)
+    }
     Column(
         modifier
             .fillMaxWidth()
             .naviPanel(bezel = 7.dp, radius = 18.dp)
             .padding(19.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(scroll),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Txt(stringResource(R.string.navigator_header), T.label.md, C.navi.label)

@@ -801,6 +801,9 @@ Behaviour notes:
 e2e flake found (run 13): the Navigator caption (with ПОЕХАЛИ) was hidden while `WindowInsets.isImeVisible`; the
 IME did not close in time after a pick and the start button never appeared. Now the caption hides only while a
 field is focused **and** the IME is up (focus is cleared on pick) — also the right UX.
+Second e2e failure (run 15, failure screenshot `zz-failed-*`): on the ≈ 640 dp window the keyboard covered the
+result rows (the tap landed on the IME). Real UX bug: while typing, the 150 dp scene strip now collapses and the
+panel scrolls to its end when results change; the test also `performScrollTo()`s the row.
 
 Deviations / open items:
 1. `DesignTokens.kt` is not byte-identical yet: DES-100 fonts are not in `res/font`, so the `font` object uses
