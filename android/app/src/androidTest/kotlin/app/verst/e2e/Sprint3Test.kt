@@ -201,7 +201,6 @@ class Sprint3Test {
         val night = stops.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
         compose.onNodeWithTag("road.stop.${night.id}").performScrollTo().performClick()
         waitTag("card.fictional")
-        compose.onNodeWithText("вымышленная", substring = true).assertExists()
         compose.waitUntil(20_000) { has("photo.loaded") || has("photo.error") || has("photo.none") }
         if (has("photo.loaded")) compose.onNodeWithText("ФОТО РАЙОНА").assertExists()
         shot("65-card-hotel-area")

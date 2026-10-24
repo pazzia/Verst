@@ -269,7 +269,8 @@ class SliceJourneyTest {
     @Test
     fun readyRouteToRoadAhead() {
         waitTag("windshield.route.0")
-        compose.onNodeWithText("Золотое кольцо").performClick()
+        val gi = (flow.windshield as WindshieldData.Routes).routes.indexOfFirst { it.id == "rr_golden_ring" }
+        compose.onNodeWithTag("windshield.route.$gi").performClick()
         compose.waitUntil(5_000) { flow.selected?.id == "rr_golden_ring" }
         // F-01: the sign row shows the engine estimate of this very request (crew, pace), not the fixture km.
         compose.waitUntil(20_000) { flow.routeKm["rr_golden_ring"] != null }

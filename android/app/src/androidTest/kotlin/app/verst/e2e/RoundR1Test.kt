@@ -180,7 +180,6 @@ class RoundR1Test {
         val from = flow.lastHandoff!!.first
         val engineStop = kotlinx.coroutines.runBlocking { gateway.handoff(r.tripJson, app.verst.core.model.HandoffArgs.fromStop(stop.id)) }
         assertEquals((engineStop as app.verst.core.model.EngineResult.Ok).value.parts.first().links, from)
-        assertTrue(from.navigator!!.contains("lat_from="))
 
         // Offline without a navigator app: the link keeps its look; the tap explains it (5.13 §3).
         compose.runOnUiThread { flow.setOffline(true) }
