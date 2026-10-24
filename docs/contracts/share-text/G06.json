@@ -1695,7 +1695,8 @@
                 "priceNightRub": 7200,
                 "rooms": 1,
                 "priceCrewRub": 7200,
-                "verified": true
+                "verified": true,
+                "distanceKm": 1.4
               },
               {
                 "placeId": "pl_nnv_hotel_kremlin",
@@ -1708,7 +1709,8 @@
                 "priceNightRub": 6500,
                 "rooms": 1,
                 "priceCrewRub": 6500,
-                "verified": true
+                "verified": true,
+                "distanceKm": 0.7
               },
               {
                 "placeId": "pl_nnv_hotel_pokrovka",
@@ -1719,7 +1721,8 @@
                 "priceNightRub": 5000,
                 "rooms": 1,
                 "priceCrewRub": 5000,
-                "verified": true
+                "verified": true,
+                "distanceKm": 0.1
               }
             ],
             "selectedHotelId": "pl_nnv_hotel_volga"

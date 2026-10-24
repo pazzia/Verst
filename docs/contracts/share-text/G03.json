@@ -959,7 +959,8 @@
                 "priceNightRub": 5200,
                 "rooms": 1,
                 "priceCrewRub": 5200,
-                "verified": true
+                "verified": true,
+                "distanceKm": 0.3
               },
               {
                 "placeId": "pl_tam_hotel_tambov",
@@ -972,7 +973,8 @@
                 "priceNightRub": 4500,
                 "rooms": 1,
                 "priceCrewRub": 4500,
-                "verified": true
+                "verified": true,
+                "distanceKm": 0.5
               }
             ],
             "selectedHotelId": "pl_tam_hotel_derzhavinskaya"

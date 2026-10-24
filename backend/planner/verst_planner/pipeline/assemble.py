@@ -48,7 +48,7 @@ def rooms(inp: NormalizedInput) -> int:
     return -(-inp.crew.adults // 2)
 
 
-def hotel_option(p: Place, inp: NormalizedInput) -> HotelOption:
+def hotel_option(p: Place, inp: NormalizedInput, lateral_km: float = 0.0) -> HotelOption:
     price = p.price_night_rub or 0
     return HotelOption(
         p.id,
@@ -58,6 +58,7 @@ def hotel_option(p: Place, inp: NormalizedInput) -> HotelOption:
         rooms(inp),
         rooms(inp) * price,
         p.source is not Source.OSM,
+        round(lateral_km, 1),
     )
 
 

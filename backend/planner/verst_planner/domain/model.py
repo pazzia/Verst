@@ -499,6 +499,8 @@ class HotelOption:
     rooms: int
     price_crew_rub: int
     verified: bool
+    # Straight distance from the route to the hotel, km (0.1), for the Exit sign «800 м» (DEV-SLICE-3).
+    distance_km: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)

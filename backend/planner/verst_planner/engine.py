@@ -326,7 +326,7 @@ class Planner:
                 views[len(sd.plan.stops) - 1] = StopView(
                     overnight_text=text.text,
                     note=note,
-                    hotel_options=tuple(hotel_option(h.place, inp) for h in c.hotel_options),
+                    hotel_options=tuple(hotel_option(h.place, inp, h.lateral_km) for h in c.hotel_options),
                 )
                 reasons.append(
                     OvernightReason(
