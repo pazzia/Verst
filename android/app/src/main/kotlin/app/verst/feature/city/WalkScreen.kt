@@ -235,6 +235,7 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         }
         for (warn in w.warnings) {
             val m = warn.messageRu ?: continue
+            if (warn.code == "SHORTER_THAN_ASKED") continue // said once, by the note under the ±15 % line (5.11 §9)
             if (warn.code == "HOURS_UNVERIFIED") {
                 // S3-QA P2-08: only when a stop really has default hours, as a muted line (not a plate)
                 if (w.stops.any { !it.hoursVerified && it.poiId != null }) Txt(m, T.body.sm, C.text.muted, Modifier.testTag("walk.hours"))
