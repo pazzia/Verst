@@ -1,0 +1,191 @@
+"""Writes the mobile API v2 contract examples (ARCH-305, M§5.4) into `docs/contracts/v2/`.
+
+One file per function and case: ``{"request": {"function", "args"}, "response": <envelope>}``. Arguments
+named ``*_json`` are passed to the bridge as JSON text; here they are shown parsed. The envelope's ``ms`` is
+written as 0. Everything runs in-process on the golden clock with both fixture worlds and the packaged
+catalogue, so a re-run is byte-identical. ``index.json`` lists the files.
+
+Run from `backend/planner`: ``python3 tools/gen_api_contracts.py``. With ``VERST_GEN_IN_MEMORY=1`` nothing
+is written and `GENERATED` (file name → text) holds the output (compared by `test_api_contracts`).
+"""
+
+import json
+import os
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from verst_planner import mobile  # noqa: E402
+
+OUT = ROOT.parents[1] / "docs" / "contracts" / "v2"
+GENERATED: dict[str, str] = {}
+R = "russia_v1"
+FUEL_ID = json.loads((ROOT / "fixtures" / "worlds" / "central_russia_v1.json").read_text("utf-8"))["places"]
+FUEL_ID = next(p["id"] for p in FUEL_ID if p["type"] == "fuel")
+YAR = {"lat": 57.6261, "lon": 39.8845, "label": "Ярославль, Советская площадь"}
+SPB = {"lat": 59.9386, "lon": 30.3141, "label": "Санкт-Петербург, Дворцовая площадь"}
+
+
+def text(doc):
+    return json.dumps(doc, ensure_ascii=False, indent=1) + "\n"
+
+
+def call(name, function, refs=None, **args):
+    shown = {k: (json.loads(v) if k.endswith("_json") and isinstance(v, str) else v) for k, v in args.items()}
+    shown.update(refs or {})
+    envelope = json.loads(getattr(mobile, function)(*args.values()))
+    envelope["ms"] = 0
+    if function == "load_catalogue" and envelope.get("ok"):
+        envelope["result"]["ms"] = 0
+    GENERATED[f"{name}.json"] = text({"request": {"function": function, "args": shown}, "response": envelope})
+    return envelope
+
+
+def setup():
+    for w in ("central_russia_v1", "edge_cases_v1"):
+        assert json.loads(mobile.load_world((ROOT / "fixtures" / "worlds" / f"{w}.json").read_text("utf-8")))[
+            "ok"
+        ]
+    mobile.set_clock("golden")
+
+
+def trip_input(origin, destination, **extra):
+    return json.dumps(
+        {"origin": origin, "destination": destination, "crew": {"adults": 2}, "dailyKm": 500, **extra}
+    )
+
+
+setup()
+call("load_catalogue", "load_catalogue")
+call("selfcheck", "selfcheck")
+call("geo_search-city", "geo_search", world=R, q="Санкт", lat=55.7558, lon=37.6173, limit=5, kinds=None)
+call(
+    "geo_search-poi", "geo_search", world=R, q="Эрми", lat=59.93, lon=30.31, limit=5, kinds='["poi", "place"]'
+)
+call("geo_nearest", "geo_nearest", world=R, lat=57.6205, lon=39.8730)
+call("geo_nearest-outside", "geo_nearest", world=R, lat=48.8566, lon=2.3522)
+ekb = {"lat": 56.8389, "lon": 60.6057, "label": "Екатеринбург"}
+tyu = {"lat": 57.153, "lon": 65.5343, "label": "Тюмень"}
+plan = call(
+    "plan-synthetic", "plan", world=R, request_id="c-plan-1", input_json=trip_input(ekb, tyu), listener=None
+)
+call("estimate-synthetic", "estimate", world=R, request_id="c-est-1", input_json=trip_input(ekb, tyu))
+msk = {"lat": 55.7558, "lon": 37.6173, "label": "Москва"}
+yar = {"lat": 57.6261, "lon": 39.8845, "label": "Ярославль"}
+graph_plan = mobile.plan(R, "c-plan-2", trip_input(msk, yar), None)
+call("city_presets", "city_presets", world=R, lat=YAR["lat"], lon=YAR["lon"])
+walk = call(
+    "city_route-overview",
+    "city_route",
+    world=R,
+    request_id="c-walk-1",
+    input_json=json.dumps({"start": YAR, "preset": "overview", "durationMin": 240, "crew": {"adults": 2}}),
+)
+call(
+    "city_route-museums-spb",
+    "city_route",
+    world=R,
+    request_id="c-walk-2",
+    input_json=json.dumps(
+        {"start": SPB, "preset": "museums", "durationMin": 360, "crew": {"adults": 2, "children": 1}}
+    ),
+)
+call(
+    "city_route-ryumochnye",
+    "city_route",
+    world=R,
+    request_id="c-walk-3",
+    input_json=json.dumps(
+        {"start": YAR, "preset": "ryumochnye", "adultConfirmed": True, "crew": {"adults": 2}}
+    ),
+)
+call(
+    "city_route-custom",
+    "city_route",
+    world=R,
+    request_id="c-walk-4",
+    input_json=json.dumps(
+        {
+            "start": YAR,
+            "preset": "custom",
+            "interests": ["parks", "views", "food"],
+            "durationMin": 240,
+            "pace": "slow",
+        }
+    ),
+)
+call(
+    "city_route-error-adult",
+    "city_route",
+    world=R,
+    request_id="c-walk-5",
+    input_json=json.dumps({"start": YAR, "preset": "beer"}),
+)
+call(
+    "city_route-error-not-enough",
+    "city_route",
+    world=R,
+    request_id="c-walk-6",
+    input_json=json.dumps(
+        {
+            "start": {"lat": 56.8587, "lon": 35.9176, "label": "Тверь"},
+            "preset": "beer",
+            "adultConfirmed": True,
+        }
+    ),
+)
+call(
+    "city_route-error-no-city",
+    "city_route",
+    world=R,
+    request_id="c-walk-7",
+    input_json=json.dumps({"start": {"lat": 61.5, "lon": 90.0, "label": "тайга"}, "preset": "overview"}),
+)
+call("poi_details-sight", "poi_details", world=R, place_id="Q900101")
+call("poi_details-fixture-sight", "poi_details", world=R, place_id="pl_yar_ilya")
+call("poi_details-hotel", "poi_details", world=R, place_id="pl_yar_hotel_strelka")
+call("poi_details-bar", "poi_details", world=R, place_id="n9001")
+call("poi_details-not-found", "poi_details", world=R, place_id=FUEL_ID)
+trip = json.loads(graph_plan)["result"]["trip"]
+first_sight = next(s["id"] for d in trip["daysList"] for s in d["stops"] if s["kind"] == "sight")
+TRIP_REF = {
+    "route_json": {"$ref": "result.trip of plan(russia_v1, Москва → Ярославль, 2 adults, 500 km/day)"}
+}
+call(
+    "handoff-car-day",
+    "handoff",
+    refs=TRIP_REF,
+    world=R,
+    route_json=json.dumps(trip, ensure_ascii=False),
+    options_json=json.dumps({"mode": "car", "day": 1, "fromHere": True}),
+)
+call(
+    "handoff-car-from-stop",
+    "handoff",
+    refs=TRIP_REF,
+    world=R,
+    route_json=json.dumps(trip, ensure_ascii=False),
+    options_json=json.dumps({"mode": "car", "fromStopId": first_sight, "fromHere": False}),
+)
+call(
+    "handoff-walk",
+    "handoff",
+    refs={"route_json": {"$ref": "result of city_route-overview.json"}},
+    world=R,
+    route_json=json.dumps(walk["result"], ensure_ascii=False),
+    options_json=json.dumps({"mode": "walk", "fromHere": False}),
+)
+assert plan["ok"], plan
+
+GENERATED["index.json"] = text({"apiVersion": mobile.API_VERSION, "files": sorted(GENERATED)})
+
+if not os.environ.get("VERST_GEN_IN_MEMORY"):
+    OUT.mkdir(parents=True, exist_ok=True)
+    for old in OUT.iterdir():
+        if old.name not in GENERATED:
+            old.unlink()
+    for name, body in GENERATED.items():
+        (OUT / name).write_text(body, "utf-8")
+    print(f"{len(GENERATED)} files, {sum(len(v.encode()) for v in GENERATED.values())} bytes")

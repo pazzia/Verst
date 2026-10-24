@@ -1,0 +1,144 @@
+"""Presets, interests, pace, dwell and the walking model of ADR-0013 (one table each)."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+SIGHT_KINDS = (
+    "museum",
+    "kremlin",
+    "monastery",
+    "church",
+    "monument",
+    "park",
+    "viewpoint",
+    "embankment",
+    "square",
+    "attraction",
+)
+BAR_KINDS = ("ryumochnaya", "pub", "craft", "bar")
+DRINK_KINDS = frozenset(BAR_KINDS)
+PRESETS = ("overview", "museums", "ryumochnye", "beer", "custom")
+ADULT_PRESETS = frozenset({"ryumochnye", "beer"})
+INTERESTS = ("history", "architecture", "museums", "parks", "food", "bars", "views")
+DURATIONS = (120, 240, 360, 480)
+PACES = {"slow": (3.5, 1.25), "normal": (4.5, 1.0), "fast": (5.5, 0.8)}  # km/h, dwell multiplier
+
+WALK_FACTOR = 1.30
+MAX_LEG_KM = 2.5
+RADIUS_MAX_KM = {120: 3.0, 240: 4.0, 360: 5.0, 480: 6.0}
+POOL_MAX = 60
+NO_CITY_KM = 15.0
+DIVERSITY = 0.6
+
+DWELL = {
+    "museum": 75,
+    "kremlin": 50,
+    "monastery": 50,
+    "church": 20,
+    "monument": 10,
+    "square": 10,
+    "viewpoint": 15,
+    "embankment": 15,
+    "park": 35,
+    "attraction": 20,
+    "bar": 40,
+    "pub": 40,
+    "craft": 40,
+    "ryumochnaya": 25,
+    "meal": 45,
+}
+BIG_MUSEUM_SITELINKS = 40
+DRINK_RUB = {"ryumochnaya": 300, "pub": 600, "craft": 600, "bar": 500}
+MEAL_RUB = 600
+TICKETS = {"museum": (400, 200), "kremlin": (300, 150), "monastery": (300, 150)}
+DEFAULT_HOURS = {"museum": "Tu-Su 10:00-18:00", "church": "Mo-Su 08:00-20:00"}
+BAR_DEFAULT_HOURS = "Mo-Su 16:00-02:00"
+
+INTEREST_KINDS: dict[str, dict[str, float]] = {
+    "history": {
+        "kremlin": 1.0,
+        "monastery": 1.0,
+        "monument": 0.9,
+        "church": 0.8,
+        "museum": 0.7,
+        "square": 0.6,
+    },
+    "architecture": {"church": 1.0, "kremlin": 1.0, "monastery": 0.9, "square": 0.9, "attraction": 0.9},
+    "museums": {"museum": 1.0},
+    "parks": {"park": 1.0, "embankment": 0.9},
+    "views": {"viewpoint": 1.0, "embankment": 0.9, "park": 0.5},
+    "bars": {"bar": 1.0, "pub": 1.0, "craft": 1.0, "ryumochnaya": 1.0},
+    "food": {},
+}
+
+
+@dataclass(frozen=True, slots=True)
+class Preset:
+    key: str
+    weights: dict[str, float]
+    gate_kinds: frozenset[str]
+    gate_min: int
+    default_duration: int
+    default_pace: str
+    caps: dict[str, int]
+    museum_dwell_cap: int | None = None
+
+
+PRESET_TABLE: dict[str, Preset] = {
+    "overview": Preset(
+        "overview",
+        {
+            "kremlin": 1.0,
+            "monastery": 1.0,
+            "church": 1.0,
+            "attraction": 1.0,
+            "monument": 0.9,
+            "square": 0.9,
+            "embankment": 0.9,
+            "viewpoint": 0.9,
+            "museum": 0.6,
+            "park": 0.6,
+        },
+        frozenset(SIGHT_KINDS),
+        4,
+        240,
+        "normal",
+        {"museum": 2},
+        museum_dwell_cap=45,
+    ),
+    "museums": Preset("museums", {"museum": 1.0}, frozenset({"museum"}), 3, 360, "slow", {"museum": 4}),
+    "ryumochnye": Preset(
+        "ryumochnye",
+        {"ryumochnaya": 1.0, "bar": 0.5, "pub": 0.3},
+        frozenset({"ryumochnaya"}),
+        3,
+        240,
+        "normal",
+        {"drinks": 5},
+    ),
+    "beer": Preset(
+        "beer",
+        {"craft": 1.0, "pub": 0.9, "bar": 0.5},
+        frozenset({"pub", "craft"}),
+        3,
+        240,
+        "normal",
+        {"drinks": 5},
+    ),
+}
+HERITAGE_BONUS = 10.0
+
+
+def custom_weights(interests: tuple[str, ...]) -> dict[str, float]:
+    """Max over the chosen interests; 0.15 for other sights; bars only when «бары» is chosen."""
+    chosen: dict[str, float] = {}
+    for i in interests:
+        for k, v in INTEREST_KINDS[i].items():
+            chosen[k] = max(chosen.get(k, 0.0), v)
+    base = {k: 0.15 for k in SIGHT_KINDS} | {k: 0.0 for k in BAR_KINDS}
+    return {k: chosen.get(k, v) for k, v in base.items()}
+
+
+def radius_km(duration_min: int, speed_kmh: float) -> float:
+    return min(0.45 * speed_kmh * duration_min / 60.0, RADIUS_MAX_KM.get(duration_min, 6.0))

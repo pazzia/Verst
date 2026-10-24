@@ -3,8 +3,10 @@
 1. `verst_planner` imports only the standard library and itself.
 2. Inside the package: `domain` imports only `domain`; `geo` only `domain`/`geo`; `pipeline` may import
    `domain, geo, hours, config, ports, events, explain`; `cost` imports `domain, config, explain.ru`;
-   `adapters.fake` imports `domain, geo, ports`; the composition roots `engine`, `cli` and `mobile`
-   may import everything.
+   `adapters.fake` imports `domain, geo, ports`; Sprint 3: `catalogue` imports `domain, resources`;
+   `adapters.catalogue` imports `domain, geo, ports, adapters.fake, catalogue, explain.ru, resources`; `city`
+   imports `domain, geo, hours, events, explain.ru`; `handoff` imports nothing internal. The composition roots
+   `engine`, `cli` and `mobile` may import everything.
 """
 
 from __future__ import annotations
@@ -54,6 +56,27 @@ RULES: dict[str, tuple[str, ...]] = {
         "verst_planner.ports",
         "verst_planner.adapters.fake",
     ),
+    # Sprint 3 (ADR-0012…0014)
+    "verst_planner.catalogue": ("verst_planner.domain", "verst_planner.resources", "verst_planner.catalogue"),
+    "verst_planner.adapters.catalogue": (
+        "verst_planner.domain",
+        "verst_planner.geo",
+        "verst_planner.ports",
+        "verst_planner.adapters.fake",
+        "verst_planner.adapters.catalogue",
+        "verst_planner.catalogue",
+        "verst_planner.explain.ru",
+        "verst_planner.resources",
+    ),
+    "verst_planner.city": (
+        "verst_planner.domain",
+        "verst_planner.geo",
+        "verst_planner.hours",
+        "verst_planner.events",
+        "verst_planner.explain.ru",
+        "verst_planner.city",
+    ),
+    "verst_planner.handoff": (),
 }
 
 

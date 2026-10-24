@@ -1,0 +1,37 @@
+{
+ "source": "fixtures/worlds/central_russia_v1.json town pairs (tools/calibrate_detour.py)",
+ "points": [
+  {
+   "straightKm": 65.7,
+   "ratio": 1.089,
+   "speedKmh": 80.0,
+   "pairs": 72
+  },
+  {
+   "straightKm": 201.4,
+   "ratio": 1.223,
+   "speedKmh": 80.6,
+   "pairs": 257
+  },
+  {
+   "straightKm": 423.2,
+   "ratio": 1.314,
+   "speedKmh": 82.5,
+   "pairs": 341
+  },
+  {
+   "straightKm": 708.5,
+   "ratio": 1.388,
+   "speedKmh": 87.7,
+   "pairs": 148
+  }
+ ],
+ "error": {
+  "pairs": 818,
+  "kmMapePct": 17.1,
+  "kmP90Pct": 35.2,
+  "kmMaxPct": 74.7,
+  "minutesMapePct": 18.4
+ },
+ "note": "Sparse fixture graph (all corridors meet at Moscow): real roads are usually shorter."
+}

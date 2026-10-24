@@ -1,0 +1,43 @@
+{
+ "request": {
+  "function": "poi_details",
+  "args": {
+   "world": "russia_v1",
+   "place_id": "pl_yar_ilya"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "id": "pl_yar_ilya",
+   "kind": "sight",
+   "poiKind": "museum",
+   "nameRu": "Церковь Ильи Пророка",
+   "descriptionRu": null,
+   "townName": "Ярославль",
+   "lat": 57.62971748693183,
+   "lon": 39.89288849931893,
+   "image": {
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Ilya_church_sample.jpg?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Ilya_church_sample.jpg?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:Ilya_church_sample.jpg",
+    "credit": null,
+    "isArea": false,
+    "labelRu": "Фото: Wikimedia Commons"
+   },
+   "hours": {
+    "textRu": "Tu-Su 10:00-18:00",
+    "verified": true
+   },
+   "ticket": {
+    "adultRub": 200,
+    "childRub": 100,
+    "estimate": false
+   },
+   "isFictional": false,
+   "attributionRu": [],
+   "wikidataId": "Q900201"
+  },
+  "ms": 0
+ }
+}

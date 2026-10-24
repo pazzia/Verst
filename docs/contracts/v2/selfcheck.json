@@ -1,0 +1,35 @@
+{
+ "request": {
+  "function": "selfcheck",
+  "args": {}
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "engineVersion": "0.1.0",
+   "apiVersion": 2,
+   "python": "3.13.16",
+   "tz": {
+    "Asia/Yekaterinburg": true,
+    "Europe/Kirov": true,
+    "Europe/Moscow": true,
+    "Europe/Samara": true,
+    "Europe/Volgograd": true
+   },
+   "resources": true,
+   "worlds": [
+    "central_russia_v1",
+    "edge_cases_v1",
+    "russia_v1"
+   ],
+   "catalogue": {
+    "version": "sample",
+    "builtAt": "2026-10-25",
+    "towns": 16,
+    "pois": 19,
+    "bars": 11
+   }
+  },
+  "ms": 0
+ }
+}

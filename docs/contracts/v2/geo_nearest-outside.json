@@ -1,0 +1,19 @@
+{
+ "request": {
+  "function": "geo_nearest",
+  "args": {
+   "world": "russia_v1",
+   "lat": 48.8566,
+   "lon": 2.3522
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "town": null,
+   "distanceKm": null,
+   "insideRussia": false
+  },
+  "ms": 0
+ }
+}

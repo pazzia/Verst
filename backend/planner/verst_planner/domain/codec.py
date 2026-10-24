@@ -879,6 +879,8 @@ def plan_to_json(p: TripPlan, public: bool = True, trip_id: str | None = None) -
         "input": normalized_to_json(p.input),
         "engineVersion": p.engine_version,
     }
+    if p.approx_distances:
+        out["approxDistances"] = True  # omitted when false: the golden snapshots stay byte-identical
     if not public:
         out["engineState"] = engine_state_to_json(p.engine_state)
     return out
@@ -914,4 +916,5 @@ def plan_from_json(d: Mapping[str, Any]) -> TripPlan:
         input=normalized_from_json(d["input"]),
         engine_version=d["engineVersion"],
         engine_state=engine_state_from_json(d["engineState"]),
+        approx_distances=bool(d.get("approxDistances", False)),
     )

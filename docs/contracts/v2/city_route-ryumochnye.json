@@ -1,0 +1,195 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-3",
+   "input_json": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "preset": "ryumochnye",
+    "adultConfirmed": true,
+    "crew": {
+     "adults": 2
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-3",
+   "titleRu": "Ярославль: по рюмочным",
+   "townId": "t_yaroslavl",
+   "townName": "Ярославль",
+   "townPrep": "Ярославле",
+   "preset": "ryumochnye",
+   "startAt": "2026-10-23T18:00",
+   "endAt": "2026-10-23T20:26",
+   "tz": "Europe/Moscow",
+   "walkKm": 2.4,
+   "walkMin": 32,
+   "durationMin": 147,
+   "returnToStart": true,
+   "start": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "finish": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "n9002",
+     "kind": "ryumochnaya",
+     "nameRu": "Рюмочная (пример) у Волги",
+     "lat": 57.629,
+     "lon": 39.896,
+     "arriveAt": "2026-10-23T18:13",
+     "departAt": "2026-10-23T18:38",
+     "dwellMin": 25,
+     "walkKmFromPrev": 1.0,
+     "walkMinFromPrev": 13,
+     "costRub": 600,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w02",
+     "poiId": "n9003",
+     "kind": "ryumochnaya",
+     "nameRu": "Рюмочная (пример) на Кирова",
+     "lat": 57.627,
+     "lon": 39.893,
+     "arriveAt": "2026-10-23T18:43",
+     "departAt": "2026-10-23T19:08",
+     "dwellMin": 25,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 5,
+     "costRub": 600,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w03",
+     "poiId": "n9001",
+     "kind": "ryumochnaya",
+     "nameRu": "Рюмочная (пример) на Советской",
+     "lat": 57.6262,
+     "lon": 39.889,
+     "arriveAt": "2026-10-23T19:12",
+     "departAt": "2026-10-23T19:37",
+     "dwellMin": 25,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 4,
+     "costRub": 600,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w04",
+     "poiId": "n9004",
+     "kind": "pub",
+     "nameRu": "Паб (пример) «Старый мост»",
+     "lat": 57.624,
+     "lon": 39.887,
+     "arriveAt": "2026-10-23T19:42",
+     "departAt": "2026-10-23T20:22",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 5,
+     "costRub": 1200,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    }
+   ],
+   "cost": {
+    "totalRub": 3000,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     },
+     {
+      "key": "drinks",
+      "rub": 3000
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": "Пейте умеренно, чередуйте с водой и едой. За руль — только трезвым.",
+   "polyline": [
+    [
+     57.6261,
+     39.8845
+    ],
+    [
+     57.629,
+     39.896
+    ],
+    [
+     57.627,
+     39.893
+    ],
+    [
+     57.6262,
+     39.889
+    ],
+    [
+     57.624,
+     39.887
+    ],
+    [
+     57.6261,
+     39.8845
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "townId": null,
+    "preset": "ryumochnye",
+    "durationMin": 240,
+    "interests": [],
+    "pace": "normal",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T18:00",
+    "crew": {
+     "adults": 2,
+     "children": 0
+    },
+    "adultConfirmed": true,
+    "exclude": []
+   }
+  },
+  "ms": 0
+ }
+}

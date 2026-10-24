@@ -1,0 +1,47 @@
+{
+ "request": {
+  "function": "poi_details",
+  "args": {
+   "world": "russia_v1",
+   "place_id": "Q900101"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "id": "Q900101",
+   "kind": "sight",
+   "poiKind": "museum",
+   "nameRu": "Эрмитаж",
+   "descriptionRu": "художественный музей",
+   "townName": "Санкт-Петербург",
+   "lat": 59.9398,
+   "lon": 30.3146,
+   "image": {
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Hermitage_sample.jpg?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Hermitage_sample.jpg?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:Hermitage_sample.jpg",
+    "credit": {
+     "author": "Пример Автор",
+     "licence": "CC BY-SA 4.0",
+     "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    "isArea": false,
+    "labelRu": "Фото: Wikimedia Commons · Пример Автор · CC BY-SA 4.0"
+   },
+   "hours": {
+    "textRu": "Часы работы уточняйте",
+    "verified": false
+   },
+   "ticket": {
+    "adultRub": 400,
+    "childRub": 200,
+    "estimate": true
+   },
+   "isFictional": false,
+   "attributionRu": [],
+   "wikidataId": "Q900101"
+  },
+  "ms": 0
+ }
+}

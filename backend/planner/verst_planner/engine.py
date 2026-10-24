@@ -378,6 +378,7 @@ class Planner:
             input=inp,
             engine_version=ENGINE_VERSION,
             engine_state=state,
+            approx_distances=corridor.route.synthetic,
         )
 
     # ------------------------------------------------------------------------------------------ replace

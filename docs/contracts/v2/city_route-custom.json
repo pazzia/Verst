@@ -1,0 +1,220 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-4",
+   "input_json": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "preset": "custom",
+    "interests": [
+     "parks",
+     "views",
+     "food"
+    ],
+    "durationMin": 240,
+    "pace": "slow"
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-4",
+   "titleRu": "Ярославль: прогулка по интересам",
+   "townId": "t_yaroslavl",
+   "townName": "Ярославль",
+   "townPrep": "Ярославле",
+   "preset": "custom",
+   "startAt": "2026-10-23T09:00",
+   "endAt": "2026-10-23T12:54",
+   "tz": "Europe/Moscow",
+   "walkKm": 6.0,
+   "walkMin": 103,
+   "durationMin": 235,
+   "returnToStart": true,
+   "start": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "finish": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "Q900206",
+     "kind": "viewpoint",
+     "nameRu": "Стрелка",
+     "lat": 57.6205,
+     "lon": 39.9011,
+     "arriveAt": "2026-10-23T09:26",
+     "departAt": "2026-10-23T09:45",
+     "dwellMin": 19,
+     "walkKmFromPrev": 1.5,
+     "walkMinFromPrev": 26,
+     "costRub": 0,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w02",
+     "poiId": "pl_yar_embankment",
+     "kind": "viewpoint",
+     "nameRu": "Волжская набережная",
+     "lat": 57.627909,
+     "lon": 39.899599,
+     "arriveAt": "2026-10-23T10:03",
+     "departAt": "2026-10-23T10:22",
+     "dwellMin": 19,
+     "walkKmFromPrev": 1.1,
+     "walkMinFromPrev": 18,
+     "costRub": 0,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w03",
+     "poiId": "pl_yar_strelka",
+     "kind": "viewpoint",
+     "nameRu": "Стрелка и Волжская набережная",
+     "lat": 57.633335,
+     "lon": 39.909665,
+     "arriveAt": "2026-10-23T10:41",
+     "departAt": "2026-10-23T11:00",
+     "dwellMin": 19,
+     "walkKmFromPrev": 1.1,
+     "walkMinFromPrev": 19,
+     "costRub": 0,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w04",
+     "poiId": null,
+     "kind": "meal",
+     "nameRu": "Обед — кафе рядом",
+     "lat": 57.633335,
+     "lon": 39.909665,
+     "arriveAt": "2026-10-23T11:00",
+     "departAt": "2026-10-23T11:56",
+     "dwellMin": 56,
+     "walkKmFromPrev": 0.0,
+     "walkMinFromPrev": 0,
+     "costRub": 600,
+     "hoursVerified": true,
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": false
+    },
+    {
+     "id": "w05",
+     "poiId": "pl_yar_tower",
+     "kind": "viewpoint",
+     "nameRu": "Власьевская башня",
+     "lat": 57.628813,
+     "lon": 39.887855,
+     "arriveAt": "2026-10-23T12:27",
+     "departAt": "2026-10-23T12:46",
+     "dwellMin": 19,
+     "walkKmFromPrev": 1.8,
+     "walkMinFromPrev": 31,
+     "costRub": 0,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    }
+   ],
+   "cost": {
+    "totalRub": 600,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     },
+     {
+      "key": "food",
+      "rub": 600
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     57.6261,
+     39.8845
+    ],
+    [
+     57.6205,
+     39.9011
+    ],
+    [
+     57.627909,
+     39.899599
+    ],
+    [
+     57.633335,
+     39.909665
+    ],
+    [
+     57.628813,
+     39.887855
+    ],
+    [
+     57.6261,
+     39.8845
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "townId": null,
+    "preset": "custom",
+    "durationMin": 240,
+    "interests": [
+     "parks",
+     "views",
+     "food"
+    ],
+    "pace": "slow",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T09:00",
+    "crew": {
+     "adults": 1,
+     "children": 0
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   }
+  },
+  "ms": 0
+ }
+}
