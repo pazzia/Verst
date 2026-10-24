@@ -379,8 +379,8 @@ private fun BoxScope.MockPartnerSheet(ui: ExitUi, windowH: Dp, a: ExitActions) {
     }.joinToString(stringResource(R.string.common_join_comma))
     val total = RuFormat.thousands(o.priceCrewRub * nights)
     val pane = stringResource(R.string.cd_mock_partner, o.name, inDate, outDate, total)
-    BottomSheet(stringResource(R.string.mock_partner_title), a::closePartner, "partner", windowH, badge = stringResource(R.string.mock_partner_badge)) {
-        Column(Modifier.semantics { paneTitle = pane }, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    BottomSheet(stringResource(R.string.mock_partner_title), a::closePartner, "partner", windowH, badge = stringResource(R.string.mock_partner_badge), pane = pane) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Txt(stringResource(R.string.mock_partner_line), T.body.sm, C.navi.label, Modifier.padding(top = 4.dp).testTag("partner.line"))
             Column(Modifier.fillMaxWidth().naviPanel().padding(6.dp).padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Txt(stringResource(R.string.mock_partner_hotel, o.name, s.name), T.title.sm, C.text.primary)

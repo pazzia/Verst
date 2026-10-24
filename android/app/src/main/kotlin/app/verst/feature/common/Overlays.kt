@@ -25,6 +25,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.runtime.Composable
@@ -72,6 +74,8 @@ fun BoxScope.BottomSheet(
     tag: String,
     maxHeight: Dp,
     badge: String? = null,
+    /** TalkBack pane title when it differs from the visible title (D-13 `cd_mock_partner`). */
+    pane: String = title,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val close = stringResource(R.string.common_close)
@@ -110,9 +114,9 @@ fun BoxScope.BottomSheet(
             .padding(top = 2.dp)
             .clip(shape)
             .background(C.dash.raised)
-            // Swallow taps so they do not reach the scrim.
-            .clickable(remember { MutableInteractionSource() }, indication = null) {}
-            .semantics { paneTitle = title }
+            // Swallow taps so they do not reach the scrim (pointerInput, not clickable: no semantics merging).
+            .pointerInput(Unit) { detectTapGestures { } }
+            .semantics { paneTitle = pane }
             .testTag(tag)
             .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
     ) {
@@ -121,7 +125,8 @@ fun BoxScope.BottomSheet(
                 .clip(RoundedCornerShape(2.dp)).background(C.dash.outline),
         )
         Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Txt(title, T.title.lg, C.text.primary, Modifier.weight(1f, fill = badge == null), maxLines = 2)
+            // With a badge the title keeps its natural width (it is short) and the spacer takes the rest.
+            Txt(title, T.title.lg, C.text.primary, if (badge == null) Modifier.weight(1f) else Modifier, maxLines = 2)
             if (badge != null) {
                 // D-13 «ДЕМО» badge: h 20, padding 0 6, radius 4, yellow outline and text.
                 Box(
@@ -203,7 +208,7 @@ fun BoxScope.NaviDialog(
     Box(Modifier.matchParentSize().background(C.overlay.scrim).clickable(remember { MutableInteractionSource() }, indication = null, onClick = onSecondary))
     Column(
         Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp).naviPanel().padding(6.dp).padding(18.dp)
-            .clickable(remember { MutableInteractionSource() }, indication = null) {}
+            .pointerInput(Unit) { detectTapGestures { } }
             .semantics { paneTitle = title }.testTag(tag),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

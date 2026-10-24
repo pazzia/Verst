@@ -182,8 +182,7 @@ class SliceJourneyTest {
         waitTag("replace")
         shot("14-replace-sheet")
         compose.onNodeWithTag("replace.alt.0", useUnmergedTree = true).performScrollTo().performClick()
-        compose.onNodeWithTag("replace.confirm", useUnmergedTree = true).performScrollTo()
-        compose.onNodeWithText("ЗАМЕНИТЬ").performClick()
+        compose.onNodeWithTag("replace.confirm", useUnmergedTree = true).performScrollTo().performClick()
         compose.waitUntil(15_000) { flow.replace == null && flow.toast is Toast.Replaced }
         val replaced = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == stop.id }
         assertEquals(alt.name, replaced.name)

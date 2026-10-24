@@ -91,7 +91,7 @@ class ScreensScreenshotTest {
     @Config(qualifiers = "ru-rRU-w360dp-h640dp-port-xxhdpi")
     fun instrumentsShort() = shot("instruments", "default", 360, 640) {
         InstrumentsScreen(
-            InstrumentsUi("Москва → Ярославль", "Москва", false, 265, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 300, 2, null, days = 1),
+            InstrumentsUi("Москва → Ярославль", "Москва", false, 265, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 300, 2, null, days = 1, originGen = "Москвы"),
             noActions,
         )
     }
@@ -160,7 +160,7 @@ class ScreensScreenshotTest {
     fun instrumentsDefault() {
         shot("instruments", "default") {
             InstrumentsScreen(
-                InstrumentsUi("Золотое кольцо", "Москва", true, 761, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.CALM, days = 3),
+                InstrumentsUi("Золотое кольцо", "Москва", true, 761, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.CALM, days = 3, originGen = "Москвы"),
                 noActions,
             )
         }
