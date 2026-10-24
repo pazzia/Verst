@@ -155,7 +155,7 @@ enum class StartSize(val outer: Dp, val face: Dp, val icon: Dp) {
 
 /** components §7 StartButton (no pulse in the slice): bezel, face, red ring, power icon, «ПОЕХАЛИ». */
 @Composable
-fun StartButton(size: StartSize, label: String, enabled: Boolean, cd: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun StartButton(size: StartSize, label: String, enabled: Boolean, cd: String, onClick: () -> Unit, modifier: Modifier = Modifier, walker: Boolean = false, loading: Boolean = false) {
     val fg = if (enabled) C.text.primary else C.text.disabled
     // motion.startPulse (enabled only): a red ring spreading 0 → 16 dp (14 on S), α 0.55 → 0, 1800 ms easeOut;
     // motion.startPress: face + label 0.96 while pressed.
@@ -190,19 +190,30 @@ fun StartButton(size: StartSize, label: String, enabled: Boolean, cd: String, on
                 .size(size.face)
                 .clip(CircleShape)
                 .background(C.dash.face)
-                .border(DesignTokens.size.startRing, if (enabled) C.accent.red else C.dash.outlineDashed, CircleShape),
+                .border(DesignTokens.size.startRing, if (enabled) C.accent.red else C.dash.outlineDashed, CircleShape)
+                .drawBehind {
+                    if (loading) {
+                        val w = DesignTokens.size.startRing.toPx()
+                        drawArc(C.accent.yellow, -90f, 100f, false, topLeft = Offset(w / 2, w / 2), size = Size(this.size.width - w, this.size.height - w), style = Stroke(w, cap = StrokeCap.Round))
+                    }
+                },
             contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Canvas(Modifier.size(size.icon)) {
-                    val sw = DesignTokens.stroke.icon.ui.toPx()
-                    val r = this.size.minDimension / 2 - sw
-                    drawArc(
-                        fg, startAngle = -50f, sweepAngle = 280f, useCenter = false,
-                        topLeft = Offset(center.x - r, center.y - r), size = Size(2 * r, 2 * r),
-                        style = Stroke(sw, cap = StrokeCap.Round),
-                    )
-                    drawLine(fg, Offset(center.x, 0f + sw / 2), Offset(center.x, center.y), sw, StrokeCap.Round)
+                // 5.10 C2: the walk variant carries `walker` and «ПОШЛИ»; while building, a static loading arc
+                if (walker) {
+                    WalkerIcon(fg, size.icon)
+                } else {
+                    Canvas(Modifier.size(size.icon)) {
+                        val sw = DesignTokens.stroke.icon.ui.toPx()
+                        val r = this.size.minDimension / 2 - sw
+                        drawArc(
+                            fg, startAngle = -50f, sweepAngle = 280f, useCenter = false,
+                            topLeft = Offset(center.x - r, center.y - r), size = Size(2 * r, 2 * r),
+                            style = Stroke(sw, cap = StrokeCap.Round),
+                        )
+                        drawLine(fg, Offset(center.x, 0f + sw / 2), Offset(center.x, center.y), sw, StrokeCap.Round)
+                    }
                 }
                 Txt(label, if (size == StartSize.S) T.button.startLabelSm else T.button.startLabel, fg, maxLines = 1)
             }

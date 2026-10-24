@@ -61,10 +61,13 @@ class SliceJourneyTest {
     @Before
     fun toRoot() {
         E2e.awaitReady(30_000)
+        E2e.noRealNominatim()
         compose.runOnUiThread {
             while (flow.back()) Unit
             flow.clearSaved()
             flow.debugForceError = null
+            flow.debugLocationAnswered() // 5.12: no rationale sheet over the journey
+            flow.debugHandoffDryRun = false
         }
     }
 

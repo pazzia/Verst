@@ -27,7 +27,13 @@ data class FuelUnitsDto(
 data class TollHitDto(val segmentId: String = "", val roadRef: String = "", val rub: Int, val night: Boolean = false)
 
 @Serializable
-data class HotelPriceDto(val placeId: String, val priceNightRub: Int, val breakfastIncluded: Boolean = true)
+data class HotelPriceDto(
+    val placeId: String,
+    val priceNightRub: Int,
+    val breakfastIncluded: Boolean = true,
+    /** ADR-0011: the room count the engine chose for this option (family rooms); null = `ceil(adults / 2)`. */
+    val rooms: Int? = null,
+)
 
 @Serializable
 data class NightUnitDto(
@@ -40,6 +46,8 @@ data class NightUnitDto(
     val defaultPrice: Boolean = false,
     val breakfastIncluded: Boolean = true,
     val breakfastCheckRub: Int = 0,
+    /** ADR-0011: explicit room count of the selected hotel (family rooms); null = `ceil(adults / 2)`. */
+    val rooms: Int? = null,
 )
 
 @Serializable
@@ -173,7 +181,7 @@ object CostCalculator {
         lines["tolls"] = roundTo(BigDecimal(u.tolls.sumOf { it.rub }), step)
 
         // ---- lodging (rooms × price after a hotel override) and breakfasts after nights without one
-        val rooms = roomsFor(crew.adults)
+        val legacyRooms = roomsFor(crew.adults)
         var lodging = BigDecimal.ZERO
         val breakfasts = LinkedHashMap<Int, Int>()
         var cheaper = false
@@ -182,9 +190,12 @@ object CostCalculator {
             val price = pick?.priceNightRub ?: n.priceNightRub
             val breakfast = pick?.breakfastIncluded ?: n.breakfastIncluded
             val sel = pick?.placeId ?: n.selectedPlaceId
+            // ADR-0011 explicit rooms: the picked option's count, else the night's, else the legacy rule.
+            val rooms = if (pick != null) pick.rooms ?: legacyRooms else n.rooms ?: legacyRooms
             lodging += BigDecimal(rooms) * BigDecimal(price)
             if (!breakfast) breakfasts[n.day + 1] = n.breakfastCheckRub
-            if (n.options.any { it.placeId != sel && it.priceNightRub < price }) cheaper = true
+            val nightCost = rooms.toLong() * price
+            if (n.options.any { it.placeId != sel && (it.rooms ?: legacyRooms).toLong() * it.priceNightRub < nightCost }) cheaper = true
         }
         lines["lodging"] = roundTo(lodging, step)
 

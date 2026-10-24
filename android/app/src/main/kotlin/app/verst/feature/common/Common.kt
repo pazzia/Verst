@@ -62,10 +62,23 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     app.verst.nav.Toast.EngineFailed -> stringResource(R.string.waybill_sync_failed)
     app.verst.nav.Toast.NeedInternet -> stringResource(R.string.common_need_internet)
     app.verst.nav.Toast.TripDeleted -> stringResource(R.string.trips_deleted)
-    app.verst.nav.Toast.NeedInternetNavigator -> stringResource(R.string.common_need_internet_navigator)
-    app.verst.nav.Toast.NoNavigator -> stringResource(R.string.stopmenu_none)
-    app.verst.nav.Toast.LocationDenied -> stringResource(R.string.windshield_location_denied)
-    app.verst.nav.Toast.LocationBlocked -> stringResource(R.string.windshield_location_blocked)
-    app.verst.nav.Toast.LocationFailed -> stringResource(app.verst.R.string.navigator_location_failed)
+    is app.verst.nav.Toast.HandoffWeb -> stringResource(if (t.walk) R.string.handoff_toast_web_walk else R.string.handoff_toast_web)
+    app.verst.nav.Toast.HandoffOffline -> stringResource(R.string.handoff_offline)
+    app.verst.nav.Toast.HandoffFailed -> stringResource(R.string.handoff_failed)
+    is app.verst.nav.Toast.LocationDenied -> stringResource(R.string.loc_denied_plate, t.town)
+    app.verst.nav.Toast.LocationBlocked -> stringResource(R.string.loc_blocked)
+    is app.verst.nav.Toast.LocationTimeout -> stringResource(R.string.loc_timeout, t.town)
+    app.verst.nav.Toast.LocationOff -> stringResource(R.string.loc_off)
+    app.verst.nav.Toast.AddressRate -> stringResource(R.string.addr_rate)
+    app.verst.nav.Toast.CityKids -> stringResource(R.string.city_kids_toast)
     is app.verst.nav.Toast.Booked -> stringResource(R.string.exit_booked_badge) // 5.7 renders its own copy with the town
+}
+
+/** The action of a toast, if it has one (5.12: «Настройки», «Включить», «Выбрать»). */
+@Composable
+fun toastAction(t: app.verst.nav.Toast): String? = when (t) {
+    app.verst.nav.Toast.LocationBlocked -> stringResource(R.string.loc_settings)
+    app.verst.nav.Toast.LocationOff -> stringResource(R.string.loc_turn_on)
+    is app.verst.nav.Toast.LocationDenied -> stringResource(R.string.loc_choose)
+    else -> null
 }

@@ -100,6 +100,11 @@ jobs:
           echo "merged demo manifest: $M"
           test -n "$M"
           if grep -n 'androidx.activity.ComponentActivity' "$M"; then echo "::error::ui-test ComponentActivity in the demo manifest"; exit 1; fi
+          # DEV-300 / ADR-0012 §7: exactly these 4 permissions, and no cleartext switch.
+          grep -o 'uses-permission[^>]*android:name="[^"]*"' "$M" | sed 's/.*android:name="//;s/"//' | grep '^android\.permission\.' | sort -u | tee "$DIAG/permissions.txt"
+          printf '%s\n' android.permission.ACCESS_COARSE_LOCATION android.permission.ACCESS_FINE_LOCATION android.permission.ACCESS_NETWORK_STATE android.permission.INTERNET > /tmp/expected-permissions.txt
+          if ! diff -u /tmp/expected-permissions.txt "$DIAG/permissions.txt"; then echo "::error::merged manifest permissions differ from ADR-0012 §7"; exit 1; fi
+          if grep -n 'usesCleartextTraffic' "$M"; then echo "::error::usesCleartextTraffic in the merged manifest"; exit 1; fi
       - name: Diagnose assemble
         if: ${{ !cancelled() && steps.assemble.outcome == 'failure' }}
         run: python3 tools/ci/diagnose.py --out "$DIAG" gradle --log "$LOGS/assemble.log" --step assemble

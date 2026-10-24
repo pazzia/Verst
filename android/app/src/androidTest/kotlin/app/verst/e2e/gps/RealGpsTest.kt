@@ -46,6 +46,7 @@ class RealGpsTest {
     @Test
     fun myLocationUsesTheDeviceFix() {
         E2e.awaitReady(30_000)
+        E2e.noRealNominatim()
         compose.runOnUiThread {
             while (flow.back()) Unit
             flow.debugResetOrigin()

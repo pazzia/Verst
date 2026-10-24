@@ -54,7 +54,7 @@ fun DebugScreen(flow: VerstFlow) {
             BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), { flow.back() })
             Txt(stringResource(R.string.debug_label_title), T.title.xl, C.text.primary)
             Label(stringResource(R.string.debug_label_world))
-            Choices(listOf("central_russia_v1", "edge_cases_v1"), flow.debugWorld, "debug.world") { flow.setWorld(it) }
+            Choices(listOf("russia_v1", "central_russia_v1", "edge_cases_v1"), flow.debugWorld, "debug.world") { flow.setWorld(it) }
             Label(stringResource(R.string.debug_label_clock))
             Choices(
                 listOf(stringResource(R.string.debug_clock_system), stringResource(R.string.debug_clock_golden)),
@@ -76,12 +76,12 @@ fun DebugScreen(flow: VerstFlow) {
                 if (flow.debugMockLocation != null) flow.locate()
             }
             flow.lastHandoff?.let { (h, target) ->
-                Txt("$target · ${h.navi ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
+                Txt("$target · ${h.navigator ?: h.maps ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
             }
             Label(stringResource(R.string.debug_label_timings))
             val s = status
             Txt(
-                if (s is EngineStatus.Ready) s.info.timings.let { "python ${it.pythonStartMs} · import ${it.importMs} · worlds ${it.worldsMs} · selfcheck ${it.selfcheckMs} · total ${it.totalMs} ms" } else s.toString(),
+                if (s is EngineStatus.Ready) s.info.timings.let { "python ${it.pythonStartMs} · import ${it.importMs} · worlds ${it.worldsMs} · catalogue ${it.catalogueMs} · selfcheck ${it.selfcheckMs} · total ${it.totalMs} ms" } else s.toString(),
                 T.body.md, C.text.secondary,
             )
             Label(stringResource(R.string.debug_label_build))

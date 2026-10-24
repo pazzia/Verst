@@ -6,8 +6,9 @@
   when the production hand-off (and a production app variant) exists.
 -->
 <resources>
-    <!-- S3-R1: stopmenu_yandex_navi / stopmenu_yandex_maps are real hand-off targets now (allow-listed in
-         backend/planner/tests/brand_handoff_keys.txt) and keep the deck text. -->
+    <!-- S3-R2 / ADR-0014: the hand-off names live only in `handoff_*`; the old stop-menu app names stay unused. -->
+    <string name="stopmenu_yandex_navi">Навигатор</string>
+    <string name="stopmenu_yandex_maps">Карты</string>
     <string name="stopmenu_2gis">Карты</string>
     <string name="stopmenu_install">Навигатор не установлен</string>
     <!-- Exit: the mock build uses exit_book_partner_mock / cd_exit_book_mock; the production partner keys are neutral. -->

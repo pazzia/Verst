@@ -82,7 +82,7 @@ class SliceTwoModelTest {
         assertEquals(SavedTrips.LIMIT, again.count)
         assertEquals(1, again.trips[3].totalRub)
 
-        assertTrue(SavedTrips.decode("""{"schema":2,"trips":[]}""").isEmpty())
+        assertTrue(SavedTrips.decode("""{"schema":3,"trips":[]}""").isEmpty())
         assertTrue(SavedTrips.decode("{broken").isEmpty())
         assertTrue(SavedTrips.decode(null).isEmpty())
         assertEquals("NE", SavedTrips.decode(SavedTrips.encode(listOf(e))).single().bearing8)

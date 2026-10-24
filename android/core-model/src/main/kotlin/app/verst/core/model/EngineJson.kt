@@ -60,6 +60,52 @@ object EngineJson {
             }
         }
 
+    /**
+     * v2 `plan` (ADR-0011): `outcome = plan` → the trip (as [planResult]); `outcome = no_fit` → the minimum (its
+     * trip decoded like a plan result, shown only on request) and the options.
+     */
+    fun planOutcome(envelope: String): EngineResult<app.verst.core.model.dto.PlanOutcome> =
+        when (val r = decode(envelope, JsonObject.serializer())) {
+            is EngineResult.Err -> r
+            is EngineResult.Ok -> try {
+                val body = r.value
+                if ((body["outcome"] as? JsonPrimitive)?.content == "no_fit") {
+                    val nf = json.decodeFromJsonElement(app.verst.core.model.dto.NoFitDto.serializer(), body)
+                    val min = body["minimum"] as? JsonObject
+                    val minTrip = (min?.get("trip") as? JsonObject)?.let { raw ->
+                        json.decodeFromJsonElement(PlanResultDto.serializer(), min).copy(tripJson = raw.toString())
+                    }
+                    val levers = (min?.get("levers"))?.let { json.decodeFromJsonElement(ListSerializer(app.verst.core.model.dto.BudgetLeverDto.serializer()), it) }.orEmpty()
+                    val total = (min?.get("totalRub") as? JsonPrimitive)?.content?.toIntOrNull() ?: minTrip?.trip?.cost?.totalRub ?: 0
+                    EngineResult.Ok(app.verst.core.model.dto.PlanOutcome.NoFit(nf.copy(minimum = minTrip, minimumLevers = levers, minimumTotalRub = total)))
+                } else {
+                    val raw = body["trip"] as? JsonObject ?: throw IllegalArgumentException("result without trip")
+                    EngineResult.Ok(app.verst.core.model.dto.PlanOutcome.Plan(json.decodeFromJsonElement(PlanResultDto.serializer(), body).copy(tripJson = raw.toString())))
+                }
+            } catch (e: Exception) {
+                EngineResult.Err(EngineErrorDto("INTERNAL", "undecodable plan: $e"))
+            }
+        }
+
+    fun geoNearest(envelope: String) = decode(envelope, app.verst.core.model.dto.GeoNearestDto.serializer())
+    fun poiDetails(envelope: String) = decode(envelope, app.verst.core.model.dto.PoiDetailsDto.serializer())
+    fun handoff(envelope: String) = decode(envelope, app.verst.core.model.dto.HandoffDto.serializer())
+    fun cityPresets(envelope: String) = decode(envelope, app.verst.core.model.dto.CityPresetsDto.serializer())
+
+    /** `city_route`: the walk plus its JSON verbatim (the `handoff` input and what is saved). */
+    fun walkRoute(envelope: String): EngineResult<app.verst.core.model.dto.WalkRouteDto> =
+        when (val r = decode(envelope, JsonObject.serializer())) {
+            is EngineResult.Err -> r
+            is EngineResult.Ok -> try {
+                EngineResult.Ok(json.decodeFromJsonElement(app.verst.core.model.dto.WalkRouteDto.serializer(), r.value).copy(json = r.value.toString()))
+            } catch (e: Exception) {
+                EngineResult.Err(EngineErrorDto("INTERNAL", "undecodable walk: $e"))
+            }
+        }
+
+    fun walk(text: String): app.verst.core.model.dto.WalkRouteDto =
+        json.decodeFromString(app.verst.core.model.dto.WalkRouteDto.serializer(), text).copy(json = text)
+
     fun estimate(envelope: String) = decode(envelope, EstimateDto.serializer())
     fun placeName(envelope: String) = decode(envelope, PlaceNameDto.serializer().nullable)
     fun kmList(envelope: String) = decode(envelope, ListSerializer(Int.serializer().nullable))
@@ -75,6 +121,60 @@ object EngineJson {
 
 data class GeoPoint(val label: String, val lat: Double, val lon: Double)
 
+/** `city_route` input (ADR-0013 "Input"). */
+data class WalkRequest(
+    val start: GeoPoint,
+    val preset: String,
+    val durationMin: Int? = null,
+    val interests: List<String> = emptyList(),
+    val pace: String? = null,
+    val budgetRub: Int? = null,
+    val returnToStart: Boolean = true,
+    val adults: Int = 2,
+    val children: Int = 0,
+    val adultConfirmed: Boolean = false,
+    val exclude: List<String> = emptyList(),
+) {
+    fun toInputJson(): String = buildJsonObject {
+        put("start", buildJsonObject {
+            put("lat", start.lat)
+            put("lon", start.lon)
+            put("label", start.label)
+        })
+        put("preset", preset)
+        durationMin?.let { put("durationMin", it) }
+        if (interests.isNotEmpty()) put("interests", kotlinx.serialization.json.JsonArray(interests.map { JsonPrimitive(it) }))
+        pace?.let { put("pace", it) }
+        budgetRub?.let { put("budgetRub", it) }
+        put("returnToStart", returnToStart)
+        put("crew", buildJsonObject {
+            put("adults", adults)
+            put("children", children)
+        })
+        if (adultConfirmed) put("adultConfirmed", true)
+        if (exclude.isNotEmpty()) put("exclude", kotlinx.serialization.json.JsonArray(exclude.map { JsonPrimitive(it) }))
+    }.toString()
+}
+
+/** `handoff` options (ADR-0014): car day / from a stop / from here, or walk. */
+object HandoffArgs {
+    fun day(day: Int): String = buildJsonObject {
+        put("mode", "car")
+        put("day", day)
+        put("fromHere", true)
+    }.toString()
+
+    fun fromStop(stopId: String): String = buildJsonObject {
+        put("mode", "car")
+        put("fromStopId", stopId)
+    }.toString()
+
+    fun walk(): String = buildJsonObject {
+        put("mode", "walk")
+        put("fromHere", false)
+    }.toString()
+}
+
 /** Bodies of `patch_cost` (A§16.9) and `estimate_points`. */
 object EngineArgs {
     fun reservePatch(on: Boolean): String = buildJsonObject { put("reserveOn", on) }.toString()
@@ -89,7 +189,11 @@ object EngineArgs {
 /** The default mock origin (D-16 «старт — Москва»; the most populous town of `central_russia_v1`). */
 val DefaultOrigin = GeoPoint("Москва", 55.7558, 37.6173)
 
-const val DefaultWorld = "central_russia_v1"
+/** Sprint 3: the app's default world = the fixture world + the catalogue (M§5.4, ADR-0012 §4). */
+const val DefaultWorld = "russia_v1"
+
+/** The golden-test world (G01–G12) and the e2e parity world. */
+const val GoldenWorld = "central_russia_v1"
 
 enum class Mood(val wire: String) { CALM("calm"), MORE_STOPS("more_stops"), JUST_DRIVE("just_drive") }
 

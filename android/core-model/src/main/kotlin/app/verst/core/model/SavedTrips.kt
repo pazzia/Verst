@@ -28,7 +28,14 @@ data class SavedTripDto(
     val townGenRu: Map<String, String> = emptyMap(),
     /** D-10 / 5.7 §8: per overnight stop id, the hotel the crew marked «Забронировали» (one per night). */
     val bookedHotels: Map<String, String> = emptyMap(),
-    val trip: JsonObject,
+    /** The engine's private trip (empty for a walk). */
+    val trip: JsonObject = JsonObject(emptyMap()),
+    /** DEV-308 schema 2: `trip` | `walk`. Schema 1 entries are trips. */
+    val kind: String = "trip",
+    /** DEV-308: the `city_route` result verbatim for a walk. */
+    val walk: JsonObject? = null,
+    /** ADR-0011: `fits` / `small_overrun` (fitted plans) or `over` (a minimum shown over budget), for the D-1 dot. */
+    val budgetStatus: String? = null,
 )
 
 /**
@@ -45,6 +52,8 @@ data class LastTripDto(
     /** S3-R1 focus restore: the Road-ahead row acted on (Exit, replace, stop menu) and the top visible row. */
     val roadFocusId: String? = null,
     val roadTopId: String? = null,
+    /** 5.9 §5: the exact scroll offset (px) of Road ahead. */
+    val roadScrollY: Int? = null,
 )
 
 /** Release review P2-10 / M§6.2: the last crew, pace, budget, mood and origin, restored on the next start. */
@@ -73,7 +82,10 @@ data class SavedTripsFile(val schema: Int = SavedTrips.SCHEMA, val trips: List<S
 
 /** Pure rules of the saved-trips file (M§6: schema 1, ≤ 50, warning from 45); the app adds the file I/O. */
 object SavedTrips {
+    /** last.json / defaults.json schema. */
     const val SCHEMA = 1
+    /** DEV-308: saved.json schema (2 = `kind` + walks); 1 is read and written back as 2 on the next save. */
+    const val TRIPS_SCHEMA = 2
     const val LIMIT = 50
     const val WARN_FROM = 45
 
@@ -85,7 +97,7 @@ object SavedTrips {
         if (text.isNullOrBlank()) return emptyList()
         return try {
             val f = EngineJson.json.decodeFromString(SavedTripsFile.serializer(), text)
-            if (f.schema == SCHEMA) f.trips else null
+            if (f.schema in 1..TRIPS_SCHEMA) f.trips else null // an unknown (newer) schema: kept aside by the store
         } catch (_: Exception) {
             null
         }
@@ -107,7 +119,7 @@ object SavedTrips {
         null
     }
 
-    fun encode(trips: List<SavedTripDto>): String = EngineJson.json.encodeToString(SavedTripsFile.serializer(), SavedTripsFile(SCHEMA, trips))
+    fun encode(trips: List<SavedTripDto>): String = EngineJson.json.encodeToString(SavedTripsFile.serializer(), SavedTripsFile(TRIPS_SCHEMA, trips))
 
     sealed interface Upsert {
         /** Saved; [count] trips now, [nearLimit] from 45 (toast «Сохранено N из 50 …»). */
@@ -144,8 +156,16 @@ object SavedTrips {
             dog = t.input.crew.dog, bearing8 = bearing8, shareText = r.shareText, pricesMonthRu = r.pricesMonthRu,
             pricesYear = r.pricesYear, townPrepRu = r.townPrepRu, townGenRu = r.townGenRu, bookedHotels = booked,
             trip = EngineJson.json.parseToJsonElement(r.tripJson) as JsonObject,
+            budgetStatus = t.budgetFit?.status ?: if (t.cost.overBudget && t.cost.budgetRub != null) "over" else null,
         )
     }
+
+    /** DEV-308: a walk for «Мои поездки» (title, ≈ km, the total, the walk verbatim). */
+    fun walkEntry(id: String, now: Long, w: app.verst.core.model.dto.WalkRouteDto): SavedTripDto = SavedTripDto(
+        id = id, savedAt = now, title = w.titleRu, km = kotlin.math.round(w.walkKm).toInt(), days = 0,
+        totalRub = w.cost.totalRub, startAt = w.startAt, adults = w.people, kind = "walk",
+        walk = EngineJson.json.parseToJsonElement(w.json) as JsonObject,
+    )
 
     /** A saved trip back as an engine result (the same shape `plan` returns). */
     fun result(s: SavedTripDto): PlanResultDto = PlanResultDto(

@@ -12,6 +12,15 @@ object E2e {
     val engine: EngineHost
         get() = (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as VerstApp).engine
 
+    /**
+     * S3-6 / ADR-0012 §5: CI never talks to the real Nominatim. Every journey points the client at a closed loopback
+     * port (S3-6 swaps in its MockWebServer).
+     */
+    fun noRealNominatim() {
+        val flow = (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as VerstApp).flow
+        (flow.address as? app.verst.data.net.NominatimClient)?.baseUrl = "http://127.0.0.1:9"
+    }
+
     fun dir(): File =
         File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null), "e2e").apply { mkdirs() }
 

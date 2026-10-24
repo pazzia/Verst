@@ -30,6 +30,14 @@ import app.verst.core.model.DefaultsDto
 import app.verst.core.model.LastTripDto
 import app.verst.core.model.NaviHandoff
 import app.verst.core.model.NaviLinks
+import app.verst.core.model.HandoffArgs
+import app.verst.core.model.WalkRequest
+import app.verst.core.model.EngineJson
+import app.verst.core.model.RuFormat
+import app.verst.core.model.dto.EstimateDto
+import app.verst.core.model.dto.HandoffDto
+import app.verst.core.model.dto.HandoffLinksDto
+import app.verst.core.model.dto.HandoffPartDto
 import app.verst.data.TripStore
 import app.verst.data.TripsLoad
 import app.verst.engine.PlannerGateway
@@ -45,7 +53,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** The routes of the slice (M§7 subset). */
-enum class Route { Windshield, Navigator, Instruments, Drive, Road, Waybill, Exit, Debug }
+enum class Route { Windshield, Navigator, Instruments, Drive, Road, Waybill, Exit, Debug, NoFit, City, Walk }
 
 sealed interface WindshieldData {
     data object Loading : WindshieldData
@@ -68,6 +76,8 @@ data class DriveUi(
     val error: EngineErrorDto? = null,
     /** 5.4 flying signs: the engine's `stop` events in arrival order. */
     val signs: List<app.verst.core.model.dto.StopEventDto> = emptyList(),
+    /** 5.8: the plan came back `no_fit` — the CTA is «Смотреть варианты». */
+    val noFit: Boolean = false,
 )
 
 /** Plate toasts of 5.5/5.6/D-6 (components §16 `PlateToast`); the screen picks the copy by type. */
@@ -79,12 +89,22 @@ sealed interface Toast {
     data object EngineFailed : Toast
     data object NeedInternet : Toast
 
-    /** S3-R1 hand-off / GPS toasts. */
-    data object NeedInternetNavigator : Toast
-    data object NoNavigator : Toast
-    data object LocationDenied : Toast
+    /** 5.13 hand-off toasts. */
+    data class HandoffWeb(val walk: Boolean) : Toast
+    data object HandoffOffline : Toast
+    data object HandoffFailed : Toast
+
+    /** 5.12 location toasts ([town] = the origin that stays). */
+    data class LocationDenied(val town: String) : Toast
     data object LocationBlocked : Toast
-    data object LocationFailed : Toast
+    data class LocationTimeout(val town: String) : Toast
+    data object LocationOff : Toast
+
+    /** 5.12 address search. */
+    data object AddressRate : Toast
+
+    /** 5.10: an 18+ preset with children in the crew. */
+    data object CityKids : Toast
 
     /** «Отметили: ночёвка в … забронирована» + «Вернуть» (stop id). */
     data class Booked(val stopId: String) : Toast
@@ -108,8 +128,12 @@ class VerstFlow(
     private val now: () -> Long = System::currentTimeMillis,
     /** E-08 / M§9: simulated connectivity (the mock needs no network; the debug panel switches it off). */
     val connectivity: Connectivity = Connectivity(),
+    /** DEV-302: the address search (Nominatim; a fake in unit tests). */
+    addressSearch: app.verst.data.net.AddressSearch? = null,
     private val retryEngine: () -> Unit,
 ) {
+    /** DEV-302: Nominatim, explicit submit only, ≤ 1/s (the e2e points its base URL at MockWebServer). */
+    val address: app.verst.data.net.AddressSearch = addressSearch ?: app.verst.data.net.NominatimClient(online = { connectivity.online })
     val stack = mutableStateListOf(Route.Windshield)
     val top: Route get() = stack.last()
 
@@ -120,36 +144,117 @@ class VerstFlow(
         private set
     var selectedRoute by mutableStateOf(0)
 
-    // ---- GPS origin (S3-R1, CEO 3)
-    /** Off (not used) / Waiting (asking the phone) / On (the origin is the town nearest to the fix) / Failed. */
+    // ---- GPS origin (S3-R1 → 5.12, DEV-301)
+    /** Off (not used) / Waiting («Ищем вас…») / On (the origin is the fix's town) / Failed. */
     var gps by mutableStateOf(GpsState.Off)
         private set
-    /** The rationale card in «Куда угодно» (5.2) until it is answered once. */
-    var locationPrompt by mutableStateOf(false)
+    /** 5.12 rationale sheet «Откуда поедем?» (until answered once). */
+    var locationSheet by mutableStateOf(false)
         private set
     private var locationAsked = false
     var originFromGps by mutableStateOf(false)
         private set
+    /** The fix is coarse («примерно, по сети» + «Точнее»). */
+    var gpsApprox by mutableStateOf(false)
+        private set
+    /** Online reverse geocoding of the fix: «ул. Советская, 1». */
+    var originAddress: String? by mutableStateOf(null)
+        private set
+    /** 5.12: the fix is outside Russia (`insideRussia = false`); ПОЕХАЛИ stays disabled until a Russian start. */
+    var outsideRussia by mutableStateOf(false)
+        private set
     /** The phone's position; set by the app (LocationManager), null in tests without one. */
     var locator: Locator? = null
-    /** Shows the system permission dialog; the activity answers through [onLocationPermission]. */
-    var askLocationPermission: (() -> Unit)? = null
-    /** Opens the app's system settings (blocked permission). */
+    /** Shows the system permission dialog (coarse, or fine for «Точнее»); the activity answers through [onLocationPermission]. */
+    var askLocationPermission: ((precise: Boolean) -> Unit)? = null
+    /** Opens the app's system settings (blocked permission) / the location settings (location off). */
     var openAppSettings: (() -> Unit)? = null
+    var openLocationSettings: (() -> Unit)? = null
     /** DEV-127 / e2e: a fixed position instead of the phone's (no permission needed). */
     var debugMockLocation: GeoPoint? by mutableStateOf(null)
 
-    // ---- navigator hand-off (S3-R1, CEO 4)
-    /** Opens a hand-off outside the app; set by the activity. */
+    // ---- navigator hand-off (5.13, ADR-0014)
+    /** Opens hand-off links outside the app; set by the activity. */
     var handoffLauncher: HandoffLauncher? = null
     /** The last hand-off and where it went (debug panel, e2e). */
-    var lastHandoff: Pair<NaviHandoff, HandoffTarget>? by mutableStateOf(null)
+    var lastHandoff: Pair<HandoffLinksDto, HandoffTarget>? by mutableStateOf(null)
         private set
     /** e2e: record the hand-off without leaving the app. */
     var debugHandoffDryRun = false
-    /** D-5 stop menu (long-press on a Road-ahead row). */
+    /** D-5 stop menu (long-press on a Road-ahead row) and its engine hand-off. */
     var stopMenu: StopDto? by mutableStateOf(null)
         private set
+    var stopHandoff: HandoffDto? by mutableStateOf(null)
+        private set
+    /** 5.13 day menu «В навигатор: день N». */
+    var dayMenu: Int? by mutableStateOf(null)
+        private set
+    var dayHandoff: HandoffDto? by mutableStateOf(null)
+        private set
+
+    // ---- 5.9 cards
+    var card: CardState? by mutableStateOf(null)
+        private set
+    /** 5.12 §3 «О данных» sheet. */
+    var aboutData by mutableStateOf(false)
+        private set
+
+    // ---- 5.8 budget fit
+    var noFit: app.verst.core.model.dto.NoFitDto? by mutableStateOf(null)
+        private set
+    /** A no-fit «Поднять бюджет до …» value between the presets («до 42 000 ₽»); cleared by the stepper. */
+    var budgetCustom: Int? by mutableStateOf(null)
+        private set
+    /** The minimum trip of a no-fit, opened by «Показать самый экономный вариант» (over budget everywhere). */
+    var showingMinimum by mutableStateOf(false)
+        private set
+    /** `estimate` budget figures per request (Instruments caption meta). */
+    private val estimates = mutableStateMapOf<PlanRequest, EstimateDto>()
+
+    // ---- 5.12 address search
+    var addressResults: List<SuggestionDto> by mutableStateOf(emptyList())
+        private set
+    var addressState by mutableStateOf(AddressState.Idle)
+        private set
+    private var addressJob: Job? = null
+
+    // ---- 5.10 / 5.11 «По городу»
+    var cityPresets: app.verst.core.model.dto.CityPresetsDto? by mutableStateOf(null)
+        private set
+    var cityLoading by mutableStateOf(false)
+        private set
+    /** `NO_CITY` / `NOT_ENOUGH_POIS` / another engine code of the last presets or walk call. */
+    var cityError: String? by mutableStateOf(null)
+        private set
+    var cityPreset by mutableStateOf("overview")
+        private set
+    var cityDurationMin by mutableStateOf(240)
+        private set
+    val cityInterests = mutableStateListOf<String>()
+    var cityPace by mutableStateOf("normal")
+        private set
+    var cityBudget: Int? by mutableStateOf(null)
+        private set
+    var cityReturn by mutableStateOf(true)
+        private set
+    var cityCustomSheet by mutableStateOf(false)
+        private set
+    /** 18+ dialog: what to apply on «Да, мне есть 18» (a preset, or the «бары» interest). */
+    var ageGate: AgeGate? by mutableStateOf(null)
+        private set
+    private var adultConfirmed = false
+    var walkBuilding by mutableStateOf(false)
+        private set
+    var walk: app.verst.core.model.dto.WalkRouteDto? by mutableStateOf(null)
+        private set
+    private val walkExclude = mutableListOf<String>()
+    private var walkJob: Job? = null
+    var walkHandoff: HandoffDto? by mutableStateOf(null)
+        private set
+    /** The walk start (the GPS origin or a picked point); null = the trip origin. */
+    var cityStart: GeoPoint? by mutableStateOf(null)
+        private set
+    private var cityPickingStart = false
 
     // ---- Road-ahead focus restore (S3-R1, CEO 2.1)
     /** The row acted on (Exit, replace, stop menu): scrolled into view and highlighted on the way back. */
@@ -281,14 +386,23 @@ class VerstFlow(
 
     fun openDebug() = push(Route.Debug)
 
+    /** e2e: the location question counts as answered («Выберу сам»), so no rationale sheet covers the screens. */
+    fun debugLocationAnswered() {
+        locationAsked = true
+        locationSheet = false
+    }
+
     /** e2e / debug: back to the default origin (Москва) with the location question unanswered. */
     fun debugResetOrigin() {
         locateJob?.cancel()
         debugMockLocation = null
         locationAsked = false
-        locationPrompt = false
+        locationSheet = false
         originFromGps = false
+        originAddress = null
+        outsideRussia = false
         gps = GpsState.Off
+        cityStart = null
         if (origin != DefaultOrigin) {
             origin = DefaultOrigin
             originGen = DefaultOrigin.label
@@ -301,7 +415,7 @@ class VerstFlow(
     fun setWorld(id: String) {
         if (gateway.world == id) return
         gateway.world = id
-        origin = if (id == app.verst.core.model.DefaultWorld) DefaultOrigin else GeoPoint("Тестовск", 58.0, 50.0)
+        origin = if (id == "edge_cases_v1") GeoPoint("Тестовск", 58.0, 50.0) else DefaultOrigin
         originGen = origin.label
         known.clear()
         rowKm.clear()
@@ -318,7 +432,7 @@ class VerstFlow(
     }
 
     fun setOffline(on: Boolean) {
-        connectivity.online = !on
+        connectivity.simulatedOffline = on
     }
 
     /** «Сбросить данные»: saved trips, the current trip and the draft. */
@@ -351,8 +465,10 @@ class VerstFlow(
         mood = null
         locationAsked = false
         originFromGps = false
+        originAddress = null
         gps = GpsState.Off
         debugMockLocation = null
+        budgetCustom = null
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
 
@@ -425,6 +541,7 @@ class VerstFlow(
                 when (val e = gateway.estimate(UUID.randomUUID().toString(), r)) {
                     is EngineResult.Ok -> {
                         record(r, TripFigures(e.value.km, e.value.days))
+                        estimates[r] = e.value
                         if (estimateError?.first == r) estimateError = null
                     }
                     is EngineResult.Err -> if (e.error.code != "CANCELLED") estimateError = r to e.error
@@ -441,6 +558,30 @@ class VerstFlow(
 
     /** System back and every back link. Sheets close first. Returns false on the root (the activity finishes). */
     fun back(): Boolean {
+        if (ageGate != null) {
+            answerAge(false)
+            return true
+        }
+        if (cityCustomSheet) {
+            cityCustomSheet = false
+            return true
+        }
+        if (locationSheet) {
+            locationSheet = false
+            return true
+        }
+        if (aboutData) {
+            aboutData = false
+            return true
+        }
+        if (card != null) {
+            closeCard()
+            return true
+        }
+        if (dayMenu != null) {
+            closeDayMenu()
+            return true
+        }
         if (stopMenu != null) {
             closeStopMenu()
             return true
@@ -477,6 +618,10 @@ class VerstFlow(
         dismissToast()
         when (top) {
             Route.Drive -> cancelPlan()
+            Route.City -> {
+                walkJob?.cancel()
+                walkBuilding = false
+            }
             Route.Navigator -> if (editingFrom) {
                 editingFrom = false
                 updateQuery("")
@@ -544,6 +689,7 @@ class VerstFlow(
     // ------------------------------------------------------------------------------------------ navigator
 
     fun updateQuery(q: String) {
+        if (q != query) clearAddresses()
         query = q
         suggestJob?.cancel()
         suggestFailed = false
@@ -556,7 +702,7 @@ class VerstFlow(
         searching = true
         suggestJob = scope.launch {
             delay(250) // 5.2 debounce
-            when (val r = gateway.suggest(q.trim(), origin)) {
+            when (val r = gateway.geoSearch(q.trim(), origin)) {
                 is EngineResult.Ok -> {
                     suggestions = r.value
                     fetchRowKm(r.value)
@@ -596,10 +742,23 @@ class VerstFlow(
     }
 
     fun pick(s: SuggestionDto) {
+        clearAddresses()
+        if (editingFrom && cityPickingStart) {
+            // 5.10 «изменить»: the walk start, back to «По городу»
+            cityPickingStart = false
+            editingFrom = false
+            cityStart = GeoPoint(if (s.kind == "address" && s.subtitle.isNotBlank()) "${s.subtitle}, ${s.name}" else s.name, s.lat, s.lon)
+            updateQuery("")
+            while (stack.size > 1 && top != Route.City) stack.removeAt(stack.lastIndex)
+            loadCityPresets()
+            return
+        }
         if (editingFrom) {
             originFromGps = false
+            originAddress = null
+            outsideRussia = false
             gps = GpsState.Off
-            origin = GeoPoint(s.name, s.lat, s.lon)
+            origin = GeoPoint(if (s.kind == "address" && s.subtitle.isNotBlank()) "${s.subtitle}, ${s.name}" else s.name, s.lat, s.lon)
             originGen = s.nameGenRu ?: s.name
             if (s.nameGenRu == null) loadOriginForms()
             rowKm.clear()
@@ -673,6 +832,14 @@ class VerstFlow(
     }
 
     fun stepBudget(delta: Int) {
+        val custom = budgetCustom
+        budgetCustom = null
+        if (custom != null) {
+            // from «до 42 000 ₽» the stepper moves to the neighbouring preset
+            val above = BudgetPresets.indexOfFirst { it == null || it > custom }.let { if (it < 0) BudgetPresets.lastIndex else it }
+            budgetIndex = if (delta > 0) above else (above - 1).coerceAtLeast(0)
+            return
+        }
         budgetIndex = (budgetIndex + delta).coerceIn(0, BudgetPresets.lastIndex)
     }
 
@@ -684,9 +851,12 @@ class VerstFlow(
         children = children,
         dog = dog,
         dailyKm = dailyKm,
-        budgetRub = BudgetPresets[budgetIndex],
+        budgetRub = budgetCustom ?: BudgetPresets[budgetIndex],
         mood = mood,
     )
+
+    /** The budget the gauge shows: a no-fit «Поднять бюджет до …» value, else the preset. */
+    val budgetRub: Int? get() = budgetCustom ?: BudgetPresets[budgetIndex]
 
     // ------------------------------------------------------------------------------------------ drive
 
@@ -696,17 +866,19 @@ class VerstFlow(
         startPlan()
     }
 
-    fun retryPlan() = startPlan()
+    fun retryPlan() = startPlan(lastPlanRequest ?: request())
 
-    private fun startPlan() {
+    private var lastPlanRequest: PlanRequest? = null
+
+    private fun startPlan(request: PlanRequest = request()) {
         planJob?.cancel()
         drive = DriveUi()
-        val request = request()
+        lastPlanRequest = request
         val id = UUID.randomUUID().toString()
         planJob = scope.launch {
             val pending = ArrayDeque<Pair<String, Float>>() // stage text, engine progress at that stage
             var days = 0
-            var finished: EngineResult<PlanResultDto>? = null
+            var finished: EngineResult<app.verst.core.model.dto.PlanOutcome>? = null
             val forced = debugForceError
             val slowMs = debugSlowSec * 1000L
             val engine = launch {
@@ -715,7 +887,7 @@ class VerstFlow(
                     finished = EngineResult.Err(EngineErrorDto(forced, "debug: forced"))
                     return@launch
                 }
-                finished = gateway.plan(id, request) { ev ->
+                finished = gateway.planOutcome(id, request) { ev ->
                     when (ev.event) {
                         "stage" -> ev.text?.let { t ->
                             if (pending.none { it.first == t } && t !in drive.lines) pending.addLast(t to (ev.progress ?: 0.0).toFloat())
@@ -741,12 +913,23 @@ class VerstFlow(
                 delay(STEP_GAP_MS)
             }
             when (val r = finished) {
-                is EngineResult.Ok -> {
-                    val bearing = readyRoute?.bearing8 ?: request.destination?.let { TripMath.bearing8(request.origin, it) } ?: "N"
-                    showTrip(r.value, request, bearing, savedId = null, fromSaved = false)
-                    drive = drive.copy(progress = 1f, done = true, days = r.value.trip.days)
-                    delay(AUTO_ADVANCE_MS)
-                    if (top == Route.Drive) openRoad()
+                is EngineResult.Ok -> when (val o = r.value) {
+                    is app.verst.core.model.dto.PlanOutcome.Plan -> {
+                        val bearing = readyRoute?.bearing8 ?: request.destination?.let { TripMath.bearing8(request.origin, it) } ?: "N"
+                        noFit = null
+                        showingMinimum = false
+                        showTrip(o.result, request, bearing, savedId = null, fromSaved = false)
+                        drive = drive.copy(progress = 1f, done = true, days = o.result.trip.days)
+                        delay(AUTO_ADVANCE_MS)
+                        if (top == Route.Drive) openRoad()
+                    }
+                    is app.verst.core.model.dto.PlanOutcome.NoFit -> {
+                        // 5.8: «Смотреть варианты», auto-advance after 1 s as for a plan
+                        noFit = o.noFit
+                        drive = drive.copy(progress = 1f, done = true, noFit = true)
+                        delay(AUTO_ADVANCE_MS)
+                        if (top == Route.Drive) openNoFit()
+                    }
                 }
                 is EngineResult.Err -> if (r.error.code == "CANCELLED") {
                     if (top == Route.Drive) stack.removeAt(stack.lastIndex)
@@ -778,9 +961,14 @@ class VerstFlow(
         expandedLine = null
         replace = null
         stopMenu = null
+        stopHandoff = null
+        dayMenu = null
+        dayHandoff = null
+        card = null
         undoTrip = null
         roadFocusId = null
         roadTopId = null
+        roadScrollY = null
         dismissToast() // a toast belongs to the screen it was raised on
         if (request != null) record(request, TripFigures(r.trip.km, r.trip.days)) // after planning: the engine's number
     }
@@ -823,130 +1011,403 @@ class VerstFlow(
     // ------------------------------------------------------------------------------------------ focus restore
 
     /** Road ahead reports its top visible row while it is on top (debounced by the screen). */
-    fun roadTop(id: String?) {
-        if (top == Route.Road && id != null) roadTopId = id
+    fun roadTop(id: String?, scrollY: Int? = null) {
+        if (top == Route.Road && id != null) {
+            roadTopId = id
+            if (scrollY != null && card == null && stopMenu == null && dayMenu == null) roadScrollY = scrollY
+        }
     }
+
+    /** 5.9 §5: the scroll offset of Road ahead, restored exactly on the way back (also after process death). */
+    var roadScrollY: Int? by mutableStateOf(null)
+        private set
 
     /** The highlight of the restored row has been shown. */
     fun roadFocusShown() {
         roadFocusId = null
     }
 
-    // ------------------------------------------------------------------------------------------ hand-off (CEO 4)
+    // ------------------------------------------------------------------------------------------ hand-off (5.13)
 
-    /** Road ahead «в навигатор ↗» of [day]: the day's stops in order. */
-    fun openDayInNavigator(day: Int) {
-        val d = result?.trip?.daysList?.firstOrNull { it.day == day } ?: return
-        handoff(NaviLinks.day(d))
+    /** The day header link → the day menu «В навигатор: день N» (the engine's links resolved behind it). */
+    fun openDayMenu(day: Int) {
+        val r = result ?: return
+        dayMenu = day
+        dayHandoff = null
+        val session = tripSession
+        scope.launch {
+            val h = engineHandoff(r.tripJson, HandoffArgs.day(day)) ?: r.trip.daysList.firstOrNull { it.day == day }?.let { NaviLinks.day(it) }?.toDto(day)
+            if (session == tripSession && dayMenu == day) dayHandoff = h
+        }
+    }
+
+    fun closeDayMenu() {
+        dayMenu = null
+        dayHandoff = null
+    }
+
+    /** «В навигатор: день N». */
+    fun dayMenuGo() {
+        val h = dayHandoff ?: return
+        dayMenu = null
+        launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false)
     }
 
     /** D-5 stop menu on a long-press of a row. */
     fun openStopMenu(stop: StopDto) {
+        val r = result ?: return
         roadFocusId = stop.id
         stopMenu = stop
+        stopHandoff = null
+        val session = tripSession
+        scope.launch {
+            val h = engineHandoff(r.tripJson, HandoffArgs.fromStop(stop.id)) ?: NaviLinks.fromStop(r.trip, stop.id)?.toDto(null)
+            if (session == tripSession && stopMenu?.id == stop.id) stopHandoff = h
+        }
     }
 
     fun closeStopMenu() {
         stopMenu = null
+        stopHandoff = null
         roadFocusSeq += 1
     }
 
-    /** «ОТКРЫТЬ В НАВИГАТОРЕ ОТСЮДА»: from this stop to the end of its day. */
+    /** «Открыть в навигаторе отсюда»: from this stop to the end of its day. */
     fun navigatorFromStop() {
-        val s = stopMenu ?: return
-        val trip = result?.trip ?: return
+        val h = stopHandoff ?: return
         stopMenu = null
-        handoff(NaviLinks.fromStop(trip, s.id))
+        stopHandoff = null
+        launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false)
+        roadFocusSeq += 1 // back from the app: the row (5.9 §5)
     }
 
     /** «Заменить» in the stop menu → the D-6 sheet. */
     fun stopMenuReplace() {
         val s = stopMenu ?: return
         stopMenu = null
+        stopHandoff = null
         openReplace(s)
     }
 
-    /** Whether the navigator app is installed (the stop menu names the target). */
+    /** 5.13 §2: what the car label names (navigator → maps → web), resolved from the installed apps. */
+    val carTarget: HandoffTarget
+        get() = when {
+            handoffLauncher?.navigatorInstalled() == true -> HandoffTarget.Navigator
+            handoffLauncher?.mapsInstalled() == true -> HandoffTarget.Maps
+            else -> HandoffTarget.Browser
+        }
+
+    /** Walk: maps → web. */
+    val walkTarget: HandoffTarget
+        get() = if (handoffLauncher?.mapsInstalled() == true) HandoffTarget.Maps else HandoffTarget.Browser
+
+    /** Kept for the R1 callers: the navigator app is installed. */
     val navigatorInstalled: Boolean get() = handoffLauncher?.navigatorInstalled() ?: false
 
-    private fun handoff(h: NaviHandoff?) {
-        if (h == null) return
-        if (!connectivity.online) {
-            showToast(Toast.NeedInternetNavigator)
+    private suspend fun engineHandoff(routeJson: String, options: String): HandoffDto? =
+        (gateway.handoff(routeJson, options) as? EngineResult.Ok)?.value?.takeIf { h -> h.parts.isNotEmpty() }
+
+    /** One tap opens the target (no chooser); a web fallback says so; offline without an app → «нужен интернет». */
+    private fun launchHandoff(links: HandoffLinksDto, walk: Boolean) {
+        val resolved = if (walk) walkTarget else carTarget
+        if (resolved == HandoffTarget.Browser && !connectivity.online) {
+            showToast(Toast.HandoffOffline)
             return
         }
         val target = if (debugHandoffDryRun) {
-            if (navigatorInstalled) HandoffTarget.NavigatorDryRun else HandoffTarget.BrowserDryRun
+            when (resolved) {
+                HandoffTarget.Navigator -> HandoffTarget.NavigatorDryRun
+                HandoffTarget.Maps -> HandoffTarget.MapsDryRun
+                else -> HandoffTarget.BrowserDryRun
+            }
         } else {
-            handoffLauncher?.open(h) ?: HandoffTarget.None
+            handoffLauncher?.open(links, walk) ?: HandoffTarget.None
         }
-        lastHandoff = h to target
-        if (target == HandoffTarget.None) showToast(Toast.NoNavigator)
+        lastHandoff = links to target
+        when (target) {
+            HandoffTarget.Browser -> showToast(Toast.HandoffWeb(walk))
+            HandoffTarget.None -> showToast(Toast.HandoffFailed)
+            else -> Unit
+        }
     }
 
-    // ------------------------------------------------------------------------------------------ GPS (CEO 3)
+    // ------------------------------------------------------------------------------------------ cards (5.9)
+
+    /** Tappable rows only (M§15.5): a sight, or a night with a hotel. */
+    fun tappable(s: StopDto): Boolean = s.kind == "sight" || (s.kind == "overnight" && s.hotelOptions.isNotEmpty())
+
+    /** A Road-ahead row → its card; the row is the focus for the way back. */
+    fun openCard(stop: StopDto) {
+        if (!tappable(stop)) return
+        roadFocusId = stop.id
+        val hotel = stop.kind == "overnight"
+        val option = if (hotel) stop.hotelOptions.firstOrNull { it.placeId == stop.selectedHotelId } ?: stop.hotelOptions.firstOrNull() else null
+        val placeId = if (hotel) option?.placeId ?: stop.placeId else stop.placeId
+        val base = app.verst.feature.card.CardUi(
+            name = stop.name, sign = stop.sign, tags = stop.tags, kind = if (hotel) "hotel" else "sight",
+            loading = placeId != null, offline = !connectivity.online, hotel = option, booked = isBooked(stop.id),
+            canReplace = stop.replaceable && stop.alternatives.isNotEmpty(),
+        )
+        card = CardState(CardSource.ROAD, stop.id, null, base)
+        loadCard(placeId, stop.id)
+    }
+
+    /** A walk stop → its card (sights / museums: sight card; bars: bar card with the ODbL line). */
+    fun openWalkCard(ws: app.verst.core.model.dto.WalkStopDto) {
+        if (!ws.tappable) return
+        val base = app.verst.feature.card.CardUi(
+            name = ws.nameRu, sign = if (ws.isBar) "service" else "tourist", kind = if (ws.isBar) "bar" else "sight",
+            loading = ws.poiId != null, offline = !connectivity.online, walkStop = true,
+        )
+        card = CardState(CardSource.WALK, ws.id, ws.poiId, base)
+        walkFocusId = ws.id
+        loadCard(ws.poiId, ws.id)
+    }
+
+    private fun loadCard(placeId: String?, rowId: String) {
+        if (placeId == null) return
+        scope.launch {
+            val r = gateway.poiDetails(placeId)
+            val c = card ?: return@launch
+            if (c.rowId != rowId) return@launch
+            card = c.copy(ui = c.ui.copy(loading = false, details = (r as? EngineResult.Ok)?.value, offline = !connectivity.online))
+        }
+    }
+
+    fun closeCard() {
+        val c = card ?: return
+        card = null
+        if (c.source == CardSource.ROAD) roadFocusSeq += 1 else walkFocusSeq += 1
+    }
+
+    /** Hotel card «Выбрать отель» → 5.7 for that night. */
+    fun cardPickHotel() {
+        val c = card ?: return
+        card = null
+        openExit(c.rowId)
+    }
+
+    /** Sight card «Заменить» → D-6. */
+    fun cardReplace() {
+        val c = card ?: return
+        val stop = result?.trip?.daysList?.flatMap { it.stops }?.firstOrNull { it.id == c.rowId } ?: return
+        card = null
+        openReplace(stop)
+    }
+
+    /** Walk card «Убрать эту точку»: the walk is solved again without it. */
+    fun cardRemoveWalkStop() {
+        val c = card ?: return
+        card = null
+        c.poiId?.let { walkExclude += it }
+        buildWalk(keepScreen = true)
+    }
+
+    fun openAboutData() {
+        aboutData = true
+    }
+
+    fun closeAboutData() {
+        aboutData = false
+    }
+
+    /** Walk result focus restore (as Road ahead). */
+    var walkFocusId: String? by mutableStateOf(null)
+        private set
+    var walkFocusSeq by mutableStateOf(0)
+        private set
+
+    fun walkFocusShown() {
+        walkFocusId = null
+    }
+
+    // ------------------------------------------------------------------------------------------ budget (5.8)
+
+    /** Drive «Смотреть варианты» / auto-advance: Drive is replaced by the no-fit screen. */
+    fun openNoFit() {
+        if (noFit == null) return
+        if (top == Route.Drive) stack[stack.lastIndex] = Route.NoFit else push(Route.NoFit)
+    }
+
+    /** An option → Instruments with it applied; the user presses ПОЕХАЛИ again (5.8 §2). */
+    fun applyBudgetOption(o: app.verst.core.model.dto.BudgetOptionDto) {
+        when (o.kind) {
+            "raise_budget" -> o.budgetRub?.let { budgetCustom = it }
+            "shorten", "cheaper_route" -> {
+                val id = o.readyRouteId
+                if (id != null) {
+                    val known = (windshield as? WindshieldData.Routes)?.routes?.firstOrNull { it.id == id }
+                    val base = known ?: readyRoute
+                    if (base != null) {
+                        readyRoute = if (known != null) known else base.copy(id = id, title = o.titleRu ?: base.title, subtitle = "")
+                        destination = null
+                    }
+                } else {
+                    // a free trip: the same route in fewer days → a longer daily pace
+                    val days = o.days
+                    val km = figures?.figures?.km ?: noFit?.minimum?.trip?.km
+                    if (days != null && days > 0 && km != null) {
+                        dailyKmTouched = true
+                        dailyKm = (((km + days - 1) / days + 49) / 50 * 50).coerceIn(TripMath.KM_MIN, TripMath.KM_MAX)
+                    }
+                }
+            }
+        }
+        backToInstruments()
+    }
+
+    private fun backToInstruments() {
+        val i = stack.lastIndexOf(Route.Instruments)
+        if (i >= 0) {
+            while (stack.size > i + 1) stack.removeAt(stack.lastIndex)
+        } else {
+            while (stack.lastOrNull() == Route.NoFit) stack.removeAt(stack.lastIndex)
+            push(Route.Instruments)
+        }
+    }
+
+    /** «Показать самый экономный вариант»: Road ahead with the minimum, over budget everywhere. */
+    fun showMinimum() {
+        val nf = noFit ?: return
+        val m = nf.minimum ?: return
+        showTrip(m, lastPlanRequest, readyRoute?.bearing8 ?: "N", savedId = null, fromSaved = false)
+        showingMinimum = true
+        if (top == Route.NoFit) stack[stack.lastIndex] = Route.Road else push(Route.Road)
+    }
+
+    /** Waybill over budget «Подогнать под бюджет»: the same trip planned again (the fitter runs) → Drive. */
+    fun refit() {
+        val req = resultRequest ?: lastPlanRequest ?: return
+        val i = stack.lastIndexOf(Route.Road)
+        if (i >= 0) while (stack.size > i) stack.removeAt(stack.lastIndex)
+        push(Route.Drive)
+        startPlan(req)
+    }
+
+    /** Instruments caption: the engine's budget verdict for the current draft (`estimate.outcome`). */
+    val budgetEstimate: EstimateDto?
+        get() = draft()?.let { estimates[it] }?.takeIf { it.outcome != null && request().budgetRub != null }
+
+    // ------------------------------------------------------------------------------------------ location (5.12)
 
     private fun onNavigatorOpened() {
         when {
             debugMockLocation != null -> if (!originFromGps || gps != GpsState.On) locate()
             locator?.granted() == true -> if (originFromGps || !locationAsked) locate()
-            !locationAsked -> locationPrompt = true
+            !locationAsked -> locationSheet = true
         }
     }
 
-    /** Rationale «Разрешить» → the system dialog. */
-    fun allowLocation() {
-        locationPrompt = false
-        locationAsked = true
-        val ask = askLocationPermission
-        if (debugMockLocation != null || locator?.granted() == true) locate() else if (ask != null) ask() else showToast(Toast.LocationFailed)
+    /** «ВЫ: …» on the Windshield, or the first «По городу»: the rationale once, else locate again. */
+    fun askLocation() {
+        when {
+            debugMockLocation != null || locator?.granted() == true -> locate()
+            !locationAsked -> locationSheet = true
+            else -> askLocationPermission?.invoke(false) ?: showToast(Toast.LocationBlocked)
+        }
     }
 
-    /** Rationale «Не разрешать»: the origin stays, the card does not come back. */
-    fun denyLocation() {
-        locationPrompt = false
+    /** Rationale «Разрешить» → the system dialog for coarse location. */
+    fun allowLocation() {
+        locationSheet = false
         locationAsked = true
-        showToast(Toast.LocationDenied)
+        val ask = askLocationPermission
+        if (debugMockLocation != null || locator?.granted() == true) locate() else if (ask != null) ask(false) else showToast(Toast.LocationDenied(origin.label))
+    }
+
+    /** Rationale «Выберу сам» → the ОТКУДА input. */
+    fun manualLocation() {
+        locationSheet = false
+        locationAsked = true
+        if (top == Route.Navigator) startEditFrom()
+    }
+
+    /** Kept for R1 callers: «Не разрешать» = «Выберу сам» without the input. */
+    fun denyLocation() {
+        locationSheet = false
+        locationAsked = true
+        showToast(Toast.LocationDenied(origin.label))
+    }
+
+    /** «Точнее» → the fine-location dialog. */
+    fun preciseLocation() {
+        askLocationPermission?.invoke(true)
     }
 
     /** The system dialog's answer; [blocked] = «don't ask again» (only the settings can allow it now). */
     fun onLocationPermission(granted: Boolean, blocked: Boolean) {
-        if (granted) locate() else showToast(if (blocked) Toast.LocationBlocked else Toast.LocationDenied)
+        if (granted) locate() else showToast(if (blocked) Toast.LocationBlocked else Toast.LocationDenied(origin.label))
     }
 
     /** «Моё местоположение» in ОТКУДА. */
     fun useMyLocation() {
         locationAsked = true
-        locationPrompt = false
+        locationSheet = false
         when {
             debugMockLocation != null || locator?.granted() == true -> locate(fromRow = true)
-            askLocationPermission != null -> askLocationPermission?.invoke()
-            else -> showToast(Toast.LocationFailed)
+            askLocationPermission != null -> askLocationPermission?.invoke(false)
+            else -> showToast(Toast.LocationTimeout(origin.label))
         }
     }
 
-    fun toastSettings() {
+    /** The toast action: «Настройки» / «Включить» / «Выбрать». */
+    fun toastAction() {
+        val t = toast
         dismissToast()
-        openAppSettings?.invoke()
+        when (t) {
+            Toast.LocationBlocked -> openAppSettings?.invoke()
+            Toast.LocationOff -> openLocationSettings?.invoke()
+            is Toast.LocationDenied -> if (top == Route.Navigator) startEditFrom()
+            else -> Unit
+        }
     }
+
+    /** R1 name of [toastAction]. */
+    fun toastSettings() = toastAction()
 
     private var locateJob: Job? = null
 
-    /** The phone's position → the nearest catalogue town (for now: the nearest fixture town) → the origin. */
+    /** The phone's position → `geo_nearest` (the catalogue town) → the origin; online also the street address. */
     fun locate(fromRow: Boolean = false) {
         locateJob?.cancel()
+        if (debugMockLocation == null && locator?.enabled() == false) {
+            showToast(Toast.LocationOff)
+            return
+        }
         gps = GpsState.Waiting
         locateJob = scope.launch {
-            val p = debugMockLocation ?: locator?.current()
-            val town = p?.let { nearestTown(it) }
-            if (town == null) {
+            val mock = debugMockLocation
+            val p = mock ?: locator?.current()
+            if (p == null) {
                 gps = GpsState.Failed
-                showToast(Toast.LocationFailed)
+                showToast(Toast.LocationTimeout(origin.label))
                 return@launch
             }
-            val o = GeoPoint(town.name, town.lat, town.lon)
+            val nearest = gateway.geoNearest(p)
+            val town: SuggestionDto? = when (nearest) {
+                is EngineResult.Ok -> {
+                    val n = nearest.value
+                    val t = n.town
+                    if (!n.insideRussia || t == null) {
+                        gps = GpsState.Failed
+                        outsideRussia = true
+                        return@launch
+                    }
+                    SuggestionDto("city", t.name, t.regionRu ?: "", t.lat, t.lon, t.id, nameGenRu = t.nameGenRu, namePrepRu = t.namePrepRu)
+                }
+                is EngineResult.Err -> nearestTown(p) // a gateway without v2 (unit tests)
+            }
+            if (town == null) {
+                gps = GpsState.Failed
+                showToast(Toast.LocationTimeout(origin.label))
+                return@launch
+            }
+            outsideRussia = false
             gps = GpsState.On
             originFromGps = true
+            gpsApprox = mock == null && locator?.precise() != true
+            // the trip starts at the fix; «ВЫ: <ГОРОД>» names the catalogue town
+            val o = GeoPoint(town.name, p.lat, p.lon)
             if (o != origin) {
                 origin = o
                 originGen = town.nameGenRu ?: town.name
@@ -954,9 +1415,18 @@ class VerstFlow(
                 rowKm.clear()
                 loadRoutes()
             }
+            originAddress = null
             if (fromRow && editingFrom) { // «Моё местоположение» picked: ОТКУДА is done
                 editingFrom = false
                 updateQuery("")
+            }
+            if (cityPickingStart || top == Route.City) {
+                cityStart = null
+                loadCityPresets()
+            }
+            if (connectivity.online) {
+                val a = address.reverse(p.lat, p.lon)
+                if (a is app.verst.data.net.AddressResult.Ok && origin == o) originAddress = a.value
             }
         }
     }
@@ -970,6 +1440,302 @@ class VerstFlow(
         }
         val towns = (gateway.popular() as? EngineResult.Ok)?.value.orEmpty().filter { it.nameGenRu != null }
         return towns.minByOrNull { TownMath.km(p.lat, p.lon, it.lat, it.lon) }
+    }
+
+    // ------------------------------------------------------------------------------------------ addresses (5.12 §2)
+
+    /** «Найти адрес» row: the query has a digit, «ул», «пр», «пер», «д.» or a comma. */
+    fun looksLikeAddress(q: String): Boolean {
+        val t = q.trim().lowercase()
+        if (t.length < 3) return false
+        return t.any { it.isDigit() } || t.contains(',') || ADDRESS_WORDS.any { w -> Regex("(^|\\s)$w(\\s|\\.|$)").containsMatchIn(t) }
+    }
+
+    /** Explicit submit (the action row or the IME «Найти»): one Nominatim request, never per keystroke. */
+    fun submitAddress() {
+        val q = query.trim()
+        if (!looksLikeAddress(q)) return
+        if (!connectivity.online) {
+            addressState = AddressState.Offline
+            return
+        }
+        addressJob?.cancel()
+        addressState = AddressState.Searching
+        addressJob = scope.launch {
+            when (val r = address.search(q)) {
+                is app.verst.data.net.AddressResult.Ok -> {
+                    addressResults = r.value
+                    addressState = if (r.value.isEmpty()) AddressState.None else AddressState.Done
+                    fetchRowKm(r.value)
+                }
+                app.verst.data.net.AddressResult.Offline -> addressState = AddressState.Offline
+                is app.verst.data.net.AddressResult.Failed -> {
+                    addressResults = emptyList()
+                    addressState = AddressState.None
+                }
+            }
+        }
+    }
+
+    private fun clearAddresses() {
+        addressJob?.cancel()
+        addressResults = emptyList()
+        addressState = AddressState.Idle
+    }
+
+    // ------------------------------------------------------------------------------------------ «По городу» (5.10)
+
+    /** Windshield «По городу · пешком» → 5.10; the start = the GPS origin or the last chosen point. */
+    fun openCity() {
+        walkExclude.clear()
+        cityError = null
+        push(Route.City)
+        if (!locationAsked && locator?.granted() != true && debugMockLocation == null) locationSheet = true
+        loadCityPresets()
+    }
+
+    val cityStartPoint: GeoPoint get() = cityStart ?: origin
+
+    private var presetsJob: Job? = null
+
+    fun loadCityPresets() {
+        presetsJob?.cancel()
+        cityLoading = true
+        cityError = null
+        val p = cityStartPoint
+        presetsJob = scope.launch {
+            when (val r = gateway.cityPresets(p)) {
+                is EngineResult.Ok -> {
+                    cityPresets = r.value
+                    val available = r.value.presets.filter { it.available }
+                    if (available.none { it.preset == cityPreset }) {
+                        available.firstOrNull { !it.adultOnly }?.let { selectDefaults(it) }
+                    } else {
+                        available.firstOrNull { it.preset == cityPreset }?.let { if (cityPreset != "custom") cityDurationMin = it.defaultDurationMin }
+                    }
+                }
+                is EngineResult.Err -> {
+                    cityPresets = null
+                    cityError = r.error.code
+                }
+            }
+            cityLoading = false
+        }
+    }
+
+    private fun selectDefaults(p: app.verst.core.model.dto.CityPresetDto) {
+        cityPreset = p.preset
+        cityDurationMin = p.defaultDurationMin
+        p.defaultPace?.let { cityPace = it }
+    }
+
+    /** «изменить» on the start line → the ОТКУДА search; the pick comes back here. */
+    fun cityChangeStart() {
+        cityPickingStart = true
+        openNavigator()
+        startEditFrom()
+    }
+
+    /** A preset plate: 18+ asks every time (children in the crew → blocked); «Свой маршрут» opens the sheet. */
+    fun selectCityPreset(preset: String) {
+        val p = cityPresets?.presets?.firstOrNull { it.preset == preset } ?: return
+        cityError = if (cityError == "NOT_ENOUGH_POIS") null else cityError
+        if (preset == "custom") {
+            selectDefaults(p)
+            cityCustomSheet = true
+            return
+        }
+        if (p.adultOnly) {
+            if (children > 0) {
+                showToast(Toast.CityKids)
+                return
+            }
+            adultConfirmed = false
+            ageGate = AgeGate(preset = preset)
+            return
+        }
+        adultConfirmed = false
+        selectDefaults(p)
+    }
+
+    /** «Да, мне есть 18» applies the pending choice; «Нет» undoes it — and no request is sent. */
+    fun answerAge(yes: Boolean) {
+        val g = ageGate ?: return
+        ageGate = null
+        if (!yes) return
+        adultConfirmed = true
+        if (g.preset != null) {
+            cityPresets?.presets?.firstOrNull { it.preset == g.preset }?.let { selectDefaults(it) }
+        } else if (g.interest != null && g.interest !in cityInterests) {
+            cityInterests += g.interest
+        }
+    }
+
+    fun setCityDuration(min: Int) {
+        cityDurationMin = min
+    }
+
+    fun toggleCityInterest(i: String) {
+        if (i in cityInterests) {
+            if (cityInterests.size > 1) cityInterests -= i
+            return
+        }
+        if (i == "bars") {
+            if (children > 0) {
+                showToast(Toast.CityKids)
+                return
+            }
+            ageGate = AgeGate(interest = i)
+            return
+        }
+        cityInterests += i
+    }
+
+    fun setCityPace(p: String) {
+        cityPace = p
+    }
+
+    fun setCityBudget(rub: Int?) {
+        cityBudget = rub
+    }
+
+    fun toggleCityReturn() {
+        cityReturn = !cityReturn
+    }
+
+    fun closeCityCustom() {
+        cityCustomSheet = false
+    }
+
+    /** «Собрать прогулку» in the custom sheet. */
+    fun buildCustomWalk() {
+        if (cityInterests.isEmpty()) cityInterests += "history"
+        cityCustomSheet = false
+        buildWalk()
+    }
+
+    fun walkRequest(): WalkRequest = WalkRequest(
+        start = cityStartPoint,
+        preset = cityPreset,
+        durationMin = cityDurationMin,
+        interests = if (cityPreset == "custom") cityInterests.toList() else emptyList(),
+        pace = cityPace,
+        budgetRub = if (cityPreset == "custom") cityBudget else null,
+        returnToStart = cityReturn,
+        adults = adults,
+        children = children,
+        adultConfirmed = adultConfirmed,
+        exclude = walkExclude.toList(),
+    )
+
+    /** ПОШЛИ / «Собрать прогулку» / «Другой вариант» → `city_route` (cancellable) → 5.11. */
+    fun buildWalk(keepScreen: Boolean = false) {
+        val p = cityPresets?.presets?.firstOrNull { it.preset == cityPreset }
+        if (p?.adultOnly == true && !adultConfirmed) {
+            ageGate = AgeGate(preset = cityPreset)
+            return
+        }
+        walkJob?.cancel()
+        walkBuilding = true
+        cityError = null
+        val req = walkRequest()
+        val id = UUID.randomUUID().toString()
+        walkJob = scope.launch {
+            when (val r = gateway.cityRoute(id, req)) {
+                is EngineResult.Ok -> {
+                    walk = r.value
+                    walkHandoff = null
+                    walkFocusId = null
+                    savedWalkId = null
+                    if (top != Route.Walk) push(Route.Walk)
+                    loadWalkHandoff()
+                }
+                is EngineResult.Err -> when (r.error.code) {
+                    "CANCELLED" -> Unit
+                    "NO_CITY", "NOT_ENOUGH_POIS" -> {
+                        cityError = r.error.code
+                        if (keepScreen && top == Route.Walk) back()
+                    }
+                    else -> showToast(Toast.EngineFailed)
+                }
+            }
+            walkBuilding = false
+        }
+    }
+
+    /** «Другой вариант»: the same walk without the current stops. */
+    fun otherWalk() {
+        val w = walk ?: return
+        walkExclude += w.stops.mapNotNull { it.poiId }
+        buildWalk(keepScreen = true)
+    }
+
+    /** `NOT_ENOUGH_POIS` «Гулять N ч»: the next duration. */
+    fun walkLonger() {
+        cityDurationMin = (WalkDurations.firstOrNull { it > cityDurationMin } ?: WalkDurations.last())
+        cityError = null
+        buildWalk()
+    }
+
+    private fun loadWalkHandoff() {
+        val w = walk ?: return
+        scope.launch {
+            val h = engineHandoff(w.json, HandoffArgs.walk())
+            if (walk?.id == w.id) walkHandoff = h ?: localWalkHandoff(w)
+        }
+    }
+
+    private fun localWalkHandoff(w: app.verst.core.model.dto.WalkRouteDto): HandoffDto {
+        val pts = listOf(app.verst.core.model.LatLon(w.start.lat, w.start.lon)) + w.stops.map { app.verst.core.model.LatLon(it.lat, it.lon) } +
+            listOfNotNull(w.finish?.let { app.verst.core.model.LatLon(it.lat, it.lon) })
+        return NaviLinks.walking(pts).toDto(null, mode = "walk")
+    }
+
+    /** «Пешком в Яндекс Картах» (part [index] of a split walk). */
+    fun walkHandoffGo(index: Int = 1) {
+        val h = walkHandoff ?: walk?.let { localWalkHandoff(it) } ?: return
+        val part = h.parts.firstOrNull { it.index == index } ?: h.parts.firstOrNull() ?: return
+        launchHandoff(part.links, walk = true)
+        walkFocusSeq += 1
+    }
+
+    /** The saved id of the walk on screen (DEV-308). */
+    var savedWalkId: String? by mutableStateOf(null)
+        private set
+
+    /** Save the walk to «Мои поездки» (schema 2, `kind = walk`). */
+    fun saveWalk() {
+        val w = walk ?: return
+        if (!tripsLoaded) return
+        val id = savedWalkId ?: UUID.randomUUID().toString()
+        val entry = SavedTrips.walkEntry(id, now(), w)
+        val i = saved.indexOfFirst { it.id == id }
+        if (i >= 0) saved[i] = entry else saved.add(entry)
+        savedWalkId = id
+        persist()
+        showToast(Toast.Saved)
+    }
+
+    /** Share text of a walk: title, stops, the cost and (alcohol presets) the responsible line. */
+    fun walkShareText(): String {
+        val w = walk ?: return ""
+        val lines = mutableListOf(w.titleRu)
+        w.stops.forEachIndexed { i, s -> lines += "${i + 1}. ${s.nameRu}" + (s.arriveAt?.let { " · " + (RuFormat.clock(it) ?: "") } ?: "") }
+        lines += "≈ ${RuFormat.thousands(w.cost.totalRub)} ₽ на всех · ≈ ${w.walkKm} км пешком"
+        w.responsibleNoteRu?.let { lines += it }
+        return lines.joinToString("\n")
+    }
+
+    /** «Мои поездки» → a saved walk. */
+    private fun openSavedWalk(t: SavedTripDto) {
+        val w = t.walk?.let { runCatching { EngineJson.walk(it.toString()) }.getOrNull() } ?: return
+        walk = w
+        savedWalkId = t.id
+        walkHandoff = null
+        tripsSheet = false
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+        push(Route.Walk)
+        loadWalkHandoff()
     }
 
     // ------------------------------------------------------------------------------------------ road / waybill
@@ -1260,7 +2026,7 @@ class VerstFlow(
     }
 
     /** Changes whenever last.json must be rewritten: the trip (identity), booking, saved id and screen. */
-    private fun lastKey(): Any? = listOf(result, booked.toMap(), savedId, lastScreen(), exitStopId, roadFocusId, roadTopId)
+    private fun lastKey(): Any? = listOf(result, booked.toMap(), savedId, lastScreen(), exitStopId, roadFocusId, roadTopId, roadScrollY)
 
     private fun lastScreen(): String? = when {
         Route.Exit in stack -> "exit"
@@ -1276,7 +2042,7 @@ class VerstFlow(
                 LastTripDto(
                     trip = SavedTrips.entry(savedId ?: "last", now(), it, resultBearing, booked.toMap()),
                     savedId = savedId, screen = lastScreen(), exitStopId = exitStopId,
-                    roadFocusId = roadFocusId, roadTopId = roadTopId,
+                    roadFocusId = roadFocusId, roadTopId = roadTopId, roadScrollY = roadScrollY,
                 )
             }.getOrNull()
         }
@@ -1304,6 +2070,7 @@ class VerstFlow(
         // S3-R1: the row we left from (or the top visible row) comes back with the trip.
         roadFocusId = l.roadFocusId ?: if (screen == "exit") l.exitStopId else null
         roadTopId = l.roadTopId
+        roadScrollY = l.roadScrollY
         roadFocusSeq += 1
     }
 
@@ -1400,6 +2167,10 @@ class VerstFlow(
     /** D-1 row → Road ahead of the saved trip; back goes to the Windshield («К лобовому», OI-27). */
     fun openSaved(id: String) {
         val s = saved.firstOrNull { it.id == id } ?: return
+        if (s.kind == "walk") {
+            openSavedWalk(s)
+            return
+        }
         tripsSheet = false
         showTrip(SavedTrips.result(s), request = null, bearing = s.bearing8, savedId = s.id, fromSaved = true, bookedStops = s.bookedHotels)
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
@@ -1426,19 +2197,45 @@ class VerstFlow(
 enum class GpsState { Off, Waiting, On, Failed }
 
 /** Where a hand-off went. */
-enum class HandoffTarget { Navigator, Browser, None, NavigatorDryRun, BrowserDryRun }
+/** Where a hand-off went (or would go: the dry runs of the e2e). */
+enum class HandoffTarget { Navigator, Maps, Browser, None, NavigatorDryRun, MapsDryRun, BrowserDryRun }
 
-/** Opens [NaviHandoff]s outside the app (the activity's implementation uses intents). */
+/** Opens ADR-0014 links outside the app: car navigator → maps → web, walk maps → web (the activity uses intents). */
 interface HandoffLauncher {
     fun navigatorInstalled(): Boolean
-    fun open(h: NaviHandoff): HandoffTarget
+    fun mapsInstalled(): Boolean = false
+    fun open(links: HandoffLinksDto, walk: Boolean): HandoffTarget
 }
 
-/** The phone's position (S3-R1: LocationManager; FusedLocation needs Play services the mock does not ship). */
+/** The phone's position (5.12: `LocationManager`; FusedLocation needs Play services the mock does not ship). */
 interface Locator {
     fun granted(): Boolean
     suspend fun current(): GeoPoint?
+    /** Fine location granted (else the fix is «примерно, по сети» and «Точнее» shows). */
+    fun precise(): Boolean = true
+    /** Location services on at all (off → «Геолокация на телефоне выключена» + «Включить»). */
+    fun enabled(): Boolean = true
 }
+
+enum class CardSource { ROAD, WALK }
+
+/** An open 5.9 card: the row it came from ([rowId] = stop id), the place id and what it shows. */
+data class CardState(val source: CardSource, val rowId: String, val poiId: String?, val ui: app.verst.feature.card.CardUi)
+
+/** 5.10 18+ dialog: the alcohol preset or the «бары» interest waiting for the answer. */
+data class AgeGate(val preset: String? = null, val interest: String? = null)
+
+/** 5.12 §2 address search state under the ОТКУДА / КУДА field. */
+enum class AddressState { Idle, Searching, Done, None, Offline }
+
+/** 5.10 «СКОЛЬКО ГУЛЯЕМ» chips, minutes. */
+val WalkDurations = listOf(120, 240, 360, 480)
+
+private val ADDRESS_WORDS = listOf("ул", "пр", "пер", "д", "просп", "наб", "пл", "ш")
+
+/** The R1 local links as an ADR-0014 hand-off (the fallback when the engine call fails). */
+fun NaviHandoff.toDto(day: Int?, mode: String = "car"): HandoffDto =
+    HandoffDto(mode, day, listOf(HandoffPartDto(1, emptyList(), HandoffLinksDto(navi, mapsApp, web))), truncated = false)
 
 /** Great-circle distance for «the nearest town». */
 object TownMath {

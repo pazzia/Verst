@@ -225,7 +225,7 @@ private fun TurnSignal(overlay: Boolean, modifier: Modifier) {
 }
 
 @Composable
-private fun tagLine(o: HotelOptionDto): String {
+internal fun tagLine(o: HotelOptionDto): String {
     val labels = o.tags.mapNotNull {
         when (it) {
             "dogs_allowed" -> stringResource(R.string.exit_tag_dogs)

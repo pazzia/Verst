@@ -159,6 +159,9 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.kotlinx.coroutines.android)
+    // Sprint 3 (ADR-0012 §6–7): the only two network uses — Commons photos (Coil) and Nominatim addresses.
+    implementation(libs.okhttp)
+    implementation(libs.coil.compose)
     // Release review P2-4: no ui-test-manifest in the demo APK (it merges an exported ComponentActivity); the
     // Robolectric screen tests run on `debug` (CI `:app:testDebugUnitTest`).
     debugImplementation(libs.compose.ui.test.manifest)
@@ -168,9 +171,11 @@ dependencies {
     testImplementation(platform(libs.compose.bom))
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.okhttp.mockwebserver)
 }

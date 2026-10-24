@@ -4,6 +4,13 @@ import androidx.compose.ui.res.stringResource
 import app.verst.core.ui.R as UiR
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import app.verst.core.ui.theme.DesignTokens
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.verst.feature.common.NaviDialog
@@ -38,6 +45,13 @@ import app.verst.core.model.dto.TripDto
 import app.verst.feature.road.RoadActions
 import app.verst.feature.road.RoadFocus
 import app.verst.nav.GpsState
+import app.verst.nav.HandoffTarget
+import app.verst.nav.AddressState
+import app.verst.core.model.EngineResult
+import app.verst.core.model.dto.SuggestionDto
+import androidx.compose.ui.semantics.SemanticsActions
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import app.verst.core.model.GeoPoint
 import app.verst.feature.road.RoadScreen
 import app.verst.feature.road.RoadUi
@@ -176,7 +190,7 @@ class ScreensScreenshotTest {
 
     @Test
     fun navigatorLocationRationale() = shot("navigator", "location-rationale") {
-        NavigatorScreen(navigator("", emptyList(), null).copy(locationPrompt = true), {}, {}, {}, {}, {})
+        NavigatorScreen(navigator("", emptyList(), null).copy(locationSheet = true), {}, {}, {}, {}, {})
     }
 
     @Test
@@ -244,6 +258,14 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("Попробовать ещё раз").assertExists()
     }
 
+    private fun <T> v2(file: String, decode: (String) -> EngineResult<T>): T {
+        val doc = Json.parseToJsonElement(root.resolve("docs/contracts/v2/$file").readText()).jsonObject
+        return (decode(doc["response"].toString()) as EngineResult.Ok).value
+    }
+
+    private fun v2PlanTrip(file: String): PlanResultDto =
+        ((v2(file, EngineJson::planOutcome)) as app.verst.core.model.dto.PlanOutcome.Plan).result
+
     private fun snapshot(name: String): TripDto = EngineJson.trip(root.resolve("backend/planner/tests/golden/snapshots/$name.json").readText())
 
     private fun result(name: String): PlanResultDto {
@@ -310,16 +332,19 @@ class ScreensScreenshotTest {
         // S3-R1 D-5: long-press menu; the navigator is not installed → Yandex Maps in the browser (allow-listed name).
         val trip = snapshot("G02_golden_ring")
         val stop = trip.daysList.first().stops[1]
-        shot("road", "stop-menu") { RoadScreen(RoadUi(trip, "NE", stopMenu = stop), noRoad) }
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-from-stop.json", EngineJson::handoff)
+        shot("road", "stop-menu") { RoadScreen(RoadUi(trip, "NE", stopMenu = stop, stopHandoff = h, carTarget = HandoffTarget.Browser), noRoad) }
         compose.onNodeWithTag("stopmenu.navigator", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("Яндекс Карты · в браузере").assertExists()
+        compose.onNodeWithText("Открыть Яндекс Карты в браузере").assertExists()
     }
 
     @Test
     fun roadStopMenuNavigatorOffline() {
         val trip = snapshot("G02_golden_ring")
         val stop = trip.daysList.flatMap { it.stops }.first { it.alternatives.size >= 2 }
-        shot("road", "stop-menu-offline") { RoadScreen(RoadUi(trip, "NE", stopMenu = stop, online = false, navigatorInstalled = true), noRoad) }
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-from-stop.json", EngineJson::handoff).copy(truncated = true)
+        shot("road", "stop-menu-navigator") { RoadScreen(RoadUi(trip, "NE", stopMenu = stop, stopHandoff = h, carTarget = HandoffTarget.Navigator), noRoad) }
+        compose.onNodeWithTag("stopmenu.navigator.truncated", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("stopmenu.swap", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).assertExists()
     }
@@ -331,6 +356,304 @@ class ScreensScreenshotTest {
         val night = trip.daysList.flatMap { it.stops }.filter { it.kind == "overnight" }[1]
         shot("road", "focus-restored") { RoadScreen(RoadUi(trip, "NE", focus = RoadFocus(night.id, null, 1)), noRoad) }
         compose.onNodeWithTag("road.stop.${night.id}", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun roadDayMenu() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        shot("road", "day-menu") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", dayMenu = 1, dayHandoff = h, carTarget = HandoffTarget.Maps), noRoad) }
+        compose.onNodeWithText("В навигатор: день 1").assertExists()
+        compose.onNodeWithText("Открыть в Яндекс Картах").assertExists()
+    }
+
+    @Test
+    fun roadSyntheticApprox() {
+        val r = v2PlanTrip("plan-synthetic.json")
+        shot("road", "approx-distances") { RoadScreen(RoadUi(r.trip, "E"), noRoad) }
+        compose.onNodeWithTag("road.approx", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun roadAboutData() = shot("road", "about-data") { RoadScreen(RoadUi(v2PlanTrip("plan-synthetic.json").trip, "E", aboutData = true), noRoad) }
+
+    @Test
+    fun roadRowsTappableOnlyForSightsAndHotels() {
+        // DEV-304: a sight row has click semantics, a fuel / rest row has none (M§15.5).
+        val trip = snapshot("G02_golden_ring")
+        compose.setContent { RoadScreen(RoadUi(trip, "NE"), noRoad) }
+        compose.waitForIdle()
+        val all = trip.daysList.flatMap { it.stops }
+        val sight = all.first { it.kind == "sight" }
+        assertTrue(compose.onNodeWithTag("road.stop.${sight.id}").fetchSemanticsNode().config.contains(SemanticsActions.OnClick))
+        all.filter { it.kind == "fuel" || it.kind == "rest" || it.kind == "start" || it.kind == "food" }.forEach { s ->
+            assertFalse(s.kind, compose.onNodeWithTag("road.stop.${s.id}").fetchSemanticsNode().config.contains(SemanticsActions.OnClick))
+        }
+    }
+
+    @Test
+    fun roadFitBadges() {
+        val trip = snapshot("G02_golden_ring")
+        val budgeted = trip.copy(cost = trip.cost.copy(budgetRub = 40_000, overBudget = false))
+        shot("road", "fit-badge") { RoadScreen(RoadUi(budgeted, "NE"), noRoad) }
+        compose.onNodeWithTag("road.fit", useUnmergedTree = true).assertExists()
+        val tight = trip.copy(
+            cost = trip.cost.copy(budgetRub = 32_000, overBudget = true),
+            budgetFit = app.verst.core.model.dto.BudgetFitDto("small_overrun", 32_000, 33_600, 41_000, trip.cost.totalRub),
+        )
+        shot("road", "tight-badge") { RoadScreen(RoadUi(tight, "NE"), noRoad) }
+        compose.onNodeWithTag("road.tight", useUnmergedTree = true).assertExists()
+        shot("road", "minimum-over") { RoadScreen(RoadUi(budgeted.copy(cost = budgeted.cost.copy(budgetRub = 30_000, overBudget = true)), "NE", minimum = true), noRoad) }
+        compose.onNodeWithTag("road.over", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun roadReplaceSheetBreaksBudget() {
+        val trip = snapshot("G02_golden_ring")
+        val stop = trip.daysList.flatMap { it.stops }.first { it.alternatives.size >= 2 }
+        val flagged = stop.copy(alternatives = stop.alternatives.mapIndexed { i, a -> if (i == 0) a.copy(breaksBudget = true) else a })
+        shot("road", "replace-breaks-budget") { RoadScreen(RoadUi(trip, "NE", replace = ReplaceUi(flagged)), noRoad) }
+        compose.onNodeWithTag("replace.alt.0.breaks", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("не в бюджете").assertExists()
+    }
+
+    // ---------------------------------------------------------------------------------------- 5.9 cards
+
+    private fun card(name: String, kind: String, sign: String, details: app.verst.core.model.dto.PoiDetailsDto?, hotel: app.verst.core.model.dto.HotelOptionDto? = null) =
+        app.verst.feature.card.CardUi(name, sign, kind = kind, details = details, hotel = hotel)
+
+    private val noCard = object : app.verst.feature.card.CardActions {
+        override fun close() = Unit
+    }
+
+    @Composable
+    private fun CardOverRoad(ui: app.verst.feature.card.CardUi) {
+        Box(Modifier.fillMaxSize()) {
+            RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", card = ui), object : RoadActions by noRoad {
+                override fun card(): app.verst.feature.card.CardActions = noCard
+            })
+        }
+    }
+
+    @Test
+    fun cardSight() {
+        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
+        shot("card", "sight-placeholder") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
+        compose.onNodeWithText("билет ≈ 400 ₽, детский ≈ 200 ₽ · цена примерная").assertExists()
+    }
+
+    @Test
+    fun cardHotelArea() {
+        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-hotel.json", EngineJson::poiDetails)
+        val night = snapshot("G02_golden_ring").daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
+        shot("card", "hotel-area") { CardOverRoad(card(d.nameRu, "hotel", "hotel", d, night.hotelOptions.first())) }
+        compose.onNodeWithTag("card.fictional", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Фото района: Ярославль · Wikimedia Commons").assertExists()
+    }
+
+    @Test
+    fun cardBar() {
+        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-bar.json", EngineJson::poiDetails)
+        shot("card", "bar") { CardOverRoad(card(d.nameRu, "bar", "service", d)) }
+        compose.onNodeWithTag("card.osm", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun cardFixtureSight() {
+        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-fixture-sight.json", EngineJson::poiDetails)
+        shot("card", "fixture-sight") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
+    }
+
+    @Test
+    fun photoFrameStates() {
+        // DEV-300: loading, loaded (a fake image, crop and contain), error and offline — the frame never changes size.
+        val fake = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color(0xFF5A7C99))
+        shot("card", "photo-states") {
+            androidx.compose.foundation.layout.Column(
+                Modifier.fillMaxSize().background(DesignTokens.color.dash.raised).padding(20.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+            ) {
+                val ph = app.verst.feature.card.Placeholder.MUSEUM
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loading, ph, null, false, "loading", Modifier.height(96.dp))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loaded(fake, contain = false, portrait = false), ph, "Фото: Wikimedia Commons · Анна П. · CC BY-SA 4.0", false, "loaded", Modifier.height(96.dp))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Error, app.verst.feature.card.Placeholder.CHURCH, null, false, "error", Modifier.height(96.dp))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Offline, app.verst.feature.card.Placeholder.PARK, null, false, "offline", Modifier.height(96.dp))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loaded(fake, contain = false, portrait = false), app.verst.feature.card.Placeholder.CITY, "Фото района: Ярославль · Wikimedia Commons", true, "area", Modifier.height(96.dp))
+            }
+        }
+        compose.onNodeWithTag("photo.offline", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("photo.error", useUnmergedTree = true).assertExists()
+        assertTrue(app.verst.feature.card.containFor(200, 150, false))
+        assertTrue(app.verst.feature.card.containFor(6000, 1200, false))
+        assertTrue(app.verst.feature.card.containFor(800, 600, true))
+        assertFalse(app.verst.feature.card.containFor(4000, 3000, false))
+    }
+
+    // ---------------------------------------------------------------------------------------- 5.8 budget
+
+    @Test
+    fun noFitScreen() {
+        val trip = (Json.parseToJsonElement(root.resolve("docs/contracts/v2/plan-synthetic.json").readText()).jsonObject["response"]!!.jsonObject["result"]!!.jsonObject)["trip"].toString()
+        val env = """{"ok": true, "result": {"outcome": "no_fit", "budgetRub": 30000, "allowedRub": 31500,
+            "minimum": {"totalRub": 41200, "levers": [], "trip": $trip, "shareText": "s"},
+            "options": [{"kind": "shorten", "days": 2, "totalRub": 29700, "readyRouteId": "rr_golden_ring_short", "titleRu": "Золотое кольцо · коротко"},
+              {"kind": "cheaper_route", "totalRub": 24300, "readyRouteId": "rr_yaroslavl", "titleRu": "Ярославль"},
+              {"kind": "raise_budget", "budgetRub": 42000}],
+            "textRu": "В 30 000 ₽ эта поездка не помещается даже в самом экономном варианте — минимум ≈ 41 200 ₽."}, "ms": 1}"""
+        val nf = ((EngineJson.planOutcome(env) as EngineResult.Ok).value as app.verst.core.model.dto.PlanOutcome.NoFit).noFit
+        shot("budget", "no-fit") {
+            app.verst.feature.budget.NoFitScreen(nf, object : app.verst.feature.budget.NoFitActions {
+                override fun back() = Unit
+                override fun option(o: app.verst.core.model.dto.BudgetOptionDto) = Unit
+                override fun showMinimum() = Unit
+            })
+        }
+        compose.onNodeWithText("Не помещается в бюджет").assertExists()
+        compose.onNodeWithTag("nofit.option.2", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun waybillFitted() {
+        val trip = snapshot("G02_golden_ring")
+        val fitted = trip.copy(
+            cost = trip.cost.copy(budgetRub = 35_000, remainingRub = 35_000 - trip.cost.totalRub, overBudget = false),
+            budgetFit = app.verst.core.model.dto.BudgetFitDto(
+                "fits", 35_000, 36_700, trip.cost.totalRub + 10_700, trip.cost.totalRub,
+                listOf(app.verst.core.model.dto.BudgetLeverDto("lodging_cheap", 6_000), app.verst.core.model.dto.BudgetLeverDto("food_economy", 4_700)),
+            ),
+        )
+        shot("waybill", "fitted") { WaybillScreen(waybill(fitted), noWaybill) }
+        compose.onNodeWithTag("waybill.levers", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("дешевле ночёвки").assertExists()
+    }
+
+    @Test
+    fun waybillOverRefit() {
+        val trip = snapshot("G02_golden_ring")
+        val over = trip.copy(cost = trip.cost.copy(budgetRub = 30_000, remainingRub = 30_000 - trip.cost.totalRub, overBudget = true))
+        shot("waybill", "over-refit") { WaybillScreen(waybill(over).copy(minimum = true), noWaybill) }
+        compose.onNodeWithTag("waybill.refit", useUnmergedTree = true).assertExists()
+    }
+
+    // ---------------------------------------------------------------------------------------- 5.10 / 5.11 city
+
+    private val noCity = object : app.verst.feature.city.CityActions {
+        override fun back() = Unit
+        override fun changeStart() = Unit
+        override fun preset(p: String) = Unit
+        override fun go() = Unit
+        override fun duration(min: Int) = Unit
+        override fun interest(i: String) = Unit
+        override fun pace(p: String) = Unit
+        override fun budget(rub: Int?) = Unit
+        override fun toggleReturn() = Unit
+        override fun closeCustom() = Unit
+        override fun buildCustom() = Unit
+        override fun age(yes: Boolean) = Unit
+        override fun longer() = Unit
+        override fun otherPreset() = Unit
+    }
+
+    private fun cityUi(error: String? = null, custom: Boolean = false, age: Boolean = false, building: Boolean = false, children: Boolean = false): app.verst.feature.city.CityUi {
+        val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets)
+        return app.verst.feature.city.CityUi(
+            presets.town?.name, "Советская пл., 1", true, if (error == "NO_CITY") emptyList() else presets.presets, false, error, "overview",
+            240, listOf("parks", "views"), "normal", null, true, custom, age, building, children, "11:00",
+        )
+    }
+
+    @Test
+    fun cityPresets() {
+        shot("city", "presets") { app.verst.feature.city.CityScreen(cityUi(), noCity) }
+        compose.onNodeWithTag("city.preset.overview", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.preset.beer", useUnmergedTree = true).assertDoesNotExist() // `available: false` is hidden
+    }
+
+    @Test
+    fun cityKidsBlocked() = shot("city", "kids-blocked") { app.verst.feature.city.CityScreen(cityUi(children = true), noCity) }
+
+    @Test
+    fun cityCustomSheet() = shot("city", "custom-sheet") { app.verst.feature.city.CityScreen(cityUi(custom = true), noCity) }
+
+    @Test
+    fun cityAgeGate() {
+        shot("city", "age-gate") { app.verst.feature.city.CityScreen(cityUi(age = true), noCity) }
+        compose.onNodeWithText("Маршрут для взрослых").assertExists()
+    }
+
+    @Test
+    fun cityBuilding() = shot("city", "building") { app.verst.feature.city.CityScreen(cityUi(building = true), noCity) }
+
+    @Test
+    fun cityNoCity() = shot("city", "no-city") { app.verst.feature.city.CityScreen(cityUi(error = "NO_CITY"), noCity) }
+
+    @Test
+    fun cityNotEnough() = shot("city", "not-enough") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS"), noCity) }
+
+    private val noWalk = object : app.verst.feature.city.WalkActions {
+        override fun back() = Unit
+        override fun save() = Unit
+        override fun share() = Unit
+        override fun stop(s: app.verst.core.model.dto.WalkStopDto) = Unit
+        override fun handoff(part: Int) = Unit
+        override fun other() = Unit
+        override fun card(): app.verst.feature.card.CardActions = noCard
+    }
+
+    private fun walkShot(file: String, state: String) {
+        val w = v2<app.verst.core.model.dto.WalkRouteDto>(file, EngineJson::walkRoute)
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-walk.json", EngineJson::handoff)
+        shot("walk", state) { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, h, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        compose.onNodeWithTag("walk.handoff", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun walkOverview() = walkShot("city_route-overview.json", "overview")
+
+    @Test
+    fun walkMuseumsSpb() = walkShot("city_route-museums-spb.json", "museums-spb")
+
+    @Test
+    fun walkCustom() = walkShot("city_route-custom.json", "custom")
+
+    @Test
+    fun walkRyumochnye() {
+        walkShot("city_route-ryumochnye.json", "ryumochnye")
+        compose.onNodeWithTag("walk.responsible", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Пейте умеренно, чередуйте с водой и едой. За руль — только трезвым.").assertExists()
+    }
+
+    // ---------------------------------------------------------------------------------------- 5.12 location / addresses
+
+    @Test
+    fun navigatorAddressResults() {
+        val rows = listOf(SuggestionDto("address", "Советская улица, 1", "Ярославль", 57.6266, 39.8938))
+        shot("navigator", "address-results") {
+            NavigatorScreen(navigator("Советская 1", emptyList(), null).copy(addressQuery = true, addressState = AddressState.Done, addressResults = rows), {}, {}, {}, {}, {})
+        }
+        compose.onNodeWithTag("address.attribution", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun navigatorAddressFind() = shot("navigator", "address-find") {
+        NavigatorScreen(navigator("Советская 1", emptyList(), null).copy(addressQuery = true), {}, {}, {}, {}, {})
+    }
+
+    @Test
+    fun navigatorAddressOffline() = shot("navigator", "address-offline") {
+        NavigatorScreen(navigator("Советская 1", emptyList(), null).copy(addressQuery = true, online = false), {}, {}, {}, {}, {})
+    }
+
+    @Test
+    fun navigatorOutsideRussia() = shot("navigator", "outside-russia") {
+        NavigatorScreen(navigator("", emptyList(), null).copy(outsideRussia = true), {}, {}, {}, {}, {})
+    }
+
+    @Test
+    fun navigatorGpsApprox() = shot("navigator", "gps-approx") {
+        NavigatorScreen(
+            navigator("", emptyList(), null).copy(origin = GeoPoint("Ярославль", 57.6261, 39.8845), gps = GpsState.On, originFromGps = true, gpsApprox = true, originAddress = "ул. Советская, 1"),
+            {}, {}, {}, {}, {},
+        )
     }
 
     @Test

@@ -20,10 +20,13 @@ class EngineStartupTest {
             .put("pythonStartMs", t.pythonStartMs)
             .put("importMs", t.importMs)
             .put("worldsMs", t.worldsMs)
+            .put("catalogueMs", t.catalogueMs)
             .put("selfcheckMs", t.selfcheckMs)
             .put("totalMs", t.totalMs)
             .put("waitedMs", waited)
         File(E2e.dir(), "timings.json").writeText(json.toString(2))
         assertTrue("totalMs ${t.totalMs} > 8000 (hard limit)", t.totalMs <= 8000)
+        // M§15.2 / backlog DEV-309: engine start incl. the catalogue ≤ 5 000 ms on the emulator.
+        assertTrue("totalMs ${t.totalMs} > 5000 (Sprint 3 budget)", t.totalMs <= 5000)
     }
 }
