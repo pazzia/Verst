@@ -799,7 +799,7 @@
                 "rooms": 1,
                 "priceCrewRub": 5500,
                 "verified": true,
-                "distanceKm": 0.4
+                "exitDistanceM": 440
               },
               {
                 "placeId": "pl_tul_hotel_pryanik",
@@ -812,7 +812,7 @@
                 "rooms": 1,
                 "priceCrewRub": 4800,
                 "verified": true,
-                "distanceKm": 0.6
+                "exitDistanceM": 619
               }
             ],
             "selectedHotelId": "pl_tul_hotel_kremlin"

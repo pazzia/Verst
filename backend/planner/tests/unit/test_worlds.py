@@ -1,4 +1,6 @@
 import itertools
+import json
+import re
 import unittest
 from functools import cache
 
@@ -230,3 +232,15 @@ class WorldsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TownFormsTest(unittest.TestCase):
+    """OI-39: every fixture town has a genitive and a prepositional name in Cyrillic."""
+
+    def test_every_town_has_genitive_and_prepositional(self) -> None:
+        for name in ("central_russia_v1", "edge_cases_v1"):
+            data = json.loads((WORLDS / f"{name}.json").read_text("utf-8"))
+            for t in data["towns"]:
+                with self.subTest(t["id"]):
+                    for key in ("nameGenRu", "namePrepRu"):
+                        self.assertRegex(t[key], re.compile(r"^[А-ЯЁ][А-Яа-яЁё -]+$"), key)

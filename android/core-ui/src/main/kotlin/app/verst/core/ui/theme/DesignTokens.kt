@@ -1222,6 +1222,78 @@ object DesignTokens {
             val easing: Easing = DesignTokens.motion.easing.accelerate
             const val infinite: Boolean = false
         }
+        object toastIn {
+            const val durationMs: Int = 200
+            val easing: Easing = DesignTokens.motion.easing.decelerate
+            val fromDyDp: Dp = 8.dp
+            const val showMs: Int = 3000
+            const val showWithActionMs: Int = 6000
+            const val infinite: Boolean = false
+        }
+        object toastOut {
+            const val durationMs: Int = 150
+            val easing: Easing = DesignTokens.motion.easing.accelerate
+            const val infinite: Boolean = false
+        }
+        object dialogIn {
+            const val durationMs: Int = 200
+            val easing: Easing = DesignTokens.motion.easing.decelerate
+            const val fromScale: Float = 0.96f
+            const val scrimAlpha: Float = 0.6f
+            const val infinite: Boolean = false
+        }
+        object dialogOut {
+            const val durationMs: Int = 150
+            val easing: Easing = DesignTokens.motion.easing.accelerate
+            const val infinite: Boolean = false
+        }
+        object captionFade {
+            const val durationMs: Int = 150
+            val easing: Easing = DesignTokens.motion.easing.standard
+            const val infinite: Boolean = false
+        }
+        object laneSlowDown {
+            const val durationMs: Int = 800
+            val easing: Easing = DesignTokens.motion.easing.decelerate
+            const val fromPeriodMs: Int = 450
+            const val toPeriodMs: Int = 900
+            const val infinite: Boolean = false
+        }
+        object rowFlash {
+            const val durationMs: Int = 1200
+            val easing: Easing = DesignTokens.motion.easing.easeOut
+            const val infinite: Boolean = false
+        }
+        object valueCrossfade {
+            const val durationMs: Int = 200
+            val easing: Easing = DesignTokens.motion.easing.standard
+            const val infinite: Boolean = false
+        }
+        object fieldPulse {
+            const val durationMs: Int = 1200
+            const val totalMs: Int = 2400
+            val easing: Easing = DesignTokens.motion.easing.easeInOut
+            const val fromAlpha: Float = 1.0f
+            const val toAlpha: Float = 0.4f
+            const val infinite: Boolean = false
+        }
+        object spinner {
+            const val durationMs: Int = 900
+            val easing: Easing = DesignTokens.motion.easing.linear
+            const val sweepDeg: Float = 270.0f
+            const val infinite: Boolean = true
+        }
+        object loadingDots {
+            const val durationMs: Int = 900
+            const val stepMs: Int = 300
+            val dotDp: Dp = 4.dp
+            const val infinite: Boolean = true
+        }
+        object rowRemove {
+            const val durationMs: Int = 250
+            val easing: Easing = DesignTokens.motion.easing.accelerate
+            const val infinite: Boolean = false
+        }
         object screen {
             object zoomToNavi {
                 const val durationMs: Int = 450

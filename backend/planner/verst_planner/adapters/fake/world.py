@@ -389,6 +389,7 @@ class _Loader:
                 id=tid,
                 name_ru=str(self._req(t, "nameRu", path)),
                 name_prep_ru=t.get("namePrepRu"),
+                name_gen_ru=t.get("nameGenRu"),
                 point=node.point,
                 region_code=region,
                 population=int(t.get("population", 0)),

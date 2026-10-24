@@ -58,7 +58,7 @@ def hotel_option(p: Place, inp: NormalizedInput, lateral_km: float = 0.0) -> Hot
         rooms(inp),
         rooms(inp) * price,
         p.source is not Source.OSM,
-        round(lateral_km, 1),
+        round(lateral_km * 1000),
     )
 
 

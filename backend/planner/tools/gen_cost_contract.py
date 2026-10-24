@@ -161,11 +161,15 @@ def expected(units, crew, reserve_on, budget, overrides):
         if alt is None:
             ticket_list.append((t["adultRub"], t["childRub"]))
         elif alt["adultRub"] is not None:
-            ticket_list.append((alt["adultRub"], alt["childRub"] if alt["childRub"] is not None else alt["adultRub"]))
+            ticket_list.append(
+                (alt["adultRub"], alt["childRub"] if alt["childRub"] is not None else alt["adultRub"])
+            )
     ticketed = {t["stopId"] for t in units["tickets"]}
     for sid, alt in replaced.items():
         if sid not in ticketed and alt["adultRub"] is not None:
-            ticket_list.append((alt["adultRub"], alt["childRub"] if alt["childRub"] is not None else alt["adultRub"]))
+            ticket_list.append(
+                (alt["adultRub"], alt["childRub"] if alt["childRub"] is not None else alt["adultRub"])
+            )
     for a, c in ticket_list:
         tickets += crew["adults"] * a + crew["children"] * c
     lines = {
@@ -442,6 +446,7 @@ case(
     units=mod(tickets=[ticket("d1s02", "pl_k", "Кремль", 1005, 1005)]),
 )
 
+
 def alt(region_code, delta, check=None, adult=None, child=None, price=None, region_name="", trip_delta=0):
     return {
         "tripKmDelta": trip_delta,
@@ -495,7 +500,10 @@ case(
     units=mod(
         fuel={
             **BASE["fuel"],
-            "regions": [region("RU-YAR", "Ярославская область", 740.0, "62.00"), region("RU-KOS", "Костромская область", 4.0, "62.20")],
+            "regions": [
+                region("RU-YAR", "Ярославская область", 740.0, "62.00"),
+                region("RU-KOS", "Костромская область", 4.0, "62.20"),
+            ],
         }
     ),
     overrides={"replaced": {"d1s04": alt("RU-KOS", -6.0)}},

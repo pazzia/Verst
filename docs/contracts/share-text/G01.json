@@ -1353,7 +1353,7 @@
                 "rooms": 1,
                 "priceCrewRub": 6000,
                 "verified": true,
-                "distanceKm": 1.3
+                "exitDistanceM": 1348
               },
               {
                 "placeId": "pl_yar_hotel_volga",
@@ -1366,7 +1366,7 @@
                 "rooms": 1,
                 "priceCrewRub": 7000,
                 "verified": true,
-                "distanceKm": 0.9
+                "exitDistanceM": 899
               },
               {
                 "placeId": "pl_yar_hotel_kotorosl",
@@ -1378,7 +1378,7 @@
                 "rooms": 1,
                 "priceCrewRub": 4800,
                 "verified": true,
-                "distanceKm": 0.3
+                "exitDistanceM": 270
               }
             ],
             "selectedHotelId": "pl_yar_hotel_strelka"
