@@ -5,7 +5,7 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonObject
 
 /*
- * Sprint 3 mobile API v2 DTOs (M§5.4, docs/contracts/v2/*.json; ADR-0011…0014). Every field the app does not
+ * Sprint 3 mobile API v2 DTOs (M§5.4, docs/contracts/v2; ADR-0011…0014). Every field the app does not
  * need to branch on is optional, so additive engine changes never break decoding.
  */
 

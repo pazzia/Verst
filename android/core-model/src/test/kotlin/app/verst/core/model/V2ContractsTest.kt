@@ -17,7 +17,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Sprint 3: every `docs/contracts/v2/*.json` response decodes into the app's DTOs (M§5.4, ARCH-305). */
+/** Sprint 3: every `docs/contracts/v2` response decodes into the app's DTOs (M§5.4, ARCH-305). */
 class V2ContractsTest {
     private fun envelope(name: String): String =
         (Json.parseToJsonElement(Contracts.repoRoot.resolve("docs/contracts/v2/$name").readText()).jsonObject["response"] as JsonObject).toString()

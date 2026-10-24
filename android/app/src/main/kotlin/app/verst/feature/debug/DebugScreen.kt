@@ -84,6 +84,12 @@ fun DebugScreen(flow: VerstFlow) {
                 if (s is EngineStatus.Ready) s.info.timings.let { "python ${it.pythonStartMs} · import ${it.importMs} · worlds ${it.worldsMs} · catalogue ${it.catalogueMs} · selfcheck ${it.selfcheckMs} · total ${it.totalMs} ms" } else s.toString(),
                 T.body.md, C.text.secondary,
             )
+            // DEV-300: «О данных» (Wikidata CC0, OSM ODbL, Commons per-file licences, approximate distances)
+            Box(
+                Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).clip12().border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(12.dp))
+                    .clickable(role = Role.Button) { flow.openAboutData() }.testTag("debug.about"),
+                contentAlignment = Alignment.Center,
+            ) { Txt(stringResource(R.string.about_data_title), T.button.md, C.text.primary) }
             Label(stringResource(R.string.debug_label_build))
             Txt(stringResource(R.string.mock_build_line, BuildConfig.BUILD_NUMBER, BuildConfig.GIT_SHA), T.body.md, C.text.secondary)
             Box(
@@ -91,6 +97,12 @@ fun DebugScreen(flow: VerstFlow) {
                     .clickable(role = Role.Button) { flow.askReset() }.testTag("debug.reset"),
                 contentAlignment = Alignment.Center,
             ) { Txt(stringResource(R.string.debug_reset), T.button.md, C.accent.redText) }
+        }
+        if (flow.aboutData) {
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.matchParentSize()) {
+                val h = maxHeight
+                androidx.compose.foundation.layout.Box(Modifier.matchParentSize()) { app.verst.feature.road.AboutDataSheet(h, flow::closeAboutData) }
+            }
         }
         // Release review P2-3: «Сбросить данные» deletes every saved trip — ask first.
         if (flow.resetAsk) {
