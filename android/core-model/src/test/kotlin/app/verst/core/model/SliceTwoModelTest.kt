@@ -35,6 +35,8 @@ class SliceTwoModelTest {
         // P0 regression guard: the slice showed haversine (249) and haversine × 1.25 (312) for Москва → Ярославль.
         val names = TripMath::class.java.declaredMethods.map { it.name }
         assertFalse(names.toString(), names.any { it.contains("haversine", true) || it.contains("roadKm", true) })
+        assertEquals("NE", TripMath.bearing8(DefaultOrigin, yar))
+        assertEquals("S", TripMath.bearing8(DefaultOrigin, GeoPoint("Тула", 54.1961, 37.6182)))
     }
 
     private fun envelope(trip: String) = """{"ok":true,"result":{"trip":$trip,"shareText":"Текст","pricesMonthRu":"октябрь","pricesYear":"2026"},"ms":3}"""

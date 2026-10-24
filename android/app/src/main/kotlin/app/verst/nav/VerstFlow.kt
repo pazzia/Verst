@@ -458,7 +458,8 @@ class VerstFlow(
             }
             when (val r = finished) {
                 is EngineResult.Ok -> {
-                    showTrip(r.value, request, readyRoute?.bearing8 ?: "N", savedId = null, fromSaved = false)
+                    val bearing = readyRoute?.bearing8 ?: request.destination?.let { TripMath.bearing8(request.origin, it) } ?: "N"
+                    showTrip(r.value, request, bearing, savedId = null, fromSaved = false)
                     drive = drive.copy(progress = 1f, done = true, days = r.value.trip.days)
                     delay(AUTO_ADVANCE_MS)
                     if (top == Route.Drive) openRoad()

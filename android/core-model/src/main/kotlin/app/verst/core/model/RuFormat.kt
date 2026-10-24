@@ -32,6 +32,17 @@ object TripMath {
     /** Odometer default (5.3 §3): 300 if the trip is < 800 km, 500 otherwise. */
     fun defaultDailyKm(tripKm: Int): Int = if (tripKm < 800) 300 else 500
 
+    /** Initial bearing a → b snapped to 8 directions (N, NE … NW) for the Road-ahead arrow of a free trip. */
+    fun bearing8(a: GeoPoint, b: GeoPoint): String {
+        val f1 = Math.toRadians(a.lat)
+        val f2 = Math.toRadians(b.lat)
+        val dl = Math.toRadians(b.lon - a.lon)
+        val y = kotlin.math.sin(dl) * kotlin.math.cos(f2)
+        val x = kotlin.math.cos(f1) * kotlin.math.sin(f2) - kotlin.math.sin(f1) * kotlin.math.cos(f2) * kotlin.math.cos(dl)
+        val deg = (Math.toDegrees(kotlin.math.atan2(y, x)) + 360.0) % 360.0
+        return listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")[((deg + 22.5) / 45.0).toInt() % 8]
+    }
+
     const val KM_MIN = 150
     const val KM_MAX = 900
     const val KM_STEP = 50
