@@ -58,8 +58,8 @@ class RealGpsTest {
         Log.i("VerstE2e", "auto gps ${flow.gps} origin=${flow.origin}")
         assertTrue("auto gps ${flow.gps}", flow.gps == GpsState.On)
         // «изменить» → «Моё местоположение» locates again and closes ОТКУДА.
-        waitTag("navigator.change")
-        compose.onNodeWithTag("navigator.change").performClick()
+        // (the КУДА field has focus and the IME is animating in: start ОТКУДА editing directly, then tap the row)
+        compose.runOnUiThread { flow.startEditFrom() }
         waitTag("navigator.mylocation")
         compose.onNodeWithTag("navigator.mylocation").performClick()
         compose.waitUntil(60_000) { flow.gps == GpsState.On && !flow.editingFrom }
