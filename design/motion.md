@@ -153,7 +153,7 @@ High-refresh displays (90/120 Hz): loops are time-based, so speed is unchanged; 
 | Token | Where | Property | From → to | Duration | Easing | Compose | Reduced motion |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `photoFadeIn` | `PhotoFrame` | image alpha over the mat | 0 → 1 | 250 ms | `standard` | `animateFloatAsState` on load success | instant |
-| `returnToItem` | 5.5 / 5.11 after a card, Exit, booking or hand-off | scroll position + row background | jump (0 ms) to the saved offset; then `color.dash.pressed` → transparent | 0 + `highlightMs` 1200 | `easeOut` | `LazyListState.scrollToItem(index, offset)` / `ScrollState.scrollTo(y)` + `animateColorAsState` | jump, no flash |
+| `returnToItem` | 5.5 / 5.11 after a card, Exit, booking or hand-off | scroll position + row background | jump (0 ms) to the saved offset; row background `color.overlay.returnFlash` (yellow 14 %) held `holdMs` 400, then → transparent over the remaining 800 ms (S3-QA: `dash.pressed` was invisible on `dash.raised`, contrast 1.05:1) | 0 + `highlightMs` 1200 | `easeOut` (fade part) | `LazyListState.scrollToItem(index, offset)` / `ScrollState.scrollTo(y)` + `animateColorAsState` | jump; the flash is shown static for 400 ms, then removed without a fade |
 | `footsteps` | `WalkColumn` (5.11) | footprint pair y | 0 → `periodDp` 48 | 1800 ms | `linear` | scene clock, global phase | one pair at the top |
 | `lamps` | `CityScene` | glow alpha | 0.7 ↔ 1 | 3200 ms (1600 each way), offsets 0 / 1100 / 2200 | `easeInOut` | clock | alpha 1 |
 | `limitSignIn` | 5.8 no-fit screen | the round limit sign: scale 0.8 → 1, alpha 0 → 1 (pivot centre), with `screen.arrive` | | 400 ms | `decelerate` | `Animatable` on first composition | final frame |

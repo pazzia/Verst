@@ -101,6 +101,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `windshield_offline_meta` | маршрут построим, когда появится сеть | caption meta |
 | `windshield_no_routes_sign` | Рядом пока нет готовых маршрутов | empty |
 | `windshield_no_routes_footer` | Наберите любой город в навигаторе ↓ | empty |
+| `windshield_meta_round_trip` | туда и обратно | caption meta suffix of a there-and-back ready route: «2 дня · по М-8 · туда и обратно»; not added when the subtitle already says «по кругу» (S3-QA, was pending) |
 | `windshield_no_routes_hint` | маршрут построим из любой точки России | empty, navi hint line |
 | `windshield_no_routes_label` | КУДА ЕДЕМ? | caption label |
 | `windshield_no_routes_title` | Выберите в навигаторе | |
@@ -153,7 +154,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `navigator_recent` | НЕДАВНО ИСКАЛИ | OI-04 |
 | `navigator_popular` | ЧАСТО ИЩУТ | OI-04, chips from config |
 | `navigator_type_city` | Г | badge |
-| `navigator_type_street` | У | badge |
+| `navigator_type_address` | У | badge of an address row (5.12 §2; «У» = улица, as the address rows always name a street). S3-QA: renamed from the unused `navigator_type_street` |
 | `navigator_type_place` | М | badge |
 | `navigator_route_label` | МАРШРУТ | caption |
 | `navigator_route_title` | {from} → {to} | vias inserted with « → » |
@@ -711,6 +712,7 @@ Keys for the on-device mock build (architecture-android-mvp M§9, ADR-0010). Spe
 | `debug_reset_body` | Удалим сохранённые поездки и настройки на этом телефоне | |
 | `debug_reset_yes` | Сбросить | |
 | `debug_reset_no` | Отмена | |
+| `debug_mock_location` | Имитация местоположения | debug panel: mock location picker (S3-QA, was pending) |
 
 ## 15. Sprint 3 — budget fit, cards, «По городу», location and addresses, hand-off
 
@@ -728,6 +730,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `budget_option_shorten_sub` | {title} · ≈ {amount} ₽ | «Золотое кольцо · коротко · ≈ 29 700 ₽» |
 | `budget_option_cheaper` | Ближе и дешевле: {title} | option `titleRu` |
 | `budget_option_cheaper_sub` | ≈ {amount} ₽ · помещается в бюджет | |
+| `budget_option_cheaper_sub_over` | ≈ {amount} ₽ · дешевле, но больше бюджета | cheaper-route option with `fits: false`; never «помещается» (S3-QA, was pending) |
 | `budget_option_raise` | Поднять бюджет до {amount} ₽ | |
 | `budget_option_raise_sub` | тот же маршрут, без изменений | |
 | `budget_nofit_cta` | Смотреть варианты | Drive CTA when the outcome is `no_fit` (auto-advance 1 s) |
@@ -762,6 +765,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `card_photo_area` | Фото района: {town} · Wikimedia Commons | hotels (engine `labelRu`); **mandatory** on hotel cards |
 | `card_area_plate` | ФОТО РАЙОНА | plate on the hotel photo (uppercase copy) |
 | `card_hotel_fictional` | Гостиница в демо-сборке вымышленная — на фото район, а не она | under the hotel photo |
+| `card_hotel_fictional_nophoto` | Гостиница в демо-сборке вымышленная | hotel card while the area photo is a placeholder (none / error / offline): the «на фото район» clause and the `card_photo_area` credit are hidden (S3-QA P1-05) |
 | `card_photo_none` | Фото пока нет | placeholder (no file / no free licence) |
 | `card_photo_offline` | Фото загрузится, когда будет интернет | placeholder offline |
 | `card_photo_error` | Фото не загрузилось | placeholder HTTP error |
@@ -784,6 +788,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `card_hours_unverified` | часы уточняйте | when `hours.verified = false` |
 | `card_ticket` | билет ≈ {adult} ₽, детский ≈ {child} ₽ | `ticket.estimate = true` → add `card_price_estimate` |
 | `card_ticket_free` | вход свободный | |
+| `card_per_night` | за ночь | hotel fact after the price: «≈ 6 000 ₽ за ночь» (S3-QA, was pending) |
 | `card_price_estimate` | цена примерная | |
 | `card_heritage` | объект культурного наследия | |
 | `card_unverified` | По открытым данным — может быть неточно | catalogue places (`verified = false`) |
@@ -841,6 +846,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `city_caption_label` | ПРОГУЛКА | |
 | `city_caption_title` | {name} · {h} ч | |
 | `city_caption_meta` | {town} · старт {time} | before the route exists |
+| `city_caption_meta_tomorrow` | {town} · старт завтра в {time} | the engine's `startAt` is on the next day (S3-QA P0-01) |
 | `city_go` | ПОШЛИ | start-button label |
 | `city_building` | Собираем прогулку… | shimmer caption while `city_route` runs |
 | `city_no_city_title` | Рядом нет города | `NO_CITY` |
@@ -860,7 +866,10 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `walk_chip_km` | ≈ {km} км пешком | |
 | `walk_chip_back` | с возвратом к старту | |
 | `walk_header` | Старт {start} · финиш ≈ {finish} | above the first row |
+| `walk_header_tomorrow` | Завтра: старт {start} · финиш ≈ {finish} | `startAt` on the next day (S3-QA P0-01) |
 | `walk_next` | через {distance} · {min} мин пешком | `{distance}` «600 м» / «1,2 км» |
+| `walk_distance_m` | {m} м | `{distance}` under 1 km, rounded to 50 m: «600 м»; ≥ 1 km uses `common_km` «1,2 км» (S3-QA, was pending) |
+| `walk_shorter` | Получилось {dur} ч вместо {asked} ч — больше открытых мест рядом нет | `{dur}`, `{asked}` pre-formatted hours («2», «2,5»); note above the column when the engine's duration is shorter than the preset / chosen one (S3-QA P1-02) |
 | `walk_start_row` | старт | |
 | `walk_finish_row` | финиш | |
 | `walk_hours_unverified` | часы работы уточняйте | engine `noteRu` default |
@@ -871,6 +880,8 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `walk_footer_label` | СКОЛЬКО СТОИТ ПРОГУЛКА | |
 | `walk_footer_total` | ≈ {amount} ₽ на всех | |
 | `walk_footer_per_person` | ≈ {amount} ₽ на человека | |
+| `walk_footer_free` | Бесплатно | footer amount when the walk total is 0 ₽; the per-person line is hidden (S3-QA P1-03) |
+| `walk_footer_free_sub` | вход везде свободный | right-hand line of the free footer |
 | `walk_saved_kind` | прогулка | «Мои поездки» meta word for walks |
 | `cd_city_preset` | {name}, {sub}. Выбрать | |
 | `cd_city_preset_18` | {name}, только для взрослых, {sub}. Выбрать | |

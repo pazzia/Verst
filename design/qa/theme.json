@@ -816,6 +816,15 @@
    "x": 227.5,
    "y": 1099.0,
    "hex": "#FFD23F"
+  },
+  {
+   "item": "color.overlay.returnFlash",
+   "state": "palette",
+   "x": 292.5,
+   "y": 1099.0,
+   "hex": "#352F1C",
+   "tol": 1,
+   "alpha": 0.14
   }
  ],
  "justified": {}
