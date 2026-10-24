@@ -4,7 +4,7 @@ Build: `main` = `ad7be27` (DEV-SLICE). Screenshots: `ci-logs` run `40083346786-1
 
 Priorities: **P0** broken (crash, unreadable, wrong data). **P1** noticeably off-spec (beyond tolerance, missing spec element, wrong colour). **P2** polish or scope cut to confirm.
 
-Already logged and **not repeated** below: system fonts instead of Plex (DES-100; fonts now on `bot/fonts-4`, see the end); km shown inconsistently (≈ 249 Navigator, ≈ 312 Instruments/Drive, 265 Road ahead). One more data point for that issue: «Золотое кольцо» is 745 on the Windshield sign and Instruments caption but **761** on the Road ahead title sign.
+Already logged and **not repeated** below: system fonts instead of Plex (DES-100; fonts now in this branch, see the end); km shown inconsistently (≈ 249 Navigator, ≈ 312 Instruments/Drive, 265 Road ahead). One more data point for that issue: «Золотое кольцо» is 745 on the Windshield sign and Instruments caption but **761** on the Road ahead title sign.
 
 Not reviewed (slice scope, dev-notes item 4): Waybill, Exit, sheets, save/share, debug panel, all animation (lanes, pulse, posts, flying signs, shimmer, odometer roll, car marker), vias, map picker, TalkBack audit. Screenshots are static frames, so motion items (W-04/05/21 pulse, D-03/04, R-06 motion) are not judged.
 
@@ -112,7 +112,7 @@ Sampler: 5.1 13 failing points, 5.2 13, 5.3 16, 5.4 5, 5.5 7 (the rest of the po
 
 ## DES-100 fonts
 
-Fonts are on `bot/fonts-4` (see the Designer's report for SHA and verification). Two findings change what we ship:
+Fonts: workflow run 40092704186 → `bot/fonts-4` (`530b43d`), fast-forwarded into this branch. All six files have `missingGlyphs: []` and sha256 equal to `android/fonts.lock`; `usWeightClass` is 400/500/600/700/600/400; the 3 OFL texts are under `assets/licenses/`. Wiring is the Developer's: `python3 tools/sync_design_tokens.py`, which turns on `DesignTokensInSyncTest` equality, then G-03 on the next screenshots. Two findings change what we ship:
 
 1. **google/fonts' IBM Plex Sans Condensed (v1.3) has no Cyrillic.** Not one glyph in U+0400–04FF; the mockups' Cyrillic was rendered in a browser fallback. The npm packages `@ibm/plex-sans-condensed@2.0.0` and `@ibm/plex@6.4.1` contain no TTFs. IBM Plex Sans v3.201 on google/fonts is a `[wdth,wght]` variable font, wdth 75–100, with full Cyrillic. Its **wdth 75** instance matches the v1.3 Condensed Latin advances to 0.01 %, so we cut the four static weights there. Resource names are unchanged (`ibm_plex_sans_condensed_*`), so `DesignTokens.kt` needs no change. Recorded in `design/decisions.md` for the Manager's confirmation (the OFL Reserved Font Name question).
 2. **Marck Script lacks «₽», «→», U+00A0 and U+202F; Plex Mono lacks U+202F.** This is OI-12 as decided: «₽» and «≈» in handwritten values are set in Plex. Spaces fall back per character and are invisible.
