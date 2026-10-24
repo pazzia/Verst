@@ -72,6 +72,10 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.layout.layout
+import app.verst.feature.common.scaled
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import app.verst.core.model.RuFormat
@@ -167,6 +171,9 @@ interface RoadActions {
     fun closeStopMenu() = Unit
     fun navigatorFromStop() = Unit
     fun stopMenuReplace() = Unit
+    /** D-7 from the stop menu / the row's TalkBack action. */
+    fun stopMenuReport() = Unit
+    fun reportStop(stop: StopDto) = Unit
 
     /** S3-R1 focus restore: the top visible row and the scroll (debounced) and «the highlight was shown». */
     fun topRow(id: String?, scrollY: Int = 0) = Unit
@@ -193,6 +200,8 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
     var content by remember { mutableStateOf<LayoutCoordinates?>(null) }
     var viewportH by remember { mutableStateOf(0) }
     var highlight by remember { mutableStateOf<String?>(null) }
+    // 5.9 §5: TalkBack focus moves to the returned row (input focus → TYPE_VIEW_FOCUSED, TalkBack follows it).
+    val requesters = remember(trip) { mutableMapOf<String, FocusRequester>() }
     val density = LocalDensity.current
     val reducedMotion = LocalReducedMotion.current
     LaunchedEffect(ui.focus.seq) {
@@ -210,6 +219,8 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
         }
         scroll.scrollTo(target.coerceIn(0, scroll.maxValue))
         if (f.focusId != null) {
+            withFrameNanos { }
+            runCatching { requesters[f.focusId]?.requestFocus() }
             if (!reducedMotion) highlight = f.focusId // reduced motion: jump, no flash
             delay(DesignTokens.motion.returnToItem.highlightMs.toLong())
             highlight = null
@@ -258,9 +269,11 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                                     StopRow(
                                         st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name,
                                         highlighted = st.id == highlight,
+                                        focusRequester = requesters.getOrPut(st.id) { FocusRequester() },
                                         onPlaced = { y, h -> if (rows[st.id] != y to h) rows[st.id] = y to h },
                                         content = { content },
                                         onLongPress = { a.stopMenu(st) },
+                                        onReport = { a.reportStop(st) },
                                         onTap = if (ui.tappable(st)) ({ a.card(st) }) else null,
                                         onHotel = { a.hotel(st.id) },
                                     ) { a.replace(st) }
@@ -333,7 +346,7 @@ private fun androidx.compose.foundation.layout.BoxScope.ReplaceSheet(r: ReplaceU
 
 /**
  * D-5 stop menu (5.13): the first item `handoff_from_stop` (target line below, the truncated note when the engine
- * kept only 8 vias), then «Заменить». «Сообщить об ошибке» (D-7) is not built yet.
+ * kept only 8 vias), then «Заменить», then «Сообщить об ошибке» (D-7).
  */
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
@@ -347,6 +360,7 @@ private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
         HandoffItem(stringResource(R.string.handoff_from_stop), target, handoff?.truncated == true, enabled = handoff != null, tag = "stopmenu.navigator", onClick = a::navigatorFromStop)
         val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
         if (canReplace) MenuRow(stringResource(R.string.stopmenu_swap), null, enabled = true, tag = "stopmenu.swap", onClick = a::stopMenuReplace)
+        MenuRow(stringResource(R.string.stopmenu_report), null, enabled = true, tag = "stopmenu.report", onClick = a::stopMenuReport)
     }
 }
 
@@ -463,14 +477,6 @@ private fun deltaText(alt: AlternativeDto): String {
         alt.deltaRub != 0 -> stringResource(R.string.replace_delta_rub, sign(alt.deltaRub), rub)
         else -> stringResource(R.string.replace_delta_none)
     }
-}
-
-/** Lays the content out at [k] of its natural size (the 0.7 mini signs of D-6). */
-private fun Modifier.scaled(k: Float): Modifier = layout { m, _ ->
-    val p = m.measure(androidx.compose.ui.unit.Constraints())
-    val w = (p.width * k).toInt()
-    val h = (p.height * k).toInt()
-    layout(w, h) { p.placeWithLayer((w - p.width) / 2, (h - p.height) / 2) { scaleX = k; scaleY = k } }
 }
 
 @Composable
@@ -601,9 +607,11 @@ private fun StopRow(
     booked: Boolean,
     townPrep: String,
     highlighted: Boolean,
+    focusRequester: FocusRequester,
     onPlaced: (y: Int, h: Int) -> Unit,
     content: () -> LayoutCoordinates?,
     onLongPress: () -> Unit,
+    onReport: () -> Unit,
     onTap: (() -> Unit)?,
     onHotel: () -> Unit,
     onReplace: () -> Unit,
@@ -636,6 +644,7 @@ private fun StopRow(
     val openLabel = stringResource(R.string.cd_card, s.name)
     val naviLabel = stringResource(R.string.cd_road_action_navigator)
     val swapLabel = stringResource(R.string.stopmenu_swap)
+    val reportLabel = stringResource(R.string.cd_road_action_report)
     Row(
         Modifier.fillMaxWidth()
             .onGloballyPositioned { c -> content()?.let { root -> if (root.isAttached && c.isAttached) onPlaced(root.localPositionOf(c, Offset.Zero).y.roundToInt(), c.size.height) } }
@@ -659,8 +668,11 @@ private fun StopRow(
                 customActions = listOfNotNull(
                     CustomAccessibilityAction(naviLabel) { onLongPress(); true },
                     if (canReplace) CustomAccessibilityAction(swapLabel) { onReplace(); true } else null,
+                    CustomAccessibilityAction(reportLabel) { onReport(); true },
                 )
             }
+            .focusRequester(focusRequester)
+            .focusable()
             .testTag("road.stop.${s.id}"),
     ) {
         Box(Modifier.padding(start = 72.dp).width(68.dp), contentAlignment = Alignment.TopCenter) {

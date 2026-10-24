@@ -60,6 +60,9 @@ import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.InfoChip
 import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.RoadSign
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.components.WalkerIcon
 import app.verst.core.ui.components.overheadPlate
@@ -111,10 +114,14 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
     val scroll = rememberScrollState()
     val rows = remember(w.id) { mutableStateMapOf<String, Int>() }
     var content by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val requesters = remember(w.id) { mutableMapOf<String, FocusRequester>() }
     LaunchedEffect(ui.focusSeq) {
         val id = ui.focusId ?: return@LaunchedEffect
         val y = withTimeoutOrNull(2_000) { snapshotFlow { rows[id] }.filterNotNull().first() } ?: return@LaunchedEffect
         if (y < scroll.value || y > scroll.value + 400) scroll.scrollTo((y - 120).coerceAtLeast(0))
+        // 5.9 §5: TalkBack focus back to the row
+        androidx.compose.runtime.withFrameNanos { }
+        runCatching { requesters[id]?.requestFocus() }
         delay(DesignTokens.motion.returnToItem.highlightMs.toLong())
         a.focusShown()
     }
@@ -149,7 +156,7 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
                         )
                         EndRow(stringResource(R.string.walk_start_row), w.start.label ?: w.townName ?: "", start)
                         w.stops.forEach { s ->
-                            WalkStopRow(s, w.people, s.id == ui.focusId, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y }) { a.stop(s) }
+                            WalkStopRow(s, w.people, s.id == ui.focusId, requesters.getOrPut(s.id) { FocusRequester() }, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y }) { a.stop(s) }
                         }
                         val fin = w.finish
                         if (fin != null) EndRow(stringResource(R.string.walk_finish_row), fin.label ?: "", finish)
@@ -294,7 +301,7 @@ private fun EndRow(kind: String, name: String, time: String) {
 }
 
 @Composable
-private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, content: () -> LayoutCoordinates?, onPlaced: (Int) -> Unit, onTap: () -> Unit) {
+private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, focusRequester: FocusRequester, content: () -> LayoutCoordinates?, onPlaced: (Int) -> Unit, onTap: () -> Unit) {
     val line = stringResource(R.string.walk_next, distance(s.walkKmFromPrev), s.walkMinFromPrev)
     val time = RuFormat.clock(s.arriveAt) ?: ""
     val cost = if (s.costRub > 0) stringResource(R.string.walk_footer_total, RuFormat.thousands(s.costRub)) else null
@@ -311,6 +318,8 @@ private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, content: 
                 contentDescription = cd
                 if (s.tappable) onClick { onTap(); true }
             }
+            .focusRequester(focusRequester)
+            .focusable()
             .testTag("walk.stop.${s.id}"),
     ) {
         Box(Modifier.padding(start = 72.dp).width(68.dp), contentAlignment = Alignment.TopCenter) {
@@ -330,7 +339,7 @@ private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, content: 
 
 /** components §21 bar sign: the `service` look with `glass` (bar, рюмочная) or `mug` (pub, craft). */
 @Composable
-private fun BarSign(kind: String) {
+internal fun BarSign(kind: String) {
     Box(
         Modifier.size(35.dp, 43.dp).clip(RoundedCornerShape(4.dp)).background(C.sign.blue).padding(3.dp)
             .clip(RoundedCornerShape(3.dp)).background(C.sign.white),

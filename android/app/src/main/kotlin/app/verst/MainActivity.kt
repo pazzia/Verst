@@ -146,6 +146,23 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
         // 5.12 location / address toasts above the caption row (start button + 16).
         PlateToast(toastText(t), bottom = 150.dp, action = app.verst.feature.common.toastAction(t), onAction = flow::toastAction)
     }
+    flow.report?.let { r ->
+        // D-7 over Road ahead or the walk (the screens draw the toast after «Отправить»)
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+            val h = maxHeight
+            Box(Modifier.fillMaxSize()) {
+                app.verst.feature.report.ReportSheet(
+                    app.verst.feature.report.ReportUi(r.name, flow.reportReason, flow.reportComment), h,
+                    object : app.verst.feature.report.ReportActions {
+                        override fun close() = flow.closeReport()
+                        override fun reason(r: String) = flow.pickReportReason(r)
+                        override fun comment(t: String) = flow.setReportCommentText(t)
+                        override fun send() = flow.sendReport()
+                    },
+                )
+            }
+        }
+    }
     flow.deleteAsk?.let { d ->
         NaviDialog(
             stringResource(UiR.string.trips_delete_title, d.title), stringResource(UiR.string.trips_delete_body),
@@ -165,7 +182,8 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 @Composable
 private fun Screens(flow: VerstFlow, context: Context) {
     val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
-        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet
+        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
+        flow.report != null
     BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
@@ -313,6 +331,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun closeStopMenu() = flow.closeStopMenu()
                         override fun navigatorFromStop() = flow.navigatorFromStop()
                         override fun stopMenuReplace() = flow.stopMenuReplace()
+                        override fun stopMenuReport() { flow.stopMenu?.let { flow.openReport(it) } }
+                        override fun reportStop(stop: app.verst.core.model.dto.StopDto) = flow.openReport(stop)
                         override fun topRow(id: String?, scrollY: Int) = flow.roadTop(id, scrollY)
                         override fun focusShown() = flow.roadFocusShown()
                     },
@@ -465,6 +485,7 @@ private fun cardActions(flow: VerstFlow, context: Context) = object : app.verst.
     override fun openPage(url: String) {
         runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
     }
+    override fun report() = flow.reportFromCard()
 }
 
 /**

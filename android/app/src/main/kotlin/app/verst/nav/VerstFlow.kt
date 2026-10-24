@@ -106,6 +106,10 @@ sealed interface Toast {
     /** 5.10: an 18+ preset with children in the crew. */
     data object CityKids : Toast
 
+    /** D-7: «Спасибо, проверим» (online) / «Отправим, когда появится сеть» (offline, queued). */
+    data object ReportThanks : Toast
+    data object ReportQueued : Toast
+
     /** «Отметили: ночёвка в … забронирована» + «Вернуть» (stop id). */
     data class Booked(val stopId: String) : Toast
     data object TripDeleted : Toast
@@ -194,6 +198,11 @@ class VerstFlow(
 
     // ---- 5.9 cards
     var card: CardState? by mutableStateOf(null)
+
+    /** D-7 report sheet: the place, the reason (one of [app.verst.core.model.Reports.REASONS]), the comment. */
+    var report: ReportTarget? by mutableStateOf(null)
+    var reportReason: String? by mutableStateOf(null)
+    var reportComment: String by mutableStateOf("")
         private set
     /** 5.12 §3 «О данных» sheet. */
     var aboutData by mutableStateOf(false)
@@ -584,6 +593,10 @@ class VerstFlow(
         }
         if (aboutData) {
             aboutData = false
+            return true
+        }
+        if (report != null) {
+            closeReport()
             return true
         }
         if (card != null) {
@@ -1165,7 +1178,7 @@ class VerstFlow(
     fun openWalkCard(ws: app.verst.core.model.dto.WalkStopDto) {
         if (!ws.tappable) return
         val base = app.verst.feature.card.CardUi(
-            name = ws.nameRu, sign = if (ws.isBar) "service" else "tourist", kind = if (ws.isBar) "bar" else "sight",
+            name = ws.nameRu, sign = if (ws.isBar) "service" else "tourist", tags = listOf(ws.kind), kind = if (ws.isBar) "bar" else "sight",
             loading = ws.poiId != null, offline = !connectivity.online, walkStop = true,
         )
         card = CardState(CardSource.WALK, ws.id, ws.poiId, base)
@@ -1179,15 +1192,84 @@ class VerstFlow(
             val r = gateway.poiDetails(placeId)
             val c = card ?: return@launch
             if (c.rowId != rowId) return@launch
-            card = c.copy(ui = c.ui.copy(loading = false, details = (r as? EngineResult.Ok)?.value, offline = !connectivity.online))
+            var d = (r as? EngineResult.Ok)?.value
+            // S3-R3 debug: real Commons files instead of the catalogue's (round robin) — real photos before the data run
+            if (d != null && debugRealPhotos) {
+                val files = app.verst.core.model.CommonsPhotos.DEBUG_FILES
+                d = d.copy(image = app.verst.core.model.CommonsPhotos.debugImage(d.image, files[debugPhotoIndex++ % files.size]))
+            }
+            card = c.copy(ui = c.ui.copy(loading = false, details = d, offline = !connectivity.online))
         }
     }
+
+    /** Debug panel «Настоящие фото Commons»: [app.verst.core.model.CommonsPhotos.DEBUG_FILES] on every card. */
+    var debugRealPhotos by mutableStateOf(false)
+    var debugPhotoIndex = 0
 
     fun closeCard() {
         val c = card ?: return
         card = null
         if (c.source == CardSource.ROAD) roadFocusSeq += 1 else walkFocusSeq += 1
     }
+
+    // ------------------------------------------------------------------------------------------ D-7 report
+
+    /** D-5 «Сообщить об ошибке» and the row's TalkBack action. */
+    fun openReport(stop: StopDto) {
+        stopMenu = null
+        stopHandoff = null
+        roadFocusId = stop.id
+        startReport(ReportTarget(stop.name, stop.placeId, stop.id, "road", fromWalk = false))
+    }
+
+    /** 5.9 C10 «Сообщить об ошибке» on a card (road or walk). */
+    fun reportFromCard() {
+        val c = card ?: return
+        card = null
+        val walk = c.source == CardSource.WALK
+        startReport(ReportTarget(c.ui.details?.nameRu ?: c.ui.name, c.poiId, c.rowId, if (walk) "walk" else "card", fromWalk = walk))
+    }
+
+    private fun startReport(t: ReportTarget) {
+        report = t
+        reportReason = null
+        reportComment = ""
+    }
+
+    fun pickReportReason(r: String) {
+        if (r in app.verst.core.model.Reports.REASONS) reportReason = r
+    }
+
+    fun setReportCommentText(t: String) {
+        reportComment = t.take(app.verst.core.model.Reports.COMMENT_MAX)
+    }
+
+    fun closeReport() {
+        val t = report ?: return
+        report = null
+        if (t.fromWalk) walkFocusSeq += 1 else roadFocusSeq += 1
+    }
+
+    /** «Отправить»: queued on the device (no endpoint yet); event `feedback_sent`. */
+    fun sendReport() {
+        val t = report ?: return
+        val reason = reportReason ?: return
+        val online = connectivity.online
+        val r = app.verst.core.model.ReportDto(
+            id = java.util.UUID.randomUUID().toString(), at = now(), reason = reason, comment = reportComment.trim(),
+            name = t.name, placeId = t.placeId, stopId = t.stopId, source = t.source, world = gateway.world, online = online,
+        )
+        pendingReports += r
+        writes.trySend(Unit)
+        runCatching { android.util.Log.i("VerstEvent", "feedback_sent reason=$reason source=${t.source} place=${t.placeId}") }
+        reportsSent += 1
+        closeReport()
+        showToast(if (online) Toast.ReportThanks else Toast.ReportQueued)
+    }
+
+    /** Reports queued this session (debug / tests). */
+    var reportsSent by mutableStateOf(0)
+        private set
 
     /** Hotel card «Выбрать отель» → 5.7 for that night. */
     fun cardPickHotel() {
@@ -1996,6 +2078,7 @@ class VerstFlow(
     private var pendingLast: LastTripDto? = null
     private var lastDirty = false
     private var pendingDefaults: DefaultsDto? = null
+    private val pendingReports = mutableListOf<app.verst.core.model.ReportDto>()
     private var tripsLoaded = false
     private var pendingSave = false
 
@@ -2022,6 +2105,10 @@ class VerstFlow(
             pendingDefaults?.let { d ->
                 pendingDefaults = null
                 withContext(io) { runCatching { store.saveDefaults(d) } }
+            }
+            while (pendingReports.isNotEmpty()) {
+                val r = pendingReports.removeAt(0)
+                withContext(io) { runCatching { store.appendReport(r) } }
             }
         }
     }
@@ -2219,6 +2306,9 @@ interface Locator {
 }
 
 enum class CardSource { ROAD, WALK }
+
+/** D-7: what the report is about; [fromWalk] = focus goes back to the walk row. */
+data class ReportTarget(val name: String, val placeId: String?, val stopId: String?, val source: String, val fromWalk: Boolean)
 
 /** An open 5.9 card: the row it came from ([rowId] = stop id), the place id and what it shows. */
 data class CardState(val source: CardSource, val rowId: String, val poiId: String?, val ui: app.verst.feature.card.CardUi)

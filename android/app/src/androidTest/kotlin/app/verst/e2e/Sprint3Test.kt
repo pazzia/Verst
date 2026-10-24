@@ -10,6 +10,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import app.verst.MainActivity
@@ -114,6 +118,17 @@ class Sprint3Test {
         return r.bottom > l.top && r.top < l.bottom
     }
 
+    private fun focused(tag: String): Boolean = runCatching {
+        compose.onNodeWithTag(tag).fetchSemanticsNode().config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.Focused) { false }
+    }.getOrDefault(false)
+
+    private fun goldenRingRoad(): List<app.verst.core.model.dto.StopDto> {
+        readyRoute("rr_golden_ring")
+        compose.onNodeWithTag("instruments.start").performClick()
+        waitTag("road.total", 60_000)
+        return flow.result!!.trip.daysList.flatMap { it.stops }
+    }
+
     private fun readyRoute(id: String) {
         waitTag("windshield.route.0")
         val i = (flow.windshield as app.verst.nav.WindshieldData.Routes).routes.indexOfFirst { it.id == id }
@@ -158,6 +173,10 @@ class Sprint3Test {
             compose.onNodeWithTag("road.total").performClick()
             waitTag("waybill.sheet")
             shot("62-waybill-ceo-fitted")
+            // S3-R3: the lever lines «Подогнали под бюджет» on screen
+            waitTag("waybill.levers")
+            compose.onNodeWithTag("waybill.levers", useUnmergedTree = true).performScrollTo()
+            shot("62b-waybill-ceo-levers")
         } else {
             waitTag("nofit")
             shot("61-nofit-ceo")
@@ -201,6 +220,8 @@ class Sprint3Test {
         back()
         compose.waitUntil(5_000) { flow.card == null }
         compose.waitUntil(5_000) { runCatching { inListViewport("road.list", "road.stop.${sight.id}") }.getOrDefault(false) }
+        // S3-R3 (5.9 §5): TalkBack focus is back on the row (input focus → TYPE_VIEW_FOCUSED)
+        compose.waitUntil(5_000) { focused("road.stop.${sight.id}") }
         shot("64-road-after-card")
         val night = stops.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
         compose.onNodeWithTag("road.stop.${night.id}").performScrollTo().performClick()
@@ -329,5 +350,84 @@ class Sprint3Test {
             E2e.noRealNominatim()
             server.shutdown()
         }
+    }
+
+    /** S3-R3: cards on real Commons files (debug override, ADR-0012 §6 URLs; CI has internet) — ≥ 3 of 5 load. */
+    @Test
+    fun r3RealCommonsPhotosOnTheCards() {
+        compose.runOnUiThread {
+            flow.debugRealPhotos = true
+            flow.debugPhotoIndex = 0
+        }
+        try {
+            val stops = goldenRingRoad()
+            val sights = stops.filter { it.kind == "sight" && it.placeId != null }
+            val night = stops.firstOrNull { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
+            val targets = (sights.take(4) + listOfNotNull(night)).take(5)
+            var loaded = 0
+            targets.forEachIndexed { i, s ->
+                compose.onNodeWithTag("road.stop.${s.id}").performScrollTo().performClick()
+                waitTag("card")
+                compose.waitUntil(30_000) { has("photo.loaded") || has("photo.error") || has("photo.none") }
+                val state = when {
+                    has("photo.loaded") -> "loaded"
+                    has("photo.error") -> "error"
+                    else -> "none"
+                }
+                if (state == "loaded") loaded++
+                val file = app.verst.core.model.CommonsPhotos.DEBUG_FILES[i % app.verst.core.model.CommonsPhotos.DEBUG_FILES.size]
+                Log.i("VerstE2e", "R3 commons «$file» on ${s.kind} ${s.placeId}: $state")
+                if (s.kind == "overnight" && state == "loaded") compose.onNodeWithText("ФОТО РАЙОНА").assertExists()
+                Thread.sleep(500) // photoFadeIn
+                shot("80-commons-$i")
+                back()
+                compose.waitUntil(5_000) { flow.card == null }
+            }
+            assertTrue("≥ 3 real Commons photos loaded, got $loaded of ${targets.size}", loaded >= 3)
+        } finally {
+            compose.runOnUiThread { flow.debugRealPhotos = false }
+        }
+    }
+
+    /** S3-R3 D-7: «Сообщить об ошибке» from the stop menu (online) and from a card (offline → queued). */
+    @Test
+    fun r3ReportFromTheStopMenuAndTheCard() {
+        val stops = goldenRingRoad()
+        val queue = File(InstrumentationRegistry.getInstrumentation().targetContext.filesDir, "reports/queue.json")
+        val before = if (queue.exists()) app.verst.core.model.Reports.decode(queue.readText()).size else 0
+        val sight = stops.filter { it.kind == "sight" && it.placeId != null }[0]
+        compose.onNodeWithTag("road.stop.${sight.id}").performScrollTo().performTouchInput { longClick() }
+        waitTag("stopmenu.report")
+        shot("83-stopmenu-report")
+        compose.onNodeWithTag("stopmenu.report").performClick()
+        waitTag("report")
+        compose.onNodeWithTag("report.send").assertIsNotEnabled()
+        compose.onNodeWithTag("report.reason.price").performClick()
+        compose.onNodeWithTag("report.send").assertIsEnabled()
+        compose.onNodeWithTag("report.comment").performTextInput("Билет уже 600 ₽")
+        shot("84-report-sheet")
+        compose.onNodeWithTag("report.send").performScrollTo().performClick()
+        compose.waitUntil(5_000) { flow.report == null && flow.toast == app.verst.nav.Toast.ReportThanks }
+        compose.waitUntil(5_000) { focused("road.stop.${sight.id}") }
+        shot("85-report-thanks")
+        // offline, from the card: «Отправим, когда появится сеть»
+        compose.runOnUiThread { flow.setOffline(true) }
+        compose.onNodeWithTag("road.stop.${sight.id}").performScrollTo().performClick()
+        waitTag("card.report")
+        compose.onNodeWithTag("card.report").performScrollTo().performClick()
+        waitTag("report")
+        compose.onNodeWithTag("report.reason.closed").performClick()
+        compose.onNodeWithTag("report.send").performScrollTo().performClick()
+        compose.waitUntil(5_000) { flow.report == null && flow.toast == app.verst.nav.Toast.ReportQueued }
+        shot("86-report-queued")
+        compose.runOnUiThread { flow.setOffline(false) }
+        compose.waitUntil(5_000) { queue.exists() && app.verst.core.model.Reports.decode(queue.readText()).size >= before + 2 }
+        val mine = app.verst.core.model.Reports.decode(queue.readText()).takeLast(2)
+        Log.i("VerstE2e", "R3 reports ${mine.map { "${it.reason}/${it.source}/${it.online}/${it.comment}" }}")
+        assertEquals(listOf("price", "closed"), mine.map { it.reason })
+        assertEquals(listOf("road", "card"), mine.map { it.source })
+        assertEquals(listOf(true, false), mine.map { it.online })
+        assertEquals("Билет уже 600 ₽", mine[0].comment)
+        assertEquals(sight.placeId, mine[1].placeId)
     }
 }

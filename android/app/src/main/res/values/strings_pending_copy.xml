@@ -16,4 +16,6 @@
     <string name="walk_distance_m">%1$d м</string>
     <!-- S3-R2 5.8 cheaper-route option with `fits: false` (ARCH-301 as built): no deck key yet. -->
     <string name="budget_option_cheaper_sub_over">≈ %1$s ₽ · дешевле, но больше бюджета</string>
+    <!-- S3-R3 debug panel: real Commons photos on the cards (debug only). -->
+    <string name="debug_real_photos">Настоящие фото Commons</string>
 </resources>

@@ -76,6 +76,9 @@ fun DebugScreen(flow: VerstFlow) {
                 flow.debugMockLocation = MockPlaces[it]
                 if (flow.debugMockLocation != null) flow.locate()
             }
+            // S3-R3: real Commons files on the cards (ADR-0012 §6 URLs), before the data run brings them
+            Label(stringResource(AppR.string.debug_real_photos))
+            Choices(listOf("0", "1"), if (flow.debugRealPhotos) "1" else "0", "debug.photos") { flow.debugRealPhotos = it == "1" }
             flow.lastHandoff?.let { (h, target) ->
                 Txt("$target · ${h.navigator ?: h.maps ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
             }
