@@ -112,6 +112,11 @@ def placeholders(t: str) -> tuple[str, int]:
     out = re.sub(r'\{([A-Za-z_]+)\}', sub, t)
     if re.search(r'[{}]', out):
         raise DeckError('unbalanced placeholder in %r' % t)
+    # «{n} {nights}» once produced «%3$d %4$d»: a count followed directly by another count is always a
+    # deck error (the word after a count is a plural word: name it {<x>_word} or {days}, never an INT name)
+    if re.search(r'\x00\d+\$d\s+\x00\d+\$d', out):
+        raise DeckError('two integer placeholders in a row (count + count) in %r; '
+                        'the plural word needs a non-integer name such as {nights_word}' % t)
     return out, len(order)
 
 

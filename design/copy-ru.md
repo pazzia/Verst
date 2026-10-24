@@ -247,7 +247,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | Key | Text | State / notes |
 | --- | --- | --- |
 | `road_title` | Дорога впереди | h1 |
-| `road_chip_days` | {d} {days} · {n} {nights} | [plural: `plural_day`, `plural_night`] |
+| `road_chip_days` | {d} {days} · {nights} {nights_word} | [plural: `plural_day`, `plural_night`]; args: day count, day word, night count, night word («3 дня · 2 ночи») |
 | `road_chip_pace` | до {km} км в день | |
 | `road_intro` | Знаки по пути — как увидите их на трассе. Любой можно заменить. | |
 | `road_day` | День {n} | |
@@ -267,6 +267,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `road_excursion` | Экскурсия от {amount} ₽ ↗ | SPEC §14 |
 | `road_waybill_label` | ПУТЕВОЙ ЛИСТ · СКОЛЬКО СТОИТ | |
 | `road_waybill_over` | ПУТЕВОЙ ЛИСТ · ПЕРЕРАСХОД {amount} ₽ | over budget |
+| `road_waybill_per_person` | ≈ {amount} ₽ на человека | footer, right of the amount (5.5 F3); `perPersonRub` from the engine cost, U+202F thousands; hidden when the crew is 1 person |
 | `road_prices_from` | Цены от {date} | prices older than 24 h |
 | `road_prices_refresh` | Обновить цены | |
 | `road_prices_updated` | Цены обновлены: ≈ {amount} ₽ | toast |

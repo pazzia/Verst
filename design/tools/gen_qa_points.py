@@ -37,7 +37,7 @@ p+=[C('W-06',38,350,'#55565C'),C('W-06',352,350,'#55565C'),C('W-07',195,4,'#0E0E
     C('W-19',300,592,'#16222C'),T('W-20',[22,727,150,24]),C('W-21',282,742,'#232327'),C('W-21',298,735,'#1C1C1F'),C('W-21',324,705.5,'#D8402B'),
     C('W-22',324,705.5,'#55555E','loading'),C('W-24',324,705.5,'#55555E','offline-empty'),T('W-23',[36,558,200,14],'offline-cached'),
     T('W-24',[32,96,320,60],'offline-empty'),C('W-25',37,610,'#FFD23F','no-routes'),T('W-26',[32,96,320,60],'error'),
-    T('W-27',[22,753,140,44],'trips-plate'),E('W-30','x',320,225,['#1E4FA3','#F4F4F0','#D6E0F5'],[None,230],'default','360x640'),
+    T('W-27',[22,753,140,44],'trips-plate'),E('W-30','x',250,240,['#1E4FA3','#163B7A','#F4F4F0'],[None,256],'default','360x640'),
     C('W-22',324,705.5,'#55555E','engine-starting'),T('W-26',[32,96,320,90],'engine-failed')]
 files['5.1-windshield']=(p,{'W-04':MOTION,'W-05':MOTION,'W-09':'silhouette slots use the glass colour #0D0D0F; checked by reading the default and crew-variant screenshots (DES-11x step 4)',
  'W-15':'arrow direction = data mapping; checked by reading (step 4) and the bearing unit test','W-18':SEM,'W-28':'not in the mock build (open-issues D-16: location is not requested)',

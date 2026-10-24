@@ -209,7 +209,7 @@
     <string name="cd_drive_progress">Готово %1$d %2$s из 5</string>
     <string name="cd_drive_ready">Дорога готова. Смотреть знаки, кнопка</string>
     <string name="road_title">Дорога впереди</string>
-    <string name="road_chip_days">%1$d %2$s · %3$d %4$d</string>
+    <string name="road_chip_days">%1$d %2$s · %3$d %4$s</string>
     <string name="road_chip_pace">до %1$s км в день</string>
     <string name="road_intro">Знаки по пути — как увидите их на трассе. Любой можно заменить.</string>
     <string name="road_day">День %1$d</string>
@@ -229,6 +229,7 @@
     <string name="road_excursion">Экскурсия от %1$s ₽ ↗</string>
     <string name="road_waybill_label">ПУТЕВОЙ ЛИСТ · СКОЛЬКО СТОИТ</string>
     <string name="road_waybill_over">ПУТЕВОЙ ЛИСТ · ПЕРЕРАСХОД %1$s ₽</string>
+    <string name="road_waybill_per_person">≈ %1$s ₽ на человека</string>
     <string name="road_prices_from">Цены от %1$s</string>
     <string name="road_prices_refresh">Обновить цены</string>
     <string name="road_prices_updated">Цены обновлены: ≈ %1$s ₽</string>
