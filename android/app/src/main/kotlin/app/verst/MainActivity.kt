@@ -74,9 +74,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** Android share sheet with the engine's share text (5.5 T2, 5.6 K2). */
+/** The shared text of the mock build: the engine's share text + `mock_share_note` (release review P0-1). */
+fun mockShareText(context: Context, engineText: String): String =
+    engineText.trimEnd() + "\n\n" + context.getString(app.verst.core.ui.R.string.mock_share_note)
+
+/** Android share sheet with the engine's share text (5.5 T2, 5.6 K2), marked as demo data. */
 private fun share(context: Context, text: String) {
-    val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
+    val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, mockShareText(context, text))
     context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
@@ -97,7 +101,8 @@ fun VerstRoot(flow: VerstFlow) {
 private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow) {
     val t = flow.toast
     if (flow.top == Route.Windshield && t != null) {
-        PlateToast(toastText(t), bottom = 24.dp, action = if (flow.canUndoDelete) stringResource(UiR.string.common_undo) else null, onAction = flow::undoDelete)
+        // F-02: above the dashboard crest (324 dp dashboard + 16), never over the caption or ПОЕХАЛИ.
+        PlateToast(toastText(t), bottom = 340.dp, action = if (flow.canUndoDelete) stringResource(UiR.string.common_undo) else null, onAction = flow::undoDelete)
     }
     flow.deleteAsk?.let { d ->
         NaviDialog(
@@ -109,7 +114,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
     if (flow.limitDialog) {
         NaviDialog(
             stringResource(UiR.string.common_storage_full_title), stringResource(UiR.string.common_storage_full_body),
-            stringResource(UiR.string.common_storage_full_open), stringResource(UiR.string.common_cancel), "limit",
+            stringResource(UiR.string.common_storage_full_open), stringResource(UiR.string.common_dialog_cancel), "limit",
             flow::limitToTrips, flow::dismissLimit,
         )
     }
@@ -117,13 +122,13 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 
 @Composable
 private fun Screens(flow: VerstFlow, context: Context) {
-    val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog
+    val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk
     BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
             WindshieldUi(
                 flow.origin.label, flow.windshield, flow.selectedRoute, flow.adults, flow.children, flow.dog,
-                trips = SavedTrips.ordered(flow.saved), tripsSheet = flow.tripsSheet, originGen = flow.originGen,
+                trips = SavedTrips.ordered(flow.saved), tripsSheet = flow.tripsSheet, originGen = flow.originGen, routeKm = flow.routeKm,
             ),
             onSelect = { flow.selectedRoute = it },
             onStart = flow::openReadyRoute,

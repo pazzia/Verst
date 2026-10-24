@@ -108,7 +108,8 @@ interface ExitActions {
 }
 
 private val DashH = 434.dp
-private val MinSceneTop = 280.dp
+/** F-04: scene minimum 260 dp → dashboard top ≥ 240 dp, so two hotel options fit at 640. */
+private val MinSceneTop = 240.dp
 
 /** 5.7 «Съезд к ночёвке»: night scene with the exit sign, the night's hotels, booking through the mock partner. */
 @Composable
@@ -246,8 +247,10 @@ private fun Panel(ui: ExitUi, a: ExitActions, modifier: Modifier) {
     val headerLeft = stringResource(R.string.exit_header, ui.night, ui.nights)
     val headerRight = stringResource(R.string.exit_header_km, km, time)
     val headingCd = stringResource(R.string.cd_exit_heading, ui.night, ui.nights, km, time, s.name)
+    val scroll = rememberScrollState()
+    Box(modifier.naviPanel().padding(6.dp)) {
     Column(
-        modifier.naviPanel().padding(6.dp).verticalScroll(rememberScrollState()).padding(12.dp).testTag("exit.panel"),
+        Modifier.verticalScroll(scroll).padding(12.dp).testTag("exit.panel"),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(Modifier.fillMaxWidth()) {
@@ -276,6 +279,14 @@ private fun Panel(ui: ExitUi, a: ExitActions, modifier: Modifier) {
                 HotelOption(o, selected = o.placeId == ui.selectedId, booked = o.placeId == ui.bookedPlaceId, index = i) { a.select(o.placeId) }
             }
         }
+    }
+    // F-04: on overflow a 16 dp `navi.screen` fade at the panel's bottom edge (the next option peeks under it).
+    if (scroll.canScrollForward) {
+        Box(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(16.dp)
+                .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(C.navi.screen.copy(alpha = 0f), C.navi.screen))),
+        )
+    }
     }
 }
 
@@ -334,6 +345,21 @@ private fun BookCta(ui: ExitUi, a: ExitActions, modifier: Modifier) {
     }
     // Mock build: no real brand anywhere (OI-40) — «демо-партнёр, без оплаты».
     val cd = stringResource(R.string.cd_exit_book_mock)
+    // F-03: no hotel options → nothing to book: the offline look, «нет вариантов с вашими условиями», not pressable.
+    val none = ui.stop.hotelOptions.isEmpty()
+    if (none) {
+        Row(
+            modifier.fillMaxWidth().height(DesignTokens.size.ctaBookH).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.dash.control)
+                .testTag("exit.book").padding(horizontal = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Txt(stringResource(R.string.exit_book), T.cta.lg, C.text.secondary, maxLines = 1)
+                Txt(stringResource(R.string.exit_book_none), T.body.smMedium, C.text.secondary, maxLines = 1)
+            }
+        }
+        return
+    }
     Row(
         modifier
             .fillMaxWidth()

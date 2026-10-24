@@ -1,5 +1,7 @@
 package app.verst
 
+import androidx.compose.ui.res.stringResource
+import app.verst.core.ui.R as UiR
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
@@ -79,6 +83,9 @@ class ScreensScreenshotTest {
         if (Screenshot.isUniform(bitmap)) bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         assertEquals(w * 3, bitmap.width)
         Screenshot.write(bitmap, screen, state, w, h)
+        // Release review P0-1: no real brand in any rendered text or TalkBack label of any screen state.
+        val texts = BrandDenyList.texts(compose.onRoot(useUnmergedTree = true).fetchSemanticsNode())
+        assertEquals("$screen/$state", emptyList<String>(), texts.flatMap { BrandDenyList.hits(it) })
     }
 
     @Test
@@ -96,13 +103,35 @@ class ScreensScreenshotTest {
         )
     }
 
-    private fun windshield(data: WindshieldData) = WindshieldUi("Москва", data, 0, 2, 1, true, originGen = "Москвы") // the engine's `reverse` form (OI-39)
+    /** Engine km of the ready routes (golden plans) — the Windshield never shows the template km. */
+    private val engineKm by lazy {
+        mapOf(
+            "rr_golden_ring" to snapshot("G02_golden_ring").km,
+            "rr_yaroslavl" to snapshot("G01_msk_yar_round").km,
+            "rr_tula_yasnaya" to snapshot("G07_tula_yasnaya").km,
+        )
+    }
+
+    private fun windshield(data: WindshieldData) =
+        WindshieldUi("Москва", data, 0, 2, 1, true, originGen = "Москвы", routeKm = engineKm) // the engine's `reverse` form (OI-39)
 
     @Test
     fun windshieldDefault() {
         shot("windshield", "default") { WindshieldScreen(windshield(WindshieldData.Routes(routes)), {}, {}, {}, {}) }
         compose.onNodeWithTag("windshield.route.0").assertExists()
         compose.onNodeWithText("РЯДОМ С ВАМИ · ИЗ МОСКВЫ").assertExists()
+    }
+
+    @Test
+    fun windshieldEstimating() {
+        // Manager release return: rows whose estimate is not in yet show a placeholder, never the template km.
+        shot("windshield", "estimating") {
+            WindshieldScreen(windshield(WindshieldData.Routes(routes)).copy(routeKm = engineKm.filterKeys { it == routes[0].id }), {}, {}, {}, {})
+        }
+        compose.onNodeWithTag("windshield.route.0.km", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("windshield.route.1.km.pending", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("windshield.route.1.km", useUnmergedTree = true).assertDoesNotExist()
+        for (r in routes) compose.onAllNodesWithText(r.kmSign.toString()).assertCountEquals(0)
     }
 
     @Test
@@ -406,7 +435,10 @@ class ScreensScreenshotTest {
     fun limitDialog() = shot("road", "limit-dialog") {
         Box(Modifier.fillMaxSize()) {
             RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE"), noRoad)
-            NaviDialog("Место для поездок закончилось", "Удалите старую поездку, чтобы сохранить эту", "Мои поездки", "Отменить", "limit", {}, {})
+            NaviDialog(
+                stringResource(UiR.string.common_storage_full_title), stringResource(UiR.string.common_storage_full_body),
+                stringResource(UiR.string.common_storage_full_open), stringResource(UiR.string.common_dialog_cancel), "limit", {}, {},
+            ) // the very keys MainActivity uses
         }
     }
 

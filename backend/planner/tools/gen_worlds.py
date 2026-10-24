@@ -2882,7 +2882,8 @@ for pid, n, town, name, (dx, dy), tags, check, rating, hours in EXTRA_CAFES:
     )
 
 # ------------------------------------------------------------------ roadside POIs laid out along chains
-FUEL_BRANDS = ["Лукойл", "Роснефть", "Газпромнефть", "Татнефть", "Башнефть", "Нефтьмагистраль"]
+# Release review P0-1: no real brand anywhere in the mock build — fuel stops are neutral «АЗС, <road>, <km> км».
+FUEL_LABEL = "АЗС"
 
 
 def roadside(
@@ -2910,7 +2911,6 @@ def roadside(
         km += fuel_every
     kms.extend(extra_fuel)
     for km in sorted(kms):
-        brand = FUEL_BRANDS[i % len(FUEL_BRANDS)]
         tags = ["24h"] if i % 2 == 0 else ["wc"]
         if cafe_at_fuel and i % 3 == 1:
             tags.append("cafe_at_fuel")
@@ -2919,7 +2919,7 @@ def roadside(
         add(
             f"pl_{code}_fuel_{int(km):03d}",
             "fuel",
-            f"{brand}, {ref_at(chain, km)}, {int(km)} км",
+            f"{FUEL_LABEL}, {ref_at(chain, km)}, {int(km)} км",
             chain_anchor(chain, km, lateral if i % 2 == 0 else -lateral),
             tags=sorted(set(tags)),
             rating=round(3.6 + (i % 5) * 0.2, 1),

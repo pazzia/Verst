@@ -5491,7 +5491,7 @@
   {
    "id": "pl_m8_fuel_022",
    "type": "fuel",
-   "nameRu": "Лукойл, М-8, 22 км",
+   "nameRu": "АЗС, М-8, 22 км",
    "anchor": {
     "edge": [
      "MSK",
@@ -5511,7 +5511,7 @@
   {
    "id": "pl_m8_fuel_054",
    "type": "fuel",
-   "nameRu": "Роснефть, М-8, 54 км",
+   "nameRu": "АЗС, М-8, 54 км",
    "anchor": {
     "edge": [
      "PUS",
@@ -5531,7 +5531,7 @@
   {
    "id": "pl_m8_fuel_086",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-8, 86 км",
+   "nameRu": "АЗС, М-8, 86 км",
    "anchor": {
     "edge": [
      "SPS",
@@ -5550,7 +5550,7 @@
   {
    "id": "pl_m8_fuel_118",
    "type": "fuel",
-   "nameRu": "Татнефть, М-8, 118 км",
+   "nameRu": "АЗС, М-8, 118 км",
    "anchor": {
     "edge": [
      "SPS",
@@ -5569,7 +5569,7 @@
   {
    "id": "pl_m8_fuel_150",
    "type": "fuel",
-   "nameRu": "Башнефть, М-8, 150 км",
+   "nameRu": "АЗС, М-8, 150 км",
    "anchor": {
     "edge": [
      "PRS",
@@ -5590,7 +5590,7 @@
   {
    "id": "pl_m8_fuel_182",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, М-8, 182 км",
+   "nameRu": "АЗС, М-8, 182 км",
    "anchor": {
     "edge": [
      "PRS",
@@ -5609,7 +5609,7 @@
   {
    "id": "pl_m8_fuel_214",
    "type": "fuel",
-   "nameRu": "Лукойл, М-8, 214 км",
+   "nameRu": "АЗС, М-8, 214 км",
    "anchor": {
     "edge": [
      "RST",
@@ -5628,7 +5628,7 @@
   {
    "id": "pl_m8_fuel_246",
    "type": "fuel",
-   "nameRu": "Роснефть, М-8, 246 км",
+   "nameRu": "АЗС, М-8, 246 км",
    "anchor": {
     "edge": [
      "RST",
@@ -5749,7 +5749,7 @@
   {
    "id": "pl_gr_fuel_025",
    "type": "fuel",
-   "nameRu": "Лукойл, Р-132, 25 км",
+   "nameRu": "АЗС, Р-132, 25 км",
    "anchor": {
     "edge": [
      "YAR",
@@ -5769,7 +5769,7 @@
   {
    "id": "pl_gr_fuel_063",
    "type": "fuel",
-   "nameRu": "Роснефть, Р-132, 63 км",
+   "nameRu": "АЗС, Р-132, 63 км",
    "anchor": {
     "edge": [
      "YAR",
@@ -5789,7 +5789,7 @@
   {
    "id": "pl_gr_fuel_101",
    "type": "fuel",
-   "nameRu": "Газпромнефть, Р-600, 101 км",
+   "nameRu": "АЗС, Р-600, 101 км",
    "anchor": {
     "edge": [
      "KOS",
@@ -5808,7 +5808,7 @@
   {
    "id": "pl_gr_fuel_139",
    "type": "fuel",
-   "nameRu": "Татнефть, Р-600, 139 км",
+   "nameRu": "АЗС, Р-600, 139 км",
    "anchor": {
     "edge": [
      "KOS",
@@ -5827,7 +5827,7 @@
   {
    "id": "pl_gr_fuel_177",
    "type": "fuel",
-   "nameRu": "Башнефть, Р-600, 177 км",
+   "nameRu": "АЗС, Р-600, 177 км",
    "anchor": {
     "edge": [
      "KOS",
@@ -5848,7 +5848,7 @@
   {
    "id": "pl_gr_fuel_215",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, Р-132, 215 км",
+   "nameRu": "АЗС, Р-132, 215 км",
    "anchor": {
     "edge": [
      "IVA",
@@ -5867,7 +5867,7 @@
   {
    "id": "pl_gr_fuel_253",
    "type": "fuel",
-   "nameRu": "Лукойл, Р-132, 253 км",
+   "nameRu": "АЗС, Р-132, 253 км",
    "anchor": {
     "edge": [
      "IVA",
@@ -6116,7 +6116,7 @@
   {
    "id": "pl_m7w_fuel_030",
    "type": "fuel",
-   "nameRu": "Лукойл, М-7, 30 км",
+   "nameRu": "АЗС, М-7, 30 км",
    "anchor": {
     "edge": [
      "MSK",
@@ -6136,7 +6136,7 @@
   {
    "id": "pl_m7w_fuel_065",
    "type": "fuel",
-   "nameRu": "Роснефть, М-7, 65 км",
+   "nameRu": "АЗС, М-7, 65 км",
    "anchor": {
     "edge": [
      "NOG",
@@ -6156,7 +6156,7 @@
   {
    "id": "pl_m7w_fuel_100",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-7, 100 км",
+   "nameRu": "АЗС, М-7, 100 км",
    "anchor": {
     "edge": [
      "NOG",
@@ -6175,7 +6175,7 @@
   {
    "id": "pl_m7w_fuel_135",
    "type": "fuel",
-   "nameRu": "Татнефть, М-7, 135 км",
+   "nameRu": "АЗС, М-7, 135 км",
    "anchor": {
     "edge": [
      "PET",
@@ -6194,7 +6194,7 @@
   {
    "id": "pl_m7w_fuel_170",
    "type": "fuel",
-   "nameRu": "Башнефть, М-7, 170 км",
+   "nameRu": "АЗС, М-7, 170 км",
    "anchor": {
     "edge": [
      "PET",
@@ -6339,7 +6339,7 @@
   {
    "id": "pl_m7e_fuel_020",
    "type": "fuel",
-   "nameRu": "Лукойл, М-7, 20 км",
+   "nameRu": "АЗС, М-7, 20 км",
    "anchor": {
     "edge": [
      "VLA",
@@ -6359,7 +6359,7 @@
   {
    "id": "pl_m7e_fuel_060",
    "type": "fuel",
-   "nameRu": "Роснефть, М-7, 60 км",
+   "nameRu": "АЗС, М-7, 60 км",
    "anchor": {
     "edge": [
      "VLA",
@@ -6379,7 +6379,7 @@
   {
    "id": "pl_m7e_fuel_100",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-7, 100 км",
+   "nameRu": "АЗС, М-7, 100 км",
    "anchor": {
     "edge": [
      "VLA",
@@ -6398,7 +6398,7 @@
   {
    "id": "pl_m7e_fuel_140",
    "type": "fuel",
-   "nameRu": "Татнефть, М-7, 140 км",
+   "nameRu": "АЗС, М-7, 140 км",
    "anchor": {
     "edge": [
      "VYZ",
@@ -6417,7 +6417,7 @@
   {
    "id": "pl_m7e_fuel_180",
    "type": "fuel",
-   "nameRu": "Башнефть, М-7, 180 км",
+   "nameRu": "АЗС, М-7, 180 км",
    "anchor": {
     "edge": [
      "GOR",
@@ -6438,7 +6438,7 @@
   {
    "id": "pl_m7e_fuel_220",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, М-7, 220 км",
+   "nameRu": "АЗС, М-7, 220 км",
    "anchor": {
     "edge": [
      "DZE",
@@ -6457,7 +6457,7 @@
   {
    "id": "pl_m7e_fuel_260",
    "type": "fuel",
-   "nameRu": "Лукойл, М-7, 260 км",
+   "nameRu": "АЗС, М-7, 260 км",
    "anchor": {
     "edge": [
      "NNV",
@@ -6476,7 +6476,7 @@
   {
    "id": "pl_m7e_fuel_300",
    "type": "fuel",
-   "nameRu": "Роснефть, М-7, 300 км",
+   "nameRu": "АЗС, М-7, 300 км",
    "anchor": {
     "edge": [
      "KST",
@@ -6496,7 +6496,7 @@
   {
    "id": "pl_m7e_fuel_340",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-7, 340 км",
+   "nameRu": "АЗС, М-7, 340 км",
    "anchor": {
     "edge": [
      "LYS",
@@ -6516,7 +6516,7 @@
   {
    "id": "pl_m7e_fuel_380",
    "type": "fuel",
-   "nameRu": "Татнефть, М-7, 380 км",
+   "nameRu": "АЗС, М-7, 380 км",
    "anchor": {
     "edge": [
      "LYS",
@@ -6535,7 +6535,7 @@
   {
    "id": "pl_m7e_fuel_420",
    "type": "fuel",
-   "nameRu": "Башнефть, М-7, 420 км",
+   "nameRu": "АЗС, М-7, 420 км",
    "anchor": {
     "edge": [
      "VOR",
@@ -6555,7 +6555,7 @@
   {
    "id": "pl_m7e_fuel_460",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, М-7, 460 км",
+   "nameRu": "АЗС, М-7, 460 км",
    "anchor": {
     "edge": [
      "VOR",
@@ -6574,7 +6574,7 @@
   {
    "id": "pl_m7e_fuel_500",
    "type": "fuel",
-   "nameRu": "Лукойл, М-7, 500 км",
+   "nameRu": "АЗС, М-7, 500 км",
    "anchor": {
     "edge": [
      "CHB",
@@ -6594,7 +6594,7 @@
   {
    "id": "pl_m7e_fuel_540",
    "type": "fuel",
-   "nameRu": "Роснефть, М-7, 540 км",
+   "nameRu": "АЗС, М-7, 540 км",
    "anchor": {
     "edge": [
      "CIV",
@@ -6614,7 +6614,7 @@
   {
    "id": "pl_m7e_fuel_580",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-7, 580 км",
+   "nameRu": "АЗС, М-7, 580 км",
    "anchor": {
     "edge": [
      "CIV",
@@ -6633,7 +6633,7 @@
   {
    "id": "pl_m7e_fuel_620",
    "type": "fuel",
-   "nameRu": "Татнефть, М-7, 620 км",
+   "nameRu": "АЗС, М-7, 620 км",
    "anchor": {
     "edge": [
      "ZEL",
@@ -7173,7 +7173,7 @@
   {
    "id": "pl_m12_fuel_040",
    "type": "fuel",
-   "nameRu": "Лукойл, М-12, 40 км",
+   "nameRu": "АЗС, М-12, 40 км",
    "anchor": {
     "edge": [
      "M12_MKAD",
@@ -7193,7 +7193,7 @@
   {
    "id": "pl_m12_fuel_085",
    "type": "fuel",
-   "nameRu": "Роснефть, М-12, 85 км",
+   "nameRu": "АЗС, М-12, 85 км",
    "anchor": {
     "edge": [
      "M12_MKAD",
@@ -7213,7 +7213,7 @@
   {
    "id": "pl_m12_fuel_130",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-12, 130 км",
+   "nameRu": "АЗС, М-12, 130 км",
    "anchor": {
     "edge": [
      "M12_MKAD",
@@ -7232,7 +7232,7 @@
   {
    "id": "pl_m12_fuel_175",
    "type": "fuel",
-   "nameRu": "Татнефть, М-12, 175 км",
+   "nameRu": "АЗС, М-12, 175 км",
    "anchor": {
     "edge": [
      "M12_MKAD",
@@ -7251,7 +7251,7 @@
   {
    "id": "pl_m12_fuel_220",
    "type": "fuel",
-   "nameRu": "Башнефть, М-12, 220 км",
+   "nameRu": "АЗС, М-12, 220 км",
    "anchor": {
     "edge": [
      "M12_BOG",
@@ -7272,7 +7272,7 @@
   {
    "id": "pl_m12_fuel_265",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, М-12, 265 км",
+   "nameRu": "АЗС, М-12, 265 км",
    "anchor": {
     "edge": [
      "M12_BOG",
@@ -7291,7 +7291,7 @@
   {
    "id": "pl_m12_fuel_310",
    "type": "fuel",
-   "nameRu": "Лукойл, М-12, 310 км",
+   "nameRu": "АЗС, М-12, 310 км",
    "anchor": {
     "edge": [
      "M12_BOG",
@@ -7310,7 +7310,7 @@
   {
    "id": "pl_m12_fuel_355",
    "type": "fuel",
-   "nameRu": "Роснефть, М-12, 355 км",
+   "nameRu": "АЗС, М-12, 355 км",
    "anchor": {
     "edge": [
      "M12_BOG",
@@ -7330,7 +7330,7 @@
   {
    "id": "pl_m12_fuel_400",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-12, 400 км",
+   "nameRu": "АЗС, М-12, 400 км",
    "anchor": {
     "edge": [
      "M12_DZE",
@@ -7350,7 +7350,7 @@
   {
    "id": "pl_m12_fuel_445",
    "type": "fuel",
-   "nameRu": "Татнефть, М-12, 445 км",
+   "nameRu": "АЗС, М-12, 445 км",
    "anchor": {
     "edge": [
      "M12_DZE",
@@ -7369,7 +7369,7 @@
   {
    "id": "pl_m12_fuel_490",
    "type": "fuel",
-   "nameRu": "Башнефть, М-12, 490 км",
+   "nameRu": "АЗС, М-12, 490 км",
    "anchor": {
     "edge": [
      "M12_DZE",
@@ -7389,7 +7389,7 @@
   {
    "id": "pl_m12_fuel_535",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, М-12, 535 км",
+   "nameRu": "АЗС, М-12, 535 км",
    "anchor": {
     "edge": [
      "M12_DZE",
@@ -7408,7 +7408,7 @@
   {
    "id": "pl_m12_fuel_580",
    "type": "fuel",
-   "nameRu": "Лукойл, М-12, 580 км",
+   "nameRu": "АЗС, М-12, 580 км",
    "anchor": {
     "edge": [
      "M12_DZE",
@@ -7428,7 +7428,7 @@
   {
    "id": "pl_m12_fuel_625",
    "type": "fuel",
-   "nameRu": "Роснефть, М-12, 625 км",
+   "nameRu": "АЗС, М-12, 625 км",
    "anchor": {
     "edge": [
      "M12_DZE",
@@ -7448,7 +7448,7 @@
   {
    "id": "pl_m12_fuel_670",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-12, 670 км",
+   "nameRu": "АЗС, М-12, 670 км",
    "anchor": {
     "edge": [
      "M12_CU",
@@ -7467,7 +7467,7 @@
   {
    "id": "pl_m12_fuel_715",
    "type": "fuel",
-   "nameRu": "Татнефть, М-12, 715 км",
+   "nameRu": "АЗС, М-12, 715 км",
    "anchor": {
     "edge": [
      "M12_CU",
@@ -7486,7 +7486,7 @@
   {
    "id": "pl_m12_fuel_760",
    "type": "fuel",
-   "nameRu": "Башнефть, М-12, 760 км",
+   "nameRu": "АЗС, М-12, 760 км",
    "anchor": {
     "edge": [
      "M12_CU",
@@ -8112,7 +8112,7 @@
   {
    "id": "pl_r22_fuel_025",
    "type": "fuel",
-   "nameRu": "Лукойл, М-4, 25 км",
+   "nameRu": "АЗС, М-4, 25 км",
    "anchor": {
     "edge": [
      "MSK",
@@ -8132,7 +8132,7 @@
   {
    "id": "pl_r22_fuel_065",
    "type": "fuel",
-   "nameRu": "Роснефть, М-4, 65 км",
+   "nameRu": "АЗС, М-4, 65 км",
    "anchor": {
     "edge": [
      "DOM",
@@ -8151,7 +8151,7 @@
   {
    "id": "pl_r22_fuel_105",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-4, 105 км",
+   "nameRu": "АЗС, М-4, 105 км",
    "anchor": {
     "edge": [
      "DOM",
@@ -8170,7 +8170,7 @@
   {
    "id": "pl_r22_fuel_145",
    "type": "fuel",
-   "nameRu": "Татнефть, Р-22, 145 км",
+   "nameRu": "АЗС, Р-22, 145 км",
    "anchor": {
     "edge": [
      "KSH",
@@ -8189,7 +8189,7 @@
   {
    "id": "pl_r22_fuel_185",
    "type": "fuel",
-   "nameRu": "Башнефть, Р-22, 185 км",
+   "nameRu": "АЗС, Р-22, 185 км",
    "anchor": {
     "edge": [
      "KSH",
@@ -8209,7 +8209,7 @@
   {
    "id": "pl_r22_fuel_225",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, Р-22, 225 км",
+   "nameRu": "АЗС, Р-22, 225 км",
    "anchor": {
     "edge": [
      "MIH",
@@ -8228,7 +8228,7 @@
   {
    "id": "pl_r22_fuel_265",
    "type": "fuel",
-   "nameRu": "Лукойл, Р-22, 265 км",
+   "nameRu": "АЗС, Р-22, 265 км",
    "anchor": {
     "edge": [
      "SKP",
@@ -8247,7 +8247,7 @@
   {
    "id": "pl_r22_fuel_305",
    "type": "fuel",
-   "nameRu": "Роснефть, Р-22, 305 км",
+   "nameRu": "АЗС, Р-22, 305 км",
    "anchor": {
     "edge": [
      "RZH",
@@ -8266,7 +8266,7 @@
   {
    "id": "pl_r22_fuel_345",
    "type": "fuel",
-   "nameRu": "Газпромнефть, Р-22, 345 км",
+   "nameRu": "АЗС, Р-22, 345 км",
    "anchor": {
     "edge": [
      "CHA",
@@ -8286,7 +8286,7 @@
   {
    "id": "pl_r22_fuel_385",
    "type": "fuel",
-   "nameRu": "Татнефть, Р-22, 385 км",
+   "nameRu": "АЗС, Р-22, 385 км",
    "anchor": {
     "edge": [
      "CHA",
@@ -8305,7 +8305,7 @@
   {
    "id": "pl_r22_fuel_457",
    "type": "fuel",
-   "nameRu": "Башнефть, Р-22, 457 км",
+   "nameRu": "АЗС, Р-22, 457 км",
    "anchor": {
     "edge": [
      "MCH",
@@ -8324,7 +8324,7 @@
   {
    "id": "pl_r22_fuel_505",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, Р-22, 505 км",
+   "nameRu": "АЗС, Р-22, 505 км",
    "anchor": {
     "edge": [
      "KOT",
@@ -8343,7 +8343,7 @@
   {
    "id": "pl_r22_fuel_545",
    "type": "fuel",
-   "nameRu": "Лукойл, Р-22, 545 км",
+   "nameRu": "АЗС, Р-22, 545 км",
    "anchor": {
     "edge": [
      "KOT",
@@ -8363,7 +8363,7 @@
   {
    "id": "pl_r22_fuel_585",
    "type": "fuel",
-   "nameRu": "Роснефть, Р-22, 585 км",
+   "nameRu": "АЗС, Р-22, 585 км",
    "anchor": {
     "edge": [
      "KOT",
@@ -8382,7 +8382,7 @@
   {
    "id": "pl_r22_fuel_625",
    "type": "fuel",
-   "nameRu": "Газпромнефть, Р-22, 625 км",
+   "nameRu": "АЗС, Р-22, 625 км",
    "anchor": {
     "edge": [
      "KOT",
@@ -8401,7 +8401,7 @@
   {
    "id": "pl_r22_fuel_665",
    "type": "fuel",
-   "nameRu": "Татнефть, Р-22, 665 км",
+   "nameRu": "АЗС, Р-22, 665 км",
    "anchor": {
     "edge": [
      "BOR",
@@ -8420,7 +8420,7 @@
   {
    "id": "pl_r22_fuel_705",
    "type": "fuel",
-   "nameRu": "Башнефть, Р-22, 705 км",
+   "nameRu": "АЗС, Р-22, 705 км",
    "anchor": {
     "edge": [
      "BOR",
@@ -8440,7 +8440,7 @@
   {
    "id": "pl_r22_fuel_745",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, Р-22, 745 км",
+   "nameRu": "АЗС, Р-22, 745 км",
    "anchor": {
     "edge": [
      "NAN",
@@ -8459,7 +8459,7 @@
   {
    "id": "pl_r22_fuel_785",
    "type": "fuel",
-   "nameRu": "Лукойл, Р-22, 785 км",
+   "nameRu": "АЗС, Р-22, 785 км",
    "anchor": {
     "edge": [
      "NAN",
@@ -8478,7 +8478,7 @@
   {
    "id": "pl_r22_fuel_825",
    "type": "fuel",
-   "nameRu": "Роснефть, Р-22, 825 км",
+   "nameRu": "АЗС, Р-22, 825 км",
    "anchor": {
     "edge": [
      "NAN",
@@ -8497,7 +8497,7 @@
   {
    "id": "pl_r22_fuel_865",
    "type": "fuel",
-   "nameRu": "Газпромнефть, Р-22, 865 км",
+   "nameRu": "АЗС, Р-22, 865 км",
    "anchor": {
     "edge": [
      "FRO",
@@ -8517,7 +8517,7 @@
   {
    "id": "pl_r22_fuel_905",
    "type": "fuel",
-   "nameRu": "Татнефть, Р-22, 905 км",
+   "nameRu": "АЗС, Р-22, 905 км",
    "anchor": {
     "edge": [
      "FRO",
@@ -8536,7 +8536,7 @@
   {
    "id": "pl_r22_fuel_945",
    "type": "fuel",
-   "nameRu": "Башнефть, Р-22, 945 км",
+   "nameRu": "АЗС, Р-22, 945 км",
    "anchor": {
     "edge": [
      "FRO",
@@ -9547,7 +9547,7 @@
   {
    "id": "pl_m2_fuel_020",
    "type": "fuel",
-   "nameRu": "Лукойл, М-2, 20 км",
+   "nameRu": "АЗС, М-2, 20 км",
    "anchor": {
     "edge": [
      "MSK",
@@ -9567,7 +9567,7 @@
   {
    "id": "pl_m2_fuel_055",
    "type": "fuel",
-   "nameRu": "Роснефть, М-2, 55 км",
+   "nameRu": "АЗС, М-2, 55 км",
    "anchor": {
     "edge": [
      "POD",
@@ -9587,7 +9587,7 @@
   {
    "id": "pl_m2_fuel_090",
    "type": "fuel",
-   "nameRu": "Газпромнефть, М-2, 90 км",
+   "nameRu": "АЗС, М-2, 90 км",
    "anchor": {
     "edge": [
      "POD",
@@ -9606,7 +9606,7 @@
   {
    "id": "pl_m2_fuel_125",
    "type": "fuel",
-   "nameRu": "Татнефть, М-2, 125 км",
+   "nameRu": "АЗС, М-2, 125 км",
    "anchor": {
     "edge": [
      "SER",
@@ -9625,7 +9625,7 @@
   {
    "id": "pl_m2_fuel_160",
    "type": "fuel",
-   "nameRu": "Башнефть, М-2, 160 км",
+   "nameRu": "АЗС, М-2, 160 км",
    "anchor": {
     "edge": [
      "SER",
@@ -9646,7 +9646,7 @@
   {
    "id": "pl_m2_fuel_195",
    "type": "fuel",
-   "nameRu": "Нефтьмагистраль, М-2, 195 км",
+   "nameRu": "АЗС, М-2, 195 км",
    "anchor": {
     "edge": [
      "TUL",

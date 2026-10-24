@@ -1,0 +1,31 @@
+# Release review P0-1: real brands that must not appear anywhere in the mock build (fixtures, engine copy,
+# goldens, contracts, shared text, Android strings, rendered screens). Case-insensitive substrings, one per line.
+# Fuel
+Лукойл
+Lukoil
+Роснефть
+Rosneft
+Газпромнефть
+Gazprom
+Татнефть
+Башнефть
+Нефтьмагистраль
+Shell
+Teboil
+# Maps / navigation / stores
+Яндекс
+Yandex
+2ГИС
+2GIS
+RuStore
+Google
+# Booking / travel
+Booking
+Ostrovok
+Островок
+Airbnb
+Суточно
+Tripster
+Трипстер
+Авито
+Avito

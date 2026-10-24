@@ -93,6 +93,13 @@ jobs:
         working-directory: android
         run: ./gradlew :app:assembleDemo :app:assembleDemoAndroidTest --console=plain --stacktrace 2>&1 | tee "$LOGS/assemble.log"
 
+      - name: Demo manifest has no test activity (release review P2-4)
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          M=$(find android/app/build/intermediates -path '*demo*' -name AndroidManifest.xml -path '*merged_manifest*' | head -1)
+          echo "merged demo manifest: $M"
+          test -n "$M"
+          if grep -n 'androidx.activity.ComponentActivity' "$M"; then echo "::error::ui-test ComponentActivity in the demo manifest"; exit 1; fi
       - name: Diagnose assemble
         if: ${{ !cancelled() && steps.assemble.outcome == 'failure' }}
         run: python3 tools/ci/diagnose.py --out "$DIAG" gradle --log "$LOGS/assemble.log" --step assemble
@@ -101,7 +108,7 @@ jobs:
         id: unit
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
         working-directory: android
-        run: ./gradlew :core-model:test :core-ui:testDebugUnitTest :app:testDemoUnitTest --continue --console=plain --stacktrace 2>&1 | tee "$LOGS/unit.log"
+        run: ./gradlew :core-model:test :core-ui:testDebugUnitTest :app:testDebugUnitTest --continue --console=plain --stacktrace 2>&1 | tee "$LOGS/unit.log"
 
       - name: Diagnose tests
         if: ${{ !cancelled() && steps.unit.outcome != 'skipped' }}

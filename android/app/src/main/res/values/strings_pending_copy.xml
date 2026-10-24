@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copy the app needs that is not in design/copy-ru.md yet (requested from the Designer in docs/dev-notes.md,
+  DEV-RELEASE). Move each key into the deck and delete it here once it lands.
+-->
+<resources>
+    <!-- Windshield caption meta of a there-and-back ready route: «2 дня · по М-8 · туда и обратно». -->
+    <string name="windshield_meta_round_trip">туда и обратно</string>
+</resources>

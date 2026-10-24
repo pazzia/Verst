@@ -101,6 +101,8 @@ data class WindshieldUi(
     val tripsSheet: Boolean = false,
     /** OI-39: the origin in the genitive from the engine («Москвы»); the nominative until it arrives. */
     val originGen: String = origin,
+    /** F-01: engine km per ready route id (estimate for the current crew and pace); a placeholder until known. */
+    val routeKm: Map<String, Int> = emptyMap(),
 )
 
 /** «Мои поездки» plate and the D-1 sheet. */
@@ -319,7 +321,7 @@ private fun Sign(ui: WindshieldUi, onSelect: (Int) -> Unit, onRetry: () -> Unit,
                 }
             }
             is WindshieldData.Routes -> {
-                d.routes.take(4).forEachIndexed { i, r -> RouteRow(r, i == ui.selected, i) { onSelect(i) } }
+                d.routes.take(4).forEachIndexed { i, r -> RouteRow(r, ui.routeKm[r.id], i == ui.selected, i) { onSelect(i) } }
                 val more = d.routes.size - 4
                 if (more > 0) {
                     Txt(
@@ -359,7 +361,7 @@ private fun Sign(ui: WindshieldUi, onSelect: (Int) -> Unit, onRetry: () -> Unit,
 }
 
 @Composable
-private fun RouteRow(r: ReadyRouteDto, selected: Boolean, index: Int, onClick: () -> Unit) {
+private fun RouteRow(r: ReadyRouteDto, km: Int?, selected: Boolean, index: Int, onClick: () -> Unit) {
     val fg = if (selected) C.accent.yellow else C.sign.white
     Row(
         Modifier
@@ -375,7 +377,13 @@ private fun RouteRow(r: ReadyRouteDto, selected: Boolean, index: Int, onClick: (
         Icon(arrowFor(r.bearing8), fg, 22.dp)
         Spacer(Modifier.width(10.dp))
         Txt(r.title, T.sign.lg, fg, Modifier.weight(1f), maxLines = 1)
-        Txt(r.kmSign.toString(), T.sign.lg, fg, align = TextAlign.End)
+        // Manager / F-01: never a template km — a static placeholder plate (components §16) until the engine
+        // estimate of this route for the current crew and pace is in.
+        if (km != null) {
+            Txt(RuFormat.thousands(km), T.sign.lg, fg, Modifier.testTag("windshield.route.$index.km"), align = TextAlign.End)
+        } else {
+            PlaceholderPlate(34.dp, 16.dp, C.sign.plate, Modifier.testTag("windshield.route.$index.km.pending"))
+        }
     }
 }
 
@@ -393,7 +401,7 @@ private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> 
             // N-02: the column (label / title / meta / 8 / plate) is centred on the start button, even when taller.
             Column(Modifier.weight(1f).padding(end = 14.dp).wrapContentHeight(unbounded = true).semantics(mergeDescendants = true) {}) {
                 val (label, title, meta) = when {
-                    selected != null -> Triple(stringResource(R.string.windshield_selected_label), selected.title, selected.subtitle)
+                    selected != null -> Triple(stringResource(R.string.windshield_selected_label), selected.title, readyMeta(selected))
                     ui.data is WindshieldData.Loading -> Triple(stringResource(R.string.windshield_selected_label), null, null)
                     else -> Triple(
                         stringResource(R.string.windshield_no_routes_label),
@@ -403,7 +411,7 @@ private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> 
                 }
                 Txt(label, T.label.md, C.text.muted, maxLines = 1)
                 if (title != null) Txt(title, T.title.xl, C.text.primary, maxLines = 1) else PlaceholderPlate(160.dp, 20.dp, C.dash.controlAlt, Modifier.padding(vertical = 4.dp))
-                if (meta != null) Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp), maxLines = 1) else PlaceholderPlate(120.dp, 12.dp, C.dash.controlAlt)
+                if (meta != null) Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp), maxLines = 2) else PlaceholderPlate(120.dp, 12.dp, C.dash.controlAlt)
                 if (ui.trips.isNotEmpty()) {
                     Spacer(Modifier.height(4.dp)) // 8 dp to the plate box (the 44 dp touch box adds 4)
                     TripsPlate(ui.trips.size, onTrips)
@@ -516,3 +524,11 @@ private fun monthGen(m: Int): String = stringResource(
         else -> R.string.common_month_gen_12
     },
 )
+
+/**
+ * Caption meta of a ready route: its subtitle, plus «туда и обратно» for a there-and-back round trip (the km on the
+ * sign is the whole trip, e.g. Ярославль ≈ 537). Loops already say «по кругу». The key is pending in the deck.
+ */
+@Composable
+private fun readyMeta(r: ReadyRouteDto): String =
+    if (r.roundTrip && !r.subtitle.contains("по кругу")) "${r.subtitle} · ${stringResource(app.verst.R.string.windshield_meta_round_trip)}" else r.subtitle

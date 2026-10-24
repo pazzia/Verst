@@ -53,13 +53,16 @@ class VerstFlowTest {
         override suspend fun setClock(spec: String): EngineResult<Unit> = EngineResult.Ok(Unit)
         override suspend fun reverse(point: GeoPoint): EngineResult<PlaceNameDto?> =
             EngineResult.Ok(PlaceNameDto("Москва", "город · Москва", "Москвы", "Москве"))
-        override suspend fun readyRoutes(origin: GeoPoint) = EngineResult.Ok(emptyList<ReadyRouteDto>())
+        var routes = emptyList<ReadyRouteDto>()
+        override suspend fun readyRoutes(origin: GeoPoint) = EngineResult.Ok(routes)
         override suspend fun suggest(query: String, near: GeoPoint?) = EngineResult.Ok(listOf(yar))
         override suspend fun popular() = EngineResult.Ok(listOf(yar))
         override suspend fun estimatePoints(origin: GeoPoint, points: List<GeoPoint>) = EngineResult.Ok(points.map { 263 as Int? })
         override suspend fun estimate(requestId: String, request: PlanRequest): EngineResult<EstimateDto> {
             estimates += request
-            return EngineResult.Ok(EstimateDto(estimateKm, 2))
+            // a ready route: its round-trip km plus 10 per adult and 1 per child, so a crew change changes the number
+            val rr = routes.firstOrNull { it.id == request.readyRouteId }
+            return EngineResult.Ok(EstimateDto(rr?.let { it.kmTotal + 10 * request.adults + request.children } ?: estimateKm, 2))
         }
         override suspend fun plan(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanResultDto> {
             onEvent(PlanEventDto("stage", text = "Прокладываем дорогу", progress = 0.1))
@@ -156,7 +159,7 @@ class VerstFlowTest {
         flow.save()
         settle(10_000)
         assertEquals(1, flow.saved.size)
-        assertEquals(1, store.load().size)
+        assertEquals(1, store.trips.size)
         assertTrue(flow.savedCurrent)
         assertEquals(1, flow.waybillNumber)
         while (flow.back()) Unit
@@ -221,7 +224,7 @@ class VerstFlowTest {
         // Save keeps the booking; delete with undo; the 50-trip limit opens the dialog.
         flow.save()
         settle()
-        assertEquals(1, store.load().single().bookedHotels.size)
+        assertEquals(1, store.trips.single().bookedHotels.size)
         while (flow.back()) Unit
         flow.askDelete(flow.saved.single().id)
         flow.confirmDelete()
@@ -248,6 +251,32 @@ class VerstFlowTest {
     }
 
     @Test
+    fun windshieldRowsShowOnlyEngineKmSelectedFirstAndReestimateOnCrewChange() = runTest {
+        val gw = FakeGateway()
+        gw.routes = listOf(
+            ReadyRouteDto("rr_tula_yasnaya", "Тула · Ясная Поляна", "2 дня · Толстой и пряники", 414, 207, "weekend", true, 2, 2, "t_moscow", "S"),
+            ReadyRouteDto("rr_yaroslavl", "Ярославль", "2 дня · по М-8", 526, 263, "weekend", true, 2, 2, "t_moscow", "NE"),
+        )
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        fun km(rr: Int) = rr + 10 * flow.adults + flow.children
+        assertEquals(mapOf("rr_tula_yasnaya" to km(414), "rr_yaroslavl" to km(526)), flow.routeKm)
+        val asked = gw.estimates.size
+        settle()
+        assertEquals("cached by request", asked, gw.estimates.size)
+
+        flow.selectedRoute = 1
+        val before = flow.routeKm
+        flow.cycleSeat(1) // a crew change: new requests — no stale number, then the new estimates
+        Snapshot.sendApplyNotifications()
+        assertTrue(flow.routeKm.isEmpty())
+        settle()
+        assertEquals("rr_yaroslavl", gw.estimates[asked].readyRouteId) // the selected row first
+        assertEquals(mapOf("rr_tula_yasnaya" to km(414), "rr_yaroslavl" to km(526)), flow.routeKm)
+        assertTrue(before != flow.routeKm)
+    }
+
+    @Test
     fun reserveIsLocalFirstThenEngine() = runTest {
         val gw = FakeGateway()
         val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
@@ -262,6 +291,71 @@ class VerstFlowTest {
         assertEquals(before.subtotalRub.let { s -> ((s + 50) / 100) * 100 }, local.totalRub)
         settle()
         assertEquals(1, gw.patches.size)
+    }
+
+    @Test
+    fun oneWriterLatestWinsAndFailuresAreReported() = runTest {
+        val gw = FakeGateway()
+        val store = MemoryTripStore()
+        val flow = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        // A save before the stored trips are loaded is deferred (P1-1), not written over them.
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        flow.save()
+        settle()
+        assertEquals(1, store.trips.size)
+        // 20 quick changes: saves, deletes and undos — the file ends with the last in-memory list.
+        repeat(10) {
+            flow.askDelete(flow.saved.single().id)
+            flow.confirmDelete()
+            flow.undoDelete()
+        }
+        flow.askDelete(flow.saved.single().id)
+        flow.confirmDelete()
+        settle()
+        assertEquals(flow.saved.toList(), store.trips)
+        assertTrue(store.trips.isEmpty())
+        // A failed write: storage toast and the trip is not shown as saved.
+        store.failWrites = true
+        flow.openSaved("none") // no-op
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        flow.save()
+        settle()
+        assertEquals(Toast.StorageFull, flow.toast)
+        assertFalse(flow.savedCurrent)
+    }
+
+    @Test
+    fun lastTripIsWrittenAndRestored() = runTest {
+        val gw = FakeGateway()
+        val store = MemoryTripStore()
+        val flow = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        flow.openWaybill()
+        settle()
+        val last = store.last!!
+        assertEquals("waybill", last.screen)
+        assertEquals(planned.trip.title, last.trip.title)
+        // A new process: the flow comes back to Waybill over Road with the same trip.
+        val again = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 8 }) {}
+        settle()
+        assertEquals(listOf(Route.Windshield, Route.Road, Route.Waybill), again.stack.toList())
+        assertEquals(planned.trip.km, again.result!!.trip.km)
+        // Back to the Windshield → the next start stays on the Windshield.
+        while (again.back()) Unit
+        settle()
+        assertNull(store.last!!.screen)
+        // Defaults (P2-10): the crew and pace survive too.
+        again.cycleSeat(1)
+        again.stepKm(50)
+        settle()
+        val third = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 9 }) {}
+        settle()
+        assertEquals(Seat.ADULT, third.seats[1])
+        assertEquals(again.dailyKm, third.dailyKm)
+        assertEquals(Route.Windshield, third.top)
     }
 }
 

@@ -46,10 +46,29 @@ ARGS=(-w -r)
 if [ -n "${E2E_CLASSES:-}" ]; then
   ARGS+=(-e class "$E2E_CLASSES")
 else
-  ARGS+=(-e package app.verst.e2e)
+  # The process-death journey (app.verst.e2e.restore) needs a kill between its phases: run below.
+  ARGS+=(-e package app.verst.e2e -e notPackage app.verst.e2e.restore)
 fi
 timeout 1500 adb shell am instrument "${ARGS[@]}" "$RUNNER" 2>&1 | tee "$OUT/instrument.txt"
 STATUS=${PIPESTATUS[0]}
+
+# Release review P1-2 / M§11 step 8: plan a trip and stay on Road ahead, HOME, kill the process, relaunch:
+# Road ahead must show the same trip. Each `am instrument` starts a fresh app process.
+if [ -z "${E2E_CLASSES:-}" ] && [ "$STATUS" -eq 0 ]; then
+  R="app.verst.e2e.restore.ProcessDeathTest"
+  timeout 300 adb shell am instrument -w -r -e class "$R#phase1PlanAndLeave" "$RUNNER" 2>&1 | tee -a "$OUT/instrument.txt"
+  S1=${PIPESTATUS[0]}
+  adb shell input keyevent KEYCODE_HOME
+  sleep 2
+  adb shell am force-stop "$APP_ID"
+  adb shell am kill "$APP_ID" || true
+  sleep 2
+  echo "process-death: $(adb shell pidof "$APP_ID" || echo 'no process') after force-stop" | tee -a "$OUT/instrument.txt"
+  timeout 300 adb shell am instrument -w -r -e class "$R#phase2RelaunchRestoresRoadAhead" "$RUNNER" 2>&1 | tee -a "$OUT/instrument.txt"
+  S2=${PIPESTATUS[0]}
+  [ "$S1" -ne 0 ] && STATUS=$S1
+  [ "$S2" -ne 0 ] && STATUS=$S2
+fi
 
 # Files written by the tests (screens/*.png, timings.json, parity.json) in the app-specific external dir.
 adb pull "/sdcard/Android/data/$APP_ID/files/e2e/." "$OUT/" >/dev/null 2>&1 || echo "no e2e files pulled" | tee "$OUT/pull-error.txt"
@@ -67,6 +86,10 @@ if grep -qE "FAILURES!!!|INSTRUMENTATION_FAILED|Process crashed|INSTRUMENTATION_
 fi
 if ! grep -q "^OK (" "$OUT/instrument.txt"; then
   echo "instrumentation did not report OK"
+  exit 1
+fi
+if [ -z "${E2E_CLASSES:-}" ] && [ "$(grep -c "^OK (" "$OUT/instrument.txt")" -ne 3 ]; then
+  echo "expected 3 OK runs (main + process-death phases 1 and 2)"
   exit 1
 fi
 exit 0

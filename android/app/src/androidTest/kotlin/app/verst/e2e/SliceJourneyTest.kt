@@ -21,7 +21,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import app.verst.MainActivity
 import app.verst.VerstApp
+import app.verst.core.model.EngineResult
+import app.verst.engine.ChaquopyPlannerGateway
 import app.verst.nav.Route
+import app.verst.nav.WindshieldData
+import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import app.verst.nav.Toast
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -235,11 +240,39 @@ class SliceJourneyTest {
         compose.runOnUiThread { flow.clearSaved() }
     }
 
+    /**
+     * Manager release return: no template km on the sign. Every visible row shows a placeholder until its engine
+     * estimate is in, then exactly the km the plan of that route gives for the same crew and pace.
+     */
+    @Test
+    fun windshieldSignKmIsThePlanKmOfEveryRow() {
+        waitTag("windshield.route.0")
+        val routes = (flow.windshield as WindshieldData.Routes).routes.take(4)
+        compose.waitUntil(60_000) { routes.indices.all { number(textOf("windshield.route.$it.km")) != null } }
+        assertTrue(compose.onAllNodes(hasTestTag("windshield.route.0.km.pending"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+        shot("01b-windshield-estimated")
+        val gateway = ChaquopyPlannerGateway(E2e.engine)
+        routes.forEachIndexed { i, r ->
+            val shown = number(textOf("windshield.route.$i.km"))!!
+            val req = compose.runOnUiThread<app.verst.core.model.PlanRequest> { flow.routeRequest(r) }
+            val plan = runBlocking { gateway.plan(UUID.randomUUID().toString(), req) {} }
+            assertTrue("plan ${r.id}: $plan", plan is EngineResult.Ok)
+            val planKm = (plan as EngineResult.Ok).value.trip.km
+            Log.i("VerstE2e", "sign ${r.id} shown=$shown plan=$planKm template=${r.kmSign}/${r.kmTotal} roundTrip=${r.roundTrip}")
+            assertEquals("row $i ${r.id}", planKm, shown)
+        }
+    }
+
     @Test
     fun readyRouteToRoadAhead() {
         waitTag("windshield.route.0")
         compose.onNodeWithText("Золотое кольцо").performClick()
         compose.waitUntil(5_000) { flow.selected?.id == "rr_golden_ring" }
+        // F-01: the sign row shows the engine estimate of this very request (crew, pace), not the fixture km.
+        compose.waitUntil(20_000) { flow.routeKm["rr_golden_ring"] != null }
+        val signKm = flow.routeKm.getValue("rr_golden_ring")
+        val row = flow.selectedRoute
+        compose.waitUntil(5_000) { number(textOf("windshield.route.$row.km")) == signKm }
         shot("08-windshield-golden-ring")
         compose.onNodeWithTag("windshield.start").performClick()
         waitTag("instruments.start")
@@ -250,6 +283,8 @@ class SliceJourneyTest {
         val planMs = (System.nanoTime() - t0) / 1_000_000
         shot("10-road-ahead-golden-ring")
         assertTrue(flow.result!!.trip.days >= 3)
+        Log.i("VerstE2e", "golden ring km windshield=$signKm plan=${flow.result!!.trip.km}")
+        assertEquals(signKm, flow.result!!.trip.km) // one trip, one distance from the Windshield on
 
         // 5.7 Exit: night 1 → another hotel (local first, engine after) → mock partner → «Забронировали?» → booked.
         val night = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.size >= 2 }

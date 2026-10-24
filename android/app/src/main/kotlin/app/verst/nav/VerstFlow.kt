@@ -26,7 +26,10 @@ import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.ReadyRouteDto
 import app.verst.core.model.dto.StopDto
 import app.verst.core.model.dto.SuggestionDto
+import app.verst.core.model.DefaultsDto
+import app.verst.core.model.LastTripDto
 import app.verst.data.TripStore
+import app.verst.data.TripsLoad
 import app.verst.engine.PlannerGateway
 import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
@@ -251,12 +254,33 @@ class VerstFlow(
     }
 
     /** «Сбросить данные»: saved trips, the current trip and the draft. */
+    var resetAsk by mutableStateOf(false)
+        private set
+
+    /** «Сбросить данные» asks first (release review P2-3). */
+    fun askReset() {
+        resetAsk = true
+    }
+
+    fun cancelReset() {
+        resetAsk = false
+    }
+
     fun resetData() {
+        resetAsk = false
         clearSaved()
         result = null
         booked.clear()
         destination = null
         known.clear()
+        dailyKmTouched = false
+        moodTouched = false
+        frontAdult = true
+        for (i in seats.indices) seats[i] = Seat.EMPTY
+        dog = false
+        dailyKm = 300
+        budgetIndex = BudgetPresets.indexOf(40_000)
+        mood = null
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
 
@@ -266,10 +290,59 @@ class VerstFlow(
     init {
         loadRoutes()
         loadOriginForms()
+        // P1-1 / P1-2: load the saved trips and the last trip first; saves wait for this (no save may write an
+        // in-memory list that lacks the stored trips), then one writer serializes every write.
         scope.launch {
-            val trips = withContext(io) { runCatching { store.load() }.getOrDefault(emptyList()) }
+            val load = withContext(io) { runCatching { store.load() }.getOrElse { TripsLoad.Unreadable("io: $it") } }
             saved.clear()
-            saved.addAll(trips)
+            if (load is TripsLoad.Ok) saved.addAll(load.trips)
+            val last = withContext(io) { runCatching { store.loadLast() }.getOrNull() }
+            val defaults = withContext(io) { runCatching { store.loadDefaults() }.getOrNull() }
+            if (defaults != null) applyDefaults(defaults)
+            tripsLoaded = true
+            if (last != null && result == null && stack.size == 1) restoreLast(last)
+            if (pendingSave) {
+                pendingSave = false
+                save()
+            }
+            writer()
+        }
+        // F-01: the Windshield sign rows show the engine estimate of each visible ready route for the current
+        // crew and pace — the same request (so the same number) Instruments, Drive and Road ahead will show.
+        scope.launch {
+            snapshotFlow {
+                if (top == Route.Windshield) {
+                    val visible = (windshield as? WindshieldData.Routes)?.routes?.take(4).orEmpty()
+                    // the selected row first, then the others top to bottom
+                    (visible.getOrNull(selectedRoute)?.let { listOf(it) }.orEmpty() + visible).distinct().map { routeRequest(it) }
+                } else {
+                    null
+                }
+            }.distinctUntilChanged().collectLatest { reqs ->
+                // Cached by the whole request (route id, crew, pace, budget, mood, origin); world / clock changes clear
+                // `known`. A crew change makes new requests: the rows fall back to the placeholder and re-estimate.
+                for (r in reqs.orEmpty()) {
+                    if (known.any { it.first == r }) continue
+                    val e = gateway.estimate(UUID.randomUUID().toString(), r)
+                    if (e is EngineResult.Ok) record(r, TripFigures(e.value.km, e.value.days))
+                }
+            }
+        }
+        // P1-2: the current trip and its screen go to last.json after every change (debounced); P2-10: defaults.
+        scope.launch {
+            snapshotFlow { lastKey() }.distinctUntilChanged().collectLatest {
+                delay(LAST_DEBOUNCE_MS)
+                if (tripsLoaded) enqueueLast()
+            }
+        }
+        scope.launch {
+            snapshotFlow { defaultsNow() }.distinctUntilChanged().collectLatest { d ->
+                delay(LAST_DEBOUNCE_MS)
+                if (tripsLoaded) {
+                    pendingDefaults = d
+                    writes.trySend(Unit)
+                }
+            }
         }
         // Navigator / Instruments: estimate the draft on the engine 300 ms after it settles; leaving the screens
         // (or a newer draft) cancels the running estimate in the engine too.
@@ -310,6 +383,10 @@ class VerstFlow(
         }
         if (deleteAsk != null) {
             deleteAsk = null
+            return true
+        }
+        if (resetAsk) {
+            resetAsk = false
             return true
         }
         if (limitDialog) {
@@ -356,12 +433,24 @@ class VerstFlow(
     val selected: ReadyRouteDto?
         get() = (windshield as? WindshieldData.Routes)?.routes?.getOrNull(selectedRoute)
 
+    /** The request Instruments will plan for ready route [r] (same pace rule as [openReadyRoute]). */
+    fun routeRequest(r: ReadyRouteDto): PlanRequest = PlanRequest(
+        origin = origin, destination = null, readyRouteId = r.id, adults = adults, children = children, dog = dog,
+        dailyKm = if (dailyKmTouched) dailyKm else TripMath.defaultDailyKm(r.kmTotal), budgetRub = BudgetPresets[budgetIndex], mood = mood,
+    )
+
+    /** F-01: the engine km of each visible ready route (route id → km), when known. */
+    val routeKm: Map<String, Int>
+        get() = (windshield as? WindshieldData.Routes)?.routes?.take(4)?.mapNotNull { r ->
+            known.lastOrNull { it.first == routeRequest(r) }?.let { r.id to it.second.km }
+        }?.toMap().orEmpty()
+
     /** ПОЕХАЛИ / mirror on 5.1 → Instruments with the selected ready route. */
     fun openReadyRoute() {
         val r = selected ?: return
         readyRoute = r
         destination = null
-        dailyKm = TripMath.defaultDailyKm(r.kmTotal)
+        if (!dailyKmTouched) dailyKm = TripMath.defaultDailyKm(r.kmTotal) // P2-10: a chosen pace is kept
         push(Route.Instruments)
     }
 
@@ -454,7 +543,7 @@ class VerstFlow(
     fun openInstrumentsFree() {
         val d = destination ?: return
         readyRoute = null
-        dailyKm = TripMath.defaultDailyKm(rowKm[d.pointKey] ?: 0)
+        if (!dailyKmTouched) dailyKm = TripMath.defaultDailyKm(rowKm[d.pointKey] ?: 0)
         push(Route.Instruments)
     }
 
@@ -477,7 +566,7 @@ class VerstFlow(
     private fun record(r: PlanRequest, f: TripFigures) {
         known.removeAll { it.first == r }
         known.add(r to f)
-        while (known.size > 24) known.removeAt(0)
+        while (known.size > 48) known.removeAt(0)
     }
 
     val tripTitle: String
@@ -499,6 +588,7 @@ class VerstFlow(
     }
 
     fun stepKm(delta: Int) {
+        dailyKmTouched = true
         dailyKm = (dailyKm + delta).coerceIn(TripMath.KM_MIN, TripMath.KM_MAX)
     }
 
@@ -667,17 +757,20 @@ class VerstFlow(
         if (costBusy) return
         costBusy = true
         val on = !r.trip.cost.reserveOn
+        val session = tripSession
         // Local first (DEV-104 CostCalculator), then the engine's answer overwrites the whole trip.
         localCost(r) { trip -> CostApply.apply(r.trip, LocalCost.reserve(trip, on), on) }
         scope.launch {
-            when (val p = gateway.patchCost(r.tripJson, EngineArgs.reservePatch(on))) {
+            val p = gateway.patchCost(r.tripJson, EngineArgs.reservePatch(on))
+            costBusy = false
+            if (session != tripSession) return@launch // P2-1: another trip is on screen now
+            when (p) {
                 is EngineResult.Ok -> updateTrip(p.value)
                 is EngineResult.Err -> {
                     result = r
                     showToast(Toast.EngineFailed)
                 }
             }
-            costBusy = false
         }
     }
 
@@ -709,16 +802,19 @@ class VerstFlow(
         val stop = r.trip.daysList.flatMap { it.stops }.firstOrNull { it.id == stopId } ?: return
         if (stop.selectedHotelId == placeId || costBusy) return
         costBusy = true
+        val session = tripSession
         localCost(r) { trip -> CostApply.apply(r.trip, LocalCost.hotel(trip, stopId, placeId), r.trip.cost.reserveOn, stopId to placeId) }
         scope.launch {
-            when (val p = gateway.patchCost(r.tripJson, EngineArgs.hotelPatch(stopId, placeId))) {
+            val p = gateway.patchCost(r.tripJson, EngineArgs.hotelPatch(stopId, placeId))
+            costBusy = false
+            if (session != tripSession) return@launch // P2-1
+            when (p) {
                 is EngineResult.Ok -> updateTrip(p.value)
                 is EngineResult.Err -> {
                     result = r
                     showToast(Toast.EngineFailed)
                 }
             }
-            costBusy = false
         }
     }
 
@@ -810,8 +906,11 @@ class VerstFlow(
         replace = ui.copy(busy = true)
         // Local total first (the row itself changes with the engine's answer a moment later).
         localCost(r) { trip -> CostApply.apply(r.trip, LocalCost.replace(trip, ui.stop.id, alt) ?: error("no units"), r.trip.cost.reserveOn) }
+        val session = tripSession
         scope.launch {
-            when (val n = gateway.replaceStop(r.tripJson, ui.stop.id, alt)) {
+            val n = gateway.replaceStop(r.tripJson, ui.stop.id, alt)
+            if (session != tripSession) return@launch // P2-1
+            when (n) {
                 is EngineResult.Ok -> {
                     undoTrip = r
                     updateTrip(n.value)
@@ -858,6 +957,10 @@ class VerstFlow(
     /** Save (5.5 T1 / 5.6 K1): upsert into the saved list, then write the file. */
     fun save(silent: Boolean = false) {
         val r = result ?: return
+        if (!tripsLoaded) {
+            pendingSave = true // P1-1: never write before the stored trips are in memory
+            return
+        }
         val id = savedId ?: UUID.randomUUID().toString()
         when (val up = SavedTrips.upsert(saved.toList(), SavedTrips.entry(id, now(), r, resultBearing, booked.toMap()))) {
             SavedTrips.Upsert.LimitReached -> limitDialog = true
@@ -873,8 +976,118 @@ class VerstFlow(
     }
 
     private fun persist() {
-        val snapshot = saved.toList()
-        scope.launch { withContext(io) { runCatching { store.save(snapshot) } } }
+        pendingTrips = saved.toList()
+        writes.trySend(Unit)
+    }
+
+    // ------------------------------------------------------------------------------------------ the one writer
+
+    private val writes = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.CONFLATED)
+    private var pendingTrips: List<SavedTripDto>? = null
+    private var pendingLast: LastTripDto? = null
+    private var lastDirty = false
+    private var pendingDefaults: DefaultsDto? = null
+    private var tripsLoaded = false
+    private var pendingSave = false
+
+    /**
+     * P1-1: one coroutine performs every write in order (latest snapshot wins: the pending fields are replaced,
+     * the conflated channel only wakes the writer). A failed trips write shows the storage toast and leaves the
+     * trip marked unsaved instead of «Сохранено».
+     */
+    private suspend fun writer() {
+        for (u in writes) {
+            pendingTrips?.let { t ->
+                pendingTrips = null
+                val ok = withContext(io) { runCatching { store.save(t) }.isSuccess }
+                if (!ok) {
+                    savedCurrent = false
+                    showToast(Toast.StorageFull)
+                }
+            }
+            if (lastDirty) {
+                lastDirty = false
+                val l = pendingLast
+                withContext(io) { runCatching { store.saveLast(l) } }
+            }
+            pendingDefaults?.let { d ->
+                pendingDefaults = null
+                withContext(io) { runCatching { store.saveDefaults(d) } }
+            }
+        }
+    }
+
+    /** Changes whenever last.json must be rewritten: the trip (identity), booking, saved id and screen. */
+    private fun lastKey(): Any? = listOf(result, booked.toMap(), savedId, lastScreen(), exitStopId)
+
+    private fun lastScreen(): String? = when {
+        Route.Exit in stack -> "exit"
+        Route.Waybill in stack -> "waybill"
+        Route.Road in stack -> "road"
+        else -> null
+    }
+
+    private fun enqueueLast() {
+        val r = result
+        pendingLast = r?.let {
+            runCatching {
+                LastTripDto(
+                    trip = SavedTrips.entry(savedId ?: "last", now(), it, resultBearing, booked.toMap()),
+                    savedId = savedId, screen = lastScreen(), exitStopId = exitStopId,
+                )
+            }.getOrNull()
+        }
+        lastDirty = true
+        writes.trySend(Unit)
+    }
+
+    /** P1-2: back to the trip and screen of last.json (process death, force-stop + relaunch). */
+    private fun restoreLast(l: LastTripDto) {
+        val screen = l.screen ?: return
+        val r = runCatching { SavedTrips.result(l.trip) }.getOrNull() ?: return
+        val stillSaved = l.savedId != null && saved.any { it.id == l.savedId }
+        showTrip(r, request = null, bearing = l.trip.bearing8, savedId = if (stillSaved) l.savedId else null, fromSaved = true, bookedStops = l.trip.bookedHotels)
+        savedCurrent = false
+        stack.clear()
+        stack.add(Route.Windshield)
+        stack.add(Route.Road)
+        when (screen) {
+            "waybill" -> stack.add(Route.Waybill)
+            "exit" -> if (l.exitStopId != null) {
+                exitStopId = l.exitStopId
+                stack.add(Route.Exit)
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------ defaults (P2-10)
+
+    private var dailyKmTouched = false
+
+    private fun defaultsNow() = DefaultsDto(
+        frontAdult = frontAdult, seats = seats.map { it.name }, dog = dog, dailyKm = if (dailyKmTouched) dailyKm else null,
+        budgetIndex = budgetIndex, mood = mood?.name, moodTouched = moodTouched,
+        originLabel = origin.label, originLat = origin.lat, originLon = origin.lon, originGen = originGen,
+    )
+
+    private fun applyDefaults(d: DefaultsDto) {
+        frontAdult = d.frontAdult
+        d.seats.take(seats.size).forEachIndexed { i, n -> seats[i] = runCatching { Seat.valueOf(n) }.getOrDefault(Seat.EMPTY) }
+        dog = d.dog
+        d.dailyKm?.let {
+            dailyKm = it
+            dailyKmTouched = true
+        }
+        budgetIndex = d.budgetIndex.coerceIn(0, BudgetPresets.lastIndex)
+        mood = d.mood?.let { runCatching { Mood.valueOf(it) }.getOrNull() }
+        moodTouched = d.moodTouched
+        val o = GeoPoint(d.originLabel, d.originLat, d.originLon)
+        if (o != origin) {
+            origin = o
+            originGen = d.originGen
+            rowKm.clear()
+            loadRoutes()
+        }
     }
 
     /** Limit dialog «Мои поездки» → back to the Windshield with the trips sheet open. */
@@ -948,13 +1161,14 @@ class VerstFlow(
         saved.clear()
         savedId = null
         savedCurrent = false
-        scope.launch { withContext(io) { runCatching { store.save(emptyList()) } } }
+        if (tripsLoaded) persist()
     }
 
     companion object {
         const val STEP_GAP_MS = 400L
         const val AUTO_ADVANCE_MS = 1000L
         const val ESTIMATE_DEBOUNCE_MS = 300L
+        const val LAST_DEBOUNCE_MS = 300L
         val ENGINE_START_CODES = setOf("NO_ENGINE", "ENGINE_START", "NO_WORLD", "TZDATA_MISSING")
     }
 }
