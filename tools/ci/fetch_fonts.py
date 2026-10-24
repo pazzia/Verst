@@ -12,9 +12,11 @@ Sources are tried in order per family; the first one whose files pass the family
   1. github.com/google/fonts at one pinned commit (static file, or a variable font instanced with fontTools)
   2. npm packages of the upstream project (IBM ships @ibm/plex-sans-condensed and the monolithic @ibm/plex)
   3. a variable font of a sibling family cut at a fixed axis position (IBM Plex Sans v3 [wdth,wght] at
-     wdth 85 = Condensed), as architecture-android-mvp §10.2 allows for variable-only families
+     wdth 75 = Condensed, the axis minimum), as architecture-android-mvp §10.2 allows for variable-only families
 Run 1 (40091925830) showed google/fonts' IBM Plex Sans Condensed v1.3 has no Cyrillic; run 2 (40092439867)
-found no npm static files and IBM Plex Sans v3.201 with Cyrillic and a wdth axis, hence source 3.
+found no npm static files and IBM Plex Sans v3.201 with Cyrillic and a wdth axis 75–100, hence source 3.
+Run 3 (40092620704) cut wdth 85: Latin advances 4.3 % wider than v1.3 Condensed; wdth 75 matches v1.3 to
+0.01 (sum of advances of a Latin sample), so the mockup metrics hold.
 
 Glyph rules (open-issues OI-12): the UI family needs А–я Ёё № ₽ ≈ « » — → ↓ ↑ · and U+00A0; Plex Mono is used
 only for odometer digits; Marck Script needs Cyrillic + digits (its «₽ ≈ →» are set in Plex per OI-12).
@@ -55,7 +57,7 @@ FAMILIES = {
     "marckscript": ("ofl/marckscript", [], CYR + DIGITS),
 }
 # family → (sibling google/fonts dir with a variable font, fixed axes) — source 3
-VF_SIBLING = {"ibmplexsanscondensed": ("ofl/ibmplexsans", {"wdth": 85})}
+VF_SIBLING = {"ibmplexsanscondensed": ("ofl/ibmplexsans", {"wdth": 75})}
 # resource name → (family, static file name, weight for a variable-font fallback)
 FONTS = {
     "ibm_plex_sans_condensed_regular": ("ibmplexsanscondensed", "IBMPlexSansCondensed-Regular.ttf", 400),
