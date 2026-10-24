@@ -4,6 +4,7 @@ import androidx.compose.ui.res.stringResource
 import app.verst.core.ui.R as UiR
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
+import app.verst.feature.report.ReportSheet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -659,7 +660,7 @@ class ScreensScreenshotTest {
                 val h = maxHeight
                 Box(Modifier.fillMaxSize()) {
                     RoadScreen(RoadUi(trip, "NE"), noRoad)
-                    app.verst.feature.report.ReportSheet(
+                    ReportSheet(
                         app.verst.feature.report.ReportUi(stop.name, "price", "Билет уже 600 ₽"), h,
                         object : app.verst.feature.report.ReportActions {
                             override fun close() = Unit
@@ -683,7 +684,7 @@ class ScreensScreenshotTest {
                 val h = maxHeight
                 Box(Modifier.fillMaxSize()) {
                     RoadScreen(RoadUi(trip, "NE"), noRoad)
-                    app.verst.feature.report.ReportSheet(
+                    ReportSheet(
                         app.verst.feature.report.ReportUi("Ростовский кремль"), h,
                         object : app.verst.feature.report.ReportActions {
                             override fun close() = Unit

@@ -17,6 +17,7 @@ import app.verst.platform.openAppSettings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Box
+import app.verst.feature.report.ReportSheet
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -151,7 +152,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
         androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
             val h = maxHeight
             Box(Modifier.fillMaxSize()) {
-                app.verst.feature.report.ReportSheet(
+                ReportSheet(
                     app.verst.feature.report.ReportUi(r.name, flow.reportReason, flow.reportComment), h,
                     object : app.verst.feature.report.ReportActions {
                         override fun close() = flow.closeReport()

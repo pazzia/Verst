@@ -301,10 +301,10 @@ class VerstFlow(
     var destination: SuggestionDto? by mutableStateOf(null)
         private set
     var editingFrom by mutableStateOf(false)
+        private set
 
     /** 5.12 §5 autofocus: КУДА takes focus after a hand-picked ОТКУДА, not after a GPS fix (S3-QA P1-01). */
     var focusToField by mutableStateOf(true)
-        private set
         private set
 
     /** Base-route km from the origin to suggestion rows («lat,lon» → km; null = unreachable). */
