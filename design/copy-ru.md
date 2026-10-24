@@ -43,6 +43,35 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `common_storage_full_body` | Удалите старую поездку, чтобы сохранить эту | |
 | `common_storage_full_open` | Мои поездки | |
 | `common_undo` | Вернуть | toast action |
+| `common_month_gen_01` | января | genitive month for dates («31 октября»); index = month 1–12 |
+| `common_month_gen_02` | февраля | |
+| `common_month_gen_03` | марта | |
+| `common_month_gen_04` | апреля | |
+| `common_month_gen_05` | мая | |
+| `common_month_gen_06` | июня | |
+| `common_month_gen_07` | июля | |
+| `common_month_gen_08` | августа | |
+| `common_month_gen_09` | сентября | |
+| `common_month_gen_10` | октября | |
+| `common_month_gen_11` | ноября | |
+| `common_month_gen_12` | декабря | |
+| `common_month_short_01` | янв. | short genitive (Russian abbreviation norm: «марта», «мая», «июня», «июля» are not abbreviated); `mock_partner_dates` «7 нояб.» |
+| `common_month_short_02` | февр. | |
+| `common_month_short_03` | марта | |
+| `common_month_short_04` | апр. | |
+| `common_month_short_05` | мая | |
+| `common_month_short_06` | июня | |
+| `common_month_short_07` | июля | |
+| `common_month_short_08` | авг. | |
+| `common_month_short_09` | сент. | |
+| `common_month_short_10` | окт. | |
+| `common_month_short_11` | нояб. | |
+| `common_month_short_12` | дек. | |
+| `common_date_day` | {day} {month} | «31 октября»; day without a leading zero; `{month}` = `common_month_gen_*` |
+| `common_date_range_month` | {day}–{day_to} {month} | same month: «7–9 ноября» (U+2013, no spaces) |
+| `common_date_range` | {day} {month} – {day_to} {month_to} | across months: «30 октября – 2 ноября» (U+2013 with spaces) |
+| `common_date_with_year` | {date} {year} | appended only when the year is not the current year: «7–9 ноября 2027» |
+| `common_dialog_cancel` | Отмена | secondary button of `NaviDialog` (50-trip limit) |
 | `common_join_dot` | " · " | separator; a text cell in straight double quotes is literal (spaces kept) |
 | `common_join_comma` | ", " | separator |
 | `cd_back` | Назад: {label} | |
@@ -183,6 +212,8 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `instruments_budget_label` | БЮДЖЕТ | |
 | `instruments_budget_value` | до {amount} ₽ | |
 | `instruments_budget_any` | не важно | |
+| `instruments_gauge_empty` | E | fuel gauge letter at the red end (components §6, Latin as on a real dashboard); `cd` not needed: the gauge node speaks the budget |
+| `instruments_gauge_full` | F | fuel gauge letter at the full end |
 | `instruments_mood_label` | НАСТРОЕНИЕ | |
 | `instruments_mood_calm` | Спокойно, с детьми | |
 | `instruments_mood_more` | Побольше остановок | |
@@ -263,7 +294,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `road_free` | вход свободный | = engine `cost.tickets.none` |
 | `road_swap` | заменить | |
 | `road_pick_hotel` | Выбрать отель → | |
-| `road_booked` | Забронировано ✓ | ✓ drawn as an icon |
+| `road_booked` | Забронировано | the check is **not** a character (Verst Sans Narrow has no U+2713; it fell back to «√»): draw §17.4 `check` 16 × 16, stroke 2, same colour as the text, gap 6, after the text |
 | `road_excursion` | Экскурсия от {amount} ₽ ↗ | SPEC §14 |
 | `road_waybill_label` | ПУТЕВОЙ ЛИСТ · СКОЛЬКО СТОИТ | |
 | `road_waybill_over` | ПУТЕВОЙ ЛИСТ · ПЕРЕРАСХОД {amount} ₽ | over budget |
@@ -303,7 +334,10 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `replace_title` | Заменить: {name} | D-6 |
 | `replace_subtitle` | Варианты в то же время, ± 45 минут | |
 | `replace_current` | сейчас | |
-| `replace_delta` | {sign}{min} мин · {sign}{amount} ₽ | sign «+» / «−» (U+2212) |
+| `replace_delta` | {min_sign}{min} мин · {rub_sign}{amount} ₽ | independent signs «+» / «−» (U+2212): «+4 мин · −150 ₽»; `{min}` and `{amount}` are absolute values (amount with U+202F) |
+| `replace_delta_min` | {min_sign}{min} мин | when the price difference is 0 |
+| `replace_delta_rub` | {rub_sign}{amount} ₽ | when the time difference is 0 |
+| `replace_delta_none` | то же время и цена | both differences are 0 |
 | `replace_confirm` | Заменить | CTA |
 | `replace_keep` | Оставить как есть | |
 | `report_title` | Что не так с местом? | D-7 |
@@ -348,7 +382,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `waybill_footnote_sample` | Пример расчёта: цены средние по трассе на {month} {year}, точные — при бронировании. | `{month}` = engine `months` (nominative), e.g. «октябрь 2026» |
 | `waybill_footnote_real` | Расчёт: цены средние по трассе на {month} {year}, точные — при бронировании. | after real data (SPEC 5.6) |
 | `waybill_save` | Сохранить офлайн | |
-| `waybill_saved` | Сохранено ✓ | |
+| `waybill_saved` | Сохранено | the check is **not** a character (Verst Sans Narrow has no U+2713; it fell back to «√»): draw §17.4 `check` 16 × 16, stroke 2, same colour as the text, gap 6, after the text |
 | `waybill_share` | Отправить экипажу | |
 | `waybill_sync_failed` | Не удалось синхронизировать расчёт — повторим позже | toast |
 | `waybill_stamp_top` | ВЕРСТА | decorative, not read |
@@ -362,7 +396,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `cd_waybill_total` | Итого примерно {amount} рублей | |
 | `cd_waybill_ready` | Путевой лист готов: итого примерно {amount} рублей | announcement |
 | `pro_plate` | Поездка Pro · безлимит, PDF, карты без сети | |
-| `pro_plate_joined` | Поездка Pro · вы в списке ✓ | |
+| `pro_plate_joined` | Поездка Pro · вы в списке | the check is **not** a character (Verst Sans Narrow has no U+2713; it fell back to «√»): draw §17.4 `check` 16 × 16, stroke 2, same colour as the text, gap 6, after the text |
 | `pro_title` | Поездка Pro | sheet |
 | `pro_intro` | Скоро. Отметьте, что пригодится, — так поймём, что делать первым. | |
 | `pro_unlimited` | Сколько угодно сохранённых поездок | |
@@ -385,6 +419,7 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `exit_sign_centre` | центр | exit sign |
 | `exit_sign_distance_m` | {m} м | «800 м» |
 | `exit_sign_distance_km` | {km} км | «1,2 км» |
+| `exit_sign_no_distance` | ночёвка | exit-sign row 2 when the engine gives no exit → hotel distance (mock build, 5.7 §8) |
 | `exit_turn` | поворотник | decorative |
 | `exit_book` | Забронировать ночь | |
 | `exit_book_partner` | через Яндекс Путешествия | |
@@ -395,6 +430,11 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `exit_return_body` | Отметим ночёвку в {town_prep} как забронированную | |
 | `exit_return_yes` | Да, забронировали | |
 | `exit_return_no` | Ещё нет | |
+| `exit_booked_badge` | забронировано | `HotelOption` price slot in the booked state (= `exit_booked_price`, kept for clarity) |
+| `exit_booked_toast` | Отметили: ночёвка в {town_prep} забронирована | toast after «Да, забронировали», with `common_undo` (6 s) to remove the mark |
+| `exit_book_partner_mock` | демо-партнёр, без оплаты | Book CTA sub-line in the mock build (replaces `exit_book_partner`, no real brand) |
+| `cd_exit_book_mock` | Забронировать ночь, демо: откроется пример бронирования без оплаты | TalkBack of the Book CTA in the mock build |
+| `cd_road_booked` | Ночёвка забронирована | appended to the hotel row on Road ahead |
 | `exit_tag_dogs` | можно с собакой | decisions.md OI-30 |
 | `exit_tag_family` | семейный номер |  |
 | `exit_tag_parking` | парковка |  |
@@ -413,6 +453,12 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `trips_delete_yes` | Удалить | |
 | `trips_delete_no` | Оставить | |
 | `trips_deleted` | Поездка удалена | + `common_undo` |
+| `trips_delete_action` | Удалить | TalkBack custom action and long-press menu item on a row (D-1) |
+| `trips_limit_reached_title` | Место для поездок закончилось | = `common_storage_full_title`; `NaviDialog` when saving trip 51 |
+| `trips_limit_reached_body` | Сохранено 50 из 50. Удалите старую поездку, чтобы сохранить эту | |
+| `trips_limit_reached_open` | Открыть «Мои поездки» | primary; secondary = `common_dialog_cancel` |
+| `trips_past` | прошла | small label before the meta of a past trip (D-1 order: upcoming first) |
+| `cd_trips_deleted` | Поездка «{name}» удалена. Вернуть, кнопка | live region for the undo toast |
 | `cd_trips_row` | {name}, {dates}, {d} {days}, примерно {amount} рублей. Открыть | |
 
 ## 9. Plurals (`<plurals>`, ICU one / few / many / other)
@@ -632,14 +678,15 @@ Keys for the on-device mock build (architecture-android-mvp M§9, ADR-0010). Spe
 | `engine_failed_text` | Сохранённые поездки на месте — попробуйте запустить ещё раз | under the title |
 | `common_engine_error` | Сохранили. Планировщик не ответил — суммы пересчитаны на телефоне | toast, M§6.3 |
 | `mock_partner_title` | Бронирование ночи | `MockPartnerSheet` title (D-13) |
-| `mock_partner_line` | Яндекс Путешествия · демо | partner line |
+| `mock_partner_line` | «Придорожная» — вымышленный партнёр · демо | partner line; «Придорожная» is a fictional name used only in the demo (no real brand anywhere in the mock build, Manager 2026-10-24) |
+| `mock_partner_badge` | ДЕМО | badge at the sheet title (D-13) |
 | `mock_partner_hotel` | {hotel}, {town} | |
 | `mock_partner_dates` | {checkin} — {checkout} · {nights} {nights_word} | [plural: `plural_night`]; dates «7 нояб.» |
 | `mock_partner_guests` | Гости: {guests} | guests = `waybill_crew_*` parts |
 | `mock_partner_price` | ≈ {amount} ₽ за {nights} {nights_word} | [plural: `plural_night`] |
-| `mock_partner_note` | Это демо-сборка: настоящего бронирования нет. В рабочей версии здесь откроется Яндекс Путешествия с этими датами. | |
+| `mock_partner_note` | Это демо-сборка: настоящего бронирования и оплаты нет. В рабочей версии здесь откроется сайт партнёра по бронированию с этими датами. | |
 | `mock_partner_back` | Вернуться в Версту | primary button; dismissal → «Забронировали?» |
-| `cd_mock_partner` | Бронирование ночи, демо. {hotel}, {checkin} — {checkout}, примерно {amount} рублей | pane description |
+| `cd_mock_partner` | Бронирование ночи, демо, вымышленный партнёр. {hotel}, {checkin} — {checkout}, примерно {amount} рублей | pane description |
 | `mock_map_unavailable` | Карта появится в следующей версии — пока введите город или адрес | plate after tapping «точка на карте» (D-14) |
 | `mock_build_line` | Сборка {n} · {sha} · демо-данные | D-4 footer, long-press 2 s → debug panel (D-16) |
 | `mock_share_note` | Посчитано в демо-сборке «Версты», цены примерные | last line of the share text instead of the link (D-16) |

@@ -80,6 +80,9 @@ New-state pairs designed here: `color.accent.redText` on #0B1218 5.51, on #16161
 | OI-36 | FIXED | MapLibre draws labels from server-side SDF glyphs, not from the APK fonts, so the map would fall back to Noto Sans | Generate PBF glyph ranges (Latin + Cyrillic) for IBM Plex Sans Condensed 400/600 on the Planetiler/tile server and reference them in the style JSON |
 | OI-37 | DECIDE | The engine share text (architecture §8.2) has no dates, crew line or per-person amount; the earlier design draft had them | Ship the engine format now (D-11 updated); add `share.dates` / `share.crew` / `share.per_person` to `strings.ru.json` in a later sprint if wanted |
 | OI-38 | DECIDE | Engine cost-line titles differ from the approved Waybill (copy-ru.md §13 R-1) | Developer changes `strings.ru.json`: «Питание», «Резерв {pct}%», «Бензин {fuel_type}», reserve sub-line without «10%» |
+| OI-39 | DECIDE (Architect) | The app needs town names in the **genitive** («из Твери», «ИЗ ТВЕРИ»: `windshield_sign_header`, `windshield_all_routes_title`, `instruments_ready_meta_ring`) and the **prepositional** («в Ярославле»: `exit_return_body`, `exit_booked_toast`, `cd_road_hotel`). The worlds carry `nameRu` and `namePrepRu` (48 towns) but no genitive. The engine exposes neither to the app, so DEV-SLICE-2 keeps a 48-entry Kotlin map, which breaks for any new town | **Engine proposal:** (1) fixtures `towns[].nameGenRu` next to `namePrepRu`, for all 48 towns, checked by a fixture test (non-empty, Cyrillic, differs from `nameRu` except indeclinable names); (2) domain `Town.name_gen_ru: str \| None` and `ru.genitive(town)` with the `nameRu` fallback, mirroring `ru.prepositional`; (3) `mobile` results carry both forms wherever a town is returned: `readyRoutes[].origin {nameRu, nameGenRu, namePrepRu}`, trip `origin`/`destination`, and every stop with a `townId` (`townNameGenRu`, `townNamePrepRu`); additive, `API_VERSION` stays 1; (4) the app deletes its map and uppercases in Kotlin only for `{CITY_GEN}`. Until then the Kotlin map stays and every new fixture town must be added to it |
+| OI-40 | FIXED (Manager, 2026-10-24) | The mock build named a real booking brand (Яндекс Путешествия) in `MockPartnerSheet`, the Book CTA sub-line and TalkBack | The mock build uses the fictional partner «Придорожная», a «ДЕМО» badge, «без оплаты» and the mock-only keys `exit_book_partner_mock` / `cd_exit_book_mock` (D-13, 5.7 §8). Production copy is unchanged |
+| OI-41 | DECIDE (Architect) | The Exit sign's «800 м» (exit → hotel distance) has no engine field | `hotelOptions[].exitDistanceM` (int). Until then the mock shows «ночёвка» in the sign (5.7 §8) |
 
 ## 4. Designed missing states and screens
 
@@ -187,10 +190,11 @@ All of these use only existing tokens and components.
     детское меню · можно с собакой
 ( ) Столовая на трассе           −15 мин · −600 ₽
     парковка · быстро
-[ ЗАМЕНИТЬ ]                                       YellowButton h 56, disabled until another row is selected
+[ Заменить ]                                       YellowButton h 56 (`replace_confirm`, sentence case, no arrow), disabled until another row is selected
 Оставить как есть                                  text button 44, text.secondary
 ```
-- Each alternative row shows the mini sign of its kind at 0.7 scale (service 35 × 43) at the left, a name `type.title.sm`, tags `type.body.sm` `color.text.secondary`, and the delta `type.body.mdStrong` `color.text.primary` (no colour coding: green is reserved for the turn signal; the signs «+»/«−» carry the meaning).
+- Rows: min-h 64, fill `color.dash.controlAlt`, radius `radius.r10`, padding 10 12, gap 8 between rows; selected: border `stroke.w1` `color.accent.yellow`; the current stop is selected when the sheet opens. Delta copy: `replace_delta` / `_min` / `_rub` / `_none` (zero parts are dropped: «+4 мин», not «+4 мин · 0 ₽»).
+- Each alternative row shows the mini sign of its kind at 0.7 scale (service 35 × 43, tourist 39 × 39, city 45 × min 28) between the radio and the name, a name `type.title.sm`, tags `type.body.sm` `color.text.secondary`, and the delta `type.body.mdStrong` `color.text.primary` (no colour coding: green is reserved for the turn signal; the signs «+»/«−» carry the meaning).
 - After «Заменить»: the sheet closes, the row updates, a row flash plays, toast «Заменили. Путевой лист: ≈ 30 800 ₽» + «Вернуть» (6 s). Server confirm failure: toast «Замену сохраним на сервере, когда появится сеть».
 - No alternatives (offline, not cached): the «заменить» button is disabled (components §2.6).
 
@@ -237,29 +241,40 @@ Defined in each screen file §4 (5.1 loading / empty / offline / error; 5.2 sugg
 
 Design numbering D-13…D-16 continues the D-list above; it is unrelated to the architecture decision log (A§15 "D-16" = 5 meals). Copy: copy-ru.md §14. Components: existing only.
 
-### D-13 `MockPartnerSheet` (5.7 «Забронировать ночь» in the mock build)
+### D-13 `MockPartnerSheet` (5.7 «Забронировать ночь» in the mock build) — revised 2026-10-24
+
+The sheet stands in for the booking partner and must read as a **fictional demo**: no real brand, logo, colours or URL anywhere (Manager, 2026-10-24). The partner is the invented «Придорожная»; the sheet says «вымышленный партнёр», «демо» and «без оплаты».
 
 ```
-┌─────────────────── ▬ ───────────────────┐   BottomSheet (components §16)
-│ Бронирование ночи                   [×]  │   type.title.lg            mock_partner_title
-│ Яндекс Путешествия · демо                │   type.label.md navi.label mock_partner_line (not uppercase: brand + «демо»)
-│┌ NaviPanel look (bezel 6, radius 16) ───┐│
-││ У Стрелки, в центре, Ярославль          ││  type.title.sm            mock_partner_hotel
-││ 7 нояб. — 8 нояб. · 1 ночь              ││  type.body.md navi.text   mock_partner_dates
-││ Гости: 2 взр., 1 реб., собака           ││  type.body.md navi.text   mock_partner_guests
-││ ≈ 6 000 ₽ за 1 ночь                     ││  type.title.sm accent.yellow mock_partner_price
+┌─────────────────── ▬ ───────────────────┐   BottomSheet (components §16), content padding 8 20 24
+│ Бронирование ночи  [ДЕМО]           [×]  │   title type.title.lg; badge; close 44 × 44
+│ «Придорожная» — вымышленный партнёр · демо│   type.body.sm navi.label (not uppercase)
+│┌ NaviPanel look (bezel 6, radius 16) ───┐│   margin-top 12; screen padding 12 14, row gap 6
+││ У Стрелки, в центре, Ярославль          ││   type.title.sm  text.primary      mock_partner_hotel
+││ 7 нояб. — 8 нояб. · 1 ночь              ││   type.body.md   navi.text         mock_partner_dates
+││ Гости: 2 взр., 1 реб., собака           ││   type.body.md   navi.text         mock_partner_guests
+││ ≈ 6 000 ₽ за 1 ночь                     ││   type.title.sm  accent.yellow     mock_partner_price
 │└─────────────────────────────────────────┘│
-│ Это демо-сборка: настоящего бронирования │   type.body.md text.secondary  mock_partner_note
-│ нет. В рабочей версии здесь откроется    │
-│ Яндекс Путешествия с этими датами.       │
-│ [ Вернуться в Версту                    ] │   YellowButton h 56, mock_partner_back
+│ Это демо-сборка: настоящего бронирования  │   margin-top 12; type.body.md text.secondary  mock_partner_note
+│ и оплаты нет. В рабочей версии здесь …    │
+│ [ Вернуться в Версту                    ] │   margin-top 16; YellowButton full width h 56  mock_partner_back
 └──────────────────────────────────────────┘
 ```
-- Opens with `motion.bottomSheetIn` from the Book CTA; the CTA shows no spinner (no link to build).
-- Dismissal by the button, «×», system back or drag → the «Забронировали?» `NaviDialog` (5.7 §4) exactly as after a real partner return.
-- Values come from the trip: hotel = the selected `HotelOption`, dates = overnight date → +1 day, guests = crew, price = the option price × nights.
-- TalkBack: pane `cd_mock_partner`; focus starts on the title.
-- No partner logo and no partner brand colours, so the demo sheet cannot be mistaken for the real partner page: the line «Яндекс Путешествия · демо» is plain text in `color.navi.label`.
+
+| Part | Spec |
+| --- | --- |
+| Title row | «Бронирование ночи» `type.title.lg` `color.text.primary`; gap 8; badge «ДЕМО» (`mock_partner_badge`): h 20, padding 0 6, radius `radius.r4`, border `stroke.w1` `color.accent.yellow`, text `type.label.md` `color.accent.yellow`, vertically centred on the title; close «×» (§17.4 `close` 16, 44 × 44 touch) right |
+| Partner line | `mock_partner_line` «Придорожная» — вымышленный партнёр · демо», `type.body.sm` `color.navi.label`, margin-top 4. Plain text: no logo, no brand colour, no link |
+| Booking card | `NaviPanel` look: bezel `stroke.w6` `color.dash.control`, radius `radius.r16`, screen `color.navi.screen`, padding 12 14, rows gap 6, full width |
+| Note | `mock_partner_note`, `type.body.md` `color.text.secondary`, wraps |
+| Button | `YellowButton` (components §15) full width, h 56, `type.cta.sm` `color.text.onLight` «Вернуться в Версту» |
+| Height | content-sized (≈ 380 dp at 390 × 844); never above 88 % of the window |
+
+- Opens with `motion.bottomSheetIn` from the Book CTA; the CTA shows no spinner (no link to build). Scene loops pause under the scrim (motion.md §4.3).
+- Dismissal by the button, «×», system back or drag → `motion.bottomSheetOut`, then the «Забронировали?» `NaviDialog` (5.7 §4) with `motion.dialogIn`, exactly as after a real partner return. From the booked CTA («Открыть бронирование») the dialog is not shown again.
+- Values come from the trip: hotel = the selected `HotelOption` name + town; dates = the overnight date → +1 day per night, formatted `{day} {month_short}` with `common_month_short_*` («7 нояб. — 8 нояб.»); guests = the crew (`waybill_crew_*` parts); price = `priceCrewRub` × nights.
+- TalkBack: pane `cd_mock_partner` («Бронирование ночи, демо, вымышленный партнёр. …»); focus starts on the title; the badge is part of the title node («Бронирование ночи, демо»).
+- Never shown in a production build: production opens the real partner link (SPEC 10).
 
 ### D-14 «точка на карте» without a map
 

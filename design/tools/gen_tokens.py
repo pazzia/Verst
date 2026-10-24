@@ -292,6 +292,19 @@ motion['carMarker'] = m(durationMs=14000, easing='linear', speedDpPerS=124, infi
 motion['shimmer'] = m(durationMs=1200, easing='linear', infinite=True)
 motion['bottomSheetIn'] = m(durationMs=300, easing='decelerate', infinite=False)
 motion['bottomSheetOut'] = m(durationMs=200, easing='accelerate', infinite=False)
+# slice-2 review: one-shots used by 5.2, 5.4, 5.5, 5.7, D-1 and the overlays that had no token yet
+motion['toastIn'] = m(durationMs=200, easing='decelerate', fromDyDp=8, showMs=3000, showWithActionMs=6000, infinite=False)
+motion['toastOut'] = m(durationMs=150, easing='accelerate', infinite=False)
+motion['dialogIn'] = m(durationMs=200, easing='decelerate', fromScale=0.96, scrimAlpha=0.6, infinite=False)
+motion['dialogOut'] = m(durationMs=150, easing='accelerate', infinite=False)
+motion['captionFade'] = m(durationMs=150, easing='standard', infinite=False)
+motion['laneSlowDown'] = m(durationMs=800, easing='decelerate', fromPeriodMs=450, toPeriodMs=900, infinite=False)
+motion['rowFlash'] = m(durationMs=1200, easing='easeOut', infinite=False)
+motion['valueCrossfade'] = m(durationMs=200, easing='standard', infinite=False)
+motion['fieldPulse'] = m(durationMs=1200, totalMs=2400, easing='easeInOut', fromAlpha=1.0, toAlpha=0.4, infinite=False)
+motion['spinner'] = m(durationMs=900, easing='linear', sweepDeg=270, infinite=True)
+motion['loadingDots'] = m(durationMs=900, stepMs=300, dotDp=4, infinite=True)
+motion['rowRemove'] = m(durationMs=250, easing='accelerate', infinite=False)
 motion['screen'] = O(
   zoomToNavi=m(durationMs=450, easing='decelerate', infinite=False),
   lookAtMirror=m(durationMs=400, easing='decelerate', infinite=False),
