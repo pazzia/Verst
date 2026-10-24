@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.testTag
@@ -216,7 +217,7 @@ private fun TurnSignal(overlay: Boolean, modifier: Modifier) {
     ) {
         Canvas(Modifier.size(18.dp)) {
             val s = size.width / 24f
-            androidx.compose.ui.graphics.drawscope.scale(s, s, pivot = androidx.compose.ui.geometry.Offset.Zero) { drawPath(turn, C.signal.green) }
+            scale(s, s, pivot = androidx.compose.ui.geometry.Offset.Zero) { drawPath(turn, C.signal.green) }
         }
         Txt(stringResource(R.string.exit_turn), T.body.smStrong, C.signal.green, maxLines = 1)
     }

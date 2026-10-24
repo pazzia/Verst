@@ -303,7 +303,8 @@ private fun Sign(ui: WindshieldUi, onSelect: (Int) -> Unit, onRetry: () -> Unit,
                 stringResource(R.string.windshield_sign_header, ui.originGen.uppercase()),
                 T.label.md, C.sign.blueText, Modifier.weight(1f).semantics { heading() }, maxLines = 1,
             )
-            if (ui.data is WindshieldData.Routes) Txt(stringResource(R.string.windshield_sign_km), T.label.md, C.sign.blueText)
+            // S-25: «КМ» stays while loading; only the rows become placeholders.
+            if (ui.data is WindshieldData.Routes || ui.data is WindshieldData.Loading) Txt(stringResource(R.string.windshield_sign_km), T.label.md, C.sign.blueText)
         }
         when (val d = ui.data) {
             is WindshieldData.Loading -> Column(Modifier.semantics(mergeDescendants = true) { contentDescription = loadingCd }) {
@@ -427,7 +428,8 @@ private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, o
             .clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("windshield.navi")
-            .padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 14.dp),
+            .padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 16.dp)
+            .defaultMinSize(minHeight = 134.dp - 32.dp), // N-12 / S-24: the panel is 134 high (D3)
     ) {
         Row(Modifier.fillMaxWidth()) {
             // DEV-127 hidden entry: a 2 s long-press on «НАВИГАТОР» opens the debug panel.
