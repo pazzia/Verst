@@ -1308,3 +1308,17 @@ G13 bundle counts in the Kotlin contract tests. Run 55: device parity count (G13
 ### Asks for the Architect
 - `city_presets`: add the town `tz` (or `startAt` per preset), so the 5.10 caption matches the engine's start.
 - Real data with Commons photos (ARCH-302 run): the sample names fail, so CI shows only the placeholder states.
+
+## S3-QA engine round (Architect, on main e2e1bd2)
+- **P0-01 walk start** (ADR-0013 "Daytime windows"): `city_route` → `startAt` (town local time), `startsTomorrow`,
+  `startNoteRu`; `city_presets` → `town.tz`, `now` (engine local), and per preset `startAt` + `startsTomorrow`.
+  Use these for `city_caption_meta_tomorrow` / `walk_header_tomorrow`; never the device clock. `geo_nearest` and
+  every `town` object now carry `tz`. Contracts `city_presets-late.json`, `city_route-tomorrow.json`.
+- **P1-02 shorter walk:** `shorter` (null or `{reason: places|budget, requestedMin, actualMin, messageRu}`) and
+  `requestedDurationMin`; contract `city_route-shorter.json` (8 h museums in Ярославль → 5 ч 30 мин).
+- **P1-06 no-lodging plate:** the `NO_LODGING` warning is one sentence per night and no longer repeats the
+  nearest hotel; the overnight stop's `note` («Ближайшая подходящая: …, N км») is the second line of the same
+  plate. A substitute is named only within `NEAREST_MAX_KM = 60` km along the route of the night stop (the
+  320 km «Волжский откос» case now names none). G01–G13 unchanged.
+- **Data run:** `data.yml` now also requests 50 random `Special:FilePath` card URLs (plus 400/500/960 px for
+  comparison) and fails under 95 % (`tools/data/check_photos.py`, `report/photos_check.json`).

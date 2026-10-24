@@ -15,8 +15,8 @@ from verst_planner.city.walk import (
     WalkInput,
     caps_for,
     dwell_for,
-    earliest_hour,
     parse_input,
+    planned_start,
     rounded_start,
     weights_for,
 )
@@ -101,11 +101,32 @@ class InputTest(unittest.TestCase):
         self.assertEqual(dwell_for("museum", 50, inp(preset="museums")), round(90 * 1.25))
         self.assertEqual(dwell_for("museum", 50, inp()), 45)
         self.assertEqual(rounded_start(NOW), datetime(2026, 10, 23, 9, 15))
-        self.assertEqual(rounded_start(NOW, 18), datetime(2026, 10, 23, 18, 0))
-        self.assertEqual(earliest_hour(inp(preset="beer", adultConfirmed=True)), 18)
-        self.assertEqual(earliest_hour(inp(preset="museums")), 10)
-        self.assertEqual(earliest_hour(inp()), 0)
         self.assertLessEqual(P.radius_km(480, 5.5), 6.0)
+
+    def test_planned_start_windows(self) -> None:
+        """Spec 5.11 §9: day 09:00 → end by 22:00 (museums 10:00), drinks 18:00 → end by 23:00."""
+
+        def at(h: int, m: int = 0, day: int = 23) -> datetime:
+            return datetime(2026, 10, day, h, m)
+
+        cases = [
+            (at(9, 7), "overview", (), 180, at(9, 15), False),
+            (at(1, 45), "overview", (), 180, at(9), False),  # night → this morning
+            (at(1, 45), "museums", (), 240, at(10), False),
+            (at(19, 0), "overview", (), 180, at(19), False),  # ends 22:00 exactly
+            (at(19, 1), "overview", (), 180, at(9, day=24), True),
+            (at(22, 45), "overview", (), 120, at(9, day=24), True),
+            (at(22, 45), "beer", (), 120, at(18, day=24), True),
+            (at(12, 0), "ryumochnye", (), 240, at(18), False),
+            (at(18, 50), "ryumochnye", (), 240, at(19), False),
+            (at(19, 10), "ryumochnye", (), 240, at(18, day=24), True),
+            (at(12, 0), "custom", ("bars",), 120, at(18), False),
+            (at(10, 0), "overview", (), 900, at(9, day=24), True),  # longer than the window: at the opening
+            (at(8, 0), "overview", (), 900, at(9), False),
+        ]
+        for now, preset, interests, dur, want, tomorrow in cases:
+            with self.subTest(now=now, preset=preset, dur=dur):
+                self.assertEqual(planned_start(now, preset, interests, dur), (want, tomorrow))
 
 
 def solver(

@@ -200,6 +200,25 @@ class CommonsTest(unittest.TestCase):
         self.assertEqual(files, sorted(set(files)))
 
 
+class PhotoCheckTest(unittest.TestCase):
+    ph = load("check_photos")
+
+    def test_sample_and_summary(self) -> None:
+        names = [f"f{i}.jpg" for i in range(200)]
+        a = self.ph.sample(names, 50, "7")
+        self.assertEqual(len(a), 50)
+        self.assertEqual(a, self.ph.sample(list(reversed(names)), 50, "7"))  # deterministic per seed
+        self.assertEqual(self.ph.sample(names[:3], 50, "7"), names[:3])
+        card, thumb = self.ph.CARD_WIDTH, self.ph.THUMB_WIDTH
+        rows = [(f, i != 0, "200 image/jpeg" if i else "HTTP 404") for i, f in enumerate(a)]
+        doc = self.ph.summary({card: rows, thumb: rows[:10]}, 200)
+        self.assertEqual(doc["rates"][str(card)], 49 / 50)
+        self.assertTrue(doc["ok"])
+        self.assertEqual(doc["failures"][str(card)], [{"file": a[0], "status": "HTTP 404"}])
+        bad = [(f, i > 5, "x") for i, f in enumerate(a)]
+        self.assertFalse(self.ph.summary({card: bad}, 200)["ok"])
+
+
 class _Parse:
     def __init__(self, tag: str, forms: dict[str, str]) -> None:
         self.tag = tag

@@ -55,9 +55,8 @@ from verst_planner.city.walk import (
     WalkInput,
     bar_hours,
     dwell_for,
-    earliest_hour,
     parse_input,
-    rounded_start,
+    planned_start,
     weights_for,
 )
 from verst_planner.config import PlannerConfig
@@ -824,6 +823,7 @@ def _town_json(w: _World, t: Town) -> dict[str, Any]:
         "nameGenRu": ru.genitive(t),
         "namePrepRu": ru.prepositional(t),
         "regionRu": region.name_ru if region else t.region_code,
+        "tz": region.tz if region else DEFAULT_TZ,
         "lat": t.point.lat,
         "lon": t.point.lon,
         "population": t.population,
@@ -1017,6 +1017,9 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
     return out[: city_presets_mod.POOL_MAX]
 
 
+DEFAULT_TZ = "Europe/Moscow"
+
+
 def _now_local(tz: str) -> datetime:
     return _CLOCK.now().astimezone(ZoneInfo(tz)).replace(tzinfo=None)
 
@@ -1033,7 +1036,7 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
         raise InvalidInput("start", "required")
     town = _walk_town(w, probe, raw.get("townId") if isinstance(raw.get("townId"), str) else None)
     region = w.world.regions.get(town.region_code)
-    tz = region.tz if region else "Europe/Moscow"
+    tz = region.tz if region else DEFAULT_TZ
     now_local = _now_local(tz)
     inp = parse_input(raw, now_local)
     token = CancelToken()
@@ -1045,7 +1048,10 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
     try:
         speed = city_presets_mod.PACES[inp.pace][0]
         cands = _candidates(w, inp, city_presets_mod.radius_km(inp.duration_min, speed))
-        start_dt = inp.start_at or rounded_start(now_local, earliest_hour(inp))
+        if inp.start_at is not None:
+            start_dt, tomorrow = inp.start_at, inp.start_at.date() > now_local.date()
+        else:
+            start_dt, tomorrow = planned_start(now_local, inp.preset, inp.interests, inp.duration_min)
         return build_walk(
             inp,
             cands,
@@ -1054,6 +1060,7 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
             ENGINE_VERSION,
             f"wlk_{rid}",
             token,
+            tomorrow,
         )
     finally:
         with _LOCK:
@@ -1072,6 +1079,8 @@ def _city_presets(world: Any, lat: Any, lon: Any) -> dict[str, Any]:
     if p is None:
         raise _BadInput("lat/lon required")
     town = _walk_town(w, p, None)
+    region = w.world.regions.get(town.region_code)
+    now_local = _now_local(region.tz if region else DEFAULT_TZ)
     out = []
     for key in city_presets_mod.PRESETS:
         preset = city_presets_mod.PRESET_TABLE.get(key)
@@ -1100,18 +1109,21 @@ def _city_presets(world: Any, lat: Any, lon: Any) -> dict[str, Any]:
         else:
             count = len(cands)
             available = count >= 2
+        start_dt, tomorrow = planned_start(now_local, key, probe.interests, duration)
         out.append(
             {
                 "preset": key,
                 "available": available,
                 "count": count,
+                "startAt": start_dt.strftime("%Y-%m-%dT%H:%M"),
+                "startsTomorrow": tomorrow,
                 "defaultDurationMin": duration,
                 "defaultPace": pace,
                 "adultOnly": key in city_presets_mod.ADULT_PRESETS,
                 "titleRu": ru.text(f"walk.preset.{key}"),
             }
         )
-    return {"town": _town_json(w, town), "presets": out}
+    return {"town": _town_json(w, town), "now": now_local.strftime("%Y-%m-%dT%H:%M"), "presets": out}
 
 
 def city_presets(world: str, lat: float, lon: float) -> str:
