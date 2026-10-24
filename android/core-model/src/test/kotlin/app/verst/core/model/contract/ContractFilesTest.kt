@@ -12,7 +12,7 @@ class ContractFilesTest {
     @Test
     fun replaceBundlesLoad() {
         val bundles = Contracts.load("replace")
-        assertEquals("replace bundles", 10, bundles.size)
+        assertEquals("replace bundles", 11, bundles.size) // G01–G10 + G13
         assertTrue("replace items", bundles.sumOf { it.items.size } >= 40)
         for (b in bundles) {
             val stopIds = b.before.getValue("daysList").jsonArray
@@ -33,7 +33,7 @@ class ContractFilesTest {
     @Test
     fun patchBundlesLoad() {
         val bundles = Contracts.load("patch")
-        assertEquals("patch bundles", 10, bundles.size)
+        assertEquals("patch bundles", 11, bundles.size) // G01–G10 + G13
         assertTrue("patch items", bundles.sumOf { it.items.size } >= 12)
         val kinds = bundles.flatMap { b -> b.items.map { it.getValue("kind").jsonPrimitive.content.substringBefore("_") } }
         assertEquals(setOf("reserve", "budget", "hotel"), kinds.toSet())

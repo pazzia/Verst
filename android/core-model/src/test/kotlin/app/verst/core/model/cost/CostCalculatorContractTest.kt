@@ -72,7 +72,7 @@ class LocalCostBundleTest {
             assertCost("${b.case} $sid/$aid", item.getValue("afterCost").jsonObject, local)
             n++
         }
-        assertEquals(129, n)
+        assertEquals(143, n) // G01–G13 (G13 = ARCH-301 CEO case)
     }
 
     @Test
@@ -90,7 +90,7 @@ class LocalCostBundleTest {
             assertCost("${b.case} ${item.getValue("kind").jsonPrimitive.content}", item.getValue("afterCost").jsonObject, local)
             n++
         }
-        assertEquals(25, n)
+        assertEquals(28, n) // G01–G13
     }
 
     @Test
