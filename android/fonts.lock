@@ -1,0 +1,196 @@
+{
+  "googleFontsCommit": "e7db6ca603fd4862010383ff17ffd6cc4ffac1c0",
+  "files": {
+    "ibm_plex_sans_condensed_regular": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
+      "instancedAt": {
+        "wght": 400,
+        "wdth": 75
+      },
+      "sha256": "b82b3045d451a3c5ff304502236961c31d4a5a3bcb3b627b805771ac183c6214",
+      "bytes": 217996,
+      "version": "Version 3.201",
+      "usWeightClass": 400,
+      "cyrillic": 192,
+      "advance_n_o": [
+        513,
+        504
+      ],
+      "unitsPerEm": 1000,
+      "missingGlyphs": [],
+      "missingSoft": []
+    },
+    "ibm_plex_sans_condensed_medium": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
+      "instancedAt": {
+        "wght": 500,
+        "wdth": 75
+      },
+      "sha256": "3d21358bad448e7cfbf9ea780cf1e041f79c785c35f2b9acf5c3171ea57d9d23",
+      "bytes": 218036,
+      "version": "Version 3.201",
+      "usWeightClass": 500,
+      "cyrillic": 192,
+      "advance_n_o": [
+        525,
+        506
+      ],
+      "unitsPerEm": 1000,
+      "missingGlyphs": [],
+      "missingSoft": []
+    },
+    "ibm_plex_sans_condensed_semibold": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
+      "instancedAt": {
+        "wght": 600,
+        "wdth": 75
+      },
+      "sha256": "150d67a5c9d62f53755ac0d1d94b76fb4bb4c8022280685c57b464d17c017747",
+      "bytes": 218020,
+      "version": "Version 3.201",
+      "usWeightClass": 600,
+      "cyrillic": 192,
+      "advance_n_o": [
+        532,
+        507
+      ],
+      "unitsPerEm": 1000,
+      "missingGlyphs": [],
+      "missingSoft": []
+    },
+    "ibm_plex_sans_condensed_bold": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
+      "instancedAt": {
+        "wght": 700,
+        "wdth": 75
+      },
+      "sha256": "d4335351f4b8d796f69912e48e8c63d18b88acdf7f45552f7892bdaa9e923123",
+      "bytes": 217904,
+      "version": "Version 3.201",
+      "usWeightClass": 700,
+      "cyrillic": 192,
+      "advance_n_o": [
+        540,
+        508
+      ],
+      "unitsPerEm": 1000,
+      "missingGlyphs": [],
+      "missingSoft": []
+    },
+    "ibm_plex_mono_semibold": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ibmplexmono/IBMPlexMono-SemiBold.ttf",
+      "sha256": "d3c38e55c78f5b0f28009fddba4834ec503278936a5986032424c9bd2d23aa46",
+      "bytes": 140216,
+      "version": "Version 2.3",
+      "usWeightClass": 600,
+      "cyrillic": 168,
+      "advance_n_o": [
+        600,
+        600
+      ],
+      "unitsPerEm": 1000,
+      "missingGlyphs": [],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "marck_script_regular": {
+      "source": "google/fonts@e7db6ca603fd:ofl/marckscript/MarckScript-Regular.ttf",
+      "sha256": "504de8cc6f919163bc9afb67b9bc208d258230c5e8d00cb82ec52474f9fafc3b",
+      "bytes": 83664,
+      "version": "Version 1.002",
+      "usWeightClass": 400,
+      "cyrillic": 94,
+      "advance_n_o": [
+        464,
+        351
+      ],
+      "unitsPerEm": 1000,
+      "missingGlyphs": [],
+      "missingSoft": [
+        "U+202F"
+      ]
+    }
+  },
+  "rejected": [
+    {
+      "family": "ibmplexsanscondensed",
+      "source": "google/fonts@e7db6ca603fd",
+      "version": "Version 1.3",
+      "cyrillic": 0,
+      "missing": [
+        "U+0410",
+        "U+0411",
+        "U+0412",
+        "U+0413",
+        "U+0414",
+        "U+0415",
+        "U+0416",
+        "U+0417",
+        "U+0418",
+        "U+0419",
+        "U+041A",
+        "U+041B"
+      ]
+    },
+    {
+      "family": "ibmplexsanscondensed",
+      "source": "npm:@ibm/plex-sans-condensed",
+      "why": "files not found"
+    },
+    {
+      "family": "ibmplexsanscondensed",
+      "source": "npm:@ibm/plex",
+      "why": "files not found"
+    }
+  ],
+  "ok": true,
+  "chosen": {
+    "ibmplexsanscondensed": "vf",
+    "ibmplexmono": "google",
+    "marckscript": "google"
+  },
+  "npm": {
+    "@ibm/plex-sans-condensed": {
+      "version": "2.0.0",
+      "ttf": []
+    },
+    "@ibm/plex": {
+      "version": "6.4.1",
+      "ttf": []
+    }
+  },
+  "vfAxes": {
+    "ibmplexsanscondensed": {
+      "file": "IBMPlexSans[wdth,wght].ttf",
+      "axes": {
+        "wght": [
+          100.0,
+          400.0,
+          700.0
+        ],
+        "wdth": [
+          75.0,
+          100.0,
+          100.0
+        ]
+      }
+    }
+  },
+  "referenceLatinCondensed": {
+    "sha256": "e7437c072eef2ef592ae6f2beb0000446287385907abb57ac1cf07bcbaa2aa33",
+    "bytes": 111236,
+    "version": "Version 1.3",
+    "usWeightClass": 400,
+    "cyrillic": 0,
+    "advance_n_o": [
+      513,
+      null
+    ],
+    "unitsPerEm": 1000,
+    "missingGlyphs": [],
+    "missingSoft": [
+      "U+202F"
+    ]
+  }
+}
