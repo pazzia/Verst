@@ -989,3 +989,13 @@ engine), forced engine error (the next plan returns the code), engine timings, b
 e2e adds: Exit (other hotel, mock partner, booked dialog, booked, Road booked row), trip delete + undo, the debug
 panel and a forced UNREACHABLE (Drive error → «Изменить маршрут» → Navigator with the error). `files/e2e/budgets.json`:
 engine start and the Golden-Ring plan time (asserted: engine ≤ 4000 ms). `docs/install-ceo.md` (Russian).
+
+### CI (DEV-SLICE-3)
+Runs: 28 red (compile: a fully qualified `DrawScope.scale` extension call), 29 red (one screenshot assertion: the
+fixture lacked the engine genitive after the Kotlin map was deleted — all 39 `case_*`, 129 + 25 bundle items and
+the perf test passed), 30 red (e2e: «merge function called on unmergeable property PaneTitle» — the sheets
+swallowed taps with `clickable`, which merges the whole sheet into one node; now `pointerInput`; and the
+sentence-case «Заменить» finder), 31 green (`f9728a4`): JUnit 99 / 0 failures, lint 0 errors, e2e 5 / 5, APK
+44.03 MB. Budgets (`e2e/budgets.json`): engine start 925 ms (budget 4000), Golden-Ring plan incl. Drive pacing
+3947 ms (budget 10 000). e2e screens 00–30 incl. 20–21 delete/undo, 22–27 Exit → mock partner → booked → Road
+booked row, 28–30 debug panel → forced UNREACHABLE → Navigator error.
