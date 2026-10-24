@@ -1298,3 +1298,13 @@ request now has an explicit 1200 × 800 size.
 - A crew patch on a trip with explicit rooms → `INVALID_INPUT(crew, replan_required)`.
 - G13 CEO case: 58 400 → **27 400 ₽** (fits, short ring). Probes: Москва → Волгоград 3+1 at 8 000 ₽ → no_fit,
   minimum 37 900 with shorten 20 800 / closer town 14 400 (`fits: false`) / raise to 38 000.
+
+### S3-R2 CI
+Runs 45–51: compile, smart cast, JVM clash and e2e fixes (see the commits). Run 52: the Coil size hang. Run 54:
+G13 bundle counts in the Kotlin contract tests. Run 55: device parity count (G13 byte-equal on the phone). **Run 56
+(40139317399) on 11e4e06: green**: main e2e 14 tests, process death × 2, real GPS. S3-1 fitted 27 400 ₽ in
+4 217 ms; the city route took 79 ms on the emulator.
+
+### Asks for the Architect
+- `city_presets`: add the town `tz` (or `startAt` per preset), so the 5.10 caption matches the engine's start.
+- Real data with Commons photos (ARCH-302 run): the sample names fail, so CI shows only the placeholder states.
