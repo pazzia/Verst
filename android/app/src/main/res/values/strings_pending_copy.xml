@@ -4,18 +4,7 @@
   Move each key into the deck and delete it here once it lands.
 -->
 <resources>
-    <!-- DEV-RELEASE: Windshield caption meta of a there-and-back ready route: «2 дня · по М-8 · туда и обратно». -->
-    <string name="windshield_meta_round_trip">туда и обратно</string>
-    <!-- S3-R1 debug panel: the mock location picker (e2e, emulator). -->
-    <string name="debug_mock_location">Имитация местоположения</string>
-    <!-- S3-R2 5.9 hotel card fact: the price per night («≈ 6 000 ₽ за ночь»). -->
-    <string name="card_per_night">за ночь</string>
-    <!-- S3-R2 5.12 §2: the badge letter of an address row (Г город, М место, У улица). -->
-    <string name="navigator_type_address">У</string>
-    <!-- S3-R2 5.11 `walk_next` {distance} under 1 km: «600 м» (deck example, no key). -->
-    <string name="walk_distance_m">%1$d м</string>
-    <!-- S3-R2 5.8 cheaper-route option with `fits: false` (ARCH-301 as built): no deck key yet. -->
-    <string name="budget_option_cheaper_sub_over">≈ %1$s ₽ · дешевле, но больше бюджета</string>
+    <!-- Provisional copy awaiting deck keys. S3-QA moved every R2 key into the deck (core-ui strings.xml). -->
     <!-- S3-R3 debug panel: real Commons photos on the cards (debug only). -->
     <string name="debug_real_photos">Настоящие фото Commons</string>
 </resources>

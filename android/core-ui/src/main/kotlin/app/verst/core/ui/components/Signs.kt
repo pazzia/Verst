@@ -81,19 +81,7 @@ fun touristPictogram(tags: List<String>): Int = when {
 @Composable
 fun RoadSign(sign: String, cityName: String, tags: List<String>, modifier: Modifier = Modifier) {
     when (sign) {
-        "city" -> Box(
-            modifier
-                .widthIn(min = 68.dp)
-                .width(68.dp)
-                .border(DesignTokens.stroke.w2, C.sign.white, RoundedCornerShape(6.dp))
-                .padding(DesignTokens.stroke.w2)
-                .clip(RoundedCornerShape(DesignTokens.radius.r4))
-                .background(C.sign.white)
-                .border(DesignTokens.stroke.w3, C.sign.black, RoundedCornerShape(DesignTokens.radius.r4))
-                .padding(horizontal = 5.dp, vertical = 8.dp)
-                .clearAndSetSemantics {},
-            contentAlignment = Alignment.Center,
-        ) { CitySignText(cityName.uppercase()) }
+        "city" -> CityPlate(cityName, modifier)
         "tourist" -> Box(
             modifier
                 .size(DesignTokens.size.touristSign)
@@ -123,29 +111,63 @@ fun RoadSign(sign: String, cityName: String, tags: List<String>, modifier: Modif
     }
 }
 
+/** Chrome around the city text: outline 2 + border padding 2 (each side) + text padding 5 (each side). */
+private val CITY_CHROME = 14.dp
+private val CITY_MIN_W = 68.dp
+private val CITY_MAX_W = 120.dp
+private const val CITY_MIN_SCALE = 0.8f
+
 /**
- * Town name on the white city plate: up to 3 lines, never broken inside a word (components §2.1). A word that
- * does not fit the plate width shrinks the text in steps (needed with the fallback font until DES-100).
+ * components §2.1 city plate (S3-QA P1-04): the town name in uppercase, up to 3 lines, broken **only** at a space
+ * or after a hyphen (the hyphen stays at the line end: «САНКТ-» / «ПЕТЕРБУРГ»), never inside a word. If the
+ * longest word does not fit the 68 dp plate, the plate grows up to 120 dp, then the text scales down to 80 %.
  */
 @Composable
-private fun CitySignText(text: String) {
-    var scale by remember(text) { mutableFloatStateOf(1f) }
+private fun CityPlate(cityName: String, modifier: Modifier) {
+    val text = cityName.uppercase()
     val base = T.sign.city
-    BasicText(
-        text = text,
-        style = base.copy(color = C.text.onLight, textAlign = TextAlign.Center, fontSize = base.fontSize * scale, lineHeight = base.lineHeight * scale),
-        maxLines = 3,
-        onTextLayout = { layout ->
-            val brokenWord = (0 until layout.lineCount - 1).any { i ->
-                val end = layout.getLineEnd(i)
-                end in 1 until text.length && !text[end - 1].isWhitespace() && !text[end].isWhitespace()
-            }
-            if ((brokenWord || layout.hasVisualOverflow) && scale > MIN_CITY_SCALE) scale *= 0.92f
-        },
-    )
+    val measurer = androidx.compose.ui.text.rememberTextMeasurer()
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    // the unbreakable pieces: split at spaces, and after each hyphen (the hyphen belongs to the left piece)
+    val words = remember(text) { text.split(' ').flatMap { w -> Regex("[^-]+-?|-").findAll(w).map { it.value }.toList() }.filter { it.isNotBlank() } }
+    val longest = remember(text, base) {
+        words.maxOfOrNull { measurer.measure(it, base, maxLines = 1, softWrap = false).size.width } ?: 0
+    }
+    val longestDp = with(density) { longest.toDp() }
+    val plateW = (longestDp + CITY_CHROME + 1.dp).coerceIn(CITY_MIN_W, CITY_MAX_W)
+    val scale = if (longestDp + CITY_CHROME + 1.dp <= CITY_MAX_W) 1f
+    else ((CITY_MAX_W - CITY_CHROME - 1.dp) / longestDp).coerceAtLeast(CITY_MIN_SCALE)
+    // explicit break opportunities after hyphens (zero-width space); no hyphenation inside words
+    val shown = text.replace("-", "-\u200B")
+    Box(
+        modifier
+            .width(plateW)
+            .border(DesignTokens.stroke.w2, C.sign.white, RoundedCornerShape(6.dp))
+            .padding(DesignTokens.stroke.w2)
+            .clip(RoundedCornerShape(DesignTokens.radius.r4))
+            .background(C.sign.white)
+            .border(DesignTokens.stroke.w3, C.sign.black, RoundedCornerShape(DesignTokens.radius.r4))
+            .padding(horizontal = 5.dp, vertical = 8.dp)
+            .clearAndSetSemantics {},
+        contentAlignment = Alignment.Center,
+    ) {
+        BasicText(
+            text = shown,
+            style = base.copy(
+                color = C.text.onLight, textAlign = TextAlign.Center,
+                fontSize = base.fontSize * scale, lineHeight = base.lineHeight * scale,
+                lineBreak = androidx.compose.ui.text.style.LineBreak.Heading,
+                hyphens = androidx.compose.ui.text.style.Hyphens.None,
+            ),
+            maxLines = 3,
+        )
+    }
 }
 
-private const val MIN_CITY_SCALE = 0.7f
+/** The pieces a city name may break into (tests): «САНКТ-ПЕТЕРБУРГ» → «САНКТ-», «ПЕТЕРБУРГ». */
+fun cityBreakPieces(name: String): List<String> =
+    name.uppercase().split(' ').flatMap { w -> Regex("[^-]+-?|-").findAll(w).map { it.value }.toList() }.filter { it.isNotBlank() }
+
 
 enum class StartSize(val outer: Dp, val face: Dp, val icon: Dp) {
     L(DesignTokens.size.startLOuter, DesignTokens.size.startLFace, DesignTokens.size.startLIcon),

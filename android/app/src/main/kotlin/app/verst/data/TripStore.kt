@@ -132,6 +132,13 @@ class MemoryTripStore(initial: List<SavedTripDto> = emptyList()) : TripStore {
         last = l
     }
 
+    @Volatile var reports: List<ReportDto> = emptyList()
+        private set
+    override fun appendReport(r: ReportDto) {
+        reports = Reports.decode(Reports.encode(reports + r))
+    }
+    override fun loadReports() = reports
+
     @Volatile var defaults: DefaultsDto? = null
     override fun loadDefaults() = defaults
     override fun saveDefaults(d: DefaultsDto) {

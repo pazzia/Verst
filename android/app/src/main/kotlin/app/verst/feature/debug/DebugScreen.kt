@@ -71,7 +71,7 @@ fun DebugScreen(flow: VerstFlow) {
                 flow.debugForceError = if (it == none) null else it
             }
             // S3-R1: a fixed position instead of the phone's (e2e; on the emulator also `adb emu geo fix`).
-            Label(stringResource(AppR.string.debug_mock_location))
+            Label(stringResource(R.string.debug_mock_location))
             Choices(listOf(none) + MockPlaces.keys, flow.debugMockLocation?.label ?: none, "debug.mock") {
                 flow.debugMockLocation = MockPlaces[it]
                 if (flow.debugMockLocation != null) flow.locate()

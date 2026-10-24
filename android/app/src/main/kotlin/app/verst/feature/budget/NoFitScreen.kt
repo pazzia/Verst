@@ -144,7 +144,7 @@ private fun OptionRow(o: BudgetOptionDto, index: Int, budget: Int, onClick: () -
             stringResource(R.string.budget_option_shorten_sub, o.titleRu ?: "", total)
         "cheaper_route" -> stringResource(R.string.budget_option_cheaper, o.titleRu ?: "") to
             // `fits = false` (ARCH-301): the cheapest candidate is still over the budget — never «помещается»
-            (if (o.fits) stringResource(R.string.budget_option_cheaper_sub, total) else stringResource(app.verst.R.string.budget_option_cheaper_sub_over, total))
+            (if (o.fits) stringResource(R.string.budget_option_cheaper_sub, total) else stringResource(R.string.budget_option_cheaper_sub_over, total))
         else -> stringResource(R.string.budget_option_raise, RuFormat.thousands(o.budgetRub ?: budget)) to stringResource(R.string.budget_option_raise_sub)
     }
     val cd = stringResource(R.string.cd_budget_option, title, sub)

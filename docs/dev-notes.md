@@ -1308,3 +1308,61 @@ G13 bundle counts in the Kotlin contract tests. Run 55: device parity count (G13
 ### Asks for the Architect
 - `city_presets`: add the town `tz` (or `startAt` per preset), so the 5.10 caption matches the engine's start.
 - Real data with Commons photos (ARCH-302 run): the sample names fail, so CI shows only the placeholder states.
+
+## S3-R3 — Sprint 3, round R3 (branch dev/S3-R3 from main e2e1bd2)
+Inputs merged: origin/des/S3-QA @ 536869f (R2 visual QA, pending copy into the deck, IME / stop-menu / highlight
+specs; `tools/sync_design_tokens.py` run: `color.overlay.returnFlash`, `motion.returnToItem.holdMs`).
+
+### R2 gaps closed
+- **5.9 C2 mini sign** in the card title row: `BottomSheet(leading = …)`; the row's RoadSign at 0.7 (shared
+  `Modifier.scaled`), bars the §21 bar sign (walk cards now carry the stop kind as the tag).
+- **TalkBack focus back to the row** (5.9 §5): the Road / walk rows are `focusable()` with a `FocusRequester`;
+  after the scroll restore the returned row requests focus. Compose then sends TYPE_VIEW_FOCUSED and TalkBack
+  follows it. e2e S3-3 and the D-7 journey assert `SemanticsProperties.Focused` on the row.
+- **D-7 «Сообщить об ошибке» (local)**:
+  - Entry points: the stop menu item (3), the row's TalkBack custom action and card C10 (not on hotel cards,
+    since the hotel is fictional).
+  - The sheet has 4 radio rows, a comment (NaviInput look, ≤ 280) and «ОТПРАВИТЬ», disabled until a reason is
+    picked.
+  - Decision: there is no feedback endpoint, so a report is appended to `files/reports/queue.json`
+    (`ReportDto`, schema 1, the newest 200, `sent = false`), written by the flow's one writer.
+  - Toast «Спасибо, проверим» online, «Отправим, когда появится сеть» offline. Event `feedback_sent` goes to
+    logcat (`VerstEvent`).
+  - Ask for the Architect: a feedback endpoint (or a `report` call that keeps the queue on the engine side).
+- **Waybill e2e shot** `62b-waybill-ceo-levers`, scrolled to the lever lines.
+- **Real Commons photos before the data run.** `CommonsPhotos` is a Kotlin port of `catalogue/photos.py`, with a
+  parity unit test on the Python output. The debug panel «Настоящие фото Commons» replaces each card's image
+  with 5 real files in turn, covering landscape JPEG, portrait JPEG, SVG→PNG and transparent PNG.
+  e2e `r3RealCommonsPhotosOnTheCards` opens 5 cards online (CI has internet) and requires ≥ 3 loaded
+  (screens 80-commons-0…4).
+
+### S3-QA findings (Android side)
+- P1-01 Navigator with the IME (5.12 §5):
+  - Fixed: the header with «GPS ●», the focused field and the helper line. Only the list scrolls, starting
+    at the top on a new query; the «Найти адрес» row comes first and «© OpenStreetMap» sits under the address
+    rows.
+  - The other field collapses to a 28 dp line (tap ОТКУДА = edit it).
+  - «Моё местоположение» moves into the list while ОТКУДА is being typed.
+  - Autofocus: КУДА after a hand-picked ОТКУДА, not after a GPS fix (`focusToField`).
+- P1-02: `walk_shorter` when the engine walk is ≥ 30 min shorter than `input.durationMin`.
+  `WalkRouteDto.shorterReason` / `startsTomorrow` are ready for the Architect's fields; until then «tomorrow»
+  comes from `startAt` + `tz`.
+- P1-03: free walk footer «Бесплатно · вход везде свободный».
+- P1-04: the city plate breaks only at a space or after a hyphen (U+200B after «-», `LineBreak.Heading`,
+  `Hyphens.None`). The plate grows to 120 dp on the measured longest piece, then the text scales to 80 %.
+  The sign column is `widthIn(min = 68)`.
+- P1-05: no credit under a placeholder. The hotel note is `card_hotel_fictional_nophoto` until the area photo is
+  on screen. The engine description of a fictional place («Демо: вымышленная гостиница») is not shown.
+- P1-07: `overlay.returnFlash` held 400 ms, then an 800 ms fade. Under reduced motion it is static for 400 ms.
+- Stop menu per components §22:
+  - `ActionItem` rows (min-h 52, pressed `dash.pressed`) with 1 dp `dash.control` dividers.
+  - The hand-off item is omitted for fuel / rest stops and for stops without coordinates.
+- P2-01: walk km without a trailing zero («≈ 6 км»).
+- P2-06: the fixture shots are consistent (small overrun ≈ 3 %; only a dearer alternative breaks the budget;
+  NO_CITY starts at «Толбухино»).
+- P2-08: HOURS_UNVERIFIED is a muted line, and only when a stop really has default hours.
+- 5.10 caption (P0-01, app side): `WalkStart` follows the engine windows (day 09:00 / museums 10:00 → end by
+  22:00, drinks 18:00 → end by 23:00, else tomorrow) in the town zone. It prefers a preset `startAt` when the
+  presets carry one. Decision: the zone is Moscow until `city_presets.town.tz` lands.
+- `strings_pending_copy.xml` now holds only `debug_real_photos` (the new debug label, for the Designer). Every R2
+  key reads from the deck.

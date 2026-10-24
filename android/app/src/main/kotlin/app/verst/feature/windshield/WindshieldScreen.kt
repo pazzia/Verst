@@ -569,4 +569,4 @@ private fun monthGen(m: Int): String = stringResource(
  */
 @Composable
 private fun readyMeta(r: ReadyRouteDto): String =
-    if (r.roundTrip && !r.subtitle.contains("по кругу")) "${r.subtitle} · ${stringResource(app.verst.R.string.windshield_meta_round_trip)}" else r.subtitle
+    if (r.roundTrip && !r.subtitle.contains("по кругу")) "${r.subtitle} · ${stringResource(R.string.windshield_meta_round_trip)}" else r.subtitle

@@ -23,6 +23,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -334,6 +335,7 @@ class ScreensScreenshotTest {
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-from-stop.json", EngineJson::handoff)
         shot("road", "stop-menu") { RoadScreen(RoadUi(trip, "NE", stopMenu = stop, stopHandoff = h, carTarget = HandoffTarget.Browser), noRoad) }
         compose.onNodeWithTag("stopmenu.navigator", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("stopmenu.report", useUnmergedTree = true).assertExists() // components §22 (3)
         compose.onNodeWithText("Открыть Яндекс Карты в браузере").assertExists()
     }
 
@@ -400,9 +402,12 @@ class ScreensScreenshotTest {
     @Test
     fun roadTightBadge() {
         val trip = snapshot("G02_golden_ring")
+        // S3-QA P2-06: a consistent small overrun — the total is ≈ 3 % over the budget (inside the 5 % tolerance)
+        val total = trip.cost.totalRub
+        val budget = (total * 0.97 / 100).toInt() * 100
         val tight = trip.copy(
-            cost = trip.cost.copy(budgetRub = 32_000, overBudget = true),
-            budgetFit = app.verst.core.model.dto.BudgetFitDto("small_overrun", 32_000, 33_600, 41_000, trip.cost.totalRub),
+            cost = trip.cost.copy(budgetRub = budget, overBudget = true),
+            budgetFit = app.verst.core.model.dto.BudgetFitDto("small_overrun", budget, budget + budget / 20, total + 8_000, total),
         )
         shot("road", "tight-badge") { RoadScreen(RoadUi(tight, "NE"), noRoad) }
         compose.onNodeWithTag("road.tight", useUnmergedTree = true).assertExists()
@@ -420,7 +425,8 @@ class ScreensScreenshotTest {
     fun roadReplaceSheetBreaksBudget() {
         val trip = snapshot("G02_golden_ring")
         val stop = trip.daysList.flatMap { it.stops }.first { it.alternatives.size >= 2 }
-        val flagged = stop.copy(alternatives = stop.alternatives.mapIndexed { i, a -> if (i == 0) a.copy(breaksBudget = true) else a })
+        // S3-QA P2-06: only a dearer alternative can break the budget
+        val flagged = stop.copy(alternatives = stop.alternatives.mapIndexed { i, a -> if (i == 0) a.copy(breaksBudget = true, deltaRub = maxOf(a.deltaRub, 600)) else a })
         shot("road", "replace-breaks-budget") { RoadScreen(RoadUi(trip, "NE", replace = ReplaceUi(flagged)), noRoad) }
         compose.onNodeWithTag("replace.alt.0.breaks", useUnmergedTree = true).assertExists()
         compose.onNodeWithText("не в бюджете").assertExists()
@@ -457,7 +463,12 @@ class ScreensScreenshotTest {
         val night = snapshot("G02_golden_ring").daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
         shot("card", "hotel-area") { CardOverRoad(card(d.nameRu, "hotel", "hotel", d, night.hotelOptions.first())) }
         compose.onNodeWithTag("card.fictional", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("Фото района: Ярославль · Wikimedia Commons").assertExists()
+        // S3-QA P1-05: while the frame is a placeholder (Robolectric never loads the URL) — no credit, the short note,
+        // no engine «Демо: вымышленная гостиница» line; the mini sign sits in the title row (§19 C2)
+        compose.onNodeWithText("Фото района: Ярославль · Wikimedia Commons").assertDoesNotExist()
+        compose.onNodeWithText("Гостиница в демо-сборке вымышленная").assertExists()
+        compose.onNodeWithText("Демо: вымышленная гостиница").assertDoesNotExist()
+        compose.onNodeWithTag("card.sign", useUnmergedTree = true).assertExists()
     }
 
     @Test
@@ -465,6 +476,7 @@ class ScreensScreenshotTest {
         val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-bar.json", EngineJson::poiDetails)
         shot("card", "bar") { CardOverRoad(card(d.nameRu, "bar", "service", d)) }
         compose.onNodeWithTag("card.osm", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.report", useUnmergedTree = true).assertExists()
     }
 
     @Test
@@ -566,7 +578,7 @@ class ScreensScreenshotTest {
     private fun cityUi(error: String? = null, custom: Boolean = false, age: Boolean = false, building: Boolean = false, children: Boolean = false): app.verst.feature.city.CityUi {
         val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets)
         return app.verst.feature.city.CityUi(
-            presets.town?.name, "Советская пл., 1", true, if (error == "NO_CITY") emptyList() else presets.presets, false, error, "overview",
+            if (error == "NO_CITY") null else presets.town?.name, if (error == "NO_CITY") "Толбухино" else "Советская пл., 1", true, if (error == "NO_CITY") emptyList() else presets.presets, false, error, "overview",
             240, listOf("parks", "views"), "normal", null, true, custom, age, building, children, "11:00",
         )
     }
@@ -618,6 +630,73 @@ class ScreensScreenshotTest {
 
     @Test
     fun walkOverview() = walkShot("city_route-overview.json", "overview")
+
+    @Test
+    fun walkFreeFooter() {
+        // S3-QA P1-03: total 0 ₽ → «Бесплатно · вход везде свободный», no per-person line
+        val w = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        val free = w.copy(cost = w.cost.copy(totalRub = 0))
+        shot("walk", "free") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(free, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        compose.onNodeWithTag("walk.free", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("вход везде свободный").assertExists()
+    }
+
+    @Test
+    fun walkShorterThanAsked() {
+        // S3-QA P1-02: 4 ч asked, 2,5 ч built → the note; «≈ 2,4 км» without a trailing zero rule check
+        walkShot("city_route-ryumochnye.json", "shorter")
+        compose.onNodeWithTag("walk.shorter", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Получилось 2,5 ч вместо 4 ч — больше открытых мест рядом нет").assertExists()
+    }
+
+    @Test
+    fun roadReportSheet() {
+        // D-7 over Road ahead: a reason picked, a comment, «ОТПРАВИТЬ» enabled
+        val trip = snapshot("G02_golden_ring")
+        val stop = trip.daysList.flatMap { it.stops }.first { it.kind == "sight" }
+        shot("road", "report") {
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+                val h = maxHeight
+                Box(Modifier.fillMaxSize()) {
+                    RoadScreen(RoadUi(trip, "NE"), noRoad)
+                    app.verst.feature.report.ReportSheet(
+                        app.verst.feature.report.ReportUi(stop.name, "price", "Билет уже 600 ₽"), h,
+                        object : app.verst.feature.report.ReportActions {
+                            override fun close() = Unit
+                            override fun reason(r: String) = Unit
+                            override fun comment(t: String) = Unit
+                            override fun send() = Unit
+                        },
+                    )
+                }
+            }
+        }
+        compose.onNodeWithTag("report.send", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Что не так с местом?").assertExists()
+    }
+
+    @Test
+    fun roadReportSheetEmpty() {
+        val trip = snapshot("G02_golden_ring")
+        shot("road", "report-empty") {
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+                val h = maxHeight
+                Box(Modifier.fillMaxSize()) {
+                    RoadScreen(RoadUi(trip, "NE"), noRoad)
+                    app.verst.feature.report.ReportSheet(
+                        app.verst.feature.report.ReportUi("Ростовский кремль"), h,
+                        object : app.verst.feature.report.ReportActions {
+                            override fun close() = Unit
+                            override fun reason(r: String) = Unit
+                            override fun comment(t: String) = Unit
+                            override fun send() = Unit
+                        },
+                    )
+                }
+            }
+        }
+        compose.onNodeWithTag("report.send").assertIsNotEnabled()
+    }
 
     @Test
     fun walkMuseumsSpb() = walkShot("city_route-museums-spb.json", "museums-spb")

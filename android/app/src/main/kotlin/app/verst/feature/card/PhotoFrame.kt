@@ -96,8 +96,11 @@ fun PhotoFrame(
     contentDescription: String,
     modifier: Modifier = Modifier,
     onCredit: (() -> Unit)? = null,
+    /** true once an image is on screen (S3-QA P1-05: the hotel note depends on it). */
+    onShown: (Boolean) -> Unit = {},
 ) {
     if (url == null) {
+        androidx.compose.runtime.LaunchedEffect(Unit) { onShown(false) }
         PhotoFrameContent(PhotoState.None, placeholder, credit, area, contentDescription, modifier, onCredit)
         return
     }
@@ -121,6 +124,8 @@ fun PhotoFrame(
         is AsyncImagePainter.State.Error -> if (offline) PhotoState.Offline else PhotoState.Error
         else -> PhotoState.Loading
     }
+    val shown = state is PhotoState.Loaded
+    androidx.compose.runtime.LaunchedEffect(shown) { onShown(shown) }
     PhotoFrameContent(state, placeholder, credit, area, contentDescription, modifier, onCredit)
 }
 
@@ -185,8 +190,9 @@ fun PhotoFrameContent(
             // hairline over the image
             Box(Modifier.matchParentSize().border(DesignTokens.stroke.w1, C.photo.border, shape))
         }
-        // contain mode / hotel placeholders: the line under the frame
-        if (credit != null && !crop && (loaded != null || area)) {
+        // contain mode: the line under the frame. A placeholder has no credit (S3-QA P1-05: it would name a photo
+        // that is not on screen), hotel areas included.
+        if (credit != null && !crop && loaded != null) {
             CreditLine(credit, C.text.muted, Modifier.padding(top = 4.dp), onCredit)
         }
     }

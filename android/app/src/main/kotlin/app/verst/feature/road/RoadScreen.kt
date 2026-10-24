@@ -53,6 +53,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,6 +74,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.layout.layout
 import app.verst.feature.common.scaled
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -221,9 +223,13 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
         if (f.focusId != null) {
             withFrameNanos { }
             runCatching { requesters[f.focusId]?.requestFocus() }
-            if (!reducedMotion) highlight = f.focusId // reduced motion: jump, no flash
-            delay(DesignTokens.motion.returnToItem.highlightMs.toLong())
+            // motion.returnToItem (S3-QA P1-07): `overlay.returnFlash` held 400 ms, then an 800 ms fade
+            // (reduced motion: shown static for 400 ms, removed without a fade)
+            val m = DesignTokens.motion.returnToItem
+            highlight = f.focusId
+            delay(m.holdMs.toLong())
             highlight = null
+            delay((m.highlightMs - m.holdMs).toLong())
             a.focusShown()
         }
     }
@@ -357,10 +363,20 @@ private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
     a: RoadActions,
 ) {
     BottomSheet(stopName(s), a::closeStopMenu, "stopmenu", windowH) {
-        HandoffItem(stringResource(R.string.handoff_from_stop), target, handoff?.truncated == true, enabled = handoff != null, tag = "stopmenu.navigator", onClick = a::navigatorFromStop)
+        // components §22 (S3-QA): items with 1 dp `dash.control` dividers, no gap. (1) the hand-off — not for
+        // fuel / rest stops or a stop without coordinates; (2) «Заменить» where the row has it; (3) D-7.
+        val items = mutableListOf<@Composable () -> Unit>()
+        val handoffRow = s.kind != "fuel" && s.kind != "rest" && s.lat != null && s.lon != null
+        if (handoffRow) {
+            items += { HandoffItem(stringResource(R.string.handoff_from_stop), target, handoff?.truncated == true, enabled = handoff != null, tag = "stopmenu.navigator", onClick = a::navigatorFromStop) }
+        }
         val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
-        if (canReplace) MenuRow(stringResource(R.string.stopmenu_swap), null, enabled = true, tag = "stopmenu.swap", onClick = a::stopMenuReplace)
-        MenuRow(stringResource(R.string.stopmenu_report), null, enabled = true, tag = "stopmenu.report", onClick = a::stopMenuReport)
+        if (canReplace) items += { ActionItem(stringResource(R.string.stopmenu_swap), "stopmenu.swap", a::stopMenuReplace) }
+        items += { ActionItem(stringResource(R.string.stopmenu_report), "stopmenu.report", a::stopMenuReport) }
+        items.forEachIndexed { i, item ->
+            if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(C.dash.control))
+            item()
+        }
     }
 }
 
@@ -416,17 +432,17 @@ internal fun androidx.compose.foundation.layout.BoxScope.AboutDataSheet(windowH:
     }
 }
 
+/** components §22 `ActionItem`: min-h 52, `type.list.title`, left-aligned, no icon; pressed `dash.pressed`. */
 @Composable
-private fun MenuRow(title: String, sub: String?, enabled: Boolean, tag: String, onClick: () -> Unit) {
-    Column(
-        Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp).clip(RoundedCornerShape(DesignTokens.radius.r10))
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick).testTag(tag)
-            .padding(horizontal = 4.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Txt(title, T.button.md, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
-        if (sub != null) Txt(sub, T.body.sm, C.text.secondary, maxLines = 1)
-    }
+private fun ActionItem(title: String, tag: String, onClick: () -> Unit) {
+    val source = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val pressed by source.collectIsPressedAsState()
+    Box(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp)
+            .background(if (pressed) C.dash.pressed else androidx.compose.ui.graphics.Color.Transparent)
+            .clickable(source, indication = null, role = Role.Button, onClick = onClick).testTag(tag),
+        contentAlignment = Alignment.CenterStart,
+    ) { Txt(title, T.list.title, C.text.primary, maxLines = 2) }
 }
 
 /** D-6 row (N-08): min-h 64, `dash.controlAlt`, radius 10, padding 10 12; radio, the kind's mini sign at 0.7. */
@@ -635,7 +651,7 @@ private fun StopRow(
     val reduced = LocalReducedMotion.current
     val glow by animateFloatAsState(
         if (highlighted) 1f else 0f,
-        if (reduced) snap() else tween(if (highlighted) 150 else 900),
+        if (reduced || highlighted) snap() else tween(DesignTokens.motion.returnToItem.highlightMs - DesignTokens.motion.returnToItem.holdMs, easing = DesignTokens.motion.returnToItem.easing),
         label = "focus",
     )
     val haptic = LocalHapticFeedback.current
@@ -648,7 +664,7 @@ private fun StopRow(
     Row(
         Modifier.fillMaxWidth()
             .onGloballyPositioned { c -> content()?.let { root -> if (root.isAttached && c.isAttached) onPlaced(root.localPositionOf(c, Offset.Zero).y.roundToInt(), c.size.height) } }
-            .drawBehind { if (glow > 0f) drawRect(C.dash.pressed.copy(alpha = glow)) } // motion.returnToItem
+            .drawBehind { if (glow > 0f) drawRect(C.overlay.returnFlash.copy(alpha = C.overlay.returnFlash.alpha * glow)) } // motion.returnToItem
             .connector()
             // D-5: a long-press opens the stop menu (children's buttons keep their taps).
             .pointerInput(s.id, onTap != null) {
@@ -675,7 +691,7 @@ private fun StopRow(
             .focusable()
             .testTag("road.stop.${s.id}"),
     ) {
-        Box(Modifier.padding(start = 72.dp).width(68.dp), contentAlignment = Alignment.TopCenter) {
+        Box(Modifier.padding(start = 72.dp).widthIn(min = 68.dp), contentAlignment = Alignment.TopCenter) {
             RoadSign(s.sign, s.name, s.tags)
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {

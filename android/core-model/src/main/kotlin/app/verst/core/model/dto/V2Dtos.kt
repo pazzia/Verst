@@ -20,6 +20,8 @@ data class GeoTownDto(
     val lat: Double,
     val lon: Double,
     val population: Int? = null,
+    /** IANA zone (Architect, S3-QA P0-01: `city_presets.town.tz`); null until the data run. */
+    val tz: String? = null,
 )
 
 /** `geo_nearest`: GPS → the origin town; `insideRussia` = the nearest town is ≤ 60 km away. */
@@ -138,6 +140,8 @@ data class HandoffDto(val mode: String, val day: Int? = null, val parts: List<Ha
 
 @Serializable
 data class CityPresetDto(
+    /** Architect (S3-QA P0-01), when it lands: the engine's default start of this preset («2026-10-24T10:00»). */
+    val startAt: String? = null,
     val preset: String,
     val available: Boolean = true,
     val count: Int = 0,
@@ -211,9 +215,31 @@ data class WalkRouteDto(
     val responsibleNoteRu: String? = null,
     val approxDistances: Boolean = false,
     val input: JsonObject? = null,
+    /** Architect (S3-QA P0-01), when it lands: the walk was moved to the next day's window. */
+    @kotlinx.serialization.SerialName("startsTomorrow") val startsTomorrowFlag: Boolean? = null,
+    /** Architect (S3-QA P1-02), when it lands: why the walk is shorter than asked (copy key or text). */
+    val shorterReason: String? = null,
     @Transient val json: String = "",
 ) {
     val adultOnly: Boolean get() = responsibleNoteRu != null
+
+    /**
+     * S3-QA P0-01: the walk starts on a later day than «now» in the town's time zone. The engine's flag
+     * (`startsTomorrow`) wins when present; otherwise derived from `startAt` + `tz`.
+     */
+    fun startsTomorrow(nowMs: Long = System.currentTimeMillis()): Boolean {
+        startsTomorrowFlag?.let { return it }
+        val at = startAt ?: return false
+        val zone = runCatching { java.time.ZoneId.of(tz ?: "Europe/Moscow") }.getOrNull() ?: return false
+        val day = runCatching { java.time.LocalDateTime.parse(at).toLocalDate() }.getOrNull() ?: return false
+        return day.isAfter(java.time.Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate())
+    }
+
+    /** The asked duration (the request echoed in `input`); null when absent. */
+    val requestedMin: Int? get() = (input?.get("durationMin") as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull()
+
+    /** 5.11 §9 (S3-QA P1-02): the engine's walk is ≥ 30 min shorter than asked. */
+    val shorterThanAsked: Boolean get() = requestedMin?.let { it - durationMin >= 30 } ?: false
     val people: Int get() = (input?.get("crew") as? JsonObject)?.let { c ->
         ((c["adults"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull() ?: 0) +
             ((c["children"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull() ?: 0)

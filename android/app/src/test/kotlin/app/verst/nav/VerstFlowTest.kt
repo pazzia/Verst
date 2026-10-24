@@ -623,4 +623,64 @@ class VerstFlowTest {
         assertTrue(flow.showingMinimum)
         assertEquals(planned.trip.km, flow.result!!.trip.km)
     }
+
+    @Test
+    fun reportFromTheStopMenuAndTheCardIsQueuedWithTheRightToast() = runTest {
+        val store = MemoryTripStore()
+        val flow = VerstFlow(FakeGateway(), backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        val sight = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.kind == "sight" }
+        // D-5 → D-7: no reason → «Отправить» does nothing
+        flow.openStopMenu(sight)
+        flow.openReport(sight)
+        assertNull(flow.stopMenu)
+        assertEquals(sight.id, flow.report!!.stopId)
+        flow.sendReport()
+        assertEquals(sight.id, flow.report!!.stopId)
+        flow.pickReportReason("nonsense")
+        assertNull(flow.reportReason)
+        flow.pickReportReason("price")
+        flow.setReportCommentText("x".repeat(400))
+        assertEquals(app.verst.core.model.Reports.COMMENT_MAX, flow.reportComment.length)
+        flow.setReportCommentText("  Билет уже 600 ₽ ")
+        val seq = flow.roadFocusSeq
+        flow.sendReport()
+        settle()
+        assertNull(flow.report)
+        assertEquals(Toast.ReportThanks, flow.toast)
+        assertEquals(seq + 1, flow.roadFocusSeq) // the row gets focus back
+        assertEquals(1, store.reports.size)
+        assertEquals("Билет уже 600 ₽", store.reports[0].comment)
+        assertEquals("road", store.reports[0].source)
+        // offline, from the card: queued
+        flow.setOffline(true)
+        flow.openCard(sight)
+        settle()
+        flow.reportFromCard()
+        assertNull(flow.card)
+        assertEquals("card", flow.report!!.source)
+        flow.pickReportReason("closed")
+        flow.sendReport()
+        settle()
+        assertEquals(Toast.ReportQueued, flow.toast)
+        assertEquals(listOf("price", "closed"), store.reports.map { it.reason })
+        assertEquals(listOf(true, false), store.reports.map { it.online })
+        // back closes the sheet without sending
+        flow.openReport(sight)
+        assertTrue(flow.back())
+        assertNull(flow.report)
+        settle()
+        assertEquals(2, store.reports.size)
+        flow.setOffline(false)
+    }
+
+    @Test
+    fun cityPlateBreaksOnlyAtSpacesAndAfterHyphens() {
+        assertEquals(listOf("САНКТ-", "ПЕТЕРБУРГ"), app.verst.core.ui.components.cityBreakPieces("Санкт-Петербург"))
+        assertEquals(listOf("ПЕРЕСЛАВЛЬ-", "ЗАЛЕССКИЙ"), app.verst.core.ui.components.cityBreakPieces("Переславль-Залесский"))
+        assertEquals(listOf("ВЕЛИКИЙ", "НОВГОРОД"), app.verst.core.ui.components.cityBreakPieces("Великий Новгород"))
+        assertEquals(listOf("РОСТОВ-", "НА-", "ДОНУ"), app.verst.core.ui.components.cityBreakPieces("Ростов-на-Дону"))
+    }
 }

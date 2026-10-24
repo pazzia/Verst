@@ -301,6 +301,10 @@ class VerstFlow(
     var destination: SuggestionDto? by mutableStateOf(null)
         private set
     var editingFrom by mutableStateOf(false)
+
+    /** 5.12 §5 autofocus: КУДА takes focus after a hand-picked ОТКУДА, not after a GPS fix (S3-QA P1-01). */
+    var focusToField by mutableStateOf(true)
+        private set
         private set
 
     /** Base-route km from the origin to suggestion rows («lat,lon» → km; null = unreachable). */
@@ -707,6 +711,7 @@ class VerstFlow(
         routeError = null
         readyRoute = null
         updateQuery("")
+        focusToField = true
         push(Route.Navigator)
         onNavigatorOpened()
     }
@@ -787,6 +792,7 @@ class VerstFlow(
             originGen = s.nameGenRu ?: s.name
             if (s.nameGenRu == null) loadOriginForms()
             rowKm.clear()
+            focusToField = true
             editingFrom = false
             loadRoutes()
             routeError = null
@@ -1503,6 +1509,7 @@ class VerstFlow(
             }
             originAddress = null
             if (fromRow && editingFrom) { // «Моё местоположение» picked: ОТКУДА is done
+                focusToField = false // 5.12 §5: after a GPS fix nothing gets focus, the IME stays down
                 editingFrom = false
                 updateQuery("")
             }

@@ -88,6 +88,8 @@ data class CityUi(
     val building: Boolean,
     val children: Boolean,
     val startTime: String,
+    /** S3-QA P0-01: the start is the next day's window opening. */
+    val startTomorrow: Boolean = false,
 )
 
 interface CityActions {
@@ -310,7 +312,12 @@ private fun Caption(ui: CityUi, a: CityActions) {
                     stringResource(R.string.city_caption_title, presetName(ui.selected, ui.selected), ui.durationMin / 60),
                     T.title.lg, C.text.primary, Modifier.testTag("city.caption"), maxLines = 1,
                 )
-                if (ui.town != null) Txt(stringResource(R.string.city_caption_meta, ui.town, ui.startTime), T.body.mdTight, C.text.secondary, maxLines = 1)
+                if (ui.town != null) {
+                    Txt(
+                        stringResource(if (ui.startTomorrow) R.string.city_caption_meta_tomorrow else R.string.city_caption_meta, ui.town, ui.startTime),
+                        T.body.mdTight, C.text.secondary, Modifier.testTag("city.caption.meta"), maxLines = 1,
+                    )
+                }
             }
         }
         val label = stringResource(R.string.city_go)

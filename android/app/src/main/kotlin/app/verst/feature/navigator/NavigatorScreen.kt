@@ -99,6 +99,8 @@ data class NavigatorUi(
     val addressQuery: Boolean = false,
     val addressState: AddressState = AddressState.Idle,
     val addressResults: List<SuggestionDto> = emptyList(),
+    /** 5.12 §5: КУДА autofocuses (false after a GPS fix set ОТКУДА). */
+    val focusTo: Boolean = true,
 )
 
 /** 5.12: location and address answers of the Navigator. */
@@ -180,19 +182,26 @@ private fun Panel(
     modifier: Modifier,
 ) {
     val scroll = rememberScrollState()
-    // Keep the field and its results in view above the keyboard: scroll to the end when results change.
-    LaunchedEffect(typing, ui.suggestions, ui.searching, ui.popular.size) {
-        if (typing) scroll.animateScrollTo(scroll.maxValue)
+    // 5.12 §5 (S3-QA P1-01): fixed header + focused field + helper; only the result list scrolls. A new query
+    // starts the list at its top (the «Найти адрес «…»» action row is the first item).
+    LaunchedEffect(ui.query) { scroll.scrollTo(0) }
+    val fromValue = when {
+        ui.gps == GpsState.Waiting -> stringResource(R.string.loc_searching)
+        ui.originFromGps && ui.originAddress != null -> stringResource(R.string.loc_here_address, ui.originAddress)
+        ui.originFromGps -> stringResource(R.string.loc_here_town, ui.origin.label)
+        else -> stringResource(R.string.navigator_from_here, ui.origin.label)
     }
+    val q = ui.query.trim()
+    val picked = !ui.editingFrom && ui.destination != null && ui.query == ui.destination.name
     Column(
         modifier
             .fillMaxWidth()
             .naviPanel(bezel = 7.dp, radius = 18.dp)
-            .padding(19.dp)
-            .verticalScroll(scroll),
+            .padding(19.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        // fixed: the header with the GPS state (always visible)
+        Row(Modifier.fillMaxWidth().testTag("navigator.header"), verticalAlignment = Alignment.CenterVertically) {
             Txt(stringResource(R.string.navigator_header), T.label.md, C.navi.label, Modifier.weight(1f))
             // S3-R1: «GPS ●» once the origin is the town of the fix, «GPS ○» while asking the phone.
             when (ui.gps) {
@@ -201,25 +210,25 @@ private fun Panel(
                 else -> Unit
             }
         }
+        // fixed: the fields. While typing, the other field collapses to one line (h 28) under the header.
         if (ui.editingFrom) {
+            if (typing) CollapsedLine(ui.destination?.name ?: stringResource(R.string.navigator_to_hint), "navigator.to.collapsed", null)
             Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from", onFocus = onFocus, autoFocus = true, onSubmit = location::findAddress)
-            MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
-            ValueField(stringResource(R.string.navigator_to_label), ui.destination?.name ?: stringResource(R.string.navigator_to_hint), square = true)
+            if (!typing) {
+                MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
+                ValueField(stringResource(R.string.navigator_to_label), ui.destination?.name ?: stringResource(R.string.navigator_to_hint), square = true)
+            }
         } else {
             if (ui.outsideRussia) {
                 OutsideRussia(onEditFrom)
+            } else if (typing) {
+                CollapsedLine(fromValue, "navigator.from.collapsed", onEditFrom)
             } else {
                 // 5.12 §1: «Ищем вас…» while the fix runs; the address (online) or «Ярославль (по GPS)»; coarse → «Точнее»
-                val value = when {
-                    ui.gps == GpsState.Waiting -> stringResource(R.string.loc_searching)
-                    ui.originFromGps && ui.originAddress != null -> stringResource(R.string.loc_here_address, ui.originAddress)
-                    ui.originFromGps -> stringResource(R.string.loc_here_town, ui.origin.label)
-                    else -> stringResource(R.string.navigator_from_here, ui.origin.label)
-                }
                 val approx = ui.originFromGps && ui.gpsApprox && ui.gps == GpsState.On
                 ValueField(
                     stringResource(R.string.navigator_from),
-                    value,
+                    fromValue,
                     square = false,
                     action = stringResource(if (approx) R.string.loc_precise else R.string.navigator_change),
                     onAction = if (approx) location::precise else onEditFrom,
@@ -227,27 +236,48 @@ private fun Panel(
                     actionTag = if (approx) "navigator.precise" else "navigator.change",
                 )
             }
-            Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus, autoFocus = ui.destination == null, onSubmit = location::findAddress)
-        }
-        val q = ui.query.trim()
-        val picked = !ui.editingFrom && ui.destination != null && ui.query == ui.destination.name
-        if (!picked && ui.addressQuery) AddressBlock(ui, q, location::findAddress, onPick)
-        when {
-            picked -> Unit
-            q.length < 2 -> if (ui.popular.isNotEmpty()) {
-                Txt(stringResource(R.string.navigator_popular), T.label.md, C.navi.hint, Modifier.padding(top = 4.dp))
-                Rows(ui.popular.take(6), ui.rowKm, onPick)
-            }
-            ui.searching && ui.suggestions.isEmpty() -> Skeleton()
-            ui.suggestFailed -> Block(stringResource(R.string.navigator_suggest_error), null)
-            ui.suggestions.isEmpty() && ui.addressQuery -> Unit // the address row / results speak for themselves (5.12 §2)
-            ui.suggestions.isEmpty() -> Block(
-                stringResource(R.string.navigator_no_results_title, q),
-                stringResource(R.string.navigator_no_results_text),
+            Input(
+                stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus,
+                autoFocus = ui.destination == null && ui.focusTo, onSubmit = location::findAddress,
             )
-            else -> Rows(ui.suggestions, ui.rowKm, onPick)
+        }
+        // fixed: the address helper line
+        if (!picked && ui.addressQuery) Txt(stringResource(R.string.addr_find_hint), T.caption.md, C.navi.hint, Modifier.testTag("address.hint"))
+        // the only scrolling part: rows (the address action first), «© OpenStreetMap» right under the address rows
+        Column(
+            Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(scroll).testTag("navigator.list"),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            if (ui.editingFrom && typing) MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
+            if (!picked && ui.addressQuery) AddressBlock(ui, q, location::findAddress, onPick)
+            when {
+                picked -> Unit
+                q.length < 2 -> if (ui.popular.isNotEmpty()) {
+                    Txt(stringResource(R.string.navigator_popular), T.label.md, C.navi.hint, Modifier.padding(top = 4.dp))
+                    Rows(ui.popular.take(6), ui.rowKm, onPick)
+                }
+                ui.searching && ui.suggestions.isEmpty() -> Skeleton()
+                ui.suggestFailed -> Block(stringResource(R.string.navigator_suggest_error), null)
+                ui.suggestions.isEmpty() && ui.addressQuery -> Unit // the address row / results speak for themselves (5.12 §2)
+                ui.suggestions.isEmpty() -> Block(
+                    stringResource(R.string.navigator_no_results_title, q),
+                    stringResource(R.string.navigator_no_results_text),
+                )
+                else -> Rows(ui.suggestions, ui.rowKm, onPick)
+            }
         }
     }
+}
+
+/** 5.12 §5: the other field while typing — one line, h 28, `type.body.sm` `text.secondary`; tap = edit it. */
+@Composable
+private fun CollapsedLine(value: String, tag: String, onClick: (() -> Unit)?) {
+    Box(
+        Modifier.fillMaxWidth().height(28.dp)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+            .testTag(tag),
+        contentAlignment = Alignment.CenterStart,
+    ) { Txt(value, T.body.sm, C.text.secondary, maxLines = 1) }
 }
 
 @Composable
@@ -389,7 +419,7 @@ private fun SuggestionRow(s: SuggestionDto, km: Int?, index: Int, tagPrefix: Str
             contentAlignment = Alignment.Center,
         ) {
             // 5.12 §2: address rows carry «У» (улица)
-            Txt(if (address) stringResource(app.verst.R.string.navigator_type_address) else stringResource(if (city) R.string.navigator_type_city else R.string.navigator_type_place), T.badge, C.text.primary)
+            Txt(if (address) stringResource(R.string.navigator_type_address) else stringResource(if (city) R.string.navigator_type_city else R.string.navigator_type_place), T.badge, C.text.primary)
         }
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
@@ -505,7 +535,6 @@ private fun OutsideRussia(onChoose: () -> Unit) {
  */
 @Composable
 private fun AddressBlock(ui: NavigatorUi, q: String, onFind: () -> Unit, onPick: (SuggestionDto) -> Unit) {
-    Txt(stringResource(R.string.addr_find_hint), T.caption.md, C.navi.hint)
     when {
         !ui.online || ui.addressState == AddressState.Offline -> Row(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list).padding(12.dp).testTag("address.offline"),

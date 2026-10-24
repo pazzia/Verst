@@ -223,6 +223,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 online = flow.connectivity.online,
                 addressQuery = flow.looksLikeAddress(flow.query),
                 addressState = flow.addressState,
+                focusTo = flow.focusToField,
                 addressResults = flow.addressResults,
             ),
             onBack = { flow.back() },
@@ -426,7 +427,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 ageGate = flow.ageGate != null,
                 building = flow.walkBuilding,
                 children = flow.children > 0,
-                startTime = remember(flow.cityPreset, flow.cityInterests.toList()) { walkStartTime(flow.cityPreset, flow.cityInterests) },
+                startTime = walkStart(flow).label,
+                startTomorrow = walkStart(flow).tomorrow,
             ),
             object : app.verst.feature.city.CityActions {
                 override fun back() {
@@ -489,18 +491,14 @@ private fun cardActions(flow: VerstFlow, context: Context) = object : app.verst.
 }
 
 /**
- * 5.10 caption «старт 11:00»: the engine's default start (ARCH-304 `rounded_start`): now rounded up to the next
- * quarter hour, no earlier than 18:00 for drink walks and 10:00 for museum walks. Device time — `city_presets`
- * carries no town tz yet (asked of the Architect); the walk result shows the engine's `startAt`.
+ * 5.10 caption: the engine's preset `startAt` when the presets carry it, else the same rule on the device
+ * ([app.verst.core.model.WalkStart]) in the town's zone (`town.tz`; Moscow until the data run brings it).
  */
-private fun walkStartTime(preset: String, interests: Collection<String>): String {
-    val now = java.time.LocalTime.now().withSecond(0).withNano(0)
-    var t = now.plusMinutes(((15 - now.minute % 15) % 15).toLong())
-    val earliest = when {
-        preset == "ryumochnye" || preset == "beer" || "bars" in interests -> 18
-        preset == "museums" -> 10
-        else -> 0
-    }
-    if (t.hour < earliest) t = java.time.LocalTime.of(earliest, 0)
-    return "%02d:%02d".format(t.hour, t.minute)
+private fun walkStart(flow: VerstFlow): app.verst.core.model.WalkStart.Start {
+    val p = flow.cityPresets
+    val zone = app.verst.core.model.WalkStart.zone(p?.town?.tz)
+    val now = java.time.ZonedDateTime.now(zone)
+    p?.presets?.firstOrNull { it.preset == flow.cityPreset }?.startAt
+        ?.let { app.verst.core.model.WalkStart.fromEngine(it, zone, now) }?.let { return it }
+    return app.verst.core.model.WalkStart.of(flow.cityPreset, flow.cityInterests, flow.cityDurationMin, now)
 }
