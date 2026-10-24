@@ -792,7 +792,8 @@ Behaviour notes:
 - Instruments: mirror bench of 3 seats (empty → adult → child), front-seat chip, dog, km/day odometer 150–900
   step 50 with «≈ X ч Y мин» and days (A§11.11), budget presets with a simple gauge, mood chips (calm preselected
   once a child is added). The start time is the engine default (the next Saturday 08:00 — no settings sheet).
-- Drive: stage texts from the engine events, paced; errors → «НЕ ПОЛУЧИЛОСЬ» + 5.4 §4.4 message and CTA
+- Drive: stage texts from the engine events, paced; the bar follows the revealed step; the «N ДНЕЙ» header
+  comes from the engine's `stop` events (the ×1.25 estimate said «2 ДНЯ» for a 1-day Москва → Ярославль); errors → «НЕ ПОЛУЧИЛОСЬ» + 5.4 §4.4 message and CTA
   (retry / «К приборам» / «Изменить маршрут»); `CANCELLED` → silent back; back = cancel (engine `cancel`).
 - Road ahead: fixed title sign, intro chips, engine warnings as plates, per-day header, stop rows (sign, «старт» /
   «через N км», time, name, note = engine `note` or `reason`, cost), road column per item, pinned white footer

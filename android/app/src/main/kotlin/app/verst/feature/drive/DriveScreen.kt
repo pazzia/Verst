@@ -56,7 +56,6 @@ fun actionLabelRes(action: DriveAction): Int = when (action) {
 fun DriveScreen(
     ui: DriveUi,
     kmLabel: String,
-    days: Int,
     action: (EngineErrorDto) -> DriveAction,
     onCancel: () -> Unit,
     onDone: () -> Unit,
@@ -76,7 +75,7 @@ fun DriveScreen(
                     .padding(start = 18.dp, end = 18.dp, top = 22.dp, bottom = 26.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Panel(ui, kmLabel, days)
+                Panel(ui, kmLabel)
                 val err = ui.error
                 when {
                     err != null -> {
@@ -93,7 +92,7 @@ fun DriveScreen(
 }
 
 @Composable
-private fun Panel(ui: DriveUi, kmLabel: String, days: Int) {
+private fun Panel(ui: DriveUi, kmLabel: String) {
     Column(
         Modifier.fillMaxWidth().height(186.dp).naviPanel().padding(horizontal = 20.dp, vertical = 18.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -107,7 +106,7 @@ private fun Panel(ui: DriveUi, kmLabel: String, days: Int) {
         }
         Row(Modifier.fillMaxWidth()) {
             Txt(stringResource(R.string.drive_header, kmLabel), T.label.md, C.navi.label, Modifier.weight(1f), maxLines = 1)
-            if (ui.split) Txt(stringResource(R.string.drive_header_days, days, pluralStringResource(R.plurals.plural_day_upper, days)), T.label.md, C.navi.label)
+            if (ui.days > 0) Txt(stringResource(R.string.drive_header_days, ui.days, pluralStringResource(R.plurals.plural_day_upper, ui.days)), T.label.md, C.navi.label)
         }
         ProgressBar(ui.progress, Modifier.fillMaxWidth().height(4.dp))
         Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(6.dp)) {

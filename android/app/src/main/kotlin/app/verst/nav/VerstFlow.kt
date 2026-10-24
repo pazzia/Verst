@@ -40,7 +40,8 @@ enum class DriveAction { RETRY, TO_INSTRUMENTS, CHANGE_ROUTE }
 data class DriveUi(
     val lines: List<String> = emptyList(),
     val progress: Float = 0f,
-    val split: Boolean = false,
+    /** Trip days once the engine has placed stops (0 = not known yet). */
+    val days: Int = 0,
     val done: Boolean = false,
     val error: EngineErrorDto? = null,
 )
@@ -295,30 +296,35 @@ class VerstFlow(private val gateway: PlannerGateway, private val scope: Coroutin
         val request = request()
         val id = UUID.randomUUID().toString()
         planJob = scope.launch {
-            val pending = ArrayDeque<String>()
-            var bar = 0f
-            var split = false
+            val pending = ArrayDeque<Pair<String, Float>>() // stage text, engine progress at that stage
+            var days = 0
             var finished: EngineResult<PlanResultDto>? = null
             val engine = launch {
                 finished = gateway.plan(id, request) { ev ->
-                    if (ev.event == "stage") {
-                        ev.text?.let { t -> if (t !in pending && t !in drive.lines) pending.addLast(t) }
-                        bar = maxOf(bar, (ev.progress ?: 0.0).toFloat())
-                        if (ev.key == "split") split = true
+                    when (ev.event) {
+                        "stage" -> ev.text?.let { t ->
+                            if (pending.none { it.first == t } && t !in drive.lines) pending.addLast(t to (ev.progress ?: 0.0).toFloat())
+                        }
+                        "stop" -> days = maxOf(days, ev.day ?: 0) // days as the engine splits them, not the estimate
                     }
+                    Unit
                 }
             }
-            // Pacer: reveal one step per 400 ms while the engine works (or until the queue is empty).
+            // Pacer: reveal one step per 400 ms while the engine works (or until the queue is empty); the bar
+            // follows the revealed step, so it never runs ahead of the text.
             while (engine.isActive || pending.isNotEmpty()) {
                 if (pending.isNotEmpty()) {
-                    drive = drive.copy(lines = drive.lines + pending.removeFirst(), progress = maxOf(drive.progress, bar), split = split)
+                    val (text, progress) = pending.removeFirst()
+                    drive = drive.copy(lines = drive.lines + text, progress = maxOf(drive.progress, progress), days = days)
+                } else {
+                    drive = drive.copy(days = days)
                 }
                 delay(STEP_GAP_MS)
             }
             when (val r = finished) {
                 is EngineResult.Ok -> {
                     result = r.value
-                    drive = drive.copy(progress = 1f, done = true, split = true)
+                    drive = drive.copy(progress = 1f, done = true, days = r.value.trip.days)
                     delay(AUTO_ADVANCE_MS)
                     if (top == Route.Drive) openRoad()
                 }

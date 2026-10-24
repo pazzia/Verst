@@ -144,23 +144,23 @@ class ScreensScreenshotTest {
     @Test
     fun driveProgress() = shot("drive", "t1500") {
         DriveScreen(
-            DriveUi(listOf("Прокладываем дорогу", "Делим кольцо на 3 дня по ≈ 250 км", "Ищем отели, куда пустят с собакой"), 0.45f, split = true),
-            "745", 3, { DriveAction.RETRY }, {}, {}, { _, _ -> },
+            DriveUi(listOf("Прокладываем дорогу", "Делим кольцо на 3 дня по ≈ 250 км", "Ищем отели, куда пустят с собакой"), 0.45f, days = 3),
+            "745", { DriveAction.RETRY }, {}, {}, { _, _ -> },
         )
     }
 
     @Test
     fun driveDone() = shot("drive", "done") {
         DriveScreen(
-            DriveUi(listOf("Делим кольцо на 3 дня", "Сверяем часы работы", "Считаем бензин: 8,0 л на 100 км", "Считаем, сколько стоит поездка"), 1f, split = true, done = true),
-            "745", 3, { DriveAction.RETRY }, {}, {}, { _, _ -> },
+            DriveUi(listOf("Делим кольцо на 3 дня", "Сверяем часы работы", "Считаем бензин: 8,0 л на 100 км", "Считаем, сколько стоит поездка"), 1f, days = 3, done = true),
+            "745", { DriveAction.RETRY }, {}, {}, { _, _ -> },
         )
     }
 
     @Test
     fun driveErrorUnreachable() {
         shot("drive", "error-unreachable") {
-            DriveScreen(DriveUi(error = EngineErrorDto("UNREACHABLE")), "≈ 900", 3, { DriveAction.CHANGE_ROUTE }, {}, {}, { _, _ -> })
+            DriveScreen(DriveUi(error = EngineErrorDto("UNREACHABLE")), "≈ 900", { DriveAction.CHANGE_ROUTE }, {}, {}, { _, _ -> })
         }
         compose.onNodeWithText("Не нашли дорогу на машине до этой точки").assertExists()
         compose.onNodeWithText("Изменить маршрут").assertExists()
@@ -169,7 +169,7 @@ class ScreensScreenshotTest {
     @Test
     fun driveErrorInternal() {
         shot("drive", "error-internal") {
-            DriveScreen(DriveUi(error = EngineErrorDto("INTERNAL")), "745", 3, { DriveAction.RETRY }, {}, {}, { _, _ -> })
+            DriveScreen(DriveUi(error = EngineErrorDto("INTERNAL")), "745", { DriveAction.RETRY }, {}, {}, { _, _ -> })
         }
         compose.onNodeWithText("Попробовать ещё раз").assertExists()
     }

@@ -11,7 +11,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import app.verst.core.model.RuFormat
-import app.verst.core.model.TripMath
 import app.verst.engine.EngineHost
 import app.verst.feature.drive.DriveScreen
 import app.verst.feature.instruments.InstrumentsActions
@@ -100,7 +99,6 @@ fun VerstRoot(flow: VerstFlow) {
         Route.Drive -> DriveScreen(
             flow.drive,
             kmLabel = flow.readyRoute?.let { RuFormat.thousands(it.kmTotal) } ?: "≈ ${RuFormat.thousands(flow.tripKm)}",
-            days = TripMath.days(flow.tripKm, flow.dailyKm),
             action = { flow.driveAction(it.code) },
             onCancel = { flow.back() },
             onDone = flow::openRoad,
