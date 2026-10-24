@@ -56,13 +56,28 @@ class ScreensScreenshotTest {
     )
     private val yaroslavl = SuggestionDto("city", "Ярославль", "город · Ярославская область", 57.6261, 39.8845, "t_yaroslavl")
 
-    private fun shot(screen: String, state: String, content: @Composable () -> Unit) {
+    private fun shot(screen: String, state: String, w: Int = 390, h: Int = 844, content: @Composable () -> Unit) {
         compose.setContent(content)
         compose.waitForIdle()
         var bitmap = Screenshot.drawDecorView(compose.activity)
         if (Screenshot.isUniform(bitmap)) bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
-        assertEquals(1170, bitmap.width)
-        Screenshot.write(bitmap, screen, state, 390, 844)
+        assertEquals(w * 3, bitmap.width)
+        Screenshot.write(bitmap, screen, state, w, h)
+    }
+
+    @Test
+    @Config(qualifiers = "ru-rRU-w360dp-h640dp-port-xxhdpi")
+    fun windshieldShort() = shot("windshield", "default", 360, 640) {
+        WindshieldScreen(windshield(WindshieldData.Routes(routes)), {}, {}, {}, {})
+    }
+
+    @Test
+    @Config(qualifiers = "ru-rRU-w360dp-h640dp-port-xxhdpi")
+    fun instrumentsShort() = shot("instruments", "default", 360, 640) {
+        InstrumentsScreen(
+            InstrumentsUi("Москва → Ярославль", "Москва", false, 312, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 300, 2, null),
+            noActions,
+        )
     }
 
     private fun windshield(data: WindshieldData) = WindshieldUi("Москва", data, 0, 2, 1, true)

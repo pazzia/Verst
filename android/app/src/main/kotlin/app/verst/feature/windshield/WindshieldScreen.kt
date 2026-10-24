@@ -77,7 +77,7 @@ fun WindshieldScreen(
         BoxWithConstraints(Modifier.matchParentSize()) {
             val sceneH = maxHeight - DashHeight + 20.dp
             WindshieldScene(sceneH)
-            Mirror(crewShort(ui.adults, ui.children, ui.dog), Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
+            Mirror(crewShort(ui.adults, ui.children, ui.dog), ui.adults, ui.children, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             Sign(ui, onSelect, onRetry, Modifier.padding(start = 20.dp, end = 20.dp, top = 84.dp).fillMaxWidth())
             Dashboard(ui, onStart, onNavigator, Modifier.align(Alignment.BottomCenter))
         }
@@ -85,7 +85,7 @@ fun WindshieldScreen(
 }
 
 @Composable
-private fun Mirror(caption: String, modifier: Modifier) {
+private fun Mirror(caption: String, adults: Int, children: Int, modifier: Modifier) {
     Column(modifier.semantics(mergeDescendants = true) {}, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(Modifier.size(8.dp, 10.dp).background(C.dash.controlAlt))
         Box(
@@ -98,11 +98,15 @@ private fun Mirror(caption: String, modifier: Modifier) {
                 .background(C.mirror.glass),
             contentAlignment = Alignment.Center,
         ) {
+            // The mirror reflects the passengers (everyone but the driver), up to 3 slots (components §3.1).
+            val passengers = List((adults - 1).coerceAtLeast(0)) { false } + List(children) { true }
             Row(horizontalArrangement = Arrangement.spacedBy(13.dp), verticalAlignment = Alignment.Bottom) {
-                repeat(3) {
+                passengers.take(3).forEach { child ->
+                    val head = if (child) 9.dp else 12.dp
+                    val color = if (child) C.crew.child else C.mirror.label
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(Modifier.size(12.dp).clip(CircleShape).background(C.mirror.label.copy(alpha = 0.5f)))
-                        Box(Modifier.padding(top = 2.dp).size(22.dp, 10.dp).clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)).background(C.mirror.label.copy(alpha = 0.5f)))
+                        Box(Modifier.size(head).clip(CircleShape).background(color))
+                        Box(Modifier.padding(top = 2.dp).size(head * 1.8f, head * 0.85f).clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)).background(color))
                     }
                 }
             }

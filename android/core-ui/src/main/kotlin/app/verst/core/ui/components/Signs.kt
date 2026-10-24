@@ -13,7 +13,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,10 +83,10 @@ fun RoadSign(sign: String, cityName: String, tags: List<String>, modifier: Modif
                 .clip(RoundedCornerShape(DesignTokens.radius.r4))
                 .background(C.sign.white)
                 .border(DesignTokens.stroke.w3, C.sign.black, RoundedCornerShape(DesignTokens.radius.r4))
-                .padding(horizontal = 4.dp, vertical = 8.dp)
+                .padding(horizontal = 5.dp, vertical = 8.dp)
                 .clearAndSetSemantics {},
             contentAlignment = Alignment.Center,
-        ) { Txt(cityName.uppercase(), T.sign.city, C.text.onLight, maxLines = 3, align = TextAlign.Center) }
+        ) { CitySignText(cityName.uppercase()) }
         "tourist" -> Box(
             modifier
                 .size(DesignTokens.size.touristSign)
@@ -110,6 +115,30 @@ fun RoadSign(sign: String, cityName: String, tags: List<String>, modifier: Modif
         }
     }
 }
+
+/**
+ * Town name on the white city plate: up to 3 lines, never broken inside a word (components §2.1). A word that
+ * does not fit the plate width shrinks the text in steps (needed with the fallback font until DES-100).
+ */
+@Composable
+private fun CitySignText(text: String) {
+    var scale by remember(text) { mutableFloatStateOf(1f) }
+    val base = T.sign.city
+    BasicText(
+        text = text,
+        style = base.copy(color = C.text.onLight, textAlign = TextAlign.Center, fontSize = base.fontSize * scale, lineHeight = base.lineHeight * scale),
+        maxLines = 3,
+        onTextLayout = { layout ->
+            val brokenWord = (0 until layout.lineCount - 1).any { i ->
+                val end = layout.getLineEnd(i)
+                end in 1 until text.length && !text[end - 1].isWhitespace() && !text[end].isWhitespace()
+            }
+            if ((brokenWord || layout.hasVisualOverflow) && scale > MIN_CITY_SCALE) scale *= 0.92f
+        },
+    )
+}
+
+private const val MIN_CITY_SCALE = 0.7f
 
 enum class StartSize(val outer: Dp, val face: Dp, val icon: Dp) {
     L(DesignTokens.size.startLOuter, DesignTokens.size.startLFace, DesignTokens.size.startLIcon),

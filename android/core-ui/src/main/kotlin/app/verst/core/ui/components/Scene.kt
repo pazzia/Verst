@@ -32,31 +32,39 @@ val FullSky = listOf(
 
 /**
  * Static windshield scene (components §9, DEV-SLICE: no lane motion yet): sky bands, sun, optional hills,
- * ground, the perspective road with edge lines and lane dashes, roof liner and A-pillars. `horizon` and
- * `bottom` are in dp of the 390-wide frame; x scales with the width. Decorative: no semantics.
+ * ground, the perspective road with edge lines and lane dashes, roof liner and A-pillars. Coordinates are dp of
+ * the 390-wide frame; x scales with the width, y by k = min(1, height / `refHeight`) on short windows (5.1 §1).
+ * Decorative: no semantics.
  */
 @Composable
-fun WindshieldScene(height: Dp, modifier: Modifier = Modifier, hills: Boolean = true, sunX: Float = 236f) {
+fun WindshieldScene(
+    height: Dp,
+    modifier: Modifier = Modifier,
+    hills: Boolean = true,
+    sunX: Float = 236f,
+    refHeight: Float = 540f,
+) {
     Canvas(modifier.fillMaxWidth().height(height).clearAndSetSemantics {}) {
         val k = size.width / 390.dp.toPx()
         val dp = 1.dp.toPx()
-        val horizon = 300f * dp
-        for (b in FullSky) drawRect(b.color, Offset(0f, b.top * dp), Size(size.width, b.height * dp))
-        drawCircle(C.scene.sun, radius = 34f * dp, center = Offset((sunX + 34f) * k * dp, 300f * dp))
-        if (hills) drawHills(k, dp)
+        val dy = dp * minOf(1f, size.height / (refHeight * dp))
+        val horizon = 300f * dy
+        for (b in FullSky) drawRect(b.color, Offset(0f, b.top * dy), Size(size.width, b.height * dy + 1f))
+        drawCircle(C.scene.sun, radius = 34f * dy, center = Offset((sunX + 34f) * k * dp, horizon))
+        if (hills) drawHills(k, dp, dy)
         drawRect(C.scene.groundDay, Offset(0f, horizon), Size(size.width, size.height - horizon))
         drawRoad(horizon, size.height, nearHalf = 115f * dp * k, farHalf = 6f * dp * k, dp = dp)
         drawInterior(dp, k)
     }
 }
 
-private fun DrawScope.drawHills(k: Float, dp: Float) {
+private fun DrawScope.drawHills(k: Float, dp: Float, dy: Float) {
     val p = Path().apply {
-        moveTo(0f, 300f * dp)
-        lineTo(0f, 286f * dp)
-        cubicTo(60f * k * dp, 272f * dp, 110f * k * dp, 280f * dp, 160f * k * dp, 288f * dp)
-        cubicTo(220f * k * dp, 276f * dp, 300f * k * dp, 272f * dp, 390f * k * dp, 284f * dp)
-        lineTo(size.width, 300f * dp)
+        moveTo(0f, 300f * dy)
+        lineTo(0f, 286f * dy)
+        cubicTo(60f * k * dp, 272f * dy, 110f * k * dp, 280f * dy, 160f * k * dp, 288f * dy)
+        cubicTo(220f * k * dp, 276f * dy, 300f * k * dp, 272f * dy, 390f * k * dp, 284f * dy)
+        lineTo(size.width, 300f * dy)
         close()
     }
     drawPath(p, C.sky.hills)

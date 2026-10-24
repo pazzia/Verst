@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
@@ -94,29 +95,36 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                 BigMirror(ui, a, Modifier.padding(start = 20.dp, end = 20.dp, top = 54.dp).fillMaxWidth().height(174.dp))
                 BackLink(ui.title, C.mirror.label, stringResource(R.string.cd_back, ui.title), a::back, Modifier.padding(start = 12.dp, top = 4.dp))
             }
-            Column(
-                Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Row(Modifier.fillMaxWidth().padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Txt(stringResource(R.string.instruments_hint), T.body.mdTight, C.text.secondary, Modifier.weight(1f).padding(end = 8.dp))
-                    ToggleChip(
-                        stringResource(if (ui.frontAdult) R.string.instruments_front_adult else R.string.instruments_front_none),
-                        ui.frontAdult, a::front, role = Role.Switch,
-                    )
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                Column(
+                    Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Row(Modifier.fillMaxWidth().padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Txt(stringResource(R.string.instruments_hint), T.body.mdTight, C.text.secondary, Modifier.weight(1f).padding(end = 8.dp))
+                        ToggleChip(
+                            stringResource(if (ui.frontAdult) R.string.instruments_front_adult else R.string.instruments_front_none),
+                            ui.frontAdult, a::front, role = Role.Switch,
+                        )
+                    }
+                    Txt(summary(ui), T.title.lgNum, C.text.primary, maxLines = 2)
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        KmWell(ui, a, Modifier.weight(1f))
+                        BudgetWell(ui, a, Modifier.weight(1f))
+                    }
+                    Txt(stringResource(R.string.instruments_mood_label), T.label.md, C.text.muted)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        ToggleChip(stringResource(R.string.instruments_mood_calm), ui.mood == Mood.CALM, { a.mood(Mood.CALM) })
+                        ToggleChip(stringResource(R.string.instruments_mood_more), ui.mood == Mood.MORE_STOPS, { a.mood(Mood.MORE_STOPS) })
+                    }
+                    ToggleChip(stringResource(R.string.instruments_mood_drive), ui.mood == Mood.JUST_DRIVE, { a.mood(Mood.JUST_DRIVE) })
+                    Spacer(Modifier.height(16.dp))
                 }
-                Txt(summary(ui), T.title.lgNum, C.text.primary, maxLines = 2)
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    KmWell(ui, a, Modifier.weight(1f))
-                    BudgetWell(ui, a, Modifier.weight(1f))
-                }
-                Txt(stringResource(R.string.instruments_mood_label), T.label.md, C.text.muted)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ToggleChip(stringResource(R.string.instruments_mood_calm), ui.mood == Mood.CALM, { a.mood(Mood.CALM) })
-                    ToggleChip(stringResource(R.string.instruments_mood_more), ui.mood == Mood.MORE_STOPS, { a.mood(Mood.MORE_STOPS) })
-                }
-                ToggleChip(stringResource(R.string.instruments_mood_drive), ui.mood == Mood.JUST_DRIVE, { a.mood(Mood.JUST_DRIVE) })
-                Spacer(Modifier.height(8.dp))
+                // 5.3 §1: content scrolls under a 16 dp fade above the caption row.
+                Box(
+                    Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(16.dp)
+                        .background(Brush.verticalGradient(listOf(C.dash.raised.copy(alpha = 0f), C.dash.raised))),
+                )
             }
             Row(
                 Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 24.dp, top = 8.dp),
