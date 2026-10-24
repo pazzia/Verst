@@ -427,14 +427,23 @@ class _ListenerSink:
                 )
 
 
-def _trip_result(plan: TripPlan) -> dict[str, Any]:
-    """The private trip, its share text and the Waybill footnote month/year («октябрь», "2026")."""
+def _trip_result(plan: TripPlan, world: FakeWorld | None = None) -> dict[str, Any]:
+    """The private trip, its share text, the Waybill footnote month/year («октябрь», "2026") and the
+    prepositional names of the overnight towns (5.7 «Отметим ночёвку в Ярославле…»)."""
     month, year = ru.month_year_ru(plan.cost.prices_as_of).split(" ")
+    prep: dict[str, str] = {}
+    if world is not None:
+        for d in plan.days_list:
+            for s in d.stops:
+                town = world.towns.get(s.town_id or "")
+                if town is not None:
+                    prep[town.id] = ru.prepositional(town)
     return {
         "trip": codec.plan_to_json(plan, public=False),
         "shareText": render_share_text(plan),
         "pricesMonthRu": month,
         "pricesYear": year,
+        "townPrepRu": prep,
     }
 
 
@@ -462,7 +471,9 @@ def _run_plan(w: _World, request_id: Any, input_json: Any, sink: Any) -> TripPla
 def plan(world: str, request_id: str, input_json: str, listener: Any = None) -> str:
     """Plan a trip; `listener.onEvent(json)` per progress event; cancellable by `cancel(request_id)`."""
     return _envelope(
-        lambda: _trip_result(_run_plan(_world(world), request_id, input_json, _ListenerSink(listener)))
+        lambda: _trip_result(
+            _run_plan(_world(world), request_id, input_json, _ListenerSink(listener)), _world(world).world
+        )
     )
 
 
@@ -559,7 +570,9 @@ def replace_stop(world: str, trip_json: str, stop_id: str, alt_id: str) -> str:
     def run() -> dict[str, Any]:
         w = _world(world)
         trip = _trip(trip_json)
-        return _trip_result(w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")))
+        return _trip_result(
+            w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")), w.world
+        )
 
     return _envelope(run)
 
@@ -602,7 +615,7 @@ def patch_cost(world: str, trip_json: str, patch_json: str) -> str:
 
     def run() -> dict[str, Any]:
         w = _world(world)
-        return _trip_result(w.planner.recompute_cost(_trip(trip_json), _cost_patch(patch_json)))
+        return _trip_result(w.planner.recompute_cost(_trip(trip_json), _cost_patch(patch_json)), w.world)
 
     return _envelope(run)
 
