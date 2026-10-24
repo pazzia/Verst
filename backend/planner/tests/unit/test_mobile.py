@@ -437,7 +437,9 @@ class MobileTest(unittest.TestCase):
         return d
 
     def test_trip_result_town_prepositional(self) -> None:
-        res = call(mobile.plan("central_russia_v1", "prep", json.dumps(self._input(rr="rr_golden_ring")), None))
+        res = call(
+            mobile.plan("central_russia_v1", "prep", json.dumps(self._input(rr="rr_golden_ring")), None)
+        )
         self.assertEqual(res["townPrepRu"]["t_yaroslavl"], "Ярославле")
         hotels = [h for d in res["trip"]["daysList"] for s in d["stops"] for h in s["hotelOptions"]]
         self.assertTrue(hotels and all(h["distanceKm"] >= 0 for h in hotels))
