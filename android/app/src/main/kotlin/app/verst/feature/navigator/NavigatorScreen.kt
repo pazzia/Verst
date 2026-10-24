@@ -240,6 +240,7 @@ private fun Panel(
             }
             ui.searching && ui.suggestions.isEmpty() -> Skeleton()
             ui.suggestFailed -> Block(stringResource(R.string.navigator_suggest_error), null)
+            ui.suggestions.isEmpty() && ui.addressQuery -> Unit // the address row / results speak for themselves (5.12 §2)
             ui.suggestions.isEmpty() -> Block(
                 stringResource(R.string.navigator_no_results_title, q),
                 stringResource(R.string.navigator_no_results_text),

@@ -247,7 +247,7 @@ private fun PresetPlate(p: CityPresetDto, selected: Boolean, children: Boolean, 
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("city.preset.${p.preset}")
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp) // 10 in the spec; the 3 dp inner border leaves no room for 24 + 2 lines
             .alpha(if (disabled) 0.45f else 1f),
     ) {
         val icon = when (p.preset) {

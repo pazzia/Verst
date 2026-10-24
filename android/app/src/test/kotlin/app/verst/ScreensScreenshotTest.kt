@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import app.verst.core.ui.theme.DesignTokens
@@ -482,11 +483,11 @@ class ScreensScreenshotTest {
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
             ) {
                 val ph = app.verst.feature.card.Placeholder.MUSEUM
-                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loading, ph, null, false, "loading", Modifier.height(96.dp))
-                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loaded(fake, contain = false, portrait = false), ph, "Фото: Wikimedia Commons · Анна П. · CC BY-SA 4.0", false, "loaded", Modifier.height(96.dp))
-                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Error, app.verst.feature.card.Placeholder.CHURCH, null, false, "error", Modifier.height(96.dp))
-                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Offline, app.verst.feature.card.Placeholder.PARK, null, false, "offline", Modifier.height(96.dp))
-                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loaded(fake, contain = false, portrait = false), app.verst.feature.card.Placeholder.CITY, "Фото района: Ярославль · Wikimedia Commons", true, "area", Modifier.height(96.dp))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loading, ph, null, false, "loading", Modifier.fillMaxWidth(0.42f))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loaded(fake, contain = false, portrait = false), ph, "Фото: Wikimedia Commons · Анна П. · CC BY-SA 4.0", false, "loaded", Modifier.fillMaxWidth(0.42f))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Error, app.verst.feature.card.Placeholder.CHURCH, null, false, "error", Modifier.fillMaxWidth(0.42f))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Offline, app.verst.feature.card.Placeholder.PARK, null, false, "offline", Modifier.fillMaxWidth(0.42f))
+                app.verst.feature.card.PhotoFrameContent(app.verst.feature.card.PhotoState.Loaded(fake, contain = false, portrait = false), app.verst.feature.card.Placeholder.CITY, "Фото района: Ярославль · Wikimedia Commons", true, "area", Modifier.fillMaxWidth(0.42f))
             }
         }
         compose.onNodeWithTag("photo.offline", useUnmergedTree = true).assertExists()
