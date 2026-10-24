@@ -56,8 +56,15 @@ class Shots:
     def __init__(self, base: str, screen: str):
         self.base, self.screen, self.cache = base, screen, {}
 
+    # CI writes screenshots/<package dir>/ (windshield, navigator, …); accept both that and <screen id>/
+    ALIASES = {'5.1-windshield': 'windshield', '5.2-navigator': 'navigator', '5.3-instruments': 'instruments',
+               '5.4-drive': 'drive', '5.5-road-ahead': 'road', '5.6-waybill': 'waybill', '5.7-exit': 'exit'}
+
     def path(self, p: dict) -> str:
-        return os.path.join(self.base, self.screen, '%s@%s.png' % (p.get('state', 'default'), p.get('size', '390x844')))
+        name = '%s@%s.png' % (p.get('state', 'default'), p.get('size', '390x844'))
+        own = os.path.join(self.base, self.screen, name)
+        alias = os.path.join(self.base, self.ALIASES.get(self.screen, self.screen), name)
+        return own if os.path.isdir(os.path.join(self.base, self.screen)) or not os.path.exists(alias) else alias
 
     def get(self, p: dict):
         path = self.path(p)

@@ -439,16 +439,16 @@
    "state": "default",
    "size": "360x640",
    "kind": "edge",
-   "x": 320,
-   "seed": 225,
+   "x": 250,
+   "seed": 240,
    "match": [
     "#1E4FA3",
-    "#F4F4F0",
-    "#D6E0F5"
+    "#163B7A",
+    "#F4F4F0"
    ],
    "expect": [
     null,
-    230
+    256
    ],
    "tol_dp": 1
   },

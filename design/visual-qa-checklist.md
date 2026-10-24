@@ -66,7 +66,7 @@ Version 1.0.0 · 2026-10-23 · Use against every build that claims a screen is d
 | W-27 | «Мои поездки» plate visible only with ≥ 1 saved trip; caption re-centred; sheet D-1 matches |
 | W-28 | Location rationale toast on first launch only; denial toast copy exact |
 | W-29 | Full-list sheet (§4.6): 56 dp rows, ring headers, selection moves the route to row 1 |
-| W-30 | Short window 360 × 640: sign shows 2 rows; dashboard height 324 |
+| W-30 | Short window 360 × 640: sign shows 3 rows (5.1 §1: floor((316 − 150) / 44) = 3); with the 3-route mock origin the footer is hidden and the plate ends at y 256; dashboard height 324 |
 | W-31 | TalkBack order and strings = 5.1 §7 |
 
 ## 3. Screen 5.2 Navigator
