@@ -16,8 +16,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, TextIO
 
+from verst_planner import resources
 from verst_planner.adapters.fake import GOLDEN_CLOCK, FakeWorld, build_fakes
-from verst_planner.config import RESOURCES, PlannerConfig
+from verst_planner.config import PlannerConfig
 from verst_planner.domain import codec
 from verst_planner.domain.model import TripPlan
 from verst_planner.engine import Planner
@@ -32,6 +33,11 @@ class _StderrSink:
 
     def emit(self, event: PlanEvent) -> None:
         self.stream.write(json.dumps(event_to_json(event), ensure_ascii=False) + "\n")
+
+
+def read_file(path: str | Path) -> str:
+    """UTF-8 text of a file given on a command line (also used by `mobile selftest --world`)."""
+    return Path(path).read_text(encoding="utf-8")
 
 
 def _plan(args: argparse.Namespace, events: TextIO | None) -> TripPlan:
@@ -62,8 +68,7 @@ def export_config_sql() -> str:
     """`INSERT … ON CONFLICT` rows for `core.app_config` from the shipped resources (DEV-021 seed)."""
     rows = []
     for key, name in (("planner", "planner_config.json"), ("reasons_ru", "reasons.ru.json")):
-        with (RESOURCES / name).open(encoding="utf-8") as f:
-            value = json.dumps(json.load(f), ensure_ascii=False, sort_keys=True)
+        value = json.dumps(json.loads(resources.read_text(name)), ensure_ascii=False, sort_keys=True)
         literal = value.replace("'", "''")
         rows.append(
             "INSERT INTO core.app_config (key, value, updated_by)\n"

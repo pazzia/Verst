@@ -121,6 +121,26 @@ jobs:
           python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 2 gradle --log "$LOGS/lint.log" --step lint
           python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 8 lint --root android
 
+      - name: Chaquopy licences (into ci-logs and the APK)
+        id: licences
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          mkdir -p "$DIAG/licences"
+          # AGP owns the output dir of a generated asset source (build/generated/assets/chaquopyLicences/<variant>)
+          SRC=$(find android/app/build/generated -path '*/licences/chaquopy.json' | sort | head -1)
+          echo "licences from: ${SRC:-none}"
+          cp "$(dirname "$SRC")"/chaquopy.* "$DIAG/licences/"
+          unzip -l android/app/build/outputs/apk/demo/app-demo.apk 'assets/licences/*' | tee "$DIAG/licences/apk-entries.txt"
+          grep -q 'assets/licences/chaquopy.txt' "$DIAG/licences/apk-entries.txt"
+          python3 - "$DIAG/licences/chaquopy.json" <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, sys
+          rows = json.load(open(sys.argv[1]))
+          assert rows, "no Chaquopy licence found"
+          print("### Chaquopy licences")
+          for r in rows:
+              print(f"- `{r['artifact']}` {r['source']}: {r.get('licence') or r.get('firstLine')} {r.get('url', '')}")
+          EOF
+
       - name: APK size budget (warn 45 MB, fail 60 MB)
         id: apk
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}

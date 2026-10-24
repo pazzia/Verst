@@ -226,15 +226,14 @@ The three run numbers and the annotation text are in dev-notes. Any gap found be
 
 **Description.** Expected outputs for the Kotlin `TripEditor`/`CostCalculator` that the JVM tests read.
 
-- `tools/gen_mobile_contracts.py` writes `docs/contracts/replace/<case>__<stopId>__<altId>.json` for every alternative of every golden trip with a snapshot: `{"before": public trip, "stopId", "altId", "after": public trip from replace_stop}`.
-- It also writes `docs/contracts/patch/<case>__<kind>.json` for reserve off, a hotel choice for each night with ≥ 2 options, and budget «не важно».
-- A byte-for-byte regeneration test, as in A§16.10.
+- `tools/gen_mobile_contracts.py` writes one gzip bundle per golden trip with a snapshot (rework after the Architect's review): `docs/contracts/replace/<case>.json.gz` = `{"case", "before": public trip (once), "items": [{"stopId", "altId", "afterDay", "afterCost", "afterKm"}]}`, one item for every alternative (≤ 3 per stop, asserted). The generator asserts that every other part of the trip after `replace_stop` equals `before`.
+- It also writes `docs/contracts/patch/<case>.json.gz` = `{"case", "before", "items": [{"kind", "patch", "afterCost", "afterInput", "afterHotel"}]}` for reserve off, a hotel choice for each night with ≥ 2 options, and budget «не важно» (`afterHotel`: the changed fields of that overnight stop, else null).
+- Deterministic gzip (`GzipFile(filename="", mtime=0)`); the regeneration test compares the decompressed text, as in A§16.10. `docs/contracts/{replace,patch}` ≤ 2 MB in total (tested).
 
 **Acceptance.**
 
 - `cd backend/planner && python3 -m unittest tests.unit.test_mobile_contracts -v` → OK (the regenerated output equals the committed files).
-- `ls docs/contracts/replace | wc -l` ≥ 40.
-- `ls docs/contracts/patch | wc -l` ≥ 12.
+- 10 replace bundles with ≥ 40 items in total, 10 patch bundles with ≥ 12 items (`test_counts`).
 
 ### DEV-113 — S2-01 golden tie hygiene (optional, carry-over A§16.12)
 
@@ -280,8 +279,8 @@ As specified in A§16.12 S2-01. It has no Android impact. Do it only if Phase 0 
   - `CostCalculatorContractTest`: 39 cases, each a separate test name `case_<name>`, so failures annotate per case;
   - `CostCalculatorPerfTest`: 10 000 recomputes of the G06 units, median < 5 ms each;
   - `DtoContractTest`: all snapshots + `plan-response.example.json`;
-  - `TripEditorReplaceContractTest`: every `docs/contracts/replace/*.json`. `after` equals `applyAlternative(before)` on every stop's `arriveAt`, `departAt`, `kmFromPrev`, `seq` and `id`, and equals `CostCalculator` on `cost.totalRub` and the 6 lines;
-  - `PatchContractTest`: every `docs/contracts/patch/*.json`;
+  - `TripEditorReplaceContractTest`: every case bundle `docs/contracts/replace/<case>.json.gz` and every item in it. The day of `applyAlternative(before)` that holds the stop equals `afterDay` on every stop's `arriveAt`, `departAt`, `kmFromPrev`, `seq` and `id`; the other days are unchanged; `CostCalculator` equals `afterCost` on `totalRub` and the 6 lines, and the trip km equals `afterKm`;
+  - `PatchContractTest`: every case bundle `docs/contracts/patch/<case>.json.gz` and every item (`afterCost`, `afterInput`, `afterHotel`);
   - `RuFormatTest`: `34500` → «34 500 ₽» with U+202F/U+00A0; `plural(1,2,5,21,111)` for день/дня/дней.
 - `CostCalculator.kt` has no `Double` arithmetic on money: `grep -n "toDouble\|Double" …/cost/CostCalculator.kt` prints only lines in the `fuel km` path, which is a float in the units by contract.
 

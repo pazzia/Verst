@@ -332,9 +332,7 @@ def plan_rests_day(
         ]
         chosen = None
         for cands in windows:
-            for c, d0 in sorted(
-                cands, key=lambda cd: (-round(rest_score(cd[0], inp), 9), abs(cd[1] - r), cd[0].place.id)
-            ):
+            for c, d0 in rank_rests(cands, inp, r):
                 stop = make_rest_stop(c, inp, ctx, d0)
                 if _open_at_eta(day, stop, ctx, profile) and (
                     not strict or _keeps_day_valid(day, stop, ctx, profile)
@@ -351,6 +349,13 @@ def plan_rests_day(
             taken.add(chosen.place.id)
         added.append(chosen)
     return added
+
+
+def rank_rests(
+    cands: list[tuple[Candidate, float]], inp: NormalizedInput, r: float
+) -> list[tuple[Candidate, float]]:
+    """Rest candidates (with driving since the break) by `rest_score` desc, tie: closer to R, then id."""
+    return sorted(cands, key=lambda cd: (-round(rest_score(cd[0], inp), 9), abs(cd[1] - r), cd[0].place.id))
 
 
 def roadside_break(km: float, pool: RestPool, ctx: PlanContext) -> PlannedStop:

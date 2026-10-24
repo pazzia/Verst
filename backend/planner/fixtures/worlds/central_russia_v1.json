@@ -2042,7 +2042,7 @@
     "family_room"
    ],
    "priceNightRub": 4800,
-   "rating": 4.4,
+   "rating": 4.35,
    "source": "curated",
    "verifiedAt": "2026-09-15"
   },
@@ -3080,7 +3080,7 @@
     "parking"
    ],
    "avgCheckRub": 600,
-   "rating": 4.2,
+   "rating": 4.1,
    "openingHours": "Mo-Su 10:00-21:00",
    "source": "curated",
    "verifiedAt": "2026-09-15"
@@ -3447,7 +3447,7 @@
     "free_entry"
    ],
    "dwellMin": 45,
-   "rating": 4.3,
+   "rating": 4.4,
    "openingHours": "Mo-Su 07:00-19:00",
    "source": "curated",
    "verifiedAt": "2026-09-15"
@@ -3467,7 +3467,7 @@
     "view"
    ],
    "dwellMin": 60,
-   "rating": 4.2,
+   "rating": 4.1,
    "openingHours": "We-Su 10:00-17:00",
    "ticketAdultRub": 350,
    "ticketChildRub": 150,
@@ -4617,7 +4617,7 @@
     "free_entry"
    ],
    "dwellMin": 30,
-   "rating": 3.7,
+   "rating": 3.6,
    "source": "curated",
    "verifiedAt": "2026-09-15"
   },
