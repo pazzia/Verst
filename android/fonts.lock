@@ -7,8 +7,9 @@
         "wght": 400,
         "wdth": 75
       },
-      "sha256": "b82b3045d451a3c5ff304502236961c31d4a5a3bcb3b627b805771ac183c6214",
-      "bytes": 217996,
+      "renamedTo": "Verst Sans Narrow",
+      "sha256": "4ebc991b49e97d0ae07fcafca59412083597a7e749949f87c7a6369341142f8a",
+      "bytes": 218160,
       "version": "Version 3.201",
       "usWeightClass": 400,
       "cyrillic": 192,
@@ -18,7 +19,10 @@
       ],
       "unitsPerEm": 1000,
       "missingGlyphs": [],
-      "missingSoft": []
+      "missingSoft": [],
+      "rfnInNames": [
+        "10:Derived from IBM Plex Sans (OFL 1.1, Reserved Font Name «Ple"
+      ]
     },
     "ibm_plex_sans_condensed_medium": {
       "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
@@ -26,8 +30,9 @@
         "wght": 500,
         "wdth": 75
       },
-      "sha256": "3d21358bad448e7cfbf9ea780cf1e041f79c785c35f2b9acf5c3171ea57d9d23",
-      "bytes": 218036,
+      "renamedTo": "Verst Sans Narrow",
+      "sha256": "e8be9f84f7c15f0e8f2eef6dfdc7e095a0b43a0e387015aeeb34133cb9019d2f",
+      "bytes": 218196,
       "version": "Version 3.201",
       "usWeightClass": 500,
       "cyrillic": 192,
@@ -37,7 +42,10 @@
       ],
       "unitsPerEm": 1000,
       "missingGlyphs": [],
-      "missingSoft": []
+      "missingSoft": [],
+      "rfnInNames": [
+        "10:Derived from IBM Plex Sans (OFL 1.1, Reserved Font Name «Ple"
+      ]
     },
     "ibm_plex_sans_condensed_semibold": {
       "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
@@ -45,8 +53,9 @@
         "wght": 600,
         "wdth": 75
       },
-      "sha256": "150d67a5c9d62f53755ac0d1d94b76fb4bb4c8022280685c57b464d17c017747",
-      "bytes": 218020,
+      "renamedTo": "Verst Sans Narrow",
+      "sha256": "8f63d6027a6141adb0c547c606a887edc678efabcf491af1ebe1223625ee0803",
+      "bytes": 218192,
       "version": "Version 3.201",
       "usWeightClass": 600,
       "cyrillic": 192,
@@ -56,7 +65,10 @@
       ],
       "unitsPerEm": 1000,
       "missingGlyphs": [],
-      "missingSoft": []
+      "missingSoft": [],
+      "rfnInNames": [
+        "10:Derived from IBM Plex Sans (OFL 1.1, Reserved Font Name «Ple"
+      ]
     },
     "ibm_plex_sans_condensed_bold": {
       "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
@@ -64,8 +76,9 @@
         "wght": 700,
         "wdth": 75
       },
-      "sha256": "d4335351f4b8d796f69912e48e8c63d18b88acdf7f45552f7892bdaa9e923123",
-      "bytes": 217904,
+      "renamedTo": "Verst Sans Narrow",
+      "sha256": "0a340f0e4585de7ad0a2115daf88011f64f76791e5b09bb1b3ba820204119830",
+      "bytes": 218036,
       "version": "Version 3.201",
       "usWeightClass": 700,
       "cyrillic": 192,
@@ -75,7 +88,10 @@
       ],
       "unitsPerEm": 1000,
       "missingGlyphs": [],
-      "missingSoft": []
+      "missingSoft": [],
+      "rfnInNames": [
+        "10:Derived from IBM Plex Sans (OFL 1.1, Reserved Font Name «Ple"
+      ]
     },
     "ibm_plex_mono_semibold": {
       "source": "google/fonts@e7db6ca603fd:ofl/ibmplexmono/IBMPlexMono-SemiBold.ttf",
@@ -92,6 +108,14 @@
       "missingGlyphs": [],
       "missingSoft": [
         "U+202F"
+      ],
+      "rfnInNames": [
+        "1:IBM Plex Mono SemiBold",
+        "3:2.3;IBM ;IBMPlexMono-SemiBold",
+        "4:IBM Plex Mono SemiBold",
+        "6:IBMPlexMono-SemiBold",
+        "7:IBM Plex(r) is a trademark of IBM Corp, registered in many j",
+        "16:IBM Plex Mono"
       ]
     },
     "marck_script_regular": {
@@ -109,7 +133,8 @@
       "missingGlyphs": [],
       "missingSoft": [
         "U+202F"
-      ]
+      ],
+      "rfnInNames": []
     }
   },
   "rejected": [
@@ -144,7 +169,7 @@
       "why": "files not found"
     }
   ],
-  "ok": true,
+  "ok": false,
   "chosen": {
     "ibmplexsanscondensed": "vf",
     "ibmplexmono": "google",

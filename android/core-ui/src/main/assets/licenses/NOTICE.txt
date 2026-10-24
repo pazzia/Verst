@@ -1,0 +1,1 @@
+Verst Sans Narrow (res/font/ibm_plex_sans_condensed_*.ttf) is derived from IBM Plex Sans v3 (Copyright 2019 IBM Corp.) under the SIL Open Font License 1.1: static instances at wdth 75, renamed because «Plex» is a Reserved Font Name. Licence: OFL-ibmplexsanscondensed.txt. IBM Plex Mono and Marck Script are unmodified (OFL-ibmplexmono.txt, OFL-marckscript.txt).
