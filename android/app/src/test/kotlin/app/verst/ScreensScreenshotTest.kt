@@ -47,8 +47,6 @@ import app.verst.feature.road.RoadFocus
 import app.verst.nav.GpsState
 import app.verst.nav.HandoffTarget
 import app.verst.nav.AddressState
-import app.verst.core.model.EngineResult
-import app.verst.core.model.dto.SuggestionDto
 import androidx.compose.ui.semantics.SemanticsActions
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
