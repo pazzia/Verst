@@ -1392,3 +1392,18 @@ specs; `tools/sync_design_tokens.py` run: `color.overlay.returnFlash`, `motion.r
   would allow «5,5 ч».
 - **No-lodging plate (P1-06).** One plate per night. The `NO_LODGING` sentence is followed by the night's
   `note` («Ближайшая подходящая: …») as a second line (`road.warning.nearest`). Duplicate plates are dropped.
+
+### S3-R3 CI
+- Runs 58–63 fixed, in order:
+  - a split `private set`, and a qualified BoxScope extension call;
+  - an NBSP assert;
+  - the card report without a place id, and the Navigator list getting no height above a ≈ 400 dp emulator
+    IME (fix: no back link while typing, tighter panel);
+  - a cross-module smart cast, and a duplicate SHORTER_THAN_ASKED plate.
+- Run 64 attempt 1: RealGpsTest timed out waiting for the emulator's `geo fix` («LocationOracle: no location»).
+  Nothing in R3 touches that path, and run 61 passed it. **Attempt 2 (40143628282-2) on d202218: green**:
+  main e2e 16 tests, process death × 2, real GPS.
+- Real Commons: 5 of 5 cards loaded on CI (landscape crop, portrait, the SVG coat of arms in contain mode,
+  Example.jpg, the flag as a hotel area photo).
+- Ask for the Designer: the Пермь synthetic route shows three identical «Не нашли ночёвку…» plates (one per
+  night). A day prefix (a key such as `road_warning_day` «Ночь {n}: …») would tell them apart.
