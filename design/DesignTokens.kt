@@ -313,6 +313,8 @@ object DesignTokens {
             val scrim: Color = Color(0xFF000000).copy(alpha = 0.6f)
             /** Keyboard focus ring, 2dp, offset 2dp */
             val focus: Color = Color(0xFFFFD23F)
+            /** Returned-row highlight on Road ahead / walk list (motion.returnToItem) */
+            val returnFlash: Color = Color(0xFFFFD23F).copy(alpha = 0.14f)
         }
     }
     object type {
@@ -1451,6 +1453,7 @@ object DesignTokens {
         object returnToItem {
             const val durationMs: Int = 0
             const val highlightMs: Int = 1200
+            const val holdMs: Int = 400
             val easing: Easing = DesignTokens.motion.easing.easeOut
             const val infinite: Boolean = false
         }

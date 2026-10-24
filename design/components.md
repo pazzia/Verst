@@ -103,7 +103,7 @@ Itinerary sign mounted next to the vertical road (Road ahead), also used on the 
 
 | Variant | Stop kinds | Visual box | Construction |
 | --- | --- | --- | --- |
-| `city` | start, finish, town | 64 × min 40 (68 × min 44 including the white outline) | Plate `color.sign.white`, border `stroke.w3` `color.sign.black` (inside), outline `stroke.w2` `color.sign.white` **outside** the border, radius `radius.r4`. Text: town name in uppercase, `type.sign.city`, `color.text.onLight`, centred, padding 3 2, up to 3 lines, no ellipsis (the sign grows vertically) |
+| `city` | start, finish, town | 64 × min 40 (68 × min 44 including the white outline) | Plate `color.sign.white`, border `stroke.w3` `color.sign.black` (inside), outline `stroke.w2` `color.sign.white` **outside** the border, radius `radius.r4`. Text: town name in uppercase, `type.sign.city`, `color.text.onLight`, centred, padding 3 2, up to 3 lines, no ellipsis (the sign grows vertically). **Line breaks only at a space or after a hyphen** (the hyphen stays at the line end: «САНКТ-» / «ПЕТЕРБУРГ»), never inside a word (Compose: `LineBreak.Heading` + `Hyphens.None`, split the name at «-» into explicit break opportunities). If one word is still wider than the plate, the plate grows to 120 dp max, then the text scales down to 80 % (`type.sign.city` × 0.8). S3-QA P1-04 |
 | `tourist` | sight | 56 × 56 | Plate `color.sign.brown`, radius `radius.r5`; inner border inset 3, `stroke.w2` `color.sign.white`, radius `radius.r3`; pictogram 30 × 30 centred, stroke `stroke.icon.thin`, `color.sign.white` |
 | `service` | fuel, food, rest, hotel | 50 × 62 | Plate `color.sign.blue`, radius `radius.r4`, padding 5; white square 40 × 40 `color.sign.white`, radius `radius.r2`, at (5, 5); pictogram 28 × 28 centred in it, stroke `stroke.icon.pictogram`, `color.sign.black`; gap 4; bar 22 × 3 `color.sign.white`, radius `radius.r2`, centred at y 49 |
 
@@ -670,7 +670,8 @@ The action block stays pinned at the bottom when the body scrolls.
 | Control | Spec |
 | --- | --- |
 | Day menu | small `BottomSheet`: title «День N» `type.title.lg`; one `HandoffItem` |
-| Stop menu (D-5) | first item `HandoffItem` `handoff_from_stop`, then the existing items |
+| Stop menu (D-5) | Long-press a row (haptic `LONG_PRESS`) → small `BottomSheet` (§16, content padding 8 20 24). Title row: the stop name `type.title.lg`, up to 2 lines, + close 44 × 44. Items top → bottom, no gap, each separated by a 1 dp `color.dash.control` divider (inset 0): (1) `HandoffItem` `handoff_from_stop` — omitted for fuel/rest stops and for stops without coordinates; (2) `ActionItem` «Заменить» (`stopmenu_swap`) — only where the row has «заменить»; (3) `ActionItem` «Сообщить об ошибке» (`stopmenu_report`, D-7, when built). A menu that would contain only (1) still opens (as in e2e 43). Offline + no app: (1) keeps its look and taps to the `handoff_offline` toast. TalkBack: the same items are also the row's custom actions |
+| `ActionItem` | min-h 52, padding 0; text `type.list.title` `color.text.primary`, left-aligned, no icon; pressed `color.dash.pressed`; touch full width × 52 |
 | `HandoffItem` | min-h 64, padding 10 0; `navigator` 22 (car) / `walker` 22 (walk) `color.accent.yellow` at the left, gap 12; title `type.list.title` `color.text.primary`; target line `type.body.sm` `color.text.muted` (`handoff_navigator` / `handoff_maps_car` / `handoff_web`); truncated line `type.body.sm` `color.accent.yellow`; chevron `upRight` 16 `color.text.secondary` (it leaves the app) |
 | Walk button | `SecondaryButton` full width h 48 (5.11 L3a), `walker` 18 + `handoff_maps_walk` / `handoff_web`; parts: one button per part with `handoff_part` |
 
