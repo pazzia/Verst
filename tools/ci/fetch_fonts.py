@@ -21,7 +21,10 @@ Run 3 (40092620704) cut wdth 85: Latin advances 4.3 % wider than v1.3 Condensed;
 Glyph rules (open-issues OI-12): the UI family needs А–я Ёё № ₽ ≈ « » — → ↓ ↑ · and U+00A0; Plex Mono is used
 only for odometer digits; Marck Script needs Cyrillic + digits (its «₽ ≈ →» are set in Plex per OI-12).
 U+202F is reported but not required: no Plex v1.x/v2.x file maps it and Android falls back per character
-(an invisible space). The fonts are never modified: Plex and Marck Script carry Reserved Font Names (OFL §3).
+(an invisible space). Files taken as published are never modified. The instanced Plex Sans statics are
+derived fonts, so (OFL §3, Reserved Font Name «Plex», Manager decision 2026-10-24) their name table is
+renamed to «Verst Sans Narrow» (IDs 1/2/3/4/6/16/17, Plex dropped from every other record except 0/13/14)
+and assets/licenses/NOTICE.txt states the derivation. Resource file names stay, so DesignTokens.kt is unchanged.
 Exit 1 when a family has no passing source.
 """
 
@@ -102,6 +105,60 @@ def check(data: bytes, required: list[str]) -> dict:
         "missingGlyphs": [f"U+{ord(ch):04X}" for ch in required if ord(ch) not in cmap],
         "missingSoft": [f"U+{ord(ch):04X}" for ch in SOFT if ord(ch) not in cmap],
     }
+
+
+# OFL §3 (Manager decision 2026-10-24): a derived font must not use the Reserved Font Name «Plex».
+# Instanced statics (source 3) are renamed; unmodified files keep their names.
+RENAMED_FAMILY = {"ibmplexsanscondensed": ("Verst Sans Narrow", "VerstSansNarrow")}
+STYLE = {400: "Regular", 500: "Medium", 600: "SemiBold", 700: "Bold"}
+KEEP_IDS = {0, 13, 14}  # copyright, licence, licence URL: kept verbatim as OFL §2 requires
+RFN = "Plex"
+
+
+def rename(data: bytes, family: str, weight: int, note: str) -> bytes:
+    from fontTools.ttLib import TTFont
+
+    fam, ps = RENAMED_FAMILY[family]
+    style = STYLE[weight]
+    font = TTFont(io.BytesIO(data))
+    name = font["name"]
+    version = font["head"].fontRevision
+    ribbi = style in ("Regular", "Bold")
+    fixed = {
+        1: fam if ribbi else f"{fam} {style}",
+        2: style if ribbi else "Regular",
+        3: f"Verst;{ps}-{style};{version:.3f}",
+        4: f"{fam} {style}",
+        6: f"{ps}-{style}",
+        10: note,
+        16: fam,
+        17: style,
+    }
+    name.names = [r for r in name.names if r.nameID not in fixed and r.nameID not in (7, 18, 21, 22, 25)]
+    for rec in name.names:
+        if rec.nameID in KEEP_IDS:
+            continue
+        text = rec.toUnicode()
+        if RFN in text:
+            text = (text.replace("IBM Plex Sans", fam).replace("IBMPlexSans", ps)
+                        .replace("IBM Plex", "Verst").replace(RFN, "Verst"))
+            rec.string = text
+    for nid, text in fixed.items():
+        name.setName(text, nid, 3, 1, 0x409)
+    os2, head = font["OS/2"], font["head"]
+    os2.fsSelection &= ~((1 << 0) | (1 << 5) | (1 << 6))
+    os2.fsSelection |= (1 << 5) if style == "Bold" else (1 << 6) if style == "Regular" else 0
+    head.macStyle = (head.macStyle & ~1) | (1 if style == "Bold" else 0)
+    buf = io.BytesIO()
+    font.save(buf)
+    return buf.getvalue()
+
+
+def rfn_names(data: bytes) -> list[str]:
+    from fontTools.ttLib import TTFont
+
+    return [f"{r.nameID}:{r.toUnicode()[:60]}" for r in TTFont(io.BytesIO(data))["name"].names
+            if RFN in r.toUnicode() and r.nameID not in KEEP_IDS]
 
 
 class GoogleFonts:
@@ -207,6 +264,10 @@ def main() -> int:
                     r = gf.font(folder, static, weight)
                 elif kind == "vf":
                     r = gf.font(VF_SIBLING[family][0], static, weight, VF_SIBLING[family][1])
+                    if r is not None and family in RENAMED_FAMILY:
+                        note = (f"Derived from IBM Plex Sans (OFL 1.1, Reserved Font Name \u00abPlex\u00bb) by "
+                                f"instancing at {r[1].get('instancedAt')}; renamed per OFL \u00a73.")
+                        r = (rename(r[0], family, weight, note), {**r[1], "renamedTo": RENAMED_FAMILY[family][0]})
                 else:
                     p = npm.package(pkg)  # type: ignore[arg-type]
                     r = (p[1][static], {"source": f"{p[0]}:{static}"}) if p and static in p[1] else None
@@ -216,7 +277,7 @@ def main() -> int:
             if len(got) != len(members):
                 lock["rejected"].append({"family": family, "source": kind + (f":{pkg}" if pkg else ""), "why": "files not found"})
                 continue
-            entries = {res: {**meta, **check(data, required)} for res, (data, meta) in got.items()}
+            entries = {res: {**meta, **check(data, required), "rfnInNames": rfn_names(data)} for res, (data, meta) in got.items()}
             bad = {res: e["missingGlyphs"] for res, e in entries.items() if e["missingGlyphs"]}
             if bad:
                 first = next(iter(entries.values()))
@@ -225,6 +286,10 @@ def main() -> int:
                                          "missing": next(iter(bad.values()))[:12]})
                 print(f"::warning title=fonts::{family} from {kind} {pkg or ''}: missing {next(iter(bad.values()))[:12]}")
                 continue
+            for res, e in entries.items():
+                if e.get("renamedTo") and e["rfnInNames"]:
+                    print(f"::error title=fonts::{res}: Reserved Font Name left in name records {e['rfnInNames']}")
+                    lock["ok"] = False
             for res, (data, _) in got.items():
                 (FONT_DIR / f"{res}.ttf").write_bytes(data)
                 lock["files"][res] = entries[res]
@@ -247,6 +312,13 @@ def main() -> int:
             print(f"::error title=fonts::{family}: no source passes the glyph check")
             lock["ok"] = False
 
+    if any(e.get("renamedTo") for e in lock["files"].values()):
+        (LIC_DIR / "NOTICE.txt").write_text(
+            "Verst Sans Narrow (res/font/ibm_plex_sans_condensed_*.ttf) is derived from IBM Plex Sans v3 "
+            "(Copyright 2019 IBM Corp.) under the SIL Open Font License 1.1: static instances at wdth 75, "
+            "renamed because \u00abPlex\u00bb is a Reserved Font Name. Licence: OFL-ibmplexsanscondensed.txt. "
+            "IBM Plex Mono and Marck Script are unmodified (OFL-ibmplexmono.txt, OFL-marckscript.txt).\n",
+            encoding="utf-8")
     lock["chosen"] = chosen
     lock["npm"] = npm.report
     lock["vfAxes"] = {fam: gf.axes(d) for fam, (d, _) in VF_SIBLING.items()}
