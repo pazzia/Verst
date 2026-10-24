@@ -222,7 +222,7 @@ TalkBack (mockup aria-label pattern): «<Левое | Среднее | Прав�
 
 ### 3.4 Dog button (`DogToggle`)
 
-Box 56 × 52, transparent. The dog body is a 32 × 26 rounded rect (radius 14 14 10 10) at (+12, +14); the ears are 9 × 14 rounded rects (radius 5) at (+6, −6) rotated −18° and (+41, −6) rotated +18°, pivot at the ear centre. Label centred at the bottom (−2 dp), `type.caption.bold` (11 sp; mockup 10 sp, OI-03).
+Box 56 × 52, transparent. The dog body is a 32 × 26 rounded rect (radius 14 14 10 10) at (+12, +14) of the box. The ears are 9 × 14 rounded rects (radius 5) positioned **relative to the body's top-left** (mockup `left: 6px; top: -6px` / `right: 6px`): (+6, −6) rotated −18° and (+17, −6) rotated +18°, pivot at the ear centre — at 390 × 844 the body is (295, 99) and the ears are at (301, 93) and (312, 93), overlapping the body top by 8 dp. (Corrected in the slice-2 review: «(+41, −6)» was box-relative and detached the ears.) Label centred at the bottom (−2 dp), `type.caption.bold` (11 sp; mockup 10 sp, OI-03).
 
 | State | Body | Ears | Label | Motion |
 | --- | --- | --- | --- | --- |
@@ -390,7 +390,7 @@ Posts are clipped to the scene. Reduced motion: posts hidden (alpha 0), because 
 
 ### 9.3 Gantry legs (Windshield)
 
-Two rects 8 × 100 at (34, 286) and (348, 286), `color.interior.pole`. On other widths: x = 34 and W − 42.
+Two rects 8 wide at x 34 and 348 (on other widths: x = 34 and W − 42), `color.interior.pole`, from **top = min(286, plate bottom − 4)** to **y 386** (the ground line of the legs). With 4 rows the plate ends at 318, so the top is 286 (100 high, as the mockup); with fewer rows or the message states the legs start 4 dp under the plate edge, so they never float below a shorter sign (slice-2 review: with 3 rows the plate ends at 256 and 286 left a 30 dp gap).
 
 ## 10. Dashboard surface (`Dashboard`)
 
