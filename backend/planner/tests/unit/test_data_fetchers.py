@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import ModuleType
-from typing import Any
+from typing import Any, ClassVar
 
 from tests.helpers import PLANNER_ROOT
 
@@ -214,7 +214,7 @@ class _Parse:
 class _Morph:
     """A stub morphology with pymorphy3's `parse` interface (lower-case word forms)."""
 
-    TABLE = {
+    TABLE: ClassVar[dict[str, _Parse]] = {
         "нижний": _Parse("ADJF,Qual masc,sing,nomn", {"gent": "нижнего", "loct": "нижнем"}),
         "новгород": _Parse("NOUN,inan,masc,Geox sing,nomn", {"gent": "новгорода", "loct": "новгороде"}),
         "ростов": _Parse("NOUN,inan,masc,Geox sing,nomn", {"gent": "ростова", "loct": "ростове"}),
