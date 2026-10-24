@@ -334,7 +334,7 @@ class Sprint3Test {
             waitTag("address.find", 10_000)
             assertEquals("typing sends nothing", 0, server.requestCount)
             shot("72-address-find-row")
-            compose.onNodeWithTag("address.find").performClick()
+            compose.onNodeWithTag("address.find").performScrollTo().performClick()
             waitTag("address.row.0", 15_000)
             waitTag("address.attribution")
             shot("73-address-results")

@@ -140,6 +140,14 @@ fun NavigatorScreen(
         inputFocused = false
         onPick(it)
     }
+    val imeUp = WindowInsets.isImeVisible
+    LaunchedEffect(imeUp, inputFocused) {
+        // 5.12 §5: no field has focus (a GPS fix set ОТКУДА) → the IME goes down; the delay skips focus hand-overs
+        if (imeUp && !inputFocused) {
+            kotlinx.coroutines.delay(400)
+            if (!inputFocused) keyboard?.hide()
+        }
+    }
     ScreenRoot(C.dash.base, statusBar = C.sky.band1) {
         Column(Modifier.fillMaxSize().imePadding()) {
             // While typing (focused field + IME) the scene strip collapses so the results stay above the keyboard.
@@ -153,10 +161,14 @@ fun NavigatorScreen(
             Column(Modifier.weight(1f).fillMaxWidth().background(C.dash.raised)) {
                 val back = stringResource(R.string.common_back_to_windshield)
                 // S-11 / 5.2 D2–D3: back link touch box y 142–186 (a 38 dp band from 150), panel top at 188.
-                Box(Modifier.fillMaxWidth().height(if (typing) 44.dp else 38.dp)) {
-                    BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp).offset(y = if (typing) 0.dp else (-8).dp))
+                // 5.12 §5: while typing the back link gives its band to the list (a tall IME leaves ≈ 270 dp on
+                // small phones; system back still works); the panel tightens its padding and gaps.
+                if (!typing) {
+                    Box(Modifier.fillMaxWidth().height(38.dp)) {
+                        BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp).offset(y = (-8).dp))
+                    }
                 }
-                Panel(ui, typing, onQuery, pick, onEditFrom, location, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(bottom = if (typing) 12.dp else 28.dp))
+                Panel(ui, typing, onQuery, pick, onEditFrom, location, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = if (typing) 8.dp else 0.dp, bottom = if (typing) 6.dp else 28.dp))
                 // 5.2 §1: the caption row hides while typing (IME open on a focused field) and returns after a pick.
                 if (!typing) Caption(ui, onStart)
             }
@@ -193,12 +205,15 @@ private fun Panel(
     }
     val q = ui.query.trim()
     val picked = !ui.editingFrom && ui.destination != null && ui.query == ui.destination.name
+    val outer = rememberScrollState()
     Column(
         modifier
             .fillMaxWidth()
             .naviPanel(bezel = 7.dp, radius = 18.dp)
-            .padding(19.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+            .padding(horizontal = if (typing) 14.dp else 19.dp, vertical = if (typing) 10.dp else 19.dp)
+            // not typing: one scroll for the panel (small windows); typing: only the list below scrolls
+            .then(if (typing) Modifier else Modifier.verticalScroll(outer)),
+        verticalArrangement = Arrangement.spacedBy(if (typing) 6.dp else 10.dp),
     ) {
         // fixed: the header with the GPS state (always visible)
         Row(Modifier.fillMaxWidth().testTag("navigator.header"), verticalAlignment = Alignment.CenterVertically) {
@@ -245,7 +260,7 @@ private fun Panel(
         if (!picked && ui.addressQuery) Txt(stringResource(R.string.addr_find_hint), T.caption.md, C.navi.hint, Modifier.testTag("address.hint"))
         // the only scrolling part: rows (the address action first), «© OpenStreetMap» right under the address rows
         Column(
-            Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(scroll).testTag("navigator.list"),
+            Modifier.fillMaxWidth().then(if (typing) Modifier.weight(1f, fill = false).verticalScroll(scroll) else Modifier).testTag("navigator.list"),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (ui.editingFrom && typing) MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)

@@ -1176,7 +1176,7 @@ class VerstFlow(
             loading = placeId != null, offline = !connectivity.online, hotel = option, booked = isBooked(stop.id),
             canReplace = stop.replaceable && stop.alternatives.isNotEmpty(),
         )
-        card = CardState(CardSource.ROAD, stop.id, null, base)
+        card = CardState(CardSource.ROAD, stop.id, placeId, base)
         loadCard(placeId, stop.id)
     }
 

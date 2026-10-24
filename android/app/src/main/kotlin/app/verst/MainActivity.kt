@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Box
 import app.verst.feature.report.ReportSheet
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -149,7 +150,8 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
     }
     flow.report?.let { r ->
         // D-7 over Road ahead or the walk (the screens draw the toast after «Отправить»)
-        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+        // the comment field raises the IME: the sheet sits above it
+        androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize().imePadding()) {
             val h = maxHeight
             Box(Modifier.fillMaxSize()) {
                 ReportSheet(

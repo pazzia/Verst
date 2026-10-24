@@ -242,11 +242,8 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
     }
 }
 
-/** Hours rounded to a half: «2», «2,5» (`walk_shorter`). */
-private fun hours(min: Int): String {
-    val halves = (min / 30.0).roundToInt()
-    return if (halves % 2 == 0) (halves / 2).toString() else "${halves / 2},5"
-}
+/** Whole hours, the same rounding as the duration chip (`walk_chip_duration`), so the note and the chip agree. */
+private fun hours(min: Int): String = ((min + 30) / 60).toString()
 
 /** One decimal below 10 km without a trailing zero («6», «5,8»); whole km from 10 (S3-QA P2-01). */
 private fun km(v: Double): String {
