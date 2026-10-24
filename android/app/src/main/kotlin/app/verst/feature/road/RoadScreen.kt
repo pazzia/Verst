@@ -409,12 +409,16 @@ private fun Footer(trip: TripDto, onClick: () -> Unit) {
             .padding(horizontal = 18.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // The label spans the row; the per-person line (F3) sits on the amount line, right of it (S-22).
         Column(Modifier.weight(1f)) {
             Txt(label, T.body.smStrong, if (over) C.paper.inkRed else C.text.onLightMuted, maxLines = 1)
-            Txt(total, T.amount, C.text.onLight, Modifier.testTag("road.total.amount"), maxLines = 1)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Txt(total, T.amount, C.text.onLight, Modifier.testTag("road.total.amount"), maxLines = 1)
+                Spacer(Modifier.weight(1f))
+                Txt(perPerson, T.body.smStrong, C.text.onLightMuted, Modifier.padding(start = 8.dp), maxLines = 1, align = TextAlign.End)
+            }
         }
-        Txt(perPerson, T.body.mdStrong, C.text.onLightMuted, align = TextAlign.End)
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(12.dp))
         Icon(R.drawable.ic_arrow_right, C.text.onLight, 22.dp)
     }
 }

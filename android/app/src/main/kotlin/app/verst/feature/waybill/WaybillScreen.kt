@@ -80,7 +80,7 @@ interface WaybillActions {
 }
 
 private val SumCol = 70.dp
-private val TotalCol = 100.dp
+private val TotalCol = 150.dp // 100 in the spec for «≈ 30 500»; our value carries «₽» (common_estimate_rub)
 private const val NONE = "—"
 
 /**
