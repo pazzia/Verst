@@ -16,6 +16,7 @@ android {
         versionCode = buildNumber
         versionName = "0.2.$buildNumber-mock"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk { abiFilters += listOf("arm64-v8a", "x86_64") } // M§3.3; Compose ships libandroidx.graphics.path.so
         buildConfigField("int", "BUILD_NUMBER", "$buildNumber")
         buildConfigField("String", "GIT_SHA", "\"${(System.getenv("VERST_GIT_SHA") ?: "local").take(12)}\"")
     }
