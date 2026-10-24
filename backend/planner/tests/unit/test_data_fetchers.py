@@ -152,6 +152,23 @@ class OverpassTest(unittest.TestCase):
         self.assertEqual([(b["osm"], b["lat"]) for b in bars], [("n5", 1.0), ("w6", 3.0)])
 
 
+    def test_assign_country_wide(self) -> None:
+        towns = [
+            {"qid": "A", "name": "a", "population": 2_000_000, "lat": 55.75, "lon": 37.62},  # 9 km
+            {"qid": "B", "name": "b", "population": 150_000, "lat": 55.80, "lon": 37.70},  # 4 km
+            {"qid": "C", "name": "c", "population": 150_000, "lat": 59.0, "lon": 30.0},
+        ]
+        els = [
+            {"type": "node", "id": 1, "lat": 55.751, "lon": 37.621, "tags": {"name": "x"}},  # A only
+            {"type": "node", "id": 2, "lat": 55.799, "lon": 37.699, "tags": {"name": "y"}},  # B nearer
+            {"type": "node", "id": 3, "lat": 56.5, "lon": 37.6, "tags": {"name": "z"}},  # nobody's
+            {"type": "way", "id": 4, "center": {"lat": 59.01, "lon": 30.01}, "tags": {"name": "w"}},
+        ]
+        got = [(b["osm"], b["townQid"]) for b in self.op.assign(els, towns)]
+        self.assertEqual(got, [("n1", "A"), ("n2", "B"), ("w4", "C")])
+        self.assertIn('"ISO3166-1"="RU"', self.op.QUERY_ALL)
+
+
 class CommonsTest(unittest.TestCase):
     cm = load("fetch_commons_meta")
 
@@ -198,6 +215,25 @@ class CommonsTest(unittest.TestCase):
             files = self.cm.files_of(Path(tmp))
         self.assertIn("Hermitage sample.jpg", files)
         self.assertEqual(files, sorted(set(files)))
+
+
+class PhotoCheckTest(unittest.TestCase):
+    ph = load("check_photos")
+
+    def test_sample_and_summary(self) -> None:
+        names = [f"f{i}.jpg" for i in range(200)]
+        a = self.ph.sample(names, 50, "7")
+        self.assertEqual(len(a), 50)
+        self.assertEqual(a, self.ph.sample(list(reversed(names)), 50, "7"))  # deterministic per seed
+        self.assertEqual(self.ph.sample(names[:3], 50, "7"), names[:3])
+        card, thumb = self.ph.CARD_WIDTH, self.ph.THUMB_WIDTH
+        rows = [(f, i != 0, "200 image/jpeg" if i else "HTTP 404") for i, f in enumerate(a)]
+        doc = self.ph.summary({card: rows, thumb: rows[:10]}, 200)
+        self.assertEqual(doc["rates"][str(card)], 49 / 50)
+        self.assertTrue(doc["ok"])
+        self.assertEqual(doc["failures"][str(card)], [{"file": a[0], "status": "HTTP 404"}])
+        bad = [(f, i > 5, "x") for i, f in enumerate(a)]
+        self.assertFalse(self.ph.summary({card: bad}, 200)["ok"])
 
 
 class _Parse:

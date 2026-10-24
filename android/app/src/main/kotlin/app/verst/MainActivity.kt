@@ -501,7 +501,12 @@ private fun walkStart(flow: VerstFlow): app.verst.core.model.WalkStart.Start {
     val p = flow.cityPresets
     val zone = app.verst.core.model.WalkStart.zone(p?.town?.tz)
     val now = java.time.ZonedDateTime.now(zone)
-    p?.presets?.firstOrNull { it.preset == flow.cityPreset }?.startAt
-        ?.let { app.verst.core.model.WalkStart.fromEngine(it, zone, now) }?.let { return it }
+    // the engine's per-preset start (S3-QA: `startAt` + `startsTomorrow`) for the ready presets; a custom walk
+    // (its own duration / interests) uses the same rule on the device
+    p?.presets?.firstOrNull { it.preset == flow.cityPreset && flow.cityPreset != "custom" && it.defaultDurationMin == flow.cityDurationMin }?.let { pr ->
+        val at = pr.startAt ?: return@let null
+        val s = app.verst.core.model.WalkStart.fromEngine(at, zone, now) ?: return@let null
+        s.copy(tomorrow = pr.startsTomorrow ?: s.tomorrow)
+    }?.let { return it }
     return app.verst.core.model.WalkStart.of(flow.cityPreset, flow.cityInterests, flow.cityDurationMin, now)
 }

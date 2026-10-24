@@ -142,6 +142,8 @@ data class HandoffDto(val mode: String, val day: Int? = null, val parts: List<Ha
 data class CityPresetDto(
     /** Architect (S3-QA P0-01), when it lands: the engine's default start of this preset («2026-10-24T10:00»). */
     val startAt: String? = null,
+    /** Architect S3-QA: [startAt] is on the next day (the window is over for today). */
+    val startsTomorrow: Boolean? = null,
     val preset: String,
     val available: Boolean = true,
     val count: Int = 0,
@@ -187,6 +189,10 @@ data class WalkCostLineDto(val key: String, val rub: Int = 0)
 @Serializable
 data class WalkCostDto(val totalRub: Int = 0, val lines: List<WalkCostLineDto> = emptyList(), val budgetRub: Int? = null)
 
+/** `city_route.shorter`: `reason` places | budget, the minutes, the engine's sentence. */
+@Serializable
+data class WalkShorterDto(val reason: String = "places", val requestedMin: Int? = null, val actualMin: Int? = null, val messageRu: String? = null)
+
 @Serializable
 data class WalkWarningDto(val code: String, val messageRu: String? = null)
 
@@ -217,8 +223,9 @@ data class WalkRouteDto(
     val input: JsonObject? = null,
     /** Architect (S3-QA P0-01), when it lands: the walk was moved to the next day's window. */
     @kotlinx.serialization.SerialName("startsTomorrow") val startsTomorrowFlag: Boolean? = null,
-    /** Architect (S3-QA P1-02), when it lands: why the walk is shorter than asked (copy key or text). */
-    val shorterReason: String? = null,
+    /** Architect S3-QA P1-02: why the walk is shorter than asked (null = it is not). */
+    val shorter: WalkShorterDto? = null,
+    val requestedDurationMin: Int? = null,
     @Transient val json: String = "",
 ) {
     val adultOnly: Boolean get() = responsibleNoteRu != null
@@ -228,18 +235,27 @@ data class WalkRouteDto(
      * (`startsTomorrow`) wins when present; otherwise derived from `startAt` + `tz`.
      */
     fun startsTomorrow(nowMs: Long = System.currentTimeMillis()): Boolean {
-        startsTomorrowFlag?.let { return it }
-        val at = startAt ?: return false
-        val zone = runCatching { java.time.ZoneId.of(tz ?: "Europe/Moscow") }.getOrNull() ?: return false
-        val day = runCatching { java.time.LocalDateTime.parse(at).toLocalDate() }.getOrNull() ?: return false
+        // the date of `startAt` against today in the town zone (a saved walk reopened the next day is «today»);
+        // the engine flag only when there is no start time
+        val at = startAt ?: return startsTomorrowFlag ?: false
+        val zone = runCatching { java.time.ZoneId.of(tz ?: "Europe/Moscow") }.getOrNull() ?: return startsTomorrowFlag ?: false
+        val day = runCatching { java.time.LocalDateTime.parse(at).toLocalDate() }.getOrNull() ?: return startsTomorrowFlag ?: false
         return day.isAfter(java.time.Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate())
     }
 
-    /** The asked duration (the request echoed in `input`); null when absent. */
-    val requestedMin: Int? get() = (input?.get("durationMin") as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull()
+    /** The asked duration: the engine's `requestedDurationMin`, else the request echoed in `input`. */
+    val requestedMin: Int? get() = requestedDurationMin
+        ?: (input?.get("durationMin") as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull()
 
-    /** 5.11 §9 (S3-QA P1-02): the engine's walk is ≥ 30 min shorter than asked. */
-    val shorterThanAsked: Boolean get() = requestedMin?.let { it - durationMin >= 30 } ?: false
+    /**
+     * 5.11 §9 (S3-QA P1-02): the engine's `shorter` decides (an engine that reports `requestedDurationMin` is
+     * authoritative); an older walk without the field falls back to «≥ 30 min shorter than asked».
+     */
+    val shorterThanAsked: Boolean get() = when {
+        shorter != null -> true
+        requestedDurationMin != null -> false
+        else -> requestedMin?.let { it - durationMin >= 30 } ?: false
+    }
     val people: Int get() = (input?.get("crew") as? JsonObject)?.let { c ->
         ((c["adults"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull() ?: 0) +
             ((c["children"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull() ?: 0)

@@ -546,8 +546,14 @@ private fun Intro(trip: TripDto, onAbout: () -> Unit) {
                 ) { Txt(stringResource(R.string.route_approx_more), T.body.mdStrong, C.navi.label) }
             }
         }
+        // S3-QA P1-06: one plate per night — the engine sentence, then the night's «Ближайшая подходящая: …» note
+        val seen = mutableSetOf<String>()
         for (w in trip.warnings) {
             val msg = w.message ?: continue
+            if (!seen.add("${w.code}|${w.day}|$msg")) continue
+            val second = if (w.code == "NO_LODGING" && w.day != null) {
+                trip.daysList.firstOrNull { it.day == w.day }?.stops?.lastOrNull { it.kind == "overnight" }?.note?.takeIf { it.isNotBlank() && it != msg }
+            } else null
             Row(
                 Modifier.fillMaxWidth().padding(top = 4.dp)
                     .border(DesignTokens.stroke.w1, C.accent.yellow, RoundedCornerShape(DesignTokens.radius.r10))
@@ -558,7 +564,10 @@ private fun Intro(trip: TripDto, onAbout: () -> Unit) {
                 Box(Modifier.width(14.dp).height(14.dp).clip(RoundedCornerShape(7.dp)).background(C.accent.yellow), contentAlignment = Alignment.Center) {
                     Txt("!", T.caption.bold, C.text.onLight)
                 }
-                Txt(msg, T.body.md, C.text.primary)
+                Column(Modifier.weight(1f)) {
+                    Txt(msg, T.body.md, C.text.primary)
+                    if (second != null) Txt(second, T.body.sm, C.text.secondary, Modifier.padding(top = 2.dp).testTag("road.warning.nearest"))
+                }
             }
         }
     }

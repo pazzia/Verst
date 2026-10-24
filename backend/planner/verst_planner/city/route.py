@@ -15,6 +15,8 @@ from verst_planner.events import NEVER, CancelToken
 from verst_planner.explain import ru
 
 MEAL_MIN_DURATION = 240
+SHORTER_MIN = 30  # spec 5.11 §9: a walk ≥ 30 min shorter than asked says why
+BUDGET_BOUND = 0.8  # spent ≥ 80 % of a set budget → the budget, not the places, cut the walk
 
 
 class NotEnoughPois(PlannerError):
@@ -45,6 +47,7 @@ def build_walk(
     engine_version: str,
     route_id: str,
     cancel: CancelToken = NEVER,
+    starts_tomorrow: bool = False,
 ) -> dict[str, Any]:
     speed = PACES[inp.pace][0]
     meal = _meal(inp)
@@ -122,7 +125,7 @@ def build_walk(
             )
     end = start_dt + timedelta(minutes=ev.total_min + shift)
     pts: list[LatLon] = [inp.start, *(cands[ci].point for ci in order)] + ([inp.start] if finish else [])
-    lines = [{"key": "tickets", "rub": tickets}]
+    lines: list[dict[str, Any]] = [{"key": "tickets", "rub": tickets}]
     if drinks:
         lines.append({"key": "drinks", "rub": drinks})
     if meal_rub:
@@ -131,6 +134,11 @@ def build_walk(
     if not verified_all:
         warnings.append({"code": "HOURS_UNVERIFIED", "messageRu": ru.text("walk.warning.hours")})
     alcohol = inp.preset in ADULT_PRESETS or any(cands[ci].kind in DRINK_KINDS for ci in order)
+    duration = round(ev.total_min + shift)
+    total_rub = tickets + drinks + meal_rub
+    shorter = _shorter(inp, duration, total_rub)
+    if shorter is not None:
+        warnings.append({"code": "SHORTER_THAN_ASKED", "messageRu": shorter["messageRu"]})
     start_obj = {
         "lat": round(inp.start.lat, 6),
         "lon": round(inp.start.lon, 6),
@@ -146,21 +154,45 @@ def build_walk(
         "townPrep": town.prep,
         "preset": inp.preset,
         "startAt": hm(start_dt),
+        "startsTomorrow": starts_tomorrow,
+        "startNoteRu": ru.text("walk.tomorrow", time=start_dt.strftime("%H:%M")) if starts_tomorrow else None,
         "endAt": hm(end),
         "tz": town.tz,
         "walkKm": r1(ev.walk_km),
         "walkMin": round(ev.walk_min),
-        "durationMin": round(ev.total_min + shift),
+        "durationMin": duration,
+        "requestedDurationMin": inp.duration_min,
+        "shorter": shorter,
         "returnToStart": inp.return_to_start,
         "start": start_obj,
         "finish": start_obj if finish else {**start_obj, **_last(stops)},
         "stops": stops,
-        "cost": {"totalRub": sum(x["rub"] for x in lines), "lines": lines, "budgetRub": inp.budget_rub},
+        "cost": {"totalRub": total_rub, "lines": lines, "budgetRub": inp.budget_rub},
         "warnings": warnings,
         "responsibleNoteRu": ru.text("walk.responsible") if alcohol else None,
         "polyline": polyline(pts),
         "approxDistances": True,
         "input": _input_echo(inp, start_dt),
+    }
+
+
+def _quarter(minutes: int) -> int:
+    return max(15, (minutes + 7) // 15 * 15)
+
+
+def _shorter(inp: WalkInput, duration: int, total_rub: int) -> dict[str, Any] | None:
+    """Why the walk is ≥ 30 min shorter than asked (P1-2), or None."""
+    if inp.duration_min - duration < SHORTER_MIN:
+        return None
+    reason = (
+        "budget" if inp.budget_rub is not None and total_rub >= BUDGET_BOUND * inp.budget_rub else "places"
+    )
+    actual, requested = ru.fmt_duration(_quarter(duration)), ru.fmt_duration(inp.duration_min)
+    return {
+        "reason": reason,
+        "requestedMin": inp.duration_min,
+        "actualMin": duration,
+        "messageRu": ru.text(f"walk.shorter.{reason}", actual=actual, requested=requested),
     }
 
 

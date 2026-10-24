@@ -211,21 +211,32 @@ class ChoiceTest(unittest.TestCase):
         self.assertEqual([w.detail for w in res.warnings], ["extra_day"])
 
     def test_fallback_no_hotel_with_nearest(self) -> None:
+        """S3-QA P1-06: the nearest passing hotel is named within NEAREST_MAX_KM, and only in the note."""
+        ctx, inp = setup(DOG)
+        towns = [
+            town("t_mid", 300, [lodging("h_mid", "t_mid", {Tag.PARKING}, 300)], quality=2),
+            town("t_dog", 250, [lodging("h_dog", "t_dog", {Tag.DOGS_ALLOWED}, 250)]),
+        ]
+        res = choose_overnights(split(2), corridor(towns), inp, ctx)
+        c = res.choices[0]
+        self.assertEqual((c.town.id if c.town else None, c.fallback), ("t_mid", OvernightFallback.NO_HOTEL))
+        self.assertIsNone(c.hotel)
+        self.assertEqual(c.nearest.place.id if c.nearest else None, "h_dog")
+        w = res.warnings[-1]
+        self.assertNotIn("Ближайшая подходящая", w.message_ru)  # one plate per night: the note names it
+        self.assertIn("nearest=h_dog", w.detail)
+
+    def test_fallback_no_hotel_nearest_too_far(self) -> None:
         ctx, inp = setup(DOG)
         towns = [
             town("t_mid", 300, [lodging("h_mid", "t_mid", {Tag.PARKING}, 300)], quality=2),
             town("t_dog", 100, [lodging("h_dog", "t_dog", {Tag.DOGS_ALLOWED}, 100)]),
         ]
         res = choose_overnights(split(2), corridor(towns), inp, ctx)
-        self.assertEqual(res.n_days, 2)
         c = res.choices[0]
-        self.assertEqual((c.town.id if c.town else None, c.fallback), ("t_mid", OvernightFallback.NO_HOTEL))
-        self.assertIsNone(c.hotel)
-        self.assertEqual(c.nearest.place.id if c.nearest else None, "h_dog")
-        w = res.warnings[-1]
-        self.assertIn("Ближайшая подходящая: ", w.message_ru)
-        self.assertIn("Город t_dog, 200 км от ночёвки", w.message_ru)
-        self.assertIn("nearest=h_dog", w.detail)
+        self.assertEqual(c.fallback, OvernightFallback.NO_HOTEL)
+        self.assertIsNone(c.nearest)  # 200 km > NEAREST_MAX_KM
+        self.assertEqual(res.warnings[-1].detail, "no_hotel")
 
     def test_no_town_road_point(self) -> None:
         ctx, inp = setup(DOG)

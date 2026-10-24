@@ -42,8 +42,11 @@ from verst_planner.hours import parse as parse_hours
 MAX_MOVES = 200
 MAX_WAIT_MIN = 60
 WAIT_STEP_MIN = 5
-DRINK_START_HOUR = 18
-MUSEUM_START_HOUR = 10
+# Daytime windows in the town's local time (ADR-0013 "Start time", spec 5.11 §9): a walk starts no earlier
+# than the opening and ends by the closing hour; when that no longer fits today, at tomorrow's opening.
+DAY_WINDOW = (9, 22)
+MUSEUM_WINDOW = (10, 22)
+DRINK_WINDOW = (18, 23)
 RETURN_LEG_KM = 4.0
 
 
@@ -473,21 +476,38 @@ def _with_weight(c: Candidate, w: float) -> Candidate:
     return replace(c, weight=w)
 
 
-def rounded_start(now_local: datetime, earliest_hour: int = 0) -> datetime:
-    """Now rounded up to the next quarter hour, and no earlier than `earliest_hour`:00 that day."""
+def rounded_start(now_local: datetime) -> datetime:
+    """Now rounded up to the next quarter hour (naive local time)."""
     base = now_local.replace(second=0, microsecond=0, tzinfo=None)
-    add = (-base.minute) % 15
-    start = base + timedelta(minutes=add)
-    if start.hour < earliest_hour:
-        start = start.replace(hour=earliest_hour, minute=0)
-    return start
+    return base + timedelta(minutes=(-base.minute) % 15)
 
 
-def earliest_hour(inp: WalkInput) -> int:
-    """Drink walks start at 18:00 at the earliest, museum walks at 10:00 (when they open)."""
-    if inp.preset in ADULT_PRESETS or "bars" in inp.interests:
-        return DRINK_START_HOUR
-    return MUSEUM_START_HOUR if inp.preset == "museums" else 0
+def window(preset: str, interests: Sequence[str]) -> tuple[int, int]:
+    """(opening hour, closing hour) of the walk's daytime window."""
+    if preset in ADULT_PRESETS or "bars" in interests:
+        return DRINK_WINDOW
+    return MUSEUM_WINDOW if preset == "museums" else DAY_WINDOW
+
+
+def planned_start(
+    now_local: datetime, preset: str, interests: Sequence[str], duration_min: int
+) -> tuple[datetime, bool]:
+    """The start of a walk asked for now: (start, starts tomorrow).
+
+    Now rounded up to 15 min if the walk still fits in today's window; before the opening → the opening
+    today; after the latest start (closing minus duration) → the opening tomorrow. A walk longer than the
+    window starts at the opening.
+    """
+    open_h, close_h = window(preset, interests)
+    start = rounded_start(now_local)
+    day = start.replace(hour=0, minute=0)
+    opening = day + timedelta(hours=open_h)
+    latest = max(opening, day + timedelta(hours=close_h, minutes=-duration_min))
+    if start <= opening:
+        return opening, False
+    if start <= latest:
+        return start, False
+    return opening + timedelta(days=1), True
 
 
 def hm(dt: datetime) -> str:

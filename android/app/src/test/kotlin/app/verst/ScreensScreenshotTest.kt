@@ -651,6 +651,30 @@ class ScreensScreenshotTest {
     }
 
     @Test
+    fun walkTomorrow() {
+        // S3-QA P0-01: the walk moved to tomorrow's window → «Завтра: старт 09:00 · финиш ≈ 12:53»
+        val w = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-tomorrow.json", EngineJson::walkRoute)
+        val day = java.time.LocalDate.now(java.time.ZoneId.of("Europe/Moscow")).plusDays(1)
+        val t = w.copy(startAt = "${day}T09:00", endAt = "${day}T12:53")
+        assertTrue(t.startsTomorrow())
+        shot("walk", "tomorrow") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(t, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        compose.onNodeWithText("Завтра", substring = true).assertExists()
+    }
+
+    @Test
+    fun walkShorterEngineReason() {
+        // the engine's `shorter` (8 h museums → 5 ч 30 мин)
+        walkShot("city_route-shorter.json", "shorter-engine")
+        compose.onNodeWithTag("walk.shorter", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun cityCaptionTomorrow() {
+        shot("city", "caption-tomorrow") { app.verst.feature.city.CityScreen(cityUi().copy(startTime = "09:00", startTomorrow = true), noCity) }
+        compose.onNodeWithText("завтра", substring = true).assertExists()
+    }
+
+    @Test
     fun roadReportSheet() {
         // D-7 over Road ahead: a reason picked, a comment, «ОТПРАВИТЬ» enabled
         val trip = snapshot("G02_golden_ring")

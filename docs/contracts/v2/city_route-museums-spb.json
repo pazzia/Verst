@@ -31,11 +31,20 @@
    "townPrep": "Санкт-Петербурге",
    "preset": "museums",
    "startAt": "2026-10-23T10:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
    "endAt": "2026-10-23T14:19",
    "tz": "Europe/Moscow",
    "walkKm": 2.1,
    "walkMin": 35,
    "durationMin": 259,
+   "requestedDurationMin": 360,
+   "shorter": {
+    "reason": "places",
+    "requestedMin": 360,
+    "actualMin": 259,
+    "messageRu": "Получилось 4 ч 15 мин вместо 6 ч — больше открытых мест рядом нет"
+   },
    "returnToStart": true,
    "start": {
     "lat": 59.9386,
@@ -99,6 +108,10 @@
     {
      "code": "HOURS_UNVERIFIED",
      "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    },
+    {
+     "code": "SHORTER_THAN_ASKED",
+     "messageRu": "Получилось 4 ч 15 мин вместо 6 ч — больше открытых мест рядом нет"
     }
    ],
    "responsibleNoteRu": null,

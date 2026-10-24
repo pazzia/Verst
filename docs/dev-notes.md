@@ -1366,3 +1366,29 @@ specs; `tools/sync_design_tokens.py` run: `color.overlay.returnFlash`, `motion.r
   presets carry one. Decision: the zone is Moscow until `city_presets.town.tz` lands.
 - `strings_pending_copy.xml` now holds only `debug_real_photos` (the new debug label, for the Designer). Every R2
   key reads from the deck.
+## S3-QA engine round (Architect, on main e2e1bd2)
+- **P0-01 walk start** (ADR-0013 "Daytime windows"): `city_route` → `startAt` (town local time), `startsTomorrow`,
+  `startNoteRu`; `city_presets` → `town.tz`, `now` (engine local), and per preset `startAt` + `startsTomorrow`.
+  Use these for `city_caption_meta_tomorrow` / `walk_header_tomorrow`; never the device clock. `geo_nearest` and
+  every `town` object now carry `tz`. Contracts `city_presets-late.json`, `city_route-tomorrow.json`.
+- **P1-02 shorter walk:** `shorter` (null or `{reason: places|budget, requestedMin, actualMin, messageRu}`) and
+  `requestedDurationMin`; contract `city_route-shorter.json` (8 h museums in Ярославль → 5 ч 30 мин).
+- **P1-06 no-lodging plate:** the `NO_LODGING` warning is one sentence per night and no longer repeats the
+  nearest hotel; the overnight stop's `note` («Ближайшая подходящая: …, N км») is the second line of the same
+  plate. A substitute is named only within `NEAREST_MAX_KM = 60` km along the route of the night stop (the
+  320 km «Волжский откос» case now names none). G01–G13 unchanged.
+- **Data run:** `data.yml` now also requests 50 random `Special:FilePath` card URLs (plus 400/500/960 px for
+  comparison) and fails under 95 % (`tools/data/check_photos.py`, `report/photos_check.json`).
+
+### S3-R3: Architect S3-QA engine round merged (arch/sprint-3 @ 7795e5f)
+- **Caption (P0-01).** It uses the engine's per-preset `startAt` + `startsTomorrow` from `city_presets`, for
+  ready presets at their default duration, so it never reads the device clock. A custom walk, or a changed
+  duration, uses `WalkStart` (the same windows) in `town.tz`.
+- **Walk header.** «Завтра: …» compares the `startAt` date with today in `tz`, so a saved walk reopened the next
+  day reads «Старт …». The engine's `startsTomorrow` is used only without a start time.
+- **Shorter walk (P1-02).** The engine's `shorter` decides. `reason = places` shows the deck `walk_shorter` with
+  the chip's whole hours; another reason shows the engine's `messageRu`.
+  Ask for the Designer: `walk_chip_duration` is `%d ч`, so «5 ч 30 мин» shows as «6 ч». A string parameter
+  would allow «5,5 ч».
+- **No-lodging plate (P1-06).** One plate per night. The `NO_LODGING` sentence is followed by the night's
+  `note` («Ближайшая подходящая: …») as a second line (`road.warning.nearest`). Duplicate plates are dropped.

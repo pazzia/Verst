@@ -30,11 +30,20 @@
    "townPrep": "Ярославле",
    "preset": "ryumochnye",
    "startAt": "2026-10-23T18:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
    "endAt": "2026-10-23T20:26",
    "tz": "Europe/Moscow",
    "walkKm": 2.4,
    "walkMin": 32,
    "durationMin": 147,
+   "requestedDurationMin": 240,
+   "shorter": {
+    "reason": "places",
+    "requestedMin": 240,
+    "actualMin": 147,
+    "messageRu": "Получилось 2 ч 30 мин вместо 4 ч — больше открытых мест рядом нет"
+   },
    "returnToStart": true,
    "start": {
     "lat": 57.6261,
@@ -138,6 +147,10 @@
     {
      "code": "HOURS_UNVERIFIED",
      "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    },
+    {
+     "code": "SHORTER_THAN_ASKED",
+     "messageRu": "Получилось 2 ч 30 мин вместо 4 ч — больше открытых мест рядом нет"
     }
    ],
    "responsibleNoteRu": "Пейте умеренно, чередуйте с водой и едой. За руль — только трезвым.",
