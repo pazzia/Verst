@@ -131,7 +131,6 @@ abstract class ChaquopyLicences : DefaultTask() {
 }
 val chaquopyLicences = tasks.register<ChaquopyLicences>("chaquopyLicences") {
     cacheRoot.set(File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1/com.chaquo.python"))
-    outputDir.set(layout.buildDirectory.dir("generated/licences"))
     outputs.upToDateWhen { false }
     mustRunAfter(tasks.matching { it.name.contains("Python") }) // the runtime artifacts are resolved by then
 }

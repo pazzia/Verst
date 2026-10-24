@@ -126,7 +126,10 @@ jobs:
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
         run: |
           mkdir -p "$DIAG/licences"
-          cp android/app/build/generated/licences/licences/chaquopy.* "$DIAG/licences/"
+          # AGP owns the output dir of a generated asset source (build/generated/assets/chaquopyLicences/<variant>)
+          SRC=$(find android/app/build/generated -path '*/licences/chaquopy.json' | sort | head -1)
+          echo "licences from: ${SRC:-none}"
+          cp "$(dirname "$SRC")"/chaquopy.* "$DIAG/licences/"
           unzip -l android/app/build/outputs/apk/demo/app-demo.apk 'assets/licences/*' | tee "$DIAG/licences/apk-entries.txt"
           grep -q 'assets/licences/chaquopy.txt' "$DIAG/licences/apk-entries.txt"
           python3 - "$DIAG/licences/chaquopy.json" <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
