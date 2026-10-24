@@ -6,4 +6,12 @@
 <resources>
     <!-- Windshield caption meta of a there-and-back ready route: «2 дня · по М-8 · туда и обратно». -->
     <string name="windshield_meta_round_trip">туда и обратно</string>
+    <!-- S3-R1 GPS (5.2 «Куда угодно»): the second answer of the location rationale card. -->
+    <string name="navigator_location_deny">Не разрешать</string>
+    <!-- S3-R1 GPS: no fix (timeout, location off) — the origin stays as it was. -->
+    <string name="navigator_location_failed">Не получилось определить, где вы. Старт прежний</string>
+    <!-- S3-R1 debug panel: the mock location picker (e2e, emulator). -->
+    <string name="debug_mock_location">Имитация местоположения</string>
+    <!-- S3-R1 D-5 stop menu: the browser fallback when the navigator app is not installed. -->
+    <string name="stopmenu_web_fallback">в браузере</string>
 </resources>

@@ -64,14 +64,21 @@ class ProcessDeathTest {
         assertEquals(Route.Road, flow.top)
         val trip = flow.result!!.trip
         assertTrue("unsaved", flow.savedId == null)
+        // S3-R1: scroll down; the top visible row goes to last.json with the trip.
+        val last = trip.daysList.last().stops.last()
+        compose.onNodeWithTag("road.stop.${last.id}").performScrollTo()
+        // The top row is reported 250 ms after scrolling settles (composition time: advance the test clock).
+        compose.mainClock.advanceTimeBy(1_000)
+        compose.waitUntil(5_000) { flow.roadTopId != null }
+        val top = flow.roadTopId!!
         Thread.sleep(1_500) // last.json is written 300 ms after a change
-        marker.writeText("${trip.title}|${trip.km}|${trip.cost.totalRub}")
+        marker.writeText("${trip.title}|${trip.km}|${trip.cost.totalRub}|$top")
         shot("31-before-process-death")
     }
 
     @Test
     fun phase2RelaunchRestoresRoadAhead() {
-        val (title, km, total) = marker.readText().split("|")
+        val (title, km, total, top) = marker.readText().split("|")
         waitTag("road.total", 20_000) // no engine needed: the trip comes from last.json
         assertEquals(Route.Road, flow.top)
         val trip = flow.result!!.trip
@@ -79,6 +86,13 @@ class ProcessDeathTest {
         assertEquals(km.toInt(), trip.km)
         assertEquals(total.toInt(), trip.cost.totalRub)
         compose.onNodeWithTag("road.back", useUnmergedTree = true).assertExists()
+        // S3-R1: the scroll position comes back too (the row that was on top is in view).
+        assertEquals(top, flow.roadTopId)
+        compose.waitUntil(5_000) {
+            val list = compose.onNodeWithTag("road.list").fetchSemanticsNode().boundsInRoot
+            val row = compose.onNodeWithTag("road.stop.$top", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
+            row.bottom > list.top && row.top < list.bottom
+        }
         compose.onNodeWithText("Дорога впереди").assertExists()
         shot("32-restored-after-process-death")
         compose.runOnUiThread { while (flow.back()) Unit }

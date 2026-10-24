@@ -51,12 +51,21 @@ class VerstFlowTest {
         override var world: String = "central_russia_v1"
         val hotelPatches = mutableListOf<String>()
         override suspend fun setClock(spec: String): EngineResult<Unit> = EngineResult.Ok(Unit)
+        var reverseName: String? = "Москва"
+        var suggestRows = listOf(yar)
+        var popularRows = listOf(yar)
         override suspend fun reverse(point: GeoPoint): EngineResult<PlaceNameDto?> =
-            EngineResult.Ok(PlaceNameDto("Москва", "город · Москва", "Москвы", "Москве"))
+            EngineResult.Ok(
+                when (reverseName) {
+                    null -> null
+                    "Москва" -> PlaceNameDto("Москва", "город · Москва", "Москвы", "Москве")
+                    else -> PlaceNameDto(reverseName!!, "город", null, null)
+                },
+            )
         var routes = emptyList<ReadyRouteDto>()
         override suspend fun readyRoutes(origin: GeoPoint) = EngineResult.Ok(routes)
-        override suspend fun suggest(query: String, near: GeoPoint?) = EngineResult.Ok(listOf(yar))
-        override suspend fun popular() = EngineResult.Ok(listOf(yar))
+        override suspend fun suggest(query: String, near: GeoPoint?) = EngineResult.Ok(suggestRows)
+        override suspend fun popular() = EngineResult.Ok(popularRows)
         override suspend fun estimatePoints(origin: GeoPoint, points: List<GeoPoint>) = EngineResult.Ok(points.map { 263 as Int? })
         override suspend fun estimate(requestId: String, request: PlanRequest): EngineResult<EstimateDto> {
             estimates += request
@@ -274,6 +283,136 @@ class VerstFlowTest {
         assertEquals("rr_yaroslavl", gw.estimates[asked].readyRouteId) // the selected row first
         assertEquals(mapOf("rr_tula_yasnaya" to km(414), "rr_yaroslavl" to km(526)), flow.routeKm)
         assertTrue(before != flow.routeKm)
+    }
+
+    @Test
+    fun focusIsRestoredOnEveryReturnToRoadAndAcrossProcessDeath() = runTest {
+        val store = MemoryTripStore()
+        val gw = FakeGateway()
+        val flow = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        assertEquals(Route.Road, flow.top)
+        val stops = flow.result!!.trip.daysList.flatMap { it.stops }
+        val night = stops.first { it.kind == "overnight" }
+        // Exit and back: the night row is the focus, and the return bumps the sequence.
+        flow.roadTop(stops[2].id)
+        flow.openExit(night.id)
+        val seq = flow.roadFocusSeq
+        assertTrue(flow.back())
+        assertEquals(Route.Road, flow.top)
+        assertEquals(night.id, flow.roadFocusId)
+        assertEquals(seq + 1, flow.roadFocusSeq)
+        flow.roadFocusShown()
+        assertNull(flow.roadFocusId)
+        // Waybill and back: no highlight, the top row comes back.
+        flow.openWaybill()
+        flow.roadTop("ignored while Waybill is on top")
+        flow.back()
+        assertEquals(stops[2].id, flow.roadTopId)
+        assertEquals(seq + 2, flow.roadFocusSeq)
+        // replace sheet / stop menu closed → a return too.
+        flow.openStopMenu(stops[1]); flow.closeStopMenu()
+        assertEquals(stops[1].id, flow.roadFocusId)
+        assertEquals(seq + 3, flow.roadFocusSeq)
+        // Process death: last.json carries both ids.
+        flow.openExit(night.id)
+        settle()
+        assertEquals(night.id, store.last!!.roadFocusId)
+        assertEquals(stops[2].id, store.last!!.roadTopId)
+        val again = VerstFlow(FakeGateway(), backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        assertEquals(listOf(Route.Windshield, Route.Road, Route.Exit), again.stack.toList())
+        assertEquals(night.id, again.roadFocusId)
+        assertEquals(stops[2].id, again.roadTopId)
+    }
+
+    @Test
+    fun handoffOpensTheDayAndFromStopRoutesAndNeedsTheNetwork() = runTest {
+        val gw = FakeGateway()
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        val opened = mutableListOf<app.verst.core.model.NaviHandoff>()
+        var installed = false
+        flow.handoffLauncher = object : HandoffLauncher {
+            override fun navigatorInstalled() = installed
+            override fun open(h: app.verst.core.model.NaviHandoff): HandoffTarget {
+                opened += h
+                return if (installed) HandoffTarget.Navigator else HandoffTarget.Browser
+            }
+        }
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        val day = flow.result!!.trip.daysList.first()
+        flow.openDayInNavigator(day.day)
+        assertEquals(HandoffTarget.Browser, flow.lastHandoff!!.second)
+        assertEquals(app.verst.core.model.NaviLinks.day(day), opened.single())
+        installed = true
+        flow.openStopMenu(day.stops[1])
+        assertTrue(flow.navigatorInstalled)
+        flow.navigatorFromStop()
+        assertNull(flow.stopMenu)
+        assertEquals(HandoffTarget.Navigator, flow.lastHandoff!!.second)
+        assertTrue(opened.last().navi!!.startsWith("yandexnavi://build_route_on_map?lat_from="))
+        flow.setOffline(true)
+        flow.openDayInNavigator(day.day)
+        assertEquals(2, opened.size)
+        assertEquals(Toast.NeedInternetNavigator, flow.toast)
+        flow.setOffline(false)
+        flow.handoffLauncher = object : HandoffLauncher {
+            override fun navigatorInstalled() = false
+            override fun open(h: app.verst.core.model.NaviHandoff) = HandoffTarget.None
+        }
+        flow.openDayInNavigator(day.day)
+        assertEquals(Toast.NoNavigator, flow.toast)
+    }
+
+    @Test
+    fun gpsOriginIsTheNearestTownWithRationaleAndDenyPaths() = runTest {
+        val gw = FakeGateway()
+        val yarCity = yar.copy(nameGenRu = "Ярославля")
+        gw.reverseName = "Ярославль"
+        gw.suggestRows = listOf(yarCity)
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        var asked = 0
+        var granted = false
+        flow.askLocationPermission = { asked++ }
+        flow.locator = object : Locator {
+            override fun granted() = granted
+            override suspend fun current() = GeoPoint("GPS", 57.63, 39.87)
+        }
+        settle()
+        // First «Куда угодно»: the rationale card; «Не разрешать» keeps Москва and the card does not come back.
+        flow.openNavigator()
+        assertTrue(flow.locationPrompt)
+        flow.denyLocation()
+        assertEquals(Toast.LocationDenied, flow.toast)
+        assertEquals("Москва", flow.origin.label)
+        flow.back(); flow.openNavigator()
+        assertFalse(flow.locationPrompt)
+        // «Моё местоположение» → the system dialog → granted → the town of the fix.
+        flow.useMyLocation()
+        assertEquals(1, asked)
+        granted = true
+        flow.onLocationPermission(granted = true, blocked = false)
+        settle()
+        assertEquals(GpsState.On, flow.gps)
+        assertEquals("Ярославль", flow.origin.label)
+        assertEquals(yarCity.lat, flow.origin.lat, 0.0)
+        assertEquals("Ярославля", flow.originGen)
+        assertTrue(flow.originFromGps)
+        // A blocked permission points to the settings.
+        flow.onLocationPermission(granted = false, blocked = true)
+        assertEquals(Toast.LocationBlocked, flow.toast)
+        // No town within 30 km: the nearest popular town.
+        gw.reverseName = null
+        val tula = SuggestionDto("city", "Тула", "город", 54.1931, 37.6177, "t_tula", nameGenRu = "Тулы")
+        gw.popularRows = listOf(yarCity, tula)
+        flow.debugMockLocation = GeoPoint("mock", 54.0, 37.5)
+        flow.locate()
+        settle()
+        assertEquals("Тула", flow.origin.label)
     }
 
     @Test

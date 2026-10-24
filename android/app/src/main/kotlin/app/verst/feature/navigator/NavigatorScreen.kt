@@ -65,6 +65,7 @@ import app.verst.core.ui.components.dashboardSurface
 import app.verst.core.ui.components.naviPanel
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.ScreenRoot
+import app.verst.nav.GpsState
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
@@ -84,7 +85,23 @@ data class NavigatorUi(
     val tripKm: Int? = null,
     /** TOO_SHORT / UNREACHABLE of the picked trip, known before planning. */
     val tripErrorCode: String? = null,
+    /** S3-R1 GPS: the header indicator and the one-time rationale card. */
+    val gps: GpsState = GpsState.Off,
+    val locationPrompt: Boolean = false,
 )
+
+/** S3-R1: the location answers of «Куда угодно». */
+interface LocationActions {
+    fun allow()
+    fun deny()
+    fun myLocation()
+}
+
+private val NoLocation = object : LocationActions {
+    override fun allow() = Unit
+    override fun deny() = Unit
+    override fun myLocation() = Unit
+}
 
 /** 5.2 Navigator, simplified: ОТКУДА (changeable) and КУДА via the engine's `suggest`; no vias, no map. */
 @OptIn(ExperimentalLayoutApi::class)
@@ -96,6 +113,7 @@ fun NavigatorScreen(
     onPick: (SuggestionDto) -> Unit,
     onEditFrom: () -> Unit,
     onStart: () -> Unit,
+    location: LocationActions = NoLocation,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
@@ -122,7 +140,7 @@ fun NavigatorScreen(
                 Box(Modifier.fillMaxWidth().height(if (typing) 44.dp else 38.dp)) {
                     BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp).offset(y = if (typing) 0.dp else (-8).dp))
                 }
-                Panel(ui, typing, onQuery, pick, onEditFrom, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(bottom = if (typing) 12.dp else 28.dp))
+                Panel(ui, typing, onQuery, pick, onEditFrom, location, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(bottom = if (typing) 12.dp else 28.dp))
                 // 5.2 §1: the caption row hides while typing (IME open on a focused field) and returns after a pick.
                 if (!typing) Caption(ui, onStart)
             }
@@ -137,6 +155,7 @@ private fun Panel(
     onQuery: (String) -> Unit,
     onPick: (SuggestionDto) -> Unit,
     onEditFrom: () -> Unit,
+    location: LocationActions,
     onFocus: (Boolean) -> Unit,
     modifier: Modifier,
 ) {
@@ -153,9 +172,18 @@ private fun Panel(
             .verticalScroll(scroll),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Txt(stringResource(R.string.navigator_header), T.label.md, C.navi.label)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Txt(stringResource(R.string.navigator_header), T.label.md, C.navi.label, Modifier.weight(1f))
+            // S3-R1: «GPS ●» once the origin is the town of the fix, «GPS ○» while asking the phone.
+            when (ui.gps) {
+                GpsState.On -> Txt(stringResource(R.string.navigator_gps_on), T.label.md, C.navi.label, Modifier.testTag("navigator.gps.on"))
+                GpsState.Waiting -> Txt(stringResource(R.string.navigator_gps_wait), T.label.md, C.navi.labelSecondary, Modifier.testTag("navigator.gps.wait"))
+                else -> Unit
+            }
+        }
         if (ui.editingFrom) {
             Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from", onFocus = onFocus, autoFocus = true)
+            MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
             ValueField(stringResource(R.string.navigator_to_label), ui.destination?.name ?: stringResource(R.string.navigator_to_hint), square = true)
         } else {
             ValueField(
@@ -166,6 +194,8 @@ private fun Panel(
                 onAction = onEditFrom,
             )
             Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus, autoFocus = ui.destination == null)
+            // S3-R1: under КУДА, so the focused field never scrolls the panel header away.
+            if (ui.locationPrompt && !typing) LocationCard(location)
         }
         val q = ui.query.trim()
         val picked = !ui.editingFrom && ui.destination != null && ui.query == ui.destination.name
@@ -393,5 +423,50 @@ private fun Caption(ui: NavigatorUi, onStart: () -> Unit) {
             cd = if (enabled) stringResource(R.string.common_go) else stringResource(R.string.cd_start_disabled_destination),
             onClick = onStart, modifier = Modifier.testTag("navigator.start"),
         )
+    }
+}
+
+/** S3-R1 rationale (5.2, provisional layout): why, «Разрешить» → the system dialog, «Не разрешать» → stays put. */
+@Composable
+private fun LocationCard(a: LocationActions) {
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list)
+            .border(DesignTokens.stroke.w1, C.navi.fieldBorder, RoundedCornerShape(DesignTokens.radius.r10))
+            .testTag("navigator.location").padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Txt(stringResource(R.string.windshield_location_rationale), T.body.md, C.text.primary)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            CardButton(stringResource(R.string.windshield_location_allow), filled = true, tag = "navigator.location.allow", onClick = a::allow, modifier = Modifier.weight(1f))
+            CardButton(stringResource(app.verst.R.string.navigator_location_deny), filled = false, tag = "navigator.location.deny", onClick = a::deny, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun CardButton(text: String, filled: Boolean, tag: String, onClick: () -> Unit, modifier: Modifier) {
+    val shape = RoundedCornerShape(DesignTokens.radius.r8)
+    Box(
+        modifier.height(DesignTokens.size.touchMin).clip(shape)
+            .then(if (filled) Modifier.background(C.accent.yellow) else Modifier.border(DesignTokens.stroke.w1, C.navi.fieldBorder, shape))
+            .clickable(role = Role.Button, onClick = onClick).testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) { Txt(text, T.body.smStrong, if (filled) C.text.onLight else C.navi.label, maxLines = 1) }
+}
+
+/** «Моё местоположение» while editing ОТКУДА: the town nearest to the phone. */
+@Composable
+private fun MyLocationRow(waiting: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.suggestionRowMinH)
+            .clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list)
+            .clickable(role = Role.Button, onClick = onClick).testTag("navigator.mylocation")
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(26.dp), contentAlignment = Alignment.Center) { Box(Modifier.size(12.dp).border(3.dp, C.navi.label, CircleShape)) }
+        Spacer(Modifier.width(10.dp))
+        Txt(stringResource(R.string.navigator_my_location), T.list.title, C.text.primary, Modifier.weight(1f), maxLines = 1)
+        Txt(stringResource(if (waiting) R.string.navigator_gps_wait else R.string.navigator_gps_on), T.label.md, C.navi.labelSecondary)
     }
 }

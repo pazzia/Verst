@@ -47,7 +47,7 @@ if [ -n "${E2E_CLASSES:-}" ]; then
   ARGS+=(-e class "$E2E_CLASSES")
 else
   # The process-death journey (app.verst.e2e.restore) needs a kill between its phases: run below.
-  ARGS+=(-e package app.verst.e2e -e notPackage app.verst.e2e.restore)
+  ARGS+=(-e package app.verst.e2e -e notPackage app.verst.e2e.restore,app.verst.e2e.gps)
 fi
 timeout 1500 adb shell am instrument "${ARGS[@]}" "$RUNNER" 2>&1 | tee "$OUT/instrument.txt"
 STATUS=${PIPESTATUS[0]}
@@ -68,6 +68,17 @@ if [ -z "${E2E_CLASSES:-}" ] && [ "$STATUS" -eq 0 ]; then
   S2=${PIPESTATUS[0]}
   [ "$S1" -ne 0 ] && STATUS=$S1
   [ "$S2" -ne 0 ] && STATUS=$S2
+
+  # S3-R1 GPS on the real location stack, last: grant the permission, location on, feed `geo fix` (Тула).
+  adb shell cmd location set-location-enabled true || true
+  adb shell pm grant "$APP_ID" android.permission.ACCESS_FINE_LOCATION || true
+  adb shell pm grant "$APP_ID" android.permission.ACCESS_COARSE_LOCATION || true
+  ( for i in $(seq 1 60); do adb emu geo fix 37.6177 54.1931 >/dev/null 2>&1; sleep 2; done ) &
+  GEO=$!
+  timeout 300 adb shell am instrument -w -r -e class app.verst.e2e.gps.RealGpsTest "$RUNNER" 2>&1 | tee -a "$OUT/instrument.txt"
+  S3=${PIPESTATUS[0]}
+  kill "$GEO" 2>/dev/null || true
+  [ "$S3" -ne 0 ] && STATUS=$S3
 fi
 
 # Files written by the tests (screens/*.png, timings.json, parity.json) in the app-specific external dir.
@@ -88,8 +99,8 @@ if ! grep -q "^OK (" "$OUT/instrument.txt"; then
   echo "instrumentation did not report OK"
   exit 1
 fi
-if [ -z "${E2E_CLASSES:-}" ] && [ "$(grep -c "^OK (" "$OUT/instrument.txt")" -ne 3 ]; then
-  echo "expected 3 OK runs (main + process-death phases 1 and 2)"
+if [ -z "${E2E_CLASSES:-}" ] && [ "$(grep -c "^OK (" "$OUT/instrument.txt")" -ne 4 ]; then
+  echo "expected 4 OK runs (main + process-death phases 1 and 2 + real GPS)"
   exit 1
 fi
 exit 0

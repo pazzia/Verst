@@ -13,6 +13,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
@@ -35,6 +36,9 @@ import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.StopDto
 import app.verst.core.model.dto.TripDto
 import app.verst.feature.road.RoadActions
+import app.verst.feature.road.RoadFocus
+import app.verst.nav.GpsState
+import app.verst.core.model.GeoPoint
 import app.verst.feature.road.RoadScreen
 import app.verst.feature.road.RoadUi
 import app.verst.feature.waybill.WaybillActions
@@ -84,6 +88,7 @@ class ScreensScreenshotTest {
         assertEquals(w * 3, bitmap.width)
         Screenshot.write(bitmap, screen, state, w, h)
         // Release review P0-1: no real brand in any rendered text or TalkBack label of any screen state.
+        BrandDenyList.allow(compose.activity) // only the hand-off app names (S3-R1)
         val texts = BrandDenyList.texts(compose.onRoot(useUnmergedTree = true).fetchSemanticsNode())
         assertEquals("$screen/$state", emptyList<String>(), texts.flatMap { BrandDenyList.hits(it) })
     }
@@ -167,6 +172,16 @@ class ScreensScreenshotTest {
     @Test
     fun navigatorTooShort() = shot("navigator", "error-too-short") {
         NavigatorScreen(navigator("Химки", emptyList(), yaroslavl.copy(name = "Химки")).copy(tripErrorCode = "TOO_SHORT"), {}, {}, {}, {}, {})
+    }
+
+    @Test
+    fun navigatorLocationRationale() = shot("navigator", "location-rationale") {
+        NavigatorScreen(navigator("", emptyList(), null).copy(locationPrompt = true), {}, {}, {}, {}, {})
+    }
+
+    @Test
+    fun navigatorGpsOrigin() = shot("navigator", "gps-origin") {
+        NavigatorScreen(navigator("", emptyList(), null).copy(origin = GeoPoint("Ярославль", 57.6261, 39.8845), gps = GpsState.On), {}, {}, {}, {}, {})
     }
 
     @Test
@@ -288,6 +303,34 @@ class ScreensScreenshotTest {
         val stop = trip.daysList.flatMap { it.stops }.firstOrNull { it.replaceable && it.alternatives.isEmpty() && it.alternativesNote != null }
             ?: trip.daysList.flatMap { it.stops }.first { it.replaceable }.let { it.copy(alternatives = emptyList(), alternativesNote = "Других вариантов в это время поблизости нет.") }
         shot("road", "replace-none-note") { RoadScreen(RoadUi(trip, "NE", replace = ReplaceUi(stop)), noRoad) }
+    }
+
+    @Test
+    fun roadStopMenu() {
+        // S3-R1 D-5: long-press menu; the navigator is not installed → Yandex Maps in the browser (allow-listed name).
+        val trip = snapshot("G02_golden_ring")
+        val stop = trip.daysList.first().stops[1]
+        shot("road", "stop-menu") { RoadScreen(RoadUi(trip, "NE", stopMenu = stop), noRoad) }
+        compose.onNodeWithTag("stopmenu.navigator", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Яндекс Карты · в браузере").assertExists()
+    }
+
+    @Test
+    fun roadStopMenuNavigatorOffline() {
+        val trip = snapshot("G02_golden_ring")
+        val stop = trip.daysList.flatMap { it.stops }.first { it.alternatives.size >= 2 }
+        shot("road", "stop-menu-offline") { RoadScreen(RoadUi(trip, "NE", stopMenu = stop, online = false, navigatorInstalled = true), noRoad) }
+        compose.onNodeWithTag("stopmenu.swap", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun roadFocusRestored() {
+        // S3-R1: back from the 2nd night's Exit — that row is scrolled into view and highlighted.
+        val trip = snapshot("G02_golden_ring")
+        val night = trip.daysList.flatMap { it.stops }.filter { it.kind == "overnight" }[1]
+        shot("road", "focus-restored") { RoadScreen(RoadUi(trip, "NE", focus = RoadFocus(night.id, null, 1)), noRoad) }
+        compose.onNodeWithTag("road.stop.${night.id}", useUnmergedTree = true).assertIsDisplayed()
     }
 
     @Test

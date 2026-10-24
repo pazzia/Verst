@@ -1,5 +1,6 @@
 package app.verst
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -10,6 +11,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import app.verst.platform.IntentHandoffLauncher
+import app.verst.platform.openAppSettings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Box
@@ -40,7 +44,9 @@ import app.verst.feature.instruments.InstrumentsScreen
 import app.verst.feature.instruments.InstrumentsUi
 import app.verst.feature.navigator.NavigatorScreen
 import app.verst.feature.navigator.NavigatorUi
+import app.verst.feature.navigator.LocationActions
 import app.verst.feature.road.RoadActions
+import app.verst.feature.road.RoadFocus
 import app.verst.feature.road.RoadScreen
 import app.verst.feature.road.RoadUi
 import app.verst.feature.waybill.WaybillActions
@@ -55,6 +61,16 @@ import java.util.Locale
 
 /** The single activity: Windshield → (Navigator) → Instruments → Drive → Road ahead (DEV-SLICE). */
 class MainActivity : ComponentActivity() {
+    private val flow get() = (application as VerstApp).flow
+    private val launcher by lazy { IntentHandoffLauncher(this) }
+
+    /** S3-R1: the system location dialog; «don't ask again» = denied without a rationale to show. */
+    private val locationPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { res ->
+        val granted = res.values.any { it }
+        val blocked = !granted && !shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)
+        flow.onLocationPermission(granted, blocked)
+    }
+
     /** The app is Russian-only: plurals and formats follow Russian rules whatever the phone's language is. */
     override fun attachBaseContext(newBase: Context) {
         val config = Configuration(newBase.resources.configuration).apply { setLocale(Locale.forLanguageTag("ru-RU")) }
@@ -68,9 +84,22 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
-        val flow = (application as VerstApp).flow
+        // S3-R1: activity-bound platform hooks (cleared in onDestroy so the app-scoped flow never leaks us).
+        flow.handoffLauncher = launcher
+        flow.askLocationPermission = { locationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) }
+        flow.openAppSettings = { openAppSettings(this) }
         Log.i(EngineHost.TAG, "build ${BuildConfig.BUILD_NUMBER} ${BuildConfig.GIT_SHA}")
         setContent { VerstRoot(flow) }
+    }
+
+    override fun onDestroy() {
+        val f = flow
+        if (f.handoffLauncher === launcher) {
+            f.handoffLauncher = null
+            f.askLocationPermission = null
+            f.openAppSettings = null
+        }
+        super.onDestroy()
     }
 }
 
@@ -103,6 +132,14 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
     if (flow.top == Route.Windshield && t != null) {
         // F-02: above the dashboard crest (324 dp dashboard + 16), never over the caption or ПОЕХАЛИ.
         PlateToast(toastText(t), bottom = 340.dp, action = if (flow.canUndoDelete) stringResource(UiR.string.common_undo) else null, onAction = flow::undoDelete)
+    }
+    if (flow.top == Route.Navigator && t != null) {
+        // S3-R1 location toasts above the Navigator caption row (start button 120 + 16).
+        val settings = t == app.verst.nav.Toast.LocationBlocked
+        PlateToast(
+            toastText(t), bottom = 150.dp,
+            action = if (settings) stringResource(UiR.string.windshield_location_settings) else null, onAction = flow::toastSettings,
+        )
     }
     flow.deleteAsk?.let { d ->
         NaviDialog(
@@ -151,12 +188,19 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 rowKm = flow.rowKm.toMap(),
                 tripKm = flow.figures?.figures?.km,
                 tripErrorCode = flow.draftError?.code,
+                gps = flow.gps,
+                locationPrompt = flow.locationPrompt,
             ),
             onBack = { flow.back() },
             onQuery = flow::updateQuery,
             onPick = flow::pick,
             onEditFrom = flow::startEditFrom,
             onStart = flow::openInstrumentsFree,
+            location = object : LocationActions {
+                override fun allow() = flow.allowLocation()
+                override fun deny() = flow.denyLocation()
+                override fun myLocation() = flow.useMyLocation()
+            },
         )
         Route.Instruments -> InstrumentsScreen(
             InstrumentsUi(
@@ -209,7 +253,11 @@ private fun Screens(flow: VerstFlow, context: Context) {
             } else {
                 RoadScreen(
                     RoadUi(r.trip, flow.resultBearing, flow.openedFromSaved, flow.savedCurrent, flow.replace, flow.toast, flow.canUndo,
-                        r.trip.daysList.flatMap { it.stops }.filter { flow.isBooked(it.id) }.map { it.id }.toSet(), r.townPrepRu),
+                        r.trip.daysList.flatMap { it.stops }.filter { flow.isBooked(it.id) }.map { it.id }.toSet(), r.townPrepRu,
+                        online = flow.connectivity.online,
+                        stopMenu = flow.stopMenu, navigatorInstalled = flow.navigatorInstalled,
+                        focus = RoadFocus(flow.roadFocusId, flow.roadTopId, flow.roadFocusSeq),
+                    ),
                     object : RoadActions {
                         override fun back() {
                             flow.back()
@@ -223,6 +271,13 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun closeReplace() = flow.closeReplace()
                         override fun undo() = flow.undo()
                         override fun hotel(stopId: String) = flow.openExit(stopId)
+                        override fun dayNavigator(day: Int) = flow.openDayInNavigator(day)
+                        override fun stopMenu(stop: StopDto) = flow.openStopMenu(stop)
+                        override fun closeStopMenu() = flow.closeStopMenu()
+                        override fun navigatorFromStop() = flow.navigatorFromStop()
+                        override fun stopMenuReplace() = flow.stopMenuReplace()
+                        override fun topRow(id: String?) = flow.roadTop(id)
+                        override fun focusShown() = flow.roadFocusShown()
                     },
                 )
             }

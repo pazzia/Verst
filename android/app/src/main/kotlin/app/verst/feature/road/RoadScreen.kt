@@ -1,6 +1,34 @@
 package app.verst.feature.road
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import app.verst.core.ui.components.LocalReducedMotion
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -86,7 +114,17 @@ data class RoadUi(
     val booked: Set<String> = emptySet(),
     /** townId → prepositional name (engine `townPrepRu`) for «Выбрать отель в Ярославле». */
     val townPrep: Map<String, String> = emptyMap(),
+    /** 5.5 offline: day links become «в навигатор» (disabled look, toast on tap). */
+    val online: Boolean = true,
+    /** D-5 stop menu of a long-pressed row. */
+    val stopMenu: StopDto? = null,
+    val navigatorInstalled: Boolean = false,
+    /** S3-R1 focus restore. */
+    val focus: RoadFocus = RoadFocus(),
 )
+
+/** S3-R1 (CEO 2.1): the row to bring back ([focusId], highlighted) or the top row to restore ([topId]); [seq] = a return. */
+data class RoadFocus(val focusId: String? = null, val topId: String? = null, val seq: Int = 0)
 
 interface RoadActions {
     fun back()
@@ -100,12 +138,57 @@ interface RoadActions {
     fun undo()
     /** «Выбрать отель →» on a night row → 5.7 for that night. */
     fun hotel(stopId: String)
+
+    /** S3-R1 hand-off: «в навигатор ↗» of a day; the D-5 stop menu. */
+    fun dayNavigator(day: Int) = Unit
+    fun stopMenu(stop: StopDto) = Unit
+    fun closeStopMenu() = Unit
+    fun navigatorFromStop() = Unit
+    fun stopMenuReplace() = Unit
+
+    /** S3-R1 focus restore: the top visible row (debounced) and «the highlight was shown». */
+    fun topRow(id: String?) = Unit
+    fun focusShown() = Unit
 }
 
 /** 5.5 Road ahead: the day-by-day signs of the plan, «заменить» (D-6), save/share, the Waybill footer. */
 @Composable
 fun RoadScreen(ui: RoadUi, a: RoadActions) {
     val trip = ui.trip
+    // S3-R1 focus restore: the scroll position and the rows' offsets in the scrolled content.
+    val scroll = rememberScrollState()
+    val rows = remember(trip) { mutableStateMapOf<String, Pair<Int, Int>>() }
+    var content by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var viewportH by remember { mutableStateOf(0) }
+    var highlight by remember { mutableStateOf<String?>(null) }
+    val density = LocalDensity.current
+    LaunchedEffect(ui.focus.seq) {
+        val f = ui.focus
+        val id = f.focusId ?: f.topId ?: return@LaunchedEffect
+        val (y, h) = withTimeoutOrNull(2_000) { snapshotFlow { rows[id] }.filterNotNull().first() } ?: return@LaunchedEffect
+        withFrameNanos { } // the content height (scroll.maxValue) of this frame
+        val target = if (f.focusId != null) {
+            // the row centred in the list viewport (rows taller than the viewport: their top 16 dp below)
+            if (h >= viewportH) y - with(density) { 16.dp.roundToPx() } else y - (viewportH - h) / 2
+        } else {
+            y // the top row's top edge: the same row is reported as the top row again
+        }
+        scroll.scrollTo(target.coerceIn(0, scroll.maxValue))
+        if (f.focusId != null) {
+            highlight = f.focusId
+            delay(FocusHighlightMs)
+            highlight = null
+            a.focusShown()
+        }
+    }
+    // The top visible row, reported after scrolling settles (restored after Waybill / process death).
+    LaunchedEffect(trip) {
+        snapshotFlow { scroll.value }.collectLatest { v ->
+            delay(250)
+            val top = rows.entries.filter { (_, yh) -> yh.first + yh.second > v }.minByOrNull { it.value.first }?.key
+            a.topRow(top)
+        }
+    }
     ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val windowH = maxHeight
@@ -125,15 +208,27 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                     }
                     TitleSign(trip, ui.bearing8, Modifier.padding(start = 20.dp, end = 20.dp, top = 56.dp).fillMaxWidth())
                 }
-                Box(Modifier.weight(1f).fillMaxWidth()) {
+                Box(Modifier.weight(1f).fillMaxWidth().onSizeChanged { viewportH = it.height }) {
                     // S-20: one scrolled column; the road section draws a single continuous road (one lane-dash
                     // phase), the rows draw only their connector stubs. A trip has tens of rows, not thousands.
-                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("road.list")) {
+                    Column(
+                        Modifier.fillMaxSize().verticalScroll(scroll).testTag("road.list")
+                            .onGloballyPositioned { content = it },
+                    ) {
                         Intro(trip)
                         Column(Modifier.fillMaxWidth().roadSection()) {
                             trip.daysList.forEachIndexed { di, d ->
-                                DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0)
-                                d.stops.forEachIndexed { si, st -> StopRow(st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name, { a.hotel(st.id) }) { a.replace(st) } }
+                                DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0, ui.online) { a.dayNavigator(d.day) }
+                                d.stops.forEachIndexed { si, st ->
+                                    StopRow(
+                                        st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name,
+                                        highlighted = st.id == highlight,
+                                        onPlaced = { y, h -> if (rows[st.id] != y to h) rows[st.id] = y to h },
+                                        content = { content },
+                                        onLongPress = { a.stopMenu(st) },
+                                        onHotel = { a.hotel(st.id) },
+                                    ) { a.replace(st) }
+                                }
                             }
                             Spacer(Modifier.height(24.dp))
                         }
@@ -154,6 +249,8 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
             }
             val r = ui.replace
             if (r != null) ReplaceSheet(r, windowH, a)
+            val m = ui.stopMenu
+            if (m != null) StopMenuSheet(m, ui.online, ui.navigatorInstalled, windowH, a)
         }
     }
 }
@@ -190,6 +287,43 @@ private fun androidx.compose.foundation.layout.BoxScope.ReplaceSheet(r: ReplaceU
                 .testTag("replace.keep"),
             contentAlignment = Alignment.Center,
         ) { Txt(stringResource(R.string.replace_keep), T.body.mdStrong, C.text.secondary) }
+    }
+}
+
+/**
+ * D-5 stop menu (S3-R1 subset): «ОТКРЫТЬ В НАВИГАТОРЕ ОТСЮДА» (the target app named under it: the navigator when
+ * installed, else Yandex Maps in the browser) and «Заменить». «Сообщить об ошибке» (D-7) is not built yet.
+ */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
+    s: StopDto,
+    online: Boolean,
+    navigatorInstalled: Boolean,
+    windowH: androidx.compose.ui.unit.Dp,
+    a: RoadActions,
+) {
+    BottomSheet(stopName(s), a::closeStopMenu, "stopmenu", windowH) {
+        val target = if (navigatorInstalled) stringResource(R.string.stopmenu_yandex_navi)
+        else stringResource(R.string.stopmenu_yandex_maps) + stringResource(R.string.common_join_dot) + stringResource(app.verst.R.string.stopmenu_web_fallback)
+        MenuRow(
+            stringResource(R.string.stopmenu_navigator), if (online) target else stringResource(R.string.common_need_internet_navigator),
+            enabled = online, tag = "stopmenu.navigator", onClick = a::navigatorFromStop,
+        )
+        val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
+        if (canReplace) MenuRow(stringResource(R.string.stopmenu_swap), null, enabled = true, tag = "stopmenu.swap", onClick = a::stopMenuReplace)
+    }
+}
+
+@Composable
+private fun MenuRow(title: String, sub: String?, enabled: Boolean, tag: String, onClick: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp).clip(RoundedCornerShape(DesignTokens.radius.r10))
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick).testTag(tag)
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Txt(title, T.button.md, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
+        if (sub != null) Txt(sub, T.body.sm, C.text.secondary, maxLines = 1)
     }
 }
 
@@ -320,7 +454,7 @@ private fun Modifier.connector(): Modifier = drawBehind {
 }
 
 @Composable
-private fun DayHeader(day: DayDto, home: Boolean, first: Boolean) {
+private fun DayHeader(day: DayDto, home: Boolean, first: Boolean, online: Boolean, onNavigator: () -> Unit) {
     val hours = (day.driveMin / 60.0).roundToInt()
     val meta = if (home) stringResource(R.string.road_day_meta_home, RuFormat.thousands(day.km))
     else stringResource(R.string.road_day_meta, RuFormat.thousands(day.km), hours)
@@ -333,12 +467,40 @@ private fun DayHeader(day: DayDto, home: Boolean, first: Boolean) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Txt(stringResource(R.string.road_day, day.day), T.title.sm, C.accent.yellow)
-        Txt(meta, T.body.sm, C.text.muted, maxLines = 1)
+        Txt(meta, T.body.sm, C.text.muted, Modifier.weight(1f), maxLines = 1)
+        // OI-26 / CEO 4: «в навигатор ↗» right, touch 44 centred on the header; offline: «в навигатор», disabled look.
+        val linkCd = stringResource(R.string.cd_road_day_navigator, day.day)
+        Box(
+            Modifier.height(DesignTokens.size.touchMin).layout { m, c ->
+                // the 44 dp touch box centred on the 19.5 dp header line without growing the header
+                val p = m.measure(c)
+                val line = 20.dp.roundToPx()
+                layout(p.width, line) { p.place(0, (line - p.height) / 2) }
+            }.clickable(role = Role.Button, onClick = onNavigator)
+                .semantics { contentDescription = linkCd }.testTag("road.day.${day.day}.navigator"),
+            contentAlignment = Alignment.Center,
+        ) {
+            Txt(
+                stringResource(if (online) R.string.road_day_navigator else R.string.road_day_navigator_off),
+                T.body.smStrong, if (online) C.navi.label else C.text.disabled, maxLines = 1,
+            )
+        }
     }
 }
 
 @Composable
-private fun StopRow(s: StopDto, first: Boolean, booked: Boolean, townPrep: String, onHotel: () -> Unit, onReplace: () -> Unit) {
+private fun StopRow(
+    s: StopDto,
+    first: Boolean,
+    booked: Boolean,
+    townPrep: String,
+    highlighted: Boolean,
+    onPlaced: (y: Int, h: Int) -> Unit,
+    content: () -> LayoutCoordinates?,
+    onLongPress: () -> Unit,
+    onHotel: () -> Unit,
+    onReplace: () -> Unit,
+) {
     val line1 = if (first || s.kind == "start") stringResource(R.string.road_start)
     else stringResource(R.string.road_ahead_km, RuFormat.thousands(s.kmFromPrev))
     val unverified = if (!s.verified) stringResource(R.string.common_join_dot) + stringResource(R.string.common_unverified) else ""
@@ -353,9 +515,38 @@ private fun StopRow(s: StopDto, first: Boolean, booked: Boolean, townPrep: Strin
         else -> null
     }
     val cd = listOfNotNull(line1 + unverified, time, name, note, cost).joinToString(", ")
+    val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
+    // S3-R1: the restored row flashes `accent.yellow` at 14 % and fades (reduced motion: on, then off).
+    val reduced = LocalReducedMotion.current
+    val glow by animateFloatAsState(
+        if (highlighted) 1f else 0f,
+        if (reduced) snap() else tween(if (highlighted) 150 else 900),
+        label = "focus",
+    )
+    val haptic = LocalHapticFeedback.current
+    val longPress by rememberUpdatedState(onLongPress)
+    val naviLabel = stringResource(R.string.cd_road_action_navigator)
+    val swapLabel = stringResource(R.string.stopmenu_swap)
     Row(
-        Modifier.fillMaxWidth().connector().padding(top = 8.dp, bottom = 12.dp, end = 16.dp)
-            .semantics(mergeDescendants = true) { contentDescription = cd }
+        Modifier.fillMaxWidth()
+            .onGloballyPositioned { c -> content()?.let { root -> if (root.isAttached && c.isAttached) onPlaced(root.localPositionOf(c, Offset.Zero).y.roundToInt(), c.size.height) } }
+            .drawBehind { if (glow > 0f) drawRect(C.accent.yellow.copy(alpha = 0.14f * glow)) }
+            .connector()
+            // D-5: a long-press opens the stop menu (children's buttons keep their taps).
+            .pointerInput(s.id) {
+                detectTapGestures(onLongPress = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    longPress()
+                })
+            }
+            .padding(top = 8.dp, bottom = 12.dp, end = 16.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = cd
+                customActions = listOfNotNull(
+                    CustomAccessibilityAction(naviLabel) { onLongPress(); true },
+                    if (canReplace) CustomAccessibilityAction(swapLabel) { onReplace(); true } else null,
+                )
+            }
             .testTag("road.stop.${s.id}"),
     ) {
         Box(Modifier.padding(start = 72.dp).width(68.dp), contentAlignment = Alignment.TopCenter) {
@@ -368,7 +559,6 @@ private fun StopRow(s: StopDto, first: Boolean, booked: Boolean, townPrep: Strin
             }
             Txt(name, T.title.md, C.text.primary, maxLines = 2)
             if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note)
-            val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
             val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
             if (cost != null || canReplace || hotel) {
                 Row(Modifier.fillMaxWidth().padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -459,5 +649,8 @@ private fun Footer(trip: TripDto, onClick: () -> Unit) {
     }
 }
 
+
+/** S3-R1: how long a restored row stays highlighted (no motion token yet — Designer request in dev-notes). */
+private const val FocusHighlightMs = 1_200L
 
 private val TightLines = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both)

@@ -5,6 +5,7 @@ import app.verst.data.FileTripStore
 import app.verst.engine.ChaquopyPlannerGateway
 import app.verst.engine.EngineHost
 import app.verst.nav.VerstFlow
+import app.verst.platform.AndroidLocator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,7 +21,7 @@ class VerstApp : Application() {
             ChaquopyPlannerGateway(engine),
             CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
             FileTripStore(this),
-        ) { engine.restart() }
+        ) { engine.restart() }.also { it.locator = AndroidLocator(this) }
     }
 
     override fun onCreate() {

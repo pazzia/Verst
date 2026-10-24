@@ -1081,3 +1081,82 @@ so its engine km (537 for 2 adults + 1 child) is the whole round trip.
   `windshield/estimating` (no template km rendered); e2e `windshieldSignKmIsThePlanKmOfEveryRow`: each visible row
   equals `plan(routeRequest(row))`.km for the same crew. The e2e now shows «OK (6 tests)» plus both
   process-death phases.
+
+## S3-R1 — Sprint 3, round R1 (branch dev/S3-R1 from main 5ca38d0)
+Android only, independent of the Architect's engine work (arch/sprint-3) and the Designer's specs (des/sprint-3).
+
+### 1. Focus restore (CEO 2.1)
+- `VerstFlow.roadFocusId` = the row acted on (Exit «Выбрать отель», «заменить», the stop menu), `roadTopId` =
+  the top visible row (reported by Road ahead 250 ms after scrolling settles), `roadFocusSeq` bumps on every return
+  (back to Road, a sheet closed, a restore). Road ahead measures each row's offset in the scrolled content; on a
+  return it centres the focus row in the list viewport and highlights it (`accent.yellow` 14 %, 1.2 s, fades;
+  reduced motion: on, then off), else puts the top row back at the top. A new trip clears both.
+- Both ids go to last.json (`LastTripDto.roadFocusId/roadTopId`): after process death the same rows come back; a
+  restore onto Exit makes that night the focus for the way back.
+- Decision: Waybill (a footer, not a row) restores the position only, without a highlight.
+- Decision: the highlight has no motion token; 1.2 s is provisional — **Designer: token + colour for «returned
+  row» highlight**.
+- e2e `RoundR1Test.focusComesBackToTheSecondNightAfterBooking` (Golden Ring night 2 → Exit → book → back: the row
+  is in the list viewport without scrolling; Waybill and back keeps the top row); `ProcessDeathTest` scrolls to
+  the last row before the kill and checks that row after the relaunch.
+
+### 2. Navigator hand-off (CEO 4)
+- `core-model/NaviLinks`: `yandexnavi://build_route_on_map?lat_from&lon_from&lat_to&lon_to&lat_via_N&lon_via_N`,
+  web `https://yandex.ru/maps/?rtext=lat,lon~…&rtt=auto`, maps app `yandexmaps://maps.yandex.ru/?rtext=…&rtt=…`,
+  walking helper (`rtt=pd`, city mode later). Coordinates: dot decimal, 6 places, any locale.
+- Decision (limits): 8 via points for the navigator, 10 points in all for the web route; above that the vias are
+  thinned evenly keeping order and the first/last via. Consecutive duplicate points (day start = last night) are
+  dropped. A day link: first stop → last stop of the day. «навигатор отсюда»: this stop → end of its day; on the
+  day's last stop → the next day; on the trip's last stop → to it from the phone's position (no `lat_from`).
+- Stops now carry `lat`/`lon` (`StopDto`, nullable — old saved trips have none and simply get no link).
+- Road ahead: «в навигатор ↗» right on every day header (offline: «в навигатор», disabled colour, toast
+  `common_need_internet_navigator`); long-press a row (haptic) → D-5 stop menu: «ОТКРЫТЬ В НАВИГАТОРЕ ОТСЮДА»
+  (target named below: «Яндекс Навигатор» when installed, else «Яндекс Карты · в браузере») and «Заменить»;
+  TalkBack custom actions on each row. «Сообщить об ошибке» (D-7) not built.
+- `IntentHandoffLauncher`: the navigator package when it resolves, else the browser, else toast `stopmenu_none`.
+  Manifest `<queries>`: the navigator and maps packages, `yandexnavi:` VIEW, https BROWSABLE.
+- Brands: `backend/planner/tests/brand_handoff_keys.txt` = the explicit allow-list (`stopmenu_yandex_navi`,
+  `stopmenu_yandex_maps`), read by `test_brands.py`, `BrandDenyListTest` (each listed key must exist and start with
+  «Яндекс ») and the rendered-screen scan (only those values are cut out). Their mock overrides were removed;
+  `stopmenu_2gis`, `stopmenu_install` and the booking-partner keys stay neutral.
+- Tests: `NaviLinksTest` (format in the ru locale, via order, limits, walking, day / from-stop on G02),
+  `VerstFlowTest.handoffOpensTheDayAndFromStopRoutesAndNeedsTheNetwork`, e2e
+  `dayLinkAndLongPressHandOffToTheNavigatorWithViaPoints` (dry run: the e2e records the link instead of leaving
+  the app; the emulator has no navigator → the browser target).
+
+### 3. GPS (CEO 3)
+- Manifest: INTERNET, ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION.
+- Decision: platform `LocationManager` (`AndroidLocator`: fused provider on API 31+, GPS, network; one fresh fix
+  each with a 10 s timeout, else the newest last-known). No FusedLocationProviderClient: it needs Google Play
+  services, which RuStore phones may lack.
+- «Куда угодно» (5.2): the first visit shows a rationale card under КУДА (`windshield_location_rationale`,
+  «Разрешить» → the system dialog, «Не разрешать» → toast `windshield_location_denied`, never asked again);
+  «don't ask again» → `windshield_location_blocked` + «Настройки» (app settings). Granted → located on the next
+  «Куда угодно» unless the origin was picked by hand. ОТКУДА «изменить» → «Моё местоположение».
+- Origin = the engine's town within 30 km (`reverse` + its `suggest` row, for coordinates and name forms), else
+  the nearest `popular` town (haversine). The Architect's catalogue replaces this. «ВЫ: <ГОРОД>» on the
+  Windshield, «GPS ●» / «GPS ○» in the Navigator header. Persisted in defaults.json (`locationAsked`,
+  `originFromGps`).
+- Debug panel: «Имитация местоположения» (нет / Ярославль / Тула / Владимир / поле); e2e uses it, and a separate
+  last instrumentation `RealGpsTest` runs on the emulator's real stack (`pm grant` + `adb emu geo fix` Тула).
+- Tests: `VerstFlowTest.gpsOriginIsTheNearestTownWithRationaleAndDenyPaths`, e2e
+  `locationRationaleDenyThenMockLocationSetsTheOrigin`, `RealGpsTest`.
+
+### Provisional copy (strings_pending_copy.xml) — for the Designer
+`navigator_location_deny` «Не разрешать», `navigator_location_failed` «Не получилось определить, где вы. Старт
+прежний», `debug_mock_location` «Имитация местоположения», `stopmenu_web_fallback` «в браузере» (plus the open
+`windshield_meta_round_trip` from DEV-RELEASE). Also needed: the D-5 stop-menu layout, the rationale card
+layout in 5.2, the highlight token.
+
+### CI (S3-R1)
+Runs: 38 red (compile: a local `app` shadowed the `app.verst` package in DebugScreen), 39 red (a test fake broke
+the Moscow genitive), 40 red (e2e: Golden Ring text matched twice once it was the selected route; the top-row
+report waits on the composition clock, which `Thread.sleep` does not advance; auto-locate closed ОТКУДА under
+the test's tap), 42 red (the IME shifted the ОТКУДА layout under a tap in RealGpsTest), 43 green (`d65ae0c`):
+unit + lint + Robolectric screenshots, e2e «OK (9 tests)», process-death phases «OK (1 test)» ×2 with «no
+process after force-stop», RealGpsTest «OK (1 test)» (emulator fix → Тула, «ВЫ: ТУЛА»). APK 44.1 MB, both ABIs.
+Screens: e2e 40–50 (focus restore, stop menu, offline day link, rationale / deny, debug mock, GPS origin, real
+GPS); screenshots road/stop-menu, road/stop-menu-offline, road/focus-restored, navigator/location-rationale,
+navigator/gps-origin.
+Open: the Navigator still autofocuses КУДА (IME up) right after ОТКУДА is set — existing 5.2 behaviour, spec
+question for the Designer; D-7 «Сообщить об ошибке» not built.

@@ -28,6 +28,8 @@ import app.verst.core.model.dto.StopDto
 import app.verst.core.model.dto.SuggestionDto
 import app.verst.core.model.DefaultsDto
 import app.verst.core.model.LastTripDto
+import app.verst.core.model.NaviHandoff
+import app.verst.core.model.NaviLinks
 import app.verst.data.TripStore
 import app.verst.data.TripsLoad
 import app.verst.engine.PlannerGateway
@@ -77,6 +79,13 @@ sealed interface Toast {
     data object EngineFailed : Toast
     data object NeedInternet : Toast
 
+    /** S3-R1 hand-off / GPS toasts. */
+    data object NeedInternetNavigator : Toast
+    data object NoNavigator : Toast
+    data object LocationDenied : Toast
+    data object LocationBlocked : Toast
+    data object LocationFailed : Toast
+
     /** «Отметили: ночёвка в … забронирована» + «Вернуть» (stop id). */
     data class Booked(val stopId: String) : Toast
     data object TripDeleted : Toast
@@ -110,6 +119,48 @@ class VerstFlow(
     var windshield: WindshieldData by mutableStateOf(WindshieldData.Loading)
         private set
     var selectedRoute by mutableStateOf(0)
+
+    // ---- GPS origin (S3-R1, CEO 3)
+    /** Off (not used) / Waiting (asking the phone) / On (the origin is the town nearest to the fix) / Failed. */
+    var gps by mutableStateOf(GpsState.Off)
+        private set
+    /** The rationale card in «Куда угодно» (5.2) until it is answered once. */
+    var locationPrompt by mutableStateOf(false)
+        private set
+    private var locationAsked = false
+    var originFromGps by mutableStateOf(false)
+        private set
+    /** The phone's position; set by the app (LocationManager), null in tests without one. */
+    var locator: Locator? = null
+    /** Shows the system permission dialog; the activity answers through [onLocationPermission]. */
+    var askLocationPermission: (() -> Unit)? = null
+    /** Opens the app's system settings (blocked permission). */
+    var openAppSettings: (() -> Unit)? = null
+    /** DEV-127 / e2e: a fixed position instead of the phone's (no permission needed). */
+    var debugMockLocation: GeoPoint? by mutableStateOf(null)
+
+    // ---- navigator hand-off (S3-R1, CEO 4)
+    /** Opens a hand-off outside the app; set by the activity. */
+    var handoffLauncher: HandoffLauncher? = null
+    /** The last hand-off and where it went (debug panel, e2e). */
+    var lastHandoff: Pair<NaviHandoff, HandoffTarget>? by mutableStateOf(null)
+        private set
+    /** e2e: record the hand-off without leaving the app. */
+    var debugHandoffDryRun = false
+    /** D-5 stop menu (long-press on a Road-ahead row). */
+    var stopMenu: StopDto? by mutableStateOf(null)
+        private set
+
+    // ---- Road-ahead focus restore (S3-R1, CEO 2.1)
+    /** The row acted on (Exit, replace, stop menu): scrolled into view and highlighted on the way back. */
+    var roadFocusId: String? by mutableStateOf(null)
+        private set
+    /** The top visible row while scrolling (restores the position after Waybill / process death). */
+    var roadTopId: String? by mutableStateOf(null)
+        private set
+    /** Bumps on every return to Road ahead (back from a screen, a sheet closed, a restore). */
+    var roadFocusSeq by mutableStateOf(0)
+        private set
 
     // ---- Navigator
     var query by mutableStateOf("")
@@ -230,6 +281,23 @@ class VerstFlow(
 
     fun openDebug() = push(Route.Debug)
 
+    /** e2e / debug: back to the default origin (Москва) with the location question unanswered. */
+    fun debugResetOrigin() {
+        locateJob?.cancel()
+        debugMockLocation = null
+        locationAsked = false
+        locationPrompt = false
+        originFromGps = false
+        gps = GpsState.Off
+        if (origin != DefaultOrigin) {
+            origin = DefaultOrigin
+            originGen = DefaultOrigin.label
+            loadOriginForms()
+            rowKm.clear()
+            loadRoutes()
+        }
+    }
+
     fun setWorld(id: String) {
         if (gateway.world == id) return
         gateway.world = id
@@ -281,6 +349,10 @@ class VerstFlow(
         dailyKm = 300
         budgetIndex = BudgetPresets.indexOf(40_000)
         mood = null
+        locationAsked = false
+        originFromGps = false
+        gps = GpsState.Off
+        debugMockLocation = null
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
 
@@ -369,6 +441,10 @@ class VerstFlow(
 
     /** System back and every back link. Sheets close first. Returns false on the root (the activity finishes). */
     fun back(): Boolean {
+        if (stopMenu != null) {
+            closeStopMenu()
+            return true
+        }
         if (replace != null) {
             closeReplace()
             return true
@@ -409,6 +485,7 @@ class VerstFlow(
             else -> Unit
         }
         stack.removeAt(stack.lastIndex)
+        if (top == Route.Road) roadFocusSeq += 1 // S3-R1: back to the row we left from
         return true
     }
 
@@ -461,6 +538,7 @@ class VerstFlow(
         readyRoute = null
         updateQuery("")
         push(Route.Navigator)
+        onNavigatorOpened()
     }
 
     // ------------------------------------------------------------------------------------------ navigator
@@ -519,6 +597,8 @@ class VerstFlow(
 
     fun pick(s: SuggestionDto) {
         if (editingFrom) {
+            originFromGps = false
+            gps = GpsState.Off
             origin = GeoPoint(s.name, s.lat, s.lon)
             originGen = s.nameGenRu ?: s.name
             if (s.nameGenRu == null) loadOriginForms()
@@ -697,7 +777,10 @@ class VerstFlow(
         openedFromSaved = fromSaved
         expandedLine = null
         replace = null
+        stopMenu = null
         undoTrip = null
+        roadFocusId = null
+        roadTopId = null
         dismissToast() // a toast belongs to the screen it was raised on
         if (request != null) record(request, TripFigures(r.trip.km, r.trip.days)) // after planning: the engine's number
     }
@@ -735,6 +818,158 @@ class VerstFlow(
                 }
             }
         }
+    }
+
+    // ------------------------------------------------------------------------------------------ focus restore
+
+    /** Road ahead reports its top visible row while it is on top (debounced by the screen). */
+    fun roadTop(id: String?) {
+        if (top == Route.Road && id != null) roadTopId = id
+    }
+
+    /** The highlight of the restored row has been shown. */
+    fun roadFocusShown() {
+        roadFocusId = null
+    }
+
+    // ------------------------------------------------------------------------------------------ hand-off (CEO 4)
+
+    /** Road ahead «в навигатор ↗» of [day]: the day's stops in order. */
+    fun openDayInNavigator(day: Int) {
+        val d = result?.trip?.daysList?.firstOrNull { it.day == day } ?: return
+        handoff(NaviLinks.day(d))
+    }
+
+    /** D-5 stop menu on a long-press of a row. */
+    fun openStopMenu(stop: StopDto) {
+        roadFocusId = stop.id
+        stopMenu = stop
+    }
+
+    fun closeStopMenu() {
+        stopMenu = null
+        roadFocusSeq += 1
+    }
+
+    /** «ОТКРЫТЬ В НАВИГАТОРЕ ОТСЮДА»: from this stop to the end of its day. */
+    fun navigatorFromStop() {
+        val s = stopMenu ?: return
+        val trip = result?.trip ?: return
+        stopMenu = null
+        handoff(NaviLinks.fromStop(trip, s.id))
+    }
+
+    /** «Заменить» in the stop menu → the D-6 sheet. */
+    fun stopMenuReplace() {
+        val s = stopMenu ?: return
+        stopMenu = null
+        openReplace(s)
+    }
+
+    /** Whether the navigator app is installed (the stop menu names the target). */
+    val navigatorInstalled: Boolean get() = handoffLauncher?.navigatorInstalled() ?: false
+
+    private fun handoff(h: NaviHandoff?) {
+        if (h == null) return
+        if (!connectivity.online) {
+            showToast(Toast.NeedInternetNavigator)
+            return
+        }
+        val target = if (debugHandoffDryRun) {
+            if (navigatorInstalled) HandoffTarget.NavigatorDryRun else HandoffTarget.BrowserDryRun
+        } else {
+            handoffLauncher?.open(h) ?: HandoffTarget.None
+        }
+        lastHandoff = h to target
+        if (target == HandoffTarget.None) showToast(Toast.NoNavigator)
+    }
+
+    // ------------------------------------------------------------------------------------------ GPS (CEO 3)
+
+    private fun onNavigatorOpened() {
+        when {
+            debugMockLocation != null -> if (!originFromGps || gps != GpsState.On) locate()
+            locator?.granted() == true -> if (originFromGps || !locationAsked) locate()
+            !locationAsked -> locationPrompt = true
+        }
+    }
+
+    /** Rationale «Разрешить» → the system dialog. */
+    fun allowLocation() {
+        locationPrompt = false
+        locationAsked = true
+        val ask = askLocationPermission
+        if (debugMockLocation != null || locator?.granted() == true) locate() else if (ask != null) ask() else showToast(Toast.LocationFailed)
+    }
+
+    /** Rationale «Не разрешать»: the origin stays, the card does not come back. */
+    fun denyLocation() {
+        locationPrompt = false
+        locationAsked = true
+        showToast(Toast.LocationDenied)
+    }
+
+    /** The system dialog's answer; [blocked] = «don't ask again» (only the settings can allow it now). */
+    fun onLocationPermission(granted: Boolean, blocked: Boolean) {
+        if (granted) locate() else showToast(if (blocked) Toast.LocationBlocked else Toast.LocationDenied)
+    }
+
+    /** «Моё местоположение» in ОТКУДА. */
+    fun useMyLocation() {
+        locationAsked = true
+        locationPrompt = false
+        when {
+            debugMockLocation != null || locator?.granted() == true -> locate(fromRow = true)
+            askLocationPermission != null -> askLocationPermission?.invoke()
+            else -> showToast(Toast.LocationFailed)
+        }
+    }
+
+    fun toastSettings() {
+        dismissToast()
+        openAppSettings?.invoke()
+    }
+
+    private var locateJob: Job? = null
+
+    /** The phone's position → the nearest catalogue town (for now: the nearest fixture town) → the origin. */
+    fun locate(fromRow: Boolean = false) {
+        locateJob?.cancel()
+        gps = GpsState.Waiting
+        locateJob = scope.launch {
+            val p = debugMockLocation ?: locator?.current()
+            val town = p?.let { nearestTown(it) }
+            if (town == null) {
+                gps = GpsState.Failed
+                showToast(Toast.LocationFailed)
+                return@launch
+            }
+            val o = GeoPoint(town.name, town.lat, town.lon)
+            gps = GpsState.On
+            originFromGps = true
+            if (o != origin) {
+                origin = o
+                originGen = town.nameGenRu ?: town.name
+                if (town.nameGenRu == null) loadOriginForms()
+                rowKm.clear()
+                loadRoutes()
+            }
+            if (fromRow && editingFrom) { // «Моё местоположение» picked: ОТКУДА is done
+                editingFrom = false
+                updateQuery("")
+            }
+        }
+    }
+
+    /** The engine's town within 30 km (`reverse` + its `suggest` row), else the nearest popular town. */
+    private suspend fun nearestTown(p: GeoPoint): SuggestionDto? {
+        val name = (gateway.reverse(p) as? EngineResult.Ok)?.value?.name
+        if (name != null) {
+            val row = (gateway.suggest(name, p) as? EngineResult.Ok)?.value?.firstOrNull { it.name == name && it.nameGenRu != null }
+            if (row != null) return row
+        }
+        val towns = (gateway.popular() as? EngineResult.Ok)?.value.orEmpty().filter { it.nameGenRu != null }
+        return towns.minByOrNull { TownMath.km(p.lat, p.lon, it.lat, it.lon) }
     }
 
     // ------------------------------------------------------------------------------------------ road / waybill
@@ -791,6 +1026,7 @@ class VerstFlow(
     /** Road-ahead night row «Выбрать отель →» → 5.7 for that night. */
     fun openExit(stopId: String) {
         exitStopId = stopId
+        roadFocusId = stopId
         partnerOpen = false
         bookedDialog = false
         push(Route.Exit)
@@ -887,6 +1123,7 @@ class VerstFlow(
 
     /** «заменить» on a stop → D-6 sheet. */
     fun openReplace(stop: StopDto) {
+        roadFocusId = stop.id
         replace = ReplaceUi(stop)
     }
 
@@ -895,7 +1132,10 @@ class VerstFlow(
     }
 
     fun closeReplace() {
-        if (replace?.busy != true) replace = null
+        if (replace?.busy != true) {
+            replace = null
+            roadFocusSeq += 1
+        }
     }
 
     /** «ЗАМЕНИТЬ»: the engine's `replace_stop`; the trip and the total update, toast with «Вернуть». */
@@ -915,11 +1155,13 @@ class VerstFlow(
                     undoTrip = r
                     updateTrip(n.value)
                     replace = null
+                    roadFocusSeq += 1
                     showToast(Toast.Replaced(n.value.trip.cost.totalRub))
                 }
                 is EngineResult.Err -> {
                     result = r
                     replace = null
+                    roadFocusSeq += 1
                     showToast(Toast.EngineFailed)
                 }
             }
@@ -1018,7 +1260,7 @@ class VerstFlow(
     }
 
     /** Changes whenever last.json must be rewritten: the trip (identity), booking, saved id and screen. */
-    private fun lastKey(): Any? = listOf(result, booked.toMap(), savedId, lastScreen(), exitStopId)
+    private fun lastKey(): Any? = listOf(result, booked.toMap(), savedId, lastScreen(), exitStopId, roadFocusId, roadTopId)
 
     private fun lastScreen(): String? = when {
         Route.Exit in stack -> "exit"
@@ -1034,6 +1276,7 @@ class VerstFlow(
                 LastTripDto(
                     trip = SavedTrips.entry(savedId ?: "last", now(), it, resultBearing, booked.toMap()),
                     savedId = savedId, screen = lastScreen(), exitStopId = exitStopId,
+                    roadFocusId = roadFocusId, roadTopId = roadTopId,
                 )
             }.getOrNull()
         }
@@ -1058,6 +1301,10 @@ class VerstFlow(
                 stack.add(Route.Exit)
             }
         }
+        // S3-R1: the row we left from (or the top visible row) comes back with the trip.
+        roadFocusId = l.roadFocusId ?: if (screen == "exit") l.exitStopId else null
+        roadTopId = l.roadTopId
+        roadFocusSeq += 1
     }
 
     // ------------------------------------------------------------------------------------------ defaults (P2-10)
@@ -1068,6 +1315,7 @@ class VerstFlow(
         frontAdult = frontAdult, seats = seats.map { it.name }, dog = dog, dailyKm = if (dailyKmTouched) dailyKm else null,
         budgetIndex = budgetIndex, mood = mood?.name, moodTouched = moodTouched,
         originLabel = origin.label, originLat = origin.lat, originLon = origin.lon, originGen = originGen,
+        locationAsked = locationAsked, originFromGps = originFromGps,
     )
 
     private fun applyDefaults(d: DefaultsDto) {
@@ -1081,6 +1329,8 @@ class VerstFlow(
         budgetIndex = d.budgetIndex.coerceIn(0, BudgetPresets.lastIndex)
         mood = d.mood?.let { runCatching { Mood.valueOf(it) }.getOrNull() }
         moodTouched = d.moodTouched
+        locationAsked = d.locationAsked
+        originFromGps = d.originFromGps
         val o = GeoPoint(d.originLabel, d.originLat, d.originLon)
         if (o != origin) {
             origin = o
@@ -1170,5 +1420,34 @@ class VerstFlow(
         const val ESTIMATE_DEBOUNCE_MS = 300L
         const val LAST_DEBOUNCE_MS = 300L
         val ENGINE_START_CODES = setOf("NO_ENGINE", "ENGINE_START", "NO_WORLD", "TZDATA_MISSING")
+    }
+}
+
+enum class GpsState { Off, Waiting, On, Failed }
+
+/** Where a hand-off went. */
+enum class HandoffTarget { Navigator, Browser, None, NavigatorDryRun, BrowserDryRun }
+
+/** Opens [NaviHandoff]s outside the app (the activity's implementation uses intents). */
+interface HandoffLauncher {
+    fun navigatorInstalled(): Boolean
+    fun open(h: NaviHandoff): HandoffTarget
+}
+
+/** The phone's position (S3-R1: LocationManager; FusedLocation needs Play services the mock does not ship). */
+interface Locator {
+    fun granted(): Boolean
+    suspend fun current(): GeoPoint?
+}
+
+/** Great-circle distance for «the nearest town». */
+object TownMath {
+    fun km(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val r = 6371.0
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a = kotlin.math.sin(dLat / 2).let { it * it } +
+            kotlin.math.cos(Math.toRadians(lat1)) * kotlin.math.cos(Math.toRadians(lat2)) * kotlin.math.sin(dLon / 2).let { it * it }
+        return 2 * r * kotlin.math.asin(kotlin.math.sqrt(a))
     }
 }

@@ -57,6 +57,9 @@ data class StopDto(
     val verified: Boolean = true,
     val townId: String? = null,
     val placeId: String? = null,
+    /** Stop coordinates (engine `lat`/`lon`) for the navigator hand-off (S3-R1); null in old saved trips. */
+    val lat: Double? = null,
+    val lon: Double? = null,
     val replaceable: Boolean = false,
     val alternatives: List<AlternativeDto> = emptyList(),
     /** Engine copy «Других вариантов…» / «Нашли только один вариант…» when < 2 alternatives. */

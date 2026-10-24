@@ -62,5 +62,10 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     app.verst.nav.Toast.EngineFailed -> stringResource(R.string.waybill_sync_failed)
     app.verst.nav.Toast.NeedInternet -> stringResource(R.string.common_need_internet)
     app.verst.nav.Toast.TripDeleted -> stringResource(R.string.trips_deleted)
+    app.verst.nav.Toast.NeedInternetNavigator -> stringResource(R.string.common_need_internet_navigator)
+    app.verst.nav.Toast.NoNavigator -> stringResource(R.string.stopmenu_none)
+    app.verst.nav.Toast.LocationDenied -> stringResource(R.string.windshield_location_denied)
+    app.verst.nav.Toast.LocationBlocked -> stringResource(R.string.windshield_location_blocked)
+    app.verst.nav.Toast.LocationFailed -> stringResource(app.verst.R.string.navigator_location_failed)
     is app.verst.nav.Toast.Booked -> stringResource(R.string.exit_booked_badge) // 5.7 renders its own copy with the town
 }
