@@ -266,8 +266,8 @@ Box 130 × 62 (`size.gaugeW` × `size.gaugeH`), Canvas. Arc centre (65, 58), rad
 | --- | --- |
 | Track | Path `M12 58 A53 53 0 0 1 118 58`, stroke 8, butt caps, `color.dash.controlAlt` |
 | E zone | Path `M12 58 A53 53 0 0 1 30 18` (180° → 131.2°, 48.8° sweep), stroke 8, `color.accent.red` |
-| Letter E | baseline-left at (8, 46), `type.caption.bold`, `color.accent.redText` (AA fix, OI-02) |
-| Letter F | baseline-left at (114, 46), `type.caption.bold`, `color.text.primary` |
+| Letter E | baseline-left at **(20, 56)** — inside the arc, clear of the 8 dp track (the mockup's (8, 46) sits on the red E zone and disappears; final review), drawn **above** the track, `type.caption.bold`, `color.accent.redText` (AA fix, OI-02); copy `instruments_gauge_empty` |
+| Letter F | baseline-left at **(103, 56)**, drawn above the track, `type.caption.bold`, `color.text.primary`; copy `instruments_gauge_full` |
 | Needle | 4 × 48 rounded rect (radius 2) `color.accent.yellow`; its bottom centre sits at the pivot (65, 58); rotation −90° (E) … +90° (F) |
 | Hub | circle d 16 `color.sign.white`, centre (65, 60) |
 
@@ -513,7 +513,7 @@ TalkBack: label = visible text; Book CTA adds «, откроется Яндек�
 | --- | --- |
 | `BottomSheet` | Fill `color.dash.raised`, top radius `radius.r16`, rim 2 dp `color.dash.control` along the top edge; handle 36 × 4 radius 2 `color.dash.outline`, 8 dp from the top; content padding 8 20 24. Scrim `color.overlay.scrim`. Enter `motion.bottomSheetIn` (slide from the bottom + scrim fade), exit `motion.bottomSheetOut`. Max height 88 % of the window. Drag-to-dismiss threshold 25 % of the height or fling > 1200 dp/s. TalkBack: pane title = sheet title; a «Закрыть» button (44 × 44, §17.4 `close`) at the top-right is always present for TalkBack/keyboard |
 | `SignSheet` | A `BottomSheet` whose content sits on an `OverheadSign.List` plate (full width − 28), for lists of ready routes |
-| `PlateToast` | Bottom-centred, 16 dp above the bottom-pinned element of the screen; min-h 44, padding 10 16, radius `radius.r10`, fill `color.dash.control`, border `stroke.w1` `color.dash.outline`; text `type.body.mdTight` `color.text.primary`; optional action `type.body.mdStrong` `color.accent.yellow`. 3 s, 6 s with an action. Live region Polite |
+| `PlateToast` | Bottom-centred, 16 dp above the bottom-pinned element of the screen, and **never over interactive content or the caption**. Anchors per screen (final review F-02): Windshield — bottom edge 16 dp above the dashboard crest (y 504 at 844; `dashTop − 16` on other heights); Road ahead — 16 dp above the Waybill footer (740); Exit — 16 dp above the Book CTA; Waybill — 16 dp above the buttons; Navigator / Instruments — 16 dp above the caption row. One line of text + action stays **44 dp** high (no extra vertical padding); max width window − 32; min-h 44, padding 10 16, radius `radius.r10`, fill `color.dash.control`, border `stroke.w1` `color.dash.outline`; text `type.body.mdTight` `color.text.primary`; optional action `type.body.mdStrong` `color.accent.yellow`. 3 s, 6 s with an action. Live region Polite |
 | `NaviDialog` | Centred card, w = window − 48, `NaviPanel` look (bezel 6, radius 16); title `type.title.lg`, body `type.body.md` `color.navi.text`; buttons: primary `PrimaryCta` style h 48, secondary `DashedButton` h 48; scrim `color.overlay.scrim`. TalkBack: dialog pane title |
 | `Shimmer` | A 90 dp wide band of the highlight colour with linear 0→1→0 alpha across its width, moving left → right across the placeholder bounds in `motion.shimmer` (1200 ms linear). Reduced motion: static base colour |
 | `OfflinePlate` | Inside the navi header row, right side: offline icon (§17.4 `offline`, 11 × 11) + «НЕТ СЕТИ», `type.label.md` `color.accent.redText` |

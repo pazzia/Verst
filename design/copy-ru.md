@@ -432,6 +432,7 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `exit_return_no` | Ещё нет | |
 | `exit_booked_badge` | забронировано | `HotelOption` price slot in the booked state (= `exit_booked_price`, kept for clarity) |
 | `exit_booked_toast` | Отметили: ночёвка в {town_prep} забронирована | toast after «Да, забронировали», with `common_undo` (6 s) to remove the mark |
+| `exit_book_none` | нет вариантов с вашими условиями | Book CTA sub-line when the night has no hotel options (5.7 §4) |
 | `exit_book_partner_mock` | демо-партнёр, без оплаты | Book CTA sub-line in the mock build (replaces `exit_book_partner`, no real brand) |
 | `cd_exit_book_mock` | Забронировать ночь, демо: откроется пример бронирования без оплаты | TalkBack of the Book CTA in the mock build |
 | `cd_road_booked` | Ночёвка забронирована | appended to the hotel row on Road ahead |

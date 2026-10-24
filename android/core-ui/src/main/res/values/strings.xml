@@ -383,6 +383,7 @@
     <string name="exit_return_no">Ещё нет</string>
     <string name="exit_booked_badge">забронировано</string>
     <string name="exit_booked_toast">Отметили: ночёвка в %1$s забронирована</string>
+    <string name="exit_book_none">нет вариантов с вашими условиями</string>
     <string name="exit_book_partner_mock">демо-партнёр, без оплаты</string>
     <string name="cd_exit_book_mock">Забронировать ночь, демо: откроется пример бронирования без оплаты</string>
     <string name="cd_road_booked">Ночёвка забронирована</string>
