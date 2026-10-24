@@ -1233,9 +1233,11 @@ sample catalogue). Default world is now `russia_v1`; `EngineHost` calls `load_ca
   budget — then no suffix, never a false «в бюджете»).
 - `CostCalculator` explicit rooms (`NightUnitDto.rooms`, `HotelPriceDto.rooms`, null = ceil(adults/2)); Kotlin
   unit test now, the contract cases come with ARCH-301.
-- **BLOCKED by ARCH-301:** M1 has no fitter — the CEO case estimates `outcome=plan ≈ 58 400 ₽`. e2e S3-1 is
-  written (fitted ≤ 31 500, or no-fit → the Тула / cheaper option → a plan that fits) and runs once the engine
-  can fit; until then it is skipped by an explicit assumption with that reason in the log.
+- M2 merged (arch/sprint-3 @ fde7aab: ARCH-301 fitter + G13, ARCH-302..306 as built). The CEO case now plans
+  (G13: 58 400 → 27 400 ₽, the short ring). e2e S3-1 asserts it strictly: a fitted plan ≤ 31 500 ₽, or the
+  no-fit screen → an option with `fits` (Тула, cheaper route, shorten, else raise) → a plan within it.
+- `BudgetOptionDto.fits` / `dailyKm`: a cheaper-route option with `fits: false` says «дешевле, но больше бюджета»
+  (pending copy) and never «помещается в бюджет».
 
 ### DEV-304 cards (5.9) / DEV-305 focus
 - Only sights and hotel nights are tappable (row tap + click semantics); fuel/rest/start/finish/food have no
@@ -1252,7 +1254,9 @@ sample catalogue). Default world is now `russia_v1`; `EngineHost` calls `load_ca
   sends nothing), custom sheet (duration, interests, pace, budget, return), ПОШЛИ (walker + loading arc),
   `NO_CITY` / `NOT_ENOUGH_POIS` plates. Walk result: city strip, WalkTitleSign, chips, ±15 % line, the walk
   hand-off (parts), responsible plate, walking column, «Другой вариант», cost plate, save / share.
-- Decision: the caption start time is local now + rounding; the engine's `startAt` (town tz) shows on the result.
+- The caption start time follows the engine's default rule (now rounded up to a quarter hour, ≥ 18:00 for drink
+  walks, ≥ 10:00 for museums) in device time; `city_presets` has no town tz (ask: add `tz` or `startAt` per
+  preset). The walk result shows the engine's `startAt`. The walk title sign carries «≈ 6,0 км» (§21).
 - Decision: walk share text is composed on the phone (no engine share for walks) and carries the responsible line.
 
 ### DEV-307 hand-off (5.13)
@@ -1276,9 +1280,21 @@ Photos: the M1 sample catalogue names files that do not exist on Commons, so on 
 
 ### Provisional copy (strings_pending_copy.xml)
 `card_per_night` «за ночь», `navigator_type_address` «У», `walk_distance_m` «%d м», `debug_mock_location`,
-`windshield_meta_round_trip` «туда и обратно». Deck keys replaced the R1 ones (`navigator_location_deny` →
+`windshield_meta_round_trip` «туда и обратно», `budget_option_cheaper_sub_over` «≈ {amount} ₽ · дешевле, но больше
+бюджета». Deck keys replaced the R1 ones (`navigator_location_deny` →
 `loc_manual`, `navigator_location_failed` → `loc_timeout`, `stopmenu_web_fallback` → `handoff_web`).
 
 Fix found by run 52: Coil 2's `rememberAsyncImagePainter` resolves its size from the first draw. `PhotoFrame` draws
 the painter only once it has loaded, so a real URL stayed «loading» forever (it hit the hotel area photo in S3-2). The
 request now has an explicit 1200 × 800 size.
+## ARCH-301 — budget fitter (M2)
+- `Planner.plan` = plain plan → ADR-0011 ladder → fitted plan (`budgetFit`) or `fit.NoFit`; the bridge returns
+  `{"outcome": "no_fit", "minimum", "options", …}` (contracts `plan-no-fit.json`, `estimate-no-fit.json`).
+- **Kotlin contract change:** `cost.units.nights[].rooms` and `options[].rooms` may be present (explicit family
+  rooms); `CostCalculator` must use them instead of `ceil(adults/2)` and compare `rooms × price` for the
+  `cheaper_overnight` hint. `cost_recompute_cases.json` has 6 new `rooms_*` cases (45 in total).
+- Alternatives may carry `breaksBudget: true`; a fitted trip carries `budgetFit`; `estimate` returns
+  `budgetStatus` (`fits` | `small_overrun` | null) and `outcome`.
+- A crew patch on a trip with explicit rooms → `INVALID_INPUT(crew, replan_required)`.
+- G13 CEO case: 58 400 → **27 400 ₽** (fits, short ring). Probes: Москва → Волгоград 3+1 at 8 000 ₽ → no_fit,
+  minimum 37 900 with shorten 20 800 / closer town 14 400 (`fits: false`) / raise to 38 000.

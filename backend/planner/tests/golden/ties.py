@@ -93,8 +93,8 @@ def record_picks(case: dict[str, Any]) -> list[Pick]:
 
     real_hotels = overnight.rank_hotels
 
-    def rank_hotels(passing: list[Any], tc: Any) -> list[Any]:
-        ranked = real_hotels(passing, tc)
+    def rank_hotels(passing: list[Any], tc: Any, *rest: Any) -> list[Any]:
+        ranked = real_hotels(passing, tc, *rest)
         if ranked:
             add("hotel", ranked[0].place.id, [overnight.hotel_score(h, tc) for h in passing])
         return ranked
@@ -126,6 +126,7 @@ def record_picks(case: dict[str, Any]) -> list[Pick]:
                 if day.km_start < c.km_at < day.km_end
                 and c.place.id not in used
                 and sights.sight_score(c, inp) >= ctx.cfg.sights.min_score
+                and not (ctx.knobs.sights_free and sights.is_paid(c, inp))  # ADR-0011 lever, as in stage 9
             ]
             pool.sort(key=lambda c: (-round(sights.sight_score(c, inp), 9), c.km_at, c.place.id))
             added = {st.place.id for st in day.stops if id(st) not in old and st.kind is StopKind.SIGHT}

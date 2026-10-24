@@ -30,7 +30,7 @@ import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeTrue
+import app.verst.core.model.dto.BudgetOptionDto
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -138,15 +138,11 @@ class Sprint3Test {
         }
         assertEquals(4, flow.adults)
         assertEquals(1, flow.children)
-        // ARCH-301 gate: without the engine's budget fitter (M1 sample) the CEO case cannot fit — skip with the reason.
+        // ARCH-301 (M2): the engine fits the CEO case — either a fitted plan ≤ 31 500 or the no-fit screen
         val req = flow.request()
         val est = runBlocking { ChaquopyPlannerGateway(E2e.engine).estimate(UUID.randomUUID().toString(), req) }
         val e = (est as EngineResult.Ok).value
         Log.i("VerstE2e", "S3-1 estimate outcome=${e.outcome} total=${e.totalRub} status=${e.budgetStatus}")
-        assumeTrue(
-            "BLOCKED by ARCH-301: the engine has no budget fitter yet (estimate ${e.outcome} ≈ ${e.totalRub} ₽ > 31 500)",
-            e.outcome == "no_fit" || (e.totalRub ?: 0) <= 31_500,
-        )
         compose.waitUntil(20_000) { has("instruments.budget") }
         shot("60-instruments-ceo-budget")
         val t0 = System.nanoTime()
@@ -167,15 +163,23 @@ class Sprint3Test {
             shot("61-nofit-ceo")
             val nf = flow.noFit!!
             assertTrue("≥ 2 options", nf.options.size >= 2)
-            val i = nf.options.indexOfFirst { it.readyRouteId == "rr_tula_yasnaya" }.takeIf { it >= 0 } ?: nf.options.indexOfFirst { it.kind == "cheaper_route" }
-            assertTrue("a cheaper route option", i >= 0)
+            Log.i("VerstE2e", "S3-1 no_fit options=${nf.options.map { "${it.kind}:${it.totalRub ?: it.budgetRub}:${it.fits}" }}")
+            // an option that fits: the cheaper route (Тула first), else shorten, else raise the budget
+            val i = listOf<(BudgetOptionDto) -> Boolean>(
+                { it.fits && it.readyRouteId == "rr_tula_yasnaya" },
+                { it.fits && it.kind == "cheaper_route" },
+                { it.fits && it.kind == "shorten" },
+                { it.kind == "raise_budget" },
+            ).firstNotNullOfOrNull { p -> nf.options.indexOfFirst(p).takeIf { it >= 0 } } ?: -1
+            assertTrue("an option that fits", i >= 0)
             compose.onNodeWithTag("nofit.option.$i").performScrollTo().performClick()
             compose.waitUntil(5_000) { flow.top == Route.Instruments }
             compose.onNodeWithTag("instruments.start").performClick()
             compose.waitUntil(60_000) { flow.top == Route.Road }
             waitTag("road.total")
             val total = flow.result!!.trip.cost.totalRub
-            assertTrue("the option fits: $total", total <= (nf.allowedRub ?: 31_500))
+            val limit = nf.options[i].budgetRub?.let { it + it / 20 } ?: nf.allowedRub ?: 31_500
+            assertTrue("the option fits: $total ≤ $limit", total <= limit)
             shot("62-road-option-fits")
         }
     }

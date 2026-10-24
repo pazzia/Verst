@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from verst_planner import mobile  # noqa: E402
+from verst_planner.domain.model import LatLon  # noqa: E402
 
 OUT = ROOT.parents[1] / "docs" / "contracts" / "v2"
 GENERATED: dict[str, str] = {}
@@ -75,6 +76,43 @@ call("estimate-synthetic", "estimate", world=R, request_id="c-est-1", input_json
 msk = {"lat": 55.7558, "lon": 37.6173, "label": "Москва"}
 yar = {"lat": 57.6261, "lon": 39.8845, "label": "Ярославль"}
 graph_plan = mobile.plan(R, "c-plan-2", trip_input(msk, yar), None)
+# ADR-0011: the CEO's case (fitted) and a «doesn't fit» outcome
+CEO = {
+    "origin": msk,
+    "readyRouteId": "rr_golden_ring",
+    "crew": {"adults": 4, "children": 1, "dog": True},
+    "dailyKm": 300,
+}
+call(
+    "plan-budget-fit",
+    "plan",
+    world=R,
+    request_id="c-fit-1",
+    input_json=json.dumps({**CEO, "budget": 30000}),
+    listener=None,
+)
+call(
+    "estimate-budget-fit",
+    "estimate",
+    world=R,
+    request_id="c-fit-2",
+    input_json=json.dumps({**CEO, "budget": 30000}),
+)
+call(
+    "plan-no-fit",
+    "plan",
+    world=R,
+    request_id="c-fit-3",
+    input_json=json.dumps({**CEO, "budget": 20000}),
+    listener=None,
+)
+call(
+    "estimate-no-fit",
+    "estimate",
+    world=R,
+    request_id="c-fit-4",
+    input_json=json.dumps({**CEO, "budget": 20000}),
+)
 call("city_presets", "city_presets", world=R, lat=YAR["lat"], lon=YAR["lon"])
 walk = call(
     "city_route-overview",
@@ -143,10 +181,35 @@ call(
     request_id="c-walk-7",
     input_json=json.dumps({"start": {"lat": 61.5, "lon": 90.0, "label": "тайга"}, "preset": "overview"}),
 )
-call("poi_details-sight", "poi_details", world=R, place_id="Q900101")
+
+
+def poi_id(q, near):
+    rows = json.loads(mobile.geo_search(R, q, near["lat"], near["lon"], 5, '["poi"]'))["result"]
+    return rows[0]["id"]
+
+
+def town_without_bars():
+    """A small catalogue town with no bar within 6 km (the NOT_ENOUGH_POIS example), deterministic."""
+    from verst_planner.geo.distance import haversine_km
+
+    cat = mobile._CATALOGUE[0]
+    for t in sorted(cat.towns, key=lambda t: (t.population, t.id)):
+        if t.population >= 5000 and all(haversine_km(t.point, b.point) > 6 for b in cat.bars):
+            return {"lat": t.point.lat, "lon": t.point.lon, "label": t.name}
+    raise AssertionError("no town without bars")
+
+
+def bar_in(near):
+    from verst_planner.geo.distance import haversine_km
+
+    cat = mobile._CATALOGUE[0]
+    return min(cat.bars, key=lambda b: (haversine_km(b.point, LatLon(near["lat"], near["lon"])), b.id)).id
+
+
+call("poi_details-sight", "poi_details", world=R, place_id=poi_id("Эрмитаж", SPB))
 call("poi_details-fixture-sight", "poi_details", world=R, place_id="pl_yar_ilya")
 call("poi_details-hotel", "poi_details", world=R, place_id="pl_yar_hotel_strelka")
-call("poi_details-bar", "poi_details", world=R, place_id="n9001")
+call("poi_details-bar", "poi_details", world=R, place_id=bar_in(YAR))
 call("poi_details-not-found", "poi_details", world=R, place_id=FUEL_ID)
 trip = json.loads(graph_plan)["result"]["trip"]
 first_sight = next(s["id"] for d in trip["daysList"] for s in d["stops"] if s["kind"] == "sight")

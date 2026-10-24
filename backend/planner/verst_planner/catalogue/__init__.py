@@ -148,6 +148,18 @@ def encode_table(rows: Sequence[dict[str, Any]], cols: Sequence[str]) -> dict[st
     return {"v": FORMAT_VERSION, "n": len(rows), "cols": {c: [r.get(c) for r in rows] for c in cols}}
 
 
+def columns(doc: Any, cols: Sequence[str], name: str) -> list[list[Any]]:
+    """The validated columns of a table document, in `cols` order (no per-row dicts)."""
+    decode_table(doc, (), name)
+    out = []
+    for c in cols:
+        col = doc["cols"].get(c)
+        if not isinstance(col, list) or len(col) != doc["n"]:
+            raise CatalogueError(f"{name}: column {c!r} missing or of the wrong length")
+        out.append(col)
+    return out
+
+
 def decode_table(doc: Any, cols: Sequence[str], name: str) -> list[dict[str, Any]]:
     if not isinstance(doc, dict) or doc.get("v") != FORMAT_VERSION:
         raise CatalogueError(f"{name}: unsupported format {doc.get('v') if isinstance(doc, dict) else doc!r}")
@@ -196,46 +208,48 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any) -> Catalogue:
     bar_kinds = list(meta.get("barKinds", BAR_KINDS))
     region_codes = [str(r["code"]) for r in meta["regions"]]
     credits = [Credit(c.get("author"), c.get("licence"), c.get("url")) for c in meta.get("credits", [])]
+    t_id, t_name, t_gen, t_prep, t_lat, t_lon, t_pop, t_region, t_image, t_credit = columns(
+        towns, TOWN_COLS, "towns"
+    )
     out_towns = [
         CatTown(
-            id=str(r["id"]),
-            name=str(r["name"]),
-            gen=r["gen"],
-            prep=r["prep"],
-            point=LatLon(coord(r["lat"]), coord(r["lon"])),
-            population=int(r["pop"] or 0),
-            region=region_codes[int(r["region"])],
-            image=r["image"],
-            credit=r["credit"],
+            str(a),
+            str(b),
+            c,
+            d,
+            LatLon(e / COORD_SCALE, f / COORD_SCALE),
+            int(g or 0),
+            region_codes[int(h)],
+            i,
+            j,
         )
-        for r in decode_table(towns, TOWN_COLS, "towns")
+        for a, b, c, d, e, f, g, h, i, j in zip(
+            t_id, t_name, t_gen, t_prep, t_lat, t_lon, t_pop, t_region, t_image, t_credit, strict=True
+        )
     ]
     town_ids = [t.id for t in out_towns]
+    p_cols = columns(pois, POI_COLS, "pois")
     out_pois = [
         CatPoi(
-            id=str(r["id"]),
-            name=str(r["name"]),
-            desc=r["desc"],
-            kind=kinds[int(r["kind"])],
-            point=LatLon(coord(r["lat"]), coord(r["lon"])),
-            town=town_ids[int(r["town"])],
-            sitelinks=int(r["sitelinks"] or 0),
-            heritage=bool(r["heritage"]),
-            image=r["image"],
-            credit=r["credit"],
+            str(a),
+            str(b),
+            c,
+            kinds[int(d)],
+            LatLon(e / COORD_SCALE, f / COORD_SCALE),
+            town_ids[int(g)],
+            int(h or 0),
+            bool(i),
+            j,
+            k,
         )
-        for r in decode_table(pois, POI_COLS, "pois")
+        for a, b, c, d, e, f, g, h, i, j, k in zip(*p_cols, strict=True)
     ]
+    b_cols = columns(bars, BAR_COLS, "bars")
     out_bars = [
         CatBar(
-            id=str(r["id"]),
-            name=str(r["name"]),
-            kind=bar_kinds[int(r["kind"])],
-            point=LatLon(coord(r["lat"]), coord(r["lon"])),
-            town=town_ids[int(r["town"])],
-            hours=r["hours"],
+            str(a), str(b), bar_kinds[int(c)], LatLon(d / COORD_SCALE, e / COORD_SCALE), town_ids[int(f)], g
         )
-        for r in decode_table(bars, BAR_COLS, "bars")
+        for a, b, c, d, e, f, g in zip(*b_cols, strict=True)
     ]
     links = {
         str(k): FixtureLink(str(v["wikidata"]), v.get("image"), v.get("credit"))

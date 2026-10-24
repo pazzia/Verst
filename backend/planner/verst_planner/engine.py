@@ -5,10 +5,11 @@ from __future__ import annotations
 import dataclasses
 import statistics
 from collections.abc import Sequence
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from verst_planner import ENGINE_VERSION
+from verst_planner import fit as fit_mod
 from verst_planner.config import PlannerConfig
 from verst_planner.cost.model import (
     CostInput,
@@ -27,6 +28,7 @@ from verst_planner.cost.model import (
 from verst_planner.cost.money import round_to
 from verst_planner.cost.recompute import effective_tickets, recompute, rooms_for
 from verst_planner.domain.enums import (
+    FuelType,
     Meal,
     PlaceType,
     SignType,
@@ -51,6 +53,7 @@ from verst_planner.domain.model import (
     DayResult,
     DayState,
     EngineState,
+    FitKnobs,
     FuelRegionUnit,
     HotelOption,
     MealUnit,
@@ -61,6 +64,9 @@ from verst_planner.domain.model import (
     Place,
     PlannedStop,
     PlanWarning,
+    PointInput,
+    ReadyRoute,
+    RegionPrice,
     ScheduledStop,
     StopState,
     TollHit,
@@ -69,10 +75,12 @@ from verst_planner.domain.model import (
     TripInput,
     TripPlan,
 )
+from verst_planner.domain.rooms import room_plan
 from verst_planner.events import NEVER, NULL_SINK, CancelToken, ProgressSink, StageEvent, StopEvent
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import overnight_reason
 from verst_planner.explain.templates import ReasonTemplates
+from verst_planner.geo.distance import haversine_km
 from verst_planner.pipeline import Corridor, PlanContext, Ports, round_half_up
 from verst_planner.pipeline import fuel as fuel_stage
 from verst_planner.pipeline.alternatives import (
@@ -120,6 +128,28 @@ from verst_planner.ports import (
     TollRepository,
 )
 
+ECONOMY_CHECK_FACTOR = Decimal("0.75")
+NO_KNOBS = FitKnobs()
+
+
+class _EconomyPrices:
+    """ADR-0011 `food_economy`: default meal checks at the «кафе попроще» tier (x 0.75, to 10 ₽)."""
+
+    def __init__(self, inner: PriceRepository) -> None:
+        self.inner = inner
+
+    def fuel_price(self, region_code: str, fuel_type: FuelType) -> RegionPrice:
+        return self.inner.fuel_price(region_code, fuel_type)
+
+    def food_default_check(self, town_population: int) -> int:
+        return round_to(Decimal(self.inner.food_default_check(town_population)) * ECONOMY_CHECK_FACTOR, 10)
+
+    def lodging_default_night(self, town_population: int) -> int:
+        return self.inner.lodging_default_night(town_population)
+
+    def defaults_as_of(self) -> date:
+        return self.inner.defaults_as_of()
+
 
 class Planner:
     def __init__(
@@ -141,8 +171,11 @@ class Planner:
         self.templates = templates
 
     # ------------------------------------------------------------------------------------------ context
-    def _ctx(self) -> PlanContext:
-        ctx = PlanContext(self.cfg, self.templates, self.ports, self.clock)
+    def _ctx(self, knobs: FitKnobs = NO_KNOBS) -> PlanContext:
+        ports = self.ports
+        if knobs.food_economy:
+            ports = dataclasses.replace(ports, prices=_EconomyPrices(ports.prices))
+        ctx = PlanContext(self.cfg, self.templates, ports, self.clock, knobs=knobs)
         ctx.stop_cost = lambda s, inp: self._stop_cost(s, inp, ctx)
         return ctx
 
@@ -155,7 +188,8 @@ class Planner:
             return food_cost(lunch_check(s, ctx), crew, self.cfg)
         if s.kind is StopKind.OVERNIGHT:
             if s.place is not None and s.place.price_night_rub is not None:
-                return overnight_cost(s.place.price_night_rub, crew)
+                rooms, price, _explicit = room_plan(s.place, crew, ctx.knobs.family_rooms)
+                return overnight_cost(price, crew, rooms)
             pop = s.town.population if s.town is not None else 0
             return overnight_cost(self.ports.prices.lodging_default_night(pop), crew)
         if s.kind is StopKind.FUEL and s.litres > 0:
@@ -190,9 +224,39 @@ class Planner:
         cancel: CancelToken = NEVER,
         split_km_hint: int | None = None,
     ) -> TripPlan:
-        """`split_km_hint`: the trip km of an earlier identical plan (mobile `estimate`), so the split stage
+        """Plan and fit to the budget (ADR-0011): the plain plan when it fits or there is no budget, else the
+        fitted plan (`budget_fit` set), else `fit.NoFit` (the minimum and the options).
+
+        `split_km_hint`: the trip km of an earlier identical plan (mobile `estimate`), so the split stage
         says «по ≈ {km}» with the trip km (incl. stop detours), not the base route km (slice-2 N-10)."""
-        ctx = self._ctx()
+        s0 = self._plan_once(raw, sink, cancel, split_km_hint, NO_KNOBS)
+        try:
+            plan = fit_mod.fit(raw, s0, _FitEnv(self, cancel))
+        except fit_mod.NoFit as nf:
+            sink.emit(StageEvent(StageKey.BUDGET, self.templates.render("stage.budget"), 0.92))
+            self._emit_final(nf.minimum, sink)
+            raise
+        if plan.budget_fit is not None:
+            sink.emit(StageEvent(StageKey.BUDGET, self.templates.render("stage.budget"), 0.92))
+        self._emit_final(plan, sink)
+        return plan
+
+    @staticmethod
+    def _emit_final(plan: TripPlan, sink: ProgressSink) -> None:
+        for d in plan.days_list:
+            for s in d.stops:
+                sink.emit(StopEvent(d.day, s.id, s.kind, s.sign, s.name_ru, s.km_at, False))
+
+    def _plan_once(
+        self,
+        raw: TripInput,
+        sink: ProgressSink,
+        cancel: CancelToken,
+        split_km_hint: int | None,
+        knobs: FitKnobs,
+    ) -> TripPlan:
+        """Stages 0-12 with the budget levers `knobs` (ADR-0011); no final stop events."""
+        ctx = self._ctx(knobs)
         t = self.templates
         inp = normalize_input(raw, ctx)
         pts = resolve_points(inp, ctx)
@@ -279,9 +343,6 @@ class Planner:
             ctx,
             engine_state(profile, region_kms, toll_hits, views, corridor, ctx),
         )
-        for d in plan.days_list:
-            for s in d.stops:
-                sink.emit(StopEvent(d.day, s.id, s.kind, s.sign, s.name_ru, s.km_at, False))
         return plan
 
     @staticmethod
@@ -334,7 +395,10 @@ class Planner:
                 views[len(sd.plan.stops) - 1] = StopView(
                     overnight_text=text.text,
                     note=note,
-                    hotel_options=tuple(hotel_option(h.place, inp, h.lateral_km) for h in c.hotel_options),
+                    hotel_options=tuple(
+                        hotel_option(h.place, inp, h.lateral_km, ctx.knobs.family_rooms)
+                        for h in c.hotel_options
+                    ),
                 )
                 reasons.append(
                     OvernightReason(
@@ -505,14 +569,24 @@ class Planner:
                 for k, x in enumerate(state.days)
             ),
         )
-        return dataclasses.replace(
-            plan,
-            days_list=days_list,
-            km=trip_km,
-            cost=cost,
-            warnings=tuple(warnings),
-            engine_state=new_state,
+        return self._flagged(
+            dataclasses.replace(
+                plan,
+                days_list=days_list,
+                km=trip_km,
+                cost=cost,
+                warnings=tuple(warnings),
+                engine_state=new_state,
+            )
         )
+
+    def _flagged(self, plan: TripPlan) -> TripPlan:
+        """ADR-0011: re-mark `breaksBudget` on the alternatives after an edit."""
+        budget = plan.input.budget_rub
+        env = _FitEnv(self, NEVER)
+        if budget is None:
+            return fit_mod.flag_alternatives(plan, 10**12, env)
+        return fit_mod.flag_alternatives(plan, fit_mod.allowed_rub(budget), env)
 
     # ------------------------------------------------------------------------------------------ cost patch
     def recompute_cost(self, plan: TripPlan, patch: CostPatch) -> TripPlan:
@@ -522,6 +596,10 @@ class Planner:
         if crew.dog != inp.crew.dog or (crew.children > 0) != (inp.crew.children > 0):
             # the lodging filters change (US-05): only a re-plan may pick other hotels (A§16.9)
             raise InvalidInput("crew", "replan_required")
+        if crew != inp.crew and any(
+            n.rooms is not None or any(o.rooms is not None for o in n.options) for n in plan.cost.units.nights
+        ):
+            raise InvalidInput("crew", "replan_required")  # ADR-0011: fitted family rooms depend on the crew
         budget = inp.budget_rub if patch.budget_rub is UNSET else patch.budget_rub
         assert budget is None or isinstance(budget, int)
         reserve_on = inp.reserve_on if patch.reserve_on is None else patch.reserve_on
@@ -546,6 +624,7 @@ class Planner:
                     False,
                     option.breakfast_included,
                     n.breakfast_check_rub,
+                    option.rooms,
                 )
                 if n.stop_id == sid
                 else n
@@ -558,7 +637,74 @@ class Planner:
         cost = self._with_hints(recompute(units, crew, reserve_on, budget))
         if crew != inp.crew:
             days_list = tuple(_recrew_day(d, units, new_inp, self.cfg) for d in days_list)
-        return dataclasses.replace(plan, cost=cost, input=new_inp, days_list=days_list)
+        return self._flagged(dataclasses.replace(plan, cost=cost, input=new_inp, days_list=days_list))
+
+
+# ---------------------------------------------------------------------------------------------- fitting
+
+
+CLOSER_MIN_FRAC, CLOSER_MAX_FRAC, CLOSER_BEST_FRAC = 0.40, 0.75, 0.60
+CLOSER_MIN_POPULATION = 20_000
+CLOSER_CORRIDOR_KM = 60.0
+HUB_RADIUS_KM = 50.0
+
+
+class _FitEnv:
+    """`fit.FitEnv` over this planner and its ports (ADR-0011)."""
+
+    def __init__(self, planner: Planner, cancel: CancelToken) -> None:
+        self.p = planner
+        self.cancel = cancel
+
+    def plan(self, raw: TripInput, knobs: FitKnobs) -> TripPlan:
+        return self.p._plan_once(raw, NULL_SINK, self.cancel, None, knobs)
+
+    def variants(self, ready_route_id: str) -> list[ReadyRoute]:
+        get = getattr(self.p.ports.places, "variants_of", None)
+        return list(get(ready_route_id)) if get is not None else []
+
+    def hub_routes(self, ready_route_id: str) -> list[ReadyRoute]:
+        places = self.p.ports.places
+        rr = places.get_ready_route(ready_route_id)
+        if rr is None:
+            return []
+        hub = places.get_towns([rr.hub_town_id]).get(rr.hub_town_id)
+        if hub is None:
+            return []
+        routes = places.ready_routes_near(hub.point, HUB_RADIUS_KM, 20)
+        out = [r for r in routes if r.id != ready_route_id and r.id != rr.parent_id]
+        return sorted(out, key=lambda r: (r.km_total, r.id))
+
+    def towns_towards(self, raw: TripInput, plan: TripPlan, limit: int) -> list[PointInput]:
+        if raw.destination is None:
+            return []
+        a, b = raw.origin.point, raw.destination.point
+        total = haversine_km(a, b)
+        if total <= 0:
+            return []
+        places = self.p.ports.places
+        towns = places.towns_in_corridor((a, b), CLOSER_CORRIDOR_KM)
+        lodgings = places.lodgings_of_towns([t.id for t in towns])
+        picks = []
+        for t in towns:
+            frac = haversine_km(a, t.point) / total
+            if not CLOSER_MIN_FRAC <= frac <= CLOSER_MAX_FRAC or t.population < CLOSER_MIN_POPULATION:
+                continue
+            if not lodgings.get(t.id):
+                continue
+            picks.append((abs(frac - CLOSER_BEST_FRAC), t.id, t))
+        picks.sort(key=lambda x: (x[0], x[1]))
+        return [PointInput(t.point, t.name_ru, None, t.id) for _f, _i, t in picks[:limit]]
+
+    def check_cancel(self) -> None:
+        self.cancel.check()
+
+    def text(self, key: str, **params: str | int) -> str:
+        return ru.text(key, **params)
+
+    def recompute_total(self, plan: TripPlan, overrides: CostOverrides) -> int:
+        inp = plan.input
+        return recompute(plan.cost.units, inp.crew, inp.reserve_on, inp.budget_rub, overrides).total_rub
 
 
 # ---------------------------------------------------------------------------------------------- helpers
@@ -670,7 +816,7 @@ def _with_hotel(d: DayResult, sid: str, pid: str, crew: Crew) -> DayResult:
                     selected_hotel_id=pid,
                     place_id=pid,
                     tags=opt.tags,
-                    cost_rub=overnight_cost(opt.price_night_rub, crew),
+                    cost_rub=overnight_cost(opt.price_night_rub, crew, opt.rooms),
                 )
         out.append(s)
     return dataclasses.replace(d, stops=tuple(out))
@@ -766,7 +912,8 @@ def _town_check(town: Town | None, corridor: Corridor, ctx: PlanContext) -> int:
         if c.place.town_id == town.id and c.place.avg_check_rub is not None
     )
     if checks:
-        return int(statistics.median_low(checks))
+        # ADR-0011 `food_economy`: the cheapest place in town instead of the median one
+        return checks[0] if ctx.knobs.food_economy else int(statistics.median_low(checks))
     return ctx.ports.prices.food_default_check(town.population)
 
 
@@ -815,6 +962,7 @@ def _cost_input(
                 tuple(h.place for h in c.hotel_options),
                 prices.lodging_default_night(pop),
                 _town_check(c.town, corridor, ctx),
+                ctx.knobs.family_rooms,
             )
         )
     day_inputs = []

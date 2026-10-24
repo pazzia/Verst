@@ -44,7 +44,7 @@ class EnumTest(unittest.TestCase):
                 "UNVERIFIED_PLACES",
                 "STOP_CLOSED",
             ],
-            StageKey: ["split", "lodging", "hours", "fuel", "cost"],
+            StageKey: ["split", "lodging", "hours", "fuel", "cost", "budget"],
             CostKey: ["fuel", "tolls", "lodging", "food", "tickets", "reserve"],
         }
         for enum_cls, values in expected.items():

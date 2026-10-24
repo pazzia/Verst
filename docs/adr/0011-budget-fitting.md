@@ -102,7 +102,9 @@ S5 = S4 + variant             (ready routes with a variant)
 }}
 ```
 
-- A normal plan result carries `"outcome": "plan"` next to `trip`. That key is new, and `API_VERSION` becomes 2.
+- Each option also carries `fits`. When no shorten or cheaper-route candidate fits the tolerance, the cheapest candidate that is still cheaper than the minimum is offered with `fits: false`: a concrete number, not a promise. A lever that saved nothing is not listed in `levers` or in the text.
+
+A normal plan result carries `"outcome": "plan"` next to `trip`. That key is new, and `API_VERSION` becomes 2.
 - **Options.** Each option is verified by an actual (fitted) plan, so its number is the engine's number. The search stops after 8 extra plan runs.
   - `raise_budget`: always present. `budgetRub` = minimum total rounded **up** to 1 000.
   - `shorten`:
@@ -127,6 +129,13 @@ When a budget is set, every `Alternative` gets `breaksBudget: true` if `recomput
 - `cost_recompute_cases.json` gains cases for explicit rooms. The Kotlin `CostCalculator` ports the rule (DEV-303); the old cases are unchanged.
 
 A budget patch (`patch_cost {budget}`) stays cost-only: no re-fit. The Waybill's over-budget state offers «Подогнать под бюджет», which re-plans with the new budget and opens Drive.
+
+## As built (ARCH-301, `arch/sprint-3`)
+
+- **Code:** `verst_planner/fit.py` (ladder, tolerance, options, `flag_alternatives`) and `domain/rooms.py` (family room plan). The knobs live in `PlanContext.knobs` and are used by stages 5 (`rank_hotels`, the town price term `W_PRICE = 0.5` per 1 000 ₽), 8 (`lunch_score` economy term; `_EconomyPrices` x 0.75 on default checks; the cheapest town check instead of the median) and 9 (`is_paid` filter).
+- **Entry point:** `Planner.plan` always fits; when the trip cannot fit, it raises `fit.NoFit` (code `NO_FIT`, never surfaced as an error by the bridge).
+- **G13 «ceo_budget_fit»** (golden clock, start 2026-11-07): the plain plan is 58 400 ₽. The fitted plan is the 2-day «Золотое кольцо · коротко» at **27 400 ₽** (`fits`). Levers: economy food −2 700, free sights −5 600, variant −22 700. Cheaper hotels and family rooms saved 0: there is one dog-friendly family hotel per town, and 2 standard rooms tie with ceil(5/4) = 2 family rooms.
+- **Fixture:** `central_russia_v1` gains the hidden ready route `rr_golden_ring_short` (`parentId`). G01–G12 are byte-identical; DEV-112 bundles gain `G13` only.
 
 ## Consequences
 

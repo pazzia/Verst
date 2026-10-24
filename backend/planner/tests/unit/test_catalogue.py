@@ -63,6 +63,24 @@ class FormatTest(unittest.TestCase):
         self.assertTrue(all(p.town in c.town_by_id for p in c.pois))
         self.assertTrue(all(b.kind in cat.BAR_KINDS for b in c.bars))
 
+    def test_real_catalogue_coverage(self) -> None:
+        """ARCH-302 acceptance on the CI-built data (skipped for the sandbox sample)."""
+        c = cat.load_packaged()
+        if c.version == "sample":
+            self.skipTest("sample catalogue")
+        self.assertGreaterEqual(len(c.towns), 1000)
+        self.assertGreaterEqual(len(c.pois), 10000)
+        self.assertGreaterEqual(len(c.bars), 2000)
+        names = {t.name: t for t in c.towns}
+        big_towns = ("Москва", "Санкт-Петербург", "Екатеринбург", "Новосибирск", "Казань", "Пермь")
+        for big in big_towns:
+            self.assertIn(big, names)
+            self.assertTrue(names[big].gen and names[big].prep, big)
+        self.assertEqual(names["Москва"].gen, "Москвы")
+        with_forms = sum(1 for t in c.towns if t.gen and t.prep)
+        self.assertGreaterEqual(with_forms / len(c.towns), 0.95)
+        self.assertGreaterEqual(sum(1 for p in c.pois if p.image) / len(c.pois), 0.3)
+
     def test_size_budget(self) -> None:
         total = sum(len(resources.read_bytes(name)) for name in cat.FILES.values())
         self.assertLessEqual(total, HARD_LIMIT_BYTES)

@@ -14,4 +14,6 @@
     <string name="navigator_type_address">У</string>
     <!-- S3-R2 5.11 `walk_next` {distance} under 1 km: «600 м» (deck example, no key). -->
     <string name="walk_distance_m">%1$d м</string>
+    <!-- S3-R2 5.8 cheaper-route option with `fits: false` (ARCH-301 as built): no deck key yet. -->
+    <string name="budget_option_cheaper_sub_over">≈ %1$s ₽ · дешевле, но больше бюджета</string>
 </resources>

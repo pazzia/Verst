@@ -249,9 +249,10 @@ private fun WideButton(text: String, tag: String, walker: Boolean = false, enabl
 @Composable
 private fun WalkTitleSign(w: WalkRouteDto, modifier: Modifier) {
     val km = km(w.walkKm)
+    val kmText = stringResource(R.string.common_km_approx, km)
     Row(
         modifier.heightIn(min = 49.dp).overheadPlate(outer = 3.dp, radius = 7.dp, innerRadius = 5.dp)
-            .semantics(mergeDescendants = true) { heading(); contentDescription = "${w.titleRu}, $km" }
+            .semantics(mergeDescendants = true) { heading(); contentDescription = "${w.titleRu}, $kmText" }
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -260,7 +261,7 @@ private fun WalkTitleSign(w: WalkRouteDto, modifier: Modifier) {
         }
         Spacer(Modifier.width(8.dp))
         Txt(w.titleRu, T.sign.xlTight, C.sign.white, Modifier.weight(1f).testTag("walk.title"), maxLines = 2)
-        Txt("≈ $km", T.sign.xlTight, C.sign.white, Modifier.padding(start = 8.dp))
+        Txt(kmText, T.sign.xlTight, C.sign.white, Modifier.padding(start = 8.dp), maxLines = 1)
     }
 }
 

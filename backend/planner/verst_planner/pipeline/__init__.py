@@ -14,6 +14,7 @@ from verst_planner.config import PlannerConfig
 from verst_planner.domain.enums import RoadClass, WarningCode
 from verst_planner.domain.model import (
     Candidate,
+    FitKnobs,
     LatLon,
     NormalizedInput,
     Place,
@@ -64,6 +65,8 @@ class PlanContext:
     stop_cost: Callable[[PlannedStop, NormalizedInput], int] = _zero_cost
     """Per-stop cost (A§7.1), injected by the engine from `cost.model` (pipeline may not import cost)."""
     ready_route: ReadyRoute | None = None
+    knobs: FitKnobs = field(default_factory=FitKnobs)
+    """ADR-0011 budget levers for this plan run (all off = the plain plan)."""
     fuel_warnings: list[PlanWarning] = field(default_factory=list)
     rerun: int = 0
     corridor_towns: list[TownCandidate] = field(default_factory=list)

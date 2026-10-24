@@ -55,6 +55,9 @@ data class BudgetOptionDto(
     val totalRub: Int? = null,
     val readyRouteId: String? = null,
     val titleRu: String? = null,
+    val dailyKm: Double? = null,
+    /** false: the cheapest candidate of its kind, still over the tolerance (a number, not a promise). */
+    val fits: Boolean = true,
 )
 
 /** `plan` → `outcome = no_fit`: the minimum (a trip shown only on request) and the options. */

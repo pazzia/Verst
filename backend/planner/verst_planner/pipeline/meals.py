@@ -20,12 +20,17 @@ from verst_planner.pipeline.timeline import Profile, eta_if_inserted, insert_sto
 
 PARKING = frozenset({Tag.PARKING, Tag.PARKING_GUARDED})
 NEAREST_TOWN_KM = 30.0
+ECONOMY_W = 4.0  # ADR-0011 `food_economy`: score points per 1 000 ₽ of the average check
+ECONOMY_UNKNOWN_CHECK = 700
 
 DayCheck = Callable[[DayPlan], bool]
 
 
 def lunch_score(c: Candidate, inp: NormalizedInput, eta_local: datetime, ctx: PlanContext) -> float:
     t = c.place.tags
+    economy = (
+        ECONOMY_W * (c.place.avg_check_rub or ECONOMY_UNKNOWN_CHECK) / 1000 if ctx.knobs.food_economy else 0.0
+    )
     return (
         c.place.rating_internal
         + 2.0 * (Tag.KIDS_MENU in t and inp.crew.children > 0)
@@ -33,6 +38,7 @@ def lunch_score(c: Candidate, inp: NormalizedInput, eta_local: datetime, ctx: Pl
         + 0.5 * (Tag.VIEW in t)
         + 0.5 * in_window(eta_local, ctx.cfg.lunch_sweet_spot)
         - c.detour_min / 5
+        - economy
     )
 
 

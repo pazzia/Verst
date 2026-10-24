@@ -64,6 +64,12 @@ handoff.*        (engine resource keys, if any)
   - The stop-menu copy keys of the deck that name the brands are renamed into the `handoff_*` space by the Designer.
 - **Walk result:** «Пешком в Яндекс Картах».
 
+## As built (ARCH-306)
+
+- `verst_planner/handoff.py` (pure, no world) and `mobile.handoff`; contract files `docs/contracts/v2/handoff-*.json`.
+- The brand allow-list is `backend/planner/tests/brand_allowlist.txt`: `json:links.{navigator,maps,web}` for the engine and `android:handoff_*` for the Kotlin test (DEV-307 adds the Android side).
+- A walk with `fromHere` starts the first part's `rtext` with `~` (current position); later parts start at the shared boundary point.
+
 ## Options rejected
 
 - **Building URIs in Kotlin.** That would be two implementations, and Python is where the point selection lives and is tested.
