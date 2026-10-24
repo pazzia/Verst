@@ -27,12 +27,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -90,9 +94,11 @@ fun NavigatorScreen(
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
+    var inputFocused by remember { mutableStateOf(false) }
     val pick: (SuggestionDto) -> Unit = {
         keyboard?.hide()
         focus.clearFocus()
+        inputFocused = false
         onPick(it)
     }
     ScreenRoot(C.dash.base) {
@@ -104,8 +110,9 @@ fun NavigatorScreen(
             Column(Modifier.weight(1f).fillMaxWidth().background(C.dash.raised)) {
                 val back = stringResource(R.string.common_back_to_windshield)
                 BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp, top = 0.dp))
-                Panel(ui, onQuery, pick, onEditFrom, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = 6.dp, bottom = 12.dp))
-                if (!WindowInsets.isImeVisible) Caption(ui, onStart)
+                Panel(ui, onQuery, pick, onEditFrom, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = 6.dp, bottom = 12.dp))
+                // 5.2 §1: the caption row hides while typing (IME open on a focused field) and returns after a pick.
+                if (!(inputFocused && WindowInsets.isImeVisible)) Caption(ui, onStart)
             }
         }
     }
@@ -117,6 +124,7 @@ private fun Panel(
     onQuery: (String) -> Unit,
     onPick: (SuggestionDto) -> Unit,
     onEditFrom: () -> Unit,
+    onFocus: (Boolean) -> Unit,
     modifier: Modifier,
 ) {
     Column(
@@ -129,7 +137,7 @@ private fun Panel(
     ) {
         Txt(stringResource(R.string.navigator_header), T.label.md, C.navi.label)
         if (ui.editingFrom) {
-            Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from")
+            Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from", onFocus = onFocus)
             ValueField(stringResource(R.string.navigator_to_label), ui.destination?.name ?: stringResource(R.string.navigator_to_hint), square = true)
         } else {
             ValueField(
@@ -139,7 +147,7 @@ private fun Panel(
                 action = stringResource(R.string.navigator_change),
                 onAction = onEditFrom,
             )
-            Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to")
+            Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus)
         }
         val q = ui.query.trim()
         val picked = !ui.editingFrom && ui.destination != null && ui.query == ui.destination.name
@@ -161,7 +169,7 @@ private fun Panel(
 }
 
 @Composable
-private fun Input(caption: String, value: String, onChange: (String) -> Unit, round: Boolean, tag: String) {
+private fun Input(caption: String, value: String, onChange: (String) -> Unit, round: Boolean, tag: String, onFocus: (Boolean) -> Unit) {
     val fr = remember { FocusRequester() }
     LaunchedEffect(tag) { fr.requestFocus() }
     val shape = RoundedCornerShape(DesignTokens.radius.r10)
@@ -186,7 +194,7 @@ private fun Input(caption: String, value: String, onChange: (String) -> Unit, ro
                 textStyle = T.field.lg.copy(color = C.text.primary),
                 cursorBrush = SolidColor(C.accent.yellow),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                modifier = Modifier.fillMaxWidth().focusRequester(fr).testTag(tag),
+                modifier = Modifier.fillMaxWidth().focusRequester(fr).onFocusChanged { onFocus(it.isFocused) }.testTag(tag),
                 decorationBox = { inner ->
                     Box {
                         if (value.isEmpty()) Txt(stringResource(R.string.navigator_to_hint), T.field.lg, C.navi.hint)

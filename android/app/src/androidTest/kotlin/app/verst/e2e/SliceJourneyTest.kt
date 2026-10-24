@@ -24,6 +24,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 import org.junit.runner.RunWith
 
 /**
@@ -34,7 +36,14 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class SliceJourneyTest {
-    @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val compose = createAndroidComposeRule<MainActivity>()
+
+    /** Inner rule: on a failure the activity is still up, so the screen at the moment of failure is kept. */
+    @get:Rule(order = 1) val onFailure = object : TestWatcher() {
+        override fun failed(e: Throwable?, description: Description) {
+            runCatching { shot("zz-failed-${description.methodName}") }
+        }
+    }
 
     private val flow get() = (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as VerstApp).flow
 
