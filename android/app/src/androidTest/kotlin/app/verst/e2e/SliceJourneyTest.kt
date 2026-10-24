@@ -167,7 +167,7 @@ class SliceJourneyTest {
         assertTrue("total drops: ${before.totalRub} → ${after.totalRub}", after.totalRub < before.totalRub)
         compose.waitUntil(5_000) { number(textOf("waybill.total")) == after.totalRub }
         assertEquals("—", textOf("waybill.reserve.sum"))
-        compose.onNodeWithTag("waybill.total").performScrollTo()
+        compose.onNodeWithTag("waybill.total", useUnmergedTree = true).performScrollTo()
         shot("13-waybill-reserve-off")
         back()
         assertEquals(Route.Road, flow.top)
