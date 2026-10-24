@@ -266,6 +266,17 @@ class VerstFlow(
     /** Bumps on every return to Road ahead (back from a screen, a sheet closed, a restore). */
     var roadFocusSeq by mutableStateOf(0)
         private set
+    /** 5.9 §5: the scroll offset of Road ahead, restored exactly on the way back (also after process death). */
+    var roadScrollY: Int? by mutableStateOf(null)
+        private set
+    /** Walk result focus restore (as Road ahead). */
+    var walkFocusId: String? by mutableStateOf(null)
+        private set
+    var walkFocusSeq by mutableStateOf(0)
+        private set
+    /** The saved id of the walk on screen (DEV-308). */
+    var savedWalkId: String? by mutableStateOf(null)
+        private set
 
     // ---- Navigator
     var query by mutableStateOf("")
@@ -1019,9 +1030,6 @@ class VerstFlow(
         }
     }
 
-    /** 5.9 §5: the scroll offset of Road ahead, restored exactly on the way back (also after process death). */
-    var roadScrollY: Int? by mutableStateOf(null)
-        private set
 
     /** The highlight of the restored row has been shown. */
     fun roadFocusShown() {
@@ -1212,11 +1220,6 @@ class VerstFlow(
         aboutData = false
     }
 
-    /** Walk result focus restore (as Road ahead). */
-    var walkFocusId: String? by mutableStateOf(null)
-        private set
-    var walkFocusSeq by mutableStateOf(0)
-        private set
 
     fun walkFocusShown() {
         walkFocusId = null
@@ -1700,9 +1703,6 @@ class VerstFlow(
         walkFocusSeq += 1
     }
 
-    /** The saved id of the walk on screen (DEV-308). */
-    var savedWalkId: String? by mutableStateOf(null)
-        private set
 
     /** Save the walk to «Мои поездки» (schema 2, `kind = walk`). */
     fun saveWalk() {
