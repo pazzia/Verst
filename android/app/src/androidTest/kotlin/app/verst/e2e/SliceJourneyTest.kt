@@ -240,6 +240,11 @@ class SliceJourneyTest {
         waitTag("windshield.route.0")
         compose.onNodeWithText("Золотое кольцо").performClick()
         compose.waitUntil(5_000) { flow.selected?.id == "rr_golden_ring" }
+        // F-01: the sign row shows the engine estimate of this very request (crew, pace), not the fixture km.
+        compose.waitUntil(20_000) { flow.routeKm["rr_golden_ring"] != null }
+        val signKm = flow.routeKm.getValue("rr_golden_ring")
+        val row = flow.selectedRoute
+        compose.waitUntil(5_000) { number(textOf("windshield.route.$row.km")) == signKm }
         shot("08-windshield-golden-ring")
         compose.onNodeWithTag("windshield.start").performClick()
         waitTag("instruments.start")
@@ -250,6 +255,8 @@ class SliceJourneyTest {
         val planMs = (System.nanoTime() - t0) / 1_000_000
         shot("10-road-ahead-golden-ring")
         assertTrue(flow.result!!.trip.days >= 3)
+        Log.i("VerstE2e", "golden ring km windshield=$signKm plan=${flow.result!!.trip.km}")
+        assertEquals(signKm, flow.result!!.trip.km) // one trip, one distance from the Windshield on
 
         // 5.7 Exit: night 1 → another hotel (local first, engine after) → mock partner → «Забронировали?» → booked.
         val night = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.size >= 2 }

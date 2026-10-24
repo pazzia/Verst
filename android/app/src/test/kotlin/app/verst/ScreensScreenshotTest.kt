@@ -1,5 +1,7 @@
 package app.verst
 
+import androidx.compose.ui.res.stringResource
+import app.verst.core.ui.R as UiR
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -409,7 +411,10 @@ class ScreensScreenshotTest {
     fun limitDialog() = shot("road", "limit-dialog") {
         Box(Modifier.fillMaxSize()) {
             RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE"), noRoad)
-            NaviDialog("Место для поездок закончилось", "Удалите старую поездку, чтобы сохранить эту", "Мои поездки", "Отменить", "limit", {}, {})
+            NaviDialog(
+                stringResource(UiR.string.common_storage_full_title), stringResource(UiR.string.common_storage_full_body),
+                stringResource(UiR.string.common_storage_full_open), stringResource(UiR.string.common_dialog_cancel), "limit", {}, {},
+            ) // the very keys MainActivity uses
         }
     }
 
