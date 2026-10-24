@@ -181,7 +181,6 @@ private fun Panel(
                 else -> Unit
             }
         }
-        if (ui.locationPrompt && !ui.editingFrom) LocationCard(location)
         if (ui.editingFrom) {
             Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from", onFocus = onFocus, autoFocus = true)
             MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
@@ -195,6 +194,8 @@ private fun Panel(
                 onAction = onEditFrom,
             )
             Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus, autoFocus = ui.destination == null)
+            // S3-R1: under КУДА, so the focused field never scrolls the panel header away.
+            if (ui.locationPrompt && !typing) LocationCard(location)
         }
         val q = ui.query.trim()
         val picked = !ui.editingFrom && ui.destination != null && ui.query == ui.destination.name
