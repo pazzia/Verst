@@ -23,4 +23,12 @@ def read_text(name: str) -> str:
         return (Path(__file__).parent / name).read_text("utf-8")
 
 
-__all__ = ["DIR", "read_text"]
+def read_bytes(name: str) -> bytes:
+    """The raw bytes of resource `name` (the gzip catalogue files, ADR-0012 §3)."""
+    try:
+        return resources.files(__name__).joinpath(name).read_bytes()
+    except (TypeError, AttributeError, NotImplementedError, ModuleNotFoundError):
+        return (Path(__file__).parent / name).read_bytes()
+
+
+__all__ = ["DIR", "read_bytes", "read_text"]

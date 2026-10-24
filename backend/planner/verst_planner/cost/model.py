@@ -31,6 +31,7 @@ from verst_planner.domain.model import (
     TollHit,
     TollUnit,
 )
+from verst_planner.domain.rooms import room_plan
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +57,7 @@ class NightInput:
     options: tuple[Place, ...]  # passing lodgings (selected first)
     default_night_rub: int  # `lodging_default_night(population)`, used when there is no hotel
     town_check_rub: int  # dinner / breakfast base check of the overnight town (median or default)
+    family_rooms: bool = False  # ADR-0011 lever: family rooms where they cost less
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,9 +139,16 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
     nights: list[NightUnit] = []
     lodging_dates: list[date] = []
     for n in ci.nights:
-        options = tuple(HotelPrice(o.id, o.price_night_rub or 0, o.breakfast_included) for o in n.options)
+        plans = {o.id: room_plan(o, inp.crew, n.family_rooms) for o in n.options}
+        options = tuple(
+            HotelPrice(o.id, plans[o.id][1], o.breakfast_included, plans[o.id][0] if plans[o.id][2] else None)
+            for o in n.options
+        )
+        rooms: int | None = None
         if n.hotel is not None:
-            price, default, bf = n.hotel.price_night_rub or 0, False, n.hotel.breakfast_included
+            r, price, explicit = room_plan(n.hotel, inp.crew, n.family_rooms)
+            rooms = r if explicit else None
+            default, bf = False, n.hotel.breakfast_included
             if n.hotel.verified_at:
                 lodging_dates.append(n.hotel.verified_at)
             else:
@@ -158,6 +167,7 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
                 default,
                 bf,
                 breakfast_check(n.town_check_rub, cfg),
+                rooms,
             )
         )
 
@@ -242,8 +252,8 @@ def food_cost(check: int, crew: Crew, cfg: PlannerConfig) -> int:
     return round_to(dec(people_weight(crew, cfg)) * check, 10)
 
 
-def overnight_cost(price_night: int, crew: Crew) -> int:
-    return round_to(dec(rooms_for(crew) * price_night), 10)
+def overnight_cost(price_night: int, crew: Crew, rooms: int | None = None) -> int:
+    return round_to(dec((rooms_for(crew) if rooms is None else rooms) * price_night), 10)
 
 
 def fuel_stop_cost(litres: float, price: RegionPrice) -> int:

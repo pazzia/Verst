@@ -1,0 +1,30 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-7",
+   "input_json": {
+    "start": {
+     "lat": 61.5,
+     "lon": 90.0,
+     "label": "тайга"
+    },
+    "preset": "overview"
+   }
+  }
+ },
+ "response": {
+  "ok": false,
+  "error": {
+   "code": "NO_CITY",
+   "message": "no town within 15 km",
+   "field": null,
+   "reason": null,
+   "pointIndex": null,
+   "roadKm": null,
+   "detail": null
+  },
+  "ms": 0
+ }
+}

@@ -329,82 +329,107 @@ class VerstFlowTest {
     }
 
     @Test
-    fun handoffOpensTheDayAndFromStopRoutesAndNeedsTheNetwork() = runTest {
+    fun handoffDayMenuStopMenuTargetsAndFallbacks() = runTest {
         val gw = FakeGateway()
         val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
-        val opened = mutableListOf<app.verst.core.model.NaviHandoff>()
-        var installed = false
+        val opened = mutableListOf<Pair<app.verst.core.model.dto.HandoffLinksDto, Boolean>>()
+        var navi = false
+        var maps = false
+        var result = HandoffTarget.Browser
         flow.handoffLauncher = object : HandoffLauncher {
-            override fun navigatorInstalled() = installed
-            override fun open(h: app.verst.core.model.NaviHandoff): HandoffTarget {
-                opened += h
-                return if (installed) HandoffTarget.Navigator else HandoffTarget.Browser
+            override fun navigatorInstalled() = navi
+            override fun mapsInstalled() = maps
+            override fun open(links: app.verst.core.model.dto.HandoffLinksDto, walk: Boolean): HandoffTarget {
+                opened += links to walk
+                return result
             }
         }
         settle()
         flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
         settle(10_000)
         val day = flow.result!!.trip.daysList.first()
-        flow.openDayInNavigator(day.day)
-        assertEquals(HandoffTarget.Browser, flow.lastHandoff!!.second)
-        assertEquals(app.verst.core.model.NaviLinks.day(day), opened.single())
-        installed = true
+        // The day menu: the engine has no `handoff` in the fake → the local ADR-0014 links of the day.
+        flow.openDayMenu(day.day)
+        settle()
+        assertEquals(day.day, flow.dayMenu)
+        assertEquals(HandoffTarget.Browser, flow.carTarget)
+        val links = flow.dayHandoff!!.parts.single().links
+        assertEquals(app.verst.core.model.NaviLinks.day(day)!!.navi, links.navigator)
+        flow.dayMenuGo()
+        assertNull(flow.dayMenu)
+        assertEquals(links to false, opened.single())
+        assertEquals(Toast.HandoffWeb(walk = false), flow.toast) // the web fallback says so
+        // The stop menu with the navigator installed → no toast.
+        navi = true
+        result = HandoffTarget.Navigator
         flow.openStopMenu(day.stops[1])
-        assertTrue(flow.navigatorInstalled)
+        settle()
+        assertEquals(HandoffTarget.Navigator, flow.carTarget)
         flow.navigatorFromStop()
         assertNull(flow.stopMenu)
         assertEquals(HandoffTarget.Navigator, flow.lastHandoff!!.second)
-        assertTrue(opened.last().navi!!.startsWith("yandexnavi://build_route_on_map?lat_from="))
+        assertTrue(opened.last().first.navigator!!.startsWith("yandexnavi://build_route_on_map?lat_from="))
+        // Offline without an app → «нужен интернет», nothing opens; all links failing → «не получилось».
+        navi = false
         flow.setOffline(true)
-        flow.openDayInNavigator(day.day)
+        flow.openDayMenu(day.day); settle(); flow.dayMenuGo()
+        assertEquals(Toast.HandoffOffline, flow.toast)
         assertEquals(2, opened.size)
-        assertEquals(Toast.NeedInternetNavigator, flow.toast)
         flow.setOffline(false)
-        flow.handoffLauncher = object : HandoffLauncher {
-            override fun navigatorInstalled() = false
-            override fun open(h: app.verst.core.model.NaviHandoff) = HandoffTarget.None
-        }
-        flow.openDayInNavigator(day.day)
-        assertEquals(Toast.NoNavigator, flow.toast)
+        result = HandoffTarget.None
+        flow.openDayMenu(day.day); settle(); flow.dayMenuGo()
+        assertEquals(Toast.HandoffFailed, flow.toast)
+        // Maps only: the car label names Яндекс Карты.
+        maps = true
+        assertEquals(HandoffTarget.Maps, flow.carTarget)
+        assertEquals(HandoffTarget.Maps, flow.walkTarget)
     }
 
     @Test
-    fun gpsOriginIsTheNearestTownWithRationaleAndDenyPaths() = runTest {
+    fun gpsOriginRationaleManualDenyAndBlocked() = runTest {
         val gw = FakeGateway()
         val yarCity = yar.copy(nameGenRu = "Ярославля")
         gw.reverseName = "Ярославль"
         gw.suggestRows = listOf(yarCity)
-        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
-        var asked = 0
+        val address = FakeAddress()
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, addressSearch = address) {}
+        val asked = mutableListOf<Boolean>()
         var granted = false
-        flow.askLocationPermission = { asked++ }
+        var precise = false
+        flow.askLocationPermission = { asked += it }
         flow.locator = object : Locator {
             override fun granted() = granted
+            override fun precise() = precise
             override suspend fun current() = GeoPoint("GPS", 57.63, 39.87)
         }
         settle()
-        // First «Куда угодно»: the rationale card; «Не разрешать» keeps Москва and the card does not come back.
+        // First «Куда угодно»: the rationale sheet; «Выберу сам» → the ОТКУДА input, the sheet never comes back.
         flow.openNavigator()
-        assertTrue(flow.locationPrompt)
-        flow.denyLocation()
-        assertEquals(Toast.LocationDenied, flow.toast)
-        assertEquals("Москва", flow.origin.label)
-        flow.back(); flow.openNavigator()
-        assertFalse(flow.locationPrompt)
-        // «Моё местоположение» → the system dialog → granted → the town of the fix.
+        assertTrue(flow.locationSheet)
+        flow.manualLocation()
+        assertFalse(flow.locationSheet)
+        assertTrue(flow.editingFrom)
+        flow.back(); flow.back(); flow.openNavigator()
+        assertFalse(flow.locationSheet)
+        // «Моё местоположение» → the coarse dialog → granted → the fix's town (a gateway without geo_nearest).
         flow.useMyLocation()
-        assertEquals(1, asked)
+        assertEquals(listOf(false), asked)
         granted = true
         flow.onLocationPermission(granted = true, blocked = false)
         settle()
         assertEquals(GpsState.On, flow.gps)
         assertEquals("Ярославль", flow.origin.label)
-        assertEquals(yarCity.lat, flow.origin.lat, 0.0)
+        assertEquals(57.63, flow.origin.lat, 0.0) // the trip starts at the fix
         assertEquals("Ярославля", flow.originGen)
         assertTrue(flow.originFromGps)
-        // A blocked permission points to the settings.
+        assertTrue("coarse → «Точнее»", flow.gpsApprox)
+        assertEquals("ул. Советская, 1", flow.originAddress) // online: the reverse-geocoded street
+        flow.preciseLocation()
+        assertEquals(listOf(false, true), asked)
         flow.onLocationPermission(granted = false, blocked = true)
         assertEquals(Toast.LocationBlocked, flow.toast)
+        flow.onLocationPermission(granted = false, blocked = false)
+        assertEquals(Toast.LocationDenied("Ярославль"), flow.toast)
         // No town within 30 km: the nearest popular town.
         gw.reverseName = null
         val tula = SuggestionDto("city", "Тула", "город", 54.1931, 37.6177, "t_tula", nameGenRu = "Тулы")
@@ -496,5 +521,106 @@ class VerstFlowTest {
         assertEquals(again.dailyKm, third.dailyKm)
         assertEquals(Route.Windshield, third.top)
     }
-}
 
+    /** DEV-302 fake: no network in unit tests. */
+    private class FakeAddress : app.verst.data.net.AddressSearch {
+        var searches = 0
+        override suspend fun search(query: String): app.verst.data.net.AddressResult<List<SuggestionDto>> {
+            searches++
+            return app.verst.data.net.AddressResult.Ok(listOf(SuggestionDto("address", "ул. Советская, 1", "Ярославль", 57.6266, 39.8938)))
+        }
+        override suspend fun reverse(lat: Double, lon: Double) = app.verst.data.net.AddressResult.Ok<String?>("ул. Советская, 1")
+    }
+
+    @Test
+    fun addressSearchOnlyOnSubmitAndOffline() = runTest {
+        val address = FakeAddress()
+        val flow = VerstFlow(FakeGateway(), backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, addressSearch = address) {}
+        settle()
+        flow.openNavigator()
+        flow.updateQuery("Ярославль Советская 1")
+        settle()
+        assertTrue(flow.looksLikeAddress(flow.query))
+        assertFalse(flow.looksLikeAddress("Санкт"))
+        assertEquals("typing never searches addresses", 0, address.searches)
+        flow.submitAddress()
+        settle()
+        assertEquals(1, address.searches)
+        assertEquals(AddressState.Done, flow.addressState)
+        assertEquals("ул. Советская, 1", flow.addressResults.single().name)
+        flow.pick(flow.addressResults.single())
+        assertEquals("ул. Советская, 1", flow.destination!!.name)
+        flow.setOffline(true)
+        flow.updateQuery("Тверская 1")
+        flow.submitAddress()
+        assertEquals(AddressState.Offline, flow.addressState)
+        assertEquals(1, address.searches)
+    }
+
+    @Test
+    fun cardsOnlyForSightsAndHotelsAndFocusComesBack() = runTest {
+        val flow = VerstFlow(FakeGateway(), backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        val stops = flow.result!!.trip.daysList.flatMap { it.stops }
+        val sight = stops.first { it.kind == "sight" }
+        stops.filter { it.kind in setOf("fuel", "rest", "start", "finish", "food") }.forEach { assertFalse(it.kind, flow.tappable(it)) }
+        assertTrue(flow.tappable(sight))
+        val seq = flow.roadFocusSeq
+        flow.openCard(sight)
+        assertEquals(sight.id, flow.card!!.rowId)
+        assertEquals(sight.id, flow.roadFocusId)
+        settle()
+        flow.closeCard()
+        assertNull(flow.card)
+        assertEquals(seq + 1, flow.roadFocusSeq)
+        // the hotel card «Выбрать отель» → 5.7 for that night
+        val night = stops.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
+        flow.openCard(night)
+        assertEquals("hotel", flow.card!!.ui.kind)
+        flow.cardPickHotel()
+        assertEquals(Route.Exit, flow.top)
+        assertEquals(night.id, flow.exitStopId)
+    }
+
+    @Test
+    fun noFitOptionsGoBackToInstrumentsAndTheMinimumIsShownOverBudget() = runTest {
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun planOutcome(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit) =
+                EngineResult.Ok(
+                    app.verst.core.model.dto.PlanOutcome.NoFit(
+                        app.verst.core.model.dto.NoFitDto(
+                            30_000, 31_500,
+                            listOf(
+                                app.verst.core.model.dto.BudgetOptionDto("cheaper_route", totalRub = 24_300, readyRouteId = "rr_tula_yasnaya", titleRu = "Тула · Ясная Поляна"),
+                                app.verst.core.model.dto.BudgetOptionDto("raise_budget", budgetRub = 42_000),
+                            ),
+                            "не помещается", minimumTotalRub = 41_200, minimum = planned,
+                        ),
+                    ),
+                )
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree()
+        flow.stepBudget(-1) // 30 000
+        flow.go()
+        settle(10_000)
+        assertEquals(Route.NoFit, flow.top)
+        assertTrue(flow.drive.noFit)
+        flow.applyBudgetOption(flow.noFit!!.options[1])
+        assertEquals(Route.Instruments, flow.top)
+        assertEquals(42_000, flow.budgetCustom)
+        assertEquals(42_000, flow.request().budgetRub)
+        flow.stepBudget(1) // back to the presets: 60 000
+        assertNull(flow.budgetCustom)
+        assertEquals(60_000, flow.request().budgetRub)
+        flow.go()
+        settle(10_000)
+        flow.showMinimum()
+        assertEquals(Route.Road, flow.top)
+        assertTrue(flow.showingMinimum)
+        assertEquals(planned.trip.km, flow.result!!.trip.km)
+    }
+}

@@ -115,6 +115,7 @@ class StageKey(StrEnum):
     HOURS = "hours"
     FUEL = "fuel"
     COST = "cost"
+    BUDGET = "budget"
 
 
 class CostKey(StrEnum):

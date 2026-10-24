@@ -108,6 +108,42 @@ color['paper'] = O(
   clip=c('#8C8C93','Clipboard clip'),
   clipShadow=c('#5D5D63','Clip inset bottom edge'),
 )
+# Sprint 3 (design/screens/5.8–5.13)
+color['city'] = O(
+  sky=c('#2B2850','City-walk scene: evening sky behind the facades (= sky.band1)'),
+  facadeA=c('#3B3046','City scene: near facades'),
+  facadeB=c('#4A3B55','City scene: middle facades'),
+  facadeC=c('#2E2939','City scene: far facades and roof line'),
+  window=c('#FFD99A','Lit windows and shop fronts (= scene.sun tone)'),
+  windowOff=c('#231F2D','Unlit windows'),
+  lamp=c('#FFE7A8','Street-lamp heads and their glow core'),
+  lampGlow=c('#FFE7A8','Street-lamp glow disc', alpha=0.18),
+  sidewalk=c('#4A4A50','Pavement of the walk column and the city scene'),
+  joint=c('#3B3B41','Pavement tile joints'),
+  curb=c('#8C8C93','Kerb line beside the pavement'),
+  footprint=c('#F4F4F0','Moving footprints in the walk column', alpha=0.55),
+)
+color['photo'] = O(
+  mat=c('#232327','Photo frame background: placeholder, letterbox mat, loading base'),
+  matHighlight=c('#2E2E33','Placeholder pattern and shimmer highlight'),
+  scrim=c('#000000','Bottom gradient behind the photo credit (alpha at the bottom edge)', alpha=0.62),
+  credit=c('#F4F4F0','Photo credit text on the scrim'),
+  border=c('#3A3A42','1 dp inner border of the photo frame (keeps white photos from bleeding into white text)'),
+  ink=c('#8C8C93','Placeholder illustration lines'),
+  accent=c('#B9B9C0','Placeholder illustration fills (dome, trees, glass)'),
+  phMuseum=c('#26262B','Placeholder mat: museum'),
+  phChurch=c('#2A2630','Placeholder mat: church, monastery, kremlin'),
+  phPark=c('#222A25','Placeholder mat: park, garden'),
+  phMonument=c('#28282C','Placeholder mat: monument, memorial, square'),
+  phView=c('#22272E','Placeholder mat: viewpoint, embankment'),
+  phBar=c('#2B2522','Placeholder mat: bar, рюмочная, pub, craft'),
+  phCity=c('#25242C','Placeholder mat: town, hotel area, other'),
+)
+color['budget'] = O(
+  overFill=c('#2A1816','«Не помещается в бюджет» plate fill'),
+  overBorder=c('#D8402B','«Не помещается» plate border (= accent.red)'),
+  tight=c('#FFD23F','«Впритык» text and dot (= accent.yellow)'),
+)
 color['overlay'] = O(
   scrim=c('#000000','Scrim behind bottom sheets and dialogs (new)', alpha=0.60),
   focus=c('#FFD23F','Keyboard focus ring, 2dp, offset 2dp'),
@@ -179,6 +215,14 @@ typ['caption'] = O(
   strong=t(S,600,11,14.3,use='Mirror caption, seat labels'),
   bold=t(S,700,11,14.3,use='Gauge letters E/F, dog label'),
 )
+typ['photo'] = O(
+  credit=t(S,500,11,14.3,use='Photo credit on the scrim «Фото: … · Wikimedia Commons»'),
+  label=t(S,600,11,14.3,ls=0.08,use='«ФОТО РАЙОНА» label over a hotel-area photo (uppercase copy)'),
+)
+typ['street'] = O(
+  name=t(S,700,22,24.2,use='Street-name plate (city walk), e.g. «Покровка»'),
+  kind=t(S,600,12,14.4,use='Street plate small line «улица», house number'),
+)
 typ['badge'] = t(S,700,12,15.6,use='Suggestion type badge Г/У/М')
 typ['odometer'] = t(M,600,22,28.6,tnum=True,use='Odometer digits')
 typ['paper'] = O(
@@ -247,6 +291,10 @@ size = O(
   serviceSignW=dp(50,'Service sign width'), serviceSignH=dp(62,'Service sign height'), pictogramPlate=dp(40,'Service sign white square'),
   touristSign=dp(56,'Tourist sign square'), citySignW=dp(64,'City sign width'), citySignMinH=dp(40,'City sign min height'),
   hotelRowMinH=dp(60,'Hotel option min height'), suggestionRowMinH=dp(52,'Suggestion row min height'),
+  photoW=dp(350,'Place-card photo frame width at 390 (= sheet content width; stretches L20/R20)'),
+  photoH=dp(233,'Card photo frame height = width / 1.5 (3:2 fixed aspect, ADR-0012 §6)'),
+  presetH=dp(76,'City-walk preset plate height'),
+  streetPlateH=dp(64,'Street-name plate height'),
   sheetHandleW=dp(36,'Bottom-sheet handle width (new)'), sheetHandleH=dp(4,'Bottom-sheet handle height (new)'),
 )
 E = O(
@@ -313,6 +361,11 @@ motion['screen'] = O(
   overlay=m(durationMs=300, easing='standard', infinite=False),
   back=m(durationMs=300, easing='decelerate', infinite=False),
 )
+motion['photoFadeIn'] = m(durationMs=250, easing='standard', infinite=False)
+motion['returnToItem'] = m(durationMs=0, highlightMs=1200, easing='easeOut', infinite=False)
+motion['footsteps'] = m(durationMs=1800, easing='linear', periodDp=48, infinite=True)
+motion['lamps'] = m(durationMs=3200, easing='easeInOut', fromAlpha=0.7, toAlpha=1.0, infinite=True)
+motion['limitSignIn'] = m(durationMs=400, easing='decelerate', fromScale=0.8, infinite=False)
 motion['frameBudgetMs'] = O(value=16, unit='ms', use='Per-frame budget at 60 fps (scene draw <= 4 ms)')
 
 tokens = O()

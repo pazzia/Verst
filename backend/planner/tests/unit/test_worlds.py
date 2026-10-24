@@ -109,7 +109,10 @@ class WorldsTest(unittest.TestCase):
         self.assertTrue(any(Tag.H24 in f.tags for f in fuel))
         yp = next(s for s in sights if s.name_ru == "Ясная Поляна")
         self.assertEqual(yp.opening_hours, "Tu-Su 09:00-17:00")
-        self.assertEqual(set(w.ready_routes), {"rr_golden_ring", "rr_yaroslavl", "rr_tula_yasnaya"})
+        self.assertEqual(
+            set(w.ready_routes), {"rr_golden_ring", "rr_yaroslavl", "rr_tula_yasnaya", "rr_golden_ring_short"}
+        )
+        self.assertEqual(w.ready_routes["rr_golden_ring_short"].parent_id, "rr_golden_ring")
         gr = w.ready_routes["rr_golden_ring"]
         self.assertEqual((gr.km_sign, gr.suggested_nights), (745, ("t_yaroslavl", "t_suzdal")))
         self.assertEqual(w.ready_routes["rr_tula_yasnaya"].suggested_nights, ("t_tula",))

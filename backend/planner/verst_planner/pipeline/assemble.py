@@ -26,6 +26,7 @@ from verst_planner.domain.model import (
     StopState,
     TollHit,
 )
+from verst_planner.domain.rooms import room_plan
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import stop_reason
 from verst_planner.geo.polyline import interpolate
@@ -48,15 +49,17 @@ def rooms(inp: NormalizedInput) -> int:
     return -(-inp.crew.adults // 2)
 
 
-def hotel_option(p: Place, inp: NormalizedInput, lateral_km: float = 0.0) -> HotelOption:
-    price = p.price_night_rub or 0
+def hotel_option(
+    p: Place, inp: NormalizedInput, lateral_km: float = 0.0, family_rooms: bool = False
+) -> HotelOption:
+    n_rooms, price, _explicit = room_plan(p, inp.crew, family_rooms)
     return HotelOption(
         p.id,
         p.name_ru,
         sorted_tags(p.tags),
         price,
-        rooms(inp),
-        rooms(inp) * price,
+        n_rooms,
+        n_rooms * price,
         p.source is not Source.OSM,
         round(lateral_km * 1000),
     )

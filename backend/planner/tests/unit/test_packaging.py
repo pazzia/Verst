@@ -43,6 +43,10 @@ planner = Planner(routing=f.routing, places=f.places, prices=f.prices, tolls=f.t
 plan = planner.plan(codec.input_from_json(case["input"]))
 out = codec.plan_to_json(plan, trip_id="trp_golden")
 sys.stdout.write(json.dumps(out, ensure_ascii=False, indent=2) + "\n")
+# Sprint 3: the gzip catalogue and the road model load from the archive too (ADR-0012 §3)
+from verst_planner.catalogue import load_packaged
+from verst_planner.adapters.catalogue import road_model
+assert load_packaged().towns and road_model().ratio(100.0) > 1.0
 """
 
 

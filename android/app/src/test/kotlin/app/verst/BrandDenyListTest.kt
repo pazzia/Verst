@@ -18,9 +18,14 @@ object BrandDenyList {
     val brands: List<String> = root.resolve("backend/planner/tests/brand_denylist.txt").readLines()
         .map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
 
-    /** S3-R1: string keys that may name the external navigator app (hand-off only). */
-    val handoffKeys: Set<String> = root.resolve("backend/planner/tests/brand_handoff_keys.txt").readLines()
-        .map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }.toSet()
+    /** ADR-0014: `android:<glob>` lines of `brand_allowlist.txt` — the only keys that may name the hand-off apps. */
+    private val globs: List<Regex> = root.resolve("backend/planner/tests/brand_allowlist.txt").readLines()
+        .map { it.trim() }.filter { it.startsWith("android:") }
+        .map { g -> Regex(g.removePrefix("android:").replace(".", "\\.").replace("*", ".*")) }
+
+    fun allowedKey(name: String): Boolean = globs.any { it.matches(name) }
+
+    val handoffKeys: Set<String> get() = app.verst.core.ui.R.string::class.java.fields.map { it.name }.filter { allowedKey(it) }.toSet()
 
     /** Rendered texts may contain the allowed hand-off values (set by [allow]); those are cut out before matching. */
     var allowed: List<String> = emptyList()
@@ -57,11 +62,10 @@ class BrandDenyListTest {
         val bad = fields.filter { it.name !in BrandDenyList.handoffKeys }
             .flatMap { f -> BrandDenyList.hits(context.getString(f.getInt(null))).map { "${f.name}: $it" } }
         assertEquals(emptyList<String>(), bad)
-        // The allow-list is explicit: each key exists, and each really is a hand-off app name.
-        for (k in BrandDenyList.handoffKeys) {
-            val v = context.getString(app.verst.core.ui.R.string::class.java.getField(k).getInt(null))
-            assertTrue("$k = $v", v.startsWith("Яндекс "))
-        }
+        // The allow-list is `handoff_*` only (ADR-0014), and it is not empty.
+        assertTrue(BrandDenyList.handoffKeys.isNotEmpty())
+        assertTrue(BrandDenyList.handoffKeys.all { it.startsWith("handoff_") })
+        assertTrue("stopmenu_yandex_navi is not allowed", !BrandDenyList.allowedKey("stopmenu_yandex_navi"))
     }
 
     @Test

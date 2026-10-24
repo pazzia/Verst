@@ -13,6 +13,13 @@ import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.ReadyRouteDto
 import app.verst.core.model.dto.SuggestionDto
+import app.verst.core.model.dto.CityPresetsDto
+import app.verst.core.model.dto.GeoNearestDto
+import app.verst.core.model.dto.HandoffDto
+import app.verst.core.model.dto.PlanOutcome
+import app.verst.core.model.dto.PoiDetailsDto
+import app.verst.core.model.dto.WalkRouteDto
+import app.verst.core.model.WalkRequest
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -50,7 +57,34 @@ interface PlannerGateway {
 
     /** Waybill reserve toggle etc. (A§16.9 `patch_cost`); cost-only, returns the whole trip. */
     suspend fun patchCost(tripJson: String, patchJson: String): EngineResult<PlanResultDto>
+
+    // ---- API v2 (M§5.4). Defaults keep the test fakes small; the Chaquopy gateway implements them all.
+
+    /** v2 `plan` with `outcome`: a trip, or «не помещается в бюджет» (ADR-0011). */
+    suspend fun planOutcome(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome> =
+        when (val r = plan(requestId, request, onEvent)) {
+            is EngineResult.Ok -> EngineResult.Ok(PlanOutcome.Plan(r.value))
+            is EngineResult.Err -> r
+        }
+
+    /** Offline typeahead over towns and places of all of Russia (ADR-0012 §5). */
+    suspend fun geoSearch(query: String, near: GeoPoint?, limit: Int = 8): EngineResult<List<SuggestionDto>> = suggest(query, near)
+
+    /** GPS → the origin town (`insideRussia` = ≤ 60 km from a town). */
+    suspend fun geoNearest(point: GeoPoint): EngineResult<GeoNearestDto> = unsupported("geo_nearest")
+
+    suspend fun poiDetails(placeId: String): EngineResult<PoiDetailsDto> = unsupported("poi_details")
+
+    /** ADR-0014 links for a trip day / a stop / a walk ([routeJson] = the private trip or the walk). */
+    suspend fun handoff(routeJson: String, optionsJson: String): EngineResult<HandoffDto> = unsupported("handoff")
+
+    suspend fun cityPresets(point: GeoPoint): EngineResult<CityPresetsDto> = unsupported("city_presets")
+
+    /** Cancellable walk solve (ADR-0013). */
+    suspend fun cityRoute(requestId: String, request: WalkRequest): EngineResult<WalkRouteDto> = unsupported("city_route")
 }
+
+private fun unsupported(function: String): EngineResult<Nothing> = EngineResult.Err(EngineErrorDto("NOT_SUPPORTED", "$function: not in this gateway"))
 
 class ChaquopyPlannerGateway(private val host: EngineHost, override var world: String = DefaultWorld) : PlannerGateway {
 
@@ -91,6 +125,30 @@ class ChaquopyPlannerGateway(private val host: EngineHost, override var world: S
 
     override suspend fun patchCost(tripJson: String, patchJson: String) =
         run(EngineJson::planResult, "patch_cost", world, tripJson, patchJson)
+
+    override suspend fun geoSearch(query: String, near: GeoPoint?, limit: Int) =
+        run(EngineJson::suggestions, "geo_search", world, query, near?.lat, near?.lon, limit, null)
+
+    override suspend fun geoNearest(point: GeoPoint) = run(EngineJson::geoNearest, "geo_nearest", world, point.lat, point.lon)
+
+    override suspend fun poiDetails(placeId: String) = run(EngineJson::poiDetails, "poi_details", world, placeId)
+
+    override suspend fun handoff(routeJson: String, optionsJson: String) = run(EngineJson::handoff, "handoff", world, routeJson, optionsJson)
+
+    override suspend fun cityPresets(point: GeoPoint) = run(EngineJson::cityPresets, "city_presets", world, point.lat, point.lon)
+
+    override suspend fun cityRoute(requestId: String, request: WalkRequest): EngineResult<WalkRouteDto> {
+        ready()?.let { return EngineResult.Err(it) }
+        return EngineJson.walkRoute(cancellable(requestId) { host.callHere("city_route", world, requestId, request.toInputJson()) })
+    }
+
+    override suspend fun planOutcome(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome> = coroutineScope {
+        ready()?.let { return@coroutineScope EngineResult.Err(it) }
+        val listener = PlanEventListener { json ->
+            EngineJson.event(json)?.let { ev -> launch(Dispatchers.Main) { onEvent(ev) } }
+        }
+        EngineJson.planOutcome(cancellable(requestId) { host.callHere("plan", world, requestId, request.toInputJson(), listener) })
+    }
 
     override suspend fun estimate(requestId: String, request: PlanRequest): EngineResult<EstimateDto> {
         ready()?.let { return EngineResult.Err(it) }

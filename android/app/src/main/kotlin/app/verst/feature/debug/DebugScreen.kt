@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import app.verst.BuildConfig
 import app.verst.VerstApp
 import app.verst.R as AppR
+import app.verst.feature.road.AboutDataSheet
 import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Txt
@@ -54,7 +55,7 @@ fun DebugScreen(flow: VerstFlow) {
             BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), { flow.back() })
             Txt(stringResource(R.string.debug_label_title), T.title.xl, C.text.primary)
             Label(stringResource(R.string.debug_label_world))
-            Choices(listOf("central_russia_v1", "edge_cases_v1"), flow.debugWorld, "debug.world") { flow.setWorld(it) }
+            Choices(listOf("russia_v1", "central_russia_v1", "edge_cases_v1"), flow.debugWorld, "debug.world") { flow.setWorld(it) }
             Label(stringResource(R.string.debug_label_clock))
             Choices(
                 listOf(stringResource(R.string.debug_clock_system), stringResource(R.string.debug_clock_golden)),
@@ -76,14 +77,20 @@ fun DebugScreen(flow: VerstFlow) {
                 if (flow.debugMockLocation != null) flow.locate()
             }
             flow.lastHandoff?.let { (h, target) ->
-                Txt("$target · ${h.navi ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
+                Txt("$target · ${h.navigator ?: h.maps ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
             }
             Label(stringResource(R.string.debug_label_timings))
             val s = status
             Txt(
-                if (s is EngineStatus.Ready) s.info.timings.let { "python ${it.pythonStartMs} · import ${it.importMs} · worlds ${it.worldsMs} · selfcheck ${it.selfcheckMs} · total ${it.totalMs} ms" } else s.toString(),
+                if (s is EngineStatus.Ready) s.info.timings.let { "python ${it.pythonStartMs} · import ${it.importMs} · worlds ${it.worldsMs} · catalogue ${it.catalogueMs} · selfcheck ${it.selfcheckMs} · total ${it.totalMs} ms" } else s.toString(),
                 T.body.md, C.text.secondary,
             )
+            // DEV-300: «О данных» (Wikidata CC0, OSM ODbL, Commons per-file licences, approximate distances)
+            Box(
+                Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).clip12().border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(12.dp))
+                    .clickable(role = Role.Button) { flow.openAboutData() }.testTag("debug.about"),
+                contentAlignment = Alignment.Center,
+            ) { Txt(stringResource(R.string.about_data_title), T.button.md, C.text.primary) }
             Label(stringResource(R.string.debug_label_build))
             Txt(stringResource(R.string.mock_build_line, BuildConfig.BUILD_NUMBER, BuildConfig.GIT_SHA), T.body.md, C.text.secondary)
             Box(
@@ -91,6 +98,12 @@ fun DebugScreen(flow: VerstFlow) {
                     .clickable(role = Role.Button) { flow.askReset() }.testTag("debug.reset"),
                 contentAlignment = Alignment.Center,
             ) { Txt(stringResource(R.string.debug_reset), T.button.md, C.accent.redText) }
+        }
+        if (flow.aboutData) {
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.matchParentSize()) {
+                val h = maxHeight
+                androidx.compose.foundation.layout.Box(Modifier.matchParentSize()) { AboutDataSheet(h, flow::closeAboutData) }
+            }
         }
         // Release review P2-3: «Сбросить данные» deletes every saved trip — ask first.
         if (flow.resetAsk) {

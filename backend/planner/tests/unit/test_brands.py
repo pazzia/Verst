@@ -8,6 +8,7 @@ deny-list file.
 
 from __future__ import annotations
 
+import fnmatch
 import gzip
 import json
 import re
@@ -18,11 +19,12 @@ from typing import Any
 from tests.helpers import PLANNER_ROOT, WORLDS
 
 REPO = PLANNER_ROOT.parents[1]
-HANDOFF_KEYS = {
-    line.strip()
-    for line in (PLANNER_ROOT / "tests" / "brand_handoff_keys.txt").read_text("utf-8").splitlines()
-    if line.strip() and not line.startswith("#")
-}
+# ADR-0014: Android keys that may name the hand-off apps (`android:<glob>` lines of brand_allowlist.txt).
+ANDROID_ALLOW = [
+    line.strip()[len("android:") :]
+    for line in (PLANNER_ROOT / "tests" / "brand_allowlist.txt").read_text("utf-8").splitlines()
+    if line.startswith("android:")
+]
 DENY = [
     line.strip()
     for line in (PLANNER_ROOT / "tests" / "brand_denylist.txt").read_text("utf-8").splitlines()
@@ -30,16 +32,25 @@ DENY = [
 ]
 
 
-def strings(node: Any) -> Iterator[str]:
+ALLOW = {
+    tuple(line.strip()[len("json:") :].split("."))
+    for line in (PLANNER_ROOT / "tests" / "brand_allowlist.txt").read_text("utf-8").splitlines()
+    if line.startswith("json:")
+}
+
+
+def strings(node: Any, parent: str | None = None) -> Iterator[str]:
     if isinstance(node, str):
         yield node
     elif isinstance(node, dict):
         # Values only: keys are field names (e.g. `yandexTravelId`, a production link id), never shown.
-        for v in node.values():
-            yield from strings(v)
+        for k, v in node.items():
+            if (parent, k) in ALLOW:
+                continue  # ADR-0014 hand-off links (tests/brand_allowlist.txt)
+            yield from strings(v, k)
     elif isinstance(node, list):
         for v in node:
-            yield from strings(v)
+            yield from strings(v, parent)
 
 
 def hits(texts: Iterator[str]) -> list[str]:
@@ -75,6 +86,25 @@ class BrandDenyListTest(unittest.TestCase):
             with self.subTest(f.name):
                 self.assertEqual(hits(strings(json.loads(gzip.decompress(f.read_bytes())))), [])
 
+    def test_catalogue_and_composed_world(self) -> None:
+        """Every name in the packaged catalogue and in the composed `russia_v1` world (ADR-0012)."""
+        from verst_planner.adapters.catalogue import compose
+        from verst_planner.adapters.fake import FakeWorld
+        from verst_planner.catalogue import FILES, load_gz, load_packaged
+        from verst_planner.resources import read_bytes
+
+        for name in FILES.values():
+            with self.subTest(name):
+                self.assertEqual(hits(strings(load_gz(read_bytes(name), name))), [])
+        cw = compose(FakeWorld.load(WORLDS / "central_russia_v1.json"), load_packaged())
+        self.assertEqual(hits(p.name_ru for p in cw.world.places.values()), [])
+        self.assertEqual(hits(t.name_ru for t in cw.world.towns.values()), [])
+
+    def test_allowlist_only_skips_handoff_links(self) -> None:
+        doc = {"links": {"maps": "yandexmaps://x", "web": "https://yandex.ru/maps"}, "nameRu": "Яндекс"}
+        self.assertEqual(len(hits(strings(doc))), 1)
+        self.assertEqual(hits(strings({"other": {"maps": "Яндекс"}})), ["'Яндекс' in 'Яндекс'"])
+
     def test_android_strings_the_app_uses(self) -> None:
         android = REPO / "android"
         xml = (android / "core-ui/src/main/res/values/strings.xml").read_text("utf-8")
@@ -83,8 +113,8 @@ class BrandDenyListTest(unittest.TestCase):
         for kt in android.rglob("src/main/**/*.kt"):
             used |= set(re.findall(r"R\.string\.([a-z0-9_]+)", kt.read_text("utf-8")))
         self.assertGreater(len(used), 100)
-        # S3-R1: only the navigator hand-off keys may name the external app.
-        self.assertEqual(hits(iter(values[k] for k in sorted(used - HANDOFF_KEYS) if k in values)), [])
-        for k in HANDOFF_KEYS:
-            self.assertIn(k, values)
-            self.assertTrue(values[k].startswith("Яндекс "), k)
+        # ADR-0014: only `handoff_*` keys may name the external app.
+        allowed = {k for k in used if any(fnmatch.fnmatchcase(k, g) for g in ANDROID_ALLOW)}
+        self.assertTrue(allowed, "the app uses hand-off keys")
+        self.assertTrue(all(k.startswith("handoff_") for k in allowed), allowed)
+        self.assertEqual(hits(iter(values[k] for k in sorted(used - allowed) if k in values)), [])

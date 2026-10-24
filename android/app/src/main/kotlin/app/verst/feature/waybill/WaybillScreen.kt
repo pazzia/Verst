@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.CostLineDto
 import app.verst.core.model.dto.TripDto
+import app.verst.core.model.dto.BudgetFitDto
 import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Glyph
@@ -79,6 +80,8 @@ data class WaybillUi(
     val toast: Toast? = null,
     /** Play the stamp (first opening of this trip); otherwise it shows its final frame (5.6 §3.1). */
     val stamp: Boolean = false,
+    /** 5.8: the minimum of a no-fit is over budget everywhere. */
+    val minimum: Boolean = false,
 )
 
 interface WaybillActions {
@@ -87,6 +90,8 @@ interface WaybillActions {
     fun toggleReserve()
     fun save()
     fun share()
+    /** 5.8 §3: over budget «Подогнать под бюджет» (re-plan → Drive). */
+    fun refit() = Unit
 }
 
 private val SumCol = 70.dp
@@ -150,9 +155,17 @@ private fun Sheet(ui: WaybillUi, a: WaybillActions) {
                 cost.lines.firstOrNull { it.key == "reserve" }?.let { ReserveRow(it, cost.reserveOn, ui.busy, a::toggleReserve) }
                 TotalRow(cost.totalRub)
             }
-            IssuedLeft(cost.budgetRub, cost.remainingRub, cost.overBudget)
-            if (cost.overBudget && cost.budgetRub != null) {
+            // 5.8 §3: «Подогнали под бюджет» + one line per lever (the savings sum to initial − total)
+            val fit = trip.budgetFit
+            if (fit != null && fit.levers.isNotEmpty()) LeverLines(fit)
+            val tight = fit?.smallOverrun == true && cost.budgetRub != null && cost.totalRub > cost.budgetRub!!
+            IssuedLeft(cost.budgetRub, cost.remainingRub, (cost.overBudget || ui.minimum) && !tight, tight, cost.totalRub)
+            if ((cost.overBudget || ui.minimum) && !tight && cost.budgetRub != null) {
                 Txt(stringResource(R.string.waybill_over_hint), T.paper.label, C.paper.text, Modifier.padding(top = 4.dp, end = 100.dp))
+                Box(
+                    Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = a::refit).testTag("waybill.refit"),
+                    contentAlignment = Alignment.CenterStart,
+                ) { Txt(stringResource(R.string.budget_refit) + " →", T.body.mdStrong, C.paper.ink) }
             }
             if (ui.monthRu != null && ui.year != null) {
                 Txt(
@@ -202,7 +215,9 @@ private fun FormGrid(trip: TripDto) {
         if (crew.children > 0) add(stringResource(R.string.waybill_crew_children, crew.children))
         if (crew.dog) add(stringResource(R.string.waybill_crew_dog))
     }.joinToString(stringResource(R.string.common_join_comma))
-    val mileage = stringResource(R.string.waybill_mileage_value, RuFormat.thousands(trip.km), trip.days, pluralStringResource(R.plurals.plural_day, trip.days))
+    // 5.12 §3: a synthetic route → «≈» in front of the km
+    val mileage = (if (trip.approxDistances) "≈ " else "") +
+        stringResource(R.string.waybill_mileage_value, RuFormat.thousands(trip.km), trip.days, pluralStringResource(R.plurals.plural_day, trip.days))
     Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         FormRow(stringResource(R.string.waybill_route), trip.title, "waybill.route")
         FormRow(stringResource(R.string.waybill_crew), crewParts, "waybill.crew")
@@ -316,7 +331,31 @@ private fun TotalRow(total: Int) {
 }
 
 @Composable
-private fun IssuedLeft(budget: Int?, remaining: Int?, over: Boolean) {
+private fun LeverLines(fit: BudgetFitDto) {
+    Column(Modifier.fillMaxWidth().padding(top = 8.dp).testTag("waybill.levers")) {
+        Txt(stringResource(R.string.budget_fitted_title), T.paper.body, C.paper.text)
+        fit.levers.forEach { l ->
+            Row(Modifier.fillMaxWidth().defaultMinSize(minHeight = 22.dp), verticalAlignment = Alignment.CenterVertically) {
+                Txt(leverName(l.code), T.paper.label, C.paper.text, Modifier.weight(1f))
+                Txt("−" + RuFormat.thousands(l.savedRub) + " ₽", T.hand.sm, C.paper.ink, Modifier.width(TotalCol), align = TextAlign.End, maxLines = 1)
+            }
+        }
+    }
+}
+
+@Composable
+internal fun leverName(code: String): String = when (code) {
+    "lodging_cheap" -> stringResource(R.string.budget_lever_lodging_cheap)
+    "family_rooms" -> stringResource(R.string.budget_lever_family_rooms)
+    "food_economy" -> stringResource(R.string.budget_lever_food_economy)
+    "sights_free" -> stringResource(R.string.budget_lever_sights_free)
+    "fewer_nights" -> stringResource(R.string.budget_lever_fewer_nights)
+    "variant" -> stringResource(R.string.budget_lever_variant)
+    else -> code
+}
+
+@Composable
+private fun IssuedLeft(budget: Int?, remaining: Int?, over: Boolean, tight: Boolean = false, total: Int = 0) {
     Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
             Txt(stringResource(R.string.waybill_issued), T.paper.label, C.paper.label)
@@ -324,8 +363,12 @@ private fun IssuedLeft(budget: Int?, remaining: Int?, over: Boolean) {
         }
         Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
             val isOver = over && budget != null
-            Txt(stringResource(if (isOver) R.string.waybill_over else R.string.waybill_left), T.paper.label, C.paper.label)
+            Txt(
+                stringResource(if (tight) R.string.waybill_tight_label else if (isOver) R.string.waybill_over else R.string.waybill_left),
+                T.paper.label, C.paper.label,
+            )
             val value = when {
+                tight && budget != null -> RuFormat.thousands(total - budget)
                 budget == null || remaining == null -> NONE
                 isOver -> RuFormat.thousands(kotlin.math.abs(remaining))
                 else -> stringResource(R.string.common_estimate_rub, RuFormat.thousands(remaining))

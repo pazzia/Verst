@@ -65,7 +65,9 @@ import app.verst.core.ui.components.dashboardSurface
 import app.verst.core.ui.components.naviPanel
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.ScreenRoot
+import app.verst.feature.common.BottomSheet
 import app.verst.nav.GpsState
+import app.verst.nav.AddressState
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
@@ -85,21 +87,33 @@ data class NavigatorUi(
     val tripKm: Int? = null,
     /** TOO_SHORT / UNREACHABLE of the picked trip, known before planning. */
     val tripErrorCode: String? = null,
-    /** S3-R1 GPS: the header indicator and the one-time rationale card. */
+    /** 5.12: the GPS state, the rationale sheet, the fix (coarse / address / outside Russia). */
     val gps: GpsState = GpsState.Off,
-    val locationPrompt: Boolean = false,
+    val locationSheet: Boolean = false,
+    val originFromGps: Boolean = false,
+    val gpsApprox: Boolean = false,
+    val originAddress: String? = null,
+    val outsideRussia: Boolean = false,
+    /** 5.12 §2: the address search under the field. */
+    val online: Boolean = true,
+    val addressQuery: Boolean = false,
+    val addressState: AddressState = AddressState.Idle,
+    val addressResults: List<SuggestionDto> = emptyList(),
 )
 
-/** S3-R1: the location answers of «Куда угодно». */
+/** 5.12: location and address answers of the Navigator. */
 interface LocationActions {
     fun allow()
-    fun deny()
+    fun manual() = Unit
+    fun deny() = Unit
+    fun precise() = Unit
     fun myLocation()
+    fun findAddress() = Unit
+    fun closeSheet() = Unit
 }
 
 private val NoLocation = object : LocationActions {
     override fun allow() = Unit
-    override fun deny() = Unit
     override fun myLocation() = Unit
 }
 
@@ -145,6 +159,12 @@ fun NavigatorScreen(
                 if (!typing) Caption(ui, onStart)
             }
         }
+        if (ui.locationSheet) {
+            androidx.compose.foundation.layout.BoxWithConstraints(Modifier.matchParentSize()) {
+                val h = maxHeight
+                Box(Modifier.matchParentSize()) { LocationSheet(h, location) }
+            }
+        }
     }
 }
 
@@ -182,23 +202,36 @@ private fun Panel(
             }
         }
         if (ui.editingFrom) {
-            Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from", onFocus = onFocus, autoFocus = true)
+            Input(stringResource(R.string.navigator_from), ui.query, onQuery, round = true, tag = "navigator.from", onFocus = onFocus, autoFocus = true, onSubmit = location::findAddress)
             MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
             ValueField(stringResource(R.string.navigator_to_label), ui.destination?.name ?: stringResource(R.string.navigator_to_hint), square = true)
         } else {
-            ValueField(
-                stringResource(R.string.navigator_from),
-                stringResource(R.string.navigator_from_here, ui.origin.label),
-                square = false,
-                action = stringResource(R.string.navigator_change),
-                onAction = onEditFrom,
-            )
-            Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus, autoFocus = ui.destination == null)
-            // S3-R1: under КУДА, so the focused field never scrolls the panel header away.
-            if (ui.locationPrompt && !typing) LocationCard(location)
+            if (ui.outsideRussia) {
+                OutsideRussia(onEditFrom)
+            } else {
+                // 5.12 §1: «Ищем вас…» while the fix runs; the address (online) or «Ярославль (по GPS)»; coarse → «Точнее»
+                val value = when {
+                    ui.gps == GpsState.Waiting -> stringResource(R.string.loc_searching)
+                    ui.originFromGps && ui.originAddress != null -> stringResource(R.string.loc_here_address, ui.originAddress)
+                    ui.originFromGps -> stringResource(R.string.loc_here_town, ui.origin.label)
+                    else -> stringResource(R.string.navigator_from_here, ui.origin.label)
+                }
+                val approx = ui.originFromGps && ui.gpsApprox && ui.gps == GpsState.On
+                ValueField(
+                    stringResource(R.string.navigator_from),
+                    value,
+                    square = false,
+                    action = stringResource(if (approx) R.string.loc_precise else R.string.navigator_change),
+                    onAction = if (approx) location::precise else onEditFrom,
+                    sub = if (approx) stringResource(R.string.loc_approx_note) else null,
+                    actionTag = if (approx) "navigator.precise" else "navigator.change",
+                )
+            }
+            Input(stringResource(R.string.navigator_to_label), ui.query, onQuery, round = false, tag = "navigator.to", onFocus = onFocus, autoFocus = ui.destination == null, onSubmit = location::findAddress)
         }
         val q = ui.query.trim()
         val picked = !ui.editingFrom && ui.destination != null && ui.query == ui.destination.name
+        if (!picked && ui.addressQuery) AddressBlock(ui, q, location::findAddress, onPick)
         when {
             picked -> Unit
             q.length < 2 -> if (ui.popular.isNotEmpty()) {
@@ -207,6 +240,7 @@ private fun Panel(
             }
             ui.searching && ui.suggestions.isEmpty() -> Skeleton()
             ui.suggestFailed -> Block(stringResource(R.string.navigator_suggest_error), null)
+            ui.suggestions.isEmpty() && ui.addressQuery -> Unit // the address row / results speak for themselves (5.12 §2)
             ui.suggestions.isEmpty() -> Block(
                 stringResource(R.string.navigator_no_results_title, q),
                 stringResource(R.string.navigator_no_results_text),
@@ -217,7 +251,7 @@ private fun Panel(
 }
 
 @Composable
-private fun Input(caption: String, value: String, onChange: (String) -> Unit, round: Boolean, tag: String, onFocus: (Boolean) -> Unit, autoFocus: Boolean) {
+private fun Input(caption: String, value: String, onChange: (String) -> Unit, round: Boolean, tag: String, onFocus: (Boolean) -> Unit, autoFocus: Boolean, onSubmit: () -> Unit = {}) {
     val fr = remember { FocusRequester() }
     var focused by remember { mutableStateOf(false) }
     LaunchedEffect(tag) { if (autoFocus) fr.requestFocus() }
@@ -243,6 +277,7 @@ private fun Input(caption: String, value: String, onChange: (String) -> Unit, ro
                 textStyle = T.field.lg.copy(color = C.text.primary),
                 cursorBrush = SolidColor(C.accent.yellow),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { onSubmit() }),
                 modifier = Modifier.fillMaxWidth().focusRequester(fr).onFocusChanged { focused = it.isFocused; onFocus(it.isFocused) }.testTag(tag),
                 decorationBox = { inner ->
                     Box {
@@ -269,6 +304,8 @@ private fun ValueField(
     square: Boolean,
     action: String? = null,
     onAction: (() -> Unit)? = null,
+    sub: String? = null,
+    actionTag: String = "navigator.change",
 ) {
     val shape = RoundedCornerShape(DesignTokens.radius.r10)
     Row(
@@ -285,14 +322,15 @@ private fun ValueField(
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Txt(caption, T.caption.md, C.navi.labelSecondary, maxLines = 1)
-            Txt(value, T.field.md, C.text.primary, maxLines = 1)
+            Txt(value, T.field.md, C.text.primary, Modifier.testTag("navigator.from.value"), maxLines = 1)
+            if (sub != null) Txt(sub, T.caption.md, C.navi.hint, maxLines = 1)
         }
         if (action != null && onAction != null) {
             Box(
                 Modifier
                     .height(44.dp)
                     .clickable(role = Role.Button, onClick = onAction)
-                    .testTag("navigator.change"),
+                    .testTag(actionTag),
                 contentAlignment = Alignment.Center,
             ) {
                 Box(
@@ -317,7 +355,7 @@ private fun Marker(round: Boolean, color: androidx.compose.ui.graphics.Color) {
 }
 
 @Composable
-private fun Rows(items: List<SuggestionDto>, rowKm: Map<String, Int?>, onPick: (SuggestionDto) -> Unit) {
+private fun Rows(items: List<SuggestionDto>, rowKm: Map<String, Int?>, onPick: (SuggestionDto) -> Unit, tagPrefix: String = "navigator.suggestion", address: Boolean = false) {
     Column(
         Modifier
             .fillMaxWidth()
@@ -326,13 +364,13 @@ private fun Rows(items: List<SuggestionDto>, rowKm: Map<String, Int?>, onPick: (
     ) {
         items.forEachIndexed { i, s ->
             if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(C.navi.divider))
-            SuggestionRow(s, rowKm[s.pointKey], i) { onPick(s) }
+            SuggestionRow(s, rowKm[s.pointKey], i, tagPrefix, address) { onPick(s) }
         }
     }
 }
 
 @Composable
-private fun SuggestionRow(s: SuggestionDto, km: Int?, index: Int, onClick: () -> Unit) {
+private fun SuggestionRow(s: SuggestionDto, km: Int?, index: Int, tagPrefix: String, address: Boolean, onClick: () -> Unit) {
     // The engine's road km to the place (before a trip exists); the trip itself adds its stop detours.
     val kmText = km?.let { stringResource(R.string.common_km_approx, RuFormat.thousands(it)) } ?: ""
     Row(
@@ -341,21 +379,22 @@ private fun SuggestionRow(s: SuggestionDto, km: Int?, index: Int, onClick: () ->
             .defaultMinSize(minHeight = DesignTokens.size.suggestionRowMinH)
             .background(C.navi.list)
             .clickable(role = Role.Button, onClick = onClick)
-            .testTag("navigator.suggestion.$index")
+            .testTag("$tagPrefix.$index")
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val city = s.kind == "city"
         Box(
-            Modifier.size(26.dp).clip(RoundedCornerShape(DesignTokens.radius.r6)).background(if (city) C.sign.blue else C.sign.brown),
+            Modifier.size(26.dp).clip(RoundedCornerShape(DesignTokens.radius.r6)).background(if (city || address) C.sign.blue else C.sign.brown),
             contentAlignment = Alignment.Center,
         ) {
-            Txt(stringResource(if (city) R.string.navigator_type_city else R.string.navigator_type_place), T.badge, C.text.primary)
+            // 5.12 §2: address rows carry «У» (улица)
+            Txt(if (address) stringResource(app.verst.R.string.navigator_type_address) else stringResource(if (city) R.string.navigator_type_city else R.string.navigator_type_place), T.badge, C.text.primary)
         }
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Txt(s.name, T.list.title, C.text.primary, maxLines = 1)
-            Txt(s.subtitle, T.body.sm, C.navi.labelSecondary, maxLines = 1)
+            Txt(if (address) stringResource(R.string.addr_sub, s.subtitle) else s.subtitle, T.body.sm, C.navi.labelSecondary, maxLines = 1)
         }
         Txt(kmText, T.body.mdTight, C.navi.text, Modifier.padding(start = 8.dp), align = TextAlign.End)
     }
@@ -397,7 +436,7 @@ private fun Caption(ui: NavigatorUi, onStart: () -> Unit) {
         "UNREACHABLE" -> stringResource(R.string.error_unreachable)
         else -> null
     }
-    val enabled = dest != null && error == null
+    val enabled = dest != null && error == null && !ui.outsideRussia // 5.12: a Russian start first
     Row(
         Modifier.fillMaxWidth().padding(start = 22.dp, end = 20.dp, bottom = 26.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -426,32 +465,77 @@ private fun Caption(ui: NavigatorUi, onStart: () -> Unit) {
     }
 }
 
-/** S3-R1 rationale (5.2, provisional layout): why, «Разрешить» → the system dialog, «Не разрешать» → stays put. */
+/** 5.12 §1 rationale sheet «Откуда поедем?»: «Разрешить» (coarse) or «Выберу сам» (→ ОТКУДА input). */
 @Composable
-private fun LocationCard(a: LocationActions) {
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list)
-            .border(DesignTokens.stroke.w1, C.navi.fieldBorder, RoundedCornerShape(DesignTokens.radius.r10))
-            .testTag("navigator.location").padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Txt(stringResource(R.string.windshield_location_rationale), T.body.md, C.text.primary)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            CardButton(stringResource(R.string.windshield_location_allow), filled = true, tag = "navigator.location.allow", onClick = a::allow, modifier = Modifier.weight(1f))
-            CardButton(stringResource(app.verst.R.string.navigator_location_deny), filled = false, tag = "navigator.location.deny", onClick = a::deny, modifier = Modifier.weight(1f))
-        }
+private fun androidx.compose.foundation.layout.BoxScope.LocationSheet(windowH: androidx.compose.ui.unit.Dp, a: LocationActions) {
+    BottomSheet(stringResource(R.string.loc_rationale_title), a::closeSheet, "location", windowH) {
+        app.verst.core.ui.components.LocateIcon(C.accent.yellow, 32.dp, Modifier.padding(bottom = 8.dp))
+        Txt(stringResource(R.string.loc_rationale_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 16.dp))
+        Box(
+            Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.accent.yellow)
+                .clickable(role = Role.Button, onClick = a::allow).testTag("location.allow"),
+            contentAlignment = Alignment.Center,
+        ) { Txt(stringResource(R.string.loc_allow), T.cta.sm, C.text.onLight, maxLines = 1) }
+        Box(
+            Modifier.fillMaxWidth().defaultMinSize(minHeight = 44.dp).clickable(role = Role.Button, onClick = a::manual).testTag("location.manual"),
+            contentAlignment = Alignment.Center,
+        ) { Txt(stringResource(R.string.loc_manual), T.body.mdStrong, C.text.secondary) }
     }
 }
 
+/** 5.12 §1 outside Russia: the state block in place of ОТКУДА. */
 @Composable
-private fun CardButton(text: String, filled: Boolean, tag: String, onClick: () -> Unit, modifier: Modifier) {
-    val shape = RoundedCornerShape(DesignTokens.radius.r8)
-    Box(
-        modifier.height(DesignTokens.size.touchMin).clip(shape)
-            .then(if (filled) Modifier.background(C.accent.yellow) else Modifier.border(DesignTokens.stroke.w1, C.navi.fieldBorder, shape))
-            .clickable(role = Role.Button, onClick = onClick).testTag(tag),
-        contentAlignment = Alignment.Center,
-    ) { Txt(text, T.body.smStrong, if (filled) C.text.onLight else C.navi.label, maxLines = 1) }
+private fun OutsideRussia(onChoose: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list).padding(12.dp).testTag("navigator.outside"),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Txt(stringResource(R.string.loc_outside_title), T.list.title, C.text.primary)
+        Txt(stringResource(R.string.loc_outside_body), T.body.sm, C.navi.labelSecondary)
+        Box(
+            Modifier.defaultMinSize(minHeight = 44.dp).clickable(role = Role.Button, onClick = onChoose).testTag("navigator.outside.choose"),
+            contentAlignment = Alignment.CenterStart,
+        ) { Txt(stringResource(R.string.loc_outside_action), T.body.smStrong, C.navi.label) }
+    }
+}
+
+/**
+ * 5.12 §2: an address-like query → the helper line and «Найти адрес «…»» (explicit submit, never per keystroke);
+ * then the address rows + «© OpenStreetMap»; offline → the hint row instead.
+ */
+@Composable
+private fun AddressBlock(ui: NavigatorUi, q: String, onFind: () -> Unit, onPick: (SuggestionDto) -> Unit) {
+    Txt(stringResource(R.string.addr_find_hint), T.caption.md, C.navi.hint)
+    when {
+        !ui.online || ui.addressState == AddressState.Offline -> Row(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list).padding(12.dp).testTag("address.offline"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) { Txt(stringResource(R.string.addr_offline), T.body.sm, C.navi.labelSecondary) }
+        ui.addressState == AddressState.Done -> {
+            Rows(ui.addressResults, ui.rowKm, onPick, tagPrefix = "address.row", address = true)
+            Txt(stringResource(R.string.addr_attribution), T.caption.md, C.navi.hint, Modifier.fillMaxWidth().height(24.dp).testTag("address.attribution"), align = TextAlign.End)
+        }
+        else -> {
+            val searching = ui.addressState == AddressState.Searching
+            Row(
+                Modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.suggestionRowMinH)
+                    .clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list)
+                    .clickable(enabled = !searching, role = Role.Button, onClick = onFind).testTag("address.find")
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                app.verst.core.ui.components.GlyphIcon(app.verst.core.ui.components.Glyph.SEARCH, C.accent.yellow, 18.dp)
+                Spacer(Modifier.width(10.dp))
+                Txt(
+                    if (searching) stringResource(R.string.addr_searching) else stringResource(R.string.addr_find_query, q),
+                    T.list.title, C.accent.yellow, Modifier.weight(1f), maxLines = 1,
+                )
+            }
+            if (ui.addressState == AddressState.None) {
+                Txt(stringResource(R.string.addr_none), T.body.sm, C.navi.labelSecondary, Modifier.testTag("address.none"))
+            }
+        }
+    }
 }
 
 /** «Моё местоположение» while editing ОТКУДА: the town nearest to the phone. */

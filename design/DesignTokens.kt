@@ -244,6 +244,70 @@ object DesignTokens {
             /** Clip inset bottom edge */
             val clipShadow: Color = Color(0xFF5D5D63)
         }
+        object city {
+            /** City-walk scene: evening sky behind the facades (= sky.band1) */
+            val sky: Color = Color(0xFF2B2850)
+            /** City scene: near facades */
+            val facadeA: Color = Color(0xFF3B3046)
+            /** City scene: middle facades */
+            val facadeB: Color = Color(0xFF4A3B55)
+            /** City scene: far facades and roof line */
+            val facadeC: Color = Color(0xFF2E2939)
+            /** Lit windows and shop fronts (= scene.sun tone) */
+            val window: Color = Color(0xFFFFD99A)
+            /** Unlit windows */
+            val windowOff: Color = Color(0xFF231F2D)
+            /** Street-lamp heads and their glow core */
+            val lamp: Color = Color(0xFFFFE7A8)
+            /** Street-lamp glow disc */
+            val lampGlow: Color = Color(0xFFFFE7A8).copy(alpha = 0.18f)
+            /** Pavement of the walk column and the city scene */
+            val sidewalk: Color = Color(0xFF4A4A50)
+            /** Pavement tile joints */
+            val joint: Color = Color(0xFF3B3B41)
+            /** Kerb line beside the pavement */
+            val curb: Color = Color(0xFF8C8C93)
+            /** Moving footprints in the walk column */
+            val footprint: Color = Color(0xFFF4F4F0).copy(alpha = 0.55f)
+        }
+        object photo {
+            /** Photo frame background: placeholder, letterbox mat, loading base */
+            val mat: Color = Color(0xFF232327)
+            /** Placeholder pattern and shimmer highlight */
+            val matHighlight: Color = Color(0xFF2E2E33)
+            /** Bottom gradient behind the photo credit (alpha at the bottom edge) */
+            val scrim: Color = Color(0xFF000000).copy(alpha = 0.62f)
+            /** Photo credit text on the scrim */
+            val credit: Color = Color(0xFFF4F4F0)
+            /** 1 dp inner border of the photo frame (keeps white photos from bleeding into white text) */
+            val border: Color = Color(0xFF3A3A42)
+            /** Placeholder illustration lines */
+            val ink: Color = Color(0xFF8C8C93)
+            /** Placeholder illustration fills (dome, trees, glass) */
+            val accent: Color = Color(0xFFB9B9C0)
+            /** Placeholder mat: museum */
+            val phMuseum: Color = Color(0xFF26262B)
+            /** Placeholder mat: church, monastery, kremlin */
+            val phChurch: Color = Color(0xFF2A2630)
+            /** Placeholder mat: park, garden */
+            val phPark: Color = Color(0xFF222A25)
+            /** Placeholder mat: monument, memorial, square */
+            val phMonument: Color = Color(0xFF28282C)
+            /** Placeholder mat: viewpoint, embankment */
+            val phView: Color = Color(0xFF22272E)
+            /** Placeholder mat: bar, рюмочная, pub, craft */
+            val phBar: Color = Color(0xFF2B2522)
+            /** Placeholder mat: town, hotel area, other */
+            val phCity: Color = Color(0xFF25242C)
+        }
+        object budget {
+            /** «Не помещается в бюджет» plate fill */
+            val overFill: Color = Color(0xFF2A1816)
+            /** «Не помещается» plate border (= accent.red) */
+            val overBorder: Color = Color(0xFFD8402B)
+            /** «Впритык» text and dot (= accent.yellow) */
+            val tight: Color = Color(0xFFFFD23F)
+        }
         object overlay {
             /** Scrim behind bottom sheets and dialogs (new) */
             val scrim: Color = Color(0xFF000000).copy(alpha = 0.6f)
@@ -656,6 +720,50 @@ object DesignTokens {
                 lineHeightStyle = CenteredLineHeight,
             )
         }
+        object photo {
+            /** Photo credit on the scrim «Фото: … · Wikimedia Commons» */
+            val credit: TextStyle = TextStyle(
+                fontFamily = DesignTokens.font.plexSansCondensed,
+                fontWeight = FontWeight.W500,
+                fontSize = 11.sp,
+                lineHeight = 14.3.sp,
+                letterSpacing = 0.em,
+                platformStyle = NoFontPadding,
+                lineHeightStyle = CenteredLineHeight,
+            )
+            /** «ФОТО РАЙОНА» label over a hotel-area photo (uppercase copy) */
+            val label: TextStyle = TextStyle(
+                fontFamily = DesignTokens.font.plexSansCondensed,
+                fontWeight = FontWeight.W600,
+                fontSize = 11.sp,
+                lineHeight = 14.3.sp,
+                letterSpacing = 0.08.em,
+                platformStyle = NoFontPadding,
+                lineHeightStyle = CenteredLineHeight,
+            )
+        }
+        object street {
+            /** Street-name plate (city walk), e.g. «Покровка» */
+            val name: TextStyle = TextStyle(
+                fontFamily = DesignTokens.font.plexSansCondensed,
+                fontWeight = FontWeight.W700,
+                fontSize = 22.sp,
+                lineHeight = 24.2.sp,
+                letterSpacing = 0.em,
+                platformStyle = NoFontPadding,
+                lineHeightStyle = CenteredLineHeight,
+            )
+            /** Street plate small line «улица», house number */
+            val kind: TextStyle = TextStyle(
+                fontFamily = DesignTokens.font.plexSansCondensed,
+                fontWeight = FontWeight.W600,
+                fontSize = 12.sp,
+                lineHeight = 14.4.sp,
+                letterSpacing = 0.em,
+                platformStyle = NoFontPadding,
+                lineHeightStyle = CenteredLineHeight,
+            )
+        }
         /** Suggestion type badge Г/У/М */
         val badge: TextStyle = TextStyle(
             fontFamily = DesignTokens.font.plexSansCondensed,
@@ -996,6 +1104,14 @@ object DesignTokens {
         val hotelRowMinH: Dp = 60.dp
         /** Suggestion row min height */
         val suggestionRowMinH: Dp = 52.dp
+        /** Place-card photo frame width at 390 (= sheet content width; stretches L20/R20) */
+        val photoW: Dp = 350.dp
+        /** Card photo frame height = width / 1.5 (3:2 fixed aspect, ADR-0012 §6) */
+        val photoH: Dp = 233.dp
+        /** City-walk preset plate height */
+        val presetH: Dp = 76.dp
+        /** Street-name plate height */
+        val streetPlateH: Dp = 64.dp
         /** Bottom-sheet handle width (new) */
         val sheetHandleW: Dp = 36.dp
         /** Bottom-sheet handle height (new) */
@@ -1326,6 +1442,36 @@ object DesignTokens {
                 val easing: Easing = DesignTokens.motion.easing.decelerate
                 const val infinite: Boolean = false
             }
+        }
+        object photoFadeIn {
+            const val durationMs: Int = 250
+            val easing: Easing = DesignTokens.motion.easing.standard
+            const val infinite: Boolean = false
+        }
+        object returnToItem {
+            const val durationMs: Int = 0
+            const val highlightMs: Int = 1200
+            val easing: Easing = DesignTokens.motion.easing.easeOut
+            const val infinite: Boolean = false
+        }
+        object footsteps {
+            const val durationMs: Int = 1800
+            val easing: Easing = DesignTokens.motion.easing.linear
+            val periodDp: Dp = 48.dp
+            const val infinite: Boolean = true
+        }
+        object lamps {
+            const val durationMs: Int = 3200
+            val easing: Easing = DesignTokens.motion.easing.easeInOut
+            const val fromAlpha: Float = 0.7f
+            const val toAlpha: Float = 1.0f
+            const val infinite: Boolean = true
+        }
+        object limitSignIn {
+            const val durationMs: Int = 400
+            val easing: Easing = DesignTokens.motion.easing.decelerate
+            const val fromScale: Float = 0.8f
+            const val infinite: Boolean = false
         }
         const val frameBudgetMs: Int = 16
     }

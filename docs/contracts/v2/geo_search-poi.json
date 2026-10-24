@@ -1,0 +1,33 @@
+{
+ "request": {
+  "function": "geo_search",
+  "args": {
+   "world": "russia_v1",
+   "q": "Эрми",
+   "lat": 59.93,
+   "lon": 30.31,
+   "limit": 5,
+   "kinds": "[\"poi\", \"place\"]"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": [
+   {
+    "kind": "poi",
+    "name": "Эрмитаж",
+    "subtitle": "место · Санкт-Петербург",
+    "lat": 59.9398,
+    "lon": 30.3146,
+    "id": "Q900101",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Санкт-Петербург",
+    "poiKind": "museum",
+    "hasPhoto": true
+   }
+  ],
+  "ms": 0
+ }
+}

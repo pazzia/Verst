@@ -30,6 +30,15 @@ def sight_score(c: Candidate, inp: NormalizedInput) -> float:
     )
 
 
+def is_paid(c: Candidate, inp: NormalizedInput) -> bool:
+    """ADR-0011 `sights_free`: a ticket costs this crew money (`free_entry` / no price = free)."""
+    p = c.place
+    if Tag.FREE_ENTRY in p.tags or not p.ticket_adult_rub:
+        return False
+    child = p.ticket_child_rub if p.ticket_child_rub is not None else p.ticket_adult_rub
+    return inp.crew.adults * p.ticket_adult_rub + inp.crew.children * child > 0
+
+
 def make_sight_stop(c: Candidate, inp: NormalizedInput, ctx: PlanContext) -> PlannedStop:
     dwell = c.place.dwell_min or ctx.cfg.dwell_min.sight_default
     key, params = sight_reason(dwell, inp.crew, c.place.source)
@@ -72,6 +81,7 @@ def plan_sights(
             if day.km_start < c.km_at < day.km_end
             and c.place.id not in used
             and sight_score(c, inp) >= ctx.cfg.sights.min_score
+            and not (ctx.knobs.sights_free and is_paid(c, inp))
         ]
         pool.sort(key=lambda c: (-round(sight_score(c, inp), 9), c.km_at, c.place.id))
         for c in pool:

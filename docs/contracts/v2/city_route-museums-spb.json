@@ -1,0 +1,148 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-2",
+   "input_json": {
+    "start": {
+     "lat": 59.9386,
+     "lon": 30.3141,
+     "label": "Санкт-Петербург, Дворцовая площадь"
+    },
+    "preset": "museums",
+    "durationMin": 360,
+    "crew": {
+     "adults": 2,
+     "children": 1
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-2",
+   "titleRu": "Санкт-Петербург: музейный маршрут",
+   "townId": "Q656",
+   "townName": "Санкт-Петербург",
+   "townPrep": "Санкт-Петербурге",
+   "preset": "museums",
+   "startAt": "2026-10-23T10:00",
+   "endAt": "2026-10-23T14:19",
+   "tz": "Europe/Moscow",
+   "walkKm": 2.1,
+   "walkMin": 35,
+   "durationMin": 259,
+   "returnToStart": true,
+   "start": {
+    "lat": 59.9386,
+    "lon": 30.3141,
+    "label": "Санкт-Петербург, Дворцовая площадь"
+   },
+   "finish": {
+    "lat": 59.9386,
+    "lon": 30.3141,
+    "label": "Санкт-Петербург, Дворцовая площадь"
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "Q900103",
+     "kind": "museum",
+     "nameRu": "Исаакиевский собор",
+     "lat": 59.9341,
+     "lon": 30.3062,
+     "arriveAt": "2026-10-23T10:14",
+     "departAt": "2026-10-23T12:06",
+     "dwellMin": 112,
+     "walkKmFromPrev": 0.9,
+     "walkMinFromPrev": 15,
+     "costRub": 1000,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w02",
+     "poiId": "Q900101",
+     "kind": "museum",
+     "nameRu": "Эрмитаж",
+     "lat": 59.9398,
+     "lon": 30.3146,
+     "arriveAt": "2026-10-23T12:24",
+     "departAt": "2026-10-23T14:16",
+     "dwellMin": 112,
+     "walkKmFromPrev": 1.0,
+     "walkMinFromPrev": 18,
+     "costRub": 1000,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    }
+   ],
+   "cost": {
+    "totalRub": 2000,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 2000
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     59.9386,
+     30.3141
+    ],
+    [
+     59.9341,
+     30.3062
+    ],
+    [
+     59.9398,
+     30.3146
+    ],
+    [
+     59.9386,
+     30.3141
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 59.9386,
+     "lon": 30.3141,
+     "label": "Санкт-Петербург, Дворцовая площадь"
+    },
+    "townId": null,
+    "preset": "museums",
+    "durationMin": 360,
+    "interests": [],
+    "pace": "slow",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T10:00",
+    "crew": {
+     "adults": 2,
+     "children": 1
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   }
+  },
+  "ms": 0
+ }
+}

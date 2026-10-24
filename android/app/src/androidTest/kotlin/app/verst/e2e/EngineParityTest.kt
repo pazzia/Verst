@@ -43,7 +43,7 @@ class EngineParityTest {
             report.put(name, entry)
         }
         File(E2e.dir(), "parity.json").writeText(report.toString(2))
-        assertEquals("snapshot cases", 10, snapshotCases)
+        assertEquals("snapshot cases", 11, snapshotCases) // G01–G08, G11–G13
         assertTrue("snapshot mismatch: $mismatches", mismatches.isEmpty())
         assertEquals("UNREACHABLE", report.getJSONObject("G09_edge_unreachable").getString("error"))
         assertEquals("TOO_SHORT", report.getJSONObject("G10_edge_too_short").getString("error"))

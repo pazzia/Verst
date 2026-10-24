@@ -61,10 +61,13 @@ class SliceJourneyTest {
     @Before
     fun toRoot() {
         E2e.awaitReady(30_000)
+        E2e.noRealNominatim()
         compose.runOnUiThread {
             while (flow.back()) Unit
             flow.clearSaved()
             flow.debugForceError = null
+            flow.debugLocationAnswered() // 5.12: no rationale sheet over the journey
+            flow.debugHandoffDryRun = false
         }
     }
 
@@ -266,7 +269,8 @@ class SliceJourneyTest {
     @Test
     fun readyRouteToRoadAhead() {
         waitTag("windshield.route.0")
-        compose.onNodeWithText("Золотое кольцо").performClick()
+        val gi = (flow.windshield as WindshieldData.Routes).routes.indexOfFirst { it.id == "rr_golden_ring" }
+        compose.onNodeWithTag("windshield.route.$gi").performClick()
         compose.waitUntil(5_000) { flow.selected?.id == "rr_golden_ring" }
         // F-01: the sign row shows the engine estimate of this very request (crew, pace), not the fixture km.
         compose.waitUntil(20_000) { flow.routeKm["rr_golden_ring"] != null }

@@ -54,7 +54,31 @@ class FileTripStoreTest {
     @Test
     fun unknownSchemaIsUnreadableToo() {
         dir.mkdirs()
-        File(dir, "saved.json").writeText("""{"schema": 2, "trips": []}""")
+        File(dir, "saved.json").writeText("""{"schema": 3, "trips": []}""")
         assertTrue(FileTripStore(context) { 7 }.load() is TripsLoad.Unreadable)
+    }
+
+    @Test
+    fun schemaOneMigratesToTwoAndWalksRoundTrip() {
+        // DEV-308: a schema 1 file (no `kind`) reads as trips and is written back as schema 2 on the next save.
+        dir.mkdirs()
+        val e = SavedTrips.entry("old", 1, result, "N")
+        val v1 = SavedTrips.encode(listOf(e)).replace("\"schema\":2", "\"schema\":1").replace(",\"kind\":\"trip\"", "")
+        assertTrue(v1.contains("\"schema\":1"))
+        File(dir, "saved.json").writeText(v1)
+        val store = FileTripStore(context) { 9 }
+        val trips = (store.load() as TripsLoad.Ok).trips
+        assertEquals("trip", trips.single().kind)
+        val doc = EngineJson.json.parseToJsonElement(root.resolve("docs/contracts/v2/city_route-overview.json").readText()) as kotlinx.serialization.json.JsonObject
+        val walkText = ((doc["response"] as kotlinx.serialization.json.JsonObject)["result"] as kotlinx.serialization.json.JsonObject).toString()
+        val walk = app.verst.core.model.EngineJson.walk(walkText)
+        store.save(trips + SavedTrips.walkEntry("w1", 2, walk))
+        val text = File(dir, "saved.json").readText()
+        assertTrue(text.contains("\"schema\":2"))
+        val back = (store.load() as TripsLoad.Ok).trips
+        assertEquals(listOf("trip", "walk"), back.map { it.kind })
+        val w = app.verst.core.model.EngineJson.walk(back[1].walk.toString())
+        assertEquals(walk.titleRu, w.titleRu)
+        assertEquals(walk.stops.size, w.stops.size)
     }
 }

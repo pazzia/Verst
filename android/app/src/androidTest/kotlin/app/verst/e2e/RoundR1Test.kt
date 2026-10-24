@@ -52,11 +52,13 @@ class RoundR1Test {
     @Before
     fun toRoot() {
         E2e.awaitReady(30_000)
+        E2e.noRealNominatim()
         compose.runOnUiThread {
             while (flow.back()) Unit
             flow.clearSaved()
             flow.debugForceError = null
             flow.debugHandoffDryRun = true
+            flow.debugLocationAnswered()
         }
     }
 
@@ -146,56 +148,65 @@ class RoundR1Test {
     }
 
     @Test
-    fun dayLinkAndLongPressHandOffToTheNavigatorWithViaPoints() {
+    fun dayMenuAndStopMenuHandOffTheEngineLinks() {
         goldenRingRoad()
-        val trip = flow.result!!.trip
-        val d1 = trip.daysList.first()
+        val r = flow.result!!
+        val gateway = app.verst.engine.ChaquopyPlannerGateway(E2e.engine, app.verst.core.model.DefaultWorld)
+        // 5.13: the day link → the day menu «В навигатор: день 1» → the engine's links (ADR-0014).
         compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).performClick()
+        waitTag("daymenu")
+        compose.waitUntil(10_000) { flow.dayHandoff != null }
+        shot("42-day-menu")
+        compose.onNodeWithTag("daymenu.go", useUnmergedTree = true).performClick()
         compose.waitUntil(5_000) { flow.lastHandoff != null }
-        val (h, target) = flow.lastHandoff!!
-        Log.i("VerstE2e", "handoff day 1 $target navi=${h.navi} web=${h.web}")
+        val (links, target) = flow.lastHandoff!!
+        Log.i("VerstE2e", "handoff day 1 $target navi=${links.navigator} web=${links.web}")
         assertEquals(if (flow.navigatorInstalled) HandoffTarget.NavigatorDryRun else HandoffTarget.BrowserDryRun, target)
-        assertEquals(NaviLinks.day(d1), h)
-        assertTrue(h.navi!!.startsWith("yandexnavi://build_route_on_map?lat_from=${NaviLinks.coord(d1.stops.first().lat!!)}"))
-        assertTrue(h.navi!!.contains("lat_via_0=${NaviLinks.coord(d1.stops[1].lat!!)}"))
-        assertTrue(h.web.startsWith("https://yandex.ru/maps/?rtext="))
+        val engineDay = kotlinx.coroutines.runBlocking { gateway.handoff(r.tripJson, app.verst.core.model.HandoffArgs.day(1)) }
+        assertEquals((engineDay as app.verst.core.model.EngineResult.Ok).value.parts.first().links, links)
+        assertTrue(links.navigator!!.startsWith("yandexnavi://build_route_on_map?"))
+        assertTrue(links.navigator!!.contains("lat_via_0="))
+        assertTrue(links.web!!.startsWith("https://yandex.ru/maps/?rtext="))
 
-        // Long-press a row → D-5 → «ОТКРЫТЬ В НАВИГАТОРЕ ОТСЮДА».
-        val stop = d1.stops[1]
+        // Long-press a row → D-5 → «Открыть в навигаторе отсюда».
+        val stop = r.trip.daysList.first().stops[1]
         compose.onNodeWithTag("road.stop.${stop.id}").performScrollTo().performTouchInput { longClick() }
         waitTag("stopmenu")
         assertEquals(stop.id, flow.stopMenu?.id)
-        shot("42-stop-menu")
+        compose.waitUntil(10_000) { flow.stopHandoff != null }
+        shot("43-stop-menu")
         compose.onNodeWithTag("stopmenu.navigator", useUnmergedTree = true).performClick()
         compose.waitUntil(5_000) { flow.stopMenu == null }
         val from = flow.lastHandoff!!.first
-        assertEquals(NaviLinks.fromStop(trip, stop.id), from)
-        assertTrue(from.navi!!.contains("lat_from=${NaviLinks.coord(stop.lat!!)}"))
-        assertTrue(from.navi!!.contains("lat_to=${NaviLinks.coord(d1.stops.last().lat!!)}"))
+        val engineStop = kotlinx.coroutines.runBlocking { gateway.handoff(r.tripJson, app.verst.core.model.HandoffArgs.fromStop(stop.id)) }
+        assertEquals((engineStop as app.verst.core.model.EngineResult.Ok).value.parts.first().links, from)
 
-        // Offline: the day link reads «в навигатор» and explains itself.
+        // Offline without a navigator app: the link keeps its look; the tap explains it (5.13 §3).
         compose.runOnUiThread { flow.setOffline(true) }
-        compose.waitUntil(5_000) { compose.onAllNodes(androidx.compose.ui.test.hasText("в навигатор"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
         val before = flow.lastHandoff
         compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Нужен интернет, чтобы открыть навигатор").assertExists()
-        assertEquals(before, flow.lastHandoff)
-        shot("43-road-offline-navigator")
+        waitTag("daymenu")
+        compose.waitUntil(10_000) { flow.dayHandoff != null }
+        compose.onNodeWithTag("daymenu.go", useUnmergedTree = true).performClick()
+        if (!flow.navigatorInstalled) {
+            compose.onNodeWithText("открыть карту в браузере", substring = true).assertExists()
+            assertEquals(before, flow.lastHandoff)
+        }
+        shot("44-handoff-offline")
     }
 
     @Test
-    fun locationRationaleDenyThenMockLocationSetsTheOrigin() {
+    fun locationRationaleManualThenMockLocationSetsTheOrigin() {
         compose.runOnUiThread { flow.debugResetOrigin() }
         waitTag("windshield.navi")
-        // First «Куда угодно»: the rationale; «Не разрешать» keeps Москва.
+        // 5.12: the first «Куда угодно» shows «Откуда поедем?»; «Выберу сам» opens the ОТКУДА input, Москва stays.
         compose.onNodeWithTag("windshield.navi").performClick()
-        waitTag("navigator.location")
-        shot("44-navigator-location-rationale")
-        compose.onNodeWithTag("navigator.location.deny", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Хорошо, старт — Москва. Изменить можно в навигаторе").assertExists()
-        assertFalse(flow.locationPrompt)
+        waitTag("location")
+        shot("45-location-rationale")
+        compose.onNodeWithTag("location.manual", useUnmergedTree = true).performClick()
+        compose.waitUntil(5_000) { !flow.locationSheet && flow.editingFrom }
         assertEquals("Москва", flow.origin.label)
-        shot("45-navigator-location-denied")
+        back()
         back()
 
         // Debug panel → mock location «Ярославль» → the origin is the nearest town, «ВЫ: ЯРОСЛАВЛЬ».

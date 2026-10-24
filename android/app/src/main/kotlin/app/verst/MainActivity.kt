@@ -85,9 +85,17 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         // S3-R1: activity-bound platform hooks (cleared in onDestroy so the app-scoped flow never leaks us).
+        (application as VerstApp).startNetwork()
         flow.handoffLauncher = launcher
-        flow.askLocationPermission = { locationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) }
+        // 5.12: coarse first; «Точнее» asks for fine
+        flow.askLocationPermission = { precise ->
+            locationPermission.launch(
+                if (precise) arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                else arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+            )
+        }
         flow.openAppSettings = { openAppSettings(this) }
+        flow.openLocationSettings = { app.verst.platform.openLocationSettings(this) }
         Log.i(EngineHost.TAG, "build ${BuildConfig.BUILD_NUMBER} ${BuildConfig.GIT_SHA}")
         setContent { VerstRoot(flow) }
     }
@@ -98,6 +106,7 @@ class MainActivity : ComponentActivity() {
             f.handoffLauncher = null
             f.askLocationPermission = null
             f.openAppSettings = null
+            f.openLocationSettings = null
         }
         super.onDestroy()
     }
@@ -133,13 +142,9 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
         // F-02: above the dashboard crest (324 dp dashboard + 16), never over the caption or ПОЕХАЛИ.
         PlateToast(toastText(t), bottom = 340.dp, action = if (flow.canUndoDelete) stringResource(UiR.string.common_undo) else null, onAction = flow::undoDelete)
     }
-    if (flow.top == Route.Navigator && t != null) {
-        // S3-R1 location toasts above the Navigator caption row (start button 120 + 16).
-        val settings = t == app.verst.nav.Toast.LocationBlocked
-        PlateToast(
-            toastText(t), bottom = 150.dp,
-            action = if (settings) stringResource(UiR.string.windshield_location_settings) else null, onAction = flow::toastSettings,
-        )
+    if ((flow.top == Route.Navigator || flow.top == Route.City) && t != null) {
+        // 5.12 location / address toasts above the caption row (start button + 16).
+        PlateToast(toastText(t), bottom = 150.dp, action = app.verst.feature.common.toastAction(t), onAction = flow::toastAction)
     }
     flow.deleteAsk?.let { d ->
         NaviDialog(
@@ -159,7 +164,8 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 
 @Composable
 private fun Screens(flow: VerstFlow, context: Context) {
-    val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk
+    val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
+        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet
     BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
@@ -180,6 +186,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 override fun delete(id: String) = flow.askDelete(id)
             },
             onDebug = flow::openDebug,
+            onCity = flow::openCity,
+            onYouAre = flow::askLocation,
         )
         Route.Navigator -> NavigatorScreen(
             NavigatorUi(
@@ -189,7 +197,15 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 tripKm = flow.figures?.figures?.km,
                 tripErrorCode = flow.draftError?.code,
                 gps = flow.gps,
-                locationPrompt = flow.locationPrompt,
+                locationSheet = flow.locationSheet,
+                originFromGps = flow.originFromGps,
+                gpsApprox = flow.gpsApprox,
+                originAddress = flow.originAddress,
+                outsideRussia = flow.outsideRussia,
+                online = flow.connectivity.online,
+                addressQuery = flow.looksLikeAddress(flow.query),
+                addressState = flow.addressState,
+                addressResults = flow.addressResults,
             ),
             onBack = { flow.back() },
             onQuery = flow::updateQuery,
@@ -198,8 +214,14 @@ private fun Screens(flow: VerstFlow, context: Context) {
             onStart = flow::openInstrumentsFree,
             location = object : LocationActions {
                 override fun allow() = flow.allowLocation()
+                override fun manual() = flow.manualLocation()
                 override fun deny() = flow.denyLocation()
+                override fun precise() = flow.preciseLocation()
                 override fun myLocation() = flow.useMyLocation()
+                override fun findAddress() = flow.submitAddress()
+                override fun closeSheet() {
+                    flow.back()
+                }
             },
         )
         Route.Instruments -> InstrumentsScreen(
@@ -218,6 +240,10 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 mood = flow.mood,
                 days = flow.figures?.figures?.days,
                 originGen = flow.originGen,
+                budgetCustom = flow.budgetCustom,
+                budgetOutcome = flow.budgetEstimate?.outcome,
+                budgetTotal = flow.budgetEstimate?.totalRub,
+                budgetStatus = flow.budgetEstimate?.budgetStatus,
             ),
             object : InstrumentsActions {
                 override fun back() {
@@ -242,7 +268,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
             kmLabel = flow.figures?.figures?.km?.let { RuFormat.thousands(it) } ?: "—",
             action = { flow.driveAction(it.code) },
             onCancel = { flow.back() },
-            onDone = flow::openRoad,
+            onDone = { if (flow.drive.noFit) flow.openNoFit() else flow.openRoad() },
             onErrorAction = flow::onDriveError,
         )
         Route.Road -> {
@@ -255,8 +281,13 @@ private fun Screens(flow: VerstFlow, context: Context) {
                     RoadUi(r.trip, flow.resultBearing, flow.openedFromSaved, flow.savedCurrent, flow.replace, flow.toast, flow.canUndo,
                         r.trip.daysList.flatMap { it.stops }.filter { flow.isBooked(it.id) }.map { it.id }.toSet(), r.townPrepRu,
                         online = flow.connectivity.online,
-                        stopMenu = flow.stopMenu, navigatorInstalled = flow.navigatorInstalled,
-                        focus = RoadFocus(flow.roadFocusId, flow.roadTopId, flow.roadFocusSeq),
+                        stopMenu = flow.stopMenu, navigatorInstalled = flow.navigatorInstalled, stopHandoff = flow.stopHandoff,
+                        dayMenu = flow.dayMenu, dayHandoff = flow.dayHandoff, carTarget = flow.carTarget,
+                        focus = RoadFocus(flow.roadFocusId, flow.roadTopId, flow.roadFocusSeq, flow.roadScrollY),
+                        card = flow.card?.takeIf { it.source == app.verst.nav.CardSource.ROAD }?.ui,
+                        aboutData = flow.aboutData,
+                        minimum = flow.showingMinimum,
+                        tappable = flow::tappable,
                     ),
                     object : RoadActions {
                         override fun back() {
@@ -271,12 +302,18 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun closeReplace() = flow.closeReplace()
                         override fun undo() = flow.undo()
                         override fun hotel(stopId: String) = flow.openExit(stopId)
-                        override fun dayNavigator(day: Int) = flow.openDayInNavigator(day)
+                        override fun dayNavigator(day: Int) = flow.openDayMenu(day)
+                        override fun dayMenuGo() = flow.dayMenuGo()
+                        override fun closeDayMenu() = flow.closeDayMenu()
+                        override fun card(stop: StopDto) = flow.openCard(stop)
+                        override fun card(): app.verst.feature.card.CardActions = cardActions(flow, context)
+                        override fun aboutData() = flow.openAboutData()
+                        override fun closeAboutData() = flow.closeAboutData()
                         override fun stopMenu(stop: StopDto) = flow.openStopMenu(stop)
                         override fun closeStopMenu() = flow.closeStopMenu()
                         override fun navigatorFromStop() = flow.navigatorFromStop()
                         override fun stopMenuReplace() = flow.stopMenuReplace()
-                        override fun topRow(id: String?) = flow.roadTop(id)
+                        override fun topRow(id: String?, scrollY: Int) = flow.roadTop(id, scrollY)
                         override fun focusShown() = flow.roadFocusShown()
                     },
                 )
@@ -319,6 +356,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                     WaybillUi(
                         r.trip, flow.waybillNumber, flow.savedCurrent, flow.expandedLine, flow.costBusy,
                         r.pricesMonthRu, r.pricesYear, flow.toast, stamp = remember(flow.tripSession) { flow.stampOnce() },
+                        minimum = flow.showingMinimum,
                     ),
                     object : WaybillActions {
                         override fun back() {
@@ -328,9 +366,120 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun toggleReserve() = flow.toggleReserve()
                         override fun save() = flow.save()
                         override fun share() = share(context, r.shareText)
+                        override fun refit() = flow.refit()
+                    },
+                )
+            }
+        }
+        Route.NoFit -> {
+            val nf = flow.noFit
+            if (nf == null) {
+                LaunchedEffect(Unit) { flow.back() }
+            } else {
+                app.verst.feature.budget.NoFitScreen(
+                    nf,
+                    object : app.verst.feature.budget.NoFitActions {
+                        override fun back() {
+                            flow.back()
+                        }
+                        override fun option(o: app.verst.core.model.dto.BudgetOptionDto) = flow.applyBudgetOption(o)
+                        override fun showMinimum() = flow.showMinimum()
+                    },
+                )
+            }
+        }
+        Route.City -> app.verst.feature.city.CityScreen(
+            app.verst.feature.city.CityUi(
+                town = flow.cityPresets?.town?.name,
+                startLabel = flow.cityStart?.label ?: flow.originAddress ?: flow.origin.label,
+                fromGps = flow.cityStart == null && flow.originFromGps,
+                presets = flow.cityPresets?.presets.orEmpty(),
+                loading = flow.cityLoading,
+                error = flow.cityError,
+                selected = flow.cityPreset,
+                durationMin = flow.cityDurationMin,
+                interests = flow.cityInterests.toList(),
+                pace = flow.cityPace,
+                budget = flow.cityBudget,
+                returnToStart = flow.cityReturn,
+                customSheet = flow.cityCustomSheet,
+                ageGate = flow.ageGate != null,
+                building = flow.walkBuilding,
+                children = flow.children > 0,
+                startTime = remember(flow.cityPreset, flow.cityInterests.toList()) { walkStartTime(flow.cityPreset, flow.cityInterests) },
+            ),
+            object : app.verst.feature.city.CityActions {
+                override fun back() {
+                    flow.back()
+                }
+                override fun changeStart() = flow.cityChangeStart()
+                override fun preset(p: String) = flow.selectCityPreset(p)
+                override fun go() = flow.buildWalk()
+                override fun duration(min: Int) = flow.setCityDuration(min)
+                override fun interest(i: String) = flow.toggleCityInterest(i)
+                override fun pace(p: String) = flow.pickCityPace(p)
+                override fun budget(rub: Int?) = flow.pickCityBudget(rub)
+                override fun toggleReturn() = flow.toggleCityReturn()
+                override fun closeCustom() = flow.closeCityCustom()
+                override fun buildCustom() = flow.buildCustomWalk()
+                override fun age(yes: Boolean) = flow.answerAge(yes)
+                override fun longer() = flow.walkLonger()
+                override fun otherPreset() = flow.selectCityPreset("custom")
+            },
+        )
+        Route.Walk -> {
+            val w = flow.walk
+            if (w == null) {
+                LaunchedEffect(Unit) { flow.back() }
+            } else {
+                app.verst.feature.city.WalkScreen(
+                    app.verst.feature.city.WalkUi(
+                        w, flow.walkHandoff, flow.walkTarget, saved = flow.savedWalkId != null, building = flow.walkBuilding,
+                        card = flow.card?.takeIf { it.source == app.verst.nav.CardSource.WALK }?.ui, toast = flow.toast,
+                        focusId = flow.walkFocusId, focusSeq = flow.walkFocusSeq,
+                    ),
+                    object : app.verst.feature.city.WalkActions {
+                        override fun back() {
+                            flow.back()
+                        }
+                        override fun save() = flow.saveWalk()
+                        override fun share() = share(context, flow.walkShareText())
+                        override fun stop(s: app.verst.core.model.dto.WalkStopDto) = flow.openWalkCard(s)
+                        override fun handoff(part: Int) = flow.walkHandoffGo(part)
+                        override fun other() = flow.otherWalk()
+                        override fun card(): app.verst.feature.card.CardActions = cardActions(flow, context)
+                        override fun focusShown() = flow.walkFocusShown()
                     },
                 )
             }
         }
     }
+}
+
+/** 5.9 card actions (Road ahead and the walk result). */
+private fun cardActions(flow: VerstFlow, context: Context) = object : app.verst.feature.card.CardActions {
+    override fun close() = flow.closeCard()
+    override fun pickHotel() = flow.cardPickHotel()
+    override fun replace() = flow.cardReplace()
+    override fun removeStop() = flow.cardRemoveWalkStop()
+    override fun openPage(url: String) {
+        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+    }
+}
+
+/**
+ * 5.10 caption «старт 11:00»: the engine's default start (ARCH-304 `rounded_start`): now rounded up to the next
+ * quarter hour, no earlier than 18:00 for drink walks and 10:00 for museum walks. Device time — `city_presets`
+ * carries no town tz yet (asked of the Architect); the walk result shows the engine's `startAt`.
+ */
+private fun walkStartTime(preset: String, interests: Collection<String>): String {
+    val now = java.time.LocalTime.now().withSecond(0).withNano(0)
+    var t = now.plusMinutes(((15 - now.minute % 15) % 15).toLong())
+    val earliest = when {
+        preset == "ryumochnye" || preset == "beer" || "bars" in interests -> 18
+        preset == "museums" -> 10
+        else -> 0
+    }
+    if (t.hour < earliest) t = java.time.LocalTime.of(earliest, 0)
+    return "%02d:%02d".format(t.hour, t.minute)
 }

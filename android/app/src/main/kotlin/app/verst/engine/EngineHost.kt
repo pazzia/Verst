@@ -25,6 +25,8 @@ data class EngineTimings(
     val worldsMs: Long,
     val selfcheckMs: Long,
     val totalMs: Long,
+    /** Sprint 3: `load_catalogue` (composes `russia_v1`, ADR-0012; M§15.2 budget ≤ 800 ms). */
+    val catalogueMs: Long = 0,
 )
 
 data class EngineInfo(val engineVersion: String, val python: String, val timings: EngineTimings)
@@ -93,11 +95,14 @@ class EngineHost(private val context: Context) {
                 expectOk(mobile.callAttr("load_world", text).toString())
             }
             val t3 = SystemClock.elapsedRealtime()
+            _status.value = EngineStatus.Starting("catalogue")
+            expectOk(mobile.callAttr("load_catalogue").toString())
+            val t3c = SystemClock.elapsedRealtime()
             expectOk(mobile.callAttr("set_clock", "system").toString())
             _status.value = EngineStatus.Starting("selfcheck")
             val check = expectOk(mobile.callAttr("selfcheck").toString())
             val t4 = SystemClock.elapsedRealtime()
-            val timings = EngineTimings(t1 - t0, t2 - t1, t3 - t2, t4 - t3, t4 - t0)
+            val timings = EngineTimings(t1 - t0, t2 - t1, t3 - t2, t4 - t3c, t4 - t0, catalogueMs = t3c - t3)
             Log.i(TAG, "ready $timings")
             module = mobile
             _status.value = EngineStatus.Ready(

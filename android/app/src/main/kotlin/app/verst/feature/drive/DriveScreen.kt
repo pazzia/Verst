@@ -104,6 +104,7 @@ fun DriveScreen(
                         val msg = stringResource(errorMessageRes(err.code))
                         PrimaryCta(stringResource(actionLabelRes(act)), { onErrorAction(act, msg) }, Modifier.testTag("drive.error.cta"))
                     }
+                    ui.done && ui.noFit -> PrimaryCta(stringResource(R.string.budget_nofit_cta), onDone, Modifier.testTag("drive.nofit"))
                     ui.done -> PrimaryCta(stringResource(R.string.drive_done), onDone, Modifier.testTag("drive.cta"))
                     else -> Box(Modifier.height(DesignTokens.size.ctaH))
                 }

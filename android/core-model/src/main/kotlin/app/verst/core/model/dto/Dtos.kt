@@ -31,7 +31,12 @@ data class SuggestionDto(
     val id: String? = null,
     /** OI-39: «Ярославля» / «Ярославле» for towns (null for places). */
     val nameGenRu: String? = null,
+    /** v2 `geo_search` extras (ADR-0012 §5). */
     val namePrepRu: String? = null,
+    val population: Int? = null,
+    val regionRu: String? = null,
+    val poiKind: String? = null,
+    val hasPhoto: Boolean = false,
 ) {
     /** Key of the row's engine road km («lat,lon»). */
     val pointKey: String get() = "$lat,$lon"
@@ -93,6 +98,8 @@ data class AlternativeDto(
     val deltaRub: Int = 0,
     val shiftMin: Int = 0,
     val stop: StopDto? = null,
+    /** ADR-0011: choosing this alternative would take the trip over the allowed budget. */
+    val breaksBudget: Boolean = false,
 )
 
 @Serializable
@@ -163,6 +170,10 @@ data class TripDto(
     val cost: CostDto,
     val warnings: List<WarningDto> = emptyList(),
     val input: TripInputDto = TripInputDto(),
+    /** ADR-0011: present when the engine fitted the plan to the budget. */
+    val budgetFit: BudgetFitDto? = null,
+    /** ADR-0012 §4: the route left the fixture road graph (synthetic) — distances are approximate. */
+    val approxDistances: Boolean = false,
 )
 
 @Serializable
@@ -210,7 +221,14 @@ data class PlanResultDto(
 
 /** `mobile.estimate`: the engine's km and days of a trip input before Road ahead (equal to its plan). */
 @Serializable
-data class EstimateDto(val km: Int, val days: Int)
+data class EstimateDto(
+    val km: Int,
+    val days: Int,
+    /** v2 (ADR-0011): `plan` | `no_fit`, the total and `fits` | `small_overrun` | null. */
+    val outcome: String? = null,
+    val totalRub: Int? = null,
+    val budgetStatus: String? = null,
+)
 
 /** `mobile.reverse`: the town at a point with its name forms (OI-39). */
 @Serializable

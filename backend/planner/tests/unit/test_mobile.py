@@ -113,7 +113,7 @@ class MobileTest(unittest.TestCase):
         central = call(mobile.load_world((WORLDS / "central_russia_v1.json").read_text("utf-8")))
         edge = call(mobile.load_world((WORLDS / "edge_cases_v1.json").read_text("utf-8")))
         self.assertEqual(
-            (central["id"], central["towns"], central["readyRoutes"]), ("central_russia_v1", 41, 3)
+            (central["id"], central["towns"], central["readyRoutes"]), ("central_russia_v1", 41, 4)
         )
         self.assertEqual(central["places"], 426)
         self.assertEqual((edge["id"], edge["asOf"]), ("edge_cases_v1", "2026-10-01"))
@@ -159,7 +159,9 @@ class MobileTest(unittest.TestCase):
         from tests.helpers import _load_world
 
         rr = _load_world(str(WORLDS / "central_russia_v1.json")).ready_routes
-        want = sorted(rr.values(), key=lambda x: (x.km_sign, x.sort, x.id))
+        want = sorted(
+            (x for x in rr.values() if x.parent_id is None), key=lambda x: (x.km_sign, x.sort, x.id)
+        )
         self.assertEqual([x["id"] for x in r], [x.id for x in want])
         self.assertTrue(all(x["bearing8"] in ("N", "NE", "E", "SE", "S", "SW", "W", "NW") for x in r))
         ring = next(x for x in r if x["id"] == "rr_golden_ring")
@@ -196,7 +198,7 @@ class MobileTest(unittest.TestCase):
             with self.subTest(case=path.stem):
                 self.assertEqual(text, snap[0].read_text("utf-8"))
             checked += 1
-        self.assertEqual(checked, 10)
+        self.assertEqual(checked, 11)
 
     def test_plan_errors(self) -> None:
         err = fail(mobile.golden_snapshot(json.dumps(case("G09"))))
@@ -324,7 +326,7 @@ class MobileTest(unittest.TestCase):
     def test_selfcheck_api_version(self) -> None:
         r = call(mobile.selfcheck())
         self.assertEqual(r["apiVersion"], mobile.API_VERSION)
-        self.assertEqual(r["apiVersion"], 1)
+        self.assertEqual(r["apiVersion"], 2)
 
     def test_stale_trip_rejected(self) -> None:
         trip = golden_plan("G02")["trip"]
@@ -455,7 +457,9 @@ class MobileTest(unittest.TestCase):
         yar = (57.6261, 39.8845)  # the `suggest` row the Navigator picks
         inp = self._input(yar)
         est, trip = self._plan_and_estimate(inp, "yar")
-        self.assertEqual(est, {"km": trip["km"], "days": trip["days"]})
+        self.assertEqual(
+            (est["km"], est["days"], est["totalRub"]), (trip["km"], trip["days"], trip["cost"]["totalRub"])
+        )
         self.assertEqual(est["km"], 265)  # the DEV-SLICE app showed 249 (straight line) and 312 (× 1.25)
         self.assertEqual(sum(d["km"] for d in trip["daysList"]), est["km"])
         # Suggestion rows: the engine's base route; the trip adds only the stop detours.
@@ -482,7 +486,10 @@ class MobileTest(unittest.TestCase):
         for tag, inp in variants.items():
             with self.subTest(tag):
                 est, trip = self._plan_and_estimate(inp, tag)
-                self.assertEqual(est, {"km": trip["km"], "days": trip["days"]})
+                self.assertEqual(
+                    (est["km"], est["days"], est["totalRub"]),
+                    (trip["km"], trip["days"], trip["cost"]["totalRub"]),
+                )
 
     def test_estimate_errors_and_cancel(self) -> None:
         err = fail(mobile.estimate("central_russia_v1", "est-short", json.dumps(self._input((55.76, 37.65)))))

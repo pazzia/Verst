@@ -17,7 +17,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import app.verst.core.model.GeoPoint
-import app.verst.core.model.NaviHandoff
+import app.verst.core.model.dto.HandoffLinksDto
 import app.verst.core.model.NaviLinks
 import app.verst.nav.HandoffLauncher
 import app.verst.nav.HandoffTarget
@@ -33,6 +33,13 @@ import kotlinx.coroutines.withTimeoutOrNull
  */
 class AndroidLocator(private val context: Context) : Locator {
     private val lm get() = context.getSystemService(LocationManager::class.java)
+
+    override fun precise(): Boolean =
+        context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+    override fun enabled(): Boolean = lm?.let { m ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) m.isLocationEnabled else true
+    } ?: true
 
     override fun granted(): Boolean =
         context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
@@ -85,35 +92,48 @@ class AndroidLocator(private val context: Context) : Locator {
 }
 
 /**
- * S3-R1 hand-off (CEO 4): Yandex Navigator when installed (`yandexnavi://build_route_on_map` with the via points),
- * else the same route in Yandex Maps in the browser. The package and the schemes are declared in `<queries>`.
+ * 5.13 / ADR-0014 hand-off: car → Яндекс Навигатор → Яндекс Карты → the web route; walk → Карты → web. One tap
+ * opens the target (no chooser); an `ActivityNotFoundException` falls through to the next link. The packages and
+ * the schemes are declared in `<queries>`.
  */
 class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
     override fun navigatorInstalled(): Boolean =
         activity.packageManager.getLaunchIntentForPackage(NaviLinks.NAVI_PACKAGE) != null
 
-    override fun open(h: NaviHandoff): HandoffTarget {
-        val navi = h.navi
-        if (navi != null && navigatorInstalled()) {
-            try {
-                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(navi)).setPackage(NaviLinks.NAVI_PACKAGE))
-                return HandoffTarget.Navigator
-            } catch (e: ActivityNotFoundException) {
-                Log.w(TAG, "navigator did not take the link", e)
-            }
-        }
+    override fun mapsInstalled(): Boolean =
+        activity.packageManager.getLaunchIntentForPackage(NaviLinks.MAPS_PACKAGE) != null
+
+    override fun open(links: HandoffLinksDto, walk: Boolean): HandoffTarget {
+        val navi = links.navigator
+        if (!walk && navi != null && navigatorInstalled() && start(navi, NaviLinks.NAVI_PACKAGE)) return HandoffTarget.Navigator
+        val maps = links.maps
+        if (maps != null && mapsInstalled() && start(maps, NaviLinks.MAPS_PACKAGE)) return HandoffTarget.Maps
+        val web = links.web ?: return HandoffTarget.None
         return try {
-            activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(h.web)).addCategory(Intent.CATEGORY_BROWSABLE))
+            activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(web)).addCategory(Intent.CATEGORY_BROWSABLE))
             HandoffTarget.Browser
         } catch (e: ActivityNotFoundException) {
-            Log.w(TAG, "no browser for ${h.web}", e)
+            Log.w(TAG, "no browser for $web", e)
             HandoffTarget.None
         }
+    }
+
+    private fun start(uri: String, pkg: String): Boolean = try {
+        activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)).setPackage(pkg))
+        true
+    } catch (e: ActivityNotFoundException) {
+        Log.w(TAG, "$pkg did not take the link", e)
+        false
     }
 
     companion object {
         const val TAG = "VerstHandoff"
     }
+}
+
+/** Location services off → the system location settings («Включить»). */
+fun openLocationSettings(activity: Activity) {
+    runCatching { activity.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) }
 }
 
 /** The app's page in the system settings (a blocked location permission). */

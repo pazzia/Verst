@@ -55,6 +55,7 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "stage.hours",
     "stage.fuel",
     "stage.cost",
+    "stage.budget",
     "hint.cheaper_overnight",
     "hint.fewer_sights",
     "hint.just_drive",

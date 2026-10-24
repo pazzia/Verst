@@ -105,6 +105,12 @@ data class InstrumentsUi(
     val days: Int? = null,
     /** OI-39: the origin in the genitive from the engine. */
     val originGen: String = origin,
+    /** 5.8: a no-fit «Поднять бюджет до …» value shown exactly («до 42 000 ₽»). */
+    val budgetCustom: Int? = null,
+    /** 5.8 §3: `estimate.outcome` + `totalRub` + `budgetStatus` (caption meta suffix). */
+    val budgetOutcome: String? = null,
+    val budgetTotal: Int? = null,
+    val budgetStatus: String? = null,
 )
 
 interface InstrumentsActions {
@@ -183,7 +189,24 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                         ui.roundTrip -> stringResource(R.string.instruments_ready_meta_ring, ui.originGen, RuFormat.thousands(km))
                         else -> stringResource(R.string.common_km, RuFormat.thousands(km))
                     }
+                    // 5.8 §3: the engine's budget verdict after the km («· ≈ 33 800 ₽ — в бюджете»)
+                    val total = ui.budgetTotal
+                    val suffix = when {
+                        km == null || ui.budgetOutcome == null -> null
+                        ui.budgetOutcome == "no_fit" -> stringResource(R.string.budget_instruments_nofit)
+                        total == null -> null
+                        // an engine without the fitter (API v2 M1) answers `plan` even over budget: say nothing then
+                        ui.budgetStatus == null && total > (ui.budgetCustom ?: BudgetPresets[ui.budgetIndex] ?: Int.MAX_VALUE) -> null
+                        ui.budgetStatus == null -> stringResource(R.string.budget_instruments_fits, RuFormat.thousands(total))
+                        else -> stringResource(R.string.budget_instruments_fitted, RuFormat.thousands(total))
+                    }
                     Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp).testTag("instruments.meta"), maxLines = 1)
+                    if (suffix != null) {
+                        Txt(
+                            suffix, T.body.mdTight, if (ui.budgetOutcome == "no_fit") C.accent.redText else C.text.secondary,
+                            Modifier.testTag("instruments.budget"), maxLines = 1,
+                        )
+                    }
                 }
                 val go = stringResource(R.string.common_go)
                 StartButton(StartSize.L, go, enabled = true, cd = go, onClick = a::go, modifier = Modifier.testTag("instruments.start"))
@@ -414,8 +437,18 @@ private fun BudgetWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modif
     val preset = BudgetPresets[ui.budgetIndex]
     Well(stringResource(R.string.instruments_budget_label), modifier, gap = 6.dp) {
         val reduced = LocalReducedMotion.current
+        // a custom budget («до 42 000 ₽») puts the needle between the neighbouring presets
+        val pos = ui.budgetCustom?.let { c ->
+            val vals = BudgetPresets.dropLast(1).filterNotNull()
+            val i = vals.indexOfLast { it <= c }
+            when {
+                i < 0 -> 0f
+                i >= vals.lastIndex -> vals.lastIndex.toFloat()
+                else -> i + (c - vals[i]).toFloat() / (vals[i + 1] - vals[i])
+            }
+        } ?: ui.budgetIndex.toFloat()
         val angle by animateFloatAsState(
-            -90f + 36f * ui.budgetIndex,
+            -90f + 36f * pos,
             if (reduced) snap() else spring(DesignTokens.motion.needle.dampingRatio, DesignTokens.motion.needle.stiffness),
             label = "needle",
         )
@@ -425,9 +458,10 @@ private fun BudgetWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modif
             Txt(stringResource(R.string.instruments_gauge_empty), T.caption.bold, C.accent.redText, Modifier.offset(x = 8.dp, y = 34.dp))
             Txt(stringResource(R.string.instruments_gauge_full), T.caption.bold, C.text.primary, Modifier.offset(x = 114.dp, y = 34.dp))
         }
+        val shown = ui.budgetCustom ?: preset
         Txt(
-            if (preset == null) stringResource(R.string.instruments_budget_any) else stringResource(R.string.instruments_budget_value, RuFormat.thousands(preset)),
-            T.title.lgNum, C.text.primary, maxLines = 1,
+            if (shown == null) stringResource(R.string.instruments_budget_any) else stringResource(R.string.instruments_budget_value, RuFormat.thousands(shown)),
+            T.title.lgNum, C.text.primary, Modifier.testTag("instruments.budget.value"), maxLines = 1,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StepperKey("−", ui.budgetIndex > 0, stringResource(R.string.cd_instruments_budget_less), { a.budget(-1) })

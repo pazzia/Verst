@@ -49,7 +49,11 @@ class ProcessDeathTest {
     @Test
     fun phase1PlanAndLeave() {
         E2e.awaitReady(30_000)
-        compose.runOnUiThread { while (flow.back()) Unit }
+        E2e.noRealNominatim()
+        compose.runOnUiThread {
+            while (flow.back()) Unit
+            flow.debugLocationAnswered()
+        }
         waitTag("windshield.navi")
         compose.onNodeWithTag("windshield.navi").performClick()
         waitTag("navigator.to")

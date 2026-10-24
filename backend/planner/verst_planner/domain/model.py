@@ -181,6 +181,8 @@ class Place:
     verified_at: date | None
     status: PlaceStatus
     breakfast_included: bool = True
+    family_price_rub: int | None = None
+    """Price per night of a family room (≤ 4 guests, ADR-0011); None = `price_night_rub x 1.4`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,6 +210,8 @@ class ReadyRoute:
     tags: tuple[str, ...]
     cover_key: str | None
     sort: int
+    parent_id: str | None = None
+    """A hidden shorter variant of that ready route (ADR-0011 lever 5); never listed by itself."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -289,6 +293,8 @@ class Route:
     snapped: tuple[LatLon, ...]
     km_total: float
     min_total: float
+    synthetic: bool = False
+    """Not a road network route: straight legs x the calibrated road model (ADR-0012 §4)."""
 
 
 # ---------------------------------------------------------------- 4.6 working state (mutable)
@@ -415,6 +421,8 @@ class HotelPrice:
     place_id: str
     price_night_rub: int
     breakfast_included: bool = True
+    rooms: int | None = None
+    """Rooms the engine chose for this option (family rooms, ADR-0011); None = `ceil(adults / 2)`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -428,6 +436,8 @@ class NightUnit:
     default_price: bool
     breakfast_included: bool
     breakfast_check_rub: int
+    rooms: int | None = None
+    """Rooms of the selected option (ADR-0011); None = `ceil(adults / 2)`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -556,6 +566,8 @@ class Alternative:
     stop: ScheduledStop
     units: AltUnits
     day_patch: tuple[StopTime, ...] = ()
+    breaks_budget: bool = False
+    """ADR-0011: the trip total with this alternative exceeds the budget tolerance."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -686,6 +698,38 @@ class EngineState:
 
 
 @dataclass(frozen=True, slots=True)
+class FitKnobs:
+    """ADR-0011 budget levers inside the stages (all off = the plain plan)."""
+
+    lodging_cheap: bool = False
+    family_rooms: bool = False
+    food_economy: bool = False
+    sights_free: bool = False
+
+    @property
+    def any(self) -> bool:
+        return self.lodging_cheap or self.family_rooms or self.food_economy or self.sights_free
+
+
+@dataclass(frozen=True, slots=True)
+class BudgetLever:
+    code: str
+    saved_rub: int
+
+
+@dataclass(frozen=True, slots=True)
+class BudgetFit:
+    status: str  # "fits" | "small_overrun"
+    budget_rub: int
+    allowed_rub: int
+    initial_total_rub: int
+    total_rub: int
+    levers: tuple[BudgetLever, ...]
+    text_ru: str
+    variant_of: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class TripPlan:
     title_ru: str
     km: int
@@ -699,6 +743,10 @@ class TripPlan:
     input: NormalizedInput
     engine_version: str
     engine_state: EngineState
+    approx_distances: bool = False
+    """The route is synthetic (ADR-0012 §4): distances and times are estimates («≈»)."""
+    budget_fit: BudgetFit | None = None
+    """ADR-0011: set when the first plan exceeded the budget and the fitter changed the trip."""
 
 
 class _Unset:

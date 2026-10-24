@@ -43,8 +43,8 @@ class MobileContractsTest(unittest.TestCase):
 
     def test_counts(self) -> None:
         replace, patch = self.bundles("replace"), self.bundles("patch")
-        self.assertEqual(len(replace), 10)
-        self.assertEqual(len(patch), 10)
+        self.assertEqual(len(replace), 11)  # G01-G08, G11, G12 + Sprint 3 G13
+        self.assertEqual(len(patch), 11)
         self.assertGreaterEqual(sum(len(b["items"]) for b in replace), 40)
         self.assertGreaterEqual(sum(len(b["items"]) for b in patch), 12)
         per_stop: dict[tuple[str, str], int] = {}

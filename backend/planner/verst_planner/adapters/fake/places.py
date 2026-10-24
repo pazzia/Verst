@@ -70,12 +70,28 @@ class FakePlaceRepository:
         self._count("get_ready_route")
         return self.world.ready_routes.get(route_id)
 
+    def variants_of(self, route_id: str) -> list[ReadyRoute]:
+        """The hidden shorter variants of a ready route, fewest days first (ADR-0011 lever 5)."""
+        out = [r for r in self.world.ready_routes.values() if r.parent_id == route_id]
+        return sorted(out, key=lambda r: (r.days_max, r.km_total, r.id))
+
+    def places_near(self, point: LatLon, radius_km: float, types: frozenset[PlaceType]) -> list[Place]:
+        """Live places of `types` within `radius_km` of `point`, nearest first, then id (city walks)."""
+        self._count("places_near")
+        hits = [
+            (round(haversine_km(point, p.point), 6), p.id, p)
+            for p in self.world.places.values()
+            if p.status is PlaceStatus.LIVE and p.type in types and haversine_km(point, p.point) <= radius_km
+        ]
+        return [p for _d, _i, p in sorted(hits, key=lambda x: (x[0], x[1]))]
+
     def ready_routes_near(self, point: LatLon, hub_radius_km: float, limit: int) -> list[ReadyRoute]:
         self._count("ready_routes_near")
         out = [
             r
             for r in self.world.ready_routes.values()
-            if haversine_km(self.world.towns[r.hub_town_id].point, point) <= hub_radius_km
+            if r.parent_id is None  # hidden shorter variants (ADR-0011) are never listed
+            and haversine_km(self.world.towns[r.hub_town_id].point, point) <= hub_radius_km
         ]
         out.sort(key=lambda r: (r.km_sign, r.sort, r.id))
         return out[:limit]

@@ -55,14 +55,14 @@ def _as_of(units: CostUnits, key: CostKey, fallback: str) -> str:
     return dict(units.as_of).get(key.value, fallback)
 
 
-def _selected(n: NightUnit, overrides: CostOverrides) -> tuple[int, bool, str | None]:
-    """(price per room, breakfast included, selected id) after a hotel override."""
+def _selected(n: NightUnit, overrides: CostOverrides) -> tuple[int, bool, str | None, int | None]:
+    """(price per room, breakfast included, selected id, explicit rooms) after a hotel override."""
     pid = overrides.hotel_by_stop.get(n.stop_id)
     if pid is not None:
         for o in n.options:
             if o.place_id == pid:
-                return o.price_night_rub, o.breakfast_included, o.place_id
-    return n.price_night_rub, n.breakfast_included, n.selected_place_id
+                return o.price_night_rub, o.breakfast_included, o.place_id, o.rooms
+    return n.price_night_rub, n.breakfast_included, n.selected_place_id, n.rooms
 
 
 def effective_tickets(units: CostUnits, ov: CostOverrides) -> list[TicketUnit]:
@@ -164,14 +164,15 @@ def recompute(
     )
 
     # ---- lodging: sum nights rooms x price
-    rooms = rooms_for(crew)
+    std_rooms = rooms_for(crew)
     lodging_exact = ZERO
     night_info = []
     lodging_rows = []
     breakfasts: dict[int, int] = {}  # day -> breakfast check (the morning after night d is day d + 1)
     cheaper = False
     for n in units.nights:
-        price, breakfast, sel = _selected(n, ov)
+        price, breakfast, sel, explicit = _selected(n, ov)
+        rooms = std_rooms if explicit is None else explicit  # ADR-0011: family rooms are explicit
         cost = dec(rooms) * price
         lodging_exact += cost
         night_info.append((n.town_name_ru, rooms, price, n.default_price))
@@ -180,7 +181,11 @@ def recompute(
         )
         if not breakfast:
             breakfasts[n.day + 1] = n.breakfast_check_rub
-        if any(o.price_night_rub < price for o in n.options if o.place_id != sel):
+        if any(
+            o.price_night_rub * (std_rooms if o.rooms is None else o.rooms) < price * rooms
+            for o in n.options
+            if o.place_id != sel
+        ):
             cheaper = True
     lines.append(
         CostLine(

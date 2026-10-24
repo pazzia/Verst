@@ -21,3 +21,5 @@ python_version = "3.12"
 "tests/**" = ["RUF001", "RUF002", "RUF003"]
 # Data generators: Russian fixture text and wide hand-made tables.
 "tools/gen_*.py" = ["RUF001", "RUF002", "RUF003", "E501", "SIM113", "B007"]
+# Sprint 3 data pipeline (CI fetchers and the catalogue builder): Russian names and SPARQL/Overpass text.
+"tools/data/*.py" = ["RUF001", "RUF002", "RUF003", "E501"]

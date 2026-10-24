@@ -1,0 +1,33 @@
+{
+ "apiVersion": 2,
+ "files": [
+  "city_presets.json",
+  "city_route-custom.json",
+  "city_route-error-adult.json",
+  "city_route-error-no-city.json",
+  "city_route-error-not-enough.json",
+  "city_route-museums-spb.json",
+  "city_route-overview.json",
+  "city_route-ryumochnye.json",
+  "estimate-budget-fit.json",
+  "estimate-no-fit.json",
+  "estimate-synthetic.json",
+  "geo_nearest-outside.json",
+  "geo_nearest.json",
+  "geo_search-city.json",
+  "geo_search-poi.json",
+  "handoff-car-day.json",
+  "handoff-car-from-stop.json",
+  "handoff-walk.json",
+  "load_catalogue.json",
+  "plan-budget-fit.json",
+  "plan-no-fit.json",
+  "plan-synthetic.json",
+  "poi_details-bar.json",
+  "poi_details-fixture-sight.json",
+  "poi_details-hotel.json",
+  "poi_details-not-found.json",
+  "poi_details-sight.json",
+  "selfcheck.json"
+ ]
+}

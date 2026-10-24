@@ -1,0 +1,36 @@
+{
+ "request": {
+  "function": "estimate",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-est-1",
+   "input_json": {
+    "origin": {
+     "lat": 56.8389,
+     "lon": 60.6057,
+     "label": "Екатеринбург"
+    },
+    "destination": {
+     "lat": 57.153,
+     "lon": 65.5343,
+     "label": "Тюмень"
+    },
+    "crew": {
+     "adults": 2
+    },
+    "dailyKm": 500
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "km": 382,
+   "days": 1,
+   "outcome": "plan",
+   "totalRub": 3600,
+   "budgetStatus": null
+  },
+  "ms": 0
+ }
+}

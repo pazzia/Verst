@@ -130,6 +130,9 @@ fun WindshieldScreen(
     onRetry: () -> Unit,
     trips: TripsActions = NoTrips,
     onDebug: () -> Unit = {},
+    /** 5.10 «По городу · пешком» plate; 5.12 a tap on «ВЫ: …» (locate). */
+    onCity: () -> Unit = {},
+    onYouAre: () -> Unit = {},
 ) {
     ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
@@ -143,7 +146,7 @@ fun WindshieldScreen(
                 Modifier.padding(start = 20.dp, end = 20.dp, top = 84.dp).fillMaxWidth()
                     .onGloballyPositioned { c -> signBottom = with(density) { (c.positionInParent().y + c.size.height).toDp().value } },
             )
-            Dashboard(ui, onStart, onNavigator, trips::open, onDebug, Modifier.align(Alignment.BottomCenter))
+            Dashboard(ui, onStart, onNavigator, trips::open, onDebug, onCity, onYouAre, Modifier.align(Alignment.BottomCenter))
             if (ui.tripsSheet && ui.trips.isNotEmpty()) TripsSheet(ui.trips, maxHeight, trips)
         }
     }
@@ -171,7 +174,9 @@ private fun TripRow(t: SavedTripDto, index: Int, onDelete: () -> Unit, onClick: 
     val deleteLabel = stringResource(R.string.trips_delete_yes)
     val daysWord = pluralStringResource(R.plurals.plural_day, t.days)
     val date = tripDates(t.startAt, t.days)
-    val meta = stringResource(R.string.trips_row_meta, date, t.days, daysWord, crewShort(t.adults, t.children, t.dog))
+    val walk = t.kind == "walk"
+    val meta = if (walk) listOf(stringResource(R.string.walk_saved_kind), tripDates(t.startAt, 1)).filter { it.isNotBlank() }.joinToString(stringResource(R.string.common_join_dot))
+    else stringResource(R.string.trips_row_meta, date, t.days, daysWord, crewShort(t.adults, t.children, t.dog))
     val total = RuFormat.thousands(t.totalRub)
     val cd = stringResource(R.string.cd_trips_row, t.title, date, t.days, daysWord, total)
     Row(
@@ -191,15 +196,42 @@ private fun TripRow(t: SavedTripDto, index: Int, onDelete: () -> Unit, onClick: 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(32.dp).clip(RoundedCornerShape(DesignTokens.radius.r4)).background(C.sign.blue), contentAlignment = Alignment.Center) {
-            Icon(arrowFor(t.bearing8), C.sign.white, 18.dp)
+            // DEV-308: a walk shows the `walker` plate instead of the bearing arrow
+            if (walk) app.verst.core.ui.components.WalkerIcon(C.sign.white, 18.dp) else Icon(arrowFor(t.bearing8), C.sign.white, 18.dp)
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Txt(t.title, T.title.sm, C.text.primary, Modifier.weight(1f), maxLines = 1)
+                // 5.8 §3 D-1: a yellow dot (small overrun) / a red dot (over budget) before the amount
+                val dot = when (t.budgetStatus) {
+                    "small_overrun" -> C.budget.tight
+                    "over" -> C.accent.red
+                    else -> null
+                }
+                if (dot != null) Box(Modifier.padding(start = 8.dp).size(6.dp).clip(RoundedCornerShape(3.dp)).background(dot))
                 Txt(stringResource(R.string.common_estimate_rub, total), T.body.mdStrong, C.accent.yellow, Modifier.padding(start = 8.dp), maxLines = 1)
             }
             Txt(meta, T.body.sm, C.text.secondary, maxLines = 1)
+        }
+    }
+}
+
+/** 5.10 §2 «По городу · пешком» plate (the «Мои поездки» plate style, `walker` icon). */
+@Composable
+private fun CityPlate(onClick: () -> Unit) {
+    Box(
+        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onClick).testTag("windshield.city"),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Row(
+            Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            app.verst.core.ui.components.WalkerIcon(C.text.secondary, 16.dp)
+            Txt(stringResource(R.string.city_entry), T.body.mdStrong, C.text.secondary, maxLines = 1)
+            Txt(stringResource(R.string.city_entry_sub), T.body.sm, C.text.muted, maxLines = 1)
         }
     }
 }
@@ -388,11 +420,11 @@ private fun RouteRow(r: ReadyRouteDto, km: Int?, selected: Boolean, index: Int, 
 }
 
 @Composable
-private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> Unit, onTrips: () -> Unit, onDebug: () -> Unit, modifier: Modifier) {
+private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> Unit, onTrips: () -> Unit, onDebug: () -> Unit, onCity: () -> Unit, onYouAre: () -> Unit, modifier: Modifier) {
     val routes = (ui.data as? WindshieldData.Routes)?.routes
     val selected = routes?.getOrNull(ui.selected)
     Box(modifier.fillMaxWidth().height(DashHeight).dashboardSurface()) {
-        NaviEntry(ui.origin, ui.data is WindshieldData.NoRoutes, onNavigator, onDebug, Modifier.padding(start = 18.dp, end = 18.dp, top = 22.dp).fillMaxWidth())
+        NaviEntry(ui.origin, ui.data is WindshieldData.NoRoutes, onNavigator, onDebug, onYouAre, Modifier.padding(start = 18.dp, end = 18.dp, top = 22.dp).fillMaxWidth())
         Row(
             Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = 22.dp, end = 20.dp, bottom = 56.dp)
                 .height(DesignTokens.size.startMOuter),
@@ -412,9 +444,11 @@ private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> 
                 Txt(label, T.label.md, C.text.muted, maxLines = 1)
                 if (title != null) Txt(title, T.title.xl, C.text.primary, maxLines = 1) else PlaceholderPlate(160.dp, 20.dp, C.dash.controlAlt, Modifier.padding(vertical = 4.dp))
                 if (meta != null) Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp), maxLines = 2) else PlaceholderPlate(120.dp, 12.dp, C.dash.controlAlt)
-                if (ui.trips.isNotEmpty()) {
-                    Spacer(Modifier.height(4.dp)) // 8 dp to the plate box (the 44 dp touch box adds 4)
-                    TripsPlate(ui.trips.size, onTrips)
+                Spacer(Modifier.height(4.dp)) // 8 dp to the plate box (the 44 dp touch box adds 4)
+                // 5.10 §2: «По городу · пешком» after «Мои поездки» on the same row (gap 8); alone without trips
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (ui.trips.isNotEmpty()) TripsPlate(ui.trips.size, onTrips)
+                    CityPlate(onCity)
                 }
             }
             StartButton(
@@ -427,7 +461,7 @@ private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> 
 }
 
 @Composable
-private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, onDebug: () -> Unit, modifier: Modifier) {
+private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, onDebug: () -> Unit, onYouAre: () -> Unit, modifier: Modifier) {
     val cd = stringResource(R.string.cd_windshield_navi)
     Column(
         modifier
@@ -450,7 +484,11 @@ private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, o
                     })
                 },
             )
-            Txt(stringResource(R.string.windshield_you_are, origin.uppercase()), T.label.md, C.navi.label)
+            // 5.12 §1: a tap on «ВЫ: …» asks for (or refreshes) the location
+            Txt(
+                stringResource(R.string.windshield_you_are, origin.uppercase()), T.label.md, C.navi.label,
+                Modifier.testTag("windshield.youare").pointerInput(Unit) { detectTapGestures(onTap = { onYouAre() }) },
+            )
         }
         Row(
             Modifier

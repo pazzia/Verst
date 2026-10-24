@@ -1,0 +1,34 @@
+{
+ "request": {
+  "function": "poi_details",
+  "args": {
+   "world": "russia_v1",
+   "place_id": "n9001"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "id": "n9001",
+   "kind": "bar",
+   "poiKind": "ryumochnaya",
+   "nameRu": "Рюмочная (пример) на Советской",
+   "descriptionRu": null,
+   "townName": "Ярославль",
+   "lat": 57.6262,
+   "lon": 39.889,
+   "image": null,
+   "hours": {
+    "textRu": "Mo-Su 12:00-24:00",
+    "verified": false
+   },
+   "ticket": null,
+   "isFictional": false,
+   "attributionRu": [
+    "© участники OpenStreetMap"
+   ],
+   "wikidataId": null
+  },
+  "ms": 0
+ }
+}
