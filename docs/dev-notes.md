@@ -895,6 +895,16 @@ now compares for equality). `slice_per_person` / `strings_slice.xml` removed →
   (title at the list top, chips +6, intro +8, road 18 below, day 1 margin 0).
 - S-22 footer arrow + deck key. S-23 genitive for all 48 fixture towns (engine `nameGenRu` still requested).
 
+### CI
+Runs: 19 red (2 unit tests: NBSP in `common_km`; `advanceUntilIdle` ignores `backgroundScope`), 21 red (Chaquopy
+licence step: the restored Gradle cache has no `com.chaquo.python` — main run 20 is red on the same step; the task
+now resolves the POMs through a detached configuration), 22 cancelled (superseded), 23 red (e2e: one merged
+finder), 25 green (`70073d4`, build + e2e 4/4), final run in the report. e2e log line:
+`km navigator=265 instruments=265 plan=265 road=265`. APK 43.92 MB.
+e2e screens 11–19 (`runs/<R>/e2e/screens/`): Waybill, fuel line open, reserve off (≈ 4 900 → ≈ 4 400), replace
+sheet, replaced + toast, saved, Windshield «Мои поездки · 1», D-1 sheet, Road from saved («К лобовому»).
+Free trips now get their Road-title arrow from the origin → destination bearing (`TripMath.bearing8`).
+
 ### Deviations / copy requests
 1. `replace_delta` has one `{sign}` for both parts; mixed signs («+4 мин · −150 ₽») are composed from two
    renderings of the same template. Designer: two sign placeholders.

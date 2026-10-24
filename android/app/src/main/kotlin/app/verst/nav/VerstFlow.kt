@@ -221,6 +221,7 @@ class VerstFlow(
             return true
         }
         if (stack.size <= 1) return false
+        dismissToast()
         when (top) {
             Route.Drive -> cancelPlan()
             Route.Navigator -> if (editingFrom) {
@@ -484,6 +485,7 @@ class VerstFlow(
         expandedLine = null
         replace = null
         undoTrip = null
+        dismissToast() // a toast belongs to the screen it was raised on
         if (request != null) record(request, TripFigures(r.trip.km, r.trip.days)) // after planning: the engine's number
     }
 
