@@ -79,6 +79,9 @@ class ScreensScreenshotTest {
         if (Screenshot.isUniform(bitmap)) bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         assertEquals(w * 3, bitmap.width)
         Screenshot.write(bitmap, screen, state, w, h)
+        // Release review P0-1: no real brand in any rendered text or TalkBack label of any screen state.
+        val texts = BrandDenyList.texts(compose.onRoot(useUnmergedTree = true).fetchSemanticsNode())
+        assertEquals("$screen/$state", emptyList<String>(), texts.flatMap { BrandDenyList.hits(it) })
     }
 
     @Test

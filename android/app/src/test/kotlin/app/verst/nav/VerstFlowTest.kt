@@ -156,7 +156,7 @@ class VerstFlowTest {
         flow.save()
         settle(10_000)
         assertEquals(1, flow.saved.size)
-        assertEquals(1, store.load().size)
+        assertEquals(1, store.trips.size)
         assertTrue(flow.savedCurrent)
         assertEquals(1, flow.waybillNumber)
         while (flow.back()) Unit
@@ -221,7 +221,7 @@ class VerstFlowTest {
         // Save keeps the booking; delete with undo; the 50-trip limit opens the dialog.
         flow.save()
         settle()
-        assertEquals(1, store.load().single().bookedHotels.size)
+        assertEquals(1, store.trips.single().bookedHotels.size)
         while (flow.back()) Unit
         flow.askDelete(flow.saved.single().id)
         flow.confirmDelete()
@@ -262,6 +262,71 @@ class VerstFlowTest {
         assertEquals(before.subtotalRub.let { s -> ((s + 50) / 100) * 100 }, local.totalRub)
         settle()
         assertEquals(1, gw.patches.size)
+    }
+
+    @Test
+    fun oneWriterLatestWinsAndFailuresAreReported() = runTest {
+        val gw = FakeGateway()
+        val store = MemoryTripStore()
+        val flow = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        // A save before the stored trips are loaded is deferred (P1-1), not written over them.
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        flow.save()
+        settle()
+        assertEquals(1, store.trips.size)
+        // 20 quick changes: saves, deletes and undos — the file ends with the last in-memory list.
+        repeat(10) {
+            flow.askDelete(flow.saved.single().id)
+            flow.confirmDelete()
+            flow.undoDelete()
+        }
+        flow.askDelete(flow.saved.single().id)
+        flow.confirmDelete()
+        settle()
+        assertEquals(flow.saved.toList(), store.trips)
+        assertTrue(store.trips.isEmpty())
+        // A failed write: storage toast and the trip is not shown as saved.
+        store.failWrites = true
+        flow.openSaved("none") // no-op
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        flow.save()
+        settle()
+        assertEquals(Toast.StorageFull, flow.toast)
+        assertFalse(flow.savedCurrent)
+    }
+
+    @Test
+    fun lastTripIsWrittenAndRestored() = runTest {
+        val gw = FakeGateway()
+        val store = MemoryTripStore()
+        val flow = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        flow.openWaybill()
+        settle()
+        val last = store.last!!
+        assertEquals("waybill", last.screen)
+        assertEquals(planned.trip.title, last.trip.title)
+        // A new process: the flow comes back to Waybill over Road with the same trip.
+        val again = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 8 }) {}
+        settle()
+        assertEquals(listOf(Route.Windshield, Route.Road, Route.Waybill), again.stack.toList())
+        assertEquals(planned.trip.km, again.result!!.trip.km)
+        // Back to the Windshield → the next start stays on the Windshield.
+        while (again.back()) Unit
+        settle()
+        assertNull(store.last!!.screen)
+        // Defaults (P2-10): the crew and pace survive too.
+        again.cycleSeat(1)
+        again.stepKm(50)
+        settle()
+        val third = VerstFlow(gw, backgroundScope, store, io = StandardTestDispatcher(testScheduler), now = { 9 }) {}
+        settle()
+        assertEquals(Seat.ADULT, third.seats[1])
+        assertEquals(again.dailyKm, third.dailyKm)
+        assertEquals(Route.Windshield, third.top)
     }
 }
 

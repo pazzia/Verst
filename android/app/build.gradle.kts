@@ -159,7 +159,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.kotlinx.coroutines.android)
-    "demoImplementation"(libs.compose.ui.test.manifest)
+    // Release review P2-4: no ui-test-manifest in the demo APK (it merges an exported ComponentActivity); the
+    // Robolectric screen tests run on `debug` (CI `:app:testDebugUnitTest`).
     debugImplementation(libs.compose.ui.test.manifest)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

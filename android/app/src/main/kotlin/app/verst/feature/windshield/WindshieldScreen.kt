@@ -101,6 +101,8 @@ data class WindshieldUi(
     val tripsSheet: Boolean = false,
     /** OI-39: the origin in the genitive from the engine («Москвы»); the nominative until it arrives. */
     val originGen: String = origin,
+    /** F-01: engine km per ready route id (estimate for the current crew and pace); template km until known. */
+    val routeKm: Map<String, Int> = emptyMap(),
 )
 
 /** «Мои поездки» plate and the D-1 sheet. */
@@ -319,7 +321,7 @@ private fun Sign(ui: WindshieldUi, onSelect: (Int) -> Unit, onRetry: () -> Unit,
                 }
             }
             is WindshieldData.Routes -> {
-                d.routes.take(4).forEachIndexed { i, r -> RouteRow(r, i == ui.selected, i) { onSelect(i) } }
+                d.routes.take(4).forEachIndexed { i, r -> RouteRow(r, ui.routeKm[r.id] ?: r.kmSign, i == ui.selected, i) { onSelect(i) } }
                 val more = d.routes.size - 4
                 if (more > 0) {
                     Txt(
@@ -359,7 +361,7 @@ private fun Sign(ui: WindshieldUi, onSelect: (Int) -> Unit, onRetry: () -> Unit,
 }
 
 @Composable
-private fun RouteRow(r: ReadyRouteDto, selected: Boolean, index: Int, onClick: () -> Unit) {
+private fun RouteRow(r: ReadyRouteDto, km: Int, selected: Boolean, index: Int, onClick: () -> Unit) {
     val fg = if (selected) C.accent.yellow else C.sign.white
     Row(
         Modifier
@@ -375,7 +377,7 @@ private fun RouteRow(r: ReadyRouteDto, selected: Boolean, index: Int, onClick: (
         Icon(arrowFor(r.bearing8), fg, 22.dp)
         Spacer(Modifier.width(10.dp))
         Txt(r.title, T.sign.lg, fg, Modifier.weight(1f), maxLines = 1)
-        Txt(r.kmSign.toString(), T.sign.lg, fg, align = TextAlign.End)
+        Txt(km.toString(), T.sign.lg, fg, Modifier.testTag("windshield.route.$index.km"), align = TextAlign.End)
     }
 }
 

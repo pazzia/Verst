@@ -32,6 +32,7 @@ import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.engine.EngineStatus
+import app.verst.feature.common.NaviDialog
 import app.verst.feature.common.ScreenRoot
 import app.verst.nav.VerstFlow
 import app.verst.core.ui.theme.DesignTokens.color as C
@@ -77,9 +78,17 @@ fun DebugScreen(flow: VerstFlow) {
             Txt(stringResource(R.string.mock_build_line, BuildConfig.BUILD_NUMBER, BuildConfig.GIT_SHA), T.body.md, C.text.secondary)
             Box(
                 Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).clip12().border(DesignTokens.stroke.w1, C.accent.redText, RoundedCornerShape(12.dp))
-                    .clickable(role = Role.Button) { flow.resetData() }.testTag("debug.reset"),
+                    .clickable(role = Role.Button) { flow.askReset() }.testTag("debug.reset"),
                 contentAlignment = Alignment.Center,
             ) { Txt(stringResource(R.string.debug_reset), T.button.md, C.accent.redText) }
+        }
+        // Release review P2-3: «Сбросить данные» deletes every saved trip — ask first.
+        if (flow.resetAsk) {
+            NaviDialog(
+                stringResource(R.string.debug_reset_title), stringResource(R.string.debug_reset_body),
+                stringResource(R.string.debug_reset_yes), stringResource(R.string.debug_reset_no), "reset",
+                flow::resetData, flow::cancelReset,
+            )
         }
     }
 }

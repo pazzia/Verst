@@ -31,6 +31,37 @@ data class SavedTripDto(
     val trip: JsonObject,
 )
 
+/**
+ * P1-2 `last.json`: the current trip (saved or not) and where the user was, so a process death or a
+ * force-stop + relaunch comes back to the same screen. [screen]: "road" | "waybill" | "exit" | null (elsewhere).
+ */
+@Serializable
+data class LastTripDto(
+    val schema: Int = SavedTrips.SCHEMA,
+    val trip: SavedTripDto,
+    val savedId: String? = null,
+    val screen: String? = null,
+    val exitStopId: String? = null,
+)
+
+/** Release review P2-10 / M§6.2: the last crew, pace, budget, mood and origin, restored on the next start. */
+@Serializable
+data class DefaultsDto(
+    val schema: Int = SavedTrips.SCHEMA,
+    val frontAdult: Boolean = true,
+    val seats: List<String> = listOf("EMPTY", "EMPTY", "EMPTY"),
+    val dog: Boolean = false,
+    /** null = the pace was never chosen (the route's default applies). */
+    val dailyKm: Int? = null,
+    val budgetIndex: Int = 2,
+    val mood: String? = null,
+    val moodTouched: Boolean = false,
+    val originLabel: String = "Москва",
+    val originLat: Double = 55.7558,
+    val originLon: Double = 37.6173,
+    val originGen: String = "Москвы",
+)
+
 @Serializable
 data class SavedTripsFile(val schema: Int = SavedTrips.SCHEMA, val trips: List<SavedTripDto> = emptyList())
 
@@ -41,14 +72,33 @@ object SavedTrips {
     const val WARN_FROM = 45
 
     /** An unreadable file or an unknown schema gives an empty list (never a crash at start). */
-    fun decode(text: String?): List<SavedTripDto> {
+    fun decode(text: String?): List<SavedTripDto> = decodeOrNull(text) ?: emptyList()
+
+    /** Like [decode] but tells "unreadable" (null) apart from "empty" (P1-1: an unreadable file is kept aside). */
+    fun decodeOrNull(text: String?): List<SavedTripDto>? {
         if (text.isNullOrBlank()) return emptyList()
         return try {
             val f = EngineJson.json.decodeFromString(SavedTripsFile.serializer(), text)
-            if (f.schema == SCHEMA) f.trips else emptyList()
+            if (f.schema == SCHEMA) f.trips else null
         } catch (_: Exception) {
-            emptyList()
+            null
         }
+    }
+
+    fun encodeDefaults(d: DefaultsDto): String = EngineJson.json.encodeToString(DefaultsDto.serializer(), d)
+
+    fun decodeDefaults(text: String?): DefaultsDto? = try {
+        text?.takeIf { it.isNotBlank() }?.let { EngineJson.json.decodeFromString(DefaultsDto.serializer(), it) }?.takeIf { it.schema == SCHEMA }
+    } catch (_: Exception) {
+        null
+    }
+
+    fun encodeLast(l: LastTripDto): String = EngineJson.json.encodeToString(LastTripDto.serializer(), l)
+
+    fun decodeLast(text: String?): LastTripDto? = try {
+        text?.takeIf { it.isNotBlank() }?.let { EngineJson.json.decodeFromString(LastTripDto.serializer(), it) }?.takeIf { it.schema == SCHEMA }
+    } catch (_: Exception) {
+        null
     }
 
     fun encode(trips: List<SavedTripDto>): String = EngineJson.json.encodeToString(SavedTripsFile.serializer(), SavedTripsFile(SCHEMA, trips))

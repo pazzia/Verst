@@ -999,3 +999,57 @@ sentence-case «Заменить» finder), 31 green (`f9728a4`): JUnit 99 / 0 f
 44.03 MB. Budgets (`e2e/budgets.json`): engine start 925 ms (budget 4000), Golden-Ring plan incl. Drive pacing
 3947 ms (budget 10 000). e2e screens 00–30 incl. 20–21 delete/undo, 22–27 Exit → mock partner → booked → Road
 booked row, 28–30 debug panel → forced UNREACHABLE → Navigator error.
+
+## DEV-RELEASE — release fix round (branch dev/DEV-RELEASE from main 262103b)
+Merged origin/des/DES-FINAL (56009cb, final-review + strings incl. `exit_book_none`, `common_dialog_cancel`;
+tokens re-synced, already verbatim) and origin/arch/release-review (0ccaf28).
+
+### ARCH P0-1 — no real brands in the mock build
+- `gen_worlds.py`: fuel stops are «АЗС, <road ref>, <km> км» (no chain names); worlds, goldens, contracts and
+  bundles regenerated; `make check` green (318 tests).
+- Deny-list `backend/planner/tests/brand_denylist.txt` (fuel chains, map/navigation, booking/travel services),
+  used by `tests/unit/test_brands.py` (both worlds, engine resources, goldens, contract JSON + gz bundles,
+  Android strings referenced from Kotlin) and by `BrandDenyListTest` (every merged `R.string` of app + core-ui via
+  Robolectric, > 300 fields) and `ScreensScreenshotTest.shot()` (all rendered texts + content descriptions).
+- Shared text = engine text + `mock_share_note` (`MainActivity.mockShareText`).
+- Decision: the unused production strings that name navigators/map apps (`stopmenu_yandex_navi`,
+  `stopmenu_yandex_maps`, `stopmenu_2gis`, `stopmenu_install`) are overridden with neutral text in
+  `app/src/main/res/values/strings_mock_overrides.xml` (app resources win over library ones), rather than a
+  prod-only source set; design/** untouched. JSON keys (`yandexTravelId`) are field names, not scanned.
+
+### ARCH P1-1 — saved trips
+- One writer coroutine (CONFLATED channel + pending snapshots → latest wins) for saved.json, last.json and
+  defaults.json; all via `AtomicFile`.
+- Unreadable saved.json (corrupt or unknown schema) is renamed to `saved.json.bad-<ts>` and never overwritten; the
+  app starts with an empty list.
+- No write before the first load: an early save is queued (`pendingSave`) and replayed after load.
+- A failed write → `Toast.StorageFull`, «Сохранено» is cleared. Decision: no dedicated «не удалось сохранить» key
+  exists in the deck — **copy request to the Designer**; StorageFull is the closest existing text.
+- Tests: `FileTripStoreTest` (round trip, unreadable kept aside, unknown schema), `VerstFlowTest`
+  `oneWriterLatestWinsAndFailuresAreReported`, `lastTripIsWrittenAndRestored`.
+
+### ARCH P1-2 — last.json and process death
+- The current trip (plan, reserve, hotel, replace, booked stops, saved id) and the screen (road / waybill / exit)
+  are written 300 ms after any change; back to the Windshield clears the screen.
+- Decision: on every start, if last.json has a screen, the app opens Road ahead (+ Waybill / Exit) with that trip
+  without the engine — this covers both a system kill and force-stop + relaunch.
+- e2e: `app.verst.e2e.restore.ProcessDeathTest` in two instrumentations; `run_e2e.sh` runs phase 1 (plan → Road
+  ahead), HOME, `am force-stop` + `am kill`, then phase 2 (fresh process → Road ahead, same title / km / total).
+  The main run excludes that package; the script expects 3 «OK (» lines.
+
+### DES F-01..F-04 (+ F-08)
+- F-01: Windshield row km = `mobile.estimate` of the same request (crew, pace) for the first 4 ready routes, only
+  while the Windshield is on top; the sign falls back to the fixture km until the estimate arrives.
+- F-02: PlateToast 44 dp (text padding 10 dp, no row padding); Windshield toast at bottom 340 dp, others as specced.
+- F-03: Exit with no hotel options → disabled CTA «exit_book_none».
+- F-04: Exit scene min top 240 dp; the panel scrolls with a 16 dp fade while more is below (640 dp shows a partial
+  next option).
+- F-08: NaviDialog secondary button dashed outline.
+
+### P2
+- P2-1: hotel / reserve / replace replies of another trip are dropped (`tripSession`), and `costBusy` is reset first.
+- Defaults (crew, km/day if chosen, budget, mood, origin) persist in defaults.json (not DataStore).
+- «Сбросить данные» asks first (NaviDialog `reset`); reset also restores crew and pace.
+- P2-4: unit tests run on `debug`; the demo APK no longer pulls `ui-test-manifest`; CI step fails if the merged
+  demo manifest contains `androidx.activity.ComponentActivity`.
+- Limit dialog secondary «Отмена» (`common_dialog_cancel`). Both ABIs kept (x86_64 + arm64-v8a).

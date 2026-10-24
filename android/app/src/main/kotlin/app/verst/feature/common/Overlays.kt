@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -164,11 +165,11 @@ fun BoxScope.PlateToast(text: String, bottom: Dp, action: String? = null, onActi
             .border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r10))
             .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
             .testTag("toast")
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp), // F-02: one line + action = 44 dp (the action box is the 44 touch target)
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Txt(text, T.body.mdTight, C.text.primary, Modifier.weight(1f, fill = false))
+        Txt(text, T.body.mdTight, C.text.primary, Modifier.weight(1f, fill = false).padding(vertical = 10.dp))
         if (action != null) {
             Box(
                 Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onAction).testTag("toast.action"),
@@ -221,7 +222,16 @@ fun BoxScope.NaviDialog(
         ) { Txt(primary, T.cta.sm, C.text.onLight, maxLines = 1) }
         Box(
             Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12))
-                .border(DesignTokens.stroke.w1, C.dash.outlineDashed, RoundedCornerShape(DesignTokens.radius.r12))
+                .drawBehind {
+                    // F-08: `DashedButton` — dashed 1 dp outline.
+                    val w = DesignTokens.stroke.w1.toPx()
+                    drawRoundRect(
+                        C.dash.outlineDashed, androidx.compose.ui.geometry.Offset(w / 2, w / 2),
+                        androidx.compose.ui.geometry.Size(size.width - w, size.height - w),
+                        androidx.compose.ui.geometry.CornerRadius(DesignTokens.radius.r12.toPx()),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(w, pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
+                    )
+                }
                 .clickable(role = Role.Button, onClick = onSecondary).testTag("$tag.no"),
             contentAlignment = Alignment.Center,
         ) { Txt(secondary, T.button.md, C.text.secondary, maxLines = 1) }
