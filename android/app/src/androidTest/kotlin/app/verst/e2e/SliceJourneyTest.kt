@@ -14,12 +14,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import app.verst.MainActivity
 import app.verst.VerstApp
 import app.verst.nav.Route
+import app.verst.nav.Toast
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -31,9 +33,10 @@ import org.junit.runner.Description
 import org.junit.runner.RunWith
 
 /**
- * DEV-SLICE journey on the real engine: Windshield → (own route) Navigator → Instruments → Drive → Road ahead,
- * back to the Windshield, then a ready route → Instruments → Drive → Road ahead. Screens go to
- * `files/e2e/screens/NN-name.png` (ci-logs `runs/<R>/e2e/screens/`).
+ * DEV-SLICE(-2) journey on the real engine: Windshield → (own route) Navigator → Instruments → Drive → Road ahead
+ * with one distance on every screen, then Waybill (expand a line, reserve off), replace a stop, save, back to
+ * the Windshield and reopen the trip from «Мои поездки»; and a ready route → Instruments → Drive → Road ahead.
+ * Screens go to `files/e2e/screens/NN-name.png` (ci-logs `runs/<R>/e2e/screens/`).
  */
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -52,7 +55,10 @@ class SliceJourneyTest {
     @Before
     fun toRoot() {
         E2e.awaitReady(30_000)
-        compose.runOnUiThread { while (flow.back()) Unit }
+        compose.runOnUiThread {
+            while (flow.back()) Unit
+            flow.clearSaved()
+        }
     }
 
     private fun shot(name: String) {
@@ -73,10 +79,17 @@ class SliceJourneyTest {
         compose.waitForIdle()
     }
 
-    private fun totalText(): String {
-        val node = compose.onNodeWithTag("road.total.amount", useUnmergedTree = true).fetchSemanticsNode()
-        return node.config.getOrNull(SemanticsProperties.Text)?.joinToString("") { it.text }.orEmpty()
+    /** Text of a tagged node, "" when it is not (yet) in the tree — safe inside `waitUntil`. */
+    private fun textOf(tag: String): String {
+        val nodes = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes()
+        return nodes.firstOrNull()?.config?.getOrNull(SemanticsProperties.Text)?.joinToString("") { it.text }.orEmpty()
     }
+
+    private fun totalText() = textOf("road.total.amount")
+
+    /** The first number in a text («265 км · город …» → 265, «1 234» → 1234). */
+    private fun number(text: String): Int? =
+        Regex("""\d[\d\u202F\u00A0 ]*""").find(text)?.value?.filter { it.isDigit() }?.toIntOrNull()
 
     private fun assertRoadAhead(prefix: String) {
         waitTag("road.total", 45_000)
@@ -102,14 +115,23 @@ class SliceJourneyTest {
         compose.onNodeWithTag("navigator.suggestion.0").performScrollTo().assertIsDisplayed().performClick()
         waitTag("navigator.start", 10_000)
         compose.onNodeWithTag("navigator.start").assertIsEnabled()
+        // P0: the caption shows the engine's km of this very trip (estimate = plan), not a straight line.
+        compose.waitUntil(15_000) { flow.figures?.stale == false && number(textOf("navigator.meta")) != null }
+        val navKm = number(textOf("navigator.meta"))!!
+        assertEquals(flow.figures!!.figures.km, navKm)
         shot("03-navigator-picked")
         compose.onNodeWithTag("navigator.start").performClick()
 
         waitTag("instruments.start")
+        compose.waitUntil(15_000) { number(textOf("instruments.meta")) != null }
+        assertEquals(navKm, number(textOf("instruments.meta"))) // same request → same number
         compose.onNodeWithTag("instruments.seat.0").performClick()
         compose.onNodeWithTag("instruments.seat.0").performClick() // adult → child
-        shot("04-instruments")
         assertEquals(1, flow.children)
+        compose.waitUntil(15_000) { flow.figures?.stale == false } // the engine re-estimated with the child
+        val instrumentsKm = number(textOf("instruments.meta"))!!
+        assertEquals(flow.figures!!.figures.km, instrumentsKm)
+        shot("04-instruments")
         compose.onNodeWithTag("instruments.start").performClick()
 
         waitTag("drive.back")
@@ -117,14 +139,83 @@ class SliceJourneyTest {
         shot("05-drive")
         assertRoadAhead("own")
         shot("06-road-ahead")
-        assertEquals("Москва → Ярославль", flow.result!!.trip.title)
+        val trip = flow.result!!.trip
+        assertEquals("Москва → Ярославль", trip.title)
+        // One trip, one distance: Instruments == the plan == the Road-ahead sign.
+        Log.i("VerstE2e", "km navigator=$navKm instruments=$instrumentsKm plan=${trip.km} road=${textOf("road.km")}")
+        assertEquals(instrumentsKm, trip.km)
+        assertEquals(trip.km, number(textOf("road.km")))
         compose.onNodeWithTag("road.list").performScrollToIndex(5)
         shot("07-road-ahead-scrolled")
+
+        // Waybill: open from the footer, expand the fuel line, switch the reserve off.
+        compose.onNodeWithTag("road.total").performClick()
+        waitTag("waybill.sheet")
+        assertEquals(Route.Waybill, flow.top)
+        assertEquals(trip.cost.totalRub, number(textOf("waybill.total")))
+        shot("11-waybill")
+        compose.onNodeWithTag("waybill.line.fuel").performScrollTo().performClick()
+        waitTag("waybill.breakdown.fuel.0")
+        assertEquals("fuel", flow.expandedLine)
+        shot("12-waybill-fuel-open")
+        compose.onNodeWithTag("waybill.line.fuel").performScrollTo().performClick() // collapse again
+        val before = flow.result!!.trip.cost
+        assertTrue(before.reserveOn)
+        compose.onNodeWithTag("waybill.reserve").performScrollTo().performClick()
+        compose.waitUntil(10_000) { !flow.result!!.trip.cost.reserveOn }
+        val after = flow.result!!.trip.cost
+        assertTrue("total drops: ${before.totalRub} → ${after.totalRub}", after.totalRub < before.totalRub)
+        compose.waitUntil(5_000) { number(textOf("waybill.total")) == after.totalRub }
+        assertEquals("—", textOf("waybill.reserve.sum"))
+        compose.onNodeWithTag("waybill.total").performScrollTo()
+        shot("13-waybill-reserve-off")
+        back()
+        assertEquals(Route.Road, flow.top)
+        compose.waitUntil(5_000) { number(totalText()) == after.totalRub }
+
+        // Replace a stop with the engine's first alternative.
+        val stop = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.alternatives.isNotEmpty() }
+        val alt = stop.alternatives.first()
+        compose.onNodeWithTag("road.list").performScrollToNode(hasTestTag("road.swap.${stop.id}"))
+        compose.onNodeWithTag("road.swap.${stop.id}").performClick()
+        waitTag("replace")
+        shot("14-replace-sheet")
+        compose.onNodeWithTag("replace.alt.0", useUnmergedTree = true).performScrollTo().performClick()
+        compose.onNodeWithTag("replace.confirm", useUnmergedTree = true).performScrollTo()
+        compose.onNodeWithText("ЗАМЕНИТЬ").performClick()
+        compose.waitUntil(15_000) { flow.replace == null && flow.toast is Toast.Replaced }
+        val replaced = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == stop.id }
+        assertEquals(alt.name, replaced.name)
+        assertEquals((flow.toast as Toast.Replaced).totalRub, flow.result!!.trip.cost.totalRub)
+        compose.waitUntil(5_000) { number(totalText()) == flow.result!!.trip.cost.totalRub }
+        shot("15-replaced")
+
+        // Save, then reopen from «Мои поездки».
+        compose.onNodeWithTag("road.save").performClick()
+        compose.waitUntil(5_000) { flow.savedCurrent && flow.saved.size == 1 }
+        shot("16-saved")
+        val savedTotal = flow.result!!.trip.cost.totalRub
 
         back()
         assertEquals(Route.Instruments, flow.top)
         back()
         assertEquals(Route.Navigator, flow.top)
+        back()
+        assertEquals(Route.Windshield, flow.top)
+        waitTag("windshield.trips")
+        shot("17-windshield-my-trips")
+        compose.onNodeWithTag("windshield.trips").performClick()
+        waitTag("trips.row.0")
+        shot("18-trips-sheet")
+        compose.onNodeWithTag("trips.row.0").performClick()
+        waitTag("road.total")
+        assertEquals(Route.Road, flow.top)
+        assertTrue(flow.openedFromSaved)
+        assertEquals("Москва → Ярославль", flow.result!!.trip.title)
+        assertEquals(savedTotal, flow.result!!.trip.cost.totalRub)
+        assertEquals(alt.name, flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == stop.id }.name)
+        compose.onNodeWithText("К лобовому").assertExists()
+        shot("19-road-from-saved")
         back()
         assertEquals(Route.Windshield, flow.top)
         waitTag("windshield.route.0")

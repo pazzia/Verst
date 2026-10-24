@@ -62,7 +62,8 @@ data class InstrumentsUi(
     val title: String,
     val origin: String,
     val roundTrip: Boolean,
-    val tripKm: Int,
+    /** The engine's km of this trip (`estimate` = the plan); null while it is computed. */
+    val tripKm: Int?,
     val frontAdult: Boolean,
     val back: List<Seat>,
     val dog: Boolean,
@@ -71,6 +72,8 @@ data class InstrumentsUi(
     val dailyKm: Int,
     val budgetIndex: Int,
     val mood: Mood?,
+    /** The engine's days of this trip; null while it is computed. */
+    val days: Int? = null,
 )
 
 interface InstrumentsActions {
@@ -87,7 +90,7 @@ interface InstrumentsActions {
 /** 5.3 Instruments, simplified: crew in the mirror, km per day, budget presets, mood; ПОЕХАЛИ. */
 @Composable
 fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
-    ScreenRoot(C.dash.raised) {
+    ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxWidth().height(232.dp)) {
                 SkyStrip(120.dp)
@@ -133,12 +136,13 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                 Column(Modifier.weight(1f).padding(end = 14.dp).semantics(mergeDescendants = true) {}) {
                     Txt(stringResource(R.string.instruments_ready_label), T.label.md, C.text.muted)
                     Txt(ui.title, T.title.lg, C.text.primary, maxLines = 1)
-                    val meta = if (ui.roundTrip) {
-                        stringResource(R.string.instruments_ready_meta_ring, genitive(ui.origin), RuFormat.thousands(ui.tripKm))
-                    } else {
-                        stringResource(R.string.common_km_approx, RuFormat.thousands(ui.tripKm))
+                    val km = ui.tripKm
+                    val meta = when {
+                        km == null -> " " // the engine's number arrives within a moment; never a guessed one
+                        ui.roundTrip -> stringResource(R.string.instruments_ready_meta_ring, genitive(ui.origin), RuFormat.thousands(km))
+                        else -> stringResource(R.string.common_km, RuFormat.thousands(km))
                     }
-                    Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp), maxLines = 1)
+                    Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp).testTag("instruments.meta"), maxLines = 1)
                 }
                 val go = stringResource(R.string.common_go)
                 StartButton(StartSize.L, go, enabled = true, cd = go, onClick = a::go, modifier = Modifier.testTag("instruments.start"))
@@ -258,8 +262,7 @@ private fun KmWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier)
     val minutes = TripMath.driveMinutes(ui.dailyKm)
     val h = minutes / 60
     val m = minutes % 60
-    val days = TripMath.days(ui.tripKm, ui.dailyKm)
-    val dayWord = pluralStringResource(R.plurals.plural_day, days)
+    val days = ui.days
     Well(stringResource(R.string.instruments_km_label), modifier) {
         Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
             ui.dailyKm.toString().padStart(3, '0').forEach { d ->
@@ -275,7 +278,10 @@ private fun KmWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier)
                 T.body.smRelaxed, C.text.secondary, align = TextAlign.Center,
             )
             Txt(
-                stringResource(if (ui.roundTrip) R.string.instruments_days_ring else R.string.instruments_days_oneway, days, dayWord),
+                if (days == null) " " else stringResource(
+                    if (ui.roundTrip) R.string.instruments_days_ring else R.string.instruments_days_oneway,
+                    days, pluralStringResource(R.plurals.plural_day, days),
+                ),
                 T.body.smRelaxed, C.text.secondary, align = TextAlign.Center,
             )
         }

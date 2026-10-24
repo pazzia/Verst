@@ -69,8 +69,5 @@ class EngineJsonTest {
         assertEquals("09:05", RuFormat.clock("2026-11-07T09:05"))
         assertNull(RuFormat.clock(null))
         assertEquals(260, TripMath.driveMinutes(300))
-        assertEquals(3, TripMath.days(745, 300))
-        val km = TripMath.roadKmEstimate(DefaultOrigin, GeoPoint("Ярославль", 57.6261, 39.8845))
-        assertTrue("$km", km in 300..340)
     }
 }

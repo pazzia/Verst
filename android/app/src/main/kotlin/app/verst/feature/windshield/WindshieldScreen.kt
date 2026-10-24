@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,8 +33,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import app.verst.core.model.RuFormat
+import app.verst.core.model.SavedTripDto
 import app.verst.core.model.dto.ReadyRouteDto
 import app.verst.core.ui.R
+import app.verst.core.ui.components.Glyph
+import app.verst.core.ui.components.GlyphIcon
 import app.verst.core.ui.components.Icon
 import app.verst.core.ui.components.PlaceholderPlate
 import app.verst.core.ui.components.StartButton
@@ -45,6 +50,7 @@ import app.verst.core.ui.components.dashboardSurface
 import app.verst.core.ui.components.naviPanel
 import app.verst.core.ui.components.overheadPlate
 import app.verst.core.ui.theme.DesignTokens
+import app.verst.feature.common.BottomSheet
 import app.verst.feature.common.ScreenRoot
 import app.verst.feature.common.crewShort
 import app.verst.feature.common.genitive
@@ -62,7 +68,23 @@ data class WindshieldUi(
     val adults: Int,
     val children: Int,
     val dog: Boolean,
+    /** Saved trips in D-1 order; the «Мои поездки» plate shows only when non-empty (W-27). */
+    val trips: List<SavedTripDto> = emptyList(),
+    val tripsSheet: Boolean = false,
 )
+
+/** «Мои поездки» plate and the D-1 sheet. */
+interface TripsActions {
+    fun open()
+    fun close()
+    fun pick(id: String)
+}
+
+private val NoTrips = object : TripsActions {
+    override fun open() {}
+    override fun close() {}
+    override fun pick(id: String) {}
+}
 
 /** 5.1 Windshield, simplified: ready routes on the overhead sign, the navigator entry, the start button. */
 @Composable
@@ -72,14 +94,85 @@ fun WindshieldScreen(
     onStart: () -> Unit,
     onNavigator: () -> Unit,
     onRetry: () -> Unit,
+    trips: TripsActions = NoTrips,
 ) {
-    ScreenRoot(C.dash.base) {
+    ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
             val sceneH = maxHeight - DashHeight + 20.dp
             WindshieldScene(sceneH)
             Mirror(crewShort(ui.adults, ui.children, ui.dog), ui.adults, ui.children, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             Sign(ui, onSelect, onRetry, Modifier.padding(start = 20.dp, end = 20.dp, top = 84.dp).fillMaxWidth())
-            Dashboard(ui, onStart, onNavigator, Modifier.align(Alignment.BottomCenter))
+            Dashboard(ui, onStart, onNavigator, trips::open, Modifier.align(Alignment.BottomCenter))
+            if (ui.tripsSheet && ui.trips.isNotEmpty()) TripsSheet(ui.trips, maxHeight, trips)
+        }
+    }
+}
+
+/** D-1 «Мои поездки»: rows with the trip arrow, name, total and meta; tap → Road ahead. */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.TripsSheet(trips: List<SavedTripDto>, windowH: androidx.compose.ui.unit.Dp, a: TripsActions) {
+    BottomSheet(stringResource(R.string.trips_title), a::close, "trips", windowH) {
+        val n = trips.size
+        Txt(
+            stringResource(R.string.trips_subtitle, n, pluralStringResource(R.plurals.plural_saved, n)),
+            T.body.sm, C.text.secondary, Modifier.padding(bottom = 10.dp),
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            trips.forEachIndexed { i, t -> TripRow(t, i) { a.pick(t.id) } }
+        }
+    }
+}
+
+@Composable
+private fun TripRow(t: SavedTripDto, index: Int, onClick: () -> Unit) {
+    val daysWord = pluralStringResource(R.plurals.plural_day, t.days)
+    // Date as «31.10»: the copy deck has no genitive month names yet (D-1 shows «7–9 ноября»).
+    val date = t.startAt?.takeIf { it.length >= 10 }?.let { "${it.substring(8, 10)}.${it.substring(5, 7)}" } ?: ""
+    val meta = stringResource(R.string.trips_row_meta, date, t.days, daysWord, crewShort(t.adults, t.children, t.dog))
+    val total = RuFormat.thousands(t.totalRub)
+    val cd = stringResource(R.string.cd_trips_row, t.title, date, t.days, daysWord, total)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 64.dp)
+            .clip(RoundedCornerShape(DesignTokens.radius.r10))
+            .background(C.dash.controlAlt)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = cd }
+            .testTag("trips.row.$index")
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(32.dp).clip(RoundedCornerShape(DesignTokens.radius.r4)).background(C.sign.blue), contentAlignment = Alignment.Center) {
+            Icon(arrowFor(t.bearing8), C.sign.white, 18.dp)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Txt(t.title, T.title.sm, C.text.primary, Modifier.weight(1f), maxLines = 1)
+                Txt(stringResource(R.string.common_estimate_rub, total), T.body.mdStrong, C.accent.yellow, Modifier.padding(start = 8.dp), maxLines = 1)
+            }
+            Txt(meta, T.body.sm, C.text.secondary, maxLines = 1)
+        }
+    }
+}
+
+/** 5.1 §4.4 «Мои поездки · N» plate (bookmark 16, outline, 36 high, 44 touch). */
+@Composable
+private fun TripsPlate(count: Int, onClick: () -> Unit) {
+    val cd = stringResource(R.string.cd_windshield_my_trips, count, pluralStringResource(R.plurals.plural_saved, count))
+    Box(
+        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = cd }.testTag("windshield.trips"),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Row(
+            Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            GlyphIcon(Glyph.BOOKMARK, C.text.secondary, 16.dp)
+            Txt(stringResource(R.string.windshield_my_trips, count), T.body.mdStrong, C.text.secondary, maxLines = 1)
         }
     }
 }
@@ -200,7 +293,7 @@ private fun RouteRow(r: ReadyRouteDto, selected: Boolean, index: Int, onClick: (
 }
 
 @Composable
-private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> Unit, modifier: Modifier) {
+private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> Unit, onTrips: () -> Unit, modifier: Modifier) {
     val routes = (ui.data as? WindshieldData.Routes)?.routes
     val selected = routes?.getOrNull(ui.selected)
     Box(modifier.fillMaxWidth().height(DashHeight).dashboardSurface()) {
@@ -222,6 +315,10 @@ private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> 
                 Txt(label, T.label.md, C.text.muted, maxLines = 1)
                 if (title != null) Txt(title, T.title.xl, C.text.primary, maxLines = 1) else PlaceholderPlate(160.dp, 20.dp, C.dash.controlAlt, Modifier.padding(vertical = 4.dp))
                 if (meta != null) Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp), maxLines = 1) else PlaceholderPlate(120.dp, 12.dp, C.dash.controlAlt)
+                if (ui.trips.isNotEmpty()) {
+                    Spacer(Modifier.height(4.dp)) // 8 dp to the plate box (the 44 dp touch box adds 4)
+                    TripsPlate(ui.trips.size, onTrips)
+                }
             }
             StartButton(
                 StartSize.M, stringResource(R.string.common_go), enabled = selected != null,

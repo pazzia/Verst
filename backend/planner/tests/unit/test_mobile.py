@@ -418,6 +418,86 @@ class MobileTest(unittest.TestCase):
         self.assertEqual(sum(1 for line in lines if line.startswith("OK plan ")), 2)
         self.assertEqual(mobile.selftest(['{"broken": 1}'], io.StringIO()), 1)
 
+    # ---- DEV-SLICE-2 P0: one trip, one distance (estimate == plan)
+
+    def _input(
+        self, dest: tuple[float, float] | None = None, rr: str | None = None, **kw: Any
+    ) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "origin": {"lat": MOSCOW[0], "lon": MOSCOW[1], "label": "Москва"},
+            "crew": {"adults": 2, "children": 0, "dog": False},
+            "dailyKm": 300,
+            "budget": 40000,
+        }
+        if dest is not None:
+            d["destination"] = {"lat": dest[0], "lon": dest[1], "label": "x"}
+        if rr is not None:
+            d["readyRouteId"] = rr
+        d.update(kw)
+        return d
+
+    def _plan_and_estimate(self, inp: dict[str, Any], tag: str) -> tuple[dict[str, Any], dict[str, Any]]:
+        est = call(mobile.estimate("central_russia_v1", f"est-{tag}", json.dumps(inp)))
+        trip = call(mobile.plan("central_russia_v1", f"plan-{tag}", json.dumps(inp), None))["trip"]
+        return est, trip
+
+    def test_estimate_equals_plan_moscow_yaroslavl(self) -> None:
+        yar = (57.6261, 39.8845)  # the `suggest` row the Navigator picks
+        inp = self._input(yar)
+        est, trip = self._plan_and_estimate(inp, "yar")
+        self.assertEqual(est, {"km": trip["km"], "days": trip["days"]})
+        self.assertEqual(est["km"], 265)  # the DEV-SLICE app showed 249 (straight line) and 312 (× 1.25)
+        self.assertEqual(sum(d["km"] for d in trip["daysList"]), est["km"])
+        # Suggestion rows: the engine's base route; the trip adds only the stop detours.
+        road = call(
+            mobile.estimate_points("central_russia_v1", *MOSCOW, json.dumps([{"lat": yar[0], "lon": yar[1]}]))
+        )
+        self.assertEqual(road, [263])
+        plan_obj = codec.plan_from_json(trip)
+        detours = sum(s.detour_km for d in plan_obj.engine_state.days for s in d.stops)
+        self.assertLessEqual(abs(est["km"] - (road[0] + detours)), 1.0)
+
+    def test_estimate_equals_plan_for_every_variant(self) -> None:
+        variants: dict[str, dict[str, Any]] = {
+            "child-calm": self._input(
+                (57.6261, 39.8845), crew={"adults": 2, "children": 1, "dog": False}, mood="calm"
+            ),
+            "dog-500": self._input(
+                (55.7963, 49.1088), crew={"adults": 1, "children": 0, "dog": True}, dailyKm=500
+            ),
+            "round": self._input((54.1961, 37.6182), roundTrip=True),
+        }
+        for r in call(mobile.ready_routes("central_russia_v1", *MOSCOW, 50, 20)):
+            variants[r["id"]] = self._input(rr=r["id"])
+        for tag, inp in variants.items():
+            with self.subTest(tag):
+                est, trip = self._plan_and_estimate(inp, tag)
+                self.assertEqual(est, {"km": trip["km"], "days": trip["days"]})
+
+    def test_estimate_errors_and_cancel(self) -> None:
+        err = fail(mobile.estimate("central_russia_v1", "est-short", json.dumps(self._input((55.76, 37.65)))))
+        self.assertEqual(err["code"], "TOO_SHORT")
+        self.assertGreater(err["roadKm"], 0)
+        self.assertEqual(fail(mobile.estimate("central_russia_v1", "est-bad", "[]"))["code"], "INVALID_INPUT")
+        call(mobile.cancel("est-cancelled"))
+        err = fail(
+            mobile.estimate("central_russia_v1", "est-cancelled", json.dumps(self._input((57.6261, 39.8845))))
+        )
+        self.assertEqual(err["code"], "CANCELLED")
+        rows = call(
+            mobile.estimate_points("central_russia_v1", *MOSCOW, json.dumps([{"lat": 10, "lon": 10}]))
+        )
+        self.assertEqual(rows, [None])
+        self.assertEqual(
+            fail(mobile.estimate_points("central_russia_v1", *MOSCOW, "[1]"))["code"], "INVALID_INPUT"
+        )
+        self.assertEqual(
+            fail(mobile.estimate_points("central_russia_v1", None, None, "[]"))["code"], "INVALID_INPUT"
+        )
+        self.assertEqual(
+            fail(mobile.estimate_points("central_russia_v1", *MOSCOW, "{}"))["code"], "INVALID_INPUT"
+        )
+
     def test_main_default_worlds(self) -> None:
         out = io.StringIO()
         from contextlib import redirect_stdout
