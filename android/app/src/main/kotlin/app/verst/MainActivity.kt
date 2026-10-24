@@ -1,56 +1,110 @@
 package app.verst
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.sp
-import app.verst.core.model.BuildInfo
-import app.verst.core.ui.HelloTheme
-import app.verst.core.ui.HelloText
-import app.verst.engine.EngineStatus
+import androidx.compose.runtime.LaunchedEffect
+import app.verst.core.model.RuFormat
+import app.verst.core.model.TripMath
+import app.verst.engine.EngineHost
+import app.verst.feature.drive.DriveScreen
+import app.verst.feature.instruments.InstrumentsActions
+import app.verst.feature.instruments.InstrumentsScreen
+import app.verst.feature.instruments.InstrumentsUi
+import app.verst.feature.navigator.NavigatorScreen
+import app.verst.feature.navigator.NavigatorUi
+import app.verst.feature.road.RoadScreen
+import app.verst.feature.windshield.WindshieldScreen
+import app.verst.feature.windshield.WindshieldUi
+import app.verst.nav.Route
+import app.verst.nav.VerstFlow
 
-/** DEV-101: «Движок <engineVersion> · <totalMs> мс» once ready, the error code otherwise. */
-fun engineLine(status: EngineStatus): String = when (status) {
-    is EngineStatus.Starting -> "Движок: STARTING"
-    is EngineStatus.Ready -> "Движок ${status.info.engineVersion} · ${status.info.timings.totalMs} мс"
-    is EngineStatus.Failed -> "Движок: ${status.code}"
-}
-
-/** DEV-100: the hello screen — «Верста» and «Сборка <n> · <sha7>» on the night background. */
+/** The single activity: Windshield → (Navigator) → Instruments → Drive → Road ahead (DEV-SLICE). */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        val engine = (application as VerstApp).engine
-        setContent {
-            val status by engine.status.collectAsState()
-            HelloScreen(BuildInfo(BuildConfig.BUILD_NUMBER, BuildConfig.GIT_SHA), engineLine(status))
-        }
+        val flow = (application as VerstApp).flow
+        Log.i(EngineHost.TAG, "build ${BuildConfig.BUILD_NUMBER} ${BuildConfig.GIT_SHA}")
+        setContent { VerstRoot(flow) }
     }
 }
 
 @Composable
-fun HelloScreen(info: BuildInfo, engine: String) {
-    HelloTheme {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            BasicText("Верста", style = TextStyle(color = HelloText, fontSize = 40.sp))
-            BasicText(info.label, style = TextStyle(color = HelloText, fontSize = 14.sp))
-            BasicText(engine, style = TextStyle(color = HelloText, fontSize = 14.sp))
+fun VerstRoot(flow: VerstFlow) {
+    BackHandler(enabled = flow.stack.size > 1) { flow.back() }
+    when (flow.top) {
+        Route.Windshield -> WindshieldScreen(
+            WindshieldUi(flow.origin.label, flow.windshield, flow.selectedRoute, flow.adults, flow.children, flow.dog),
+            onSelect = { flow.selectedRoute = it },
+            onStart = flow::openReadyRoute,
+            onNavigator = flow::openNavigator,
+            onRetry = flow::retryWindshield,
+        )
+        Route.Navigator -> NavigatorScreen(
+            NavigatorUi(
+                flow.origin, flow.editingFrom, flow.query, flow.searching, flow.suggestions, flow.popular,
+                flow.suggestFailed, flow.destination, flow.routeError,
+            ),
+            onBack = { flow.back() },
+            onQuery = flow::setQuery,
+            onPick = flow::pick,
+            onEditFrom = flow::startEditFrom,
+            onStart = flow::openInstrumentsFree,
+        )
+        Route.Instruments -> InstrumentsScreen(
+            InstrumentsUi(
+                title = flow.tripTitle,
+                origin = flow.origin.label,
+                roundTrip = flow.readyRoute?.roundTrip ?: false,
+                tripKm = flow.tripKm,
+                frontAdult = flow.frontAdult,
+                back = flow.seats.toList(),
+                dog = flow.dog,
+                adults = flow.adults,
+                children = flow.children,
+                dailyKm = flow.dailyKm,
+                budgetIndex = flow.budgetIndex,
+                mood = flow.mood,
+            ),
+            object : InstrumentsActions {
+                override fun back() {
+                    flow.back()
+                }
+                override fun seat(i: Int) = flow.cycleSeat(i)
+                override fun front() {
+                    flow.frontAdult = !flow.frontAdult
+                }
+                override fun dog() {
+                    flow.dog = !flow.dog
+                }
+                override fun km(delta: Int) = flow.stepKm(delta)
+                override fun budget(delta: Int) = flow.stepBudget(delta)
+                override fun mood(m: app.verst.core.model.Mood) = flow.pickMood(m)
+                override fun go() = flow.go()
+            },
+        )
+        Route.Drive -> DriveScreen(
+            flow.drive,
+            kmLabel = flow.readyRoute?.let { RuFormat.thousands(it.kmTotal) } ?: "≈ ${RuFormat.thousands(flow.tripKm)}",
+            days = TripMath.days(flow.tripKm, flow.dailyKm),
+            action = { flow.driveAction(it.code) },
+            onCancel = { flow.back() },
+            onDone = flow::openRoad,
+            onErrorAction = flow::onDriveError,
+        )
+        Route.Road -> {
+            val trip = flow.result?.trip
+            if (trip == null) {
+                // Never blank: without a trip the Road screen is not reachable; go back to Instruments.
+                LaunchedEffect(Unit) { flow.back() }
+            } else {
+                RoadScreen(trip, flow.readyRoute?.bearing8 ?: "N", onBack = { flow.back() })
+            }
         }
     }
 }
