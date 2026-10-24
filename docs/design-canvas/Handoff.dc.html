@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>В навигатор</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,a{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+@keyframes sheetIn{from{transform:translateY(100%)}to{transform:none}}
+.sheet{animation:sheetIn .28s cubic-bezier(.2,.8,.3,1) both}
+</style>
+</helmet>
+<!-- 5.13 Hand-off (design/screens/5.13-handoff.md, ADR-0014). Road ahead (5.5) behind a scrim; the day menu opened from «в навигатор ↗».
+     Tap the sheet title to cycle what the phone has installed: Навигатор → only Карты → nothing (web). Tap «Показать усечение» for the
+     8-via note; tap the item to see the result (the sheet closes; web state: the fallback toast 16 dp above the Waybill footer). Tap «Меню остановки» for the D-5 stop menu. -->
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; inset: 0">
+    <div style="height: 132px; background: linear-gradient(#2B2850 0 38%, #8E4A6B 38% 64%, #D9655A 64% 84%, #F29A5E 84%)"></div>
+    <div style="position: absolute; left: 20px; right: 20px; top: 56px; height: 49px; background: #1E4FA3; border-radius: 7px; padding: 3px; box-sizing: border-box">
+      <div style="height: 100%; border: 2px solid #F4F4F0; border-radius: 5px; box-sizing: border-box; display: flex; align-items: center; padding: 0 10px; font-weight: 700; font-size: 20px; justify-content: space-between"><span>Золотое кольцо</span><span>745 км</span></div>
+    </div>
+    <div style="padding: 18px 20px 0">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <span style="font-weight: 700; font-size: 22px">День 2</span>
+        <span style="font-size: 13px; font-weight: 600; color: #FFD23F">в навигатор ↗</span>
+      </div>
+      <div style="font-size: 13px; color: #8C8C93; margin-top: 2px">260&nbsp;км · ≈&nbsp;4&nbsp;ч</div>
+      <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 18px">
+        <div style="display: flex; gap: 14px"><span style="width: 56px; height: 56px; border-radius: 5px; background: #6B3E26; box-shadow: inset 0 0 0 3px #6B3E26, inset 0 0 0 5px #F4F4F0"></span><span><span style="display: block; font-size: 12px; color: #8C8C93">через 80&nbsp;км · 11:00</span><span style="font-weight: 700; font-size: 17px">Ипатьевский монастырь</span></span></div>
+        <div style="display: flex; gap: 14px"><span style="width: 50px; height: 62px; border-radius: 4px; background: #1E4FA3; margin-left: 3px"></span><span><span style="display: block; font-size: 12px; color: #8C8C93">через 50&nbsp;км · 12:15</span><span style="font-weight: 700; font-size: 17px">Место отдыха</span></span></div>
+        <div style="display: flex; gap: 14px"><span style="width: 50px; height: 62px; border-radius: 4px; background: #1E4FA3; margin-left: 3px"></span><span><span style="display: block; font-size: 12px; color: #8C8C93">через 55&nbsp;км · 13:30</span><span style="font-weight: 700; font-size: 17px">Обед · Иваново</span></span></div>
+        <div style="display: flex; gap: 14px"><span style="width: 50px; height: 62px; border-radius: 4px; background: #1E4FA3; margin-left: 3px"></span><span><span style="display: block; font-size: 12px; color: #8C8C93">через 75&nbsp;км · 15:30</span><span style="font-weight: 700; font-size: 17px">Ночёвка · Суздаль</span></span></div>
+      </div>
+    </div>
+    <div style="position: absolute; left: 16px; right: 16px; top: 756px; height: 64px; border-radius: 12px; background: #F4F4F0; color: #141416; display: flex; flex-direction: column; justify-content: center; padding: 0 18px; box-sizing: border-box"><span style="font-size: 12px; font-weight: 600; color: #55565C">ПУТЕВОЙ ЛИСТ</span><span style="font-size: 22px; font-weight: 700">≈&nbsp;41&#8239;200&nbsp;₽</span></div>
+  </div>
+  <div aria-hidden="true" style="{{scrim}}"></div>
+
+  <div role="status" style="{{toastStyle}}">{{toastText}}</div>
+
+  <div class="sheet" role="dialog" aria-label="{{sheetTitle}}" style="{{sheetHide}}position: absolute; left: 0; right: 0; bottom: 0; background: #161618; border-radius: 16px 16px 0 0; border-top: 2px solid #232327; padding: 8px 20px 24px; box-sizing: border-box">
+    <div aria-hidden="true" style="width: 36px; height: 4px; border-radius: 2px; background: #3A3A42; margin: 0 auto"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px">
+      <button type="button" onClick="{{cycle}}" style="background: none; border: none; padding: 0; color: #F4F4F0; font-weight: 700; font-size: 22px; line-height: 28.6px; cursor: pointer; text-align: left">{{sheetTitle}}</button>
+      <button type="button" aria-label="Закрыть" style="width: 44px; height: 44px; background: none; border: none; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B9B9C0" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+    <button type="button" onClick="{{tap}}" aria-label="{{cd}}" style="width: 100%; min-height: 64px; padding: 10px 0; background: none; border: none; border-bottom: 1px solid #2A2A2E; color: #F4F4F0; display: flex; align-items: center; gap: 12px; cursor: pointer; text-align: left">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="2.2" stroke-linejoin="round" style="flex-shrink: 0"><path d="M3 11l18-8-8 18-2-8z"></path></svg>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 3px">
+        <span style="font-weight: 700; font-size: 17px; line-height: 22px">{{title}}</span>
+        <span style="font-size: 13px; line-height: 17px; color: #8C8C93">{{target}}</span>
+        <span style="{{truncStyle}}">Навигатор принимает до 8 промежуточных точек — взяли главные</span>
+      </span>
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B9B9C0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M8 16L16 8M9 8h7v7"></path></svg>
+    </button>
+    <sc-for list="{{extra}}" as="e" hint-placeholder-count="2">
+      <div style="min-height: 52px; display: flex; align-items: center; border-bottom: 1px solid #2A2A2E; font-size: 16px; font-weight: 600">{{e}}</div>
+    </sc-for>
+    <div style="display: flex; gap: 8px; margin-top: 16px">
+      <button type="button" onClick="{{toggleTrunc}}" style="flex: 1; height: 36px; border-radius: 18px; border: 1px dashed #3A3A42; background: none; color: #8C8C93; font-size: 12px; cursor: pointer">{{truncBtn}}</button>
+      <button type="button" onClick="{{toggleMenu}}" style="flex: 1; height: 36px; border-radius: 18px; border: 1px dashed #3A3A42; background: none; color: #8C8C93; font-size: 12px; cursor: pointer">{{menuBtn}}</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { target: 0, trunc: false, stop: false, toast: false }; }
+  renderVals() {
+    const s = this.state, hide = 'display:none';
+    const targets = ['Открыть в Яндекс Навигаторе', 'Открыть в Яндекс Картах', 'Открыть Яндекс Карты в браузере'];
+    const cds = ['Открыть маршрут в Яндекс Навигаторе', 'Открыть маршрут в Яндекс Навигаторе', 'Открыть маршрут на карте в браузере'];
+    const results = ['Открывается Яндекс Навигатор с маршрутом дня', 'Открываются Яндекс Карты с маршрутом дня', 'Яндекс Навигатор не установлен — открыли карту в браузере'];
+    const title = s.stop ? 'Открыть в навигаторе отсюда' : 'В навигатор: день 2';
+    return {
+      sheetTitle: s.stop ? 'Ночёвка · Суздаль' : 'День 2',
+      title,
+      target: targets[s.target],
+      cd: title + '. ' + cds[s.target],
+      truncStyle: s.trunc ? 'font-size:13px;line-height:17px;color:#FFD23F' : hide,
+      extra: s.stop ? ['Заменить', 'Сообщить об ошибке'] : [],
+      cycle: () => this.setState({ target: (s.target + 1) % 3, toast: false }),
+      tap: () => this.setState({ toast: true }),
+      scrim: s.toast ? 'display:none' : 'position:absolute;inset:0;background:rgba(0,0,0,.6)',
+      sheetHide: s.toast ? 'display:none;' : '',
+      toggleTrunc: () => this.setState({ trunc: !s.trunc }),
+      toggleMenu: () => this.setState({ stop: !s.stop, toast: false }),
+      truncBtn: s.trunc ? 'Без усечения' : 'Показать усечение',
+      menuBtn: s.stop ? 'Меню дня' : 'Меню остановки',
+      toastText: results[s.target],
+      toastStyle: s.toast ? 'position:absolute;left:16px;right:16px;bottom:104px;min-height:44px;padding:10px 16px;box-sizing:border-box;border-radius:10px;background:#232327;border:1px solid #3A3A42;font-size:13px;display:flex;align-items:center;z-index:2' : hide
+    };
+  }
+}
+</script>
+</body>
+</html>

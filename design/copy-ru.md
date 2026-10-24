@@ -477,6 +477,8 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `plural_child` | ребёнок | ребёнка | детей | ребёнка |
 | `plural_via` | заезд | заезда | заездов | заезда |
 | `plural_stage` | этап | этапа | этапов | этапа |
+| `plural_place` | место | места | мест | места |
+| `plural_person` | человек | человека | человек | человека |
 | `plural_hour` | час | часа | часов | часа |
 | `plural_minute` | минута | минуты | минут | минуты |
 | `plural_km_spoken` | километр | километра | километров | километра |
@@ -709,3 +711,227 @@ Keys for the on-device mock build (architecture-android-mvp M§9, ADR-0010). Spe
 | `debug_reset_body` | Удалим сохранённые поездки и настройки на этом телефоне | |
 | `debug_reset_yes` | Сбросить | |
 | `debug_reset_no` | Отмена | |
+
+## 15. Sprint 3 — budget fit, cards, «По городу», location and addresses, hand-off
+
+Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR-0011…0014 and `docs/backlog-sprint3.md` (DES-300…305). **Brand rule:** real brand names appear **only** in keys starting with `handoff_` (ADR-0014 allow-list `backend/planner/tests/brand_allowlist.txt`); every other key, including TalkBack keys, stays brand-free. The existing `stopmenu_yandex_navi`, `stopmenu_yandex_maps`, `stopmenu_2gis`, `stopmenu_install`, `exit_book_partner` and `cd_exit_book` stay in the deck for history but are **not used** (deny-listed); their Sprint 3 replacements are below.
+
+### 15.1 Budget fit (5.8, DES-300)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `budget_nofit_title` | Не помещается в бюджет | 5.8 h1 |
+| `budget_nofit_sign` | {amount} ₽ | number in the round «ограничение» sign, e.g. «30 000 ₽» |
+| `budget_nofit_min` | Даже самый экономный вариант — ≈ {amount} ₽ | under the engine `textRu` |
+| `budget_nofit_options` | ЧТО МОЖНО СДЕЛАТЬ | section label |
+| `budget_option_shorten` | Сократить до {d} {days} | [plural: `plural_day`]; sub = option `titleRu` |
+| `budget_option_shorten_sub` | {title} · ≈ {amount} ₽ | «Золотое кольцо · коротко · ≈ 29 700 ₽» |
+| `budget_option_cheaper` | Ближе и дешевле: {title} | option `titleRu` |
+| `budget_option_cheaper_sub` | ≈ {amount} ₽ · помещается в бюджет | |
+| `budget_option_raise` | Поднять бюджет до {amount} ₽ | |
+| `budget_option_raise_sub` | тот же маршрут, без изменений | |
+| `budget_nofit_cta` | Смотреть варианты | Drive CTA when the outcome is `no_fit` (auto-advance 1 s) |
+| `budget_nofit_min_label` | САМЫЙ ЭКОНОМНЫЙ ВАРИАНТ | minimum plate label (uppercase copy) |
+| `waybill_tight_label` | Сверх бюджета | Waybill «Остаток» label for a small overrun (value in ink) |
+| `budget_show_minimum` | Показать самый экономный вариант | text button; the trip then shows as over budget everywhere |
+| `budget_fit_badge` | В БЮДЖЕТЕ | Road ahead footer badge (uppercase copy) |
+| `budget_tight_badge` | ЧУТЬ БОЛЬШЕ: +{amount} ₽ | small overrun badge |
+| `budget_fitted_title` | Подогнали под бюджет | Waybill heading of the lever lines |
+| `budget_lever_line` | {lever}: −{amount} ₽ | one line per lever under the Waybill total |
+| `budget_lever_lodging_cheap` | дешевле ночёвки | lever names (engine codes) |
+| `budget_lever_family_rooms` | семейные номера | |
+| `budget_lever_food_economy` | кафе попроще | |
+| `budget_lever_sights_free` | бесплатные места | |
+| `budget_lever_fewer_nights` | на день меньше | |
+| `budget_lever_variant` | короткий вариант маршрута | |
+| `budget_refit` | Подогнать под бюджет | Waybill over-budget action (re-plan → Drive) |
+| `budget_alt_breaks` | не в бюджете | replace-sheet row mark (`breaksBudget`) |
+| `budget_instruments_fits` | ≈ {amount} ₽ — в бюджете | Instruments caption meta suffix (`estimate.outcome`) |
+| `budget_instruments_fitted` | ≈ {amount} ₽ — подгоним под бюджет | estimate needed levers |
+| `budget_instruments_nofit` | не помещается в бюджет | `color.accent.redText` |
+| `drive_step_budget` | Подбираем под бюджет: {lever} | engine stage text template (key `budget`), for reference |
+| `cd_budget_nofit` | Не помещается в бюджет {budget} рублей. Самый экономный вариант примерно {amount} рублей. Есть варианты | |
+| `cd_budget_option` | {title}. {sub}. Применить | |
+
+### 15.2 Cards (5.9, DES-301)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `card_photo_credit` | Фото: Wikimedia Commons · {author} · {licence} | ADR-0012 §6 order; tap → file page |
+| `card_photo_credit_short` | Фото: Wikimedia Commons | no author / PD |
+| `card_photo_area` | Фото района: {town} · Wikimedia Commons | hotels (engine `labelRu`); **mandatory** on hotel cards |
+| `card_area_plate` | ФОТО РАЙОНА | plate on the hotel photo (uppercase copy) |
+| `card_hotel_fictional` | Гостиница в демо-сборке вымышленная — на фото район, а не она | under the hotel photo |
+| `card_photo_none` | Фото пока нет | placeholder (no file / no free licence) |
+| `card_photo_offline` | Фото загрузится, когда будет интернет | placeholder offline |
+| `card_photo_error` | Фото не загрузилось | placeholder HTTP error |
+| `card_kind_museum` | музей | kind line words (engine `poiKind`) |
+| `card_kind_church` | храм | |
+| `card_kind_monastery` | монастырь | |
+| `card_kind_kremlin` | кремль | |
+| `card_kind_park` | парк | |
+| `card_kind_monument` | памятник | |
+| `card_kind_view` | смотровая площадка | |
+| `card_kind_square` | площадь | |
+| `card_kind_embankment` | набережная | |
+| `card_kind_sight` | достопримечательность | |
+| `card_kind_bar` | бар | |
+| `card_kind_ryumochnaya` | рюмочная | |
+| `card_kind_pub` | паб | |
+| `card_kind_craft` | крафтовый бар | |
+| `card_kind_hotel` | гостиница · {town} | |
+| `card_kind_line` | {kind} · {town} | |
+| `card_hours_unverified` | часы уточняйте | when `hours.verified = false` |
+| `card_ticket` | билет ≈ {adult} ₽, детский ≈ {child} ₽ | `ticket.estimate = true` → add `card_price_estimate` |
+| `card_ticket_free` | вход свободный | |
+| `card_price_estimate` | цена примерная | |
+| `card_heritage` | объект культурного наследия | |
+| `card_unverified` | По открытым данным — может быть неточно | catalogue places (`verified = false`) |
+| `card_report` | Сообщить об ошибке | text button (D-7 sheet) |
+| `card_pick_hotel` | Выбрать отель | hotel card → 5.7 |
+| `card_osm` | Данные о месте: © участники OpenStreetMap | bar cards (ODbL) |
+| `cd_card` | Карточка: {name} | pane title |
+| `cd_card_photo` | Фото: {name} | |
+| `cd_card_photo_area` | Фото района: {town}. Это не фото гостиницы | |
+| `cd_card_credit` | Автор фото: {author}, {licence}. Открыть страницу фото | |
+
+### 15.3 «По городу» and the walk result (5.10, 5.11, DES-302)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `city_entry` | По городу | Windshield plate (beside «Мои поездки») |
+| `city_entry_sub` | пешком | second word on the plate (`type.body.sm`) |
+| `city_title` | По городу | 5.10 h1 |
+| `city_plate_kind` | пешком | street-name plate small line |
+| `city_start` | Старт: {place} | |
+| `city_start_change` | изменить | |
+| `city_presets_label` | ГОТОВЫЕ ПРОГУЛКИ | |
+| `city_preset_overview` | Обзорный | engine `overview` |
+| `city_preset_overview_sub` | главное · {h} ч | default 4 h |
+| `city_preset_museums` | Музейный | `museums` |
+| `city_preset_museums_sub` | до 4 музеев · {h} ч | default 6 h |
+| `city_preset_ryumochnye` | По рюмочным | `ryumochnye`, 18+ |
+| `city_preset_ryumochnye_sub` | 18+ · {h} ч · только пешком | |
+| `city_preset_beer` | Пивной | `beer`, 18+ |
+| `city_preset_beer_sub` | 18+ · {h} ч · только пешком | |
+| `city_preset_custom` | Свой маршрут | `custom` |
+| `city_preset_custom_sub` | время, интересы, темп | |
+| `city_badge_18` | 18+ | |
+| `city_kids_blocked` | не с детьми | 18+ preset sub-line when the crew has children (disabled) |
+| `city_kids_toast` | Этот маршрут только для взрослых — в экипаже есть дети | |
+| `city_custom_title` | Свой маршрут | custom sheet title |
+| `city_duration_label` | СКОЛЬКО ГУЛЯЕМ | |
+| `city_duration` | {h} ч | chips 2 / 4 / 6 / 8 |
+| `city_interests_label` | ЧТО ИНТЕРЕСНО | multi-select |
+| `city_interest_history` | история | engine `history` |
+| `city_interest_architecture` | архитектура | |
+| `city_interest_museums` | музеи | |
+| `city_interest_parks` | парки | |
+| `city_interest_food` | еда | |
+| `city_interest_bars` | бары | 18+ dialog when chosen |
+| `city_interest_views` | виды | |
+| `city_pace_label` | ТЕМП | |
+| `city_pace_slow` | неспешно | |
+| `city_pace_normal` | обычный | |
+| `city_pace_fast` | бодро | |
+| `city_budget_label` | БЮДЖЕТ НА ВСЕХ | tickets + food/drinks for the whole group |
+| `city_budget_value` | до {amount} ₽ | chips 2 000 / 5 000 / 10 000 + `instruments_budget_any` |
+| `city_return_label` | Вернуться к старту | switch |
+| `city_build` | Собрать прогулку | YellowButton in the custom sheet |
+| `city_caption_label` | ПРОГУЛКА | |
+| `city_caption_title` | {name} · {h} ч | |
+| `city_caption_meta` | {town} · старт {time} | before the route exists |
+| `city_go` | ПОШЛИ | start-button label |
+| `city_building` | Собираем прогулку… | shimmer caption while `city_route` runs |
+| `city_no_city_title` | Рядом нет города | `NO_CITY` |
+| `city_no_city_body` | Прогулки строим в городах России. Выберите старт в городе — например, центр Ярославля. | |
+| `city_no_city_action` | Выбрать старт | |
+| `city_not_enough_title` | Мало мест для такой прогулки | `NOT_ENOUGH_POIS` |
+| `city_not_enough_body` | Попробуйте дольше погулять или другой маршрут. | |
+| `city_not_enough_longer` | Гулять {h} ч | action: next duration |
+| `city_not_enough_other` | Другой маршрут | action: back to presets |
+| `age_gate_title` | Маршрут для взрослых | `NaviDialog`, shown **every time** an 18+ preset or «бары» is chosen |
+| `age_gate_body` | Бары и рюмочные — только для тех, кому исполнилось 18. Вам есть 18? | |
+| `age_gate_yes` | Да, мне есть 18 | primary → `adultConfirmed = true` |
+| `age_gate_no` | Нет | secondary → no request |
+| `walk_title` | {town}: {name} | 5.11 title sign, e.g. «Ярославль: обзорная прогулка» = engine `titleRu` |
+| `walk_heading` | Прогулка | 5.11 h1 |
+| `walk_chip_duration` | {h} ч | chips |
+| `walk_chip_km` | ≈ {km} км пешком | |
+| `walk_chip_back` | с возвратом к старту | |
+| `walk_header` | Старт {start} · финиш ≈ {finish} | above the first row |
+| `walk_next` | через {distance} · {min} мин пешком | `{distance}` «600 м» / «1,2 км» |
+| `walk_start_row` | старт | |
+| `walk_finish_row` | финиш | |
+| `walk_hours_unverified` | часы работы уточняйте | engine `noteRu` default |
+| `walk_responsible` | Пейте умеренно, чередуйте с водой и едой. За руль — только трезвым. | **fixed copy** (backlog); alcohol presets, on the result and in the share text |
+| `walk_approx` | Расстояния пешком приблизительные: ±15 % | under the chips |
+| `walk_other` | Другой вариант | re-run with `exclude` |
+| `walk_remove_stop` | Убрать эту точку | card / stop menu action |
+| `walk_footer_label` | СКОЛЬКО СТОИТ ПРОГУЛКА | |
+| `walk_footer_total` | ≈ {amount} ₽ на всех | |
+| `walk_footer_per_person` | ≈ {amount} ₽ на человека | |
+| `walk_saved_kind` | прогулка | «Мои поездки» meta word for walks |
+| `cd_city_preset` | {name}, {sub}. Выбрать | |
+| `cd_city_preset_18` | {name}, только для взрослых, {sub}. Выбрать | |
+
+### 15.4 Location and address search (5.12, DES-303, DES-304)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `loc_rationale_title` | Откуда поедем? | sheet |
+| `loc_rationale_body` | Разрешите геопозицию — начнём маршрут оттуда, где вы сейчас. Координаты нужны только для старта и не сохраняются. | |
+| `loc_allow` | Разрешить | coarse permission |
+| `loc_manual` | Выберу сам | text button → ОТКУДА input |
+| `loc_searching` | Ищем вас… | ОТКУДА value while the fix runs (≤ 10 s) |
+| `loc_here_address` | {address} · вы здесь | online (reverse geocoding), e.g. «ул. Советская, 1 · вы здесь» |
+| `loc_here_town` | {town} (по GPS) | offline label |
+| `loc_precise` | Точнее | action → fine permission (shown while only coarse is granted) |
+| `loc_approx_note` | примерно, по сети | sub-line while the fix is coarse |
+| `loc_denied_plate` | Без геопозиции старт — {town}. Изменить можно в навигаторе | plate (last start or Москва) |
+| `loc_choose` | Выбрать | action on the denied plate → ОТКУДА input |
+| `loc_blocked` | Геопозиция для «Версты» выключена в настройках | |
+| `loc_settings` | Настройки | |
+| `loc_off` | Геолокация на телефоне выключена | |
+| `loc_turn_on` | Включить | |
+| `loc_timeout` | Не получилось определить, где вы. Старт — {town} | after 10 s |
+| `loc_outside_title` | Вы не в России | outside-Russia state (`insideRussia = false`) |
+| `loc_outside_body` | Маршруты строим только по России. Выберите старт в российском городе. | |
+| `loc_outside_action` | Выбрать старт | |
+| `navigator_from_input` | ОТКУДА — город или адрес | ОТКУДА as an input |
+| `addr_find` | Найти адрес | explicit submit (button / IME action); never per keystroke |
+| `addr_find_query` | Найти адрес «{q}» | the action row text with the typed query |
+| `addr_find_hint` | Город или место — сразу, адрес — по кнопке «Найти адрес» | helper line under the field when the query contains a digit or «ул.» |
+| `addr_searching` | Ищем адрес… | |
+| `addr_kind` | адрес | suggestion sub type word |
+| `addr_sub` | адрес · {city} | |
+| `addr_none` | Такого адреса не нашли — проверьте написание | |
+| `addr_offline` | Адреса ищутся только с интернетом — города и места доступны | offline hint row |
+| `addr_rate` | Подождите секунду и попробуйте ещё раз | if the 1 req/s bucket is empty |
+| `addr_attribution` | © OpenStreetMap | under address results (ODbL) |
+| `route_approx` | Расстояния приблизительные | Road ahead line when `approxDistances = true` |
+| `route_approx_more` | О данных | link → «О данных» |
+| `about_data_title` | О данных | screen |
+| `about_data_body` | Города и места — Wikidata (CC0). Бары и адреса — © участники OpenStreetMap (ODbL). Фото — Wikimedia Commons, у каждого своя лицензия и автор. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные. | |
+| `cd_loc_searching` | Ищем, где вы | |
+| `cd_addr_row` | {name}, {sub}, примерно {km} километров | |
+
+### 15.5 Hand-off (5.13, DES-305) — the only brand-bearing keys
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `handoff_navigator` | Открыть в Яндекс Навигаторе | car, app installed (ADR-0014) |
+| `handoff_maps_car` | Открыть в Яндекс Картах | car, only Карты installed |
+| `handoff_maps_walk` | Пешком в Яндекс Картах | walk |
+| `handoff_web` | Открыть Яндекс Карты в браузере | no app |
+| `handoff_day` | В навигатор: день {n} | day-header menu item |
+| `handoff_from_stop` | Открыть в навигаторе отсюда | stop-menu item (replaces `stopmenu_navigator` text) |
+| `handoff_truncated` | Навигатор принимает до 8 промежуточных точек — взяли главные | note under the item when `truncated` |
+| `handoff_part` | Часть {k} из {n} | walk split into parts |
+| `handoff_toast_web` | Яндекс Навигатор не установлен — открыли карту в браузере | after the fallback |
+| `handoff_toast_web_walk` | Яндекс Карты не установлены — открыли карту в браузере | |
+| `handoff_offline` | Нужен интернет, чтобы открыть карту в браузере | |
+| `handoff_failed` | Не получилось открыть карту. Попробуйте ещё раз | |
+| `handoff_cd_navigator` | Открыть маршрут в Яндекс Навигаторе | TalkBack (key kept in the `handoff_` space) |
+| `handoff_cd_maps_walk` | Открыть маршрут пешком в Яндекс Картах | |
+| `handoff_cd_web` | Открыть маршрут на карте в браузере | |
