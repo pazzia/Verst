@@ -321,7 +321,7 @@ private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, content: 
                 Txt(time, T.body.sm, C.text.muted, align = TextAlign.End)
             }
             Txt(s.nameRu, T.title.md, C.text.primary, maxLines = 2)
-            if (!s.noteRu.isNullOrBlank()) Txt(s.noteRu, T.body.md, C.text.note)
+            s.noteRu?.takeIf { it.isNotBlank() }?.let { Txt(it, T.body.md, C.text.note) }
             if (cost != null) Txt(cost, T.body.mdStrong, C.accent.yellow)
         }
     }

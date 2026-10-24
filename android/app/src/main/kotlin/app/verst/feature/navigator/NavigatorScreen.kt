@@ -65,6 +65,7 @@ import app.verst.core.ui.components.dashboardSurface
 import app.verst.core.ui.components.naviPanel
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.ScreenRoot
+import app.verst.feature.common.BottomSheet
 import app.verst.nav.GpsState
 import app.verst.nav.AddressState
 import app.verst.core.ui.theme.DesignTokens.color as C
@@ -466,7 +467,7 @@ private fun Caption(ui: NavigatorUi, onStart: () -> Unit) {
 /** 5.12 §1 rationale sheet «Откуда поедем?»: «Разрешить» (coarse) or «Выберу сам» (→ ОТКУДА input). */
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.LocationSheet(windowH: androidx.compose.ui.unit.Dp, a: LocationActions) {
-    app.verst.feature.common.BottomSheet(stringResource(R.string.loc_rationale_title), a::closeSheet, "location", windowH) {
+    BottomSheet(stringResource(R.string.loc_rationale_title), a::closeSheet, "location", windowH) {
         app.verst.core.ui.components.LocateIcon(C.accent.yellow, 32.dp, Modifier.padding(bottom = 8.dp))
         Txt(stringResource(R.string.loc_rationale_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 16.dp))
         Box(

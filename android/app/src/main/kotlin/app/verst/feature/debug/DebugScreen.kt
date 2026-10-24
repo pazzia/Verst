@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import app.verst.BuildConfig
 import app.verst.VerstApp
 import app.verst.R as AppR
+import app.verst.feature.road.AboutDataSheet
 import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Txt
@@ -101,7 +102,7 @@ fun DebugScreen(flow: VerstFlow) {
         if (flow.aboutData) {
             androidx.compose.foundation.layout.BoxWithConstraints(Modifier.matchParentSize()) {
                 val h = maxHeight
-                androidx.compose.foundation.layout.Box(Modifier.matchParentSize()) { app.verst.feature.road.AboutDataSheet(h, flow::closeAboutData) }
+                androidx.compose.foundation.layout.Box(Modifier.matchParentSize()) { AboutDataSheet(h, flow::closeAboutData) }
             }
         }
         // Release review P2-3: «Сбросить данные» deletes every saved trip — ask first.
