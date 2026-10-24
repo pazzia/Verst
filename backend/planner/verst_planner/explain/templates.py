@@ -5,10 +5,11 @@ from __future__ import annotations
 import json
 import string
 from collections.abc import Mapping
-from pathlib import Path
 from typing import Any
 
-RESOURCES = Path(__file__).resolve().parent.parent / "resources"
+from verst_planner import resources
+
+RESOURCES = resources.DIR
 
 TEMPLATE_KEYS: tuple[str, ...] = (
     "overnight.shift.hotels",
@@ -88,8 +89,7 @@ class ReasonTemplates:
 
     @classmethod
     def default(cls) -> ReasonTemplates:
-        with (RESOURCES / "reasons.ru.json").open(encoding="utf-8") as f:
-            return cls(json.load(f))
+        return cls(json.loads(resources.read_text("reasons.ru.json")))
 
     @classmethod
     def from_dict(cls, d: Mapping[str, str]) -> ReasonTemplates:

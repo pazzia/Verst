@@ -167,6 +167,11 @@ def _crew_from_json(d: Any) -> Crew:
     )
 
 
+def crew_from_json(d: Any) -> Crew:
+    """Public form of the crew decoder (used by the app-facing `mobile.patch_cost`)."""
+    return _crew_from_json(d)
+
+
 def _crew_to_json(c: Crew) -> Json:
     return {
         "adults": c.adults,

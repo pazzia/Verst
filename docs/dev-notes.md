@@ -613,3 +613,81 @@ Final state: `make check` → ruff `All checks passed!`, mypy `Success: no issue
   `0002_app_config.sql` regenerated (`extended_detour_min`, `cluster_km`, `rest.roadside`).
 - Totals: G01 16 500, G02 33 800, G03 16 200, G04 8 900, G05 11 500, G06 18 200, G07 21 600, G08 5 700,
   G11 3 000, G12 3 900.
+
+---
+
+# Sprint 2
+
+## DEV-110 Zip-safe resource loading
+- New `verst_planner/resources/__init__.py`: `read_text(name)` via `importlib.resources.files(...)`, fallback
+  `Path(__file__).parent / name`; `DIR` replaces the three `RESOURCES = Path(__file__)…` constants (kept as
+  aliases for `cli export-config` and tests). `config.py`, `explain/ru.py`, `explain/templates.py`, `cli.py`
+  use the helper; layering rules allow `config`/`explain` → `resources`.
+- `tests/unit/test_packaging.py`: `test_import_from_zip` (subprocess `python3 -I`, `sys.path = [vp.zip]`,
+  config/templates/strings load, G02 output == snapshot bytes), `test_no_file_reads_outside_helper` (AST),
+  `test_resources_helper`. Proof of the bug: with the helper removed the zip test fails with
+  `NotADirectoryError: …/vp.zip/verst_planner/resources/planner_config.json`.
+- `python3 -m unittest tests.unit.test_packaging -v` → `Ran 3 tests` / `OK`; snapshots unchanged; seed unchanged.
+
+## DEV-111 `verst_planner/mobile.py`
+- M§5.1 in full: envelope `{ok, result|error, ms}`, never raises (`INVALID_INPUT` for malformed arguments,
+  `INTERNAL` with traceback in `detail` and on stderr, `NO_WORLD`, `TZDATA_MISSING`, planner codes);
+  `load_world`, `selfcheck`, `set_clock` (`system`/`golden`/ISO with offset), `suggest`, `popular`
+  (extra optional `origin_id`, default = most populous town), `reverse`, `ready_routes` (`bearing8` hub → first
+  via), `plan` (listener `onEvent(str)`, swallowed errors logged once, cancel token per request id under a
+  lock), `cancel`, `replace_stop`, `patch_cost`, `share_text`, `golden_snapshot`; CLI `selftest [--world]`.
+- Suggestion subtitles use the approved copy `navigator_sub_city` «город · {region}» and `navigator_sub_place`
+  «место · {region}» (design/copy-ru.md), stored as `suggest.sub.*` in `strings.ru.json`.
+- Additions outside mobile: `codec.crew_from_json` (public alias), `cli.read_file` (file reads stay in cli).
+- `python3 -m unittest tests.unit.test_mobile -v` → `Ran 21 tests` / `OK`; `python3 -m verst_planner.mobile
+  selftest` → 26 `OK` lines, exit 0; coverage `verst_planner/mobile.py 324 7 97.8%`.
+
+## DEV-112 Kotlin contract exports
+- `tools/gen_mobile_contracts.py` → `docs/contracts/replace/` 129 files, `docs/contracts/patch/` 25 files
+  (`reserve_off`, `budget_none`, `hotel_<stopId>`); compact JSON (indent 1 was 23 MB, compact 15 MB — still
+  large: ask the Manager whether to gzip or to cap alternatives per case).
+- `tests.unit.test_mobile_contracts` (byte-for-byte, file set, counts, shape: `after` day == alternative
+  `dayPatch`) → `Ran 2 tests` / `OK`.
+
+## DEV-113 Golden tie hygiene (S2-01)
+- `tests/golden/ties.py` records the lunch, fuel, rest, overnight-town and hotel picks of every golden plan and
+  their two best scores; `TiePicksTest.test_no_pick_decided_by_a_tie` requires margin ≥ 0.05 (30 picks).
+- Found two: G06 day-1 lunch 5.1 / 5.1 and G07 hotel 4.25 / 4.22. Fixture: Трапезная Гороховца rating
+  4.2 → 4.1, Пряничный двор 4.4 → 4.35; plans and snapshots unchanged; G06/G07 workings updated.
+- `rest.rank_rests` factored out (no behaviour change) so the check can observe it.
+
+Python state after DEV-110…113: `make check` → `Ran 301 tests` / `OK`, coverage `TOTAL 5066 121 97.6%`.
+
+## DEV-100 Hello Compose → CI (branch `dev/DEV-100`)
+- Worktree `/home/claude/verst-dev`; commits `df0448a` (3 modules, `demo` build type, committed
+  `demo.keystore`, wrapper 8.14.3 generated offline in an empty dir) and `e51bcee` (ABI filters).
+- Run 2 `40047400263` (df0448a, cold caches): green. build 00:56:01–00:58:58 (2 m 57 s), e2e
+  00:59:00–01:01:39 (2 m 39 s), ci-logs 5 s. am-start `TotalTime: 1843`. junit 3/0, lint errors 0, warnings 1.
+  Robolectric screenshot via `View.draw` (1170 × 2532, background pixel (20,20,22), text region 222 colours);
+  `captureToImage` fallback not needed. Toolchain: Temurin 17.0.20.1, Python 3.12.15, Gradle 8.14.3.
+- Run 4 `40047995831` (e51bcee, warm): green. build 3 m 29 s, e2e 1 m 58 s; am-start `TotalTime: 1468`;
+  APK 5.57 MB, `abis ["arm64-v8a", "x86_64"]`, device ABI x86_64.
+- Deviation: the backlog expects `abis == []` for hello; Compose ships `libandroidx.graphics.path.so` for
+  4 ABIs, so `ndk.abiFilters arm64-v8a, x86_64` is set already (the DEV-101 target set).
+- Release (acceptance 2, 6) needs the merge to main by the Manager.
+
+## DEV-101 Chaquopy spike (branch `dev/DEV-101`, commit `15b7158`)
+- Run 5 `40048288659` green on the first try with Catalog A (no Catalog B, no `extractPackages`).
+  build 01:06:54–01:10:20, e2e 01:10:22–01:13:14. `OK (3 tests)`.
+- `parity.json`: 10 snapshot cases `"equal": true` (G01 146 ms, G02 126, G03 101, G04 200, G05 33, G06 180,
+  G07 52, G08 52, G11 13, G12 10 — total ≈ 0.9 s); G09 `UNREACHABLE`, G10 `TOO_SHORT`.
+- `timings.json` (instrumentation process, second start): python 577, import 299, worlds 79, selfcheck 20,
+  **total 975 ms**. The true first launch after install (am-start, logcat `VerstEngine`): python 1186,
+  import 360, worlds 56, selfcheck 306, **total 1908 ms**. Both under the 4000 ms target.
+- Resolved: plugin `com.chaquo.python` 16.0.0, runtime Python **3.12.7** (selfcheck), `tzdata==2025.2` from
+  pypi (index also lists chaquo.com/pypi-13.1). Build warning: "Python version 3.12 may have fewer packages".
+- APK 43.28 MB (`abis ["arm64-v8a", "x86_64"]`, under 60, just under the 45 warn). largestEntries:
+  lib 24 805 600, assets 12 586 408, classes.dex 4 202 434, classes2.dex 1 133 937, resources.arsc 142 768,
+  res 12 881, kotlin 12 053, META-INF 11 334, AndroidManifest.xml 1 577.
+  Size lever: `srcDir(backend/planner)` also packs `tests/`, `tools/` and `fixtures/` (worlds then appear twice:
+  as assets and inside the Python zip). Staging only `verst_planner/` with a Sync task would cut several MB.
+- Hello screen (emulator `01-hello.png`): «Верста / Сборка 5 · 15b7158 / Движок 0.1.0 · 975 мс». Before ready
+  it shows `Движок: STARTING`; on error `Движок: <code>`. That is a code, not copy; final copy goes to the Designer.
+- Licence: not verified yet. The sandbox proxy blocks github.com raw and Maven Central, and the GitHub page
+  fetch was not approved. Open: read `LICENSE.txt` from the plugin jar in the CI gradle cache.
+- The branch also carries the uncommitted Python of DEV-110…113, which `mobile.py` needs.

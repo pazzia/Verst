@@ -12,12 +12,12 @@ import typing
 from dataclasses import dataclass
 from datetime import time
 from decimal import Decimal
-from pathlib import Path
 from typing import Any
 
+from verst_planner import resources
 from verst_planner.domain.enums import Mood
 
-RESOURCES = Path(__file__).resolve().parent / "resources"
+RESOURCES = resources.DIR
 
 
 @dataclass(frozen=True, slots=True)
@@ -165,8 +165,7 @@ class PlannerConfig:
 
     @staticmethod
     def default_dict() -> dict[str, Any]:
-        with (RESOURCES / "planner_config.json").open(encoding="utf-8") as f:
-            data: dict[str, Any] = json.load(f)
+        data: dict[str, Any] = json.loads(resources.read_text("planner_config.json"))
         return data
 
     @classmethod
