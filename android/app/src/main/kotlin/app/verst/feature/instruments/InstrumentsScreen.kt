@@ -1,6 +1,17 @@
 package app.verst.feature.instruments
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.unit.Dp
+import app.verst.core.ui.components.Band
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,8 +64,6 @@ import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.ScreenRoot
 import app.verst.feature.common.genitive
 import app.verst.nav.Seat
-import kotlin.math.cos
-import kotlin.math.sin
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
@@ -93,8 +102,10 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
     ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxWidth().height(232.dp)) {
-                SkyStrip(120.dp)
-                Box(Modifier.fillMaxSize().padding(top = 104.dp).dashboardSurface(curve = 30.dp))
+                SkyStrip(120.dp, bands = InstrumentsSky)
+                Box(Modifier.fillMaxSize().padding(top = 104.dp).dashboardSurface(curve = 30.dp, rim = false))
+                // M1: the mirror stem (30 × 58 from the top edge), under the body.
+                Box(Modifier.align(Alignment.TopCenter).size(30.dp, 58.dp).background(C.dash.controlAlt))
                 BigMirror(ui, a, Modifier.padding(start = 20.dp, end = 20.dp, top = 54.dp).fillMaxWidth().height(174.dp))
                 BackLink(ui.title, C.mirror.label, stringResource(R.string.cd_back, ui.title), a::back, Modifier.padding(start = 12.dp, top = 4.dp))
             }
@@ -111,9 +122,10 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                         )
                     }
                     Txt(summary(ui), T.title.lgNum, C.text.primary, maxLines = 2)
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        KmWell(ui, a, Modifier.weight(1f))
-                        BudgetWell(ui, a, Modifier.weight(1f))
+                    // S-13: both wells the same height (175 × 197 at 390).
+                    Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        KmWell(ui, a, Modifier.weight(1f).fillMaxHeight())
+                        BudgetWell(ui, a, Modifier.weight(1f).fillMaxHeight())
                     }
                     Txt(stringResource(R.string.instruments_mood_label), T.label.md, C.text.muted)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -175,30 +187,69 @@ private fun BigMirror(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifi
     ) {
         Column(Modifier.fillMaxSize()) {
             Spacer(Modifier.height(54.dp))
-            Box(Modifier.fillMaxWidth().height(22.dp).background(C.scene.groundDay))
+            // M4/M5: reflected ground with the road trapezoid (top x 188…202, bottom 160…230 on screen).
+            Box(
+                Modifier.fillMaxWidth().height(22.dp).background(C.scene.groundDay).drawBehind {
+                    val cx = size.width / 2
+                    val d = 1.dp.toPx()
+                    drawPath(
+                        Path().apply {
+                            moveTo(cx - 7 * d, 0f); lineTo(cx + 7 * d, 0f); lineTo(cx + 35 * d, size.height); lineTo(cx - 35 * d, size.height); close()
+                        },
+                        C.scene.road,
+                    )
+                },
+            )
+            Spacer(Modifier.fillMaxWidth().height(4.dp).background(C.mirror.glass))
             Row(
-                Modifier.fillMaxSize().background(C.dash.bench).padding(horizontal = 16.dp, vertical = 6.dp),
+                Modifier.fillMaxSize().background(C.dash.bench).padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val names = listOf("Левое", "Среднее", "Правое")
                 ui.back.forEachIndexed { i, seat -> SeatButton(seat, names[i], { a.seat(i) }, Modifier.weight(1f).testTag("instruments.seat.$i")) }
             }
         }
-        val dogCd = stringResource(if (ui.dog) R.string.cd_instruments_dog_on else R.string.cd_instruments_dog_off)
-        Box(
-            Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 12.dp, end = 12.dp)
-                .height(44.dp)
-                .clip(RoundedCornerShape(22.dp))
-                .background(if (ui.dog) C.crew.dog else C.mirror.glass.copy(alpha = 0.6f))
-                .clickable(role = Role.Switch, onClick = a::dog)
-                .semantics { contentDescription = dogCd }
-                .padding(horizontal = 14.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Txt(stringResource(if (ui.dog) R.string.instruments_dog_on else R.string.instruments_dog_off), T.body.mdStrong, if (ui.dog) C.text.onLight else C.mirror.label)
+        DogToggle(ui.dog, a::dog, Modifier.align(Alignment.TopStart).padding(start = 258.dp, top = 26.dp))
+    }
+}
+
+/** components §3.4 `DogToggle`: 56 × 52, body 32 × 26 + ears when on; dashed body, «+ пёс» when off. */
+@Composable
+private fun DogToggle(on: Boolean, onClick: () -> Unit, modifier: Modifier) {
+    val cd = stringResource(if (on) R.string.cd_instruments_dog_on else R.string.cd_instruments_dog_off)
+    Box(
+        modifier
+            .size(56.dp, 52.dp)
+            .toggleable(on, role = Role.Switch) { onClick() }
+            .semantics { contentDescription = cd }
+            .testTag("instruments.dog"),
+    ) {
+        Canvas(Modifier.matchParentSize()) {
+            val d = 1.dp.toPx()
+            val body = Path().apply {
+                addRoundRect(
+                    RoundRect(
+                        12 * d, 14 * d, 44 * d, 40 * d,
+                        topLeftCornerRadius = CornerRadius(14 * d), topRightCornerRadius = CornerRadius(14 * d),
+                        bottomRightCornerRadius = CornerRadius(10 * d), bottomLeftCornerRadius = CornerRadius(10 * d),
+                    ),
+                )
+            }
+            if (on) {
+                for ((x, deg) in listOf(6f to -18f, 41f to 18f)) {
+                    rotate(deg, Offset((x + 4.5f) * d, 1f * d)) {
+                        drawRoundRect(C.crew.dog, Offset(x * d, -6 * d), Size(9 * d, 14 * d), CornerRadius(5 * d))
+                    }
+                }
+                drawPath(body, C.crew.dog)
+            } else {
+                drawPath(body, C.text.muted, style = Stroke(2 * d, pathEffect = PathEffect.dashPathEffect(floatArrayOf(4 * d, 3 * d))))
+            }
         }
+        Txt(
+            stringResource(if (on) R.string.instruments_dog_on else R.string.instruments_dog_off), T.caption.bold,
+            if (on) C.text.primary else C.text.secondary, Modifier.align(Alignment.BottomCenter), maxLines = 1,
+        )
     }
 }
 
@@ -212,14 +263,20 @@ private fun SeatButton(seat: Seat, side: String, onClick: () -> Unit, modifier: 
         },
     )
     val cd = stringResource(R.string.cd_instruments_seat, side, label)
-    val shape = RoundedCornerShape(DesignTokens.radius.r12)
+    val shape = RoundedCornerShape(topStart = DesignTokens.radius.r14, topEnd = DesignTokens.radius.r14, bottomEnd = DesignTokens.radius.r6, bottomStart = DesignTokens.radius.r6)
     Column(
         modifier
             .fillMaxSize()
             .clip(shape)
             .then(
-                if (seat == Seat.EMPTY) Modifier.border(DesignTokens.stroke.w1, C.dash.outlineDashed, shape)
-                else Modifier.background(C.dash.outline),
+                // components §3.3: empty = dashed 2 dp (6 / 4) `color.dash.outlineDashed`, transparent.
+                if (seat == Seat.EMPTY) Modifier.drawBehind {
+                    val w = 2.dp.toPx()
+                    drawRoundRect(
+                        C.dash.outlineDashed, Offset(w / 2, w / 2), Size(size.width - w, size.height - w), CornerRadius(12.dp.toPx()),
+                        style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
+                    )
+                } else Modifier.background(C.dash.outline),
             )
             .clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd },
@@ -238,11 +295,11 @@ private fun SeatButton(seat: Seat, side: String, onClick: () -> Unit, modifier: 
 @Composable
 private fun Silhouette(head: androidx.compose.ui.unit.Dp, body: androidx.compose.ui.unit.Dp, color: androidx.compose.ui.graphics.Color) {
     Box(Modifier.size(head).clip(CircleShape).background(color))
-    Box(Modifier.padding(top = 2.dp).size(body, head).clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)).background(color))
+    Box(Modifier.padding(top = 2.dp).size(body, head).clip(RoundedCornerShape(topStart = head, topEnd = head)).background(color))
 }
 
 @Composable
-private fun Well(label: String, modifier: Modifier, content: @Composable () -> Unit) {
+private fun Well(label: String, modifier: Modifier, gap: Dp = 8.dp, content: @Composable () -> Unit) {
     Column(
         modifier
             .clip(RoundedCornerShape(DesignTokens.radius.r24))
@@ -250,7 +307,7 @@ private fun Well(label: String, modifier: Modifier, content: @Composable () -> U
             .border(DesignTokens.stroke.w4, C.dash.control, RoundedCornerShape(DesignTokens.radius.r24))
             .padding(horizontal = 10.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(gap, Alignment.CenterVertically),
     ) {
         Txt(label, T.label.wide, C.text.muted)
         content()
@@ -264,12 +321,19 @@ private fun KmWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier)
     val m = minutes % 60
     val days = ui.days
     Well(stringResource(R.string.instruments_km_label), modifier) {
-        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-            ui.dailyKm.toString().padStart(3, '0').forEach { d ->
+        // components §4: frame 113 × 42, four drums «0300», the last one white.
+        val digits = ui.dailyKm.toString().padStart(4, '0')
+        Row(
+            Modifier.clip(RoundedCornerShape(DesignTokens.radius.r6)).background(C.dash.odometerFrame).padding(4.dp).testTag("instruments.odometer"),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            digits.forEachIndexed { i, d ->
+                val last = i == digits.lastIndex
                 Box(
-                    Modifier.size(DesignTokens.size.drumW, DesignTokens.size.drumH).clip(RoundedCornerShape(DesignTokens.radius.r4)).background(C.dash.face),
+                    Modifier.size(DesignTokens.size.drumW, DesignTokens.size.drumH).clip(RoundedCornerShape(DesignTokens.radius.r3))
+                        .background(if (last) C.sign.white else C.dash.face),
                     contentAlignment = Alignment.Center,
-                ) { Txt(d.toString(), T.odometer, C.text.primary) }
+                ) { Txt(d.toString(), T.odometer, if (last) C.text.onLight else C.text.primary) }
             }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -295,8 +359,8 @@ private fun KmWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier)
 @Composable
 private fun BudgetWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier) {
     val preset = BudgetPresets[ui.budgetIndex]
-    Well(stringResource(R.string.instruments_budget_label), modifier) {
-        Gauge(ui.budgetIndex.toFloat() / BudgetPresets.lastIndex, Modifier.size(DesignTokens.size.gaugeW * 0.85f, DesignTokens.size.gaugeH * 0.85f))
+    Well(stringResource(R.string.instruments_budget_label), modifier, gap = 6.dp) {
+        Gauge(ui.budgetIndex, Modifier.size(DesignTokens.size.gaugeW, DesignTokens.size.gaugeH))
         Txt(
             if (preset == null) stringResource(R.string.instruments_budget_any) else stringResource(R.string.instruments_budget_value, RuFormat.thousands(preset)),
             T.title.lgNum, C.text.primary, maxLines = 1,
@@ -308,20 +372,26 @@ private fun BudgetWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modif
     }
 }
 
-/** components §6 FuelGauge, simplified: E…F arc and a needle at the preset fraction. */
+/**
+ * components §6 FuelGauge (S-14): 130 × 62, arc centre (65, 58) r 53, track and E zone stroke 8 butt, needle
+ * 4 × 48 (radius 2) rotated −90° + 36° · preset, hub d 16 at (65, 60).
+ */
 @Composable
-private fun Gauge(fraction: Float, modifier: Modifier) {
+private fun Gauge(preset: Int, modifier: Modifier) {
     Canvas(modifier) {
-        val sw = 5.dp.toPx()
-        val r = minOf(size.width / 2, size.height) - sw
-        val c = Offset(size.width / 2, size.height - sw / 2)
-        val box = Size(2 * r, 2 * r)
+        val d = size.width / 130f
+        val c = Offset(65 * d, 58 * d)
+        val r = 53 * d
         val tl = Offset(c.x - r, c.y - r)
-        drawArc(C.dash.controlAlt, 180f, 180f, false, tl, box, style = Stroke(sw, cap = StrokeCap.Round))
-        drawArc(C.accent.red, 180f, 30f, false, tl, box, style = Stroke(sw, cap = StrokeCap.Round))
-        val a = Math.toRadians((180.0 + 180.0 * fraction))
-        val tip = Offset(c.x + (r - sw * 2) * cos(a).toFloat(), c.y + (r - sw * 2) * sin(a).toFloat())
-        drawLine(C.accent.yellow, c, tip, 3.dp.toPx(), StrokeCap.Round)
-        drawCircle(C.text.primary, 4.dp.toPx(), c)
+        val box = Size(2 * r, 2 * r)
+        drawArc(C.dash.controlAlt, 180f, 180f, false, tl, box, style = Stroke(8 * d, cap = StrokeCap.Butt))
+        drawArc(C.accent.red, 180f, 48.8f, false, tl, box, style = Stroke(8 * d, cap = StrokeCap.Butt))
+        rotate(-90f + 36f * preset, c) {
+            drawRoundRect(C.accent.yellow, Offset(c.x - 2 * d, c.y - 48 * d), Size(4 * d, 48 * d), CornerRadius(2 * d))
+        }
+        drawCircle(C.sign.white, 8 * d, Offset(65 * d, 60 * d))
     }
 }
+
+/** Sky of the 5.3 strip (S1–S3): band 1 0–60, band 3 60–90, band 4 90–120. */
+private val InstrumentsSky = listOf(Band(0f, 60f, C.sky.band1), Band(60f, 30f, C.sky.band3), Band(90f, 30f, C.sky.band4))

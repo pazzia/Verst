@@ -132,7 +132,7 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxWidth().height(150.dp)) {
                     SkyStrip(132.dp)
-                    Box(Modifier.fillMaxSize().padding(top = 110.dp).dashboardSurface(curve = 30.dp))
+                    Box(Modifier.fillMaxSize().padding(top = 110.dp).dashboardSurface(curve = 30.dp, rim = false))
                     // OI-27: «К лобовому» when the trip was opened from «Мои поездки».
                     val back = stringResource(if (ui.fromSaved) R.string.common_back_to_windshield else R.string.common_back_instruments)
                     BackLink(back, C.mirror.label, stringResource(R.string.cd_back, back), a::back, Modifier.padding(start = 12.dp, top = 10.dp).testTag("road.back"))

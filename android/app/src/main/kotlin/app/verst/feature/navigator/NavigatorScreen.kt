@@ -54,6 +54,8 @@ import app.verst.core.model.dto.SuggestionDto
 import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.PlaceholderPlate
+import app.verst.core.ui.components.NavigatorRoad
+import app.verst.core.ui.components.NavigatorSky
 import app.verst.core.ui.components.SkyStrip
 import app.verst.core.ui.components.StartButton
 import app.verst.core.ui.components.StartSize
@@ -109,7 +111,7 @@ fun NavigatorScreen(
             val typing = inputFocused && WindowInsets.isImeVisible
             if (!typing) {
                 Box(Modifier.fillMaxWidth().height(150.dp)) {
-                    SkyStrip(150.dp, ground = true)
+                    SkyStrip(150.dp, bands = NavigatorSky, groundTop = 104f, road = NavigatorRoad)
                     Box(Modifier.fillMaxSize().padding(top = 132.dp).dashboardSurface(curve = 30.dp))
                 }
             }

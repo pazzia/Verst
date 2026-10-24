@@ -99,7 +99,7 @@ fun WindshieldScreen(
     ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
             val sceneH = maxHeight - DashHeight + 20.dp
-            WindshieldScene(sceneH)
+            WindshieldScene(sceneH, gantry = true)
             Mirror(crewShort(ui.adults, ui.children, ui.dog), ui.adults, ui.children, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             Sign(ui, onSelect, onRetry, Modifier.padding(start = 20.dp, end = 20.dp, top = 84.dp).fillMaxWidth())
             Dashboard(ui, onStart, onNavigator, trips::open, Modifier.align(Alignment.BottomCenter))
