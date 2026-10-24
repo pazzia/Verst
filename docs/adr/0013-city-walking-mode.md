@@ -132,7 +132,7 @@ ties → lower walking minutes, then id
 
 `ENGINE_VERSION` stays `0.1.0` this sprint. Every change is additive and old trips decode, so saved Sprint 2 trips never become `TRIP_INCOMPATIBLE` and the golden snapshots keep their `engineVersion`. `mobile.API_VERSION` becomes 2.
 
-### Output (`WalkRoute` JSON; a contract file per sample in `docs/contracts/city/`)
+### Output (`WalkRoute` JSON; contract files `docs/contracts/v2/city_route-*.json`)
 
 ```jsonc
 {"kind": "walk", "engineVersion": "<ENGINE_VERSION>", "id": "wlk_<uuid>", "titleRu": "Ярославль: обзорная прогулка",
@@ -175,4 +175,16 @@ The walk is self-contained, so the app saves it as a trip of kind `walk` (`Saved
   - gates;
   - 18+ and children errors;
   - the solver against brute force on 9-candidate random pools: its score must be ≥ 0.9 × the optimum, in ≥ 95 % of 200 seeds.
-- Golden-like samples on `russia_v1` with the golden clock: Ярославль overview/museums/custom and Санкт-Петербург museums. They become contract files `docs/contracts/city/*.json`, regenerated together with the catalogue.
+- Golden-like samples on `russia_v1` with the golden clock: Ярославль overview/custom/«По рюмочным» and Санкт-Петербург museums, plus the error cases. They are contract files `docs/contracts/v2/city_route-*.json`, regenerated together with the catalogue (`tools/gen_api_contracts.py`).
+
+## As built (ARCH-304, `arch/sprint-3`)
+
+- **Code:** `verst_planner/city/{presets,walk,route}.py`; the bridge (`mobile.city_presets` / `city_route`) builds the candidates from `places_near` (sights) and the catalogue bar grid.
+- **Solver additions:**
+  - Two constructions, Δscore/Δmin and plain Δscore, each followed by 2-opt, single replacements and drop-and-refill; the better result is kept.
+  - A visit may wait up to 60 min for opening (5-min steps).
+  - Lower-bound pruning: travel + dwell − the current waiting time.
+- **Default start times:** drink walks start at 18:00 at the earliest, museum walks at 10:00, others at now rounded up to 15 min. The solver never returns a walk that has to wait for 09:00 museums at 10:00 instead of starting there.
+- **Meal stop:** the «еда» interest (custom, ≥ 4 h) adds one meal stop of 45 min (× pace) near the midpoint, at the previous stop's place, not tappable. It is not a fictional cafe in a real city.
+- **Measured** on the sandbox desktop, 60 candidates: 9 ms (2 h), 27 ms (4 h), 165 ms (8 h). Brute force: ≥ 0.9 × optimum in ≥ 190 of 200 random 8-candidate pools.
+- **Errors:** `NOT_ENOUGH_POIS` (`field = preset`), `NO_CITY`, `INVALID_INPUT` (`adultConfirmed` / `preset` children), `CANCELLED` through `cancel(request_id)`.

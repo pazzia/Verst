@@ -137,6 +137,16 @@ class MobileV2Test(unittest.TestCase):
         self.assertEqual(fail(mobile.city_route(R, "e7", walk()))["code"], "CANCELLED")
         self.assertEqual(fail(mobile.city_presets(R, None, None))["code"], "INVALID_INPUT")  # type: ignore[arg-type]
 
+    @staticmethod
+    def _town_without_bars() -> dict[str, float]:
+        from verst_planner.geo.distance import haversine_km
+
+        cat = mobile._CATALOGUE[0]
+        for t in sorted(cat.towns, key=lambda t: (t.population, t.id)):
+            if t.population >= 5000 and all(haversine_km(t.point, b.point) > 6 for b in cat.bars):
+                return {"lat": t.point.lat, "lon": t.point.lon}
+        raise AssertionError("no town without bars")
+
     def test_poi_details(self) -> None:
         sight = call(mobile.poi_details(R, "pl_yar_ilya"))
         self.assertEqual((sight["kind"], sight["isFictional"]), ("sight", False))
