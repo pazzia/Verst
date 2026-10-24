@@ -43,7 +43,7 @@ import org.robolectric.annotation.GraphicsMode
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h844dp-port-xxhdpi")
+@Config(qualifiers = "ru-rRU-w390dp-h844dp-port-xxhdpi")
 class ScreensScreenshotTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
@@ -70,7 +70,7 @@ class ScreensScreenshotTest {
     @Test
     fun windshieldDefault() {
         shot("windshield", "default") { WindshieldScreen(windshield(WindshieldData.Routes(routes)), {}, {}, {}, {}) }
-        compose.onNodeWithText("Тула · Ясная Поляна").assertExists()
+        compose.onNodeWithTag("windshield.route.0").assertExists()
         compose.onNodeWithText("РЯДОМ С ВАМИ · ИЗ МОСКВЫ").assertExists()
     }
 
@@ -116,11 +116,14 @@ class ScreensScreenshotTest {
     }
 
     @Test
-    fun instrumentsDefault() = shot("instruments", "default") {
-        InstrumentsScreen(
-            InstrumentsUi("Золотое кольцо", "Москва", true, 745, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.CALM),
-            noActions,
-        )
+    fun instrumentsDefault() {
+        shot("instruments", "default") {
+            InstrumentsScreen(
+                InstrumentsUi("Золотое кольцо", "Москва", true, 745, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.CALM),
+                noActions,
+            )
+        }
+        compose.onNodeWithText("3 взрослых · 1 ребёнок · собака").assertExists() // Russian plural rules (ru locale)
     }
 
     @Test

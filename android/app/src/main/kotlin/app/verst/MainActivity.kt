@@ -1,5 +1,7 @@
 package app.verst
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -22,9 +24,16 @@ import app.verst.feature.windshield.WindshieldScreen
 import app.verst.feature.windshield.WindshieldUi
 import app.verst.nav.Route
 import app.verst.nav.VerstFlow
+import java.util.Locale
 
 /** The single activity: Windshield → (Navigator) → Instruments → Drive → Road ahead (DEV-SLICE). */
 class MainActivity : ComponentActivity() {
+    /** The app is Russian-only: plurals and formats follow Russian rules whatever the phone's language is. */
+    override fun attachBaseContext(newBase: Context) {
+        val config = Configuration(newBase.resources.configuration).apply { setLocale(Locale.forLanguageTag("ru-RU")) }
+        super.attachBaseContext(newBase.createConfigurationContext(config))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
