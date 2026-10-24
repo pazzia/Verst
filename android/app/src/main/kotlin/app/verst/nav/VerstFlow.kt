@@ -553,6 +553,7 @@ class VerstFlow(
     // ------------------------------------------------------------------------------------------ navigation
 
     fun push(route: Route) {
+        locationSheet = false // the rationale belongs to the screen that asked
         stack.add(route)
     }
 
@@ -566,7 +567,7 @@ class VerstFlow(
             cityCustomSheet = false
             return true
         }
-        if (locationSheet) {
+        if (locationSheet && (top == Route.Navigator || top == Route.City)) {
             locationSheet = false
             return true
         }

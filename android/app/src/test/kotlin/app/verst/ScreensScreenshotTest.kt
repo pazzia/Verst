@@ -389,17 +389,28 @@ class ScreensScreenshotTest {
     }
 
     @Test
-    fun roadFitBadges() {
+    fun roadFitBadge() {
         val trip = snapshot("G02_golden_ring")
         val budgeted = trip.copy(cost = trip.cost.copy(budgetRub = 40_000, overBudget = false))
         shot("road", "fit-badge") { RoadScreen(RoadUi(budgeted, "NE"), noRoad) }
         compose.onNodeWithTag("road.fit", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun roadTightBadge() {
+        val trip = snapshot("G02_golden_ring")
         val tight = trip.copy(
             cost = trip.cost.copy(budgetRub = 32_000, overBudget = true),
             budgetFit = app.verst.core.model.dto.BudgetFitDto("small_overrun", 32_000, 33_600, 41_000, trip.cost.totalRub),
         )
         shot("road", "tight-badge") { RoadScreen(RoadUi(tight, "NE"), noRoad) }
         compose.onNodeWithTag("road.tight", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun roadMinimumOver() {
+        val trip = snapshot("G02_golden_ring")
+        val budgeted = trip.copy(cost = trip.cost.copy(budgetRub = 40_000, overBudget = false))
         shot("road", "minimum-over") { RoadScreen(RoadUi(budgeted.copy(cost = budgeted.cost.copy(budgetRub = 30_000, overBudget = true)), "NE", minimum = true), noRoad) }
         compose.onNodeWithTag("road.over", useUnmergedTree = true).assertExists()
     }
@@ -436,7 +447,7 @@ class ScreensScreenshotTest {
     fun cardSight() {
         val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
         shot("card", "sight-placeholder") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
-        compose.onNodeWithText("билет ≈ 400 ₽, детский ≈ 200 ₽ · цена примерная").assertExists()
+        compose.onNodeWithText("цена примерная", substring = true).assertExists() // the deck uses NBSPs in the ticket line
     }
 
     @Test

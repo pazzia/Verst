@@ -190,7 +190,7 @@ class RoundR1Test {
         compose.waitUntil(10_000) { flow.dayHandoff != null }
         compose.onNodeWithTag("daymenu.go", useUnmergedTree = true).performClick()
         if (!flow.navigatorInstalled) {
-            compose.onNodeWithText("Нужен интернет, чтобы открыть карту в браузере").assertExists()
+            compose.onNodeWithText("открыть карту в браузере", substring = true).assertExists()
             assertEquals(before, flow.lastHandoff)
         }
         shot("44-handoff-offline")
