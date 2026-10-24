@@ -203,9 +203,9 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         if (w.shorterThanAsked) {
             // «places» → the deck sentence; another reason (budget) → the engine's own sentence
             val sh = w.shorter
-            val text = if (sh == null || sh.reason == "places" || sh.messageRu == null) {
-                stringResource(R.string.walk_shorter, hours(sh?.actualMin ?: w.durationMin), hours(sh?.requestedMin ?: w.requestedMin ?: 0))
-            } else sh.messageRu
+            val engineText = sh?.messageRu?.takeIf { sh.reason != "places" }
+            val text = engineText
+                ?: stringResource(R.string.walk_shorter, hours(sh?.actualMin ?: w.durationMin), hours(sh?.requestedMin ?: w.requestedMin ?: 0))
             Txt(text, T.body.sm, C.text.muted, Modifier.testTag("walk.shorter"))
         }
         // L3a: the walk hand-off, one button per part when the engine split the walk
