@@ -181,6 +181,8 @@ class Place:
     verified_at: date | None
     status: PlaceStatus
     breakfast_included: bool = True
+    family_price_rub: int | None = None
+    """Price per night of a family room (≤ 4 guests, ADR-0011); None = `price_night_rub x 1.4`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -289,6 +291,8 @@ class Route:
     snapped: tuple[LatLon, ...]
     km_total: float
     min_total: float
+    synthetic: bool = False
+    """Not a road network route: straight legs x the calibrated road model (ADR-0012 §4)."""
 
 
 # ---------------------------------------------------------------- 4.6 working state (mutable)
@@ -699,6 +703,8 @@ class TripPlan:
     input: NormalizedInput
     engine_version: str
     engine_state: EngineState
+    approx_distances: bool = False
+    """The route is synthetic (ADR-0012 §4): distances and times are estimates («≈»)."""
 
 
 class _Unset:

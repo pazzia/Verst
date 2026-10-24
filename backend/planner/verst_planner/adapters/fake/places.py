@@ -70,6 +70,16 @@ class FakePlaceRepository:
         self._count("get_ready_route")
         return self.world.ready_routes.get(route_id)
 
+    def places_near(self, point: LatLon, radius_km: float, types: frozenset[PlaceType]) -> list[Place]:
+        """Live places of `types` within `radius_km` of `point`, nearest first, then id (city walks)."""
+        self._count("places_near")
+        hits = [
+            (round(haversine_km(point, p.point), 6), p.id, p)
+            for p in self.world.places.values()
+            if p.status is PlaceStatus.LIVE and p.type in types and haversine_km(point, p.point) <= radius_km
+        ]
+        return [p for _d, _i, p in sorted(hits, key=lambda x: (x[0], x[1]))]
+
     def ready_routes_near(self, point: LatLon, hub_radius_km: float, limit: int) -> list[ReadyRoute]:
         self._count("ready_routes_near")
         out = [

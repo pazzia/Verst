@@ -1,0 +1,20 @@
+{
+ "request": {
+  "function": "load_catalogue",
+  "args": {}
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "version": "sample",
+   "builtAt": "2026-10-25",
+   "towns": 16,
+   "pois": 19,
+   "bars": 11,
+   "world": "russia_v1",
+   "places": 497,
+   "ms": 0
+  },
+  "ms": 0
+ }
+}

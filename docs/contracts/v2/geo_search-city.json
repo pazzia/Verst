@@ -1,0 +1,33 @@
+{
+ "request": {
+  "function": "geo_search",
+  "args": {
+   "world": "russia_v1",
+   "q": "Санкт",
+   "lat": 55.7558,
+   "lon": 37.6173,
+   "limit": 5,
+   "kinds": null
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": [
+   {
+    "kind": "city",
+    "name": "Санкт-Петербург",
+    "subtitle": "город · Санкт-Петербург",
+    "lat": 59.9386,
+    "lon": 30.3141,
+    "id": "Q656",
+    "nameGenRu": "Санкт-Петербурга",
+    "namePrepRu": "Санкт-Петербурге",
+    "population": 5600044,
+    "regionRu": "Санкт-Петербург",
+    "poiKind": null,
+    "hasPhoto": true
+   }
+  ],
+  "ms": 0
+ }
+}

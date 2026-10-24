@@ -1,0 +1,28 @@
+{
+ "request": {
+  "function": "geo_nearest",
+  "args": {
+   "world": "russia_v1",
+   "lat": 57.6205,
+   "lon": 39.873
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "town": {
+    "id": "t_yaroslavl",
+    "name": "Ярославль",
+    "nameGenRu": "Ярославля",
+    "namePrepRu": "Ярославле",
+    "regionRu": "Ярославская область",
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "population": 570000
+   },
+   "distanceKm": 0.9,
+   "insideRussia": true
+  },
+  "ms": 0
+ }
+}

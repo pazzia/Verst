@@ -25,16 +25,25 @@ DENY = [
 ]
 
 
-def strings(node: Any) -> Iterator[str]:
+ALLOW = {
+    tuple(line.strip()[len("json:") :].split("."))
+    for line in (PLANNER_ROOT / "tests" / "brand_allowlist.txt").read_text("utf-8").splitlines()
+    if line.startswith("json:")
+}
+
+
+def strings(node: Any, parent: str | None = None) -> Iterator[str]:
     if isinstance(node, str):
         yield node
     elif isinstance(node, dict):
         # Values only: keys are field names (e.g. `yandexTravelId`, a production link id), never shown.
-        for v in node.values():
-            yield from strings(v)
+        for k, v in node.items():
+            if (parent, k) in ALLOW:
+                continue  # ADR-0014 hand-off links (tests/brand_allowlist.txt)
+            yield from strings(v, k)
     elif isinstance(node, list):
         for v in node:
-            yield from strings(v)
+            yield from strings(v, parent)
 
 
 def hits(texts: Iterator[str]) -> list[str]:
@@ -69,6 +78,25 @@ class BrandDenyListTest(unittest.TestCase):
         for f in bundles:
             with self.subTest(f.name):
                 self.assertEqual(hits(strings(json.loads(gzip.decompress(f.read_bytes())))), [])
+
+    def test_catalogue_and_composed_world(self) -> None:
+        """Every name in the packaged catalogue and in the composed `russia_v1` world (ADR-0012)."""
+        from verst_planner.adapters.catalogue import compose
+        from verst_planner.adapters.fake import FakeWorld
+        from verst_planner.catalogue import FILES, load_gz, load_packaged
+        from verst_planner.resources import read_bytes
+
+        for name in FILES.values():
+            with self.subTest(name):
+                self.assertEqual(hits(strings(load_gz(read_bytes(name), name))), [])
+        cw = compose(FakeWorld.load(WORLDS / "central_russia_v1.json"), load_packaged())
+        self.assertEqual(hits(p.name_ru for p in cw.world.places.values()), [])
+        self.assertEqual(hits(t.name_ru for t in cw.world.towns.values()), [])
+
+    def test_allowlist_only_skips_handoff_links(self) -> None:
+        doc = {"links": {"maps": "yandexmaps://x", "web": "https://yandex.ru/maps"}, "nameRu": "Яндекс"}
+        self.assertEqual(len(hits(strings(doc))), 1)
+        self.assertEqual(hits(strings({"other": {"maps": "Яндекс"}})), ["'Яндекс' in 'Яндекс'"])
 
     def test_android_strings_the_app_uses(self) -> None:
         android = REPO / "android"

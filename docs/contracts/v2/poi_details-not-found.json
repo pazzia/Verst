@@ -1,0 +1,22 @@
+{
+ "request": {
+  "function": "poi_details",
+  "args": {
+   "world": "russia_v1",
+   "place_id": "pl_m8_fuel_022"
+  }
+ },
+ "response": {
+  "ok": false,
+  "error": {
+   "code": "NOT_FOUND",
+   "message": "place pl_m8_fuel_022 not found",
+   "field": null,
+   "reason": null,
+   "pointIndex": null,
+   "roadKm": null,
+   "detail": null
+  },
+  "ms": 0
+ }
+}

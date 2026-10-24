@@ -1,0 +1,36 @@
+{
+ "request": {
+  "function": "poi_details",
+  "args": {
+   "world": "russia_v1",
+   "place_id": "pl_yar_hotel_strelka"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "id": "pl_yar_hotel_strelka",
+   "kind": "hotel",
+   "poiKind": null,
+   "nameRu": "У Стрелки, в центре",
+   "descriptionRu": "Демо: вымышленная гостиница",
+   "townName": "Ярославль",
+   "lat": 57.631526230397746,
+   "lon": 39.904632398365415,
+   "image": {
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Yaroslavl_Strelka.jpg?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Yaroslavl_Strelka.jpg?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:Yaroslavl_Strelka.jpg",
+    "credit": null,
+    "isArea": true,
+    "labelRu": "Фото района: Ярославль · Wikimedia Commons"
+   },
+   "hours": null,
+   "ticket": null,
+   "isFictional": true,
+   "attributionRu": [],
+   "wikidataId": null
+  },
+  "ms": 0
+ }
+}
