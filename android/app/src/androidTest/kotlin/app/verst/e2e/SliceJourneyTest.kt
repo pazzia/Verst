@@ -13,8 +13,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToIndex
-import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -145,7 +145,7 @@ class SliceJourneyTest {
         Log.i("VerstE2e", "km navigator=$navKm instruments=$instrumentsKm plan=${trip.km} road=${textOf("road.km")}")
         assertEquals(instrumentsKm, trip.km)
         assertEquals(trip.km, number(textOf("road.km")))
-        compose.onNodeWithTag("road.list").performScrollToIndex(5)
+        compose.onNodeWithTag("road.list").performTouchInput { swipeUp() }
         shot("07-road-ahead-scrolled")
 
         // Waybill: open from the footer, expand the fuel line, switch the reserve off.
@@ -176,8 +176,7 @@ class SliceJourneyTest {
         // Replace a stop with the engine's first alternative.
         val stop = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.alternatives.isNotEmpty() }
         val alt = stop.alternatives.first()
-        compose.onNodeWithTag("road.list").performScrollToNode(hasTestTag("road.swap.${stop.id}"))
-        compose.onNodeWithTag("road.swap.${stop.id}").performClick()
+        compose.onNodeWithTag("road.swap.${stop.id}").performScrollTo().performClick()
         waitTag("replace")
         shot("14-replace-sheet")
         compose.onNodeWithTag("replace.alt.0", useUnmergedTree = true).performScrollTo().performClick()

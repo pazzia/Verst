@@ -19,7 +19,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -111,7 +110,7 @@ class VerstFlowTest {
         // Plan: the engine's trip km is used everywhere afterwards, even if an estimate had said otherwise.
         assertEquals(542, planned.trip.km) // G01: the plan's number differs from what the fake estimate said
         flow.go()
-        advanceUntilIdle()
+        settle(10_000)
         assertEquals(Route.Road, flow.top)
         assertEquals(planned.trip.km, flow.result!!.trip.km)
         assertEquals(TripFigures(planned.trip.km, planned.trip.days), flow.figures!!.figures)
@@ -123,7 +122,7 @@ class VerstFlowTest {
         flow.toggleLine("food")
         assertEquals("food", flow.expandedLine)
         flow.toggleReserve()
-        advanceUntilIdle()
+        settle(10_000)
         assertEquals(listOf(EngineArgs.reservePatch(false)), gw.patches)
         assertFalse(flow.result!!.trip.cost.reserveOn)
         assertTrue(flow.back())
@@ -144,7 +143,7 @@ class VerstFlowTest {
 
         // Save → «Мои поездки» → reopen into Road ahead with the saved trip.
         flow.save()
-        advanceUntilIdle()
+        settle(10_000)
         assertEquals(1, flow.saved.size)
         assertEquals(1, store.load().size)
         assertTrue(flow.savedCurrent)

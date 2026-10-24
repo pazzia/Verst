@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import app.verst.core.model.DefaultOrigin
@@ -125,7 +126,9 @@ class ScreensScreenshotTest {
         shot("navigator", "destination-picked") {
             NavigatorScreen(navigator("Ярославль", emptyList(), yaroslavl).copy(tripKm = 265), {}, {}, {}, {}, {})
         }
-        compose.onNodeWithText("265 км · город · Ярославская область").assertExists() // the engine's km, not ≈ 249 / 312
+        // The engine's km (estimate = plan), not ≈ 249 / ≈ 312; the copy uses U+00A0 before «км».
+        compose.onNodeWithTag("navigator.meta", useUnmergedTree = true).assertTextContains("265", substring = true)
+        compose.onNodeWithText("≈", substring = true, useUnmergedTree = true).assertDoesNotExist()
     }
 
     @Test

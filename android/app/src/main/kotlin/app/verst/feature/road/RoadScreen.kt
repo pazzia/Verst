@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -71,26 +71,6 @@ import kotlin.math.roundToInt
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
-private sealed interface Item {
-    val key: String
-
-    data object Intro : Item {
-        override val key = "intro"
-    }
-
-    data class Day(val day: DayDto, val last: Boolean) : Item {
-        override val key = "day${day.day}"
-    }
-
-    data class Stop(val stop: StopDto, val first: Boolean) : Item {
-        override val key = stop.id
-    }
-
-    data object Bottom : Item {
-        override val key = "bottom"
-    }
-}
-
 /** Everything Road ahead draws (stateless; `VerstRoot` maps `VerstFlow` into it). */
 data class RoadUi(
     val trip: TripDto,
@@ -118,14 +98,6 @@ interface RoadActions {
 @Composable
 fun RoadScreen(ui: RoadUi, a: RoadActions) {
     val trip = ui.trip
-    val rows = buildList<Item> {
-        add(Item.Intro)
-        trip.daysList.forEachIndexed { di, d ->
-            add(Item.Day(d, di == trip.daysList.lastIndex))
-            d.stops.forEachIndexed { si, s -> add(Item.Stop(s, di == 0 && si == 0)) }
-        }
-        add(Item.Bottom)
-    }
     ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val windowH = maxHeight
@@ -146,14 +118,16 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                     TitleSign(trip, ui.bearing8, Modifier.padding(start = 20.dp, end = 20.dp, top = 56.dp).fillMaxWidth())
                 }
                 Box(Modifier.weight(1f).fillMaxWidth()) {
-                    LazyColumn(Modifier.fillMaxSize().testTag("road.list")) {
-                        items(rows, key = { it.key }) { item ->
-                            when (item) {
-                                Item.Intro -> Intro(trip)
-                                is Item.Day -> DayHeader(item.day, trip.roundTrip && item.last && trip.days > 1)
-                                is Item.Stop -> StopRow(item.stop, item.first) { a.replace(item.stop) }
-                                Item.Bottom -> Spacer(Modifier.height(24.dp))
+                    // S-20: one scrolled column; the road section draws a single continuous road (one lane-dash
+                    // phase), the rows draw only their connector stubs. A trip has tens of rows, not thousands.
+                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("road.list")) {
+                        Intro(trip)
+                        Column(Modifier.fillMaxWidth().roadSection()) {
+                            trip.daysList.forEachIndexed { di, d ->
+                                DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0)
+                                d.stops.forEachIndexed { si, st -> StopRow(st, di == 0 && si == 0) { a.replace(st) } }
                             }
+                            Spacer(Modifier.height(24.dp))
                         }
                     }
                     Box(
@@ -278,7 +252,8 @@ private fun TitleSign(trip: TripDto, bearing8: String, modifier: Modifier) {
 
 @Composable
 private fun Intro(trip: TripDto) {
-    Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    // S-21 / 5.5 §2.2: L1 at the list top, L2 +6, L3 +8, road column 18 below L3 (padding 4 + margin 14).
+    Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Txt(stringResource(R.string.road_title), T.display, C.text.primary, Modifier.semantics { heading() })
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             // S-01: the deck's `road_chip_days` («3 дня · 2 ночи»), now with a string 4th argument.
@@ -293,7 +268,7 @@ private fun Intro(trip: TripDto) {
             InfoChip(crewShort(trip.input.crew.adults, trip.input.crew.children, trip.input.crew.dog))
             InfoChip(stringResource(R.string.road_chip_pace, RuFormat.thousands(trip.input.dailyKm)))
         }
-        Txt(stringResource(R.string.road_intro), T.body.mdTight, C.text.secondary)
+        Txt(stringResource(R.string.road_intro), T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp))
         for (w in trip.warnings) {
             val msg = w.message ?: continue
             Row(
@@ -312,28 +287,34 @@ private fun Intro(trip: TripDto) {
     }
 }
 
-/** The road column of one list item (5.5 §2.4): asphalt, edge lines, lane dashes; per item, so it scrolls. */
-private fun Modifier.roadColumn(connector: Boolean): Modifier = drawBehind {
+/** 5.5 §2.4: asphalt x 14…60, 3 dp edges, lane dashes 32 / 64 from the section top (one global phase). */
+private fun Modifier.roadSection(): Modifier = drawBehind {
     val dp = 1.dp.toPx()
     drawRect(C.scene.road, Offset(14 * dp, 0f), Size(46 * dp, size.height))
     drawRect(C.scene.roadEdge, Offset(14 * dp, 0f), Size(3 * dp, size.height))
     drawRect(C.scene.roadEdge, Offset(57 * dp, 0f), Size(3 * dp, size.height))
-    var y = 8 * dp
+    var y = 0f
     while (y < size.height) {
         drawRect(C.scene.roadEdge, Offset(35.5f * dp, y), Size(3 * dp, minOf(32 * dp, size.height - y)))
         y += 64 * dp
     }
-    if (connector) drawRect(C.interior.pole, Offset(60 * dp, 38 * dp), Size(14 * dp, 3 * dp))
+}
+
+/** Per row: the 14 × 3 connector stub at x 60, row top + 38 (`color.interior.pole`). */
+private fun Modifier.connector(): Modifier = drawBehind {
+    val dp = 1.dp.toPx()
+    drawRect(C.interior.pole, Offset(60 * dp, 38 * dp), Size(14 * dp, 3 * dp))
 }
 
 @Composable
-private fun DayHeader(day: DayDto, home: Boolean) {
+private fun DayHeader(day: DayDto, home: Boolean, first: Boolean) {
     val hours = (day.driveMin / 60.0).roundToInt()
     val meta = if (home) stringResource(R.string.road_day_meta_home, RuFormat.thousands(day.km))
     else stringResource(R.string.road_day_meta, RuFormat.thousands(day.km), hours)
     val cd = stringResource(R.string.cd_road_day, day.day, day.km.toString(), hours, pluralStringResource(R.plurals.plural_hour, hours))
     Row(
-        Modifier.fillMaxWidth().roadColumn(false).padding(start = 72.dp, end = 16.dp, top = 6.dp, bottom = 10.dp)
+        // S-21: day 1 starts at the road top (margin 0), later days 6 below the previous row; 10 to row 1.
+        Modifier.fillMaxWidth().padding(start = 72.dp, end = 16.dp, top = if (first) 0.dp else 6.dp, bottom = 10.dp)
             .semantics(mergeDescendants = true) { heading(); contentDescription = cd },
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -360,7 +341,7 @@ private fun StopRow(s: StopDto, first: Boolean, onReplace: () -> Unit) {
     }
     val cd = listOfNotNull(line1 + unverified, time, name, note, cost).joinToString(", ")
     Row(
-        Modifier.fillMaxWidth().roadColumn(true).padding(top = 8.dp, bottom = 12.dp, end = 16.dp)
+        Modifier.fillMaxWidth().connector().padding(top = 8.dp, bottom = 12.dp, end = 16.dp)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("road.stop.${s.id}"),
     ) {

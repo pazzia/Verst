@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -117,8 +118,11 @@ fun NavigatorScreen(
             }
             Column(Modifier.weight(1f).fillMaxWidth().background(C.dash.raised)) {
                 val back = stringResource(R.string.common_back_to_windshield)
-                BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp, top = 0.dp))
-                Panel(ui, typing, onQuery, pick, onEditFrom, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = 6.dp, bottom = 12.dp))
+                // S-11 / 5.2 D2–D3: back link touch box y 142–186 (a 38 dp band from 150), panel top at 188.
+                Box(Modifier.fillMaxWidth().height(if (typing) 44.dp else 38.dp)) {
+                    BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp).offset(y = if (typing) 0.dp else (-8).dp))
+                }
+                Panel(ui, typing, onQuery, pick, onEditFrom, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(bottom = if (typing) 12.dp else 28.dp))
                 // 5.2 §1: the caption row hides while typing (IME open on a focused field) and returns after a pick.
                 if (!typing) Caption(ui, onStart)
             }
@@ -243,7 +247,7 @@ private fun ValueField(
             .clip(shape)
             .background(C.navi.field)
             .border(DesignTokens.stroke.w1, C.navi.fieldBorder, shape)
-            .padding(start = 12.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+            .padding(start = 12.dp, end = 8.dp, top = 3.dp, bottom = 3.dp), // D5: 50 high with the 44 dp «изменить»
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Marker(!square, if (square) C.accent.yellow else C.navi.label)

@@ -1,5 +1,6 @@
 package app.verst.feature.windshield
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -100,7 +107,7 @@ fun WindshieldScreen(
         BoxWithConstraints(Modifier.matchParentSize()) {
             val sceneH = maxHeight - DashHeight + 20.dp
             WindshieldScene(sceneH, gantry = true)
-            Mirror(crewShort(ui.adults, ui.children, ui.dog), ui.adults, ui.children, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
+            Mirror(crewShort(ui.adults, ui.children, ui.dog), ui.adults, ui.children, ui.dog, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             Sign(ui, onSelect, onRetry, Modifier.padding(start = 20.dp, end = 20.dp, top = 84.dp).fillMaxWidth())
             Dashboard(ui, onStart, onNavigator, trips::open, Modifier.align(Alignment.BottomCenter))
             if (ui.tripsSheet && ui.trips.isNotEmpty()) TripsSheet(ui.trips, maxHeight, trips)
@@ -177,35 +184,67 @@ private fun TripsPlate(count: Int, onClick: () -> Unit) {
     }
 }
 
+/**
+ * components §3.1 `Mirror.Small` (S-07, S-08): stem + body as one Canvas 150 × 56 (origin = screen (120, 8)),
+ * glass reflecting sky (`sky.band2`) and ground, crew silhouettes as cut-outs in `mirror.glass` at the slot
+ * centres 154 / 193 / 230 (adults from the outer slots inward, children in the rest), the dog at the right,
+ * glare; the crew caption below.
+ */
 @Composable
-private fun Mirror(caption: String, adults: Int, children: Int, modifier: Modifier) {
+private fun Mirror(caption: String, adults: Int, children: Int, dog: Boolean, modifier: Modifier) {
     Column(modifier.semantics(mergeDescendants = true) {}, horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(Modifier.size(8.dp, 10.dp).background(C.dash.controlAlt))
-        Box(
-            Modifier
-                .size(DesignTokens.size.mirrorSW, DesignTokens.size.mirrorSH)
-                .clip(RoundedCornerShape(22.dp))
-                .background(C.dash.controlAlt)
-                .padding(3.dp)
-                .clip(RoundedCornerShape(19.dp))
-                .background(C.mirror.glass),
-            contentAlignment = Alignment.Center,
-        ) {
-            // The mirror reflects the passengers (everyone but the driver), up to 3 slots (components §3.1).
-            val passengers = List((adults - 1).coerceAtLeast(0)) { false } + List(children) { true }
-            Row(horizontalArrangement = Arrangement.spacedBy(13.dp), verticalAlignment = Alignment.Bottom) {
-                passengers.take(3).forEach { child ->
-                    val head = if (child) 9.dp else 12.dp
-                    val color = if (child) C.crew.child else C.mirror.label
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(Modifier.size(head).clip(CircleShape).background(color))
-                        Box(Modifier.padding(top = 2.dp).size(head * 1.8f, head * 0.85f).clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)).background(color))
-                    }
+        Canvas(Modifier.size(150.dp, 54.dp)) {
+            val d = 1.dp.toPx()
+            drawRect(C.dash.controlAlt, Offset(71 * d, 0f), Size(8 * d, 10 * d))
+            drawRoundRect(C.dash.controlAlt, Offset(0f, 10 * d), Size(150 * d, 44 * d), CornerRadius(22 * d))
+            val glass = Path().apply { addRoundRect(RoundRect(3 * d, 13 * d, 147 * d, 51 * d, CornerRadius(19 * d))) }
+            clipPath(glass) {
+                drawRect(C.mirror.glass, Offset(3 * d, 13 * d), Size(144 * d, 38 * d))
+                drawRect(C.sky.band2, Offset(3 * d, 13 * d), Size(144 * d, 20 * d))
+                drawRect(C.scene.groundDay, Offset(3 * d, 33 * d), Size(144 * d, 18 * d))
+                val slotsX = listOf(34f, 73f, 110f)
+                val nA = (adults - 1).coerceIn(0, 3)
+                val adultSlots = listOf(0, 2, 1).take(nA)
+                val childSlots = (0..2).filter { it !in adultSlots }.take(children.coerceAtMost(3 - nA))
+                for (i in adultSlots) {
+                    val cx = slotsX[i]
+                    drawCircle(C.mirror.glass, 6 * d, Offset(cx * d, 31 * d))
+                    drawRoundRectTop(C.mirror.glass, (cx - 12) * d, 38 * d, 24 * d, 12 * d, 10 * d)
                 }
+                for (i in childSlots) {
+                    val cx = slotsX[i]
+                    drawCircle(C.mirror.glass, 4.5f * d, Offset(cx * d, 35.5f * d))
+                    drawRoundRectTop(C.mirror.glass, (cx - 9) * d, 41 * d, 18 * d, 10 * d, 8 * d)
+                }
+                if (dog) {
+                    for ((x, deg) in listOf(126f to 20f, 134f to -20f)) {
+                        rotate(deg, Offset((x + 2) * d, 33 * d)) { drawRoundRect(C.mirror.glass, Offset(x * d, 30 * d), Size(4 * d, 6 * d), CornerRadius(2 * d)) }
+                    }
+                    drawPath(
+                        Path().apply {
+                            addRoundRect(
+                                RoundRect(
+                                    125 * d, 33 * d, 139 * d, 45 * d, topLeftCornerRadius = CornerRadius(6 * d), topRightCornerRadius = CornerRadius(6 * d),
+                                    bottomRightCornerRadius = CornerRadius(4 * d), bottomLeftCornerRadius = CornerRadius(4 * d),
+                                ),
+                            )
+                        },
+                        C.mirror.glass,
+                    )
+                }
+                rotate(25f, Offset(13 * d, 38 * d)) { drawRect(C.mirror.glare, Offset(-17 * d, 3 * d), Size(60 * d, 70 * d)) }
             }
         }
         Txt(caption, T.caption.strong, C.mirror.label, Modifier.padding(top = 3.dp), maxLines = 1)
     }
+}
+
+/** A rect with rounded top corners only (silhouette bodies). */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawRoundRectTop(color: androidx.compose.ui.graphics.Color, x: Float, y: Float, w: Float, h: Float, r: Float) {
+    drawPath(
+        Path().apply { addRoundRect(RoundRect(x, y, x + w, y + h, topLeftCornerRadius = CornerRadius(r), topRightCornerRadius = CornerRadius(r))) },
+        color,
+    )
 }
 
 @Composable
@@ -297,7 +336,7 @@ private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> 
     val routes = (ui.data as? WindshieldData.Routes)?.routes
     val selected = routes?.getOrNull(ui.selected)
     Box(modifier.fillMaxWidth().height(DashHeight).dashboardSurface()) {
-        NaviEntry(ui.origin, onNavigator, Modifier.padding(start = 18.dp, end = 18.dp, top = 22.dp).fillMaxWidth())
+        NaviEntry(ui.origin, ui.data is WindshieldData.NoRoutes, onNavigator, Modifier.padding(start = 18.dp, end = 18.dp, top = 22.dp).fillMaxWidth())
         Row(
             Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = 22.dp, end = 20.dp, bottom = 56.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -330,7 +369,7 @@ private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> 
 }
 
 @Composable
-private fun NaviEntry(origin: String, onClick: () -> Unit, modifier: Modifier) {
+private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, modifier: Modifier) {
     val cd = stringResource(R.string.cd_windshield_navi)
     Column(
         modifier
@@ -352,7 +391,12 @@ private fun NaviEntry(origin: String, onClick: () -> Unit, modifier: Modifier) {
                 .height(48.dp)
                 .clip(RoundedCornerShape(DesignTokens.radius.r10))
                 .background(C.navi.field)
-                .border(DesignTokens.stroke.w1, C.navi.fieldBorder, RoundedCornerShape(DesignTokens.radius.r10))
+                // 5.1 §4.7 (S-09): no routes nearby → the field is the way on, yellow 2 dp border (static frame).
+                .border(
+                    if (highlight) DesignTokens.stroke.w2 else DesignTokens.stroke.w1,
+                    if (highlight) C.accent.yellow else C.navi.fieldBorder,
+                    RoundedCornerShape(DesignTokens.radius.r10),
+                )
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
