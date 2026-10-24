@@ -1591,11 +1591,11 @@ class VerstFlow(
         cityInterests += i
     }
 
-    fun setCityPace(p: String) {
+    fun pickCityPace(p: String) {
         cityPace = p
     }
 
-    fun setCityBudget(rub: Int?) {
+    fun pickCityBudget(rub: Int?) {
         cityBudget = rub
     }
 
