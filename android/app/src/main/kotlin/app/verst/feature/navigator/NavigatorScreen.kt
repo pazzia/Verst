@@ -59,9 +59,8 @@ import app.verst.core.ui.components.dashboardSurface
 import app.verst.core.ui.components.naviPanel
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.ScreenRoot
-
-private val C = DesignTokens.color
-private val T = DesignTokens.type
+import app.verst.core.ui.theme.DesignTokens.color as C
+import app.verst.core.ui.theme.DesignTokens.type as T
 
 /** Straight-line distance under which no car trip is offered (5.2 §4.4). */
 private const val TOO_SHORT_KM = 15

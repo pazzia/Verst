@@ -49,9 +49,9 @@ import app.verst.feature.common.ScreenRoot
 import app.verst.feature.common.crewShort
 import app.verst.feature.common.genitive
 import app.verst.nav.WindshieldData
+import app.verst.core.ui.theme.DesignTokens.color as C
+import app.verst.core.ui.theme.DesignTokens.type as T
 
-private val C = DesignTokens.color
-private val T = DesignTokens.type
 private val DashHeight = 324.dp
 
 /** Everything the Windshield draws (stateless; the caller maps `VerstFlow` into it). */

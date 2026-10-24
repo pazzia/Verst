@@ -33,9 +33,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.verst.core.ui.R
 import app.verst.core.ui.theme.DesignTokens
-
-private val C = DesignTokens.color
-private val T = DesignTokens.type
+import app.verst.core.ui.theme.DesignTokens.color as C
+import app.verst.core.ui.theme.DesignTokens.type as T
 
 /** `BasicText` with a token style and colour (there is no Material in this app). */
 @Composable

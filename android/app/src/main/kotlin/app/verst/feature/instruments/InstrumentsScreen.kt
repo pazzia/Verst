@@ -54,9 +54,8 @@ import app.verst.feature.common.genitive
 import app.verst.nav.Seat
 import kotlin.math.cos
 import kotlin.math.sin
-
-private val C = DesignTokens.color
-private val T = DesignTokens.type
+import app.verst.core.ui.theme.DesignTokens.color as C
+import app.verst.core.ui.theme.DesignTokens.type as T
 
 data class InstrumentsUi(
     val title: String,

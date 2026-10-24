@@ -52,9 +52,8 @@ import app.verst.feature.common.days
 import app.verst.feature.common.rub
 import app.verst.R as AppR
 import kotlin.math.roundToInt
-
-private val C = DesignTokens.color
-private val T = DesignTokens.type
+import app.verst.core.ui.theme.DesignTokens.color as C
+import app.verst.core.ui.theme.DesignTokens.type as T
 
 private sealed interface Item {
     val key: String

@@ -19,8 +19,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.verst.core.ui.theme.DesignTokens
-
-private val C = DesignTokens.color
+import app.verst.core.ui.theme.DesignTokens.color as C
 
 /** Sky bands as (top dp, height dp, colour) in the 390-wide reference frame. */
 data class Band(val top: Float, val height: Float, val color: Color)

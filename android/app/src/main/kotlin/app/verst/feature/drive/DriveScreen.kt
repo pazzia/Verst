@@ -32,9 +32,9 @@ import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.ScreenRoot
 import app.verst.nav.DriveAction
 import app.verst.nav.DriveUi
+import app.verst.core.ui.theme.DesignTokens.color as C
+import app.verst.core.ui.theme.DesignTokens.type as T
 
-private val C = DesignTokens.color
-private val T = DesignTokens.type
 private val DashHeight = 304.dp
 
 /** User-facing message for an engine error code (5.4 §4.4, M§9). */
