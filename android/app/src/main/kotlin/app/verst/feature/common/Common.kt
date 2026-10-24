@@ -116,4 +116,6 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     is app.verst.nav.Toast.SavedNearLimit -> stringResource(R.string.common_saved_near_limit, t.count)
     app.verst.nav.Toast.StorageFull -> stringResource(R.string.common_storage_full_title) + ". " + stringResource(R.string.common_storage_full_body)
     app.verst.nav.Toast.EngineFailed -> stringResource(R.string.waybill_sync_failed)
+    app.verst.nav.Toast.NeedInternet -> stringResource(R.string.common_need_internet)
+    app.verst.nav.Toast.TripDeleted -> stringResource(R.string.trips_deleted)
 }

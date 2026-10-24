@@ -77,6 +77,9 @@ data class GeoPoint(val label: String, val lat: Double, val lon: Double)
 object EngineArgs {
     fun reservePatch(on: Boolean): String = buildJsonObject { put("reserveOn", on) }.toString()
 
+    fun hotelPatch(stopId: String, placeId: String): String =
+        buildJsonObject { put("hotelChoice", buildJsonObject { put("stopId", stopId); put("placeId", placeId) }) }.toString()
+
     fun points(points: List<GeoPoint>): String =
         kotlinx.serialization.json.JsonArray(points.map { p -> buildJsonObject { put("lat", p.lat); put("lon", p.lon) } }).toString()
 }

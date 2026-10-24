@@ -12,7 +12,24 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import app.verst.core.ui.components.LocalReducedMotion
+import app.verst.core.ui.components.reducedMotion
+import app.verst.feature.common.NaviDialog
+import app.verst.feature.common.PlateToast
+import app.verst.feature.common.toastText
+import app.verst.feature.debug.DebugScreen
+import app.verst.feature.exit.ExitActions
+import app.verst.feature.exit.ExitScreen
+import app.verst.feature.exit.ExitUi
+import app.verst.core.ui.R as UiR
 import app.verst.core.model.RuFormat
 import app.verst.core.model.SavedTrips
 import app.verst.core.model.dto.StopDto
@@ -66,7 +83,42 @@ private fun share(context: Context, text: String) {
 @Composable
 fun VerstRoot(flow: VerstFlow) {
     val context = LocalContext.current
-    BackHandler(enabled = flow.stack.size > 1 || flow.replace != null || flow.tripsSheet) { flow.back() }
+    val reduced = remember { reducedMotion(context) }
+    CompositionLocalProvider(LocalReducedMotion provides reduced) {
+        Box(Modifier.fillMaxSize()) {
+            Screens(flow, context)
+            Overlays(flow)
+        }
+    }
+}
+
+/** Dialogs and the Windshield toast that are not owned by one screen (D-1 delete, 5.5 §4 limit). */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow) {
+    val t = flow.toast
+    if (flow.top == Route.Windshield && t != null) {
+        PlateToast(toastText(t), bottom = 24.dp, action = if (flow.canUndoDelete) stringResource(UiR.string.common_undo) else null, onAction = flow::undoDelete)
+    }
+    flow.deleteAsk?.let { d ->
+        NaviDialog(
+            stringResource(UiR.string.trips_delete_title, d.title), stringResource(UiR.string.trips_delete_body),
+            stringResource(UiR.string.trips_delete_yes), stringResource(UiR.string.trips_delete_no), "delete",
+            flow::confirmDelete, flow::cancelDelete,
+        )
+    }
+    if (flow.limitDialog) {
+        NaviDialog(
+            stringResource(UiR.string.common_storage_full_title), stringResource(UiR.string.common_storage_full_body),
+            stringResource(UiR.string.common_storage_full_open), stringResource(UiR.string.common_cancel), "limit",
+            flow::limitToTrips, flow::dismissLimit,
+        )
+    }
+}
+
+@Composable
+private fun Screens(flow: VerstFlow, context: Context) {
+    val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog
+    BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
             WindshieldUi(
@@ -83,6 +135,7 @@ fun VerstRoot(flow: VerstFlow) {
                     flow.back()
                 }
                 override fun pick(id: String) = flow.openSaved(id)
+                override fun delete(id: String) = flow.askDelete(id)
             },
         )
         Route.Navigator -> NavigatorScreen(
@@ -148,7 +201,7 @@ fun VerstRoot(flow: VerstFlow) {
                 LaunchedEffect(Unit) { flow.back() }
             } else {
                 RoadScreen(
-                    RoadUi(r.trip, flow.resultBearing, flow.openedFromSaved, flow.savedCurrent, flow.replace, flow.toast, flow.canUndo),
+                    RoadUi(r.trip, flow.resultBearing, flow.openedFromSaved, flow.savedCurrent, flow.replace, flow.toast, flow.canUndo, flow.booked.toSet(), r.townPrepRu),
                     object : RoadActions {
                         override fun back() {
                             flow.back()
@@ -161,10 +214,37 @@ fun VerstRoot(flow: VerstFlow) {
                         override fun confirmReplace() = flow.confirmReplace()
                         override fun closeReplace() = flow.closeReplace()
                         override fun undo() = flow.undo()
+                        override fun hotel(stopId: String) = flow.openExit(stopId)
                     },
                 )
             }
         }
+        Route.Exit -> {
+            val r = flow.result
+            val stop = r?.trip?.daysList?.flatMap { it.stops }?.firstOrNull { it.id == flow.exitStopId }
+            if (r == null || stop == null) {
+                LaunchedEffect(Unit) { flow.back() }
+            } else {
+                val nights = r.trip.daysList.flatMap { it.stops }.filter { it.kind == "overnight" }
+                ExitScreen(
+                    ExitUi(
+                        r.trip, stop, nights.indexOfFirst { it.id == stop.id } + 1, nights.size, stop.id in flow.booked,
+                        !flow.connectivity.online, r.townPrepRu[stop.townId] ?: stop.name, flow.partnerOpen, flow.bookedDialog, flow.toast,
+                    ),
+                    object : ExitActions {
+                        override fun back() {
+                            flow.back()
+                        }
+                        override fun select(placeId: String) = flow.selectHotel(stop.id, placeId)
+                        override fun book() = flow.book()
+                        override fun closePartner() = flow.closePartner()
+                        override fun answer(booked: Boolean) = flow.answerBooked(booked)
+                        override fun needInternet() = flow.needInternet()
+                    },
+                )
+            }
+        }
+        Route.Debug -> DebugScreen(flow)
         Route.Waybill -> {
             val r = flow.result
             if (r == null) {
@@ -173,7 +253,7 @@ fun VerstRoot(flow: VerstFlow) {
                 WaybillScreen(
                     WaybillUi(
                         r.trip, flow.waybillNumber, flow.savedCurrent, flow.expandedLine, flow.costBusy,
-                        r.pricesMonthRu, r.pricesYear, flow.toast,
+                        r.pricesMonthRu, r.pricesYear, flow.toast, stamp = remember(flow.tripSession) { flow.stampOnce() },
                     ),
                     object : WaybillActions {
                         override fun back() {

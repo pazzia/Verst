@@ -1,6 +1,10 @@
 package app.verst.feature.waybill
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,6 +28,9 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +56,7 @@ import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.GlyphIcon
+import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.PlateToast
@@ -69,6 +77,8 @@ data class WaybillUi(
     val monthRu: String? = null,
     val year: String? = null,
     val toast: Toast? = null,
+    /** Play the stamp (first opening of this trip); otherwise it shows its final frame (5.6 §3.1). */
+    val stamp: Boolean = false,
 )
 
 interface WaybillActions {
@@ -86,7 +96,7 @@ private const val NONE = "—"
 /**
  * 5.6 Waybill, simplified (DEV-SLICE-2): the paper sheet with the engine's cost lines and formulas, one line
  * expanded at a time, the reserve switch re-costed by the engine (`patch_cost`), issued / left against the
- * budget. Not in this slice: the stamp and its animation, the entry slide, the Pro plate and sheet.
+ * budget, the stamp (once per trip), the entry slide and value cross-fades. Not in this slice: the Pro plate and sheet.
  */
 @Composable
 fun WaybillScreen(ui: WaybillUi, a: WaybillActions) {
@@ -96,7 +106,14 @@ fun WaybillScreen(ui: WaybillUi, a: WaybillActions) {
                 val back = stringResource(R.string.common_back_road)
                 BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), a::back, Modifier.padding(top = 8.dp).testTag("waybill.back"))
                 Spacer(Modifier.height(18.dp))
-                Sheet(ui, a)
+                // motion.sheetSlide: 40 dp up + fade in over 600 ms on entry (at rest under reduced motion).
+                val reduced = LocalReducedMotion.current
+                val slide = remember { Animatable(if (reduced) 1f else 0f) }
+                LaunchedEffect(Unit) { if (!reduced) slide.animateTo(1f, tween(DesignTokens.motion.sheetSlide.durationMs, easing = DesignTokens.motion.sheetSlide.easing)) }
+                Box(Modifier.graphicsLayer { translationY = DesignTokens.motion.sheetSlide.fromDyDp.toPx() * (1 - slide.value); alpha = slide.value }) {
+                    Sheet(ui, a)
+                }
+                Spacer(Modifier.height(30.dp)) // the stamp hangs 30 dp below the sheet
                 Spacer(Modifier.height(16.dp))
             }
             Row(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 20.dp, top = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -144,6 +161,7 @@ private fun Sheet(ui: WaybillUi, a: WaybillActions) {
                 )
             }
         }
+        Stamp(ui.stamp, Modifier.align(Alignment.BottomEnd).offset(x = (-12).dp, y = 30.dp))
         // Clipboard clip (decorative), centred on the top edge.
         Box(
             Modifier.align(Alignment.TopCenter).offset(y = (-14).dp).size(120.dp, 30.dp)
@@ -284,7 +302,7 @@ private fun ReserveRow(line: CostLineDto, on: Boolean, busy: Boolean, onToggle: 
                 }
             }
         },
-        right = { Txt(sum, T.hand.md, C.paper.ink, align = TextAlign.End, maxLines = 1, modifier = Modifier.testTag("waybill.reserve.sum")) },
+        right = { Fade(sum) { Txt(it, T.hand.md, C.paper.ink, align = TextAlign.End, maxLines = 1, modifier = Modifier.testTag("waybill.reserve.sum")) } },
     )
 }
 
@@ -294,7 +312,7 @@ private fun TotalRow(total: Int) {
     val cd = stringResource(R.string.cd_waybill_total, RuFormat.thousands(total))
     TableRow(0.dp, TotalCol, Modifier.semantics(mergeDescendants = true) { heading(); contentDescription = cd }, left = {
         Txt(stringResource(R.string.waybill_total), T.paper.total, C.paper.text, Modifier.padding(6.dp))
-    }, right = { Txt(value, T.hand.xl, C.paper.ink, Modifier.padding(vertical = 4.dp).testTag("waybill.total"), align = TextAlign.End, maxLines = 1) })
+    }, right = { Fade(value) { Txt(it, T.hand.xl, C.paper.ink, Modifier.padding(vertical = 4.dp).testTag("waybill.total"), align = TextAlign.End, maxLines = 1) } })
 }
 
 @Composable
@@ -312,7 +330,7 @@ private fun IssuedLeft(budget: Int?, remaining: Int?, over: Boolean) {
                 isOver -> RuFormat.thousands(kotlin.math.abs(remaining))
                 else -> stringResource(R.string.common_estimate_rub, RuFormat.thousands(remaining))
             }
-            Txt(value, T.hand.md, if (isOver) C.paper.inkRed else C.paper.ink, Modifier.fillMaxWidth().underline(C.paper.lines).testTag("waybill.left"))
+            Fade(value) { Txt(it, T.hand.md, if (isOver) C.paper.inkRed else C.paper.ink, Modifier.fillMaxWidth().underline(C.paper.lines).testTag("waybill.left")) }
         }
     }
 }
@@ -345,4 +363,59 @@ private fun YellowButton(text: String, onClick: () -> Unit, modifier: Modifier) 
             .clickable(role = Role.Button, onClick = onClick).padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) { Txt(text, T.cta.sm, C.text.onLight, maxLines = 1, align = TextAlign.Center) }
+}
+
+
+/** 5.6 §3: changed handwritten values cross-fade 200 ms (instant under reduced motion). */
+@Composable
+private fun Fade(value: String, content: @Composable (String) -> Unit) {
+    if (LocalReducedMotion.current) content(value) else Crossfade(value, animationSpec = tween(200, easing = DesignTokens.motion.easing.standard), label = "value") { content(it) }
+}
+
+/**
+ * components §11.1 stamp: 94 dp circle, ring 3 + inner ring 1, «ВЕРСТА / В ПУТЬ / ГОТОВЫ», rotated −14°, α 0.85.
+ * `motion.stamp` once per trip: after 1000 ms, scale 2.4 → 0.92 (300 ms) → 1 (500 ms), α 0 → 0.9 → 0.85.
+ */
+@Composable
+private fun Stamp(play: Boolean, modifier: Modifier) {
+    val m = DesignTokens.motion.stamp
+    val reduced = LocalReducedMotion.current
+    val p = remember { Animatable(if (play && !reduced) 0f else 1f) }
+    LaunchedEffect(play) {
+        if (play && !reduced) {
+            p.animateTo(1f, keyframes {
+                durationMillis = m.durationMs
+                delayMillis = m.delayMs
+                0f at 0 using m.easing
+                m.midFraction at (m.durationMs * m.midFraction).toInt() using m.easing
+            })
+        }
+    }
+    Box(
+        modifier
+            .size(94.dp)
+            .graphicsLayer {
+                val v = p.value
+                val scale = if (v <= m.midFraction) m.fromScale + (m.midScale - m.fromScale) * (v / m.midFraction)
+                else m.midScale + (m.toScale - m.midScale) * ((v - m.midFraction) / (1 - m.midFraction))
+                scaleX = scale
+                scaleY = scale
+                alpha = if (v <= m.midFraction) m.midAlpha * (v / m.midFraction) else m.midAlpha + (m.toAlpha - m.midAlpha) * ((v - m.midFraction) / (1 - m.midFraction))
+                rotationZ = m.rotationDeg
+            }
+            .clearAndSetSemantics {}
+            .drawBehind {
+                val d = 1.dp.toPx()
+                drawCircle(C.paper.stamp, size.minDimension / 2 - 1.5f * d, style = androidx.compose.ui.graphics.drawscope.Stroke(3 * d))
+                drawCircle(C.paper.stamp, size.minDimension / 2 - 6.5f * d, style = androidx.compose.ui.graphics.drawscope.Stroke(1 * d))
+            }
+            .testTag("waybill.stamp"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Txt(stringResource(R.string.waybill_stamp_top), T.stamp.sm, C.paper.stamp, maxLines = 1)
+            Txt(stringResource(R.string.waybill_stamp_mid), T.stamp.lg, C.paper.stamp, maxLines = 1)
+            Txt(stringResource(R.string.waybill_stamp_bottom), T.stamp.sm, C.paper.stamp, maxLines = 1)
+        }
+    }
 }

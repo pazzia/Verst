@@ -34,7 +34,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -66,6 +69,7 @@ import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
 private val DashHeight = 324.dp
+private const val SavedTripsWarn = app.verst.core.model.SavedTrips.WARN_FROM
 
 /** Everything the Windshield draws (stateless; the caller maps `VerstFlow` into it). */
 data class WindshieldUi(
@@ -85,12 +89,14 @@ interface TripsActions {
     fun open()
     fun close()
     fun pick(id: String)
+    fun delete(id: String)
 }
 
 private val NoTrips = object : TripsActions {
     override fun open() {}
     override fun close() {}
     override fun pick(id: String) {}
+    override fun delete(id: String) {}
 }
 
 /** 5.1 Windshield, simplified: ready routes on the overhead sign, the navigator entry, the start button. */
@@ -122,16 +128,19 @@ private fun androidx.compose.foundation.layout.BoxScope.TripsSheet(trips: List<S
         val n = trips.size
         Txt(
             stringResource(R.string.trips_subtitle, n, pluralStringResource(R.plurals.plural_saved, n)),
-            T.body.sm, C.text.secondary, Modifier.padding(bottom = 10.dp),
+            T.body.sm, C.text.secondary, Modifier.padding(bottom = if (n >= SavedTripsWarn) 4.dp else 10.dp),
         )
+        if (n >= SavedTripsWarn) Txt(stringResource(R.string.trips_near_limit, n), T.body.sm, C.accent.redText, Modifier.padding(bottom = 10.dp))
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            trips.forEachIndexed { i, t -> TripRow(t, i) { a.pick(t.id) } }
+            trips.forEachIndexed { i, t -> TripRow(t, i, { a.delete(t.id) }) { a.pick(t.id) } }
         }
     }
 }
 
 @Composable
-private fun TripRow(t: SavedTripDto, index: Int, onClick: () -> Unit) {
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+private fun TripRow(t: SavedTripDto, index: Int, onDelete: () -> Unit, onClick: () -> Unit) {
+    val deleteLabel = stringResource(R.string.trips_delete_yes)
     val daysWord = pluralStringResource(R.plurals.plural_day, t.days)
     // Date as «31.10»: the copy deck has no genitive month names yet (D-1 shows «7–9 ноября»).
     val date = t.startAt?.takeIf { it.length >= 10 }?.let { "${it.substring(8, 10)}.${it.substring(5, 7)}" } ?: ""
@@ -144,8 +153,12 @@ private fun TripRow(t: SavedTripDto, index: Int, onClick: () -> Unit) {
             .defaultMinSize(minHeight = 64.dp)
             .clip(RoundedCornerShape(DesignTokens.radius.r10))
             .background(C.dash.controlAlt)
-            .clickable(role = Role.Button, onClick = onClick)
-            .semantics(mergeDescendants = true) { contentDescription = cd }
+            // D-1: tap opens, long-press (or the TalkBack action «Удалить») asks to delete.
+            .combinedClickable(role = Role.Button, onLongClick = onDelete, onClick = onClick)
+            .semantics(mergeDescendants = true) {
+                contentDescription = cd
+                customActions = listOf(CustomAccessibilityAction(deleteLabel) { onDelete(); true })
+            }
             .testTag("trips.row.$index")
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,

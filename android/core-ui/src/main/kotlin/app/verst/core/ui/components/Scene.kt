@@ -56,13 +56,22 @@ data class RoadSpec(
 val WindshieldRoad = RoadSpec(300f, 240f, 210f, 76f, 230f, 1000f, 6f, 8f)
 val DriveRoad = RoadSpec(300f, 260f, 210f, 76f, 240f, 1000f, 6f, 8f)
 val NavigatorRoad = RoadSpec(104f, 46f, 120f, 80f, 160f, 600f, 4f, 6f)
+val ExitRoad = RoadSpec(240f, 190f, 200f, 76f, 230f, 900f, 6f, 8f)
 
 /**
  * components §9.1 closed form: s = P / (P + d·sinθ), x' = cx + x·s, y' = top + (H − d·cosθ)·s; every element is
  * a quad of 4 projected corners (asphalt, both edge lines, lane dashes measured from the far end, phase 0),
  * clipped at the container top. [kx] / [ky] are px per reference dp horizontally / vertically.
  */
-fun DrawScope.drawRoad3D(r: RoadSpec, kx: Float, ky: Float, phase: Float = 0f) {
+fun DrawScope.drawRoad3D(
+    r: RoadSpec,
+    kx: Float,
+    ky: Float,
+    phase: Float = 0f,
+    asphalt: Color = C.scene.road,
+    edges: Color = C.scene.roadEdge,
+    laneColor: Color = C.scene.roadEdge,
+) {
     val th = Math.toRadians(r.thetaDeg.toDouble())
     val sinT = kotlin.math.sin(th).toFloat()
     val cosT = kotlin.math.cos(th).toFloat()
@@ -80,13 +89,15 @@ fun DrawScope.drawRoad3D(r: RoadSpec, kx: Float, ky: Float, phase: Float = 0f) {
     }
     clipRect(top = r.top * ky, bottom = (r.top + r.h) * ky) {
         val hw = r.w / 2
-        quad(-hw + r.edge, hw - r.edge, 0f, r.l, C.scene.road)
-        quad(-hw, -hw + r.edge, 0f, r.l, C.scene.roadEdge)
-        quad(hw - r.edge, hw, 0f, r.l, C.scene.roadEdge)
-        var u = phase
+        quad(-hw + r.edge, hw - r.edge, 0f, r.l, asphalt)
+        quad(-hw, -hw + r.edge, 0f, r.l, edges)
+        quad(hw - r.edge, hw, 0f, r.l, edges)
+        // Dash k covers u ∈ [phase + k·period − period, …]: start one period early so the far end is never empty.
+        var u = (phase % r.period) - r.period
         while (u < r.l) {
+            val u0 = maxOf(u, 0f)
             val u1 = minOf(u + r.dash, r.l)
-            quad(-r.lane / 2, r.lane / 2, r.l - u, r.l - u1, C.scene.roadEdge)
+            if (u1 > u0) quad(-r.lane / 2, r.lane / 2, r.l - u0, r.l - u1, laneColor)
             u += r.period
         }
     }
@@ -109,8 +120,14 @@ fun WindshieldScene(
     road: RoadSpec = WindshieldRoad,
     sunCenterY: Float = 300f,
     gantry: Boolean = false,
+    laneCycleMs: Int = DesignTokens.motion.lane.idle.durationMs,
+    posts: PostSpec? = WindshieldPosts,
+    overlay: Boolean = false,
 ) {
+    val clock = sceneClock(overlay)
+    val reduced = LocalReducedMotion.current
     Canvas(modifier.fillMaxWidth().height(height).clearAndSetSemantics {}) {
+        val t = clock.value
         val k = size.width / 390.dp.toPx()
         val dp = 1.dp.toPx()
         val dy = dp * minOf(1f, size.height / (refHeight * dp))
@@ -119,12 +136,78 @@ fun WindshieldScene(
         drawCircle(C.scene.sun, radius = 34f * dy, center = Offset((sunX + 34f) * k * dp, sunCenterY * dy))
         if (hills) drawHills(k * dp, dy)
         drawRect(C.scene.groundDay, Offset(0f, horizon), Size(size.width, size.height - horizon))
-        drawRoad3D(road, k * dp, dy)
+        drawRoad3D(road, k * dp, dy, phase = Phases.lane(t, laneCycleMs))
+        if (posts != null && !reduced) drawPosts(posts, t, k * dp, dy)
         if (gantry) {
             // §9.3: two legs 8 × 100 at x 34 and W − 42, y 286, under the sign.
             drawRect(C.interior.pole, Offset(34f * dp, 286f * dy), Size(8f * dp, 100f * dy))
             drawRect(C.interior.pole, Offset(size.width - 42f * dp, 286f * dy), Size(8f * dp, 100f * dy))
         }
+        drawInterior(dp, k)
+    }
+}
+
+/** §9.2 roadside posts: start boxes, travel, scale and timing (two posts, mirrored, offset by half a cycle). */
+data class PostSpec(
+    val rightX: Float, val leftX: Float, val y: Float, val dx: Float, val dy: Float,
+    val fromScale: Float, val toScale: Float, val durationMs: Int, val offsetMs: Int, val easing: androidx.compose.animation.core.Easing,
+)
+
+val WindshieldPosts = DesignTokens.motion.post.idle.let {
+    PostSpec(236f, 148f, 302f, it.dxDp.value, it.dyDp.value, it.fromScale, it.toScale, it.durationMs, it.offsetMs, it.easing)
+}
+val DrivePosts = DesignTokens.motion.post.drive.let {
+    PostSpec(212f, 172f, 300f, it.dxDp.value, it.dyDp.value, it.fromScale, it.toScale, it.durationMs, it.offsetMs, it.easing)
+}
+
+private fun DrawScope.drawPosts(p: PostSpec, t: Long, kx: Float, ky: Float) {
+    for ((x0, sign, off) in listOf(Triple(p.rightX, 1f, 0), Triple(p.leftX, -1f, p.offsetMs))) {
+        val prog = Phases.cycle(t, p.durationMs, off)
+        val e = p.easing.transform(prog)
+        val alpha = p.easing.transform(minOf(1f, prog / 0.1f))
+        val sc = p.fromScale + (p.toScale - p.fromScale) * e
+        val cx = (x0 + 3f + sign * p.dx * e) * kx
+        val cy = (p.y + 9f + p.dy * e) * ky
+        val w = 6f * sc * kx
+        val h = 18f * sc * ky
+        drawRect(C.scene.roadEdge.copy(alpha = alpha), Offset(cx - w / 2, cy - h / 2), Size(w, h))
+        drawRect(C.dash.base.copy(alpha = alpha), Offset(cx - w / 2, cy - h / 2), Size(w, 5f * sc * ky))
+    }
+}
+
+/**
+ * 5.7 night scene (§2.1): night sky and two bands, twinkling stars, crescent moon, town lights, night ground and
+ * road (`lane.exit`), headlight, sign pole, liner and pillars. Reference frame 390 × 430, y scaled on short windows.
+ */
+@Composable
+fun ExitScene(height: Dp, modifier: Modifier = Modifier, overlay: Boolean = false) {
+    val clock = sceneClock(overlay)
+    val reduced = LocalReducedMotion.current
+    Canvas(modifier.fillMaxWidth().height(height).clearAndSetSemantics {}) {
+        val t = clock.value
+        val k = size.width / 390.dp.toPx()
+        val dp = 1.dp.toPx()
+        val dy = dp * minOf(1f, size.height / (430f * dp))
+        val kx = k * dp
+        drawRect(C.sky.night, Offset.Zero, Size(size.width, 150f * dy + 1f))
+        drawRect(C.sky.band1, Offset(0f, 150f * dy), Size(size.width, 60f * dy + 1f))
+        drawRect(C.sky.band2, Offset(0f, 210f * dy), Size(size.width, 30f * dy + 1f))
+        for ((i, st) in listOf(Triple(60f, 40f, 3f), Triple(150f, 80f, 2f), Triple(300f, 30f, 3f)).withIndex()) {
+            val a = if (reduced) 1f else Phases.twinkle(t, i * DesignTokens.motion.twinkle.staggerMs)
+            drawCircle(C.scene.star.copy(alpha = a), st.third / 2 * dp, Offset((st.first + st.third / 2) * kx, (st.second + st.third / 2) * dy))
+        }
+        drawCircle(C.scene.moon, 20f * dp, Offset(90f * kx, 66f * dy))
+        drawCircle(C.sky.night, 20f * dp, Offset(102f * kx, 60f * dy))
+        for ((x, d) in listOf(210f to 3f, 223f to 2f, 235f to 3f, 248f to 2f, 260f to 3f)) {
+            drawCircle(C.scene.sun, d / 2 * dp, Offset((x + d / 2) * kx, (232f + d / 2) * dy))
+        }
+        drawRect(C.scene.groundNight, Offset(0f, 240f * dy), Size(size.width, size.height - 240f * dy))
+        drawRoad3D(ExitRoad, kx, dy, Phases.lane(t, DesignTokens.motion.lane.exit.durationMs), C.scene.roadNight, C.scene.roadEdgeNight, C.scene.roadEdge)
+        drawPath(
+            Path().apply { moveTo(175f * kx, 300f * dy); lineTo(215f * kx, 300f * dy); lineTo(320f * kx, 430f * dy); lineTo(70f * kx, 430f * dy); close() },
+            C.scene.headlight,
+        )
+        drawRect(C.interior.pole, Offset(314f * kx, 196f * dy), Size(6f * dp, 100f * dy))
         drawInterior(dp, k)
     }
 }
@@ -169,15 +252,18 @@ fun SkyStrip(
     bands: List<Band> = RoadSky,
     groundTop: Float? = null,
     road: RoadSpec? = null,
+    laneCycleMs: Int = DesignTokens.motion.lane.navi.durationMs,
     content: @Composable BoxScope.() -> Unit = {},
 ) {
+    val clock = sceneClock()
     Box(
         modifier.fillMaxWidth().height(height).drawBehind {
             val dp = 1.dp.toPx()
+            val t = clock.value
             for (b in bands) drawRect(b.color, Offset(0f, b.top * dp), Size(size.width, b.height * dp + 1f))
             if (groundTop != null) {
                 drawRect(C.scene.groundDay, Offset(0f, groundTop * dp), Size(size.width, size.height - groundTop * dp))
-                if (road != null) drawRoad3D(road, size.width / 390f, dp)
+                if (road != null) drawRoad3D(road, size.width / 390f, dp, Phases.lane(t, laneCycleMs))
             }
             drawPath(
                 Path().apply {

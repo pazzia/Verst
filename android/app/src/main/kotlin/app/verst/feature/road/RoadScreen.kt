@@ -80,6 +80,10 @@ data class RoadUi(
     val replace: ReplaceUi? = null,
     val toast: Toast? = null,
     val canUndo: Boolean = false,
+    /** Overnight stop ids marked as booked (D-10) → «Забронировано ✓». */
+    val booked: Set<String> = emptySet(),
+    /** townId → prepositional name (engine `townPrepRu`) for «Выбрать отель в Ярославле». */
+    val townPrep: Map<String, String> = emptyMap(),
 )
 
 interface RoadActions {
@@ -92,6 +96,8 @@ interface RoadActions {
     fun confirmReplace()
     fun closeReplace()
     fun undo()
+    /** «Выбрать отель →» on a night row → 5.7 for that night. */
+    fun hotel(stopId: String)
 }
 
 /** 5.5 Road ahead: the day-by-day signs of the plan, «заменить» (D-6), save/share, the Waybill footer. */
@@ -125,7 +131,7 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                         Column(Modifier.fillMaxWidth().roadSection()) {
                             trip.daysList.forEachIndexed { di, d ->
                                 DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0)
-                                d.stops.forEachIndexed { si, st -> StopRow(st, di == 0 && si == 0) { a.replace(st) } }
+                                d.stops.forEachIndexed { si, st -> StopRow(st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name, { a.hotel(st.id) }) { a.replace(st) } }
                             }
                             Spacer(Modifier.height(24.dp))
                         }
@@ -325,7 +331,7 @@ private fun DayHeader(day: DayDto, home: Boolean, first: Boolean) {
 }
 
 @Composable
-private fun StopRow(s: StopDto, first: Boolean, onReplace: () -> Unit) {
+private fun StopRow(s: StopDto, first: Boolean, booked: Boolean, townPrep: String, onHotel: () -> Unit, onReplace: () -> Unit) {
     val line1 = if (first || s.kind == "start") stringResource(R.string.road_start)
     else stringResource(R.string.road_ahead_km, RuFormat.thousands(s.kmFromPrev))
     val unverified = if (!s.verified) stringResource(R.string.common_join_dot) + stringResource(R.string.common_unverified) else ""
@@ -356,10 +362,12 @@ private fun StopRow(s: StopDto, first: Boolean, onReplace: () -> Unit) {
             Txt(name, T.title.md, C.text.primary, maxLines = 2)
             if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note)
             val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
-            if (cost != null || canReplace) {
+            val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
+            if (cost != null || canReplace || hotel) {
                 Row(Modifier.fillMaxWidth().padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                     Txt(cost ?: "", T.body.mdStrong, C.accent.yellow, Modifier.weight(1f))
-                    if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
+                    if (hotel) HotelButton(booked, stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
+                    else if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
                 }
             }
         }
@@ -378,6 +386,21 @@ private fun SwapButton(cd: String, tag: String, onClick: () -> Unit) {
             Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 10.dp),
             contentAlignment = Alignment.Center,
         ) { Txt(stringResource(R.string.road_swap), T.body.smStrong, C.text.secondary, maxLines = 1) }
+    }
+}
+
+/** components §2.6 `HotelButton` «Выбрать отель →» (blue), booked «Забронировано ✓». */
+@Composable
+private fun HotelButton(booked: Boolean, cd: String, tag: String, onClick: () -> Unit) {
+    Box(
+        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = cd }.testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier.height(36.dp).clip(RoundedCornerShape(DesignTokens.radius.r8)).background(C.sign.blue).padding(horizontal = 12.dp),
+            contentAlignment = Alignment.Center,
+        ) { Txt(stringResource(if (booked) R.string.road_booked else R.string.road_pick_hotel), T.body.mdStrong, C.text.primary, maxLines = 1) }
     }
 }
 

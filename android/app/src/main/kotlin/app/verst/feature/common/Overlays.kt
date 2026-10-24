@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,6 +39,7 @@ import app.verst.core.ui.R
 import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.GlyphIcon
 import app.verst.core.ui.components.Txt
+import app.verst.core.ui.components.naviPanel
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
@@ -127,4 +129,38 @@ fun IconButton44(glyph: Glyph, tint: androidx.compose.ui.graphics.Color, cd: Str
 @Composable
 fun FullOverlay(content: @Composable BoxScope.() -> Unit) {
     Box(Modifier.fillMaxSize(), content = content)
+}
+
+/** components §16 `NaviDialog`: centred card (window − 48), navi look, title, body, primary + secondary. */
+@Composable
+fun BoxScope.NaviDialog(
+    title: String,
+    body: String,
+    primary: String,
+    secondary: String,
+    tag: String,
+    onPrimary: () -> Unit,
+    onSecondary: () -> Unit,
+) {
+    Box(Modifier.matchParentSize().background(C.overlay.scrim).clickable(remember { MutableInteractionSource() }, indication = null, onClick = onSecondary))
+    Column(
+        Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp).naviPanel().padding(6.dp).padding(18.dp)
+            .clickable(remember { MutableInteractionSource() }, indication = null) {}
+            .semantics { paneTitle = title }.testTag(tag),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Txt(title, T.title.lg, C.text.primary)
+        Txt(body, T.body.md, C.navi.text)
+        Box(
+            Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.accent.yellow)
+                .clickable(role = Role.Button, onClick = onPrimary).testTag("$tag.yes"),
+            contentAlignment = Alignment.Center,
+        ) { Txt(primary, T.cta.sm, C.text.onLight, maxLines = 1) }
+        Box(
+            Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12))
+                .border(DesignTokens.stroke.w1, C.dash.outlineDashed, RoundedCornerShape(DesignTokens.radius.r12))
+                .clickable(role = Role.Button, onClick = onSecondary).testTag("$tag.no"),
+            contentAlignment = Alignment.Center,
+        ) { Txt(secondary, T.button.md, C.text.secondary, maxLines = 1) }
+    }
 }

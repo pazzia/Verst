@@ -58,6 +58,22 @@ data class StopDto(
     val alternatives: List<AlternativeDto> = emptyList(),
     /** Engine copy «Других вариантов…» / «Нашли только один вариант…» when < 2 alternatives. */
     val alternativesNote: String? = null,
+    /** Overnight stops: up to 3 hotels (the engine's choice first) and the selected one (5.7). */
+    val hotelOptions: List<HotelOptionDto> = emptyList(),
+    val selectedHotelId: String? = null,
+)
+
+/** A 5.7 hotel option: price per night for the whole crew, distance route → hotel for the exit sign. */
+@Serializable
+data class HotelOptionDto(
+    val placeId: String,
+    val name: String,
+    val tags: List<String> = emptyList(),
+    val priceNightRub: Int = 0,
+    val rooms: Int = 1,
+    val priceCrewRub: Int = 0,
+    val verified: Boolean = true,
+    val distanceKm: Double = 0.0,
 )
 
 /** One D-6 alternative of a stop (A§6.11, A§16.6): the stop it would become and its deltas. */
@@ -178,6 +194,8 @@ data class PlanResultDto(
     val shareText: String = "",
     val pricesMonthRu: String? = null,
     val pricesYear: String? = null,
+    /** townId → prepositional name («Ярославле») for 5.7 copy. */
+    val townPrepRu: Map<String, String> = emptyMap(),
     @Transient val tripJson: String = "",
 )
 

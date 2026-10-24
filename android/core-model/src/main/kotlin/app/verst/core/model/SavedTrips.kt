@@ -24,6 +24,9 @@ data class SavedTripDto(
     val shareText: String = "",
     val pricesMonthRu: String? = null,
     val pricesYear: String? = null,
+    val townPrepRu: Map<String, String> = emptyMap(),
+    /** Overnight stop ids the crew marked «Забронировали» (D-10). */
+    val bookedStops: List<String> = emptyList(),
     val trip: JsonObject,
 )
 
@@ -55,6 +58,16 @@ object SavedTrips {
         data object LimitReached : Upsert
     }
 
+    /** Delete (D-1) keeping the position, so «Вернуть» puts it back where it was. */
+    fun remove(trips: List<SavedTripDto>, id: String): Pair<List<SavedTripDto>, Pair<Int, SavedTripDto>?> {
+        val i = trips.indexOfFirst { it.id == id }
+        if (i < 0) return trips to null
+        return trips.filterIndexed { j, _ -> j != i } to (i to trips[i])
+    }
+
+    fun restore(trips: List<SavedTripDto>, removed: Pair<Int, SavedTripDto>): List<SavedTripDto> =
+        trips.toMutableList().apply { add(removed.first.coerceAtMost(size), removed.second) }
+
     /** Replaces the entry with the same id in place (re-save after a replace or a reserve toggle) or appends. */
     fun upsert(trips: List<SavedTripDto>, entry: SavedTripDto): Upsert {
         val i = trips.indexOfFirst { it.id == entry.id }
@@ -66,13 +79,14 @@ object SavedTrips {
         return Upsert.Saved(next, next.size, next.size >= WARN_FROM)
     }
 
-    fun entry(id: String, now: Long, r: PlanResultDto, bearing8: String): SavedTripDto {
+    fun entry(id: String, now: Long, r: PlanResultDto, bearing8: String, booked: List<String> = emptyList()): SavedTripDto {
         val t = r.trip
         return SavedTripDto(
             id = id, savedAt = now, title = t.title, km = t.km, days = t.days, totalRub = t.cost.totalRub,
             startAt = t.input.startAt, adults = t.input.crew.adults, children = t.input.crew.children,
             dog = t.input.crew.dog, bearing8 = bearing8, shareText = r.shareText, pricesMonthRu = r.pricesMonthRu,
-            pricesYear = r.pricesYear, trip = EngineJson.json.parseToJsonElement(r.tripJson) as JsonObject,
+            pricesYear = r.pricesYear, townPrepRu = r.townPrepRu, bookedStops = booked,
+            trip = EngineJson.json.parseToJsonElement(r.tripJson) as JsonObject,
         )
     }
 
@@ -82,6 +96,7 @@ object SavedTrips {
         shareText = s.shareText,
         pricesMonthRu = s.pricesMonthRu,
         pricesYear = s.pricesYear,
+        townPrepRu = s.townPrepRu,
         tripJson = s.trip.toString(),
     )
 

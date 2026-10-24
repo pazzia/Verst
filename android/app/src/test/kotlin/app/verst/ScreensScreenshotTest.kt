@@ -213,6 +213,7 @@ class ScreensScreenshotTest {
         override fun confirmReplace() {}
         override fun closeReplace() {}
         override fun undo() {}
+        override fun hotel(stopId: String) {}
     }
 
     private val noWaybill = object : WaybillActions {
