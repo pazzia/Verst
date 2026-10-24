@@ -183,7 +183,15 @@ class Planner:
         return round_half_up(route.km_total)
 
     # ------------------------------------------------------------------------------------------ plan
-    def plan(self, raw: TripInput, sink: ProgressSink = NULL_SINK, cancel: CancelToken = NEVER) -> TripPlan:
+    def plan(
+        self,
+        raw: TripInput,
+        sink: ProgressSink = NULL_SINK,
+        cancel: CancelToken = NEVER,
+        split_km_hint: int | None = None,
+    ) -> TripPlan:
+        """`split_km_hint`: the trip km of an earlier identical plan (mobile `estimate`), so the split stage
+        says «по ≈ {km}» with the trip km (incl. stop detours), not the base route km (slice-2 N-10)."""
         ctx = self._ctx()
         t = self.templates
         inp = normalize_input(raw, ctx)
@@ -204,7 +212,7 @@ class Planner:
                     "stage.split_ring" if ring else "stage.split",
                     n=split.n_days,
                     days_word=ru.days_word(split.n_days),
-                    km=round_half_up(route.km_total / split.n_days),
+                    km=round_half_up((split_km_hint or route.km_total) / split.n_days),
                 ),
                 0.25,
             )
@@ -326,7 +334,7 @@ class Planner:
                 views[len(sd.plan.stops) - 1] = StopView(
                     overnight_text=text.text,
                     note=note,
-                    hotel_options=tuple(hotel_option(h.place, inp) for h in c.hotel_options),
+                    hotel_options=tuple(hotel_option(h.place, inp, h.lateral_km) for h in c.hotel_options),
                 )
                 reasons.append(
                     OvernightReason(

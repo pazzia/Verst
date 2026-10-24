@@ -104,14 +104,14 @@ Version 1.0.0 · 2026-10-23 · Use against every build that claims a screen is d
 | I-05 | Seat states: empty dashed #55555E + «свободно» #A0A0A7; adult #E9E2F2 silhouette 22/44×22; child #FFD23F 16/32×16; cycle order |
 | I-06 | Dog (283, 85) 56 × 52; on #C99A5B + wag ±6° 1.2 s; off dashed #8C8C93 + «+ пёс» |
 | I-07 | Front chip 44 high, radius 22; on white / off outline; copy exact |
-| I-08 | Summary at y 276, 20 sp/700, plurals correct for 1, 2, 5 adults and 1, 2, 5 children |
-| I-09 | Wells (14, 316) and (201, 316), 175 × 197, #0F0F11, border 4 #232327, radius 24 |
+| I-08 | Summary at y 282, 20 sp/700, plurals correct for 1, 2, 5 adults and 1, 2, 5 children |
+| I-09 | Wells (14, 322) and (201, 322), 175 × 197, #0F0F11, border 4 #232327, radius 24 |
 | I-10 | Odometer frame (45, 354) 113 × 42; drums 24 × 34, last drum white; digits Plex Mono 22/600; roll 300 ms only on changed drums |
 | I-11 | Read-out lines and plurals; «мин» omitted when 0 |
 | I-12 | Keys 52 × 44, #2A2A2E, inset 3 dp #0E0E10; disabled at 150 / 900 and at budget ends |
 | I-13 | Gauge: track and E arc paths exact; needle angle −90 + 36·i; spring settles 500 ± 50 ms, overshoot ≤ 10° |
 | I-14 | «E» #E6604A, «F» #F4F4F0, 11 sp/700 at (8, 46) / (114, 46) of the gauge |
-| I-15 | Mood chips (y 529 label, 551 chips), settings plate (20, 659) 350 × 44 |
+| I-15 | Mood chips (y 535 label, 557 chips), settings plate (20, 665) 350 × 44 |
 | I-16 | Caption at y 743; start L (270, 720) 100 |
 | I-17 | Third row link and second bench (OI-07) if accepted |
 | I-18 | Settings sheet D-4 |

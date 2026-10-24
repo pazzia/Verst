@@ -166,6 +166,11 @@ def prepositional(town: Town) -> str:
     return town.name_prep_ru or town.name_ru
 
 
+def genitive(town: Town) -> str:
+    """Genitive form («из Ярославля», OI-39), falling back to the nominative name."""
+    return town.name_gen_ru or town.name_ru
+
+
 def month_year_ru(as_of: str | date) -> str:
     """``"2026-10"`` or a date → «октябрь 2026»."""
     if isinstance(as_of, date):

@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.performTextInput
@@ -58,6 +59,7 @@ class SliceJourneyTest {
         compose.runOnUiThread {
             while (flow.back()) Unit
             flow.clearSaved()
+            flow.debugForceError = null
         }
     }
 
@@ -180,8 +182,7 @@ class SliceJourneyTest {
         waitTag("replace")
         shot("14-replace-sheet")
         compose.onNodeWithTag("replace.alt.0", useUnmergedTree = true).performScrollTo().performClick()
-        compose.onNodeWithTag("replace.confirm", useUnmergedTree = true).performScrollTo()
-        compose.onNodeWithText("ЗАМЕНИТЬ").performClick()
+        compose.onNodeWithTag("replace.confirm", useUnmergedTree = true).performScrollTo().performClick()
         compose.waitUntil(15_000) { flow.replace == null && flow.toast is Toast.Replaced }
         val replaced = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == stop.id }
         assertEquals(alt.name, replaced.name)
@@ -218,6 +219,20 @@ class SliceJourneyTest {
         back()
         assertEquals(Route.Windshield, flow.top)
         waitTag("windshield.route.0")
+
+        // D-1 delete with undo (long-press the row → dialog → «Удалить» → toast «Вернуть»).
+        compose.onNodeWithTag("windshield.trips").performClick()
+        waitTag("trips.row.0")
+        compose.onNodeWithTag("trips.row.0").performTouchInput { longClick() }
+        waitTag("delete")
+        shot("20-trips-delete-dialog")
+        compose.onNodeWithTag("delete.yes").performClick()
+        compose.waitUntil(5_000) { flow.saved.isEmpty() && flow.canUndoDelete }
+        shot("21-trip-deleted-toast")
+        compose.onNodeWithTag("toast.action", useUnmergedTree = true).performClick()
+        compose.waitUntil(5_000) { flow.saved.size == 1 }
+        waitTag("windshield.trips")
+        compose.runOnUiThread { flow.clearSaved() }
     }
 
     @Test
@@ -230,11 +245,77 @@ class SliceJourneyTest {
         waitTag("instruments.start")
         shot("09-instruments-golden-ring")
         compose.onNodeWithTag("instruments.start").performClick()
+        val t0 = System.nanoTime()
         assertRoadAhead("ready")
+        val planMs = (System.nanoTime() - t0) / 1_000_000
         shot("10-road-ahead-golden-ring")
         assertTrue(flow.result!!.trip.days >= 3)
+
+        // 5.7 Exit: night 1 → another hotel (local first, engine after) → mock partner → «Забронировали?» → booked.
+        val night = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.size >= 2 }
+        compose.onNodeWithTag("road.hotel.${night.id}").performScrollTo().performClick()
+        waitTag("exit.panel")
+        assertEquals(Route.Exit, flow.top)
+        shot("22-exit")
+        val before = flow.result!!.trip.cost.totalRub
+        val pick = night.hotelOptions[1]
+        compose.onNodeWithTag("exit.option.1", useUnmergedTree = true).performScrollTo().performClick()
+        compose.waitUntil(10_000) { !flow.costBusy && flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == night.id }.selectedHotelId == pick.placeId }
+        Log.i("VerstE2e", "hotel ${pick.placeId} total $before → ${flow.result!!.trip.cost.totalRub}")
+        shot("23-exit-other-hotel")
+        compose.onNodeWithTag("exit.book").performClick()
+        waitTag("partner")
+        compose.onNodeWithTag("partner.badge", useUnmergedTree = true).assertExists()
+        shot("24-mock-partner")
+        compose.onNodeWithTag("partner.back").performScrollTo().performClick()
+        waitTag("booked")
+        shot("25-booked-dialog")
+        compose.onNodeWithTag("booked.yes").performClick()
+        compose.waitUntil(5_000) { flow.isBooked(night.id) }
+        shot("26-exit-booked")
+        compose.onNodeWithText("Открыть бронирование").assertExists()
+        back()
+        assertEquals(Route.Road, flow.top)
+        compose.onNodeWithTag("road.hotel.${night.id}").performScrollTo()
+        shot("27-road-booked-row")
+
         back()
         assertEquals(Route.Instruments, flow.top)
+        back()
+        assertEquals(Route.Windshield, flow.top)
+        val engine = (E2e.engine.status.value as app.verst.engine.EngineStatus.Ready).info.timings
+        File(E2e.dir(), "budgets.json").writeText(
+            """{"engineStartMs":${engine.totalMs},"planGoldenRingMs":$planMs,"startBudgetMs":4000,"planBudgetMs":10000}""",
+        )
+        Log.i("VerstE2e", "budgets engine=${engine.totalMs} ms plan=$planMs ms")
+        assertTrue("engine start ${engine.totalMs} ms ≤ 4000", engine.totalMs <= 4_000)
+    }
+
+    @Test
+    fun errorPathAndDebugPanel() {
+        waitTag("windshield.route.0")
+        // DEV-127: 2 s long-press on «НАВИГАТОР» → debug panel; force UNREACHABLE for the next plan.
+        compose.onNodeWithTag("windshield.debug", useUnmergedTree = true).performTouchInput { down(center); advanceEventTime(2_300); up() }
+        waitTag("debug")
+        compose.onNodeWithTag("debug.error.UNREACHABLE", useUnmergedTree = true).performScrollTo().performClick()
+        shot("28-debug-panel")
+        back()
+        assertEquals(Route.Windshield, flow.top)
+        compose.onNodeWithTag("windshield.navi").performClick()
+        waitTag("navigator.to")
+        compose.onNodeWithTag("navigator.to").performTextInput("Тула")
+        waitTag("navigator.suggestion.0")
+        compose.onNodeWithTag("navigator.suggestion.0").performScrollTo().performClick()
+        waitTag("navigator.start", 10_000)
+        compose.onNodeWithTag("navigator.start").performClick()
+        waitTag("instruments.start")
+        compose.onNodeWithTag("instruments.start").performClick()
+        waitTag("drive.error.cta", 20_000)
+        shot("29-drive-error-unreachable")
+        compose.onNodeWithTag("drive.error.cta").performClick() // «Изменить маршрут» → Navigator with the error
+        compose.waitUntil(5_000) { flow.top == Route.Navigator && flow.routeError != null }
+        shot("30-navigator-route-error")
+        compose.runOnUiThread { flow.debugForceError = null }
         back()
         assertEquals(Route.Windshield, flow.top)
     }

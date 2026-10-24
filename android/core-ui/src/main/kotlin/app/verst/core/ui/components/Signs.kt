@@ -14,7 +14,14 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -150,12 +157,27 @@ enum class StartSize(val outer: Dp, val face: Dp, val icon: Dp) {
 @Composable
 fun StartButton(size: StartSize, label: String, enabled: Boolean, cd: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val fg = if (enabled) C.text.primary else C.text.disabled
+    // motion.startPulse (enabled only): a red ring spreading 0 → 16 dp (14 on S), α 0.55 → 0, 1800 ms easeOut;
+    // motion.startPress: face + label 0.96 while pressed.
+    val pulseClock = sceneClock(overlay = !enabled)
+    val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val press by animateFloatAsState(if (pressed) DesignTokens.motion.startPress.toScale else 1f, tween(DesignTokens.motion.startPress.durationMs), label = "press")
+    val pm = DesignTokens.motion.startPulse
     Box(
         modifier
             .size(size.outer)
+            .drawBehind {
+                if (!enabled) return@drawBehind
+                val t = pulseClock.value
+                if (t == 0L) return@drawBehind
+                val p = pm.easing.transform(Phases.cycle(t, pm.durationMs))
+                val spread = (if (size == StartSize.S) pm.toSpreadSmDp else pm.toSpreadDp).toPx() * p
+                drawCircle(C.accent.redPulse.copy(alpha = pm.fromAlpha * (1 - p)), this.size.minDimension / 2 + spread)
+            }
             .clip(CircleShape)
             .background(C.dash.control)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .clickable(interaction, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) {
                 contentDescription = cd
                 if (!enabled) disabled()
@@ -164,6 +186,7 @@ fun StartButton(size: StartSize, label: String, enabled: Boolean, cd: String, on
     ) {
         Box(
             Modifier
+                .graphicsLayer { scaleX = press; scaleY = press }
                 .size(size.face)
                 .clip(CircleShape)
                 .background(C.dash.face)

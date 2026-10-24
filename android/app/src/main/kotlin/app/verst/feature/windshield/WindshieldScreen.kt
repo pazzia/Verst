@@ -1,6 +1,17 @@
 package app.verst.feature.windshield
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import kotlinx.coroutines.withTimeoutOrNull
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import app.verst.core.ui.components.LocalReducedMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,6 +22,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,7 +52,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -60,12 +81,12 @@ import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
 import app.verst.feature.common.ScreenRoot
 import app.verst.feature.common.crewShort
-import app.verst.feature.common.genitive
 import app.verst.nav.WindshieldData
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
 private val DashHeight = 324.dp
+private const val SavedTripsWarn = app.verst.core.model.SavedTrips.WARN_FROM
 
 /** Everything the Windshield draws (stateless; the caller maps `VerstFlow` into it). */
 data class WindshieldUi(
@@ -78,6 +99,8 @@ data class WindshieldUi(
     /** Saved trips in D-1 order; the «Мои поездки» plate shows only when non-empty (W-27). */
     val trips: List<SavedTripDto> = emptyList(),
     val tripsSheet: Boolean = false,
+    /** OI-39: the origin in the genitive from the engine («Москвы»); the nominative until it arrives. */
+    val originGen: String = origin,
 )
 
 /** «Мои поездки» plate and the D-1 sheet. */
@@ -85,12 +108,14 @@ interface TripsActions {
     fun open()
     fun close()
     fun pick(id: String)
+    fun delete(id: String)
 }
 
 private val NoTrips = object : TripsActions {
     override fun open() {}
     override fun close() {}
     override fun pick(id: String) {}
+    override fun delete(id: String) {}
 }
 
 /** 5.1 Windshield, simplified: ready routes on the overhead sign, the navigator entry, the start button. */
@@ -102,14 +127,21 @@ fun WindshieldScreen(
     onNavigator: () -> Unit,
     onRetry: () -> Unit,
     trips: TripsActions = NoTrips,
+    onDebug: () -> Unit = {},
 ) {
     ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
             val sceneH = maxHeight - DashHeight + 20.dp
-            WindshieldScene(sceneH, gantry = true)
+            var signBottom by remember { mutableStateOf(290f) }
+            WindshieldScene(sceneH, gantry = true, gantryTop = minOf(286f, signBottom - 4f), overlay = ui.tripsSheet)
             Mirror(crewShort(ui.adults, ui.children, ui.dog), ui.adults, ui.children, ui.dog, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
-            Sign(ui, onSelect, onRetry, Modifier.padding(start = 20.dp, end = 20.dp, top = 84.dp).fillMaxWidth())
-            Dashboard(ui, onStart, onNavigator, trips::open, Modifier.align(Alignment.BottomCenter))
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            Sign(
+                ui, onSelect, onRetry,
+                Modifier.padding(start = 20.dp, end = 20.dp, top = 84.dp).fillMaxWidth()
+                    .onGloballyPositioned { c -> signBottom = with(density) { (c.positionInParent().y + c.size.height).toDp().value } },
+            )
+            Dashboard(ui, onStart, onNavigator, trips::open, onDebug, Modifier.align(Alignment.BottomCenter))
             if (ui.tripsSheet && ui.trips.isNotEmpty()) TripsSheet(ui.trips, maxHeight, trips)
         }
     }
@@ -122,19 +154,21 @@ private fun androidx.compose.foundation.layout.BoxScope.TripsSheet(trips: List<S
         val n = trips.size
         Txt(
             stringResource(R.string.trips_subtitle, n, pluralStringResource(R.plurals.plural_saved, n)),
-            T.body.sm, C.text.secondary, Modifier.padding(bottom = 10.dp),
+            T.body.sm, C.text.secondary, Modifier.padding(bottom = if (n >= SavedTripsWarn) 4.dp else 10.dp),
         )
+        if (n >= SavedTripsWarn) Txt(stringResource(R.string.trips_near_limit, n), T.body.sm, C.accent.redText, Modifier.padding(bottom = 10.dp))
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            trips.forEachIndexed { i, t -> TripRow(t, i) { a.pick(t.id) } }
+            trips.forEachIndexed { i, t -> TripRow(t, i, { a.delete(t.id) }) { a.pick(t.id) } }
         }
     }
 }
 
 @Composable
-private fun TripRow(t: SavedTripDto, index: Int, onClick: () -> Unit) {
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+private fun TripRow(t: SavedTripDto, index: Int, onDelete: () -> Unit, onClick: () -> Unit) {
+    val deleteLabel = stringResource(R.string.trips_delete_yes)
     val daysWord = pluralStringResource(R.plurals.plural_day, t.days)
-    // Date as «31.10»: the copy deck has no genitive month names yet (D-1 shows «7–9 ноября»).
-    val date = t.startAt?.takeIf { it.length >= 10 }?.let { "${it.substring(8, 10)}.${it.substring(5, 7)}" } ?: ""
+    val date = tripDates(t.startAt, t.days)
     val meta = stringResource(R.string.trips_row_meta, date, t.days, daysWord, crewShort(t.adults, t.children, t.dog))
     val total = RuFormat.thousands(t.totalRub)
     val cd = stringResource(R.string.cd_trips_row, t.title, date, t.days, daysWord, total)
@@ -144,8 +178,12 @@ private fun TripRow(t: SavedTripDto, index: Int, onClick: () -> Unit) {
             .defaultMinSize(minHeight = 64.dp)
             .clip(RoundedCornerShape(DesignTokens.radius.r10))
             .background(C.dash.controlAlt)
-            .clickable(role = Role.Button, onClick = onClick)
-            .semantics(mergeDescendants = true) { contentDescription = cd }
+            // D-1: tap opens, long-press (or the TalkBack action «Удалить») asks to delete.
+            .combinedClickable(role = Role.Button, onLongClick = onDelete, onClick = onClick)
+            .semantics(mergeDescendants = true) {
+                contentDescription = cd
+                customActions = listOf(CustomAccessibilityAction(deleteLabel) { onDelete(); true })
+            }
             .testTag("trips.row.$index")
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -192,7 +230,16 @@ private fun TripsPlate(count: Int, onClick: () -> Unit) {
  */
 @Composable
 private fun Mirror(caption: String, adults: Int, children: Int, dog: Boolean, modifier: Modifier) {
-    Column(modifier.semantics(mergeDescendants = true) {}, horizontalAlignment = Alignment.CenterHorizontally) {
+    // motion.mirrorSway: ±1.5° about the stem top, 2000 ms each way (0° under reduced motion).
+    val sway = if (LocalReducedMotion.current) 0f else rememberInfiniteTransition(label = "sway").animateFloat(
+        DesignTokens.motion.mirrorSway.fromDeg, DesignTokens.motion.mirrorSway.toDeg,
+        infiniteRepeatable(tween(DesignTokens.motion.mirrorSway.durationMs / 2, easing = DesignTokens.motion.mirrorSway.easing), RepeatMode.Reverse),
+        label = "swayDeg",
+    ).value
+    Column(
+        modifier.graphicsLayer { rotationZ = sway; transformOrigin = TransformOrigin(0.5f, 0f) }.semantics(mergeDescendants = true) {},
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Canvas(Modifier.size(150.dp, 54.dp)) {
             val d = 1.dp.toPx()
             drawRect(C.dash.controlAlt, Offset(71 * d, 0f), Size(8 * d, 10 * d))
@@ -253,10 +300,11 @@ private fun Sign(ui: WindshieldUi, onSelect: (Int) -> Unit, onRetry: () -> Unit,
     Column(modifier.overheadPlate().padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 10.dp)) {
         Row(Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, bottom = 4.dp)) {
             Txt(
-                stringResource(R.string.windshield_sign_header, genitive(ui.origin).uppercase()),
+                stringResource(R.string.windshield_sign_header, ui.originGen.uppercase()),
                 T.label.md, C.sign.blueText, Modifier.weight(1f).semantics { heading() }, maxLines = 1,
             )
-            if (ui.data is WindshieldData.Routes) Txt(stringResource(R.string.windshield_sign_km), T.label.md, C.sign.blueText)
+            // S-25: «КМ» stays while loading; only the rows become placeholders.
+            if (ui.data is WindshieldData.Routes || ui.data is WindshieldData.Loading) Txt(stringResource(R.string.windshield_sign_km), T.label.md, C.sign.blueText)
         }
         when (val d = ui.data) {
             is WindshieldData.Loading -> Column(Modifier.semantics(mergeDescendants = true) { contentDescription = loadingCd }) {
@@ -332,16 +380,18 @@ private fun RouteRow(r: ReadyRouteDto, selected: Boolean, index: Int, onClick: (
 }
 
 @Composable
-private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> Unit, onTrips: () -> Unit, modifier: Modifier) {
+private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> Unit, onTrips: () -> Unit, onDebug: () -> Unit, modifier: Modifier) {
     val routes = (ui.data as? WindshieldData.Routes)?.routes
     val selected = routes?.getOrNull(ui.selected)
     Box(modifier.fillMaxWidth().height(DashHeight).dashboardSurface()) {
-        NaviEntry(ui.origin, ui.data is WindshieldData.NoRoutes, onNavigator, Modifier.padding(start = 18.dp, end = 18.dp, top = 22.dp).fillMaxWidth())
+        NaviEntry(ui.origin, ui.data is WindshieldData.NoRoutes, onNavigator, onDebug, Modifier.padding(start = 18.dp, end = 18.dp, top = 22.dp).fillMaxWidth())
         Row(
-            Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = 22.dp, end = 20.dp, bottom = 56.dp),
+            Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = 22.dp, end = 20.dp, bottom = 56.dp)
+                .height(DesignTokens.size.startMOuter),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(Modifier.weight(1f).padding(end = 14.dp).semantics(mergeDescendants = true) {}) {
+            // N-02: the column (label / title / meta / 8 / plate) is centred on the start button, even when taller.
+            Column(Modifier.weight(1f).padding(end = 14.dp).wrapContentHeight(unbounded = true).semantics(mergeDescendants = true) {}) {
                 val (label, title, meta) = when {
                     selected != null -> Triple(stringResource(R.string.windshield_selected_label), selected.title, selected.subtitle)
                     ui.data is WindshieldData.Loading -> Triple(stringResource(R.string.windshield_selected_label), null, null)
@@ -369,7 +419,7 @@ private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> 
 }
 
 @Composable
-private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, modifier: Modifier) {
+private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, onDebug: () -> Unit, modifier: Modifier) {
     val cd = stringResource(R.string.cd_windshield_navi)
     Column(
         modifier
@@ -378,10 +428,20 @@ private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, m
             .clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("windshield.navi")
-            .padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 14.dp),
+            .padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 16.dp)
+            .defaultMinSize(minHeight = 134.dp - 32.dp), // N-12 / S-24: the panel is 134 high (D3)
     ) {
         Row(Modifier.fillMaxWidth()) {
-            Txt(stringResource(R.string.windshield_navi_label), T.label.md, C.navi.label, Modifier.weight(1f))
+            // DEV-127 hidden entry: a 2 s long-press on «НАВИГАТОР» opens the debug panel.
+            Txt(
+                stringResource(R.string.windshield_navi_label), T.label.md, C.navi.label,
+                Modifier.weight(1f).testTag("windshield.debug").pointerInput(Unit) {
+                    detectTapGestures(onPress = {
+                        val released = withTimeoutOrNull(2_000) { tryAwaitRelease() }
+                        if (released == null) onDebug()
+                    })
+                },
+            )
             Txt(stringResource(R.string.windshield_you_are, origin.uppercase()), T.label.md, C.navi.label)
         }
         Row(
@@ -424,3 +484,35 @@ fun SearchGlyph(modifier: Modifier = Modifier) {
         },
     )
 }
+
+
+/** N-03 / D-1 dates: «31 октября», «7–9 ноября», «30 октября – 2 ноября» (+ year when not this year). */
+@Composable
+fun tripDates(startAt: String?, days: Int): String {
+    val start = startAt?.takeIf { it.length >= 10 }?.let { runCatching { java.time.LocalDate.parse(it.substring(0, 10)) }.getOrNull() } ?: return ""
+    val end = start.plusDays((days - 1).coerceAtLeast(0).toLong())
+    val text = when {
+        end == start -> stringResource(R.string.common_date_day, start.dayOfMonth.toString(), monthGen(start.monthValue))
+        end.monthValue == start.monthValue -> stringResource(R.string.common_date_range_month, start.dayOfMonth.toString(), end.dayOfMonth.toString(), monthGen(end.monthValue))
+        else -> stringResource(R.string.common_date_range, start.dayOfMonth.toString(), monthGen(start.monthValue), end.dayOfMonth.toString(), monthGen(end.monthValue))
+    }
+    return if (end.year != java.time.LocalDate.now().year) stringResource(R.string.common_date_with_year, text, end.year.toString()) else text
+}
+
+@Composable
+private fun monthGen(m: Int): String = stringResource(
+    when (m) {
+        1 -> R.string.common_month_gen_01
+        2 -> R.string.common_month_gen_02
+        3 -> R.string.common_month_gen_03
+        4 -> R.string.common_month_gen_04
+        5 -> R.string.common_month_gen_05
+        6 -> R.string.common_month_gen_06
+        7 -> R.string.common_month_gen_07
+        8 -> R.string.common_month_gen_08
+        9 -> R.string.common_month_gen_09
+        10 -> R.string.common_month_gen_10
+        11 -> R.string.common_month_gen_11
+        else -> R.string.common_month_gen_12
+    },
+)

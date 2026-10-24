@@ -1,6 +1,6 @@
 # Verst — Motion specification
 
-Version 1.0.0 · 2026-10-23 · Tokens: `motion.*` in `tokens.json` / `DesignTokens.motion`
+Version 1.1.0 · 2026-10-24 (§2.3 added) · Tokens: `motion.*` in `tokens.json` / `DesignTokens.motion`
 
 ## 1. Easing tokens
 
@@ -67,6 +67,25 @@ Columns: property, from → to, duration, easing, loop, Compose implementation, 
 | Seat/value cross-fade | Waybill handwritten values | alpha | old → new | 200 ms | `standard` | `Crossfade(tween(200))` | instant |
 | Toast in / out | `PlateToast` | alpha, translationY | 0, 8 dp → 1, 0 | 200 ms in / 150 ms out | `decelerate` / `accelerate` | `AnimatedVisibility` | instant |
 
+### 2.3 Tokens added in the slice-2 review (2026-10-24)
+
+These one-shots were described in the screen files but had no token. They are now in `tokens.json` / `DesignTokens.motion`, so the Developer writes no literal (TokenLiteralsTest).
+
+| Token | Where | Property | From → to | Duration | Easing | Compose | Reduced motion |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `toastIn` / `toastOut` | `PlateToast` (save, replace, delete, booked) | alpha, translationY | in: 0, 8 dp → 1, 0; out: reverse | 200 ms in, 150 ms out; visible `showMs` 3000, `showWithActionMs` 6000 | `decelerate` / `accelerate` | `AnimatedVisibility(fadeIn(tween(200, easing = decelerate)) + slideInVertically { 8.dp }, …)`; the timer pauses while TalkBack focus is on the toast | instant; durations unchanged |
+| `dialogIn` / `dialogOut` | `NaviDialog` («Забронировали?», delete trip, 50-trip limit) | scrim alpha 0 → `scrimAlpha` 0.6; card scale 0.96 → 1 and alpha 0 → 1 (pivot centre) | | 200 ms in, 150 ms out | `decelerate` / `accelerate` | `AnimatedVisibility` with `scaleIn(initialScale = 0.96f) + fadeIn` | instant |
+| `captionFade` | 5.2 caption + start row while the IME is open | alpha | 1 ↔ 0 | 150 ms | `standard` | `AnimatedVisibility(fadeIn/fadeOut(tween(150)))`; layout height kept until the fade ends | instant |
+| `laneSlowDown` | 5.4 error / offline | lane period | 450 → 900 ms | 800 ms | `decelerate` | interpolate the **period**, keep the phase continuous (as `screen.launch` ramp, reversed) | phase 0 |
+| `rowFlash` | 5.5 row after replace | row background | `color.dash.pressed` → transparent | 1200 ms | `easeOut` | `animateColorAsState` started once per replace | none |
+| `valueCrossfade` | 5.6 handwritten values, 5.5 footer amount after replace / reserve | alpha | old → new | 200 ms | `standard` | `Crossfade(tween(200))` | instant |
+| `fieldPulse` | 5.1 no-routes navi field border | border alpha | 1 → 0.4 → 1, twice (`totalMs` 2400), then solid | 1200 ms per cycle | `easeInOut` | `repeatable(4, tween(600, easing = easeInOut), RepeatMode.Reverse)` on first display only | solid |
+| `spinner` | 5.7 Book CTA (production), components §7 start loading | arc start angle, 270° sweep (`sweepDeg`) | 0 → 360° | 900 ms | `linear` | `rememberInfiniteTransition` | static arc at 0° |
+| `loadingDots` | `SwapButton` loading (components §2.6) | 3 dots 4 dp (`dotDp`), alpha 1 for one 300 ms step each | dot 1 → 2 → 3 | 900 ms cycle, `stepMs` 300 | step | clock: `active = (t / 300) % 3` | three dots at alpha 1 |
+| `rowRemove` | D-1 row after «Удалить» | height → 0, alpha → 0 | | 250 ms | `accelerate` | `AnimatedVisibility(shrinkVertically + fadeOut)`; «Вернуть» re-inserts with `bottomSheetIn` timing | instant |
+
+Exit screen order (5.7 §6, unchanged): `screen.overlay` cross-fade + `exitNear` from t = 0; `MockPartnerSheet` = `bottomSheetIn` / `bottomSheetOut`; then «Забронировали?» = `dialogIn`. While the sheet or dialog is open, the Exit loops (lanes, twinkle, turn signal) pause (§4.3) and resume in phase.
+
 Mockup-only: Panel.dc.html animates the needle with `transition: transform .5s cubic-bezier(.3,1.5,.5,1)`. SPEC 6 sets a spring (stiffness 300, damping 0.6) for the app. The spring wins; QA compares the settle time (500 ± 50 ms) and the overshoot (≤ 10°), not the curve.
 
 ## 3. Screen transitions (NEW — the mockups have none)
@@ -87,7 +106,7 @@ Reduced motion: transitions are instant cuts (no cross-fade), and shared-bounds 
 ## 4. Loop and pause rules
 
 1. **Lifecycle:** every continuous loop runs only while the screen's `Lifecycle` is at least `RESUMED`. On `onPause`, the clock stops and the phase is held, so the loop resumes from the same frame (no jump).
-2. **Visibility:** a loop runs only while its composable is in the composition and on screen. On Road ahead the lane and car draw only for visible items (LazyColumn), so they cost nothing off screen.
+2. **Visibility:** a loop runs only while its composable is in the composition and on screen. Road ahead draws one road section for the whole scrolled `Column` (DEV-SLICE-2 deviation from `LazyColumn`, accepted): the lane and the car are drawn only for the **visible** y range (`clipRect` to the viewport from `ScrollState.value`), so off-screen dashes cost nothing and the phase stays global.
 3. **Overlays:** when a bottom sheet or dialog covers the scene (scrim visible), the scene loops (lanes, posts, sway, twinkle, turn signal, start pulse) pause. Shimmer and spinners inside the overlay run.
 4. **Reduced motion:** `LocalReducedMotion = true` when `Settings.Global.TRANSITION_ANIMATION_SCALE == 0f` or `ANIMATOR_DURATION_SCALE == 0f` (the "Remove animations" switch sets both). All loops stop and show the static frames in §2. One-shots jump to their final state. State colour changes remain (they are not motion).
 5. **Power saver:** when `PowerManager.isPowerSaveMode` is true, the scene loops stop (static frames, as for reduced motion), while one-shots keep running. Proposed; OI-31 asks the Manager to confirm.

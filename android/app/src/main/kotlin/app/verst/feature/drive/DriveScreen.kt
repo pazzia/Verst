@@ -8,7 +8,23 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import app.verst.core.ui.components.LocalReducedMotion
+import app.verst.core.ui.components.RoadSign
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -25,6 +41,7 @@ import app.verst.core.ui.components.PrimaryCta
 import app.verst.core.ui.components.ProgressBar
 import app.verst.core.ui.components.StepLine
 import app.verst.core.ui.components.Txt
+import app.verst.core.ui.components.DrivePosts
 import app.verst.core.ui.components.DriveRoad
 import app.verst.core.ui.components.DriveSky
 import app.verst.core.ui.components.WindshieldScene
@@ -65,7 +82,9 @@ fun DriveScreen(
 ) {
     ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
-            WindshieldScene(maxHeight - DashHeight + 20.dp, hills = false, sunX = 161f, refHeight = 560f, sky = DriveSky, road = DriveRoad, sunCenterY = 304f)
+            WindshieldScene(maxHeight - DashHeight + 20.dp, hills = false, sunX = 161f, refHeight = 560f, sky = DriveSky, road = DriveRoad, sunCenterY = 304f,
+                laneCycleMs = DesignTokens.motion.lane.drive.durationMs, posts = DrivePosts)
+            if (ui.error == null) FlyingSigns(ui.signs, maxWidth)
             val back = stringResource(if (ui.error != null) R.string.common_back_instruments else R.string.common_cancel)
             BackLink(
                 back, C.mirror.label,
@@ -110,12 +129,71 @@ private fun Panel(ui: DriveUi, kmLabel: String) {
             Txt(stringResource(R.string.drive_header, kmLabel), T.label.md, C.navi.label, Modifier.weight(1f), maxLines = 1)
             if (ui.days > 0) Txt(stringResource(R.string.drive_header_days, ui.days, pluralStringResource(R.plurals.plural_day_upper, ui.days)), T.label.md, C.navi.label)
         }
-        ProgressBar(ui.progress, Modifier.fillMaxWidth().height(4.dp))
+        // motion.progress: 400 ms easeInOut toward the revealed stage.
+        val reduced = LocalReducedMotion.current
+        val progress by animateFloatAsState(
+            ui.progress, if (reduced) snap() else tween(DesignTokens.motion.progress.durationMs, easing = DesignTokens.motion.progress.easing), label = "progress",
+        )
+        ProgressBar(progress, Modifier.fillMaxWidth().height(4.dp))
         Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             val shown = ui.lines.takeLast(4)
             shown.forEachIndexed { i, line ->
                 val isLast = i == shown.lastIndex
-                StepLine(line, done = !isLast || ui.done)
+                key(line) { AppearLine(line, done = !isLast || ui.done) }
+            }
+        }
+    }
+}
+
+
+/** motion.stepAppear: fade in + 6 dp from the left, 350 ms easeOut (instant under reduced motion). */
+@Composable
+private fun AppearLine(text: String, done: Boolean) {
+    val reduced = LocalReducedMotion.current
+    val p = remember { Animatable(if (reduced) 1f else 0f) }
+    LaunchedEffect(Unit) { if (!reduced) p.animateTo(1f, tween(DesignTokens.motion.stepAppear.durationMs, easing = DesignTokens.motion.stepAppear.easing)) }
+    StepLine(text, done, Modifier.graphicsLayer { alpha = p.value; translationX = DesignTokens.motion.stepAppear.fromDxDp.toPx() * (1 - p.value) })
+}
+
+/**
+ * motion.flyingSign (5.4 S10): each engine `stop` becomes a sign that flies from (195, 250) toward the viewer,
+ * left or right, scale 0.12 → 1.7, alpha in over the first 15 %, 3600 ms rushIn, ≥ 1200 ms apart, ≤ 3 in flight.
+ * Reduced motion: the latest sign, static at the spawn point, scale 1.
+ */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.FlyingSigns(signs: List<app.verst.core.model.dto.StopEventDto>, width: androidx.compose.ui.unit.Dp) {
+    val m = DesignTokens.motion.flyingSign
+    val reduced = LocalReducedMotion.current
+    val k = width.value / 390f
+    if (reduced) {
+        val last = signs.lastOrNull() ?: return
+        Box(Modifier.offset(x = (195 * k).dp - 34.dp, y = 250.dp - 31.dp).clearAndSetSemantics {}) { RoadSign(last.sign ?: "city", last.name ?: "", emptyList()) }
+        return
+    }
+    signs.forEachIndexed { i, st ->
+        key(st.id ?: "$i") {
+            val p = remember { Animatable(0f) }
+            var visible by remember { mutableStateOf(true) }
+            LaunchedEffect(Unit) {
+                delay((i * m.staggerMs).toLong())
+                p.animateTo(1f, tween(m.durationMs, easing = m.easing))
+                visible = false
+            }
+            if (visible && p.value > 0f) {
+                val dir = if (i % 2 == 0) 1f else -1f
+                Box(
+                    Modifier.offset(x = (195 * k).dp - 34.dp, y = 250.dp - 31.dp)
+                        .graphicsLayer {
+                            val e = p.value
+                            val s = m.fromScale + (m.toScale - m.fromScale) * e
+                            scaleX = s
+                            scaleY = s
+                            translationX = dir * m.dxDp.toPx() * e
+                            translationY = m.dyDp.toPx() * e
+                            alpha = minOf(1f, e / m.fadeInFraction)
+                        }
+                        .clearAndSetSemantics {},
+                ) { RoadSign(st.sign ?: "city", st.name ?: "", emptyList()) }
             }
         }
     }

@@ -35,63 +35,7 @@ fun ScreenRoot(background: Color, statusBar: Color = background, content: @Compo
     }
 }
 
-/**
- * Town names in the genitive for «ИЗ МОСКВЫ» / «из Москвы» (copy-ru `windshield_sign_header`). S-23: every
- * town of the two fixture worlds (any of them can become the origin through «изменить»); the engine has no
- * `nameGenRu` yet (requested). Indeclinable names (Пушкино, Иваново …) stay as they are.
- */
-private val Genitive = mapOf(
-    "Москва" to "Москвы",
-    "Пушкино" to "Пушкино",
-    "Сергиев Посад" to "Сергиева Посада",
-    "Переславль-Залесский" to "Переславля-Залесского",
-    "Ростов" to "Ростова",
-    "Ярославль" to "Ярославля",
-    "Кострома" to "Костромы",
-    "Иваново" to "Иваново",
-    "Суздаль" to "Суздаля",
-    "Владимир" to "Владимира",
-    "Ногинск" to "Ногинска",
-    "Покров" to "Покрова",
-    "Петушки" to "Петушков",
-    "Вязники" to "Вязников",
-    "Гороховец" to "Гороховца",
-    "Дзержинск" to "Дзержинска",
-    "Нижний Новгород" to "Нижнего Новгорода",
-    "Кстово" to "Кстово",
-    "Лысково" to "Лыскова",
-    "Воротынец" to "Воротынца",
-    "Чебоксары" to "Чебоксар",
-    "Цивильск" to "Цивильска",
-    "Зеленодольск" to "Зеленодольска",
-    "Казань" to "Казани",
-    "Домодедово" to "Домодедово",
-    "Кашира" to "Каширы",
-    "Михайлов" to "Михайлова",
-    "Скопин" to "Скопина",
-    "Ряжск" to "Ряжска",
-    "Чаплыгин" to "Чаплыгина",
-    "Мичуринск" to "Мичуринска",
-    "Тамбов" to "Тамбова",
-    "Котовск" to "Котовска",
-    "Борисоглебск" to "Борисоглебска",
-    "Новоаннинский" to "Новоаннинского",
-    "Фролово" to "Фролово",
-    "Волгоград" to "Волгограда",
-    "Подольск" to "Подольска",
-    "Серпухов" to "Серпухова",
-    "Тула" to "Тулы",
-    "Щёкино" to "Щёкино",
-    "Тестовск" to "Тестовска",
-    "Средний" to "Среднего",
-    "Серединск" to "Серединска",
-    "Конечный" to "Конечного",
-    "Пустошь" to "Пустоши",
-    "Ближний" to "Ближнего",
-    "Глухово" to "Глухово",
-)
 
-fun genitive(town: String): String = Genitive[town] ?: town
 
 /** «2 взр · 1 реб · пёс» (mirror caption, Road ahead crew chip). */
 @Composable
@@ -116,4 +60,7 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     is app.verst.nav.Toast.SavedNearLimit -> stringResource(R.string.common_saved_near_limit, t.count)
     app.verst.nav.Toast.StorageFull -> stringResource(R.string.common_storage_full_title) + ". " + stringResource(R.string.common_storage_full_body)
     app.verst.nav.Toast.EngineFailed -> stringResource(R.string.waybill_sync_failed)
+    app.verst.nav.Toast.NeedInternet -> stringResource(R.string.common_need_internet)
+    app.verst.nav.Toast.TripDeleted -> stringResource(R.string.trips_deleted)
+    is app.verst.nav.Toast.Booked -> stringResource(R.string.exit_booked_badge) // 5.7 renders its own copy with the town
 }

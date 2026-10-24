@@ -149,7 +149,7 @@ class MobileTest(unittest.TestCase):
     def test_reverse(self) -> None:
         self.assertEqual(
             call(mobile.reverse("central_russia_v1", *MOSCOW)),
-            {"name": "Москва", "subtitle": "город · Москва"},
+            {"name": "Москва", "subtitle": "город · Москва", "nameGenRu": "Москвы", "namePrepRu": "Москве"},
         )
         self.assertIsNone(call(mobile.reverse("central_russia_v1", 60.0, 30.0)))
 
@@ -435,6 +435,16 @@ class MobileTest(unittest.TestCase):
             d["readyRouteId"] = rr
         d.update(kw)
         return d
+
+    def test_trip_result_town_prepositional(self) -> None:
+        res = call(
+            mobile.plan("central_russia_v1", "prep", json.dumps(self._input(rr="rr_golden_ring")), None)
+        )
+        self.assertEqual(res["townPrepRu"]["t_yaroslavl"], "Ярославле")
+        hotels = [h for d in res["trip"]["daysList"] for s in d["stops"] for h in s["hotelOptions"]]
+        self.assertTrue(
+            hotels and all(isinstance(h["exitDistanceM"], int) and h["exitDistanceM"] >= 0 for h in hotels)
+        )
 
     def _plan_and_estimate(self, inp: dict[str, Any], tag: str) -> tuple[dict[str, Any], dict[str, Any]]:
         est = call(mobile.estimate("central_russia_v1", f"est-{tag}", json.dumps(inp)))

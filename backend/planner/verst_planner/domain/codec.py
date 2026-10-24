@@ -325,6 +325,7 @@ def _hotel_option_to_json(h: HotelOption) -> Json:
         "rooms": h.rooms,
         "priceCrewRub": h.price_crew_rub,
         "verified": h.verified,
+        "exitDistanceM": h.exit_distance_m,
     }
 
 
@@ -337,6 +338,7 @@ def _hotel_option_from_json(d: Mapping[str, Any]) -> HotelOption:
         rooms=d["rooms"],
         price_crew_rub=d["priceCrewRub"],
         verified=d["verified"],
+        exit_distance_m=int(d.get("exitDistanceM", 0)),
     )
 
 

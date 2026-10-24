@@ -710,7 +710,8 @@
               "priceNightRub": 6000,
               "rooms": 1,
               "priceCrewRub": 6000,
-              "verified": true
+              "verified": true,
+              "exitDistanceM": 288
             },
             {
               "placeId": "pl_yar_hotel_volga",
@@ -722,7 +723,8 @@
               "priceNightRub": 7000,
               "rooms": 1,
               "priceCrewRub": 7000,
-              "verified": true
+              "verified": true,
+              "exitDistanceM": 583
             }
           ],
           "selectedHotelId": "pl_yar_hotel_strelka"
@@ -1216,7 +1218,8 @@
               "priceNightRub": 6000,
               "rooms": 1,
               "priceCrewRub": 6000,
-              "verified": true
+              "verified": true,
+              "exitDistanceM": 657
             }
           ],
           "selectedHotelId": "pl_suz_hotel_pushkarskaya"

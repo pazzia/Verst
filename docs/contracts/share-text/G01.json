@@ -1352,7 +1352,8 @@
                 "priceNightRub": 6000,
                 "rooms": 1,
                 "priceCrewRub": 6000,
-                "verified": true
+                "verified": true,
+                "exitDistanceM": 1348
               },
               {
                 "placeId": "pl_yar_hotel_volga",
@@ -1364,7 +1365,8 @@
                 "priceNightRub": 7000,
                 "rooms": 1,
                 "priceCrewRub": 7000,
-                "verified": true
+                "verified": true,
+                "exitDistanceM": 899
               },
               {
                 "placeId": "pl_yar_hotel_kotorosl",
@@ -1375,7 +1377,8 @@
                 "priceNightRub": 4800,
                 "rooms": 1,
                 "priceCrewRub": 4800,
-                "verified": true
+                "verified": true,
+                "exitDistanceM": 270
               }
             ],
             "selectedHotelId": "pl_yar_hotel_strelka"
@@ -2887,6 +2890,114 @@
             "replaceable": true,
             "alternatives": [
               {
+                "id": "alt_d2s06_pl_prs_iron",
+                "placeId": "pl_prs_iron",
+                "name": "Музей утюга",
+                "deltaMin": -37,
+                "deltaRub": -210,
+                "shiftMin": -37,
+                "units": {
+                  "deltaKm": -2.927,
+                  "regionCode": "RU-YAR",
+                  "checkRub": null,
+                  "adultRub": 200,
+                  "childRub": 100,
+                  "name": "Музей утюга",
+                  "placeId": "pl_prs_iron",
+                  "priceRub": "61.90",
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -3
+                },
+                "stop": {
+                  "id": "d2s06",
+                  "seq": 12,
+                  "day": 2,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_prs_iron",
+                  "townId": "t_pereslavl",
+                  "name": "Музей утюга",
+                  "note": null,
+                  "lat": 56.737908743465916,
+                  "lon": 38.86085108526628,
+                  "arriveAt": "2026-10-25T13:57",
+                  "departAt": "2026-10-25T14:27",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 1,
+                  "kmAt": 386,
+                  "dwellMin": 30,
+                  "tags": [
+                    "museum"
+                  ],
+                  "costRub": 400,
+                  "reason": "Полчаса на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 7,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T09:52",
+                    "departAt": "2026-10-25T10:52",
+                    "kmFromPrev": 61
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T11:45",
+                    "departAt": "2026-10-25T12:15",
+                    "kmFromPrev": 63
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T12:19",
+                    "departAt": "2026-10-25T12:49",
+                    "kmFromPrev": 2
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 11,
+                    "arriveAt": "2026-10-25T12:55",
+                    "departAt": "2026-10-25T13:55",
+                    "kmFromPrev": 3
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 12,
+                    "arriveAt": "2026-10-25T13:57",
+                    "departAt": "2026-10-25T14:27",
+                    "kmFromPrev": 1
+                  },
+                  {
+                    "stopId": "d2s07",
+                    "seq": 13,
+                    "arriveAt": "2026-10-25T15:47",
+                    "departAt": "2026-10-25T16:07",
+                    "kmFromPrev": 101
+                  },
+                  {
+                    "stopId": "d2s08",
+                    "seq": 14,
+                    "arriveAt": "2026-10-25T16:48",
+                    "departAt": null,
+                    "kmFromPrev": 40
+                  }
+                ]
+              },
+              {
                 "id": "alt_d2s06_pl_prs_botik",
                 "placeId": "pl_prs_botik",
                 "name": "Музей-усадьба «Ботик Петра Первого»",
@@ -2990,114 +3101,6 @@
                     "stopId": "d2s08",
                     "seq": 14,
                     "arriveAt": "2026-10-25T17:21",
-                    "departAt": null,
-                    "kmFromPrev": 40
-                  }
-                ]
-              },
-              {
-                "id": "alt_d2s06_pl_prs_iron",
-                "placeId": "pl_prs_iron",
-                "name": "Музей утюга",
-                "deltaMin": -37,
-                "deltaRub": -210,
-                "shiftMin": -37,
-                "units": {
-                  "deltaKm": -2.927,
-                  "regionCode": "RU-YAR",
-                  "checkRub": null,
-                  "adultRub": 200,
-                  "childRub": 100,
-                  "name": "Музей утюга",
-                  "placeId": "pl_prs_iron",
-                  "priceRub": "61.90",
-                  "regionName": "Ярославская область",
-                  "tripKmDelta": -3
-                },
-                "stop": {
-                  "id": "d2s06",
-                  "seq": 12,
-                  "day": 2,
-                  "kind": "sight",
-                  "sign": "tourist",
-                  "placeId": "pl_prs_iron",
-                  "townId": "t_pereslavl",
-                  "name": "Музей утюга",
-                  "note": null,
-                  "lat": 56.737908743465916,
-                  "lon": 38.86085108526628,
-                  "arriveAt": "2026-10-25T13:57",
-                  "departAt": "2026-10-25T14:27",
-                  "tz": "Europe/Moscow",
-                  "kmFromPrev": 1,
-                  "kmAt": 386,
-                  "dwellMin": 30,
-                  "tags": [
-                    "museum"
-                  ],
-                  "costRub": 400,
-                  "reason": "Полчаса на осмотр.",
-                  "verified": true,
-                  "replaceable": true,
-                  "alternatives": [],
-                  "alternativesNote": null,
-                  "hotelOptions": [],
-                  "selectedHotelId": null
-                },
-                "dayPatch": [
-                  {
-                    "stopId": "d2s01",
-                    "seq": 7,
-                    "arriveAt": null,
-                    "departAt": "2026-10-25T09:00",
-                    "kmFromPrev": 0
-                  },
-                  {
-                    "stopId": "d2s02",
-                    "seq": 8,
-                    "arriveAt": "2026-10-25T09:52",
-                    "departAt": "2026-10-25T10:52",
-                    "kmFromPrev": 61
-                  },
-                  {
-                    "stopId": "d2s03",
-                    "seq": 9,
-                    "arriveAt": "2026-10-25T11:45",
-                    "departAt": "2026-10-25T12:15",
-                    "kmFromPrev": 63
-                  },
-                  {
-                    "stopId": "d2s04",
-                    "seq": 10,
-                    "arriveAt": "2026-10-25T12:19",
-                    "departAt": "2026-10-25T12:49",
-                    "kmFromPrev": 2
-                  },
-                  {
-                    "stopId": "d2s05",
-                    "seq": 11,
-                    "arriveAt": "2026-10-25T12:55",
-                    "departAt": "2026-10-25T13:55",
-                    "kmFromPrev": 3
-                  },
-                  {
-                    "stopId": "d2s06",
-                    "seq": 12,
-                    "arriveAt": "2026-10-25T13:57",
-                    "departAt": "2026-10-25T14:27",
-                    "kmFromPrev": 1
-                  },
-                  {
-                    "stopId": "d2s07",
-                    "seq": 13,
-                    "arriveAt": "2026-10-25T15:47",
-                    "departAt": "2026-10-25T16:07",
-                    "kmFromPrev": 101
-                  },
-                  {
-                    "stopId": "d2s08",
-                    "seq": 14,
-                    "arriveAt": "2026-10-25T16:48",
                     "departAt": null,
                     "kmFromPrev": 40
                   }

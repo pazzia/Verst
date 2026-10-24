@@ -2,6 +2,7 @@ package app.verst.core.model
 
 import app.verst.core.model.dto.EngineErrorDto
 import app.verst.core.model.dto.EstimateDto
+import app.verst.core.model.dto.PlaceNameDto
 import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.ReadyRouteDto
@@ -60,6 +61,7 @@ object EngineJson {
         }
 
     fun estimate(envelope: String) = decode(envelope, EstimateDto.serializer())
+    fun placeName(envelope: String) = decode(envelope, PlaceNameDto.serializer().nullable)
     fun kmList(envelope: String) = decode(envelope, ListSerializer(Int.serializer().nullable))
 
     fun trip(text: String): TripDto = json.decodeFromString(TripDto.serializer(), text)
@@ -76,6 +78,9 @@ data class GeoPoint(val label: String, val lat: Double, val lon: Double)
 /** Bodies of `patch_cost` (A§16.9) and `estimate_points`. */
 object EngineArgs {
     fun reservePatch(on: Boolean): String = buildJsonObject { put("reserveOn", on) }.toString()
+
+    fun hotelPatch(stopId: String, placeId: String): String =
+        buildJsonObject { put("hotelChoice", buildJsonObject { put("stopId", stopId); put("placeId", placeId) }) }.toString()
 
     fun points(points: List<GeoPoint>): String =
         kotlinx.serialization.json.JsonArray(points.map { p -> buildJsonObject { put("lat", p.lat); put("lon", p.lon) } }).toString()

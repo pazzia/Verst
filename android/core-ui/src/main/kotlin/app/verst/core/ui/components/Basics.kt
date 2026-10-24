@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -120,6 +121,8 @@ fun StepperKey(glyph: String, enabled: Boolean, cd: String, onClick: () -> Unit,
             .size(DesignTokens.size.keyW, DesignTokens.size.keyH)
             .clip(RoundedCornerShape(DesignTokens.radius.r10))
             .background(C.dash.controlAlt)
+            // S-28 `shadow.key`: a 3 dp inner bottom band of `dash.keyShadow` (none when disabled).
+            .drawBehind { if (enabled) drawRect(C.dash.keyShadow, androidx.compose.ui.geometry.Offset(0f, size.height - 3.dp.toPx()), androidx.compose.ui.geometry.Size(size.width, 3.dp.toPx())) }
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics { contentDescription = cd },
         contentAlignment = Alignment.Center,

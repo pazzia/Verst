@@ -155,6 +155,7 @@ class Town:
     quality: int
     evening_walk: bool
     lodging_count_cache: int
+    name_gen_ru: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -499,6 +500,8 @@ class HotelOption:
     rooms: int
     price_crew_rub: int
     verified: bool
+    # OI-41: distance from the route (motorway exit) to the hotel in metres, for the 5.7 exit sign «800 м».
+    exit_distance_m: int = 0
 
 
 @dataclass(frozen=True, slots=True)

@@ -48,7 +48,7 @@ from verst_planner.domain import codec
 from verst_planner.domain.errors import InvalidInput, PlanCancelled, PlannerError, TooShort, Unreachable
 from verst_planner.domain.model import UNSET, CostPatch, GeoSuggestion, LatLon, TripPlan
 from verst_planner.engine import Planner
-from verst_planner.events import CancelToken, PlanEvent, event_to_json
+from verst_planner.events import NULL_SINK, CancelToken, PlanEvent, event_to_json
 from verst_planner.explain import ru
 from verst_planner.explain.share import share_text as render_share_text
 from verst_planner.explain.templates import ReasonTemplates
@@ -311,6 +311,7 @@ def set_clock(spec: str) -> str:
 
 def _suggestion(world: FakeWorld, s: GeoSuggestion) -> dict[str, Any]:
     key = "suggest.sub.city" if s.kind == "city" else "suggest.sub.place"
+    town = world.towns.get(s.osm_id or "") if s.kind == "city" else None
     return {
         "kind": s.kind,
         "name": s.name_ru,
@@ -318,6 +319,9 @@ def _suggestion(world: FakeWorld, s: GeoSuggestion) -> dict[str, Any]:
         "lat": s.point.lat,
         "lon": s.point.lon,
         "id": s.osm_id,
+        # OI-39: the forms the app's copy needs («из Ярославля», «в Ярославле»); null for places.
+        "nameGenRu": ru.genitive(town) if town else None,
+        "namePrepRu": ru.prepositional(town) if town else None,
     }
 
 
@@ -363,7 +367,13 @@ def reverse(world: str, lat: float, lon: float) -> str:
         label = w.fakes.geocoding.reverse(p)
         if label is None:
             return None
-        return {"name": label.name_ru, "subtitle": ru.text("suggest.sub.city", region=label.subtitle_ru)}
+        town = next((t for t in w.world.towns.values() if t.name_ru == label.name_ru), None)
+        return {
+            "name": label.name_ru,
+            "subtitle": ru.text("suggest.sub.city", region=label.subtitle_ru),
+            "nameGenRu": ru.genitive(town) if town else label.name_ru,
+            "namePrepRu": ru.prepositional(town) if town else label.name_ru,
+        }
 
     return _envelope(run)
 
@@ -427,19 +437,40 @@ class _ListenerSink:
                 )
 
 
-def _trip_result(plan: TripPlan) -> dict[str, Any]:
-    """The private trip, its share text and the Waybill footnote month/year («октябрь», "2026")."""
+def _trip_result(plan: TripPlan, world: FakeWorld | None = None) -> dict[str, Any]:
+    """The private trip, its share text, the Waybill footnote month/year («октябрь», "2026") and the
+    prepositional names of the overnight towns (5.7 «Отметим ночёвку в Ярославле…»)."""
     month, year = ru.month_year_ru(plan.cost.prices_as_of).split(" ")
+    prep: dict[str, str] = {}
+    gen: dict[str, str] = {}
+    if world is not None:
+        for d in plan.days_list:
+            for s in d.stops:
+                town = world.towns.get(s.town_id or "")
+                if town is not None:
+                    prep[town.id] = ru.prepositional(town)
+                    gen[town.id] = ru.genitive(town)
     return {
         "trip": codec.plan_to_json(plan, public=False),
         "shareText": render_share_text(plan),
         "pricesMonthRu": month,
         "pricesYear": year,
+        "townPrepRu": prep,
+        "townGenRu": gen,
     }
 
 
-def _run_plan(w: _World, request_id: Any, input_json: Any, sink: Any) -> TripPlan:
-    """Decode the input and run `Planner.plan` under a cancel token registered for `request_id`."""
+_TRIP_KM: dict[str, int] = {}  # (world, canonical input) → trip km of an `estimate` (bounded, oldest evicted)
+TRIP_KM_CACHE = 64
+
+
+def _input_key(world_id: str, raw: Any) -> str:
+    return world_id + "\n" + json.dumps(raw, sort_keys=True, ensure_ascii=False)
+
+
+def _run_plan(w: _World, request_id: Any, input_json: Any, sink: Any, hint: bool = False) -> TripPlan:
+    """Decode the input and run `Planner.plan` under a cancel token registered for `request_id`. With
+    `hint`, the split stage uses the trip km of an identical earlier `estimate` (run quietly if missing)."""
     raw = _decode(input_json, "input")
     if not isinstance(raw, dict):
         raise _BadInput("input: not an object")
@@ -452,17 +483,36 @@ def _run_plan(w: _World, request_id: Any, input_json: Any, sink: Any) -> TripPla
             raise PlanCancelled()
         _CANCELS[rid] = token
     try:
-        return w.planner.plan(trip_input, sink, token)
+        km: int | None = None
+        if hint:
+            key = _input_key(w.world.id, raw)
+            km = _TRIP_KM.get(key)
+            if km is None:
+                km = w.planner.plan(trip_input, NULL_SINK, token).km
+        plan = w.planner.plan(trip_input, sink, token, split_km_hint=km)
+        _remember_km(w.world.id, raw, plan.km)
+        return plan
     finally:
         with _LOCK:
             if _CANCELS.get(rid) is token:
                 del _CANCELS[rid]
 
 
+def _remember_km(world_id: str, raw: Any, km: int) -> None:
+    key = _input_key(world_id, raw)
+    _TRIP_KM.pop(key, None)
+    _TRIP_KM[key] = km
+    while len(_TRIP_KM) > TRIP_KM_CACHE:
+        del _TRIP_KM[next(iter(_TRIP_KM))]
+
+
 def plan(world: str, request_id: str, input_json: str, listener: Any = None) -> str:
     """Plan a trip; `listener.onEvent(json)` per progress event; cancellable by `cancel(request_id)`."""
     return _envelope(
-        lambda: _trip_result(_run_plan(_world(world), request_id, input_json, _ListenerSink(listener)))
+        lambda: _trip_result(
+            _run_plan(_world(world), request_id, input_json, _ListenerSink(listener), hint=True),
+            _world(world).world,
+        )
     )
 
 
@@ -559,7 +609,9 @@ def replace_stop(world: str, trip_json: str, stop_id: str, alt_id: str) -> str:
     def run() -> dict[str, Any]:
         w = _world(world)
         trip = _trip(trip_json)
-        return _trip_result(w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")))
+        return _trip_result(
+            w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")), w.world
+        )
 
     return _envelope(run)
 
@@ -602,7 +654,7 @@ def patch_cost(world: str, trip_json: str, patch_json: str) -> str:
 
     def run() -> dict[str, Any]:
         w = _world(world)
-        return _trip_result(w.planner.recompute_cost(_trip(trip_json), _cost_patch(patch_json)))
+        return _trip_result(w.planner.recompute_cost(_trip(trip_json), _cost_patch(patch_json)), w.world)
 
     return _envelope(run)
 

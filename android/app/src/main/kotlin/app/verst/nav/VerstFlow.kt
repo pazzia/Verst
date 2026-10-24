@@ -18,6 +18,9 @@ import app.verst.core.model.SavedTrips
 import app.verst.core.model.TripFigures
 import app.verst.core.model.TripFiguresPick
 import app.verst.core.model.TripMath
+import app.verst.core.model.cost.CostApply
+import app.verst.core.model.cost.LocalCost
+import app.verst.engine.Connectivity
 import app.verst.core.model.dto.EngineErrorDto
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.ReadyRouteDto
@@ -37,7 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** The routes of the slice (M§7 subset). */
-enum class Route { Windshield, Navigator, Instruments, Drive, Road, Waybill }
+enum class Route { Windshield, Navigator, Instruments, Drive, Road, Waybill, Exit, Debug }
 
 sealed interface WindshieldData {
     data object Loading : WindshieldData
@@ -58,6 +61,8 @@ data class DriveUi(
     val days: Int = 0,
     val done: Boolean = false,
     val error: EngineErrorDto? = null,
+    /** 5.4 flying signs: the engine's `stop` events in arrival order. */
+    val signs: List<app.verst.core.model.dto.StopEventDto> = emptyList(),
 )
 
 /** Plate toasts of 5.5/5.6/D-6 (components §16 `PlateToast`); the screen picks the copy by type. */
@@ -67,6 +72,11 @@ sealed interface Toast {
     data class SavedNearLimit(val count: Int) : Toast
     data object StorageFull : Toast
     data object EngineFailed : Toast
+    data object NeedInternet : Toast
+
+    /** «Отметили: ночёвка в … забронирована» + «Вернуть» (stop id). */
+    data class Booked(val stopId: String) : Toast
+    data object TripDeleted : Toast
 }
 
 /** The D-6 replace sheet: the stop, the picked alternative (null = keep), whether the engine call runs. */
@@ -84,6 +94,8 @@ class VerstFlow(
     private val store: TripStore,
     private val io: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
+    /** E-08 / M§9: simulated connectivity (the mock needs no network; the debug panel switches it off). */
+    val connectivity: Connectivity = Connectivity(),
     private val retryEngine: () -> Unit,
 ) {
     val stack = mutableStateListOf(Route.Windshield)
@@ -177,11 +189,83 @@ class VerstFlow(
     var tripsSheet by mutableStateOf(false)
         private set
 
+    /** D-1 deletion: the trip awaiting confirmation (NaviDialog), the last deleted one for «Вернуть». */
+    var deleteAsk: SavedTripDto? by mutableStateOf(null)
+        private set
+    private var lastDeleted: Pair<Int, SavedTripDto>? = null
+
+    /** 5.5 §4 limit: the «Место для поездок закончилось» dialog. */
+    var limitDialog by mutableStateOf(false)
+        private set
+
+    // ---- Exit 5.7 / D-10
+    var exitStopId: String? by mutableStateOf(null)
+        private set
+    var partnerOpen by mutableStateOf(false)
+        private set
+    var bookedDialog by mutableStateOf(false)
+        private set
+
+    /** 5.7 §8: per overnight stop, the hotel marked «Забронировали» (persisted with a saved trip). */
+    val booked = mutableStateMapOf<String, String>()
+    private var undoBooked: String? = null
+
+    /** OI-39: the origin's genitive from the engine («Москвы»), the nominative until known. */
+    var originGen by mutableStateOf(DefaultOrigin.label)
+        private set
+
+    /** Trips whose Waybill stamp has played (motion.stamp once per trip version, 5.6 §3.1). */
+    private val stampShown = mutableSetOf<String>()
+
+    // ---- DEV-127 debug panel (plain list, not part of visual QA)
+    var debugGolden by mutableStateOf(false)
+        private set
+    var debugSlowSec by mutableStateOf(0)
+    /** null = no forced error; else the engine code the next plan returns. */
+    var debugForceError: String? by mutableStateOf(null)
+    val debugWorld: String get() = gateway.world
+
+    fun openDebug() = push(Route.Debug)
+
+    fun setWorld(id: String) {
+        if (gateway.world == id) return
+        gateway.world = id
+        origin = if (id == app.verst.core.model.DefaultWorld) DefaultOrigin else GeoPoint("Тестовск", 58.0, 50.0)
+        originGen = origin.label
+        known.clear()
+        rowKm.clear()
+        popular = emptyList()
+        destination = null
+        loadRoutes()
+        loadOriginForms()
+    }
+
+    fun setGoldenClock(on: Boolean) {
+        debugGolden = on
+        known.clear()
+        scope.launch { gateway.setClock(if (on) "golden" else "system") }
+    }
+
+    fun setOffline(on: Boolean) {
+        connectivity.online = !on
+    }
+
+    /** «Сбросить данные»: saved trips, the current trip and the draft. */
+    fun resetData() {
+        clearSaved()
+        result = null
+        booked.clear()
+        destination = null
+        known.clear()
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+    }
+
     val adults: Int get() = 1 + (if (frontAdult) 1 else 0) + seats.count { it == Seat.ADULT }
     val children: Int get() = seats.count { it == Seat.CHILD }
 
     init {
         loadRoutes()
+        loadOriginForms()
         scope.launch {
             val trips = withContext(io) { runCatching { store.load() }.getOrDefault(emptyList()) }
             saved.clear()
@@ -214,6 +298,22 @@ class VerstFlow(
     fun back(): Boolean {
         if (replace != null) {
             closeReplace()
+            return true
+        }
+        if (bookedDialog) {
+            answerBooked(false)
+            return true
+        }
+        if (partnerOpen) {
+            closePartner()
+            return true
+        }
+        if (deleteAsk != null) {
+            deleteAsk = null
+            return true
+        }
+        if (limitDialog) {
+            limitDialog = false
             return true
         }
         if (tripsSheet) {
@@ -331,6 +431,8 @@ class VerstFlow(
     fun pick(s: SuggestionDto) {
         if (editingFrom) {
             origin = GeoPoint(s.name, s.lat, s.lon)
+            originGen = s.nameGenRu ?: s.name
+            if (s.nameGenRu == null) loadOriginForms()
             rowKm.clear()
             editingFrom = false
             loadRoutes()
@@ -435,16 +537,27 @@ class VerstFlow(
             val pending = ArrayDeque<Pair<String, Float>>() // stage text, engine progress at that stage
             var days = 0
             var finished: EngineResult<PlanResultDto>? = null
+            val forced = debugForceError
+            val slowMs = debugSlowSec * 1000L
             val engine = launch {
+                if (forced != null) {
+                    delay(STEP_GAP_MS)
+                    finished = EngineResult.Err(EngineErrorDto(forced, "debug: forced"))
+                    return@launch
+                }
                 finished = gateway.plan(id, request) { ev ->
                     when (ev.event) {
                         "stage" -> ev.text?.let { t ->
                             if (pending.none { it.first == t } && t !in drive.lines) pending.addLast(t to (ev.progress ?: 0.0).toFloat())
                         }
-                        "stop" -> days = maxOf(days, ev.day ?: 0) // days as the engine splits them, not the estimate
+                        "stop" -> {
+                            days = maxOf(days, ev.day ?: 0) // days as the engine splits them, not the estimate
+                            ev.stop?.let { st -> drive = drive.copy(signs = drive.signs + st) }
+                        }
                     }
                     Unit
                 }
+                if (slowMs > 0) delay(slowMs) // debug «Задержать готовность плана»
             }
             // Pacer: reveal one step per 400 ms while the engine works (or until the queue is empty); the bar
             // follows the revealed step, so it never runs ahead of the text.
@@ -475,8 +588,18 @@ class VerstFlow(
         }
     }
 
-    private fun showTrip(r: PlanResultDto, request: PlanRequest?, bearing: String, savedId: String?, fromSaved: Boolean) {
+    private fun showTrip(
+        r: PlanResultDto,
+        request: PlanRequest?,
+        bearing: String,
+        savedId: String?,
+        fromSaved: Boolean,
+        bookedStops: Map<String, String> = emptyMap(),
+    ) {
         result = r
+        tripSession += 1
+        booked.clear()
+        booked.putAll(bookedStops)
         resultRequest = request
         resultBearing = bearing
         this.savedId = savedId
@@ -543,12 +666,120 @@ class VerstFlow(
         val r = result ?: return
         if (costBusy) return
         costBusy = true
+        val on = !r.trip.cost.reserveOn
+        // Local first (DEV-104 CostCalculator), then the engine's answer overwrites the whole trip.
+        localCost(r) { trip -> CostApply.apply(r.trip, LocalCost.reserve(trip, on), on) }
         scope.launch {
-            when (val p = gateway.patchCost(r.tripJson, EngineArgs.reservePatch(!r.trip.cost.reserveOn))) {
+            when (val p = gateway.patchCost(r.tripJson, EngineArgs.reservePatch(on))) {
                 is EngineResult.Ok -> updateTrip(p.value)
-                is EngineResult.Err -> showToast(Toast.EngineFailed)
+                is EngineResult.Err -> {
+                    result = r
+                    showToast(Toast.EngineFailed)
+                }
             }
             costBusy = false
+        }
+    }
+
+    /** Shows [f]'s local trip at once (the engine trip JSON stays the source for the next engine call). */
+    private fun localCost(r: PlanResultDto, f: (kotlinx.serialization.json.JsonObject) -> app.verst.core.model.dto.TripDto) {
+        runCatching { f(LocalCost.parse(r.tripJson)) }.onSuccess { result = r.copy(trip = it) }
+    }
+
+    /** Waybill stamp: true the first time it is asked for this trip version (then the final frame). */
+    fun stampOnce(): Boolean = stampShown.add(tripSession.toString())
+
+    /** Increments when a new trip is shown (plan or reopened saved trip); cost edits keep the session. */
+    var tripSession by mutableStateOf(0)
+        private set
+
+    // ------------------------------------------------------------------------------------------ exit 5.7
+
+    /** Road-ahead night row «Выбрать отель →» → 5.7 for that night. */
+    fun openExit(stopId: String) {
+        exitStopId = stopId
+        partnerOpen = false
+        bookedDialog = false
+        push(Route.Exit)
+    }
+
+    /** A hotel option: local recompute + selection now, `patch_cost {hotelChoice}` overwrites. */
+    fun selectHotel(stopId: String, placeId: String) {
+        val r = result ?: return
+        val stop = r.trip.daysList.flatMap { it.stops }.firstOrNull { it.id == stopId } ?: return
+        if (stop.selectedHotelId == placeId || costBusy) return
+        costBusy = true
+        localCost(r) { trip -> CostApply.apply(r.trip, LocalCost.hotel(trip, stopId, placeId), r.trip.cost.reserveOn, stopId to placeId) }
+        scope.launch {
+            when (val p = gateway.patchCost(r.tripJson, EngineArgs.hotelPatch(stopId, placeId))) {
+                is EngineResult.Ok -> updateTrip(p.value)
+                is EngineResult.Err -> {
+                    result = r
+                    showToast(Toast.EngineFailed)
+                }
+            }
+            costBusy = false
+        }
+    }
+
+    /** «Забронировать ночь» / «Открыть бронирование» → the mock partner sheet (D-13); offline → toast. */
+    fun book() {
+        if (!connectivity.online) {
+            showToast(Toast.NeedInternet)
+            return
+        }
+        partnerOpen = true
+    }
+
+    fun needInternet() = showToast(Toast.NeedInternet)
+
+    private fun selectedHotel(stopId: String): String? =
+        result?.trip?.daysList?.flatMap { it.stops }?.firstOrNull { it.id == stopId }?.let { it.selectedHotelId ?: it.hotelOptions.firstOrNull()?.placeId }
+
+    /** The selected hotel of [stopId] is the booked one (Road «Забронировано», 5.7 booked CTA). */
+    fun isBooked(stopId: String): Boolean = booked[stopId] != null && booked[stopId] == selectedHotel(stopId)
+
+    /** Sheet dismissed (button, ×, back) → «Забронировали?» unless the selected hotel is already booked. */
+    fun closePartner() {
+        partnerOpen = false
+        val sid = exitStopId ?: return
+        if (!isBooked(sid)) bookedDialog = true
+    }
+
+    /** «Да, забронировали» marks the selected hotel (moving the mark, one per night) + toast with «Вернуть». */
+    fun answerBooked(yes: Boolean) {
+        bookedDialog = false
+        val sid = exitStopId ?: return
+        val pid = selectedHotel(sid) ?: return
+        if (yes) {
+            undoBooked = booked[sid] ?: ""
+            booked[sid] = pid
+            persistBooking()
+            showToast(Toast.Booked(sid))
+        }
+    }
+
+    /** «Вернуть» on the booked toast: the previous mark (or none). */
+    fun undoBooking() {
+        val sid = exitStopId ?: return
+        val prev = undoBooked ?: return
+        undoBooked = null
+        if (prev.isEmpty()) booked.remove(sid) else booked[sid] = prev
+        persistBooking()
+        dismissToast()
+    }
+
+    private fun persistBooking() {
+        savedCurrent = false
+        if (savedId != null) save(silent = true) // a saved trip keeps its booking at once
+    }
+
+    /** The origin's name forms from the engine (OI-39). */
+    private fun loadOriginForms() {
+        val o = origin
+        scope.launch {
+            val r = gateway.reverse(o)
+            if (r is EngineResult.Ok && o == origin) r.value?.nameGenRu?.let { originGen = it }
         }
     }
 
@@ -577,6 +808,8 @@ class VerstFlow(
         val alt = ui.picked ?: return
         val r = result ?: return
         replace = ui.copy(busy = true)
+        // Local total first (the row itself changes with the engine's answer a moment later).
+        localCost(r) { trip -> CostApply.apply(r.trip, LocalCost.replace(trip, ui.stop.id, alt) ?: error("no units"), r.trip.cost.reserveOn) }
         scope.launch {
             when (val n = gateway.replaceStop(r.tripJson, ui.stop.id, alt)) {
                 is EngineResult.Ok -> {
@@ -586,6 +819,7 @@ class VerstFlow(
                     showToast(Toast.Replaced(n.value.trip.cost.totalRub))
                 }
                 is EngineResult.Err -> {
+                    result = r
                     replace = null
                     showToast(Toast.EngineFailed)
                 }
@@ -607,9 +841,10 @@ class VerstFlow(
         toast = t
         toastJob?.cancel()
         toastJob = scope.launch {
-            delay(if (t is Toast.Replaced) 6_000 else 3_000)
+            delay(if (t is Toast.Replaced || t is Toast.TripDeleted || t is Toast.Booked) 6_000 else 3_000)
             toast = null
             if (t is Toast.Replaced) undoTrip = null
+            if (t is Toast.TripDeleted) lastDeleted = null
         }
     }
 
@@ -621,22 +856,75 @@ class VerstFlow(
     // ------------------------------------------------------------------------------------------ saved trips
 
     /** Save (5.5 T1 / 5.6 K1): upsert into the saved list, then write the file. */
-    fun save() {
+    fun save(silent: Boolean = false) {
         val r = result ?: return
         val id = savedId ?: UUID.randomUUID().toString()
-        when (val up = SavedTrips.upsert(saved.toList(), SavedTrips.entry(id, now(), r, resultBearing))) {
-            SavedTrips.Upsert.LimitReached -> showToast(Toast.StorageFull)
+        when (val up = SavedTrips.upsert(saved.toList(), SavedTrips.entry(id, now(), r, resultBearing, booked.toMap()))) {
+            SavedTrips.Upsert.LimitReached -> limitDialog = true
             is SavedTrips.Upsert.Saved -> {
                 saved.clear()
                 saved.addAll(up.trips)
                 savedId = id
                 savedCurrent = true
-                showToast(if (up.nearLimit) Toast.SavedNearLimit(up.count) else Toast.Saved)
-                val snapshot = up.trips
-                scope.launch { withContext(io) { runCatching { store.save(snapshot) } } }
+                if (!silent) showToast(if (up.nearLimit) Toast.SavedNearLimit(up.count) else Toast.Saved)
+                persist()
             }
         }
     }
+
+    private fun persist() {
+        val snapshot = saved.toList()
+        scope.launch { withContext(io) { runCatching { store.save(snapshot) } } }
+    }
+
+    /** Limit dialog «Мои поездки» → back to the Windshield with the trips sheet open. */
+    fun limitToTrips() {
+        limitDialog = false
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+        tripsSheet = true
+    }
+
+    fun dismissLimit() {
+        limitDialog = false
+    }
+
+    /** D-1 long-press / TalkBack «Удалить» → confirmation dialog. */
+    fun askDelete(id: String) {
+        deleteAsk = saved.firstOrNull { it.id == id }
+    }
+
+    fun cancelDelete() {
+        deleteAsk = null
+    }
+
+    /** «Удалить»: removed at once, toast «Поездка удалена» + «Вернуть» (6 s). */
+    fun confirmDelete() {
+        val t = deleteAsk ?: return
+        deleteAsk = null
+        val (rest, removed) = SavedTrips.remove(saved.toList(), t.id)
+        lastDeleted = removed
+        saved.clear()
+        saved.addAll(rest)
+        if (savedId == t.id) {
+            savedId = null
+            savedCurrent = false
+        }
+        if (saved.isEmpty()) tripsSheet = false
+        persist()
+        showToast(Toast.TripDeleted)
+    }
+
+    fun undoDelete() {
+        val removed = lastDeleted ?: return
+        lastDeleted = null
+        val back = SavedTrips.restore(saved.toList(), removed)
+        saved.clear()
+        saved.addAll(back)
+        persist()
+        dismissToast()
+    }
+
+    val canUndoDelete: Boolean get() = lastDeleted != null && toast == Toast.TripDeleted
 
     /** Waybill «№ 001»: the trip's ordinal among the saved trips (1 when not saved). */
     val waybillNumber: Int
@@ -650,7 +938,7 @@ class VerstFlow(
     fun openSaved(id: String) {
         val s = saved.firstOrNull { it.id == id } ?: return
         tripsSheet = false
-        showTrip(SavedTrips.result(s), request = null, bearing = s.bearing8, savedId = s.id, fromSaved = true)
+        showTrip(SavedTrips.result(s), request = null, bearing = s.bearing8, savedId = s.id, fromSaved = true, bookedStops = s.bookedHotels)
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
         push(Route.Road)
     }

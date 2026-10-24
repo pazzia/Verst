@@ -37,6 +37,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.AlternativeDto
@@ -80,6 +82,10 @@ data class RoadUi(
     val replace: ReplaceUi? = null,
     val toast: Toast? = null,
     val canUndo: Boolean = false,
+    /** Overnight stop ids marked as booked (D-10) → «Забронировано ✓». */
+    val booked: Set<String> = emptySet(),
+    /** townId → prepositional name (engine `townPrepRu`) for «Выбрать отель в Ярославле». */
+    val townPrep: Map<String, String> = emptyMap(),
 )
 
 interface RoadActions {
@@ -92,6 +98,8 @@ interface RoadActions {
     fun confirmReplace()
     fun closeReplace()
     fun undo()
+    /** «Выбрать отель →» on a night row → 5.7 for that night. */
+    fun hotel(stopId: String)
 }
 
 /** 5.5 Road ahead: the day-by-day signs of the plan, «заменить» (D-6), save/share, the Waybill footer. */
@@ -125,7 +133,7 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                         Column(Modifier.fillMaxWidth().roadSection()) {
                             trip.daysList.forEachIndexed { di, d ->
                                 DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0)
-                                d.stops.forEachIndexed { si, st -> StopRow(st, di == 0 && si == 0) { a.replace(st) } }
+                                d.stops.forEachIndexed { si, st -> StopRow(st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name, { a.hotel(st.id) }) { a.replace(st) } }
                             }
                             Spacer(Modifier.height(24.dp))
                         }
@@ -158,27 +166,24 @@ private fun androidx.compose.foundation.layout.BoxScope.ReplaceSheet(r: ReplaceU
         Txt(stringResource(R.string.replace_subtitle), T.body.sm, C.text.secondary, Modifier.padding(bottom = 10.dp))
         Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             // Sub-line: the engine's own sentence for the place (copy has no per-tag labels for food/rest yet).
-            OptionRow(s.name, s.note ?: s.reason, stringResource(R.string.replace_current), r.picked == null, "replace.current") { a.pick(null) }
+            OptionRow(s, s.name, s.note ?: s.reason, stringResource(R.string.replace_current), r.picked == null, "replace.current") { a.pick(null) }
             s.alternatives.forEachIndexed { i, alt ->
-                OptionRow(alt.name, alt.stop?.note ?: alt.stop?.reason, deltaText(alt), r.picked == alt.id, "replace.alt.$i") { a.pick(alt.id) }
+                OptionRow(alt.stop ?: s, alt.name, alt.stop?.note ?: alt.stop?.reason, deltaText(alt), r.picked == alt.id, "replace.alt.$i") { a.pick(alt.id) }
             }
         }
         val note = s.alternativesNote
         if (note != null) Txt(note, T.body.md, C.text.note, Modifier.padding(top = 10.dp))
         Spacer(Modifier.height(14.dp))
         if (s.alternatives.isNotEmpty()) {
+            // N-13: `YellowButton` h 56, sentence case, no arrow; disabled until another row is picked.
             val enabled = r.picked != null && !r.busy
-            Box(Modifier.fillMaxWidth().testTag("replace.confirm")) {
-                if (enabled) {
-                    PrimaryCta(stringResource(R.string.replace_confirm).uppercase(), a::confirmReplace)
-                } else {
-                    Box(
-                        Modifier.fillMaxWidth().height(DesignTokens.size.ctaH).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.dash.control)
-                            .padding(horizontal = 18.dp),
-                        contentAlignment = Alignment.CenterStart,
-                    ) { Txt(stringResource(R.string.replace_confirm).uppercase(), T.cta.md, C.text.disabled, maxLines = 1) }
-                }
-            }
+            Box(
+                Modifier.fillMaxWidth().height(DesignTokens.size.buttonH).clip(RoundedCornerShape(DesignTokens.radius.r12))
+                    .background(if (enabled) C.accent.yellow else C.dash.control)
+                    .clickable(enabled = enabled, role = Role.Button, onClick = a::confirmReplace)
+                    .testTag("replace.confirm"),
+                contentAlignment = Alignment.Center,
+            ) { Txt(stringResource(R.string.replace_confirm), T.cta.sm, if (enabled) C.text.onLight else C.text.disabled, maxLines = 1) }
         }
         Box(
             Modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = a::closeReplace)
@@ -188,26 +193,27 @@ private fun androidx.compose.foundation.layout.BoxScope.ReplaceSheet(r: ReplaceU
     }
 }
 
-/** HotelOption-style radio row (components §12.2, D-6). */
+/** D-6 row (N-08): min-h 64, `dash.controlAlt`, radius 10, padding 10 12; radio, the kind's mini sign at 0.7. */
 @Composable
-private fun OptionRow(name: String, sub: String?, delta: String, selected: Boolean, tag: String, onClick: () -> Unit) {
+private fun OptionRow(kind: StopDto, name: String, sub: String?, delta: String, selected: Boolean, tag: String, onClick: () -> Unit) {
     val shape = RoundedCornerShape(DesignTokens.radius.r10)
     Row(
         Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = DesignTokens.size.hotelRowMinH)
+            .defaultMinSize(minHeight = 64.dp)
             .clip(shape)
-            .background(if (selected) C.dash.controlAlt else C.dash.raised)
-            .border(DesignTokens.stroke.w1, if (selected) C.accent.yellow else C.dash.outline, shape)
+            .background(C.dash.controlAlt)
+            .then(if (selected) Modifier.border(DesignTokens.stroke.w1, C.accent.yellow, shape) else Modifier)
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .testTag(tag)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Box(Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellow else C.text.secondary, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) {
             if (selected) Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(C.accent.yellow))
         }
+        RoadSign(kind.sign, kind.name, kind.tags, Modifier.scaled(0.7f))
         Column(Modifier.weight(1f)) {
             Txt(name, T.title.sm, C.text.primary, maxLines = 1)
             if (!sub.isNullOrBlank()) Txt(sub, T.body.sm, C.text.secondary, maxLines = 2)
@@ -216,20 +222,26 @@ private fun OptionRow(name: String, sub: String?, delta: String, selected: Boole
     }
 }
 
-/** «+4 мин · −150 ₽» from `replace_delta` («{sign}{min} мин · {sign}{amount} ₽», copy-ru D-6), one sign per part. */
+/** N-14: `replace_delta` with independent signs; a zero part is dropped (`_min` / `_rub` / `_none`). */
 @Composable
 private fun deltaText(alt: AlternativeDto): String {
-    fun sign(n: Int) = when {
-        n > 0 -> "+"
-        n < 0 -> "−"
-        else -> ""
+    fun sign(n: Int) = if (n > 0) "+" else "−"
+    val min = kotlin.math.abs(alt.deltaMin)
+    val rub = RuFormat.thousands(kotlin.math.abs(alt.deltaRub))
+    return when {
+        alt.deltaMin != 0 && alt.deltaRub != 0 -> stringResource(R.string.replace_delta, sign(alt.deltaMin), min, sign(alt.deltaRub), rub)
+        alt.deltaMin != 0 -> stringResource(R.string.replace_delta_min, sign(alt.deltaMin), min)
+        alt.deltaRub != 0 -> stringResource(R.string.replace_delta_rub, sign(alt.deltaRub), rub)
+        else -> stringResource(R.string.replace_delta_none)
     }
-    val minutes = stringResource(R.string.replace_delta, sign(alt.deltaMin), kotlin.math.abs(alt.deltaMin), RuFormat.thousands(kotlin.math.abs(alt.deltaRub)))
-    if (sign(alt.deltaMin) == sign(alt.deltaRub)) return minutes
-    // Mixed signs: the template uses one sign for both parts, so each part comes from its own rendering.
-    val rub = stringResource(R.string.replace_delta, sign(alt.deltaRub), kotlin.math.abs(alt.deltaMin), RuFormat.thousands(kotlin.math.abs(alt.deltaRub)))
-    val sep = stringResource(R.string.common_join_dot)
-    return minutes.substringBefore(sep) + sep + rub.substringAfter(sep)
+}
+
+/** Lays the content out at [k] of its natural size (the 0.7 mini signs of D-6). */
+private fun Modifier.scaled(k: Float): Modifier = layout { m, _ ->
+    val p = m.measure(androidx.compose.ui.unit.Constraints())
+    val w = (p.width * k).toInt()
+    val h = (p.height * k).toInt()
+    layout(w, h) { p.placeWithLayer((w - p.width) / 2, (h - p.height) / 2) { scaleX = k; scaleY = k } }
 }
 
 @Composable
@@ -254,7 +266,8 @@ private fun TitleSign(trip: TripDto, bearing8: String, modifier: Modifier) {
 private fun Intro(trip: TripDto) {
     // S-21 / 5.5 §2.2: L1 at the list top, L2 +6, L3 +8, road column 18 below L3 (padding 4 + margin 14).
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Txt(stringResource(R.string.road_title), T.display, C.text.primary, Modifier.semantics { heading() })
+        // N-07: the 29.4 line box exactly (no font padding, trimmed line height), so the chips land at +6.
+        Txt(stringResource(R.string.road_title), T.display.copy(lineHeightStyle = TightLines), C.text.primary, Modifier.semantics { heading() })
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             // S-01: the deck's `road_chip_days` («3 дня · 2 ночи»), now with a string 4th argument.
             InfoChip(
@@ -325,7 +338,7 @@ private fun DayHeader(day: DayDto, home: Boolean, first: Boolean) {
 }
 
 @Composable
-private fun StopRow(s: StopDto, first: Boolean, onReplace: () -> Unit) {
+private fun StopRow(s: StopDto, first: Boolean, booked: Boolean, townPrep: String, onHotel: () -> Unit, onReplace: () -> Unit) {
     val line1 = if (first || s.kind == "start") stringResource(R.string.road_start)
     else stringResource(R.string.road_ahead_km, RuFormat.thousands(s.kmFromPrev))
     val unverified = if (!s.verified) stringResource(R.string.common_join_dot) + stringResource(R.string.common_unverified) else ""
@@ -356,10 +369,12 @@ private fun StopRow(s: StopDto, first: Boolean, onReplace: () -> Unit) {
             Txt(name, T.title.md, C.text.primary, maxLines = 2)
             if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note)
             val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
-            if (cost != null || canReplace) {
+            val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
+            if (cost != null || canReplace || hotel) {
                 Row(Modifier.fillMaxWidth().padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                     Txt(cost ?: "", T.body.mdStrong, C.accent.yellow, Modifier.weight(1f))
-                    if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
+                    if (hotel) HotelButton(booked, if (booked) stringResource(R.string.cd_road_booked) else stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
+                    else if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
                 }
             }
         }
@@ -378,6 +393,27 @@ private fun SwapButton(cd: String, tag: String, onClick: () -> Unit) {
             Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 10.dp),
             contentAlignment = Alignment.Center,
         ) { Txt(stringResource(R.string.road_swap), T.body.smStrong, C.text.secondary, maxLines = 1) }
+    }
+}
+
+/** components §2.6 `HotelButton` «Выбрать отель →» (blue), booked «Забронировано ✓». */
+@Composable
+private fun HotelButton(booked: Boolean, cd: String, tag: String, onClick: () -> Unit) {
+    Box(
+        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = cd }.testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier.height(36.dp).clip(RoundedCornerShape(DesignTokens.radius.r8)).background(C.sign.blue).padding(horizontal = 12.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Txt(stringResource(if (booked) R.string.road_booked else R.string.road_pick_hotel), T.body.mdStrong, C.text.primary, maxLines = 1)
+                // N-09: the check is drawn (the font has no «✓»).
+                if (booked) GlyphIcon(Glyph.CHECK, C.text.primary, 16.dp, Modifier.padding(start = 6.dp))
+            }
+        }
     }
 }
 
@@ -422,3 +458,6 @@ private fun Footer(trip: TripDto, onClick: () -> Unit) {
         Icon(R.drawable.ic_arrow_right, C.text.onLight, 22.dp)
     }
 }
+
+
+private val TightLines = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both)

@@ -148,4 +148,6 @@ if not os.environ.get("VERST_GEN_IN_MEMORY"):
         (OUT / rel).write_bytes(gz(body))
     n_items = {k: len(json.loads(v)["items"]) for k, v in GENERATED.items()}
     n_replace = sum(v for k, v in n_items.items() if k.startswith("replace/"))
-    print(f"{len(GENERATED)} bundles: {n_replace} replace items, {sum(n_items.values()) - n_replace} patch items")
+    print(
+        f"{len(GENERATED)} bundles: {n_replace} replace items, {sum(n_items.values()) - n_replace} patch items"
+    )

@@ -1,6 +1,10 @@
 package app.verst
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import app.verst.feature.common.NaviDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
@@ -87,12 +91,12 @@ class ScreensScreenshotTest {
     @Config(qualifiers = "ru-rRU-w360dp-h640dp-port-xxhdpi")
     fun instrumentsShort() = shot("instruments", "default", 360, 640) {
         InstrumentsScreen(
-            InstrumentsUi("Москва → Ярославль", "Москва", false, 265, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 300, 2, null, days = 1),
+            InstrumentsUi("Москва → Ярославль", "Москва", false, 265, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 300, 2, null, days = 1, originGen = "Москвы"),
             noActions,
         )
     }
 
-    private fun windshield(data: WindshieldData) = WindshieldUi("Москва", data, 0, 2, 1, true)
+    private fun windshield(data: WindshieldData) = WindshieldUi("Москва", data, 0, 2, 1, true, originGen = "Москвы") // the engine's `reverse` form (OI-39)
 
     @Test
     fun windshieldDefault() {
@@ -156,7 +160,7 @@ class ScreensScreenshotTest {
     fun instrumentsDefault() {
         shot("instruments", "default") {
             InstrumentsScreen(
-                InstrumentsUi("Золотое кольцо", "Москва", true, 761, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.CALM, days = 3),
+                InstrumentsUi("Золотое кольцо", "Москва", true, 761, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.CALM, days = 3, originGen = "Москвы"),
                 noActions,
             )
         }
@@ -167,7 +171,7 @@ class ScreensScreenshotTest {
     fun driveProgress() = shot("drive", "t1500") {
         DriveScreen(
             DriveUi(listOf("Прокладываем дорогу", "Делим кольцо на 3 дня по ≈ 250 км", "Ищем отели, куда пустят с собакой"), 0.45f, days = 3),
-            "745", { DriveAction.RETRY }, {}, {}, { _, _ -> },
+            "761", { DriveAction.RETRY }, {}, {}, { _, _ -> },
         )
     }
 
@@ -175,7 +179,7 @@ class ScreensScreenshotTest {
     fun driveDone() = shot("drive", "done") {
         DriveScreen(
             DriveUi(listOf("Делим кольцо на 3 дня", "Сверяем часы работы", "Считаем бензин: 8,0 л на 100 км", "Считаем, сколько стоит поездка"), 1f, days = 3, done = true),
-            "745", { DriveAction.RETRY }, {}, {}, { _, _ -> },
+            "761", { DriveAction.RETRY }, {}, {}, { _, _ -> },
         )
     }
 
@@ -191,7 +195,7 @@ class ScreensScreenshotTest {
     @Test
     fun driveErrorInternal() {
         shot("drive", "error-internal") {
-            DriveScreen(DriveUi(error = EngineErrorDto("INTERNAL")), "745", { DriveAction.RETRY }, {}, {}, { _, _ -> })
+            DriveScreen(DriveUi(error = EngineErrorDto("INTERNAL")), "761", { DriveAction.RETRY }, {}, {}, { _, _ -> })
         }
         compose.onNodeWithText("Попробовать ещё раз").assertExists()
     }
@@ -213,6 +217,7 @@ class ScreensScreenshotTest {
         override fun confirmReplace() {}
         override fun closeReplace() {}
         override fun undo() {}
+        override fun hotel(stopId: String) {}
     }
 
     private val noWaybill = object : WaybillActions {
@@ -320,6 +325,89 @@ class ScreensScreenshotTest {
             WindshieldScreen(windshield(WindshieldData.Routes(routes)).copy(trips = savedTrips(), tripsSheet = true), {}, {}, {}, {})
         }
         compose.onNodeWithTag("trips.row.1", useUnmergedTree = true).assertExists()
+    }
+
+    private val noExit = object : app.verst.feature.exit.ExitActions {
+        override fun back() {}
+        override fun select(placeId: String) {}
+        override fun book() {}
+        override fun closePartner() {}
+        override fun answer(booked: Boolean) {}
+        override fun needInternet() {}
+        override fun undoBooking() {}
+    }
+
+    private fun exitUi(bookedFirst: Boolean = false, offline: Boolean = false, partner: Boolean = false, dialog: Boolean = false, trip: TripDto = snapshot("G02_golden_ring")): app.verst.feature.exit.ExitUi {
+        val nights = trip.daysList.flatMap { it.stops }.filter { it.kind == "overnight" }
+        val stop = nights.first()
+        return app.verst.feature.exit.ExitUi(
+            trip, stop, 1, nights.size, if (bookedFirst) stop.selectedHotelId else null, offline, "Ярославле", partner, dialog,
+        )
+    }
+
+    @Test
+    fun exitDefault() {
+        shot("exit", "default") { app.verst.feature.exit.ExitScreen(exitUi(), noExit) }
+        compose.onNodeWithTag("exit.option.0", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("exit.sign", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "ru-rRU-w360dp-h640dp-port-xxhdpi")
+    fun exitShort() = shot("exit", "default", 360, 640) { app.verst.feature.exit.ExitScreen(exitUi(), noExit) }
+
+    @Test
+    fun exitOffline() {
+        shot("exit", "offline") { app.verst.feature.exit.ExitScreen(exitUi(offline = true), noExit) }
+        compose.onNodeWithTag("exit.offline", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun exitMockPartner() {
+        shot("exit", "mock-partner-sheet") { app.verst.feature.exit.ExitScreen(exitUi(partner = true), noExit) }
+        compose.onNodeWithTag("partner.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Яндекс", substring = true, useUnmergedTree = true).assertDoesNotExist() // OI-40
+    }
+
+    @Test
+    fun exitBookedDialog() = shot("exit", "booked-dialog") { app.verst.feature.exit.ExitScreen(exitUi(dialog = true), noExit) }
+
+    @Test
+    fun exitBooked() {
+        shot("exit", "booked") { app.verst.feature.exit.ExitScreen(exitUi(bookedFirst = true), noExit) }
+        compose.onNodeWithText("Открыть бронирование", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun exitNoLodging() {
+        val t = snapshot("G05_edge_no_dog_lodging")
+        shot("exit", "no-lodging") { app.verst.feature.exit.ExitScreen(exitUi(trip = t), noExit) }
+    }
+
+    @Test
+    fun roadBookedRow() = shot("road", "booked-row") {
+        val t = snapshot("G02_golden_ring")
+        val night = t.daysList.flatMap { it.stops }.first { it.kind == "overnight" }
+        RoadScreen(RoadUi(t, "NE", booked = setOf(night.id)), noRoad)
+    }
+
+    @Test
+    fun waybillStamp() = shot("waybill", "stamp-final") { WaybillScreen(waybill(snapshot("G02_golden_ring")).copy(stamp = false), noWaybill) }
+
+    @Test
+    fun tripsDeleteDialog() = shot("windshield", "trips-delete-dialog") {
+        Box(Modifier.fillMaxSize()) {
+            WindshieldScreen(windshield(WindshieldData.Routes(routes)).copy(trips = savedTrips(), tripsSheet = true), {}, {}, {}, {})
+            NaviDialog("Удалить поездку «Золотое кольцо»?", "Она пропадёт с этого телефона", "Удалить", "Оставить", "delete", {}, {})
+        }
+    }
+
+    @Test
+    fun limitDialog() = shot("road", "limit-dialog") {
+        Box(Modifier.fillMaxSize()) {
+            RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE"), noRoad)
+            NaviDialog("Место для поездок закончилось", "Удалите старую поездку, чтобы сохранить эту", "Мои поездки", "Отменить", "limit", {}, {})
+        }
     }
 
     @Test
