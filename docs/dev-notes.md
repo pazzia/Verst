@@ -1053,3 +1053,13 @@ tokens re-synced, already verbatim) and origin/arch/release-review (0ccaf28).
 - P2-4: unit tests run on `debug`; the demo APK no longer pulls `ui-test-manifest`; CI step fails if the merged
   demo manifest contains `androidx.activity.ComponentActivity`.
 - Limit dialog secondary «Отмена» (`common_dialog_cancel`). Both ABIs kept (x86_64 + arm64-v8a).
+
+### CI (DEV-RELEASE)
+Runs: 33 red (`eed0413`: the new `BrandDenyListTest` caught two more unused production strings naming the booking
+partner, `exit_book_partner` and `cd_exit_book`; now neutral overrides), 34 green (`8103f4d`), 35 green
+(`59757de`): unit + lint + Robolectric screenshots, e2e «OK (5 tests)» + process-death phase 1 «OK (1 test)», «no
+process after force-stop», phase 2 «OK (1 test)». F-01 on the device: Golden Ring sign 757 = plan 757 (logcat
+`VerstE2e`). APK 44.05 MB, ABIs arm64-v8a + x86_64. The limit-dialog screenshot now renders the real keys
+(«Отмена»). New e2e screens: 31-before-process-death, 32-restored-after-process-death.
+Open: «не удалось сохранить» copy key (StorageFull used meanwhile); debug-panel error chips row scrolls past
+the right edge (debug only).
