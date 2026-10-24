@@ -750,3 +750,70 @@ Architect: DEV-110 accepted; DEV-111/112/113 returned. Mirrored into this tree (
   no LICENSE entry. Note: CPython itself is PSF-licensed; the MIT POM covers Chaquopy's packaging only.
 - AGP owns the output dir of a generated asset source (`addGeneratedSourceDirectory`), so CI finds the files
   by `find` (run 6 failed on a fixed path).
+
+## DEV-SLICE — thin end-to-end vertical slice (branch `dev/DEV-SLICE`, Manager re-prioritisation 2026-10-24)
+
+Goal: a usable path on the phone now, polish later. Windshield → (own route) Navigator → Instruments → Drive →
+Road ahead, and Windshield ready route → Instruments → Drive → Road ahead, on the real on-device engine.
+Runs: 9–11 red (compile: nested token objects held in a `val`; `setQuery` JVM clash; a duplicate-text assertion),
+12 green, 13 red (e2e flake, see below), 14 green, final run in the report.
+
+Files:
+- `:core-model`: `dto/Dtos.kt` (slice subset of the plan JSON, `ReadyRouteDto`, `SuggestionDto`, `TripDto`…,
+  `PlanEventDto`, `EngineErrorDto`), `EngineJson.kt` (envelope → `EngineResult.Ok|Err`, never throws;
+  `PlanRequest.toInputJson()`, `DefaultOrigin` Москва, `BudgetPresets`, `Mood`), `RuFormat.kt` (U+202F
+  thousands, «HH:mm», A§11.11 estimates). `kotlinx-serialization-json` is now `api`. Test `EngineJsonTest`
+  (all golden snapshots decode, envelopes, events, request JSON, formats).
+- `:core-ui`: `theme/DesignTokens.kt` (see deviation 1), `components/Basics.kt` (Txt, Icon, BackLink, InfoChip,
+  ToggleChip, StepperKey, PrimaryCta, SecondaryButton, PlaceholderPlate), `Scene.kt` (static WindshieldScene with
+  the 5.1 §1 short-window y-scaling, SkyStrip, `dashboardSurface`, `overheadPlate`, `naviPanel`), `Signs.kt`
+  (RoadSign city/tourist/service with DES-102 pictograms, arrows by `bearing8`, StartButton S/M/L, StepLine,
+  ProgressBar). `HelloTheme` removed. Test `DesignTokensInSyncTest`.
+- `:app`: `engine/EngineHost.kt` (+ `dispatcher` over `verst-python`, `callHere` that turns any throwable into an
+  `INTERNAL` envelope and refuses the main thread, direct `cancel`, `restart`), `engine/PlannerGateway.kt`
+  (`ChaquopyPlannerGateway`: waits for Ready ≤ 30 s, `readyRoutes`/`suggest`/`popular`/`plan` with a Java-visible
+  `PlanEventListener`; cancelling the caller calls `mobile.cancel` from a watcher coroutine because the plan
+  blocks `verst-python`), `nav/VerstFlow.kt` (back stack of 5 routes, draft, instruments, Drive pacer ≥ 400 ms
+  per step + 1 000 ms auto-advance, Drive → Road replaces Drive), `feature/{windshield,navigator,instruments,
+  drive,road}/*Screen.kt` (stateless, `XUi` data in), `feature/common/Common.kt`, `MainActivity` (BackHandler =
+  back links; Russian `Configuration` locale), `res/values/strings_slice.xml`.
+- Tests: `ScreensScreenshotTest` (Robolectric, ru locale, 18 PNGs incl. 360 × 640), emulator
+  `SliceJourneyTest` (two journeys; `files/e2e/screens/01…10`; failure screenshot `zz-failed-*`).
+  `HelloSmokeTest`/`HelloScreenshotTest`/`HelloThemeTest` removed. `tools/sync_design_tokens.py`.
+
+Behaviour notes:
+- Windshield: `ready_routes(Москва, 50 km)` → overhead sign (≤ 4 rows, selected row yellow on `blueSelected`);
+  states loading (static placeholders, no shimmer), no-routes, error and engine-failed («Повторить» restarts the
+  engine). ПОЕХАЛИ → Instruments with the selected route; the navi panel → Navigator.
+- Navigator: ОТКУДА value field («изменить» makes it an input), КУДА `BasicTextField` with 250 ms debounce over
+  `suggest`; < 2 chars → «ЧАСТО ИЩУТ» rows from `popular`; skeleton, no-results, suggest-error blocks; caption
+  with ≈ straight-line km; < 15 km → «Слишком близко…» and start disabled; a TOO_SHORT/UNREACHABLE from Drive
+  comes back as the red caption meta. No vias, no map.
+- Instruments: mirror bench of 3 seats (empty → adult → child), front-seat chip, dog, km/day odometer 150–900
+  step 50 with «≈ X ч Y мин» and days (A§11.11), budget presets with a simple gauge, mood chips (calm preselected
+  once a child is added). The start time is the engine default (the next Saturday 08:00 — no settings sheet).
+- Drive: stage texts from the engine events, paced; errors → «НЕ ПОЛУЧИЛОСЬ» + 5.4 §4.4 message and CTA
+  (retry / «К приборам» / «Изменить маршрут»); `CANCELLED` → silent back; back = cancel (engine `cancel`).
+- Road ahead: fixed title sign, intro chips, engine warnings as plates, per-day header, stop rows (sign, «старт» /
+  «через N км», time, name, note = engine `note` or `reason`, cost), road column per item, pinned white footer
+  «≈ total ₽» + per person (red label when over budget).
+
+e2e flake found (run 13): the Navigator caption (with ПОЕХАЛИ) was hidden while `WindowInsets.isImeVisible`; the
+IME did not close in time after a pick and the start button never appeared. Now the caption hides only while a
+field is focused **and** the IME is up (focus is cleared on pick) — also the right UX.
+
+Deviations / open items:
+1. `DesignTokens.kt` is not byte-identical yet: DES-100 fonts are not in `res/font`, so the `font` object uses
+   `DeviceFontFamilyName("sans-serif-condensed")` / Monospace / Cursive (+ the `R` import swapped).
+   `tools/sync_design_tokens.py` writes it verbatim as soon as `ibm_plex_sans_condensed_regular.ttf` exists;
+   `DesignTokensInSyncTest` then requires equality.
+2. Copy not in the deck: `slice_per_person` «≈ N ₽ на человека» (app module, flagged for the Designer); seat
+   positions «Левое/Среднее/Правое» are the values from copy-ru `cd_instruments_seat` notes; town genitive for
+   «ИЗ МОСКВЫ» is a two-entry map (Москва, Тестовск) — the worlds have no `nameGenRu` (engine field proposed).
+3. copy-ru bug: `road_chip_days` is «%1$d %2$s · %3$d %4$d» — the 4th arg is a word, `%4$d` would crash; the
+   slice builds the chip from plurals instead. Designer to fix the generator/deck.
+4. Not done (by instruction): Waybill, Exit/booking, replace-stop sheets, save/share, debug panel, animations
+   (no lane motion, pulse, flying signs, shimmer, odometer roll), vias, map picker, TalkBack strings audit,
+   TokenLiteralsTest/PackageRulesTest (dp/sp literals exist in screens), ViewModels (one `VerstFlow` holder).
+5. The emulator window is 1170 × 1920 px (≈ 390 × 640 dp) despite `wm size 1170x2532` in `run_e2e.sh`, so the
+   e2e screens are the short-window layout; Robolectric covers 390 × 844 and 360 × 640.

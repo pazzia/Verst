@@ -111,6 +111,7 @@ class SliceJourneyTest {
         compose.onNodeWithTag("instruments.start").performClick()
 
         waitTag("drive.back")
+        compose.waitUntil(10_000) { flow.drive.lines.size >= 2 || flow.drive.done } // paced steps on the device
         shot("05-drive")
         assertRoadAhead("own")
         shot("06-road-ahead")
