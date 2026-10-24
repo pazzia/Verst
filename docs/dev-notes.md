@@ -1147,3 +1147,16 @@ Android only, independent of the Architect's engine work (arch/sprint-3) and the
 прежний», `debug_mock_location` «Имитация местоположения», `stopmenu_web_fallback` «в браузере» (plus the open
 `windshield_meta_round_trip` from DEV-RELEASE). Also needed: the D-5 stop-menu layout, the rationale card
 layout in 5.2, the highlight token.
+
+### CI (S3-R1)
+Runs: 38 red (compile: a local `app` shadowed the `app.verst` package in DebugScreen), 39 red (a test fake broke
+the Moscow genitive), 40 red (e2e: Golden Ring text matched twice once it was the selected route; the top-row
+report waits on the composition clock, which `Thread.sleep` does not advance; auto-locate closed ОТКУДА under
+the test's tap), 42 red (the IME shifted the ОТКУДА layout under a tap in RealGpsTest), 43 green (`d65ae0c`):
+unit + lint + Robolectric screenshots, e2e «OK (9 tests)», process-death phases «OK (1 test)» ×2 with «no
+process after force-stop», RealGpsTest «OK (1 test)» (emulator fix → Тула, «ВЫ: ТУЛА»). APK 44.1 MB, both ABIs.
+Screens: e2e 40–50 (focus restore, stop menu, offline day link, rationale / deny, debug mock, GPS origin, real
+GPS); screenshots road/stop-menu, road/stop-menu-offline, road/focus-restored, navigator/location-rationale,
+navigator/gps-origin.
+Open: the Navigator still autofocuses КУДА (IME up) right after ОТКУДА is set — existing 5.2 behaviour, spec
+question for the Designer; D-7 «Сообщить об ошибке» not built.
