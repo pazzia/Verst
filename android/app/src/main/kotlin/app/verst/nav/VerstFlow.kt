@@ -120,7 +120,7 @@ class VerstFlow(private val gateway: PlannerGateway, private val scope: Coroutin
             Route.Drive -> cancelPlan()
             Route.Navigator -> if (editingFrom) {
                 editingFrom = false
-                setQuery("")
+                updateQuery("")
                 return true
             }
             else -> Unit
@@ -163,13 +163,13 @@ class VerstFlow(private val gateway: PlannerGateway, private val scope: Coroutin
     fun openNavigator() {
         editingFrom = false
         routeError = null
-        setQuery("")
+        updateQuery("")
         push(Route.Navigator)
     }
 
     // ------------------------------------------------------------------------------------------ navigator
 
-    fun setQuery(q: String) {
+    fun updateQuery(q: String) {
         query = q
         suggestJob?.cancel()
         suggestFailed = false
@@ -202,7 +202,7 @@ class VerstFlow(private val gateway: PlannerGateway, private val scope: Coroutin
 
     fun startEditFrom() {
         editingFrom = true
-        setQuery("")
+        updateQuery("")
     }
 
     fun pick(s: SuggestionDto) {
@@ -211,7 +211,7 @@ class VerstFlow(private val gateway: PlannerGateway, private val scope: Coroutin
             editingFrom = false
             loadRoutes()
             routeError = null
-            setQuery("")
+            updateQuery("")
         } else {
             destination = s
             routeError = null

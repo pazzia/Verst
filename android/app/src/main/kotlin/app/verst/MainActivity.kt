@@ -51,7 +51,7 @@ fun VerstRoot(flow: VerstFlow) {
                 flow.suggestFailed, flow.destination, flow.routeError,
             ),
             onBack = { flow.back() },
-            onQuery = flow::setQuery,
+            onQuery = flow::updateQuery,
             onPick = flow::pick,
             onEditFrom = flow::startEditFrom,
             onStart = flow::openInstrumentsFree,
