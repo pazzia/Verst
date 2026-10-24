@@ -34,11 +34,12 @@ def request(
     data: dict[str, str] | None = None,
     accept: str = "application/json",
     timeout: float = 120.0,
+    retries: int = RETRIES,
 ) -> Any:
     """GET (or POST form `data`) and decode JSON, with exponential back-off on 429/5xx/timeouts."""
     body = urllib.parse.urlencode(data).encode("utf-8") if data is not None else None
     last_error: Exception | None = None
-    for attempt in range(RETRIES):
+    for attempt in range(retries):
         pacer.wait()
         req = urllib.request.Request(url, data=body, headers={"User-Agent": USER_AGENT, "Accept": accept})
         try:
@@ -53,7 +54,9 @@ def request(
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
             last_error = e
             pause = 5.0 * 2**attempt
-        print(f"retry {attempt + 1}/{RETRIES} in {pause:.0f}s: {last_error}", file=sys.stderr)
+        if attempt + 1 == retries:
+            break
+        print(f"retry {attempt + 1}/{retries} in {pause:.0f}s: {last_error}", file=sys.stderr)
         time.sleep(pause)
     assert last_error is not None
     raise last_error

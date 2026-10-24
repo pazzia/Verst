@@ -152,6 +152,23 @@ class OverpassTest(unittest.TestCase):
         self.assertEqual([(b["osm"], b["lat"]) for b in bars], [("n5", 1.0), ("w6", 3.0)])
 
 
+    def test_assign_country_wide(self) -> None:
+        towns = [
+            {"qid": "A", "name": "a", "population": 2_000_000, "lat": 55.75, "lon": 37.62},  # 9 km
+            {"qid": "B", "name": "b", "population": 150_000, "lat": 55.80, "lon": 37.70},  # 4 km
+            {"qid": "C", "name": "c", "population": 150_000, "lat": 59.0, "lon": 30.0},
+        ]
+        els = [
+            {"type": "node", "id": 1, "lat": 55.751, "lon": 37.621, "tags": {"name": "x"}},  # A only
+            {"type": "node", "id": 2, "lat": 55.799, "lon": 37.699, "tags": {"name": "y"}},  # B nearer
+            {"type": "node", "id": 3, "lat": 56.5, "lon": 37.6, "tags": {"name": "z"}},  # nobody's
+            {"type": "way", "id": 4, "center": {"lat": 59.01, "lon": 30.01}, "tags": {"name": "w"}},
+        ]
+        got = [(b["osm"], b["townQid"]) for b in self.op.assign(els, towns)]
+        self.assertEqual(got, [("n1", "A"), ("n2", "B"), ("w4", "C")])
+        self.assertIn('"ISO3166-1"="RU"', self.op.QUERY_ALL)
+
+
 class CommonsTest(unittest.TestCase):
     cm = load("fetch_commons_meta")
 
