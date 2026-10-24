@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>По городу</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,a{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+@keyframes lamp{0%,100%{opacity:.7}50%{opacity:1}}
+.lamp{animation:lamp 3.2s ease-in-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(216,64,43,.55)}100%{box-shadow:0 0 0 16px rgba(216,64,43,0)}}
+.start{animation:ring 1.8s ease-out infinite}
+</style>
+</helmet>
+<!-- 5.10 «По городу» (design/screens/5.10-city.md, ADR-0013). Tap a preset to select it; the 18+ presets open the
+     age dialog first (every time); «Свой маршрут» opens the parameters sheet. -->
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <!-- CityScene 0–200 -->
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 203px; overflow: hidden; background: #2B2850">
+    <svg width="390" height="200" viewBox="0 0 390 200" style="position: absolute; left: 0; top: 0">
+      <path d="M0 112 L34 112 L34 96 L80 96 L80 106 L128 106 L128 88 L150 80 L172 88 L172 104 L230 104 L230 92 L270 92 L270 108 L318 108 L318 94 L390 94 V200 H0 Z" fill="#2E2939"></path>
+      <rect x="0" y="124" width="70" height="76" fill="#4A3B55"></rect><rect x="70" y="132" width="80" height="68" fill="#4A3B55"></rect>
+      <rect x="150" y="124" width="86" height="76" fill="#4A3B55"></rect><rect x="236" y="132" width="82" height="68" fill="#4A3B55"></rect><rect x="318" y="124" width="72" height="76" fill="#4A3B55"></rect>
+      <rect x="0" y="140" width="390" height="46" fill="#3B3046"></rect>
+      <g fill="#FFD99A">
+        <rect x="8" y="150" width="10" height="14"></rect><rect x="52" y="150" width="10" height="14"></rect><rect x="74" y="150" width="10" height="14"></rect><rect x="118" y="150" width="10" height="14"></rect>
+        <rect x="162" y="150" width="10" height="14"></rect><rect x="184" y="150" width="10" height="14"></rect><rect x="250" y="150" width="10" height="14"></rect><rect x="294" y="150" width="10" height="14"></rect>
+        <rect x="338" y="150" width="10" height="14"></rect><rect x="30" y="172" width="10" height="14"></rect><rect x="96" y="172" width="10" height="14"></rect><rect x="140" y="172" width="10" height="14"></rect>
+        <rect x="206" y="172" width="10" height="14"></rect><rect x="228" y="172" width="10" height="14"></rect><rect x="316" y="172" width="10" height="14"></rect><rect x="360" y="172" width="10" height="14"></rect>
+      </g>
+      <g fill="#231F2D">
+        <rect x="30" y="150" width="10" height="14"></rect><rect x="96" y="150" width="10" height="14"></rect><rect x="140" y="150" width="10" height="14"></rect><rect x="206" y="150" width="10" height="14"></rect>
+        <rect x="228" y="150" width="10" height="14"></rect><rect x="272" y="150" width="10" height="14"></rect><rect x="316" y="150" width="10" height="14"></rect><rect x="360" y="150" width="10" height="14"></rect>
+        <rect x="8" y="172" width="10" height="14"></rect><rect x="52" y="172" width="10" height="14"></rect><rect x="74" y="172" width="10" height="14"></rect><rect x="118" y="172" width="10" height="14"></rect>
+        <rect x="162" y="172" width="10" height="14"></rect><rect x="184" y="172" width="10" height="14"></rect><rect x="250" y="172" width="10" height="14"></rect><rect x="272" y="172" width="10" height="14"></rect><rect x="294" y="172" width="10" height="14"></rect><rect x="338" y="172" width="10" height="14"></rect>
+      </g>
+      <rect x="0" y="186" width="390" height="14" fill="#4A4A50"></rect>
+      <path d="M24 186v14M48 186v14M72 186v14M96 186v14M120 186v14M144 186v14M168 186v14M192 186v14M216 186v14M240 186v14M264 186v14M288 186v14M312 186v14M336 186v14M360 186v14M384 186v14" stroke="#3B3B41" stroke-width="1"></path>
+      <g fill="#55565C"><rect x="55" y="134" width="3" height="52"></rect><rect x="195" y="134" width="3" height="52"></rect><rect x="335" y="134" width="3" height="52"></rect></g>
+      <g fill="#FFE7A8"><rect x="50" y="130" width="14" height="6" rx="2"></rect><rect x="190" y="130" width="14" height="6" rx="2"></rect><rect x="330" y="130" width="14" height="6" rx="2"></rect></g>
+      <g fill="#FFE7A8" fill-opacity=".18"><circle class="lamp" cx="57" cy="134" r="18"></circle><circle class="lamp" cx="197" cy="134" r="18" style="animation-delay:1.1s"></circle><circle class="lamp" cx="337" cy="134" r="18" style="animation-delay:2.2s"></circle></g>
+    </svg>
+    <div style="position: absolute; left: 0; right: 0; top: 200px; height: 3px; background: #8C8C93"></div>
+  </div>
+  <a href="Wind.dc.html" style="position: absolute; left: 16px; top: 8px; height: 32px; display: flex; align-items: center; gap: 6px; color: #E9E2F2; text-decoration: none; font-size: 13px">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>К лобовому</a>
+  <!-- StreetPlate -->
+  <div role="heading" aria-level="2" aria-label="По городу, старт: Советская площадь, 1, Ярославль" style="position: absolute; left: 20px; top: 44px; display: flex; gap: 6px">
+    <div style="height: 64px; background: #1E4FA3; border-radius: 6px; padding: 4px; box-sizing: border-box; box-shadow: 0 6px 14px rgba(0,0,0,.4)">
+      <div style="height: 100%; border: 2px solid #F4F4F0; border-radius: 4px; box-sizing: border-box; padding: 4px 12px; display: flex; flex-direction: column; justify-content: center">
+        <span style="font-size: 12px; font-weight: 600; color: #D6E0F5">пешком · Ярославль</span>
+        <span style="font-size: 22px; font-weight: 700; line-height: 24px">Советская пл.</span>
+      </div>
+    </div>
+    <div style="width: 44px; height: 44px; background: #1E4FA3; border-radius: 6px; padding: 3px; box-sizing: border-box"><div style="height: 100%; border: 2px solid #F4F4F0; border-radius: 4px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700">1</div></div>
+  </div>
+
+  <h1 style="position: absolute; left: 20px; top: 218px; margin: 0; font-size: 28px; line-height: 29.4px; font-weight: 700">По городу</h1>
+  <div style="position: absolute; left: 20px; right: 20px; top: 253px; height: 44px; display: flex; align-items: center; justify-content: space-between">
+    <span style="font-size: 13px; color: #B9B9C0">Старт: Советская пл., 1 · вы здесь</span>
+    <button type="button" style="height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #3A3A42; background: transparent; color: #B9B9C0; font-weight: 600; font-size: 12px">изменить</button>
+  </div>
+  <div style="position: absolute; left: 20px; top: 309px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">ГОТОВЫЕ ПРОГУЛКИ</div>
+  <div style="position: absolute; left: 20px; right: 20px; top: 331px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+    <sc-for list="{{presets}}" as="p" hint-placeholder-count="5">
+      <button type="button" onClick="{{p.pick}}" aria-label="{{p.cd}}" aria-pressed="{{p.on}}" style="{{p.style}}">
+        <span aria-hidden="true" style="position: absolute; inset: 3px; border: 2px {{p.border}} #F4F4F0; border-radius: 3px"></span>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 10px"><path d="{{p.icon}}"></path></svg>
+        <span style="{{p.badge}}">18+</span>
+        <span style="position: absolute; left: 12px; bottom: 10px; display: flex; flex-direction: column; text-align: left">
+          <span style="font-weight: 700; font-size: 15px; line-height: 19.5px">{{p.name}}</span>
+          <span style="font-size: 12px; color: #E9E2F2">{{p.sub}}</span>
+        </span>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="position: absolute; left: 20px; bottom: 47px; width: 236px">
+    <div style="font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">ПРОГУЛКА</div>
+    <div style="font-weight: 700; font-size: 20px; line-height: 23px">{{capTitle}}</div>
+    <div style="font-size: 13px; color: #B9B9C0">Ярославль · старт 11:00</div>
+  </div>
+  <a href="WalkResult.dc.html" class="start" aria-label="Пошли" style="position: absolute; left: 278px; top: 720px; width: 92px; height: 92px; border-radius: 50%; background: #232327; display: flex; align-items: center; justify-content: center; text-decoration: none">
+    <span style="width: 76px; height: 76px; border-radius: 50%; background: #1C1C1F; box-shadow: inset 0 0 0 3px #D8402B; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #F4F4F0">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="2" fill="#F4F4F0"></circle><path d="M9.5 21l2.5-6.5 2.5 2V21M12 14.5l1-5-3.5 1.5L8 14M13 9.5l2.5 3 3 1"></path></svg>
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: .06em">ПОШЛИ</span>
+    </span>
+  </a>
+
+  <!-- 18+ dialog -->
+  <div aria-hidden="true" style="{{scrim}}"></div>
+  <div role="dialog" aria-label="Маршрут для взрослых" style="{{gate}}">
+    <h2 style="margin: 0 0 10px; font-size: 20px; font-weight: 700">Маршрут для взрослых</h2>
+    <p style="margin: 0 0 16px; font-size: 13px; line-height: 1.4; color: #B9C6D3">Бары и рюмочные — только для тех, кому исполнилось 18. Вам есть 18?</p>
+    <button type="button" onClick="{{yes}}" style="width: 100%; height: 48px; border: none; border-radius: 12px; background: #FFD23F; color: #141416; font-weight: 700; font-size: 15px; cursor: pointer">Да, мне есть 18</button>
+    <button type="button" onClick="{{no}}" style="width: 100%; height: 48px; margin-top: 10px; border-radius: 10px; border: 1px dashed #3A5266; background: transparent; color: #7FA6D9; font-weight: 600; font-size: 13px; cursor: pointer">Нет</button>
+  </div>
+  <!-- custom sheet -->
+  <div role="dialog" aria-label="Свой маршрут" style="{{sheet}}">
+    <div aria-hidden="true" style="width: 36px; height: 4px; border-radius: 2px; background: #3A3A42; margin: 0 auto 16px"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 20px; font-weight: 700">Свой маршрут</h2>
+      <button type="button" onClick="{{closeSheet}}" aria-label="Закрыть" style="width: 44px; height: 44px; border: none; background: transparent; color: #B9B9C0; font-size: 22px">×</button></div>
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+      <div style="margin-top: 14px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">{{r.label}}</div>
+      <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{r.chips}}" as="c" hint-placeholder-count="4">
+          <span style="{{c.style}}">{{c.t}}</span>
+        </sc-for>
+      </div>
+    </sc-for>
+    <div style="margin-top: 16px; min-height: 44px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600">Вернуться к старту
+      <span aria-hidden="true" style="width: 40px; height: 24px; border-radius: 12px; background: #FFD23F; position: relative"><span style="position: absolute; right: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #141416"></span></span></div>
+    <a href="WalkResult.dc.html" style="margin-top: 12px; height: 56px; border-radius: 12px; background: #FFD23F; color: #141416; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; text-decoration: none">Собрать прогулку</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { pick: 'overview', gate: null, sheet: false }; }
+  renderVals() {
+    const st = this.state, hide = 'display:none';
+    const icons = {
+      overview: 'M5 15a3.5 3.5 0 1 0 0.01 0M19 15a3.5 3.5 0 1 0 0.01 0M9 7l-2 4.5M15 7l2 4.5M10.5 14h3',
+      museums: 'M3 9l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18',
+      ryumochnye: 'M7 4h10l-1.2 9.5a3.8 3.8 0 0 1-7.6 0zM12 17v3M8.5 20h7',
+      beer: 'M6 7h9v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zM15 10h2.5a2 2 0 0 1 0 4H15M8 4c.5 1 1.5 1 2 0s1.5-1 2 0',
+      custom: 'M12 9a3 3 0 1 0 0.01 0M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1'
+    };
+    const list = [
+      { id: 'overview', name: 'Обзорный', sub: 'главное · 4 ч' },
+      { id: 'museums', name: 'Музейный', sub: 'до 4 музеев · 6 ч' },
+      { id: 'ryumochnye', name: 'По рюмочным', sub: '18+ · 4 ч · только пешком', adult: true },
+      { id: 'beer', name: 'Пивной', sub: '18+ · 4 ч · только пешком', adult: true },
+      { id: 'custom', name: 'Свой маршрут', sub: 'время, интересы, темп' }
+    ];
+    const presets = list.map(p => {
+      const on = st.pick === p.id, custom = p.id === 'custom';
+      return Object.assign({}, p, {
+        on: on ? 'true' : 'false', icon: icons[p.id], border: custom ? 'dashed' : 'solid',
+        cd: p.name + (p.adult ? ', только для взрослых' : '') + ', ' + p.sub + '. Выбрать',
+        badge: p.adult ? 'position:absolute;right:' + (on ? 36 : 10) + 'px;top:10px;width:22px;height:22px;border-radius:50%;background:#F4F4F0;color:#141416;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center' : hide,
+        style: 'position:relative;height:76px;border:none;border-radius:5px;cursor:pointer;color:#F4F4F0;background:' + (custom ? 'transparent' : '#6B3E26') + ';box-shadow:' + (on ? '0 0 0 2px #161618,0 0 0 4px #FFD23F' : 'none') + ';' + (custom ? 'outline:2px dashed #55555E;outline-offset:-2px' : ''),
+        pick: () => {
+          if (custom) return this.setState({ sheet: true, pick: 'custom' });
+          if (p.adult) return this.setState({ gate: p.id });
+          this.setState({ pick: p.id });
+        }
+      });
+    });
+    const chip = (t, on) => ({ t, style: 'height:44px;padding:0 14px;border-radius:22px;display:flex;align-items:center;font-size:13px;font-weight:600;box-sizing:border-box;' + (on ? 'background:#F4F4F0;color:#141416' : 'border:1px solid #55555E;color:#B9B9C0') });
+    const rows = [
+      { label: 'СКОЛЬКО ГУЛЯЕМ', chips: [chip('2 ч'), chip('4 ч', true), chip('6 ч'), chip('8 ч')] },
+      { label: 'ЧТО ИНТЕРЕСНО', chips: [chip('история', true), chip('архитектура', true), chip('музеи'), chip('парки'), chip('еда', true), chip('бары'), chip('виды')] },
+      { label: 'ТЕМП', chips: [chip('неспешно'), chip('обычный', true), chip('бодро')] },
+      { label: 'БЮДЖЕТ НА ВСЕХ', chips: [chip('до 2 000 ₽'), chip('до 5 000 ₽', true), chip('до 10 000 ₽'), chip('не важно')] }
+    ];
+    const names = { overview: 'Обзорный · 4 ч', museums: 'Музейный · 6 ч', ryumochnye: 'По рюмочным · 4 ч', beer: 'Пивной · 4 ч', custom: 'Свой маршрут · 4 ч' };
+    return {
+      presets, rows,
+      capTitle: names[st.pick],
+      scrim: (st.gate || st.sheet) ? 'position:absolute;inset:0;background:rgba(0,0,0,.6)' : hide,
+      gate: st.gate ? 'position:absolute;left:24px;right:24px;top:280px;background:#0B1218;border:6px solid #232327;border-radius:16px;padding:18px 18px 16px' : hide,
+      yes: () => this.setState({ pick: st.gate, gate: null }),
+      no: () => this.setState({ gate: null }),
+      sheet: st.sheet ? 'position:absolute;left:0;right:0;bottom:0;background:#161618;border-radius:16px 16px 0 0;box-shadow:0 -2px 0 #232327;padding:8px 20px 24px' : hide,
+      closeSheet: () => this.setState({ sheet: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

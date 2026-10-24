@@ -593,10 +593,219 @@
    "hex": "#5D5D63"
   },
   {
-   "item": "color.overlay.scrim",
+   "item": "color.city.sky",
    "state": "palette",
    "x": 227.5,
    "y": 799.0,
+   "hex": "#2B2850"
+  },
+  {
+   "item": "color.city.facadeA",
+   "state": "palette",
+   "x": 292.5,
+   "y": 799.0,
+   "hex": "#3B3046"
+  },
+  {
+   "item": "color.city.facadeB",
+   "state": "palette",
+   "x": 357.5,
+   "y": 799.0,
+   "hex": "#4A3B55"
+  },
+  {
+   "item": "color.city.facadeC",
+   "state": "palette",
+   "x": 32.5,
+   "y": 859.0,
+   "hex": "#2E2939"
+  },
+  {
+   "item": "color.city.window",
+   "state": "palette",
+   "x": 97.5,
+   "y": 859.0,
+   "hex": "#FFD99A"
+  },
+  {
+   "item": "color.city.windowOff",
+   "state": "palette",
+   "x": 162.5,
+   "y": 859.0,
+   "hex": "#231F2D"
+  },
+  {
+   "item": "color.city.lamp",
+   "state": "palette",
+   "x": 227.5,
+   "y": 859.0,
+   "hex": "#FFE7A8"
+  },
+  {
+   "item": "color.city.lampGlow",
+   "state": "palette",
+   "x": 292.5,
+   "y": 859.0,
+   "hex": "#3E3A30",
+   "tol": 1,
+   "alpha": 0.18
+  },
+  {
+   "item": "color.city.sidewalk",
+   "state": "palette",
+   "x": 357.5,
+   "y": 859.0,
+   "hex": "#4A4A50"
+  },
+  {
+   "item": "color.city.joint",
+   "state": "palette",
+   "x": 32.5,
+   "y": 919.0,
+   "hex": "#3B3B41"
+  },
+  {
+   "item": "color.city.curb",
+   "state": "palette",
+   "x": 97.5,
+   "y": 919.0,
+   "hex": "#8C8C93"
+  },
+  {
+   "item": "color.city.footprint",
+   "state": "palette",
+   "x": 162.5,
+   "y": 919.0,
+   "hex": "#8F8F8E",
+   "tol": 1,
+   "alpha": 0.55
+  },
+  {
+   "item": "color.photo.mat",
+   "state": "palette",
+   "x": 227.5,
+   "y": 919.0,
+   "hex": "#232327"
+  },
+  {
+   "item": "color.photo.matHighlight",
+   "state": "palette",
+   "x": 292.5,
+   "y": 919.0,
+   "hex": "#2E2E33"
+  },
+  {
+   "item": "color.photo.scrim",
+   "state": "palette",
+   "x": 357.5,
+   "y": 919.0,
+   "hex": "#080808",
+   "tol": 1,
+   "alpha": 0.62
+  },
+  {
+   "item": "color.photo.credit",
+   "state": "palette",
+   "x": 32.5,
+   "y": 979.0,
+   "hex": "#F4F4F0"
+  },
+  {
+   "item": "color.photo.border",
+   "state": "palette",
+   "x": 97.5,
+   "y": 979.0,
+   "hex": "#3A3A42"
+  },
+  {
+   "item": "color.photo.ink",
+   "state": "palette",
+   "x": 162.5,
+   "y": 979.0,
+   "hex": "#8C8C93"
+  },
+  {
+   "item": "color.photo.accent",
+   "state": "palette",
+   "x": 227.5,
+   "y": 979.0,
+   "hex": "#B9B9C0"
+  },
+  {
+   "item": "color.photo.phMuseum",
+   "state": "palette",
+   "x": 292.5,
+   "y": 979.0,
+   "hex": "#26262B"
+  },
+  {
+   "item": "color.photo.phChurch",
+   "state": "palette",
+   "x": 357.5,
+   "y": 979.0,
+   "hex": "#2A2630"
+  },
+  {
+   "item": "color.photo.phPark",
+   "state": "palette",
+   "x": 32.5,
+   "y": 1039.0,
+   "hex": "#222A25"
+  },
+  {
+   "item": "color.photo.phMonument",
+   "state": "palette",
+   "x": 97.5,
+   "y": 1039.0,
+   "hex": "#28282C"
+  },
+  {
+   "item": "color.photo.phView",
+   "state": "palette",
+   "x": 162.5,
+   "y": 1039.0,
+   "hex": "#22272E"
+  },
+  {
+   "item": "color.photo.phBar",
+   "state": "palette",
+   "x": 227.5,
+   "y": 1039.0,
+   "hex": "#2B2522"
+  },
+  {
+   "item": "color.photo.phCity",
+   "state": "palette",
+   "x": 292.5,
+   "y": 1039.0,
+   "hex": "#25242C"
+  },
+  {
+   "item": "color.budget.overFill",
+   "state": "palette",
+   "x": 357.5,
+   "y": 1039.0,
+   "hex": "#2A1816"
+  },
+  {
+   "item": "color.budget.overBorder",
+   "state": "palette",
+   "x": 32.5,
+   "y": 1099.0,
+   "hex": "#D8402B"
+  },
+  {
+   "item": "color.budget.tight",
+   "state": "palette",
+   "x": 97.5,
+   "y": 1099.0,
+   "hex": "#FFD23F"
+  },
+  {
+   "item": "color.overlay.scrim",
+   "state": "palette",
+   "x": 162.5,
+   "y": 1099.0,
    "hex": "#080809",
    "tol": 1,
    "alpha": 0.6
@@ -604,8 +813,8 @@
   {
    "item": "color.overlay.focus",
    "state": "palette",
-   "x": 292.5,
-   "y": 799.0,
+   "x": 227.5,
+   "y": 1099.0,
    "hex": "#FFD23F"
   }
  ],

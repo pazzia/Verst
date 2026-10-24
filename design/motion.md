@@ -147,3 +147,15 @@ The scene Canvas reads `clock.value` **inside the draw lambda only** (`drawWithC
 | Measurement | Macrobenchmark `FrameTimingMetric` per screen, 10 s idle + 10 s scroll; JankStats in beta builds |
 
 High-refresh displays (90/120 Hz): loops are time-based, so speed is unchanged; the budget scales to 11.1 / 8.3 ms per frame, and on devices that miss it the app requests 60 Hz for the scene screens (`Window.setFrameRate(60f)` via `Surface.setFrameRate`, API 30+).
+
+### 2.4 Sprint 3 tokens (5.8–5.13; ADR-0011…0014)
+
+| Token | Where | Property | From → to | Duration | Easing | Compose | Reduced motion |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `photoFadeIn` | `PhotoFrame` | image alpha over the mat | 0 → 1 | 250 ms | `standard` | `animateFloatAsState` on load success | instant |
+| `returnToItem` | 5.5 / 5.11 after a card, Exit, booking or hand-off | scroll position + row background | jump (0 ms) to the saved offset; then `color.dash.pressed` → transparent | 0 + `highlightMs` 1200 | `easeOut` | `LazyListState.scrollToItem(index, offset)` / `ScrollState.scrollTo(y)` + `animateColorAsState` | jump, no flash |
+| `footsteps` | `WalkColumn` (5.11) | footprint pair y | 0 → `periodDp` 48 | 1800 ms | `linear` | scene clock, global phase | one pair at the top |
+| `lamps` | `CityScene` | glow alpha | 0.7 ↔ 1 | 3200 ms (1600 each way), offsets 0 / 1100 / 2200 | `easeInOut` | clock | alpha 1 |
+| `limitSignIn` | 5.8 no-fit screen | the round limit sign: scale 0.8 → 1, alpha 0 → 1 (pivot centre), with `screen.arrive` | | 400 ms | `decelerate` | `Animatable` on first composition | final frame |
+
+Card sheet, day / stop hand-off menus and the custom-walk sheet: `bottomSheetIn` / `bottomSheetOut`; the 18+ dialog: `dialogIn` / `dialogOut`; hand-off and location toasts: `toastIn` / `toastOut`; walk building: `shimmer` on the caption + the start-button loading arc (`spinner`). Scene loops (lamps, footsteps) pause under sheets and dialogs (§4.3).

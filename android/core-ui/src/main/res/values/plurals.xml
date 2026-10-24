@@ -67,6 +67,18 @@
         <item quantity="many">этапов</item>
         <item quantity="other">этапа</item>
     </plurals>
+    <plurals name="plural_place">
+        <item quantity="one">место</item>
+        <item quantity="few">места</item>
+        <item quantity="many">мест</item>
+        <item quantity="other">места</item>
+    </plurals>
+    <plurals name="plural_person">
+        <item quantity="one">человек</item>
+        <item quantity="few">человека</item>
+        <item quantity="many">человек</item>
+        <item quantity="other">человека</item>
+    </plurals>
     <plurals name="plural_hour">
         <item quantity="one">час</item>
         <item quantity="few">часа</item>

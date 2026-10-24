@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Не помещается в бюджет</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;family=Marck+Script&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,a{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+@keyframes signIn{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+.limit{animation:signIn .4s cubic-bezier(.2,.8,.3,1) both}
+.opt:hover{background:#1A2C3B}
+</style>
+</helmet>
+<!-- 5.8 Budget fit (design/screens/5.8-budget-fit.md, ADR-0011). Default: the no-fit screen that replaces Road ahead.
+     Tap the round sign to see the fitted plan: the Waybill lever lines and the Road footer badge. -->
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 150px">
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 50px; background: #2B2850"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 50px; height: 34px; background: #8E4A6B"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 84px; height: 26px; background: #D9655A"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 110px; height: 22px; background: #F29A5E"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 14px; background: #0E0E10; border-radius: 0 0 50% 50% / 0 0 12px 12px"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 110px; height: 40px; background: #161618; border-radius: 50% 50% 0 0 / 30px 30px 0 0"></div>
+  </div>
+  <a href="Panel.dc.html" style="position: absolute; left: 16px; top: 18px; height: 32px; display: flex; align-items: center; gap: 6px; color: #E9E2F2; text-decoration: none; font-size: 13px">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>Приборы</a>
+
+  <button type="button" class="limit" onClick="{{toggle}}" aria-label="Переключить пример" style="position: absolute; left: 147px; top: 56px; width: 96px; height: 96px; border-radius: 50%; border: none; padding: 0; cursor: pointer; background: #F4F4F0; box-shadow: inset 0 0 0 10px #D8402B, 0 0 0 2px #F4F4F0, 0 6px 14px rgba(0,0,0,.4); color: #141416; font-weight: 700; font-size: 17px">30&#8239;000&nbsp;₽</button>
+
+  <div style="{{nofitStyle}}">
+    <h1 style="margin: 0; font-size: 28px; line-height: 29.4px; font-weight: 700; text-align: center">Не помещается в бюджет</h1>
+    <p style="margin: 8px 0 0; font-size: 13px; line-height: 18.2px; color: #B9B9C0; text-align: center">В 30&#8239;000&nbsp;₽ эта поездка не помещается даже в самом экономном варианте — минимум ≈&nbsp;41&#8239;200&nbsp;₽.</p>
+    <div style="margin-top: 12px; min-height: 56px; padding: 8px 12px; box-sizing: border-box; border-radius: 10px; background: #2A1816; border: 1px solid #D8402B; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #E6604A">САМЫЙ ЭКОНОМНЫЙ ВАРИАНТ</span>
+      <span style="font-size: 22px; font-weight: 700; line-height: 28.6px">≈&nbsp;41&#8239;200&nbsp;₽</span>
+    </div>
+    <div style="margin-top: 20px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">ЧТО МОЖНО СДЕЛАТЬ</div>
+    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px">
+      <sc-for list="{{options}}" as="o" hint-placeholder-count="3">
+        <a class="opt" href="Panel.dc.html" aria-label="{{o.cd}}" style="min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 10px; box-sizing: border-box; background: #16222C; border: 1px solid #2B3D4D; color: #F4F4F0; text-decoration: none">
+          <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+            <span style="font-weight: 700; font-size: 15px; line-height: 19.5px">{{o.title}}</span>
+            <span style="font-size: 12px; color: #8FA4B8">{{o.sub}}</span>
+          </span>
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7FA6D9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0"><path d="M9 5l7 7-7 7"></path></svg>
+        </a>
+      </sc-for>
+    </div>
+    <a href="Signs.dc.html" style="display: flex; justify-content: center; align-items: center; min-height: 44px; margin-top: 12px; font-weight: 600; font-size: 13px; color: #B9B9C0; text-decoration: none">Показать самый экономный вариант</a>
+  </div>
+
+  <div style="{{fittedStyle}}">
+    <h1 style="margin: 0; font-size: 28px; line-height: 29.4px; font-weight: 700; text-align: center">Подогнали под бюджет</h1>
+    <p style="margin: 8px 0 0; font-size: 13px; line-height: 18.2px; color: #B9B9C0; text-align: center">Так выглядят строки под «ИТОГО» в путевом листе и метка на кнопке внизу дороги.</p>
+    <div style="margin-top: 16px; background: #EEF2F4; border-radius: 4px; padding: 14px 16px; color: #22313D">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; border: 1.5px solid #22313D; padding: 6px">
+        <span style="font-weight: 700; font-size: 14px">ИТОГО</span>
+        <span style="font-family: 'Marck Script', cursive; font-size: 26px; color: #1B3FA0">≈ 29&#8239;800</span>
+      </div>
+      <div style="margin-top: 8px; font-weight: 600; font-size: 13px">Подогнали под бюджет</div>
+      <sc-for list="{{levers}}" as="l" hint-placeholder-count="4">
+        <div style="min-height: 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #9FB0BE">
+          <span style="font-size: 11px">{{l.name}}</span>
+          <span style="font-family: 'Marck Script', cursive; font-size: 15px; color: #1B3FA0">{{l.rub}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top: 24px; height: 64px; border-radius: 12px; background: #F4F4F0; color: #141416; display: flex; align-items: center; justify-content: space-between; padding: 0 18px">
+      <span style="display: flex; flex-direction: column">
+        <span style="display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #55565C">ПУТЕВОЙ ЛИСТ ·
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#55565C" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>В БЮДЖЕТЕ</span>
+        <span style="font-size: 22px; font-weight: 700">≈&nbsp;29&#8239;800&nbsp;₽</span>
+      </span>
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M13 5l7 7-7 7"></path></svg>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { fitted: false }; }
+  renderVals() {
+    const f = this.state.fitted;
+    const n = ' ', t = ' ';
+    const options = [
+      { title: 'Сократить до 2' + n + 'дней', sub: 'Золотое кольцо · коротко · ≈' + n + '29' + t + '700' + n + '₽' },
+      { title: 'Ближе и дешевле: Ярославль', sub: '≈' + n + '24' + t + '300' + n + '₽ · помещается в бюджет' },
+      { title: 'Поднять бюджет до 42' + t + '000' + n + '₽', sub: 'тот же маршрут, без изменений' }
+    ].map(o => Object.assign({}, o, { cd: o.title + '. ' + o.sub + '. Применить' }));
+    const levers = [
+      { name: 'дешевле ночёвки', rub: '−12' + t + '000' },
+      { name: 'кафе попроще', rub: '−4' + t + '700' },
+      { name: 'бесплатные места', rub: '−6' + t + '600' },
+      { name: 'на день меньше', rub: '−5' + t + '300' }
+    ];
+    const box = 'position:absolute;left:20px;right:20px;top:168px;';
+    return {
+      toggle: () => this.setState({ fitted: !f }),
+      options, levers,
+      nofitStyle: f ? 'display:none' : box,
+      fittedStyle: f ? box : 'display:none'
+    };
+  }
+}
+</script>
+</body>
+</html>
