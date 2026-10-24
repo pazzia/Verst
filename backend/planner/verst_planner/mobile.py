@@ -1,13 +1,26 @@
 """App-facing engine API for the on-device mock build (DEV-111, M§5.1, ADR-0010).
 
 A stdlib-only composition root like `cli.py`: the Android app (Chaquopy) calls only these functions.
-Every public function takes and returns JSON `str` and never raises. The envelope is
+Every public function takes and returns JSON `str` and never raises, not even while serialising its
+result. The envelope is
 
     {"ok": true,  "result": <payload>, "ms": 12}
-    {"ok": false, "error": {"code", "message", "field", "reason", "pointIndex", "detail"}, "ms": 3}
+    {"ok": false, "error": {"code", "message", "field", "reason", "pointIndex", "roadKm", "detail"}, "ms": 3}
 
-Error codes are the `PlannerError.code` values plus `INTERNAL` (any other exception; the traceback goes to
-`detail` and to stderr, which Chaquopy routes to logcat), `NO_WORLD` and `TZDATA_MISSING`.
+Error codes: the `PlannerError.code` values (`INVALID_INPUT` with `field`/`reason`, `UNREACHABLE` with
+`pointIndex`, `TOO_SHORT` with `roadKm`, `UPSTREAM`, `NOT_FOUND`, `CANCELLED`), plus `NO_WORLD`,
+`TZDATA_MISSING`, `TRIP_INCOMPATIBLE` (a trip whose `engineVersion` differs from `ENGINE_VERSION` in
+major.minor; `field` = `engineVersion`) and `INTERNAL` (any other exception; the traceback goes to `detail`
+and to stderr, which Chaquopy routes to logcat). `message` is diagnostic English for logs only: the app picks
+its copy by `code` (and `field`/`reason`) alone. Arguments are decoded strictly: JSON booleans only where a
+boolean is expected, integers that are not booleans, strings where a string is expected.
+
+`API_VERSION` (returned by `selfcheck` as `apiVersion`) changes whenever a signature or envelope changes.
+
+Threading: the app makes every call from one thread (`verst-python`, M§5.2) — the module state (worlds, clock)
+is not guarded otherwise. `cancel` is the only call allowed from another thread. A `cancel` for an id that
+has no running `plan` leaves a tombstone (the last 32 ids are kept): a later `plan` with that id returns
+`CANCELLED` at once, so a cancel that overtakes its plan is not lost.
 
 CLI: ``python3 -m verst_planner.mobile selftest [--world PATH …]`` runs the whole API against the worlds
 (default: both fixture worlds next to the package) and prints one ``OK <function> <ms>`` line per call.
@@ -32,7 +45,7 @@ from verst_planner import ENGINE_VERSION
 from verst_planner.adapters.fake import GOLDEN_CLOCK, FakePorts, FakeWorld, build_fakes
 from verst_planner.config import PlannerConfig
 from verst_planner.domain import codec
-from verst_planner.domain.errors import InvalidInput, PlannerError, Unreachable
+from verst_planner.domain.errors import InvalidInput, PlanCancelled, PlannerError, TooShort, Unreachable
 from verst_planner.domain.model import UNSET, CostPatch, GeoSuggestion, LatLon, TripPlan
 from verst_planner.engine import Planner
 from verst_planner.events import CancelToken, PlanEvent, event_to_json
@@ -41,7 +54,9 @@ from verst_planner.explain.share import share_text as render_share_text
 from verst_planner.explain.templates import ReasonTemplates
 from verst_planner.geo.bearing import bearing8
 
+API_VERSION = 1
 REQUIRED_ZONES = ("Europe/Moscow", "Europe/Volgograd")
+TOMBSTONES = 32
 
 
 class Listener(Protocol):
@@ -51,11 +66,12 @@ class Listener(Protocol):
 
 
 class EngineFailure(Exception):
-    """An error with an app-facing code that is not a `PlannerError` (`NO_WORLD`, `TZDATA_MISSING`)."""
+    """App-facing error that is no `PlannerError`: `NO_WORLD`, `TZDATA_MISSING`, `TRIP_INCOMPATIBLE`."""
 
-    def __init__(self, code: str, message: str = "") -> None:
+    def __init__(self, code: str, message: str = "", field: str | None = None) -> None:
         super().__init__(message)
         self.code = code
+        self.field = field
 
 
 class SystemClock:
@@ -83,6 +99,7 @@ class _World:
 _WORLDS: dict[str, _World] = {}
 _CLOCK: SystemClock | _Fixed = SystemClock()
 _CANCELS: dict[str, CancelToken] = {}
+_TOMBSTONES: dict[str, None] = {}  # insertion-ordered set of ids cancelled before their plan started
 _LOCK = threading.Lock()
 
 
@@ -96,33 +113,50 @@ def _error(code: str, message: str = "", **extra: Any) -> dict[str, Any]:
         "field": None,
         "reason": None,
         "pointIndex": None,
+        "roadKm": None,
         "detail": None,
     }
     out.update(extra)
     return out
 
 
+def _dump(body: dict[str, Any]) -> str:
+    return json.dumps(body, ensure_ascii=False, allow_nan=False)
+
+
+def _failure(e: BaseException) -> dict[str, Any]:
+    tb = traceback.format_exc()
+    sys.stderr.write(tb)
+    return {"ok": False, "error": _error("INTERNAL", repr(e), detail=tb)}
+
+
 def _envelope(fn: Callable[[], Any]) -> str:
     t0 = time.perf_counter()
+
+    def ms() -> int:
+        return round((time.perf_counter() - t0) * 1000)
+
     try:
-        result = fn()
-        body: dict[str, Any] = {"ok": True, "result": result}
-    except InvalidInput as e:
-        body = {"ok": False, "error": _error(e.code, str(e), field=e.field, reason=e.reason)}
-    except Unreachable as e:
-        body = {"ok": False, "error": _error(e.code, str(e), pointIndex=e.point_index)}
-    except PlannerError as e:
-        body = {"ok": False, "error": _error(e.code, str(e))}
-    except EngineFailure as e:
-        body = {"ok": False, "error": _error(e.code, str(e))}
-    except _BadInput as e:
-        body = {"ok": False, "error": _error("INVALID_INPUT", str(e), detail=repr(e.__cause__))}
-    except Exception as e:  # never raise across the bridge
-        tb = traceback.format_exc()
-        sys.stderr.write(tb)
-        body = {"ok": False, "error": _error("INTERNAL", repr(e), detail=tb)}
-    body["ms"] = round((time.perf_counter() - t0) * 1000)
-    return json.dumps(body, ensure_ascii=False)
+        try:
+            body: dict[str, Any] = {"ok": True, "result": fn()}
+        except InvalidInput as e:
+            body = {"ok": False, "error": _error(e.code, str(e), field=e.field, reason=e.reason)}
+        except Unreachable as e:
+            body = {"ok": False, "error": _error(e.code, str(e), pointIndex=e.point_index)}
+        except TooShort as e:
+            body = {"ok": False, "error": _error(e.code, str(e), roadKm=e.road_km)}
+        except PlannerError as e:
+            body = {"ok": False, "error": _error(e.code, str(e))}
+        except EngineFailure as e:
+            body = {"ok": False, "error": _error(e.code, str(e), field=e.field)}
+        except _BadInput as e:
+            body = {"ok": False, "error": _error("INVALID_INPUT", str(e), detail=repr(e.__cause__))}
+        body["ms"] = ms()
+        return _dump(body)
+    except Exception as e:  # never raise across the bridge, serialisation (NaN, non-JSON types) included
+        body = _failure(e)
+        body["ms"] = ms()
+        return _dump(body)
 
 
 class _BadInput(Exception):
@@ -155,12 +189,33 @@ def _world(world_id: Any) -> _World:
 def _point(lat: Any, lon: Any) -> LatLon | None:
     if lat is None or lon is None:
         return None
-    point: LatLon = _parse("lat/lon", lambda: LatLon(float(lat), float(lon)))
+    point: LatLon = _parse("lat/lon", lambda: LatLon(_num(lat, "lat"), _num(lon, "lon")))
     return point
 
 
 def _int(v: Any, what: str) -> int:
-    return int(_parse(what, lambda: int(v)))
+    """A real integer (a JSON number without fraction); booleans and strings are rejected."""
+    if isinstance(v, bool) or not isinstance(v, int):
+        raise _BadInput(f"{what}: not an integer")
+    return v
+
+
+def _bool(v: Any, what: str) -> bool:
+    if not isinstance(v, bool):
+        raise _BadInput(f"{what}: not a boolean")
+    return v
+
+
+def _str(v: Any, what: str) -> str:
+    if not isinstance(v, str):
+        raise _BadInput(f"{what}: not a string")
+    return v
+
+
+def _num(v: Any, what: str) -> float:
+    if isinstance(v, bool) or not isinstance(v, int | float):
+        raise _BadInput(f"{what}: not a number")
+    return float(v)
 
 
 # ---------------------------------------------------------------------------------------------- planners
@@ -216,6 +271,7 @@ def _selfcheck() -> dict[str, Any]:
         raise EngineFailure("TZDATA_MISSING", ", ".join(missing))
     return {
         "engineVersion": ENGINE_VERSION,
+        "apiVersion": API_VERSION,
         "python": ".".join(str(x) for x in sys.version_info[:3]),
         "tz": tz,
         "resources": True,
@@ -271,7 +327,7 @@ def suggest(world: str, q: str, lat: float | None = None, lon: float | None = No
     def run() -> list[dict[str, Any]]:
         w = _world(world)
         near = _point(lat, lon)
-        found = w.fakes.geocoding.suggest(str(q), near, _int(limit, "limit"))
+        found = w.fakes.geocoding.suggest(_str(q, "q"), near, _int(limit, "limit"))
         return [_suggestion(w.world, s) for s in found]
 
     return _envelope(run)
@@ -320,7 +376,7 @@ def ready_routes(world: str, lat: float, lon: float, radius_km: float = 50, limi
         p = _point(lat, lon)
         if p is None:
             raise _BadInput("lat/lon required")
-        radius = float(_parse("radius_km", lambda: float(radius_km)))
+        radius = _num(radius_km, "radius_km")
         out = []
         for r in w.fakes.places.ready_routes_near(p, radius, _int(limit, "limit")):
             hub = w.world.towns[r.hub_town_id]
@@ -385,26 +441,37 @@ def plan(world: str, request_id: str, input_json: str, listener: Any = None) -> 
             raise _BadInput("input: not an object")
         trip_input = _parse("input", lambda: codec.input_from_json(raw))
         token = CancelToken()
+        rid = _str(request_id, "request_id")
         with _LOCK:
-            _CANCELS[str(request_id)] = token
+            if rid in _TOMBSTONES:
+                del _TOMBSTONES[rid]
+                raise PlanCancelled()
+            _CANCELS[rid] = token
         try:
             return _trip_result(w.planner.plan(trip_input, _ListenerSink(listener), token))
         finally:
             with _LOCK:
-                if _CANCELS.get(str(request_id)) is token:
-                    del _CANCELS[str(request_id)]
+                if _CANCELS.get(rid) is token:
+                    del _CANCELS[rid]
 
     return _envelope(run)
 
 
 def cancel(request_id: str) -> str:
-    """Cancel a running `plan` (thread-safe; the plan fails with `CANCELLED` at its next check)."""
+    """Cancel a `plan` (the one call allowed from any thread). A running plan fails with `CANCELLED` at its
+    next check (`{"cancelled": true}`); for an id with no running plan a tombstone is kept, so that plan
+    returns `CANCELLED` when it starts (`{"cancelled": false, "pending": true}`)."""
 
     def run() -> dict[str, Any]:
+        rid = _str(request_id, "request_id")
         with _LOCK:
-            token = _CANCELS.get(str(request_id))
-        if token is None:
-            return {"cancelled": False}
+            token = _CANCELS.get(rid)
+            if token is None:
+                _TOMBSTONES.pop(rid, None)
+                _TOMBSTONES[rid] = None
+                while len(_TOMBSTONES) > TOMBSTONES:
+                    del _TOMBSTONES[next(iter(_TOMBSTONES))]
+                return {"cancelled": False, "pending": True}
         token.cancel()
         return {"cancelled": True}
 
@@ -415,6 +482,13 @@ def _trip(trip_json: Any) -> TripPlan:
     data = _decode(trip_json, "trip")
     if not isinstance(data, dict):
         raise _BadInput("trip: not an object")
+    version = data.get("engineVersion")
+    if not isinstance(version, str):
+        raise InvalidInput("engineVersion", "missing")
+    if version.split(".")[:2] != ENGINE_VERSION.split(".")[:2]:
+        raise EngineFailure(
+            "TRIP_INCOMPATIBLE", f"trip engine {version!r}, engine {ENGINE_VERSION}", field="engineVersion"
+        )
     plan_obj: TripPlan = _parse("trip", lambda: codec.plan_from_json(data))
     return plan_obj
 
@@ -424,9 +498,22 @@ def replace_stop(world: str, trip_json: str, stop_id: str, alt_id: str) -> str:
 
     def run() -> dict[str, Any]:
         w = _world(world)
-        return _trip_result(w.planner.replace_stop(_trip(trip_json), str(stop_id), str(alt_id)))
+        trip = _trip(trip_json)
+        return _trip_result(w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")))
 
     return _envelope(run)
+
+
+def _crew(raw: Any) -> Any:
+    if isinstance(raw, dict):
+        for key in ("adults", "children"):
+            if key in raw:
+                _int(raw[key], f"crew.{key}")
+        if "dog" in raw:
+            _bool(raw["dog"], "crew.dog")
+        for age in raw.get("childAges") or []:
+            _int(age, "crew.childAges")
+    return _parse("crew", lambda: codec.crew_from_json(raw))
 
 
 def _cost_patch(patch_json: Any) -> CostPatch:
@@ -436,15 +523,17 @@ def _cost_patch(patch_json: Any) -> CostPatch:
     unknown = set(d) - {"crew", "budget", "reserveOn", "hotelChoice"}
     if unknown:
         raise InvalidInput("patch", "unknown_key")
-    crew = codec.crew_from_json(d["crew"]) if "crew" in d else None
+    crew = _crew(d["crew"]) if "crew" in d else None
     budget: Any = UNSET
     if "budget" in d:
         budget = None if d["budget"] is None else _int(d["budget"], "budget")
-    reserve = None if d.get("reserveOn") is None else bool(d["reserveOn"])
+    reserve = None if d.get("reserveOn") is None else _bool(d["reserveOn"], "reserveOn")
     hotel = None
     if d.get("hotelChoice") is not None:
         hc = d["hotelChoice"]
-        hotel = _parse("hotelChoice", lambda: (str(hc["stopId"]), str(hc["placeId"])))
+        if not isinstance(hc, dict):
+            raise _BadInput("hotelChoice: not an object")
+        hotel = (_str(hc.get("stopId"), "hotelChoice.stopId"), _str(hc.get("placeId"), "hotelChoice.placeId"))
     return CostPatch(crew=crew, budget_rub=budget, reserve_on=reserve, hotel_choice=hotel)
 
 
@@ -535,7 +624,7 @@ def selftest(world_texts: Sequence[str], out: Any = None) -> int:
             "startAt": "2026-10-24T08:00",
         }
         planned = check("plan", plan(wid, f"selftest-{wid}", json.dumps(trip_input), _Recorder()))
-        check("cancel", cancel(f"selftest-{wid}"))
+        check("cancel", cancel(f"selftest-{wid}-idle"))  # leaves a tombstone for an id never planned
         if not planned["ok"]:
             continue
         trip = planned["result"]["trip"]
@@ -569,6 +658,7 @@ if __name__ == "__main__":
 
 
 __all__ = [
+    "API_VERSION",
     "cancel",
     "golden_snapshot",
     "load_world",

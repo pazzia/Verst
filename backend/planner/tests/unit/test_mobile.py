@@ -106,9 +106,7 @@ class MobileTest(unittest.TestCase):
                 for g in garbage:
                     body = json.loads(fn(g))
                     if not body["ok"]:
-                        self.assertIn(
-                            body["error"]["code"], ("INVALID_INPUT", "INTERNAL", "NO_WORLD"), (fn, g, body)
-                        )
+                        self.assertIn(body["error"]["code"], ("INVALID_INPUT", "NO_WORLD"), (fn, g, body))
         call(mobile.set_clock("system"))
 
     def test_load_world_both(self) -> None:
@@ -233,7 +231,8 @@ class MobileTest(unittest.TestCase):
         release.set()
         t.join(30)
         self.assertEqual(fail(out["r"])["code"], "CANCELLED")
-        self.assertEqual(call(mobile.cancel("req-1")), {"cancelled": False})  # unregistered after the run
+        # unregistered after the run: a late cancel only leaves a tombstone
+        self.assertEqual(call(mobile.cancel("req-1")), {"cancelled": False, "pending": True})
 
     def test_replace_roundtrip(self) -> None:
         from tests.golden.test_golden import load_case, run_case
@@ -321,6 +320,94 @@ class MobileTest(unittest.TestCase):
         self.assertEqual(body["error"]["code"], "INTERNAL")
         self.assertIn("RuntimeError: drill", body["error"]["detail"])
         self.assertIn("RuntimeError: drill", err.getvalue())
+
+    def test_selfcheck_api_version(self) -> None:
+        r = call(mobile.selfcheck())
+        self.assertEqual(r["apiVersion"], mobile.API_VERSION)
+        self.assertEqual(r["apiVersion"], 1)
+
+    def test_stale_trip_rejected(self) -> None:
+        trip = golden_plan("G02")["trip"]
+        stop = next(s for d in trip["daysList"] for s in d["stops"] if s["alternatives"])
+        major, minor, _patch = trip["engineVersion"].split(".")
+        same_minor = dict(trip, engineVersion=f"{major}.{minor}.99")
+        self.assertIn("trip", call(mobile.patch_cost("central_russia_v1", json.dumps(same_minor), "{}")))
+        stale = json.dumps(dict(trip, engineVersion=f"{major}.{int(minor) + 1}.0"))
+        for envelope in (
+            mobile.replace_stop("central_russia_v1", stale, stop["id"], stop["alternatives"][0]["id"]),
+            mobile.patch_cost("central_russia_v1", stale, json.dumps({"reserveOn": False})),
+            mobile.share_text(stale),
+        ):
+            err = fail(envelope)
+            self.assertEqual((err["code"], err["field"]), ("TRIP_INCOMPATIBLE", "engineVersion"))
+        missing = {k: v for k, v in trip.items() if k != "engineVersion"}
+        err = fail(mobile.share_text(json.dumps(missing)))
+        self.assertEqual((err["code"], err["field"]), ("INVALID_INPUT", "engineVersion"))
+
+    def test_patch_strict_types(self) -> None:
+        trip = json.dumps(golden_plan("G02")["trip"])
+        bad_patches = [
+            {"crew": {"adults": "two"}},
+            {"crew": {"adults": True, "children": 0, "dog": False}},
+            {"crew": {"adults": 2, "children": 0, "dog": "no"}},
+            {"crew": {"adults": 2, "children": 1, "dog": False, "childAges": ["5"]}},
+            {"crew": "2+1"},
+            {"reserveOn": "false"},
+            {"reserveOn": 0},
+            {"budget": True},
+            {"budget": "50000"},
+            {"budget": 1.5},
+            {"hotelChoice": "x"},
+            {"hotelChoice": {"stopId": 1, "placeId": "p"}},
+        ]
+        for patch in bad_patches:
+            with self.subTest(patch=patch):
+                self.assertEqual(
+                    fail(mobile.patch_cost("central_russia_v1", trip, json.dumps(patch)))["code"],
+                    "INVALID_INPUT",
+                )
+        w = "central_russia_v1"
+        for envelope in (
+            mobile.suggest(w, None, None, None, 6),  # type: ignore[arg-type]
+            mobile.suggest(w, 5, None, None, 6),  # type: ignore[arg-type]
+            mobile.suggest(w, "Тул", None, None, True),  # type: ignore[arg-type]
+            mobile.suggest(w, "Тул", None, None, "6"),  # type: ignore[arg-type]
+            mobile.popular(w, False),  # type: ignore[arg-type]
+            mobile.reverse(w, True, 37.6),  # type: ignore[arg-type]
+            mobile.ready_routes(w, *MOSCOW, "50", 20),  # type: ignore[arg-type]
+            mobile.cancel(None),  # type: ignore[arg-type]
+        ):
+            self.assertEqual(fail(envelope)["code"], "INVALID_INPUT")
+
+    def test_serialization_failure_is_internal(self) -> None:
+        with redirect_stderr(io.StringIO()) as err:
+            body = json.loads(mobile._envelope(lambda: {"x": float("nan")}))
+            unserialisable = json.loads(mobile._envelope(lambda: {"x": object()}))
+        self.assertEqual(body["error"]["code"], "INTERNAL")
+        self.assertIn("ValueError", body["error"]["detail"])
+        self.assertEqual(unserialisable["error"]["code"], "INTERNAL")
+        self.assertIn("Traceback", err.getvalue())
+
+    def test_too_short_carries_road_km(self) -> None:
+        err = fail(mobile.golden_snapshot(json.dumps(case("G10"))))
+        self.assertEqual(err["code"], "TOO_SHORT")
+        self.assertIsInstance(err["roadKm"], float)
+        self.assertGreater(err["roadKm"], 0)
+
+    def test_cancel_before_plan(self) -> None:
+        c = case("G08")
+        self.assertEqual(call(mobile.cancel("early-1")), {"cancelled": False, "pending": True})
+        self.assertEqual(
+            fail(mobile.plan(c["world"], "early-1", json.dumps(c["input"]), None))["code"], "CANCELLED"
+        )
+        # the tombstone is used up: the same id plans normally afterwards
+        self.assertIn("trip", call(mobile.plan(c["world"], "early-1", json.dumps(c["input"]), None)))
+        for i in range(mobile.TOMBSTONES + 5):
+            call(mobile.cancel(f"flood-{i}"))
+        self.assertEqual(len(mobile._TOMBSTONES), mobile.TOMBSTONES)
+        self.assertNotIn("flood-0", mobile._TOMBSTONES)
+        self.assertIn(f"flood-{mobile.TOMBSTONES + 4}", mobile._TOMBSTONES)
+        mobile._TOMBSTONES.clear()
 
     def test_selftest_cli(self) -> None:
         out = io.StringIO()

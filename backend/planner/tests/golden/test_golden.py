@@ -267,7 +267,8 @@ class AlternativesGateTest(unittest.TestCase):
 class TiePicksTest(unittest.TestCase):
     def test_no_pick_decided_by_a_tie(self) -> None:
         """A§16.12 S2-01: in every golden plan the winner of each stage pick (lunch, fuel, rest, overnight
-        town, hotel) beats the runner-up by ≥ 0.05, so no pick depends on a tie-break."""
+        town, hotel, the sight cap and every sight drop — DEV-113 T1) beats the runner-up by ≥ 0.05, so no
+        pick depends on a tie-break."""
         from tests.golden.ties import MIN_MARGIN, record_picks
 
         checked = 0
@@ -279,7 +280,7 @@ class TiePicksTest(unittest.TestCase):
                 checked += 1
                 with self.subTest(case=case["id"], stage=p.stage, place=p.place_id):
                     self.assertGreaterEqual(p.margin, MIN_MARGIN, f"{p.best} vs {p.second}")
-        self.assertGreaterEqual(checked, 25)  # 30 picks across the 10 plans
+        self.assertGreaterEqual(checked, 35)  # 39 picks across the 10 plans (9 of them sight picks)
 
 
 def _soft(s: str) -> str:
