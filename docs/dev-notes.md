@@ -1108,3 +1108,15 @@ so its engine km (537 for 2 adults + 1 child) is the whole round trip.
 - Brand allow-list `tests/brand_allowlist.txt`: only `links.{navigator,maps,web}` values in engine output and
   `handoff_*` Android keys. The catalogue files and the composed world are deny-list scanned.
 - Coverage gate raised to 95 % (`make coverage-planner`).
+
+## ARCH-301 — budget fitter (M2)
+- `Planner.plan` = plain plan → ADR-0011 ladder → fitted plan (`budgetFit`) or `fit.NoFit`; the bridge returns
+  `{"outcome": "no_fit", "minimum", "options", …}` (contracts `plan-no-fit.json`, `estimate-no-fit.json`).
+- **Kotlin contract change:** `cost.units.nights[].rooms` and `options[].rooms` may be present (explicit family
+  rooms); `CostCalculator` must use them instead of `ceil(adults/2)` and compare `rooms × price` for the
+  `cheaper_overnight` hint. `cost_recompute_cases.json` has 6 new `rooms_*` cases (45 in total).
+- Alternatives may carry `breaksBudget: true`; a fitted trip carries `budgetFit`; `estimate` returns
+  `budgetStatus` (`fits` | `small_overrun` | null) and `outcome`.
+- A crew patch on a trip with explicit rooms → `INVALID_INPUT(crew, replan_required)`.
+- G13 CEO case: 58 400 → **27 400 ₽** (fits, short ring). Probes: Москва → Волгоград 3+1 at 8 000 ₽ → no_fit,
+  minimum 37 900 with shorten 20 800 / closer town 14 400 (`fits: false`) / raise to 38 000.

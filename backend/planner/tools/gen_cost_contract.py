@@ -121,20 +121,26 @@ def expected(units, crew, reserve_on, budget, overrides):
     else:
         shown_km = sum((max(D(0), k) for k in kms.values()), D(0))
     tolls = sum((D(t["rub"]) for t in units["tolls"]), D(0))
-    rooms = math.ceil(crew["adults"] / 2)
+    std_rooms = math.ceil(crew["adults"] / 2)
     lodging = D(0)
     breakfasts = []
     cheaper = False
     for n in units["nights"]:
+        # ADR-0011: a night or option may carry explicit `rooms` (family rooms); absent = ceil(adults / 2)
         price, bf, sel = n["priceNightRub"], n["breakfastIncluded"], n["selectedPlaceId"]
+        rooms = n.get("rooms") or std_rooms
         want = hotel_by_stop.get(n["stopId"])
         for o in n["options"]:
             if o["placeId"] == want:
                 price, bf, sel = o["priceNightRub"], o["breakfastIncluded"], o["placeId"]
+                rooms = o.get("rooms") or std_rooms
         lodging += rooms * price
         if not bf:
             breakfasts.append(n["breakfastCheckRub"])
-        if any(o["priceNightRub"] < price and o["placeId"] != sel for o in n["options"]):
+        if any(
+            o["priceNightRub"] * (o.get("rooms") or std_rooms) < price * rooms and o["placeId"] != sel
+            for o in n["options"]
+        ):
             cheaper = True
     ages = crew.get("childAges")
     if ages is None:
@@ -518,6 +524,67 @@ case(
     "rule 4: a sight replaced by a rest area loses its ticket (no fewer_sights hint without tickets)",
     budget=20000,
     overrides={"replaced": {"d1s02": alt("RU-YAR", -0.4)}},
+)
+
+# ---- ADR-0011 explicit rooms (family rooms chosen by the budget fitter)
+FAMILY = {"adults": 3, "children": 1, "dog": False, "childAges": None}
+
+
+def fam_nights(night_rooms, options):
+    return [
+        night("d1s05", 1, "Ярославль", "h_yar", 6000, [("h_yar", 6000, True)]),
+        {
+            **night("d2s05", 2, "Суздаль", "h_suz", 8400, [(p, pr, b) for p, pr, b, _r in options]),
+            **({"rooms": night_rooms} if night_rooms is not None else {}),
+            "options": [
+                {"placeId": p, "priceNightRub": pr, "breakfastIncluded": b, **({"rooms": r} if r else {})}
+                for p, pr, b, r in options
+            ],
+        },
+    ]
+
+
+case(
+    "rooms_explicit_family",
+    "a family room (≤ 4 guests): 1 room x 8 400 instead of ceil(3/2) = 2 standard rooms",
+    units=mod(nights=fam_nights(1, [("h_suz", 8400, True, 1), ("h_suz2", 4500, False, None)])),
+    crew=FAMILY,
+)
+case(
+    "rooms_option_explicit_override",
+    "hotelByStop picks an option with explicit rooms = 1",
+    units=mod(nights=fam_nights(None, [("h_suz", 6000, True, None), ("h_suz3", 7800, True, 1)])),
+    crew=FAMILY,
+    overrides={"hotelByStop": {"d2s05": "h_suz3"}},
+)
+case(
+    "rooms_option_without_rooms",
+    "an option without `rooms` falls back to ceil(adults / 2) after the override",
+    units=mod(nights=fam_nights(1, [("h_suz", 8400, True, 1), ("h_suz2", 4500, False, None)])),
+    crew=FAMILY,
+    overrides={"hotelByStop": {"d2s05": "h_suz2"}},
+)
+case(
+    "rooms_cheaper_hint_by_total",
+    "cheaper_overnight compares rooms x price: 1 x 8 400 < 2 x 6 000",
+    units=mod(nights=fam_nights(None, [("h_suz", 6000, True, None), ("h_fam", 8400, True, 1)])),
+    crew=FAMILY,
+    budget=20000,
+)
+case(
+    "rooms_no_hint_more_rooms",
+    "a lower price per room but more rooms is not cheaper: 2 x 4 500 > 1 x 8 400",
+    units=mod(nights=fam_nights(1, [("h_suz", 8400, True, 1), ("h_std", 4500, True, None)])),
+    crew=FAMILY,
+    budget=20000,
+)
+case(
+    "rooms_mixed_nights_reserve_off",
+    "night 1 legacy (2 rooms), night 2 explicit 1 room, reserve off",
+    units=mod(nights=fam_nights(1, [("h_suz", 8400, True, 1)])),
+    crew=FAMILY,
+    reserve_on=False,
+    budget=30000,
 )
 
 TEXT = (

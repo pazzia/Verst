@@ -29,6 +29,8 @@ from verst_planner.domain.errors import InvalidInput
 from verst_planner.domain.model import (
     Alternative,
     AltUnits,
+    BudgetFit,
+    BudgetLever,
     CandidateState,
     CostBreakdownRow,
     CostLine,
@@ -381,6 +383,7 @@ def _alternative_to_json(a: Alternative) -> Json:
         "deltaRub": a.delta_rub,
         "shiftMin": a.shift_min,
         "units": alt_units_to_json(a.units),
+        **({"breaksBudget": True} if a.breaks_budget else {}),
         "stop": stop_to_json(a.stop),
         "dayPatch": [
             {
@@ -405,6 +408,7 @@ def _alternative_from_json(d: Mapping[str, Any]) -> Alternative:
         shift_min=d["shiftMin"],
         stop=stop_from_json(d["stop"]),
         units=alt_units_from_json(d["units"]),
+        breaks_budget=bool(d.get("breaksBudget", False)),
         day_patch=tuple(
             StopTime(
                 p["stopId"], p["seq"], dt_from_str(p["arriveAt"]), dt_from_str(p["departAt"]), p["kmFromPrev"]
@@ -547,12 +551,14 @@ def units_to_json(u: CostUnits) -> Json:
                         "priceNightRub": o.price_night_rub,
                         "breakfastIncluded": o.breakfast_included,
                     }
+                    | ({} if o.rooms is None else {"rooms": o.rooms})
                     for o in n.options
                 ],
                 "defaultPrice": n.default_price,
                 "breakfastIncluded": n.breakfast_included,
                 "breakfastCheckRub": n.breakfast_check_rub,
             }
+            | ({} if n.rooms is None else {"rooms": n.rooms})
             for n in u.nights
         ],
         "meals": [
@@ -605,12 +611,15 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
                 selected_place_id=n["selectedPlaceId"],
                 price_night_rub=n["priceNightRub"],
                 options=tuple(
-                    HotelPrice(o["placeId"], o["priceNightRub"], o.get("breakfastIncluded", True))
+                    HotelPrice(
+                        o["placeId"], o["priceNightRub"], o.get("breakfastIncluded", True), o.get("rooms")
+                    )
                     for o in n["options"]
                 ),
                 default_price=n["defaultPrice"],
                 breakfast_included=n["breakfastIncluded"],
                 breakfast_check_rub=n["breakfastCheckRub"],
+                rooms=n.get("rooms"),
             )
             for n in d["nights"]
         ),
@@ -844,6 +853,32 @@ def engine_state_from_json(d: Mapping[str, Any]) -> EngineState:
 # ---------------------------------------------------------------- plan
 
 
+def budget_fit_to_json(f: BudgetFit) -> Json:
+    return {
+        "status": f.status,
+        "budgetRub": f.budget_rub,
+        "allowedRub": f.allowed_rub,
+        "initialTotalRub": f.initial_total_rub,
+        "totalRub": f.total_rub,
+        "levers": [{"code": x.code, "savedRub": x.saved_rub} for x in f.levers],
+        "textRu": f.text_ru,
+        "variantOf": f.variant_of,
+    }
+
+
+def budget_fit_from_json(d: Mapping[str, Any]) -> BudgetFit:
+    return BudgetFit(
+        status=d["status"],
+        budget_rub=d["budgetRub"],
+        allowed_rub=d["allowedRub"],
+        initial_total_rub=d["initialTotalRub"],
+        total_rub=d["totalRub"],
+        levers=tuple(BudgetLever(x["code"], x["savedRub"]) for x in d["levers"]),
+        text_ru=d["textRu"],
+        variant_of=d.get("variantOf"),
+    )
+
+
 def plan_to_json(p: TripPlan, public: bool = True, trip_id: str | None = None) -> Json:
     """`TripPlan` → PlanResponse-shaped dict. `public=True` (API default) omits `engineState`.
 
@@ -881,6 +916,8 @@ def plan_to_json(p: TripPlan, public: bool = True, trip_id: str | None = None) -
     }
     if p.approx_distances:
         out["approxDistances"] = True  # omitted when false: the golden snapshots stay byte-identical
+    if p.budget_fit is not None:
+        out["budgetFit"] = budget_fit_to_json(p.budget_fit)
     if not public:
         out["engineState"] = engine_state_to_json(p.engine_state)
     return out
@@ -917,4 +954,5 @@ def plan_from_json(d: Mapping[str, Any]) -> TripPlan:
         engine_version=d["engineVersion"],
         engine_state=engine_state_from_json(d["engineState"]),
         approx_distances=bool(d.get("approxDistances", False)),
+        budget_fit=None if d.get("budgetFit") is None else budget_fit_from_json(d["budgetFit"]),
     )

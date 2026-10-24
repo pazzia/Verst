@@ -167,6 +167,16 @@ class GoldenTest(unittest.TestCase):
                 self.assertEqual(plan.engine_state.rerun, e["rerun"])
             if "overBudgetDays" in e:
                 self.assertEqual([d.day for d in plan.days_list if d.over_budget], e["overBudgetDays"])
+        with self.subTest(expect="budgetFit"):
+            if "budgetFit" in e:  # ADR-0011 (G13)
+                bf, want = plan.budget_fit, e["budgetFit"]
+                assert bf is not None
+                self.assertEqual(bf.status, want["status"])
+                self.assertLessEqual(plan.cost.total_rub, want["totalMax"])
+                self.assertEqual(bf.total_rub, plan.cost.total_rub)
+                self.assertEqual([x.code for x in bf.levers], want["levers"])
+                self.assertEqual(bf.variant_of, want.get("variantOf"))
+                self.assertEqual(bf.initial_total_rub - bf.total_rub, sum(x.saved_rub for x in bf.levers))
         with self.subTest(expect="cost"):
             if "costTotalRub" in e:
                 self.assertTrue(

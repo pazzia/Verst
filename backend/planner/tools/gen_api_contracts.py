@@ -75,6 +75,43 @@ call("estimate-synthetic", "estimate", world=R, request_id="c-est-1", input_json
 msk = {"lat": 55.7558, "lon": 37.6173, "label": "Москва"}
 yar = {"lat": 57.6261, "lon": 39.8845, "label": "Ярославль"}
 graph_plan = mobile.plan(R, "c-plan-2", trip_input(msk, yar), None)
+# ADR-0011: the CEO's case (fitted) and a «doesn't fit» outcome
+CEO = {
+    "origin": msk,
+    "readyRouteId": "rr_golden_ring",
+    "crew": {"adults": 4, "children": 1, "dog": True},
+    "dailyKm": 300,
+}
+call(
+    "plan-budget-fit",
+    "plan",
+    world=R,
+    request_id="c-fit-1",
+    input_json=json.dumps({**CEO, "budget": 30000}),
+    listener=None,
+)
+call(
+    "estimate-budget-fit",
+    "estimate",
+    world=R,
+    request_id="c-fit-2",
+    input_json=json.dumps({**CEO, "budget": 30000}),
+)
+call(
+    "plan-no-fit",
+    "plan",
+    world=R,
+    request_id="c-fit-3",
+    input_json=json.dumps({**CEO, "budget": 20000}),
+    listener=None,
+)
+call(
+    "estimate-no-fit",
+    "estimate",
+    world=R,
+    request_id="c-fit-4",
+    input_json=json.dumps({**CEO, "budget": 20000}),
+)
 call("city_presets", "city_presets", world=R, lat=YAR["lat"], lon=YAR["lon"])
 walk = call(
     "city_route-overview",

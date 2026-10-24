@@ -3132,6 +3132,31 @@ READY = [
         ],
         "suggestedNights": ["t_tula"],
     },
+    {
+        # ADR-0011 lever 5: the hidden 2-day variant of «Золотое кольцо» (never listed by itself)
+        "id": "rr_golden_ring_short",
+        "parentId": "rr_golden_ring",
+        "hubTownId": "t_moscow",
+        "titleRu": "Золотое кольцо · коротко",
+        "subtitleRu": "2 дня · Сергиев Посад, Переславль, Ростов, Ярославль",
+        "kmTotal": 530,
+        "kmSign": 265,
+        "ring": "weekend",
+        "roundTrip": True,
+        "daysMin": 2,
+        "daysMax": 2,
+        "tags": ["history", "family"],
+        "coverKey": "golden_ring",
+        "sort": 11,
+        "points": [
+            {"seq": 1, "role": "via", "townId": "t_sergiev_posad"},
+            {"seq": 2, "role": "stop", "placeId": "pl_sps_lavra"},
+            {"seq": 3, "role": "via", "townId": "t_pereslavl"},
+            {"seq": 4, "role": "via", "townId": "t_rostov"},
+            {"seq": 5, "role": "via", "townId": "t_yaroslavl"},
+        ],
+        "suggestedNights": ["t_yaroslavl"],
+    },
 ]
 
 

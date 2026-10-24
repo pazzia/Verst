@@ -505,5 +505,9 @@ class _Loader:
                 tags=tuple(str(t) for t in r.get("tags", [])),
                 cover_key=r.get("coverKey"),
                 sort=int(r.get("sort", 100)),
+                parent_id=r.get("parentId"),
             )
+        for rid, rr in out.items():
+            if rr.parent_id is not None and rr.parent_id not in out:
+                raise ValueError(f"readyRoutes.{rid}.parentId: unknown ready route {rr.parent_id!r}")
         return out

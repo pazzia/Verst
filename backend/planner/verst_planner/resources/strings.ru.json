@@ -165,5 +165,13 @@
     "Столовая «Щи да каша»"
   ],
   "synthetic.fuel": "АЗС у трассы",
-  "synthetic.rest": "Площадка отдыха"
+  "synthetic.rest": "Площадка отдыха",
+  "fit.lever.lodging_cheap": "дешевле ночёвки",
+  "fit.lever.food_economy": "кафе попроще",
+  "fit.lever.sights_free": "бесплатные места",
+  "fit.lever.fewer_nights": "меньше ночёвок",
+  "fit.lever.variant": "короткий вариант маршрута",
+  "fit.fits": "Подогнали под бюджет {budget} ₽: {levers}.",
+  "fit.small_overrun": "Почти в бюджет: ≈ {total} ₽ при бюджете {budget} ₽ — {levers}.",
+  "fit.no_fit": "В {budget} ₽ эта поездка не помещается даже в самом экономном варианте — минимум ≈ {total} ₽."
 }

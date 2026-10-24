@@ -77,6 +77,7 @@ from verst_planner.events import NULL_SINK, CancelToken, PlanEvent, event_to_jso
 from verst_planner.explain import ru
 from verst_planner.explain.share import share_text as render_share_text
 from verst_planner.explain.templates import ReasonTemplates
+from verst_planner.fit import NoFit
 from verst_planner.geo.bearing import bearing8
 from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.grid import GridIndex
@@ -540,15 +541,51 @@ def _remember_km(world_id: str, raw: Any, km: int) -> None:
         del _TRIP_KM[next(iter(_TRIP_KM))]
 
 
+def _no_fit_result(nf: NoFit, w: _World) -> dict[str, Any]:
+    """ADR-0011 «не помещается в бюджет»: the minimum (a private trip, never a normal plan) + options."""
+    options = []
+    for o in nf.options:
+        dest = None
+        if o.destination is not None:
+            p = o.destination
+            dest = {"lat": p.point.lat, "lon": p.point.lon, "label": p.label, "townId": p.town_id}
+        options.append(
+            {
+                "kind": o.kind,
+                "totalRub": o.total_rub,
+                "budgetRub": o.budget_rub,
+                "days": o.days,
+                "dailyKm": o.daily_km,
+                "readyRouteId": o.ready_route_id,
+                "destination": dest,
+                "titleRu": o.title_ru,
+                "fits": o.fits,
+            }
+        )
+    return {
+        "outcome": "no_fit",
+        "budgetRub": nf.budget_rub,
+        "allowedRub": nf.allowed,
+        "minimum": {
+            "totalRub": nf.minimum.cost.total_rub,
+            "levers": [{"code": x.code, "savedRub": x.saved_rub} for x in nf.levers],
+            **_trip_result(nf.minimum, w.world),
+        },
+        "options": options,
+        "textRu": nf.text_ru,
+    }
+
+
 def plan(world: str, request_id: str, input_json: str, listener: Any = None) -> str:
     """Plan a trip; `listener.onEvent(json)` per progress event; cancellable by `cancel(request_id)`."""
 
     def run() -> dict[str, Any]:
         w = _world(world)
-        result = _trip_result(
-            _run_plan(w, request_id, input_json, _ListenerSink(listener), hint=True), w.world
-        )
-        return {"outcome": "plan", **result}
+        try:
+            trip = _run_plan(w, request_id, input_json, _ListenerSink(listener), hint=True)
+        except NoFit as nf:
+            return _no_fit_result(nf, w)
+        return {"outcome": "plan", **_trip_result(trip, w.world)}
 
     return _envelope(run)
 
@@ -564,13 +601,26 @@ def estimate(world: str, request_id: str, input_json: str) -> str:
 
     def run() -> dict[str, Any]:
         w = _world(world)
-        trip = _run_plan(w, request_id, input_json, _ListenerSink(None))
+        try:
+            trip = _run_plan(w, request_id, input_json, _ListenerSink(None))
+        except NoFit as nf:
+            m = nf.minimum
+            return {
+                "km": m.km,
+                "days": m.days,
+                "outcome": "no_fit",
+                "totalRub": m.cost.total_rub,
+                "budgetStatus": None,
+            }
+        status = None
+        if trip.input.budget_rub is not None:
+            status = trip.budget_fit.status if trip.budget_fit is not None else "fits"
         return {
             "km": trip.km,
             "days": trip.days,
             "outcome": "plan",
             "totalRub": trip.cost.total_rub,
-            "budgetStatus": None,
+            "budgetStatus": status,
         }
 
     return _envelope(run)

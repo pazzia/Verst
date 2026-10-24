@@ -15,6 +15,7 @@ from verst_planner.domain.model import (
     ScoredTown,
     TownCandidate,
 )
+from verst_planner.domain.rooms import room_plan
 from verst_planner.explain import ru
 from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.polyline import interpolate
@@ -25,6 +26,7 @@ from verst_planner.pipeline.timeline import Profile
 PARKING_TAGS = frozenset({Tag.PARKING, Tag.PARKING_GUARDED})
 HOTEL_CENTRE_KM = 2.0
 EVENING_AFTER_ARRIVAL_MIN = 60
+W_PRICE = 0.5  # ADR-0011 `lodging_cheap`: score points per 1 000 ₽ of the cheapest night
 
 
 @dataclass(slots=True)
@@ -53,7 +55,21 @@ def hotel_score(h: Candidate, tc: TownCandidate) -> float:
     )
 
 
-def rank_hotels(passing: list[Candidate], tc: TownCandidate) -> list[Candidate]:
+def night_cost(h: Candidate, inp: NormalizedInput, ctx: PlanContext) -> int:
+    """Rooms x price of one night for the crew (family rooms when that lever is on, ADR-0011)."""
+    rooms, price, _explicit = room_plan(h.place, inp.crew, ctx.knobs.family_rooms)
+    return rooms * price
+
+
+def rank_hotels(
+    passing: list[Candidate],
+    tc: TownCandidate,
+    inp: NormalizedInput | None = None,
+    ctx: PlanContext | None = None,
+) -> list[Candidate]:
+    if inp is not None and ctx is not None and ctx.knobs.lodging_cheap:
+        # ADR-0011 lever 1: the cheapest night for this crew first, then the usual hotel score
+        return sorted(passing, key=lambda h: (night_cost(h, inp, ctx), -hotel_score(h, tc), h.place.id))
     return sorted(passing, key=lambda h: (-hotel_score(h, tc), h.place.price_night_rub or 0, h.place.id))
 
 
@@ -107,6 +123,8 @@ class _Scorer:
         total = (
             s.w_h * h + s.w_q * q + s.w_e * e - s.w_km * abs(tc.km_at - target) / 100 - s.w_detour * det / 15
         )
+        if self.ctx.knobs.lodging_cheap and passing:
+            total -= W_PRICE * min(night_cost(x, self.inp, self.ctx) for x in passing) / 1000
         return ScoredTown(tc.town, tc.km_at, total, h, q, e, det)
 
 
@@ -120,7 +138,7 @@ def _choice(
     target: float,
     with_hotel: bool = True,
 ) -> OvernightChoice:
-    ranked = rank_hotels(scorer.passing(tc), tc) if with_hotel else []
+    ranked = rank_hotels(scorer.passing(tc), tc, scorer.inp, scorer.ctx) if with_hotel else []
     hotel = ranked[0] if ranked else None
     point = hotel.place.point if hotel else tc.town.point
     if hotel is not None:
