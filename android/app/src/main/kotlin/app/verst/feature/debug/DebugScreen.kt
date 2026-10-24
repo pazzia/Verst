@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.verst.BuildConfig
 import app.verst.VerstApp
+import app.verst.R as AppR
 import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Txt
@@ -69,7 +70,7 @@ fun DebugScreen(flow: VerstFlow) {
                 flow.debugForceError = if (it == none) null else it
             }
             // S3-R1: a fixed position instead of the phone's (e2e; on the emulator also `adb emu geo fix`).
-            Label(stringResource(app.verst.R.string.debug_mock_location))
+            Label(stringResource(AppR.string.debug_mock_location))
             Choices(listOf(none) + MockPlaces.keys, flow.debugMockLocation?.label ?: none, "debug.mock") {
                 flow.debugMockLocation = MockPlaces[it]
                 if (flow.debugMockLocation != null) flow.locate()
