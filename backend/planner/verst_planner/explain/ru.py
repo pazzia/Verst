@@ -11,12 +11,12 @@ import json
 from datetime import date, time
 from decimal import ROUND_HALF_UP, Decimal
 from functools import cache
-from pathlib import Path
 from typing import Any
 
+from verst_planner import resources
 from verst_planner.domain.model import Town
 
-RESOURCES = Path(__file__).resolve().parent.parent / "resources"
+RESOURCES = resources.DIR
 THIN = chr(0x202F)  # narrow no-break space
 NBSP = chr(0x00A0)  # no-break space
 RUB = chr(0x20BD)  # rouble sign
@@ -24,8 +24,7 @@ RUB = chr(0x20BD)  # rouble sign
 
 @cache
 def _strings() -> dict[str, Any]:
-    with (RESOURCES / "strings.ru.json").open(encoding="utf-8") as f:
-        data: dict[str, Any] = json.load(f)
+    data: dict[str, Any] = json.loads(resources.read_text("strings.ru.json"))
     return data
 
 

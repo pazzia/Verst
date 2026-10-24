@@ -761,7 +761,7 @@ add(
     townId="t_tula",
     tags=["parking", "family_room"],
     priceNightRub=4800,
-    rating=4.4,
+    rating=4.35,  # S2-01: 4.4 put G07's hotel pick within 0.03 of Тульский кремль-отель
 )
 add(
     "pl_tul_hotel_station",
@@ -1346,7 +1346,7 @@ add(
     townId="t_gorokhovets",
     tags=["parking"],
     avgCheckRub=600,
-    rating=4.2,
+    rating=4.1,  # S2-01: 4.2 tied G06's day-1 lunch with Кафе «Привал» (5.1 / 5.1)
     openingHours="Mo-Su 10:00-21:00",
 )
 add(

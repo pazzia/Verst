@@ -1,0 +1,113 @@
+package app.verst.engine
+
+import android.content.Context
+import android.os.Build
+import android.os.SystemClock
+import android.util.Log
+import com.chaquo.python.PyObject
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import org.json.JSONObject
+
+/** Engine start-up timings in milliseconds (logged under `VerstEngine`, written by `EngineStartupTest`). */
+data class EngineTimings(
+    val pythonStartMs: Long,
+    val importMs: Long,
+    val worldsMs: Long,
+    val selfcheckMs: Long,
+    val totalMs: Long,
+)
+
+data class EngineInfo(val engineVersion: String, val python: String, val timings: EngineTimings)
+
+sealed interface EngineStatus {
+    data class Starting(val phase: String) : EngineStatus
+    data class Ready(val info: EngineInfo) : EngineStatus
+    data class Failed(val code: String, val detail: String) : EngineStatus
+}
+
+/**
+ * The on-device planner (M§5.2, minimal DEV-101 form): CPython via Chaquopy on the single thread
+ * `verst-python`, the module `verst_planner.mobile`, both fixture worlds from the assets, the self-check.
+ * Every call except `cancel` runs on that thread.
+ */
+class EngineHost(private val context: Context) {
+    private val thread: ExecutorService = Executors.newSingleThreadExecutor { Thread(it, "verst-python") }
+    private val _status = MutableStateFlow<EngineStatus>(EngineStatus.Starting("python"))
+    val status: StateFlow<EngineStatus> = _status
+    private var module: PyObject? = null
+
+    fun start() {
+        if (Build.FINGERPRINT == "robolectric") {
+            _status.value = EngineStatus.Failed("NO_ENGINE", "Robolectric: no CPython in JVM unit tests")
+            return
+        }
+        thread.execute { boot() }
+    }
+
+    private fun boot() {
+        try {
+            val t0 = SystemClock.elapsedRealtime()
+            if (!Python.isStarted()) Python.start(AndroidPlatform(context))
+            val t1 = SystemClock.elapsedRealtime()
+            _status.value = EngineStatus.Starting("import")
+            val mobile = Python.getInstance().getModule("verst_planner.mobile")
+            module = mobile
+            val t2 = SystemClock.elapsedRealtime()
+            _status.value = EngineStatus.Starting("worlds")
+            for (name in WORLDS) {
+                val text = context.assets.open("worlds/$name.json").bufferedReader(Charsets.UTF_8).use { it.readText() }
+                expectOk(mobile.callAttr("load_world", text).toString())
+            }
+            val t3 = SystemClock.elapsedRealtime()
+            expectOk(mobile.callAttr("set_clock", "system").toString())
+            _status.value = EngineStatus.Starting("selfcheck")
+            val check = expectOk(mobile.callAttr("selfcheck").toString())
+            val t4 = SystemClock.elapsedRealtime()
+            val timings = EngineTimings(t1 - t0, t2 - t1, t3 - t2, t4 - t3, t4 - t0)
+            Log.i(TAG, "ready $timings")
+            _status.value = EngineStatus.Ready(
+                EngineInfo(check.getString("engineVersion"), check.getString("python"), timings),
+            )
+        } catch (e: EngineCallFailed) {
+            Log.e(TAG, "engine failed ${e.code}: ${e.detail}")
+            _status.value = EngineStatus.Failed(e.code, e.detail)
+        } catch (e: Throwable) {
+            Log.e(TAG, "engine start failed", e)
+            _status.value = EngineStatus.Failed("ENGINE_START", e.toString())
+        }
+    }
+
+    /** Calls `verst_planner.mobile.<function>(args)` on the engine thread and returns the envelope JSON. */
+    fun call(function: String, vararg args: Any?): String {
+        val task: Future<String> = thread.submit(
+            Callable {
+                val m = module ?: error("engine not started")
+                m.callAttr(function, *args).toString()
+            },
+        )
+        return task.get()
+    }
+
+    private class EngineCallFailed(val code: String, val detail: String) : Exception(code)
+
+    private fun expectOk(envelope: String): JSONObject {
+        val body = JSONObject(envelope)
+        if (!body.getBoolean("ok")) {
+            val err = body.getJSONObject("error")
+            throw EngineCallFailed(err.getString("code"), err.optString("detail", err.optString("message")))
+        }
+        return body.optJSONObject("result") ?: JSONObject()
+    }
+
+    companion object {
+        const val TAG = "VerstEngine"
+        val WORLDS = listOf("central_russia_v1", "edge_cases_v1")
+    }
+}

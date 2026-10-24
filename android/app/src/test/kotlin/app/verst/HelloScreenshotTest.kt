@@ -22,6 +22,7 @@ class HelloScreenshotTest {
     @Test
     fun helloDefault() {
         compose.onNodeWithText("Верста").assertExists()
+        compose.onNodeWithText("Движок: NO_ENGINE").assertExists() // no CPython under Robolectric
         compose.waitForIdle()
         var bitmap = Screenshot.drawDecorView(compose.activity)
         var method = "View.draw"

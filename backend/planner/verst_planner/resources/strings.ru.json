@@ -114,5 +114,7 @@
   "share.day": "День {day} · {km} км",
   "share.stop": "{time} {name}",
   "share.total": "Итого ≈ {total} на {people} чел.",
-  "label.roadside_break": "Остановка у дороги"
+  "label.roadside_break": "Остановка у дороги",
+  "suggest.sub.city": "город · {region}",
+  "suggest.sub.place": "место · {region}"
 }

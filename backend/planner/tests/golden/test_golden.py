@@ -264,6 +264,24 @@ class AlternativesGateTest(unittest.TestCase):
         self.assertGreaterEqual(share, GATE_SHARE)
 
 
+class TiePicksTest(unittest.TestCase):
+    def test_no_pick_decided_by_a_tie(self) -> None:
+        """A§16.12 S2-01: in every golden plan the winner of each stage pick (lunch, fuel, rest, overnight
+        town, hotel) beats the runner-up by ≥ 0.05, so no pick depends on a tie-break."""
+        from tests.golden.ties import MIN_MARGIN, record_picks
+
+        checked = 0
+        for path in sorted(CASES.glob("G*.json")):
+            case = load_case(path)
+            if case["expect"].get("error"):
+                continue
+            for p in record_picks(case):
+                checked += 1
+                with self.subTest(case=case["id"], stage=p.stage, place=p.place_id):
+                    self.assertGreaterEqual(p.margin, MIN_MARGIN, f"{p.best} vs {p.second}")
+        self.assertGreaterEqual(checked, 25)  # 30 picks across the 10 plans
+
+
 def _soft(s: str) -> str:
     """Compare formula text ignoring the kind of space (U+202F / U+00A0 / ' ')."""
     return s.replace(" ", " ").replace(" ", " ")

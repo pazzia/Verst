@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".VerstApp"
         android:allowBackup="false"
         android:label="Верста"
         android:supportsRtl="false"

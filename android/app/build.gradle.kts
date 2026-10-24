@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.chaquopy)
 }
 val repoRoot: File = rootDir.parentFile
 val buildNumber = (System.getenv("VERST_BUILD_NUMBER") ?: "1").toInt()
@@ -45,6 +46,10 @@ android {
     testBuildType = "demo" // androidTest APK targets the APK the CEO installs
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     buildFeatures { compose = true; buildConfig = true }
+    sourceSets {
+        getByName("main") { assets.srcDir(repoRoot.resolve("backend/planner/fixtures")) } // assets/worlds/*.json
+        getByName("androidTest") { assets.srcDir(repoRoot.resolve("backend/planner/tests/golden")) } // cases/, snapshots/
+    }
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -62,6 +67,14 @@ android {
     lint { abortOnError = true; warningsAsErrors = false; xmlReport = true; sarifReport = true; checkReleaseBuilds = false }
 }
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
+chaquopy {
+    defaultConfig {
+        version = "3.12"
+        pip { install("tzdata==2025.2") }
+        // fallback switch (ADR-0010 risks): extractPackages("verst_planner")
+    }
+    sourceSets { getByName("main") { srcDir(repoRoot.resolve("backend/planner")) } }
+}
 dependencies {
     implementation(project(":core-model"))
     implementation(project(":core-ui"))
@@ -71,6 +84,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlinx.coroutines.android)
     "demoImplementation"(libs.compose.ui.test.manifest)
     debugImplementation(libs.compose.ui.test.manifest)
     testImplementation(libs.junit)

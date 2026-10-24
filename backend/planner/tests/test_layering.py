@@ -3,7 +3,8 @@
 1. `verst_planner` imports only the standard library and itself.
 2. Inside the package: `domain` imports only `domain`; `geo` only `domain`/`geo`; `pipeline` may import
    `domain, geo, hours, config, ports, events, explain`; `cost` imports `domain, config, explain.ru`;
-   `adapters.fake` imports `domain, geo, ports`; `engine`/`cli` may import everything.
+   `adapters.fake` imports `domain, geo, ports`; the composition roots `engine`, `cli` and `mobile`
+   may import everything.
 """
 
 from __future__ import annotations
@@ -21,10 +22,16 @@ RULES: dict[str, tuple[str, ...]] = {
     "verst_planner.domain": ("verst_planner.domain",),
     "verst_planner.geo": ("verst_planner.domain", "verst_planner.geo"),
     "verst_planner.hours": ("verst_planner.domain", "verst_planner.hours"),
-    "verst_planner.config": ("verst_planner.domain", "verst_planner.config"),
+    "verst_planner.config": ("verst_planner.domain", "verst_planner.config", "verst_planner.resources"),
+    "verst_planner.resources": ("verst_planner.resources",),
     "verst_planner.ports": ("verst_planner.domain", "verst_planner.ports"),
     "verst_planner.events": ("verst_planner.domain", "verst_planner.events"),
-    "verst_planner.explain": ("verst_planner.domain", "verst_planner.config", "verst_planner.explain"),
+    "verst_planner.explain": (
+        "verst_planner.domain",
+        "verst_planner.config",
+        "verst_planner.explain",
+        "verst_planner.resources",
+    ),
     "verst_planner.pipeline": (
         "verst_planner.domain",
         "verst_planner.geo",
@@ -121,6 +128,13 @@ class LayeringTest(unittest.TestCase):
                 with self.subTest(module=mod, line=line, imported=name):
                     self.assertTrue(allowed(name, rule), f"{mod} must not import {name}")
         self.assertGreater(checked, 50)
+
+    def test_mobile_is_a_composition_root(self) -> None:
+        """DEV-111: `mobile` (like `cli`, `engine`) may import every subpackage, only stdlib outside."""
+        for mod in ("verst_planner.mobile", "verst_planner.cli", "verst_planner.engine"):
+            self.assertIsNone(rule_for(mod), mod)
+        names = {n for _line, n in imports(PKG / "mobile.py")}
+        self.assertTrue(any(n == "verst_planner.engine" for n in names))
 
     def test_engine_uses_public_context(self) -> None:
         """A§16.1 #4 (R-10): `engine.py` reaches `PlanContext` only through its public API."""
