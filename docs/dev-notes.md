@@ -1063,3 +1063,21 @@ process after force-stop», phase 2 «OK (1 test)». F-01 on the device: Golden 
 («Отмена»). New e2e screens: 31-before-process-death, 32-restored-after-process-death.
 Open: «не удалось сохранить» copy key (StorageFull used meanwhile); debug-panel error chips row scrolls past
 the right edge (debug only).
+
+### Manager return — Windshield km (run 36 green, `8763cf9`)
+Problem: rows without an estimate yet showed the fixture km (`kmSign` 263 / 745) and then jumped to the engine km
+(537 / 757). Ярославль is a there-and-back ready route (`roundTrip: true`, `kmTotal` 526, `kmSign` 263 = one way),
+so its engine km (537 for 2 adults + 1 child) is the whole round trip.
+- A row never shows template km: until the estimate for the current request is in, it shows a static
+  `PlaceholderPlate` (components §16, `sign.plate`), tag `windshield.route.N.km.pending`. Decision: static, no shimmer
+  animation (the existing placeholder plates are static; motion budget).
+- Estimates run on the engine thread for all visible rows, selected row first, then top to bottom. The cache key is
+  the whole `PlanRequest` (route id, crew, pace, budget, mood, origin); a world or clock change clears it. A crew
+  change makes new requests, so rows go back to the placeholder and get re-estimated. Cache size raised to 48.
+- Caption meta of a there-and-back route: «<subtitle> · туда и обратно» (loops already say «по кругу»), wrapped to
+  two lines. **Copy request to the Designer:** `windshield_meta_round_trip` = «туда и обратно» is a new key, kept in
+  `app/src/main/res/values/strings_pending_copy.xml` until it reaches the deck.
+- Tests: `VerstFlowTest.windshieldRowsShowOnlyEngineKmSelectedFirstAndReestimateOnCrewChange`; screenshot
+  `windshield/estimating` (no template km rendered); e2e `windshieldSignKmIsThePlanKmOfEveryRow`: each visible row
+  equals `plan(routeRequest(row))`.km for the same crew. The e2e now shows «OK (6 tests)» plus both
+  process-death phases.
