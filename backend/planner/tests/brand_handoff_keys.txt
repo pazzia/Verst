@@ -1,0 +1,4 @@
+# S3-R1 (Manager): real names are allowed ONLY in these navigator hand-off string keys — the app names the
+# external app it opens. Every other string, fixture and rendered text must stay brand-free (brand_denylist.txt).
+stopmenu_yandex_navi
+stopmenu_yandex_maps

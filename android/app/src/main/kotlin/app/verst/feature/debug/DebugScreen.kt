@@ -68,6 +68,15 @@ fun DebugScreen(flow: VerstFlow) {
             Choices(listOf(none, "INTERNAL", "UNREACHABLE", "TOO_SHORT", "INVALID_INPUT"), flow.debugForceError ?: none, "debug.error") {
                 flow.debugForceError = if (it == none) null else it
             }
+            // S3-R1: a fixed position instead of the phone's (e2e; on the emulator also `adb emu geo fix`).
+            Label(stringResource(app.verst.R.string.debug_mock_location))
+            Choices(listOf(none) + MockPlaces.keys, flow.debugMockLocation?.label ?: none, "debug.mock") {
+                flow.debugMockLocation = MockPlaces[it]
+                if (flow.debugMockLocation != null) flow.locate()
+            }
+            flow.lastHandoff?.let { (h, target) ->
+                Txt("$target · ${h.navi ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
+            }
             Label(stringResource(R.string.debug_label_timings))
             val s = status
             Txt(
@@ -92,6 +101,14 @@ fun DebugScreen(flow: VerstFlow) {
         }
     }
 }
+
+/** Mock positions: near fixture towns, and one far from any (the nearest-town fallback). */
+private val MockPlaces = linkedMapOf(
+    "Ярославль" to app.verst.core.model.GeoPoint("Ярославль", 57.6261, 39.8845),
+    "Тула" to app.verst.core.model.GeoPoint("Тула", 54.1931, 37.6177),
+    "Владимир" to app.verst.core.model.GeoPoint("Владимир", 56.1290, 40.4066),
+    "поле" to app.verst.core.model.GeoPoint("поле", 58.40, 43.90),
+)
 
 private fun Modifier.clip12() = this.then(Modifier.background(C.dash.raised, RoundedCornerShape(12.dp)))
 

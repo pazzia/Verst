@@ -18,7 +18,24 @@ object BrandDenyList {
     val brands: List<String> = root.resolve("backend/planner/tests/brand_denylist.txt").readLines()
         .map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
 
-    fun hits(text: String): List<String> = brands.filter { text.contains(it, ignoreCase = true) }.map { "«$it» in «${text.take(80)}»" }
+    /** S3-R1: string keys that may name the external navigator app (hand-off only). */
+    val handoffKeys: Set<String> = root.resolve("backend/planner/tests/brand_handoff_keys.txt").readLines()
+        .map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }.toSet()
+
+    /** Rendered texts may contain the allowed hand-off values (set by [allow]); those are cut out before matching. */
+    var allowed: List<String> = emptyList()
+
+    fun allow(context: android.content.Context) {
+        allowed = handoffKeys.map { k ->
+            val id = app.verst.core.ui.R.string::class.java.getField(k).getInt(null)
+            context.getString(id)
+        }.sortedByDescending { it.length }
+    }
+
+    fun hits(text: String): List<String> {
+        val t = allowed.fold(text) { acc, a -> acc.replace(a, "") }
+        return brands.filter { t.contains(it, ignoreCase = true) }.map { "«$it» in «${text.take(80)}»" }
+    }
 
     /** Every text of a semantics tree (unmerged), for the rendered-screen check. */
     fun texts(node: SemanticsNode): List<String> =
@@ -37,8 +54,14 @@ class BrandDenyListTest {
         // core-ui's R lists every deck key; resolving through the app context gives the merged (overridden) value.
         val fields = app.verst.core.ui.R.string::class.java.fields + app.verst.R.string::class.java.fields
         assertTrue("merged string resources found: ${fields.size}", fields.size > 300)
-        val bad = fields.flatMap { f -> BrandDenyList.hits(context.getString(f.getInt(null))).map { "${f.name}: $it" } }
+        val bad = fields.filter { it.name !in BrandDenyList.handoffKeys }
+            .flatMap { f -> BrandDenyList.hits(context.getString(f.getInt(null))).map { "${f.name}: $it" } }
         assertEquals(emptyList<String>(), bad)
+        // The allow-list is explicit: each key exists, and each really is a hand-off app name.
+        for (k in BrandDenyList.handoffKeys) {
+            val v = context.getString(app.verst.core.ui.R.string::class.java.getField(k).getInt(null))
+            assertTrue("$k = $v", v.startsWith("Яндекс "))
+        }
     }
 
     @Test

@@ -42,6 +42,9 @@ data class LastTripDto(
     val savedId: String? = null,
     val screen: String? = null,
     val exitStopId: String? = null,
+    /** S3-R1 focus restore: the Road-ahead row acted on (Exit, replace, stop menu) and the top visible row. */
+    val roadFocusId: String? = null,
+    val roadTopId: String? = null,
 )
 
 /** Release review P2-10 / M§6.2: the last crew, pace, budget, mood and origin, restored on the next start. */
@@ -60,6 +63,9 @@ data class DefaultsDto(
     val originLat: Double = 55.7558,
     val originLon: Double = 37.6173,
     val originGen: String = "Москвы",
+    /** S3-R1 GPS: the location rationale was answered (allow / «не разрешать»); the origin came from GPS. */
+    val locationAsked: Boolean = false,
+    val originFromGps: Boolean = false,
 )
 
 @Serializable

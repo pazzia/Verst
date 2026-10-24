@@ -18,6 +18,11 @@ from typing import Any
 from tests.helpers import PLANNER_ROOT, WORLDS
 
 REPO = PLANNER_ROOT.parents[1]
+HANDOFF_KEYS = {
+    line.strip()
+    for line in (PLANNER_ROOT / "tests" / "brand_handoff_keys.txt").read_text("utf-8").splitlines()
+    if line.strip() and not line.startswith("#")
+}
 DENY = [
     line.strip()
     for line in (PLANNER_ROOT / "tests" / "brand_denylist.txt").read_text("utf-8").splitlines()
@@ -78,4 +83,8 @@ class BrandDenyListTest(unittest.TestCase):
         for kt in android.rglob("src/main/**/*.kt"):
             used |= set(re.findall(r"R\.string\.([a-z0-9_]+)", kt.read_text("utf-8")))
         self.assertGreater(len(used), 100)
-        self.assertEqual(hits(iter(values[k] for k in sorted(used) if k in values)), [])
+        # S3-R1: only the navigator hand-off keys may name the external app.
+        self.assertEqual(hits(iter(values[k] for k in sorted(used - HANDOFF_KEYS) if k in values)), [])
+        for k in HANDOFF_KEYS:
+            self.assertIn(k, values)
+            self.assertTrue(values[k].startswith("Яндекс "), k)
