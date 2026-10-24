@@ -1,0 +1,210 @@
+{
+  "googleFontsCommit": "e7db6ca603fd4862010383ff17ffd6cc4ffac1c0",
+  "files": {
+    "ibm_plex_mono_semibold": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ibmplexmono/IBMPlexMono-SemiBold.ttf",
+      "sha256": "d3c38e55c78f5b0f28009fddba4834ec503278936a5986032424c9bd2d23aa46",
+      "bytes": 140216,
+      "version": "Version 2.3",
+      "usWeightClass": 600,
+      "cyrillic": 168,
+      "missingGlyphs": [],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "marck_script_regular": {
+      "source": "google/fonts@e7db6ca603fd:ofl/marckscript/MarckScript-Regular.ttf",
+      "sha256": "504de8cc6f919163bc9afb67b9bc208d258230c5e8d00cb82ec52474f9fafc3b",
+      "bytes": 83664,
+      "version": "Version 1.002",
+      "usWeightClass": 400,
+      "cyrillic": 94,
+      "missingGlyphs": [],
+      "missingSoft": [
+        "U+202F"
+      ]
+    }
+  },
+  "rejected": [
+    {
+      "family": "ibmplexsanscondensed",
+      "source": "google/fonts@e7db6ca603fd",
+      "version": "Version 1.3",
+      "cyrillic": 0,
+      "missing": [
+        "U+0410",
+        "U+0411",
+        "U+0412",
+        "U+0413",
+        "U+0414",
+        "U+0415",
+        "U+0416",
+        "U+0417",
+        "U+0418",
+        "U+0419",
+        "U+041A",
+        "U+041B"
+      ]
+    },
+    {
+      "family": "ibmplexsanscondensed",
+      "source": "npm:@ibm/plex-sans-condensed",
+      "why": "files not found"
+    },
+    {
+      "family": "ibmplexsanscondensed",
+      "source": "npm:@ibm/plex",
+      "why": "files not found"
+    }
+  ],
+  "ok": false,
+  "probe": {
+    "firasanscondensed/FiraSansCondensed-Regular.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/firasanscondensed/FiraSansCondensed-Regular.ttf",
+      "sha256": "c67609f14fc9d328442bfffcc31988b0f76e5575cf460fcc1f3dd8e4912fe257",
+      "bytes": 459804,
+      "version": "Version 4.203",
+      "usWeightClass": 400,
+      "cyrillic": 240,
+      "missingGlyphs": [],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "firasanscondensed/FiraSansCondensed-Medium.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/firasanscondensed/FiraSansCondensed-Medium.ttf",
+      "sha256": "6385967fe921a6ee837221cde461e695e77f8931a3ca4bc82c7c1c1a5fe47f86",
+      "bytes": 456428,
+      "version": "Version 4.203",
+      "usWeightClass": 500,
+      "cyrillic": 240,
+      "missingGlyphs": [],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "firasanscondensed/FiraSansCondensed-SemiBold.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/firasanscondensed/FiraSansCondensed-SemiBold.ttf",
+      "sha256": "5a9586bc549d557c415a6a3dc88658b1453d1df661edf811954ebd55776c01cd",
+      "bytes": 488728,
+      "version": "Version 4.203",
+      "usWeightClass": 600,
+      "cyrillic": 240,
+      "missingGlyphs": [],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "firasanscondensed/FiraSansCondensed-Bold.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/firasanscondensed/FiraSansCondensed-Bold.ttf",
+      "sha256": "b9371052e58ec5b709153dd0fffc60b5205b4d3435cf957c2522705b31b0dbcc",
+      "bytes": 489176,
+      "version": "Version 4.203",
+      "usWeightClass": 700,
+      "cyrillic": 240,
+      "missingGlyphs": [],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "robotocondensed/RobotoCondensed-Regular.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/robotocondensed/RobotoCondensed[wght].ttf",
+      "instancedAt": {
+        "wght": 400
+      },
+      "sha256": "ce321dd8eb35c13b2be3d868edc3f281ad62df3b8f60876af4fe85f9c85a2753",
+      "bytes": 144196,
+      "version": "Version 3.008; 2023",
+      "usWeightClass": 400,
+      "cyrillic": 255,
+      "missingGlyphs": [
+        "U+2192",
+        "U+2193",
+        "U+2191"
+      ],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "robotocondensed/RobotoCondensed-Bold.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/robotocondensed/RobotoCondensed[wght].ttf",
+      "instancedAt": {
+        "wght": 700
+      },
+      "sha256": "6f5f48d3d1c64cb335e80468d28e7bf8f5981b7b39d8c751baf79e00fe254b82",
+      "bytes": 144860,
+      "version": "Version 3.008; 2023",
+      "usWeightClass": 700,
+      "cyrillic": 255,
+      "missingGlyphs": [
+        "U+2192",
+        "U+2193",
+        "U+2191"
+      ],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "ptsansnarrow/PT_Sans-Narrow-Web-Regular.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ptsansnarrow/PT_Sans-Narrow-Web-Regular.ttf",
+      "sha256": "4102edda03059163771869d258df54ac8563c408fa6e9ef75b2ddc85eabea6f4",
+      "bytes": 396212,
+      "version": "Version 2.003W OFL",
+      "usWeightClass": 400,
+      "cyrillic": 210,
+      "missingGlyphs": [
+        "U+2192",
+        "U+2193",
+        "U+2191"
+      ],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "ptsansnarrow/PT_Sans-Narrow-Web-Bold.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ptsansnarrow/PT_Sans-Narrow-Web-Bold.ttf",
+      "sha256": "e69d83bcf5bd647892b4e2b22f5098dabd55c989413513197722fc156fb9f00e",
+      "bytes": 487720,
+      "version": "Version 2.003W OFL",
+      "usWeightClass": 700,
+      "cyrillic": 210,
+      "missingGlyphs": [
+        "U+2192",
+        "U+2193",
+        "U+2191"
+      ],
+      "missingSoft": [
+        "U+202F"
+      ]
+    },
+    "ibmplexsans/IBMPlexSans-Regular.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
+      "instancedAt": {
+        "wght": 400,
+        "wdth": 100.0
+      },
+      "sha256": "e8b43ae908e8aec19fc63013d358abbe864cd54128b72a956d63dd46a890eb8b",
+      "bytes": 218056,
+      "version": "Version 3.201",
+      "usWeightClass": 400,
+      "cyrillic": 192,
+      "missingGlyphs": [],
+      "missingSoft": []
+    },
+    "ibmplexsans/IBMPlexSans-Bold.ttf": {
+      "source": "google/fonts@e7db6ca603fd:ofl/ibmplexsans/IBMPlexSans[wdth,wght].ttf",
+      "instancedAt": {
+        "wght": 700,
+        "wdth": 100.0
+      },
+      "sha256": "61eacd8f91ff2944ae5307be4bfa4bae7ef80c66d1277f6ece3f29f461b623fd",
+      "bytes": 218148,
+      "version": "Version 3.201",
+      "usWeightClass": 700,
+      "cyrillic": 192,
+      "missingGlyphs": [],
+      "missingSoft": []
+    }
+  }
+}
