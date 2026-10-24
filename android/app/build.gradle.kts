@@ -95,18 +95,23 @@ tasks.matching { it.name.contains("Python") }.configureEach { dependsOn(stagePla
  */
 abstract class ChaquopyLicences : DefaultTask() {
     @get:Internal abstract val cacheRoot: DirectoryProperty
+
+    /** POMs / jars resolved explicitly (the restored CI cache does not always contain them). */
+    @get:InputFiles abstract val resolved: ConfigurableFileCollection
     @get:OutputDirectory abstract val outputDir: DirectoryProperty
 
     @TaskAction
     fun collect() {
         val root = cacheRoot.get().asFile
         val out = outputDir.get().asFile.resolve("licences").apply { deleteRecursively(); mkdirs() }
-        val files = root.walkTopDown().filter { it.isFile }.sortedBy { it.path }.toList()
+        val cached = if (root.isDirectory) root.walkTopDown().filter { it.isFile }.toList() else emptyList()
+        val files = (cached + resolved.files.filter { it.isFile }).distinctBy { it.canonicalPath }.sortedBy { it.name }
         val pomLicence = Regex("<license>.*?<name>(.*?)</name>(?:.*?<url>(.*?)</url>)?.*?</license>", RegexOption.DOT_MATCHES_ALL)
         val entryName = Regex("(?i)(^|/)(LICEN[CS]E|COPYING|NOTICE)[^/]*$")
         val text = StringBuilder("Chaquopy (com.chaquo.python) — licences found in the build's Gradle cache\n\n")
         val index = mutableListOf<Map<String, String>>()
-        fun coord(f: File): String = f.relativeTo(root).path.split(File.separatorChar).take(2).joinToString(":")
+        // modules-2 layout: <group>/<artifact>/<version>/<sha1>/<file> (root = the group dir) → «artifact:version».
+        fun coord(f: File): String = f.parentFile.parentFile.let { v -> "${v.parentFile.name}:${v.name}" }
         for (pom in files.filter { it.name.endsWith(".pom") }) {
             for (m in pomLicence.findAll(pom.readText())) {
                 val (name, url) = m.destructured
@@ -129,8 +134,15 @@ abstract class ChaquopyLicences : DefaultTask() {
         out.resolve("chaquopy.json").writeText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(index)) + "\n")
     }
 }
+// The Chaquopy plugin and runtime artifacts whose licences ship in the APK, resolved from Maven Central.
+val chaquopyLicenceArtifacts = configurations.detachedConfiguration(
+    dependencies.create("com.chaquo.python:gradle:${libs.versions.chaquopy.get()}@pom"),
+    dependencies.create("com.chaquo.python:gradle:${libs.versions.chaquopy.get()}@jar"),
+    dependencies.create("com.chaquo.python:target:3.12.7-0@pom"),
+).apply { isTransitive = false }
 val chaquopyLicences = tasks.register<ChaquopyLicences>("chaquopyLicences") {
     cacheRoot.set(File(gradle.gradleUserHomeDir, "caches/modules-2/files-2.1/com.chaquo.python"))
+    resolved.from(chaquopyLicenceArtifacts)
     outputs.upToDateWhen { false }
     mustRunAfter(tasks.matching { it.name.contains("Python") }) // the runtime artifacts are resolved by then
 }

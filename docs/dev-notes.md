@@ -821,3 +821,84 @@ Deviations / open items:
    TokenLiteralsTest/PackageRulesTest (dp/sp literals exist in screens), ViewModels (one `VerstFlow` holder).
 5. The emulator window is 1170 × 1920 px (≈ 390 × 640 dp) despite `wm size 1170x2532` in `run_e2e.sh`, so the
    e2e screens are the short-window layout; Robolectric covers 390 × 844 and 360 × 640.
+
+## DEV-SLICE-2 — one distance, Waybill, replace stop, saved trips (branch `dev/DEV-SLICE-2`, on main `a844b9e`)
+
+### P0 km consistency — root cause and fix
+For Москва → Ярославль the slice showed three numbers from three sources:
+- Navigator ≈ 249: `TripMath.haversineKm` (straight line, rows and caption);
+- Instruments / Drive ≈ 312: `TripMath.roadKmEstimate` = straight line × 1.25 (A§11.11);
+- Road ahead 265: the engine's `trip.km` = base route 263 + 2 km of stop detours.
+Ready routes had the same issue: «Золотое кольцо» showed `kmTotal` 745 before the plan and 761 after (16 km of
+sight detours). A base-route estimate alone can never agree with the plan, so the pre-plan estimate is the
+engine's plan itself:
+- `mobile.estimate(world, request_id, input_json)` → `{km, days}`: `Planner.plan` of the same input without
+  events, cancellable like `plan` (shared `_run_plan`). Equal to the later plan by construction (deterministic
+  engine, same clock); errors as `plan` (`TOO_SHORT` / `UNREACHABLE` are now known in the Navigator before
+  planning, replacing the 15 km straight-line check).
+- `mobile.estimate_points(world, lat, lon, points_json)` → base-route km per suggestion row (`Planner.estimate_km`,
+  stages 0–2); `null` for unreachable/outside Russia. Rows are places, not trips yet: they show «≈ 263 км», the
+  picked trip shows «265 км».
+- `_trip_result` adds `pricesMonthRu` / `pricesYear` (Waybill footnote via `ru.month_year_ru`).
+- App: `TripFigures` / `TripFiguresPick` (`:core-model`): one list of engine figures per `PlanRequest`
+  (estimates and plans); the exact request wins, the same road shows its last figure as stale while the new
+  estimate runs, another road shows nothing. `VerstFlow` estimates the draft 300 ms after it settles on Navigator
+  and Instruments (`snapshotFlow` + `collectLatest`, which cancels a stale estimate in the engine); after a plan,
+  replace or reserve toggle the trip's own km is recorded. `TripMath.haversineKm/roadKmEstimate/days` are deleted.
+  Instruments days also come from the engine (the slice's ×1.25 said «2 дня» for a 1-day trip).
+- Tests: `test_mobile.test_estimate_equals_plan_moscow_yaroslavl` (265 = plan; rows 263 = 265 − detours),
+  `test_estimate_equals_plan_for_every_variant` (child/calm, dog/500 km, round trip, every ready route from
+  Москва), `test_estimate_errors_and_cancel`; Kotlin `SliceTwoModelTest.figuresPrefer…`, `noStraightLineKmLeft…`,
+  `VerstFlowTest` (estimate shown before, the plan's number after), e2e asserts Navigator == Instruments ==
+  plan == Road-ahead sign. `make check` → `Ran 312 tests` / `OK`; coverage `TOTAL 5155 121 97.7%`.
+
+### Waybill 5.6 (DEV-125 simplified) — `feature/waybill/WaybillScreen.kt`
+Opened from the Road footer (now a button with the arrow, S-22). Paper sheet: header, № (saved ordinal), route,
+crew, mileage; table with the engine's lines (title, formula in hand, sum), chevron, one line expanded at a time
+(breakdown rows: label · formula without its trailing «= N ₽»); reserve row → `patch_cost {reserveOn}` on the
+engine (no Kotlin `CostCalculator` exists yet — DEV-104), «—» when off; total; issued / left or «Перерасход» in
+ink red + hint; budget «не важно» → «—»; footnote «Расчёт: … на октябрь 2026». Save / share buttons.
+Not done: stamp + animation, entry slide, Pro plate/sheet, cross-fade of changed values.
+
+### Replace stop (D-6) — Road ahead
+«заменить» (components §2.6) on replaceable stops with alternatives or an `alternativesNote`. Bottom sheet
+(`feature/common/Overlays.kt` `BottomSheet`, static): current stop «сейчас», alternatives with Δ min / Δ ₽, the
+engine note when < 2, «ЗАМЕНИТЬ» (disabled until another row is picked), «Оставить как есть». Confirm →
+`replace_stop` → the trip and the footer total update; toast «Заменили. Путевой лист: ≈ N ₽» + «Вернуть» (6 s, undo
+restores the previous trip). Row sub-lines are the engine's `note`/`reason` sentence (the deck has no per-tag
+copy for food/rest tags).
+
+### Saved trips
+`data/TripStore.kt`: `FileTripStore` = one JSON file `files/trips/saved.json` through `AtomicFile` (no Room);
+`SavedTrips` (`:core-model`): schema 1, ≤ 50 (`LimitReached`), warning from 45, upsert by id, the engine's private
+trip JSON verbatim (so a reopened trip can be replaced / re-costed / shared). Road toolbar T1 save (bookmark,
+filled yellow when saved) and T2 share (`ACTION_SEND` with the engine share text); Waybill K1/K2 the same.
+Windshield «Мои поездки · N» plate in the caption column (5.1 §4.4) when ≥ 1 saved; D-1 sheet rows → Road ahead
+with the back label «К лобовому» (OI-27), back → Windshield. Not done: delete, «Вернуть», the 50-limit dialog
+(a toast instead), past/upcoming styling.
+
+### Designer review `design/qa/slice-review.md` (merged to main as `a844b9e`)
+Fonts: rebased on main, `python3 tools/sync_design_tokens.py` → `DesignTokens.kt` verbatim (DesignTokensInSyncTest
+now compares for equality). `slice_per_person` / `strings_slice.xml` removed → `road_waybill_per_person`.
+- S-01 chip via `road_chip_days`. S-02 `enableEdgeToEdge(SystemBarStyle.dark(TRANSPARENT))` + `ScreenRoot(statusBar=)`
+  bands (`interior.liner` on Windshield/Drive, `sky.band1` on strip screens, nav bar `dash.raised`).
+- S-03 `dashboardSurface` = two elliptical arcs (`arcTo`), S-30 caps without rim.
+- S-04/S-10/S-18 `drawRoad3D` (§9.1 closed form, quads, clipped at the container top) with `WindshieldRoad`,
+  `NavigatorRoad`, `DriveRoad`; S-05 hills polyline; S-06 gantry legs; S-17 `DriveSky` + sun centred; S-19 `RoadSky`.
+- S-07/S-08 `Mirror.Small` as one Canvas: reflected sky/ground, glass cut-out silhouettes at slots 154/193/230
+  (adults outer-first), dog at the right, glare. S-09 yellow 2 dp field border in no-routes (static, no pulse).
+- S-11 Navigator: back link in a 38 dp band (touch 142–186), panel top 188, value field 50, bottom inset 140.
+- S-12 odometer 4 drums (last white) in the 113 × 42 frame; S-13 equal well heights; S-14 gauge per §6;
+  S-15 `DogToggle` per §3.4; S-16 dashed empty seats, seat radius 14/6; S-27 mirror stem + reflected road.
+- S-20 Road list is a scrolled `Column` with one road section (continuous lanes) instead of per-item road
+  segments in a `LazyColumn` (deviation from DEV-124's `LazyColumn`: a trip has tens of rows); S-21 rhythm
+  (title at the list top, chips +6, intro +8, road 18 below, day 1 margin 0).
+- S-22 footer arrow + deck key. S-23 genitive for all 48 fixture towns (engine `nameGenRu` still requested).
+
+### Deviations / copy requests
+1. `replace_delta` has one `{sign}` for both parts; mixed signs («+4 мин · −150 ₽») are composed from two
+   renderings of the same template. Designer: two sign placeholders.
+2. D-1 rows show the date as «31.10»: the deck has no genitive month names («7–9 ноября»).
+3. Toast StorageFull = `common_storage_full_title` + body joined with «. » (no NaviDialog yet).
+4. The «—» for empty Waybill values and gauge without E/F letters (no copy keys for E/F).
+5. `mobile.API_VERSION` stays 1: `estimate`/`estimate_points` are additive; `_trip_result` gained two keys.
