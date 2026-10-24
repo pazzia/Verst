@@ -55,7 +55,13 @@ class VerstFlowTest {
         var suggestRows = listOf(yar)
         var popularRows = listOf(yar)
         override suspend fun reverse(point: GeoPoint): EngineResult<PlaceNameDto?> =
-            EngineResult.Ok(reverseName?.let { PlaceNameDto(it, "город", "${it}а", "${it}е") })
+            EngineResult.Ok(
+                when (reverseName) {
+                    null -> null
+                    "Москва" -> PlaceNameDto("Москва", "город · Москва", "Москвы", "Москве")
+                    else -> PlaceNameDto(reverseName!!, "город", null, null)
+                },
+            )
         var routes = emptyList<ReadyRouteDto>()
         override suspend fun readyRoutes(origin: GeoPoint) = EngineResult.Ok(routes)
         override suspend fun suggest(query: String, near: GeoPoint?) = EngineResult.Ok(suggestRows)
