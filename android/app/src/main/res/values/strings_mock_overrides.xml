@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Release review P0-1 / P2-6: production copy in :core-ui names real navigator apps and a store (stop menu D-5,
+  Release review P0-1 / P2-6: production copy in :core-ui names real navigator apps, a store and the booking partner (stop menu D-5,
   not built). The mock build must not carry any real brand, so the app overrides those keys with neutral text;
   app resources replace library resources at merge, so the brand text is not in the mock APK. Remove this file
   when the production hand-off (and a production app variant) exists.
@@ -10,4 +10,7 @@
     <string name="stopmenu_yandex_maps">Карты</string>
     <string name="stopmenu_2gis">Карты</string>
     <string name="stopmenu_install">Навигатор не установлен</string>
+    <!-- Exit: the mock build uses exit_book_partner_mock / cd_exit_book_mock; the production partner keys are neutral. -->
+    <string name="exit_book_partner">через партнёра</string>
+    <string name="cd_exit_book">Забронировать ночь через партнёра</string>
 </resources>
