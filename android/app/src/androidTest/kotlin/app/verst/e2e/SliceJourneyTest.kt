@@ -21,7 +21,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import app.verst.MainActivity
 import app.verst.VerstApp
+import app.verst.core.model.EngineResult
+import app.verst.engine.ChaquopyPlannerGateway
 import app.verst.nav.Route
+import app.verst.nav.WindshieldData
+import java.util.UUID
+import kotlinx.coroutines.runBlocking
 import app.verst.nav.Toast
 import java.io.File
 import org.junit.Assert.assertEquals
@@ -233,6 +238,29 @@ class SliceJourneyTest {
         compose.waitUntil(5_000) { flow.saved.size == 1 }
         waitTag("windshield.trips")
         compose.runOnUiThread { flow.clearSaved() }
+    }
+
+    /**
+     * Manager release return: no template km on the sign. Every visible row shows a placeholder until its engine
+     * estimate is in, then exactly the km the plan of that route gives for the same crew and pace.
+     */
+    @Test
+    fun windshieldSignKmIsThePlanKmOfEveryRow() {
+        waitTag("windshield.route.0")
+        val routes = (flow.windshield as WindshieldData.Routes).routes.take(4)
+        compose.waitUntil(60_000) { routes.indices.all { number(textOf("windshield.route.$it.km")) != null } }
+        assertTrue(compose.onAllNodes(hasTestTag("windshield.route.0.km.pending"), useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+        shot("01b-windshield-estimated")
+        val gateway = ChaquopyPlannerGateway(E2e.engine)
+        routes.forEachIndexed { i, r ->
+            val shown = number(textOf("windshield.route.$i.km"))!!
+            val req = compose.runOnUiThread<app.verst.core.model.PlanRequest> { flow.routeRequest(r) }
+            val plan = runBlocking { gateway.plan(UUID.randomUUID().toString(), req) {} }
+            assertTrue("plan ${r.id}: $plan", plan is EngineResult.Ok)
+            val planKm = (plan as EngineResult.Ok).value.trip.km
+            Log.i("VerstE2e", "sign ${r.id} shown=$shown plan=$planKm template=${r.kmSign}/${r.kmTotal} roundTrip=${r.roundTrip}")
+            assertEquals("row $i ${r.id}", planKm, shown)
+        }
     }
 
     @Test

@@ -53,13 +53,16 @@ class VerstFlowTest {
         override suspend fun setClock(spec: String): EngineResult<Unit> = EngineResult.Ok(Unit)
         override suspend fun reverse(point: GeoPoint): EngineResult<PlaceNameDto?> =
             EngineResult.Ok(PlaceNameDto("Москва", "город · Москва", "Москвы", "Москве"))
-        override suspend fun readyRoutes(origin: GeoPoint) = EngineResult.Ok(emptyList<ReadyRouteDto>())
+        var routes = emptyList<ReadyRouteDto>()
+        override suspend fun readyRoutes(origin: GeoPoint) = EngineResult.Ok(routes)
         override suspend fun suggest(query: String, near: GeoPoint?) = EngineResult.Ok(listOf(yar))
         override suspend fun popular() = EngineResult.Ok(listOf(yar))
         override suspend fun estimatePoints(origin: GeoPoint, points: List<GeoPoint>) = EngineResult.Ok(points.map { 263 as Int? })
         override suspend fun estimate(requestId: String, request: PlanRequest): EngineResult<EstimateDto> {
             estimates += request
-            return EngineResult.Ok(EstimateDto(estimateKm, 2))
+            // a ready route: its round-trip km plus 10 per adult and 1 per child, so a crew change changes the number
+            val rr = routes.firstOrNull { it.id == request.readyRouteId }
+            return EngineResult.Ok(EstimateDto(rr?.let { it.kmTotal + 10 * request.adults + request.children } ?: estimateKm, 2))
         }
         override suspend fun plan(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanResultDto> {
             onEvent(PlanEventDto("stage", text = "Прокладываем дорогу", progress = 0.1))
@@ -245,6 +248,32 @@ class VerstFlowTest {
         flow.limitToTrips()
         assertTrue(flow.tripsSheet)
         assertEquals(Route.Windshield, flow.top)
+    }
+
+    @Test
+    fun windshieldRowsShowOnlyEngineKmSelectedFirstAndReestimateOnCrewChange() = runTest {
+        val gw = FakeGateway()
+        gw.routes = listOf(
+            ReadyRouteDto("rr_tula_yasnaya", "Тула · Ясная Поляна", "2 дня · Толстой и пряники", 414, 207, "weekend", true, 2, 2, "t_moscow", "S"),
+            ReadyRouteDto("rr_yaroslavl", "Ярославль", "2 дня · по М-8", 526, 263, "weekend", true, 2, 2, "t_moscow", "NE"),
+        )
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        fun km(rr: Int) = rr + 10 * flow.adults + flow.children
+        assertEquals(mapOf("rr_tula_yasnaya" to km(414), "rr_yaroslavl" to km(526)), flow.routeKm)
+        val asked = gw.estimates.size
+        settle()
+        assertEquals("cached by request", asked, gw.estimates.size)
+
+        flow.selectedRoute = 1
+        val before = flow.routeKm
+        flow.cycleSeat(1) // a crew change: new requests — no stale number, then the new estimates
+        Snapshot.sendApplyNotifications()
+        assertTrue(flow.routeKm.isEmpty())
+        settle()
+        assertEquals("rr_yaroslavl", gw.estimates[asked].readyRouteId) // the selected row first
+        assertEquals(mapOf("rr_tula_yasnaya" to km(414), "rr_yaroslavl" to km(526)), flow.routeKm)
+        assertTrue(before != flow.routeKm)
     }
 
     @Test

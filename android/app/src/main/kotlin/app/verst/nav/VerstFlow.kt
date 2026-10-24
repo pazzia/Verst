@@ -311,8 +311,16 @@ class VerstFlow(
         // crew and pace — the same request (so the same number) Instruments, Drive and Road ahead will show.
         scope.launch {
             snapshotFlow {
-                if (top == Route.Windshield) (windshield as? WindshieldData.Routes)?.routes?.take(4)?.map { routeRequest(it) } else null
+                if (top == Route.Windshield) {
+                    val visible = (windshield as? WindshieldData.Routes)?.routes?.take(4).orEmpty()
+                    // the selected row first, then the others top to bottom
+                    (visible.getOrNull(selectedRoute)?.let { listOf(it) }.orEmpty() + visible).distinct().map { routeRequest(it) }
+                } else {
+                    null
+                }
             }.distinctUntilChanged().collectLatest { reqs ->
+                // Cached by the whole request (route id, crew, pace, budget, mood, origin); world / clock changes clear
+                // `known`. A crew change makes new requests: the rows fall back to the placeholder and re-estimate.
                 for (r in reqs.orEmpty()) {
                     if (known.any { it.first == r }) continue
                     val e = gateway.estimate(UUID.randomUUID().toString(), r)
@@ -558,7 +566,7 @@ class VerstFlow(
     private fun record(r: PlanRequest, f: TripFigures) {
         known.removeAll { it.first == r }
         known.add(r to f)
-        while (known.size > 24) known.removeAt(0)
+        while (known.size > 48) known.removeAt(0)
     }
 
     val tripTitle: String
