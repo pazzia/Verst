@@ -1,6 +1,7 @@
 # Verst — Android mock MVP architecture (Sprint 2)
 
 Status: **approved for Sprint 2** · Owner: Architect · Date: 2026-10-24 · Decision record: ADR-0010
+As-built sync: §1, §5.1, §5.2, §6, §8.2, §9 and §11 were updated to `main` @ `262103b` with the pre-release review `docs/review/release-review.md`. Where the build differs from the plan, the text says "as built" or "not built".
 Scope: the CEO's phone build. The app runs end to end on mock data (fixture worlds) with the real planner on the device, in design v5 «За рулём», built and released only by GitHub Actions.
 
 References:
@@ -52,7 +53,11 @@ Unchanged from A§11: Kotlin + Compose, single activity, type-safe Navigation Co
 │        ▼                                                                                  │
 │   CPython 3.12 (Chaquopy) + verst_planner (backend/planner, unchanged except DEV-110)     │
 └───────────────────────────────────────────────────────────────────────────────────────────┘
-External: Yandex Navigator / Yandex Maps / 2GIS / browser via Intents (real); booking = in-app MockPartnerSheet.
+External:
+
+- Planned: Yandex Navigator / Yandex Maps / 2GIS / browser via Intents (real). **Not built as of `262103b`**; see `docs/review/release-review.md` P2-13.
+- Booking: the in-app `MockPartnerSheet` with the fictional partner «Придорожная» (OI-40).
+- Share: the Android share sheet.
 ```
 
 ---
@@ -325,21 +330,31 @@ An allow-list holds the documented exceptions, and the list must be empty at spr
                         "pointIndex": 1, "detail": "<repr or traceback for INTERNAL>"}, "ms": 3}
 ```
 
-Error codes are the `PlannerError.code` values (`INVALID_INPUT`, `UNREACHABLE`, `TOO_SHORT`, `NOT_FOUND`, `CANCELLED`, `UPSTREAM`) plus `INTERNAL` (any other exception; traceback in `detail` and on stderr, which Chaquopy routes to logcat `python.stderr`), `NO_WORLD` and `TZDATA_MISSING`.
+Error codes:
+
+- the `PlannerError.code` values: `INVALID_INPUT` with `field`/`reason`, `UNREACHABLE` with `pointIndex`, `TOO_SHORT` with `roadKm`, `NOT_FOUND`, `CANCELLED`, `UPSTREAM`;
+- `INTERNAL`: any other exception, including a serialization failure. The traceback goes to `detail` and to stderr, which Chaquopy routes to logcat `python.stderr`;
+- `NO_WORLD`;
+- `TZDATA_MISSING`;
+- `TRIP_INCOMPATIBLE`: a stored trip whose `engineVersion` differs in major.minor; `field` = `engineVersion`. A missing `engineVersion` is `INVALID_INPUT`.
+
+`message` is diagnostic English. The app chooses its copy by `code` only. Arguments are decoded strictly: JSON booleans only, integers that are not booleans, strings where strings are expected. `API_VERSION = 1` is returned by `selfcheck` as `apiVersion`; additive changes keep it.
 
 | Function | Payload | Notes |
 | --- | --- | --- |
 | `load_world(text)` | `{"id", "asOf", "towns": n, "places": n, "readyRoutes": n}` | `FakeWorld.from_dict(json.loads(text))` + `build_fakes`; one `Planner` per world, `config = PlannerConfig.from_dict({})` |
-| `selfcheck()` | `{"engineVersion", "python": "3.12.x", "tz": {"Europe/Moscow": true, "Europe/Volgograd": true}, "resources": true}` | `ZoneInfo` for every `tz` of every loaded region; config, templates and strings load. Fails with `TZDATA_MISSING` if a zone cannot be resolved |
+| `selfcheck()` | `{"engineVersion", "apiVersion": 1, "python": "3.12.x", "tz": {"Europe/Moscow": true, "Europe/Volgograd": true}, "resources": true, "worlds": [...]}` | `ZoneInfo` for every `tz` of every loaded region; config, templates and strings load. Fails with `TZDATA_MISSING` if a zone cannot be resolved |
 | `set_clock(spec)` | `{"now": iso}` | `"system"` (default, aware UTC now), `"golden"` (`GOLDEN_CLOCK`), or an ISO datetime |
-| `suggest(world, q, lat, lon, limit)` | `[{"kind": "city"\|"place", "name", "subtitle", "lat", "lon", "id"}]` | `FakeGeocoding.suggest`. `subtitle` follows A§5.3.2 («город · Ярославская область»). `id` = town/place id |
-| `popular(world, limit)` | same shape | towns by population desc, excluding the origin, for «ЧАСТО ИЩУТ» chips (OI-04) |
-| `reverse(world, lat, lon)` | `{"name", "subtitle"} \| null` | |
+| `suggest(world, q, lat, lon, limit)` | `[{"kind": "city"\|"place", "name", "subtitle", "lat", "lon", "id", "nameGenRu", "namePrepRu"}]` | `FakeGeocoding.suggest`. `subtitle` follows A§5.3.2 («город · Ярославская область»). `id` = town/place id. `nameGenRu`/`namePrepRu` are the town's genitive/prepositional forms («Ярославля» / «Ярославле», fixture `towns[].nameGenRu`, OI-39), `null` for places. The app never inflects names itself |
+| `popular(world, limit, origin_id=None)` | same shape | Towns by population, descending, for the «ЧАСТО ИЩУТ» chips (OI-04). They exclude `origin_id`, which defaults to the most populous town. The app does not pass the origin yet (review P2-7) |
+| `reverse(world, lat, lon)` | `{"name", "subtitle", "nameGenRu", "namePrepRu"} \| null` | The nearest town within 30 km. The app takes the origin's genitive from it («ИЗ МОСКВЫ») |
 | `ready_routes(world, lat, lon, radius_km, limit)` | `[{"id", "title", "subtitle", "kmTotal", "kmSign", "ring", "roundTrip", "daysMin", "daysMax", "tags", "hubTownId", "bearing8", "coverKey"}]` | A§6.12: hub within radius, sorted `(kmSign, sort)`. `bearing8` = `geo.bearing.bearing8(hub, first via)` |
-| `plan(world, request_id, input_json, listener)` | `{"trip": <plan_to_json(plan, public=False)>, "shareText": str}` | `listener.onEvent(event_json)` per `PlanEvent` (`events.event_to_json`); listener errors are swallowed after the first one. `CancelToken` registered under `request_id` |
+| `plan(world, request_id, input_json, listener)` | `{"trip": <plan_to_json(plan, public=False)>, "shareText", "pricesMonthRu", "pricesYear", "townPrepRu": {townId: form}, "townGenRu": {townId: form}}` | `listener.onEvent(event_json)` is called per `PlanEvent` (`events.event_to_json`); listener errors are swallowed after the first one. The `CancelToken` is registered under `request_id`. N-10: the split stage text uses the trip km of an identical earlier `estimate` (a cache of 64, keyed by world + canonical input; it runs a quiet estimate on a miss), so «по ≈ N км» matches the header. `pricesMonthRu`/`pricesYear` feed the Waybill footnote. The name maps cover every stop town, so the plan codec and the goldens stay unchanged. Every hotel option carries `exitDistanceM` (OI-41: route → hotel lateral distance in m, 0 = unknown), used by the 5.7 exit sign |
+| `estimate(world, request_id, input_json)` | `{"km", "days"}` | **The only source of trip km/days before Road ahead** (DEV-SLICE-2 P0): the engine's own plan of the same `TripInputDTO`, without events, so it equals the later `plan` exactly. It is cancellable like `plan`, and its errors are those of `plan` (`TOO_SHORT`/`UNREACHABLE` are known on the Navigator before planning) |
+| `estimate_points(world, lat, lon, points_json)` | `[km \| null]` | Base-route km (stages 0–2) from the origin to each suggestion row. `null` = unreachable or outside Russia. Rows show «≈ 263 км»; the picked trip shows the estimate's «265 км» |
 | `cancel(request_id)` | `{"cancelled": bool}` | thread-safe (lock); callable while `plan` runs on another thread |
-| `replace_stop(world, trip_json, stop_id, alt_id)` | `{"trip", "shareText"}` | `codec.plan_from_json` → `Planner.replace_stop` |
-| `patch_cost(world, trip_json, patch_json)` | `{"trip", "shareText"}` | `patch_json` = `{"crew"?, "budget"? (null = не важно), "reserveOn"?, "hotelChoice"?: {"stopId", "placeId"}}` → `CostPatch` |
+| `replace_stop(world, trip_json, stop_id, alt_id)` | same as `plan` | `codec.plan_from_json` → `Planner.replace_stop`; `TRIP_INCOMPATIBLE` on an engine major.minor mismatch |
+| `patch_cost(world, trip_json, patch_json)` | same as `plan` | `patch_json` = `{"crew"?, "budget"? (null = не важно), "reserveOn"?, "hotelChoice"?: {"stopId", "placeId"}}` → `CostPatch` |
 | `share_text(trip_json)` | `str` | `explain.share.share_text` |
 | `golden_snapshot(case_json)` | `str` | exact `tests/golden/test_golden.snapshot_text` output for a golden case (`world`, `clock`, `config`, `input`). Used by the emulator parity test |
 
@@ -348,26 +363,32 @@ The CLI gains `python3 -m verst_planner.mobile selftest`. It runs the whole API 
 ### 5.2 Kotlin side
 
 - **`EngineHost`** (singleton, created in `VerstApp.onCreate`):
-  - Starts on the dedicated thread `verst-python`: `Python.start(AndroidPlatform(app))` → `getModule("verst_planner.mobile")` → `load_world` for `assets/worlds/central_russia_v1.json` and `edge_cases_v1.json` → `set_clock` (from DataStore, default `system`) → `selfcheck`.
+  - Starts on the dedicated thread `verst-python`: `Python.start(AndroidPlatform(app))` → `getModule("verst_planner.mobile")` → `load_world` for `assets/worlds/central_russia_v1.json` and `edge_cases_v1.json` → `set_clock("system")` (as built, always; the debug panel switches to `golden` later) → `selfcheck`. `restart()` re-runs the boot after `Failed` (5.1 «Повторить»).
   - Exposes `status: StateFlow<EngineStatus>` = `Starting(phase)` | `Ready(EngineInfo)` | `Failed(code, detail)`.
   - `EngineInfo` carries the timings `pythonStartMs`, `importMs`, `worldsMs`, `selfcheckMs` and `totalMs`. They are logged under tag `VerstEngine` and shown in the debug panel.
 - **`PythonThread`**: `Executors.newSingleThreadExecutor { Thread(it, "verst-python") }.asCoroutineDispatcher()`. Every call except `cancel` runs here, so calls are serialized and there is no GIL contention. `cancel` runs on `Dispatchers.Default`. Python never runs on the main thread.
-- **`ChaquopyPlannerGateway : PlannerGateway`**:
+- **`ChaquopyPlannerGateway : PlannerGateway`** (`app/src/main/kotlin/app/verst/engine/PlannerGateway.kt`). This is the interface as built in `262103b`; the M§5.2 draft had `Flow<PlanStreamEvent>` and `StoredTrip` arguments:
   ```kotlin
   interface PlannerGateway {
-      val status: StateFlow<EngineStatus>
-      fun plan(request: PlanRequest): Flow<PlanStreamEvent>              // Stage, Stop, Done(trip, shareText), Failed(error)
-      suspend fun replaceStop(trip: StoredTrip, stopId: String, altId: String): EngineResult<StoredTrip>
-      suspend fun patchCost(trip: StoredTrip, patch: CostPatchDto): EngineResult<StoredTrip>
-      suspend fun suggest(query: String, near: LatLon?, limit: Int = 6): EngineResult<List<SuggestionDto>>
-      suspend fun popular(limit: Int): EngineResult<List<SuggestionDto>>
-      suspend fun readyRoutes(origin: LatLon, radiusKm: Int = 50, limit: Int = 20): EngineResult<List<ReadyRouteDto>>
-      suspend fun shareText(trip: StoredTrip): EngineResult<String>
+      var world: String                                                    // central_russia_v1 | edge_cases_v1 (debug panel, in memory)
+      suspend fun readyRoutes(origin: GeoPoint): EngineResult<List<ReadyRouteDto>>          // radius 50 km, limit 20
+      suspend fun suggest(query: String, near: GeoPoint?): EngineResult<List<SuggestionDto>>
+      suspend fun popular(): EngineResult<List<SuggestionDto>>
+      suspend fun reverse(point: GeoPoint): EngineResult<PlaceNameDto?>                     // name forms of the origin (OI-39)
+      suspend fun estimate(requestId: String, request: PlanRequest): EngineResult<EstimateDto>   // the single km/days source
+      suspend fun estimatePoints(origin: GeoPoint, points: List<GeoPoint>): EngineResult<List<Int?>>
+      suspend fun plan(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanResultDto>
+      suspend fun replaceStop(tripJson: String, stopId: String, altId: String): EngineResult<PlanResultDto>
+      suspend fun patchCost(tripJson: String, patchJson: String): EngineResult<PlanResultDto>
+      suspend fun setClock(spec: String): EngineResult<Unit>                                 // "system" | "golden"
   }
   ```
-  `plan` is a `callbackFlow`. A Kotlin object implementing the Java interface `PlanEventListener { fun onEvent(json: String) }` is passed to Python and calls `trySend(decode(json))`. The call itself is `launch(PythonThread) { … send(Done|Failed); close() }`. `awaitClose { if (running) cancel(requestId) }`, so leaving Drive cancels the plan (D-13).
-- **World choice**: `DefaultsRepository.worldId` (debug panel; default `central_russia_v1`). One active world at a time; the origin defaults to the world's most populous town (Москва; Тестовск in the edge world).
-- **Parity guard**: after a local Kotlin recompute (§6.3), the engine result arrives. If `cost.totalRub` differs, a `VerstParity` warning is logged and counted in the debug panel. The emulator journey asserts the count is 0.
+  - Every call first waits for `EngineStatus.Ready`, for at most 30 s. A failure or timeout becomes an `EngineResult.Err` with the start code (`ENGINE_START`, `NO_ENGINE`, …).
+  - `PlanResultDto.tripJson` is the engine's private trip verbatim (with `engineState`). It is the input of every later engine call on that trip, and it is what gets saved.
+  - `plan` and `estimate` run inside `cancellable(requestId)`. A sibling coroutine waits for the caller's cancellation and then calls `EngineHost.cancel` (`mobile.cancel`) on `Dispatchers.Default`, because the blocking call holds `verst-python`. So leaving Drive, or a newer draft (`collectLatest`), stops the engine run (D-13).
+  - `PlanEventListener.onEvent` is called on `verst-python` and posts each decoded event to Main.
+- **World and clock**: `gateway.world` (default `central_russia_v1`) and the clock are switched by the debug panel and are **not persisted**: a restart is central world + system clock. Saved trips do not record their world yet (review P2-2). The origin defaults to Москва (Тестовск in the edge world).
+- **Parity guard** (planned, **not built** — review P2-11): after a local Kotlin recompute (§6.3), the engine result arrives; if `cost.totalRub` differs, log `VerstParity` and count it in the debug panel; the emulator journey asserts 0. Today parity is proven on the JVM only (`LocalCostBundleTest`, §11).
 
 ### 5.3 Fidelity proof on the device
 
@@ -379,28 +400,30 @@ The CLI gains `python3 -m verst_planner.mobile selftest`. It runs the whole API 
 
 ### 6.1 Trips: `FileTripStore : TripStore`
 
+**As built (`262103b`, DEV-SLICE-2/3):** one file holds the whole list.
+
 ```
-filesDir/trips/last.json            the one unsaved "last trip" slot (overwritten by the next plan; SPEC §13)
-filesDir/trips/saved/<id>.json      saved trips, ≤ 50; warn from 45 (copy road_saved_limit_*)
-filesDir/cache/ready_routes.json    last successful ready-route list per (world, origin town)
-filesDir/cache/recent_searches.json ≤ 10, newest first, unique by (name, lat, lon)
+filesDir/trips/saved.json           {"schema": 1, "trips": [SavedTripDto…]}: ≤ 50, warning from 45, upsert by id, written via android.util.AtomicFile
 ```
 
 ```jsonc
-// StoredTrip file, schema 1
-{"schema": 1, "id": "trp_<uuid>", "world": "central_russia_v1", "engineVersion": "0.1.0",
- "savedAt": 1761300000000, "updatedAt": 1761300000000,
- "trip": { /* plan_to_json(plan, public=False): PlanResponse + engineState */ },
- "shareText": "…",
- "local": {"bookedStops": ["d1s07"], "stampShown": true, "proJoined": false}}
+// SavedTripDto (core-model SavedTrips.kt)
+{"id": "<uuid>", "savedAt": 1761300000000, "title": "Золотое кольцо", "km": 761, "days": 3, "totalRub": 33800,
+ "startAt": "2026-11-07T08:00", "adults": 2, "children": 1, "dog": true, "bearing8": "NE",
+ "shareText": "…", "pricesMonthRu": "октябрь", "pricesYear": "2026",
+ "townPrepRu": {"t_yaroslavl": "Ярославле"}, "townGenRu": {"t_yaroslavl": "Ярославля"},
+ "bookedHotels": {"d1s07": "pl_yar_hotel_2"},          // D-10: per overnight stop, the hotel marked «Забронировали»
+ "trip": { /* plan_to_json(plan, public=False) verbatim: PlanResponse + engineState */ }}
 ```
 
-- Writes use `androidx.core.util.AtomicFile`.
-- `observeSaved(): Flow<List<TripHeader>>` scans headers. ≤ 50 files of ≤ 150 KB each, parsed lazily (`title`, `km`, `days`, `startAt` come from the top-level `trip` fields).
-- The trip JSON returned by the engine is authoritative. `local` holds only UI state that the engine does not own.
-- Unknown `schema` → the file is skipped and logged. No destructive migration.
+- The trip JSON returned by the engine is authoritative. Everything else is list metadata or UI state that the engine does not own.
+- An unknown `schema` or an unreadable file must be **kept aside and logged, never overwritten**. Today it is read as an empty list and overwritten on the next save. That is a P1 in `docs/review/release-review.md`, together with the unserialized writes; all writes must go through one writer.
+
+**Still to build (review P1-2):** `filesDir/trips/last.json`, the one unsaved "last trip" slot (overwritten by the next plan; SPEC §13). It restores Road ahead after process death. Also still to build: `filesDir/cache/ready_routes.json` (last ready-route list per world and origin) and `recent_searches.json` (≤ 10). Splitting `saved.json` into `saved/<id>.json` files is optional; it would make one save cost one trip instead of the whole list.
 
 ### 6.2 Defaults: `DataStoreDefaults` (`verst_prefs`)
+
+**Not built as of `262103b`** (review P2-10). The crew, km/day, budget, mood and origin reset on every launch, and the DataStore dependency is not in `:app`. This section is the target.
 
 These keys are a subset of A§11.6, with the same names and defaults: `crew_back_seats`, `crew_front_passenger`, `crew_dog`, `crew_third_row`, `daily_km`, `daily_km_user_set`, `budget_preset`, `consumption`, `fuel_type`, `tank_l`, `start_time`, `avoid_tolls`, `mood`, `last_origin_id`/`_label`/`_lat`/`_lon`.
 
@@ -418,12 +441,12 @@ Device token, location and onboarding keys are not used.
 
 | Action | Immediately (pure Kotlin, ≤ 100 ms, P-08) | Then (engine, authoritative) |
 | --- | --- | --- |
-| Reserve toggle (5.6) | `CostCalculator.recompute(units, crew, reserveOn, budget, overrides)` | `patch_cost {reserveOn}` → replace stored trip |
-| Hotel choice (5.7) | `TripEditor.withHotel(trip, stopId, placeId)` + `CostCalculator` with `hotelByStop` | `patch_cost {hotelChoice}` |
-| Replace stop (5.5, D-6) | `TripEditor.applyAlternative(trip, stopId, altId)`: the day's stops in `dayPatch` order with its times/km verbatim (A§16.6) + `CostCalculator` with `replaced[stopId] = alt.units` (A§16.11.4 rules 1–5) | `replace_stop` → new alternatives for that day |
-| Save / share | `TripStore.save`; share text from the stored trip | `share_text` after any edit |
+| Reserve toggle (5.6) | `LocalCost.reserve` → `CostCalculator.recompute(units, crew, reserveOn, budget)` → `CostApply` (numbers only; formula text stays the engine's) | `patch_cost {reserveOn}` → the whole trip is replaced |
+| Hotel choice (5.7) | `LocalCost.hotel` (`hotelByStop`) → `CostApply` sets `selectedHotelId`, the stop cost and tags | `patch_cost {hotelChoice}`. The engine bakes the choice into `cost.units`, so the next local edit needs only its own override |
+| Replace stop (5.5, D-6) | As built: **only the total** (`LocalCost.replace`, `replaced[stopId] = alt.units`, A§16.11.4 rules 1–5). The day's rows change when the engine answers. `TripEditor.applyAlternative` (the `dayPatch` applied locally) is not built | `replace_stop` → the new trip, with new alternatives for that day |
+| Save / share | `TripStore.save`; share text from the current engine result | Every `plan`/`replace_stop`/`patch_cost` result carries its `shareText` |
 
-If the engine call fails, the local result is kept, the toast `common_engine_error` (DES-104) is shown and the trip is still saved.
+As built, if the engine call fails, the **previous** trip is restored (not the local result) and the toast `waybill_sync_failed` is shown.
 
 ---
 
@@ -472,12 +495,12 @@ Screenshots are `screenshots/<screen>/<state>@<w>x<h>[-fs130].png`. They are ren
 | Screen | Design | Package | States (screenshot `<state>`) | Data |
 | --- | --- | --- | --- | --- |
 | 5.1 Windshield | `screens/5.1-windshield.md`, `states/5.1-*`, D-1 | `feature.windshield`, `feature.trips` | `default`, `row2-selected`, `loading`, `offline-cached`, `offline-empty`, `no-routes`, `error`, `engine-starting`, `engine-failed`, `trips-plate`, `full-list-sheet`, `trips-sheet` | `ready_routes` for the origin; saved headers |
-| 5.2 Navigator | `screens/5.2-navigator.md`, `states/5.2-*` | `feature.navigator` | `default-query-yaro`, `no-destination`, `destination-picked`, `no-results`, `outside-russia`, `too-short`, `unreachable`, `vias-3`, `map-unavailable-plate`, `popular-chips` | `suggest`, `popular`, recent searches |
-| 5.3 Instruments | `screens/5.3-instruments.md`, D-4 | `feature.instruments` | `default`, `crew-full`, `km-150`, `km-900`, `budget-any`, `mood-calm`, `third-row`, `settings-sheet` | defaults; ready route km or straight line × 1.25 (A§11.11) |
+| 5.2 Navigator | `screens/5.2-navigator.md`, `states/5.2-*` | `feature.navigator` | `default-query-yaro`, `no-destination`, `destination-picked`, `no-results`, `outside-russia`, `too-short`, `unreachable`, `vias-3`, `map-unavailable-plate`, `popular-chips` | `suggest`, `popular`, `estimate_points` (row km «≈ N км»), `estimate` (caption km, `TOO_SHORT`/`UNREACHABLE` before planning) |
+| 5.3 Instruments | `screens/5.3-instruments.md`, D-4 | `feature.instruments` | `default`, `crew-full`, `km-150`, `km-900`, `budget-any`, `mood-calm`, `third-row`, `settings-sheet` | `mobile.estimate` of the draft, 300 ms after it settles: the only km/days source, equal to the later plan (DEV-SLICE-2 P0). The straight line and its × 1.25 (A§11.11) are not used anywhere any more. A stale figure for the same road is shown while a new estimate runs; another road shows nothing |
 | 5.4 Drive | `screens/5.4-drive.md`, `states/5.4-*` | `feature.drive` | `t1500` (2 steps, 2 signs), `t4000`, `done`, `slow`, `no-lodging`, `error-unreachable`, `error-too-short`, `error-invalid`, `error-internal`, `offline` | `plan` events, paced by §8.3 |
 | 5.5 Road ahead | `screens/5.5-road-ahead.md`, `states/5.5-*`, D-5, D-6, D-7, D-11 | `feature.road` | `g02-top`, `g02-day2`, `no-lodging-over-budget` (G05), `offline`, `stop-menu`, `replace-sheet`, `replace-none-note`, `report-sheet`, `saved-toast`, `limit-45`, `booked-row` | stored trip |
 | 5.6 Waybill | `screens/5.6-waybill.md`, `states/5.6-*`, D-9 | `feature.waybill` | `reference` (canvas fixture: 3 720 / 0 / 12 000 / 9 000 / 3 000 / 2 770 / ≈ 30 500, P-15), `g02`, `reserve-off`, `line-expanded`, `over-budget`, `no-budget`, `stamp-final`, `pro-sheet`, `pro-joined` | stored trip + `CostCalculator` |
-| 5.7 Exit | `screens/5.7-exit.md`, `states/5.7-*`, D-10 | `feature.exit` | `default`, `three-options`, `no-lodging`, `offline`, `mock-partner-sheet`, `booked-dialog`, `booked` | stored trip |
+| 5.7 Exit | `screens/5.7-exit.md`, `states/5.7-*`, D-10 | `feature.exit` | `default`, `three-options`, `no-lodging`, `offline`, `mock-partner-sheet`, `booked-dialog`, `booked` | stored trip; hotel options with `exitDistanceM` for the exit sign («800 м», «ночёвка» when 0); `townPrepRu` for «в Ярославле» |
 
 Screenshot data comes from the golden snapshots, which the Robolectric tests read as resources from `backend/planner/tests/golden/snapshots`. The screens therefore show real engine output. Two hand-built fixtures match the canvases exactly: `WaybillUiState.reference()` and `WindshieldUiState.mockup()`.
 
@@ -503,10 +526,10 @@ The engine finishes in ~0.2–0.6 s, but the Drive screen follows the 5.4 §6 ti
 | Engine start | Windshield ready routes show the shimmer until `EngineStatus.Ready`. The cached list is shown at once if present (5.1 §4.3, ≤ 2 s; skeleton never < 300 ms). `Failed` → full-width plate `engine_failed_title` + `common_retry` (DES-104); retry restarts `EngineHost` |
 | Engine errors in Drive | `UNREACHABLE`, `TOO_SHORT`, `INVALID_INPUT` → 5.4 §4.4 messages from copy-ru §10. `INTERNAL`/`TZDATA_MISSING`/`NO_WORLD` → `error_upstream` text with «Попробовать ещё раз» (the "server" is the engine). `CANCELLED` → silent back |
 | Reachable errors on the phone | Edge world (debug panel), origin Тестовск: «Глухово» → `UNREACHABLE` (G09), «Ближний» → `TOO_SHORT` (G10), «Конечный» with the dog → `NO_LODGING` (G05), «Пустошь» with a 30 l tank → `FUEL_GAP` (G11), ready route «Тестовый марафон» calm → `DAY_OVER_BUDGET` (G12) |
-| Booking / excursions | `MockPartnerSheet` (ADR-0010); return → «Забронировали?» → `local.bookedStops` |
-| Navigator hand-off | Real intents. The manifest declares `<queries>` for `ru.yandex.yandexnavi`, `ru.yandex.yandexmaps`, `ru.dublgis.dgismobile`; browser fallback |
+| Booking / excursions | `MockPartnerSheet` with the fictional partner «Придорожная», the ДЕМО badge and «без оплаты». No real brand (OI-40; the ADR-0010 text «здесь откроется Яндекс Путешествия» is superseded). Closing the sheet → «Забронировали?» → `SavedTripDto.bookedHotels[stopId] = placeId` (one per night) |
+| Navigator hand-off | Target: real intents, with a manifest `<queries>` for `ru.yandex.yandexnavi`, `ru.yandex.yandexmaps`, `ru.dublgis.dgismobile`, and a browser fallback. **Not built as of `262103b`**: no stop menu, no intents, no `<queries>` (review P2-13) |
 | Location | Not requested. «ВЫ: <origin>» opens Navigator with focus ОТКУДА |
-| Debug panel (`feature.debug`) | Plain list, not part of visual QA: world, clock (system / golden), simulate offline, slow plan seconds, force engine error, engine timings, parity mismatches, build/sha, «Сбросить данные» |
+| Debug panel (`feature.debug`) | Opened by a 2 s long-press on «НАВИГАТОР» on the Windshield (there is no D-4 settings sheet yet). Plain list, not part of visual QA: world, clock (system / golden), simulate offline, slow plan seconds, force engine error, engine timings, build/sha, «Сбросить данные». Parity mismatches are not shown yet (§5.2). Nothing is persisted |
 
 ---
 
@@ -547,12 +570,12 @@ The engine finishes in ~0.2–0.6 s, but the Drive screen follows the 5.4 §6 ti
 | Layer | Where | Runs | What |
 | --- | --- | --- | --- |
 | Planner + bridge | `backend/planner/tests/**` incl. new `test_mobile.py`, `test_packaging.py` | sandbox + `planner.yml` | as Sprint 1, plus: zip import (the device importer's behaviour), bridge envelopes, listener, cancel, every function, both worlds |
-| Contracts (Kotlin) | `:core-model` `src/test` | CI `:core-model:test` | `CostCalculatorContractTest`: all 39 cases of `cost_recompute_cases.json`, exact on lines, subtotal, total, per person, remaining, overBudget, hintKeys, fuelFormulaKm. `DtoContractTest`: every golden snapshot and `docs/contracts/plan-response.example.json` decodes and re-encodes without loss of known fields. `TripEditorTest`: for every alternative of every golden trip, the applied `dayPatch` gives the day the engine's `replace_stop` produced (expected files generated by DEV-111 `mobile selftest --export-replace` into `docs/contracts/replace/`) |
+| Contracts (Kotlin) | `:core-model` `src/test` | CI `:core-model:test` | `CostCalculatorContractTest`: all 39 cases of `backend/planner/tests/contract/cost_recompute_cases.json` (one test per case, `case_<name>`), exact on lines, subtotal, total, per person, remaining, overBudget, hintKeys and fuelFormulaKm, plus a 10 000-recompute perf check (< 5 ms each). **Engine bundles, one gzip file per golden case** (DEV-112, generator `backend/planner/tools/gen_mobile_contracts.py`, byte-identical on regeneration, read by `contract/Contracts.kt`): `docs/contracts/replace/<case>.json.gz` = `{"case", "before": <private trip>, "items": [{stopId, altId, afterDay, afterCost, afterKm}]}`, one item per alternative of every replaceable stop; and `docs/contracts/patch/<case>.json.gz` = `{"case", "before", "items": [{kind, patch, afterCost, afterInput, afterHotel}]}` (`reserve_off`, `budget_none`, `hotel_<stopId>`, …). Each covers 10 cases (G01–G08, G11, G12) with 129 replace + 25 patch items, ≈ 332 KB in total. `before` is stored once per case; the generator asserts that `before` plus an item rebuilds the engine's full output. `ContractFilesTest`: the bundles load, the counts match, ≤ 3 alternatives per stop. `LocalCostBundleTest`: for every item, the local `LocalCost` total and each line equal the engine's `afterCost`. `EngineJsonTest`: every golden snapshot decodes. Also in `docs/contracts/`, used by the Python tests: `share-text/G01…G08.json` (`{plan, text}`) and `plan-response.example.json`. Not built: `DtoContractTest` (re-encode without loss) and `TripEditorTest` (local `dayPatch` vs `afterDay`), because no local day editor exists (§6.3) |
 | Unit (Android) | `:core-ui`, `:app` `src/test` (Robolectric, sdk 35, native graphics) | CI `testDebugUnitTest`/`testDemoUnitTest` | reducers, `DrivePacer`, `RoadProjection`, semantics (TalkBack strings exact, touch targets ≥ 44 dp via `assertTouchHeightIsAtLeast`), `DesignTokensInSyncTest`, `TokenLiteralsTest`, `PackageRulesTest`, FileTripStore round trip |
 | Screenshots | `:core-ui` (components), `:app` (screens §8.2) | same task; PNG → `ci-logs` | about 90 PNGs per run |
-| Emulator | `:app` `src/androidTest/app/verst/e2e` | CI job `e2e`, API 34 x86_64, 1170 × 2532 @ 480 dpi = 390 × 844 dp | `EngineParityTest` (§5.3); `EngineStartupTest` (status Ready, writes `timings.json`); `MockJourneyTest` (below) |
+| Emulator | `:app` `src/androidTest/app/verst/e2e` | CI job `e2e`, API 34 x86_64, 1170 × 2532 @ 480 dpi = 390 × 844 dp | `EngineParityTest` (§5.3); `EngineStartupTest` (status Ready, writes `timings.json`); `SliceJourneyTest` (planned as `MockJourneyTest`, below; it also writes `budgets.json`) |
 
-`MockJourneyTest` runs on the real engine with the golden clock. Each step is screenshotted to `files/e2e/screens/NN-name.png`:
+`SliceJourneyTest` (planned name `MockJourneyTest`) runs on the real engine with the golden clock. Step 8 (kill and relaunch) is not covered yet; review P1-2. Each step is screenshotted to `files/e2e/screens/NN-name.png`:
 
 1. Windshield shows 3 ready routes. Pick «Золотое кольцо».
 2. Instruments: add a child and the dog. ПОЕХАЛИ.
