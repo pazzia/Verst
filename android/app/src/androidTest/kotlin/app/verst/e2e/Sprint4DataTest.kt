@@ -193,10 +193,10 @@ class Sprint4DataTest {
         planTo("Санкт-Петербург", Mood.FUN, child = true, dog = true)
         logTrip("fun-msk-spb")
         shot("130-fun-msk-spb-top")
-        val fun = stops().filter { it.stretch }
-        Log.i("VerstE2e", "S4D fun stops: ${fun.map { "${it.name} ${it.funFor} ${it.poiKind}" }}")
-        fun.take(2).forEachIndexed { i, s -> scrollShot(s, "13${1 + i}-fun-stop-$i") }
-        assertTrue("«Разминка» stops on M-11", fun.isNotEmpty())
+        val funStops = stops().filter { it.stretch }
+        Log.i("VerstE2e", "S4D fun stops: ${funStops.map { "${it.name} ${it.funFor} ${it.poiKind}" }}")
+        funStops.take(2).forEachIndexed { i, s -> scrollShot(s, "13${1 + i}-fun-stop-$i") }
+        assertTrue("«Разминка» stops on M-11", funStops.isNotEmpty())
         cardsAtEveryLevel("msk-spb")
     }
 
