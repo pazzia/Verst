@@ -82,9 +82,11 @@ fun BoxScope.ReportSheet(ui: ReportUi, windowH: Dp, a: ReportActions) {
         // comment and «ОТПРАВИТЬ» are brought into view above it
         val bring = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
         var commentFocused by remember { mutableStateOf(false) }
-        androidx.compose.runtime.LaunchedEffect(commentFocused) {
+        // follow the IME while it animates in: every inset change brings the comment + button back into view
+        val imeBottom = androidx.compose.foundation.layout.WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current)
+        androidx.compose.runtime.LaunchedEffect(commentFocused, imeBottom) {
             if (commentFocused) {
-                kotlinx.coroutines.delay(350) // the IME animation
+                kotlinx.coroutines.delay(50)
                 bring.bringIntoView()
             }
         }

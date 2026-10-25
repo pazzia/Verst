@@ -415,8 +415,9 @@ class Sprint3Test {
         shot("84-report-sheet")
         compose.onNodeWithTag("report.comment").performClick()
         compose.onNodeWithTag("report.comment").performTextInput("Билет уже 600 ₽")
-        Thread.sleep(700) // IME + bring-into-view
-        compose.onNodeWithTag("report.send").assertIsDisplayed()
+        // IME + bring-into-view: the button stays on screen above the keyboard
+        compose.waitUntil(3_000) { runCatching { compose.onNodeWithTag("report.send").assertIsDisplayed(); true }.getOrDefault(false) }
+        Thread.sleep(300)
         shot("84b-report-comment")
         compose.onNodeWithTag("report.send").performScrollTo().performClick()
         compose.waitUntil(5_000) { flow.report == null && flow.toast == app.verst.nav.Toast.ReportThanks }
