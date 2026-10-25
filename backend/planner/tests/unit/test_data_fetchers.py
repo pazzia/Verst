@@ -55,6 +55,25 @@ class WikidataTest(unittest.TestCase):
         self.assertFalse(report["ok"])
         self.assertEqual(report["mismatches"], {"Q570116": "railway station"})
 
+    def test_resolve_classes(self) -> None:
+        e = "http://www.wikidata.org/entity/"
+        rows = {
+            "кремль": [{"c": lit(e + "Q5"), "n": lit("40")}, {"c": lit(e + "Q4"), "n": lit("40")}],
+            "набережная": [{"c": lit(e + "Q1501717"), "n": lit("3")}],
+        }
+        asked: list[str] = []
+
+        def query(q: str) -> list[dict[str, Any]]:
+            label = q.split('"')[1]
+            asked.append(label)
+            return rows.get(label, [])
+
+        report = {"mismatches": {"Q12035": "Titanoecid spider", "Q1501717": "x", "Q999": "y"}}
+        self.assertEqual(self.wd.resolve_classes(report, query), {"Q12035": "Q4"})  # tie → smaller id
+        self.assertEqual(asked, ["кремль", "набережная"])  # Q999 has no ru label
+        self.assertIsNone(self.wd.pick_resolved([{"c": lit(e + "Q1"), "n": lit("0")}]))
+        self.assertIn("wdt:P17 wd:Q159", self.wd.Q_RESOLVE)
+
     def test_towns_aggregate(self) -> None:
         e = "http://www.wikidata.org/entity/"
         rows = [
