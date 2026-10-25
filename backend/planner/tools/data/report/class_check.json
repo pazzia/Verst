@@ -1,0 +1,29 @@
+{
+ "labels": {
+  "Q159": "Russia",
+  "Q2977": "cathedral",
+  "Q22698": "park",
+  "Q23413": "castle",
+  "Q12035": "Titanoecid spider",
+  "Q16970": "church building",
+  "Q57821": "fortification",
+  "Q44613": "monastery",
+  "Q174782": "square",
+  "Q179700": "statue",
+  "Q183342": "federal city of Russia",
+  "Q570116": "tourist attraction",
+  "Q1107656": "garden",
+  "Q33506": "museum",
+  "Q1501717": "HIV trial in Libya",
+  "Q2319498": "architectural landmark",
+  "Q4989906": "monument",
+  "Q5003624": "memorial",
+  "Q6017969": "scenic viewpoint",
+  "Q7930989": "city or town"
+ },
+ "mismatches": {
+  "Q12035": "Titanoecid spider",
+  "Q1501717": "HIV trial in Libya"
+ },
+ "ok": false
+}

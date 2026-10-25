@@ -1,0 +1,799 @@
+[
+ {
+  "mirror": "https://overpass-api.de/api/interpreter",
+  "error": "<HTTPError 502: 'Bad Gateway'>"
+ },
+ {
+  "mirror": "https://overpass.kumi.systems/api/interpreter",
+  "error": "<HTTPError 504: 'Gateway Timeout'>"
+ },
+ {
+  "mirror": "https://overpass.private.coffee/api/interpreter",
+  "error": "<HTTPError 504: 'Gateway Timeout'>"
+ },
+ {
+  "qid": "Q649",
+  "name": "Москва",
+  "error": "<HTTPError 502: 'Bad Gateway'>"
+ },
+ {
+  "qid": "Q656",
+  "name": "Санкт-Петербург",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q883",
+  "name": "Новосибирск",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q900",
+  "name": "Казань",
+  "error": "<HTTPError 504: 'Gateway Timeout'>"
+ },
+ {
+  "qid": "Q891",
+  "name": "Нижний Новгород",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q894",
+  "name": "Самара",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q911",
+  "name": "Уфа",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q908",
+  "name": "Ростов-на-Дону",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q898",
+  "name": "Омск",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q919",
+  "name": "Красноярск",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q3426",
+  "name": "Воронеж",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q915",
+  "name": "Пермь",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q914",
+  "name": "Волгоград",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q5332",
+  "name": "Саратов",
+  "error": "TimeoutError('The read operation timed out')"
+ },
+ {
+  "qid": "Q6014",
+  "name": "Барнаул",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5426",
+  "name": "Ижевск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q4454",
+  "name": "Хабаровск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5627",
+  "name": "Ульяновск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2423",
+  "name": "Ярославль",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q95041",
+  "name": "Набережные Челны",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q976",
+  "name": "Томск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q104557",
+  "name": "Балашиха",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5337",
+  "name": "Оренбург",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q93910",
+  "name": "Новокузнецк",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2746",
+  "name": "Рязань",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5470",
+  "name": "Чебоксары",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q1829",
+  "name": "Калининград",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5540",
+  "name": "Пенза",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q3490",
+  "name": "Липецк",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5384",
+  "name": "Киров",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q3927",
+  "name": "Астрахань",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2770",
+  "name": "Тула",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5206",
+  "name": "Ставрополь",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q39420",
+  "name": "Сочи",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q6816",
+  "name": "Улан-Удэ",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q183002",
+  "name": "Сургут",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2288",
+  "name": "Тверь",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q95449",
+  "name": "Магнитогорск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2801",
+  "name": "Брянск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2630",
+  "name": "Иваново",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2684",
+  "name": "Владимир",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q53139",
+  "name": "Чита",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5196",
+  "name": "Грозный",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q98967",
+  "name": "Нижний Тагил",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2837",
+  "name": "Калуга",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q3323",
+  "name": "Белгород",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q19520",
+  "name": "Подольск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q98995",
+  "name": "Волжский",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q1957",
+  "name": "Вологда",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5343",
+  "name": "Саранск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q13379",
+  "name": "Курган",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2144",
+  "name": "Череповец",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q1851",
+  "name": "Архангельск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5239",
+  "name": "Владикавказ",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q3118",
+  "name": "Орёл",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5449",
+  "name": "Йошкар-Ола",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q196489",
+  "name": "Стерлитамак",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q23185",
+  "name": "Мытищи",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2592",
+  "name": "Кострома",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q1763",
+  "name": "Мурманск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q15760",
+  "name": "Новороссийск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q197582",
+  "name": "Химки",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q3544",
+  "name": "Тамбов",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5265",
+  "name": "Нальчик",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q172657",
+  "name": "Нижнекамск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q170513",
+  "name": "Таганрог",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q6934",
+  "name": "Благовещенск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q141358",
+  "name": "Люберцы",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q154801",
+  "name": "Комсомольск-на-Амуре",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q155309",
+  "name": "Королёв",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2235",
+  "name": "Великий Новгород",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q198748",
+  "name": "Энгельс",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q132732",
+  "name": "Братск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q198206",
+  "name": "Шахты",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2143",
+  "name": "Сыктывкар",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q103565",
+  "name": "Ангарск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q196486",
+  "name": "Старый Оскол",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q76493",
+  "name": "Дзержинск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q155569",
+  "name": "Красногорск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q175742",
+  "name": "Одинцово",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2214",
+  "name": "Псков",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q15767",
+  "name": "Армавир",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q7859",
+  "name": "Южно-Сахалинск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q104560",
+  "name": "Балаково",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q102667",
+  "name": "Бийск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q196934",
+  "name": "Уссурийск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q175517",
+  "name": "Норильск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q184147",
+  "name": "Прокопьевск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q193413",
+  "name": "Рыбинск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q103483",
+  "name": "Альметьевск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q133175",
+  "name": "Волгодонск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q7951",
+  "name": "Петропавловск-Камчатский",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q147756",
+  "name": "Хасавюрт",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q175452",
+  "name": "Новочеркасск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q105444",
+  "name": "Каменск-Уральский",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q2219",
+  "name": "Сызрань",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q135410",
+  "name": "Домодедово",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q140087",
+  "name": "Златоуст",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q190499",
+  "name": "Северодвинск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q105455",
+  "name": "Миасс",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q193443",
+  "name": "Салават",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q155148",
+  "name": "Копейск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q198419",
+  "name": "Электросталь",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q198369",
+  "name": "Щёлково",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q194067",
+  "name": "Серпухов",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q172601",
+  "name": "Нефтекамск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q156658",
+  "name": "Находка",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q145507",
+  "name": "Каспийск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q105002",
+  "name": "Березники",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q133026",
+  "name": "Коломна",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q6049",
+  "name": "Кызыл",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q131416",
+  "name": "Дербент",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q163935",
+  "name": "Назрань",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q102445",
+  "name": "Ковров",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q172616",
+  "name": "Нефтеюганск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q153676",
+  "name": "Кисловодск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q104649",
+  "name": "Батайск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q135787",
+  "name": "Ессентуки",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q5326",
+  "name": "Черкесск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q193380",
+  "name": "Рубцовск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q175433",
+  "name": "Новочебоксарск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q135394",
+  "name": "Долгопрудный",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q193293",
+  "name": "Реутов",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q163643",
+  "name": "Раменское",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q176325",
+  "name": "Октябрьский",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q175161",
+  "name": "Новомосковск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q159112",
+  "name": "Михайловск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q6329",
+  "name": "Ханты-Мансийск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q184322",
+  "name": "Пушкино",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q19157",
+  "name": "Первоуральск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q136435",
+  "name": "Жуковский",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q133075",
+  "name": "Видное",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q103993",
+  "name": "Артём",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q135285",
+  "name": "Димитровград",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q175470",
+  "name": "Новый Уренгой",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q193909",
+  "name": "Северск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q176636",
+  "name": "Орехово-Зуево",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q144170",
+  "name": "Камышин",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q3977",
+  "name": "Элиста",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q162677",
+  "name": "Муром",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q103789",
+  "name": "Арзамас",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q175480",
+  "name": "Ногинск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q175524",
+  "name": "Ноябрьск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q104991",
+  "name": "Бердск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q155809",
+  "name": "Новошахтинск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q168782",
+  "name": "Тобольск",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q193722",
+  "name": "Сергиев Посад",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q128499",
+  "name": "Ялта",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q14657",
+  "name": "Выборг",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q158491",
+  "name": "Феодосия",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q178188",
+  "name": "Переславль-Залесский",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q158604",
+  "name": "Бахчисарай",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q111048",
+  "name": "Великий Устюг",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q193342",
+  "name": "Ростов Великий",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q15339",
+  "name": "Шлиссельбург",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q15256",
+  "name": "Ивангород",
+  "error": "per-town time budget spent"
+ },
+ {
+  "qid": "Q15757",
+  "name": "Суздаль",
+  "error": "per-town time budget spent"
+ }
+]
