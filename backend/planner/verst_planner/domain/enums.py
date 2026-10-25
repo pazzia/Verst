@@ -48,8 +48,9 @@ class PlaceStatus(StrEnum):
 
 class Mood(StrEnum):
     CALM = "calm"
-    MORE_STOPS = "more_stops"
+    MORE_STOPS = "more_stops"  # v2 «Побольше остановок»; kept with its old behaviour for saved trips
     JUST_DRIVE = "just_drive"
+    FUN = "fun"  # v3 «Весело и познавательно» (ADR-0015 §5)
 
 
 class FuelType(StrEnum):

@@ -29,7 +29,7 @@ class EnumTest(unittest.TestCase):
             PlaceType: ["sight", "food", "fuel", "rest", "lodging"],
             Source: ["curated", "osm", "partner"],
             PlaceStatus: ["draft", "live", "hidden"],
-            Mood: ["calm", "more_stops", "just_drive"],
+            Mood: ["calm", "more_stops", "just_drive", "fun"],
             FuelType: ["ai92", "ai95", "dt"],
             RoadClass: ["motorway", "trunk", "primary", "secondary", "other"],
             StopKind: ["start", "sight", "food", "fuel", "rest", "overnight", "via", "finish"],

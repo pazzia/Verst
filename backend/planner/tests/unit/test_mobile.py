@@ -187,6 +187,12 @@ class MobileTest(unittest.TestCase):
         self.assertEqual(len(stops), sum(len(d["stops"]) for d in r["trip"]["daysList"]))
         self.assertIn("engineState", r["trip"])
         self.assertTrue(r["shareText"].startswith("Москва → Ярославль"))
+        # API v3 (ADR-0015 §7): driven and remaining km per stop
+        flat = [s for d in r["trip"]["daysList"] for s in d["stops"]]
+        driven = [s["kmDriven"] for s in flat]
+        self.assertEqual(driven, sorted(driven))
+        self.assertEqual((driven[0], driven[-1]), (0, r["trip"]["km"]))
+        self.assertTrue(all(s["kmDriven"] + s["kmLeft"] == r["trip"]["km"] for s in flat))
 
     def test_plan_matches_golden_all(self) -> None:
         checked = 0
@@ -252,7 +258,11 @@ class MobileTest(unittest.TestCase):
         want = planner.replace_stop(plan, stop["id"], alt["id"])
         self.assertEqual(
             json.dumps(got["trip"], sort_keys=True, ensure_ascii=False),
-            json.dumps(codec.plan_to_json(want, public=False), sort_keys=True, ensure_ascii=False),
+            json.dumps(
+                mobile.with_driven_km(codec.plan_to_json(want, public=False)),
+                sort_keys=True,
+                ensure_ascii=False,
+            ),
         )
         err = fail(mobile.replace_stop("central_russia_v1", json.dumps(trip), "d9s99", alt["id"]))
         self.assertEqual(err["code"], "NOT_FOUND")
@@ -328,7 +338,7 @@ class MobileTest(unittest.TestCase):
     def test_selfcheck_api_version(self) -> None:
         r = call(mobile.selfcheck())
         self.assertEqual(r["apiVersion"], mobile.API_VERSION)
-        self.assertEqual(r["apiVersion"], 2)
+        self.assertEqual(r["apiVersion"], 3)
 
     def test_stale_trip_rejected(self) -> None:
         trip = golden_plan("G02")["trip"]
@@ -400,6 +410,8 @@ class MobileTest(unittest.TestCase):
 
     def test_cancel_before_plan(self) -> None:
         c = case("G08")
+        call(mobile.set_clock(c["clock"]))  # the case's startAt is in the past on the system clock
+        self.addCleanup(lambda: call(mobile.set_clock("system")))
         self.assertEqual(call(mobile.cancel("early-1")), {"cancelled": False, "pending": True})
         self.assertEqual(
             fail(mobile.plan(c["world"], "early-1", json.dumps(c["input"]), None))["code"], "CANCELLED"

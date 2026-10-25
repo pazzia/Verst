@@ -70,7 +70,9 @@
         "alternatives": [],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 0,
+        "kmLeft": 386
        },
        {
         "id": "d1s02",
@@ -101,7 +103,9 @@
         "alternatives": [],
         "alternativesNote": "Других вариантов в это время поблизости нет.",
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 4,
+        "kmLeft": 382
        },
        {
         "id": "d1s03",
@@ -380,7 +384,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 108,
+        "kmLeft": 278
        },
        {
         "id": "d1s04",
@@ -659,7 +665,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 184,
+        "kmLeft": 202
        },
        {
         "id": "d1s05",
@@ -1061,7 +1069,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 260,
+        "kmLeft": 126
        },
        {
         "id": "d1s06",
@@ -1092,7 +1102,9 @@
         "alternatives": [],
         "alternativesNote": "Других вариантов в это время поблизости нет.",
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 380,
+        "kmLeft": 6
        },
        {
         "id": "d1s07",
@@ -1491,7 +1503,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 381,
+        "kmLeft": 5
        },
        {
         "id": "d1s08",
@@ -1889,7 +1903,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 382,
+        "kmLeft": 4
        },
        {
         "id": "d1s09",
@@ -2288,7 +2304,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 383,
+        "kmLeft": 3
        },
        {
         "id": "d1s10",
@@ -2316,7 +2334,9 @@
         "alternatives": [],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 386,
+        "kmLeft": 0
        }
       ]
      }

@@ -56,11 +56,23 @@
      "links": {
       "navigator": "yandexnavi://build_route_on_map?lat_to=57.626100&lon_to=39.884500&lat_from=56.317109&lon_from=38.143898&lat_via_0=56.748761&lon_via_0=38.867402&lat_via_1=57.186204&lon_via_1=39.419573&lat_via_2=57.188013&lon_via_2=39.421231",
       "maps": "yandexmaps://maps.yandex.ru/?rtext=56.317109,38.143898~56.748761,38.867402~57.186204,39.419573~57.188013,39.421231~57.626100,39.884500&rtt=auto",
-      "web": "https://yandex.ru/maps/?rtext=56.317109,38.143898~56.748761,38.867402~57.186204,39.419573~57.188013,39.421231~57.626100,39.884500&rtt=auto"
+      "web": "https://yandex.ru/maps/?rtext=56.317109,38.143898~56.748761,38.867402~57.186204,39.419573~57.188013,39.421231~57.626100,39.884500&rtt=auto",
+      "navigatorNext": "yandexnavi://build_route_on_map?lat_to=56.748761&lon_to=38.867402"
+     },
+     "next": {
+      "lat": 56.748761,
+      "lon": 38.867402,
+      "nameRu": "Никитский монастырь",
+      "role": "destination"
      }
     }
    ],
-   "truncated": false
+   "truncated": false,
+   "order": [
+    "maps",
+    "navigatorNext",
+    "web"
+   ]
   },
   "ms": 0
  }

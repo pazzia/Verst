@@ -473,7 +473,7 @@ class CostUnits:
     as_of: tuple[tuple[str, str], ...] = ()
     """`(line key, "YYYY-MM")` freshness per line, so offline recompute keeps `CostLine.as_of`."""
     mood_just_drive: bool = False
-    """Mood is already «Просто доехать» (then the `just_drive` overspend hint is not offered)."""
+    """Mood is already «Только доехать» (then the `just_drive` overspend hint is not offered)."""
 
 
 @dataclass(frozen=True, slots=True)
