@@ -364,7 +364,7 @@ class ScreensScreenshotTest {
                         st.kind == "overnight" -> app.verst.core.model.dto.ParkingDto(rub = 0, source = "free", freeRu = "у гостиницы, на ночь")
                         else -> null
                     },
-                    amenities = if (st.kind == "rest") listOf("toilets", "tables", "shelter") else emptyList(),
+                    amenities = if (st.kind == "rest" || st.kind == "fuel") listOf("toilets", "tables", "shelter") else emptyList(), // G02 has no rest areas
                 )
             })
         }
@@ -631,6 +631,7 @@ class ScreensScreenshotTest {
         val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
         val d = real.copy(
             poiKind = "museum", image = null, verified = false,
+            descriptionRu = "Музей под открытым небом: избы, церкви и мельницы XVII–XIX веков, свезённые со всей области.",
             whyRu = "объект наследия федерального значения · есть в Викигиде", descSource = "wikipedia",
             hours = app.verst.core.model.dto.PoiHoursDto(textRu = "11:00–20:00", verified = false, todayRu = "11:00–20:00", openNow = true),
             dogsAllowed = false,
