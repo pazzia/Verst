@@ -66,6 +66,14 @@ class EngineHost(private val context: Context) {
 
     @Volatile private var module: PyObject? = null
 
+    /**
+     * S3-R4: the real catalogue (1 114 towns, 11 817 POIs) loads right after «ready» on the same engine thread,
+     * so the first screen does not wait for it; every engine call queues behind it (FIFO, one thread). The value
+     * is the load time in ms once done (null while loading).
+     */
+    private val _catalogueMs = MutableStateFlow<Long?>(null)
+    val catalogueMs: StateFlow<Long?> = _catalogueMs
+
     fun start() {
         if (Build.FINGERPRINT == "robolectric") {
             _status.value = EngineStatus.Failed("NO_ENGINE", "Robolectric: no CPython in JVM unit tests")
@@ -95,19 +103,24 @@ class EngineHost(private val context: Context) {
                 expectOk(mobile.callAttr("load_world", text).toString())
             }
             val t3 = SystemClock.elapsedRealtime()
-            _status.value = EngineStatus.Starting("catalogue")
-            expectOk(mobile.callAttr("load_catalogue").toString())
-            val t3c = SystemClock.elapsedRealtime()
             expectOk(mobile.callAttr("set_clock", "system").toString())
             _status.value = EngineStatus.Starting("selfcheck")
             val check = expectOk(mobile.callAttr("selfcheck").toString())
             val t4 = SystemClock.elapsedRealtime()
-            val timings = EngineTimings(t1 - t0, t2 - t1, t3 - t2, t4 - t3c, t4 - t0, catalogueMs = t3c - t3)
-            Log.i(TAG, "ready $timings")
             module = mobile
+            // «ready» without the catalogue: the app shows its first screen (shimmer until the first answer)
+            val timings = EngineTimings(t1 - t0, t2 - t1, t3 - t2, t4 - t3, t4 - t0, catalogueMs = 0)
+            Log.i(TAG, "ready $timings")
             _status.value = EngineStatus.Ready(
                 EngineInfo(check.getString("engineVersion"), check.getString("python"), timings),
             )
+            // then the catalogue (composes `russia_v1`) and the self-check again for its time zones
+            val c0 = SystemClock.elapsedRealtime()
+            expectOk(mobile.callAttr("load_catalogue").toString())
+            expectOk(mobile.callAttr("selfcheck").toString())
+            val c1 = SystemClock.elapsedRealtime()
+            Log.i(TAG, "catalogue ${c1 - c0} ms (ready + catalogue ${c1 - t0} ms)")
+            _catalogueMs.value = c1 - c0
         } catch (e: EngineCallFailed) {
             Log.e(TAG, "engine failed ${e.code}: ${e.detail}")
             _status.value = EngineStatus.Failed(e.code, e.detail)
