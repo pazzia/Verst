@@ -272,7 +272,10 @@ internal fun FooterParking(rub: Int) {
             PGlyph(14.dp)
             Txt(stringResource(R.string.road_footer_parking), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
         }
-        Txt(stringResource(R.string.common_estimate_rub, RuFormat.thousands(rub)), T.paper.total, C.text.onLight, maxLines = 1, align = TextAlign.End)
+        Txt(
+            if (rub == 0) stringResource(R.string.road_parking_inline_free) else stringResource(R.string.common_estimate_rub, RuFormat.thousands(rub)),
+            T.paper.total, C.text.onLight, maxLines = 1, align = TextAlign.End,
+        )
     }
 }
 
