@@ -54,6 +54,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -147,6 +149,10 @@ data class RoadUi(
     val minimum: Boolean = false,
     /** M§15.5: which rows open a card (sights, nights with a hotel). */
     val tappable: (StopDto) -> Boolean = { it.kind == "sight" || (it.kind == "overnight" && it.hotelOptions.isNotEmpty()) },
+    /** 5.5 §10.6: the stop whose ParkingSheet is open. */
+    val parking: StopDto? = null,
+    /** 5.5 §10.1: the day «Вести в навигаторе» starts with (today's day of a running trip, else 1). */
+    val handoffDay: Int = 1,
 )
 
 /** S3-R1 (CEO 2.1): the row to bring back ([focusId], highlighted) or the top row to restore ([topId]); [seq] = a return. */
@@ -190,6 +196,14 @@ interface RoadActions {
     /** 5.12 §3 «Расстояния приблизительные · О данных». */
     fun aboutData() = Unit
     fun closeAboutData() = Unit
+
+    /** 5.5 §10.1: «Вести в навигаторе» / a day's «вести» → the hand-off sheet on that day; long-press = always the sheet. */
+    fun handoff(day: Int) = dayNavigator(day)
+    fun handoffSheet(day: Int) = handoff(day)
+
+    /** 5.5 §10.6: the P part of a row → the ParkingSheet. */
+    fun parking(stop: StopDto) = Unit
+    fun closeParking() = Unit
 }
 
 /** 5.5 Road ahead: the day-by-day signs of the plan, «заменить» (D-6), save/share, the Waybill footer. */
@@ -202,6 +216,7 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
     var content by remember { mutableStateOf<LayoutCoordinates?>(null) }
     var viewportH by remember { mutableStateOf(0) }
     var highlight by remember { mutableStateOf<String?>(null) }
+    var section by remember { mutableStateOf(0 to 0) }
     // 5.9 §5: TalkBack focus moves to the returned row (input focus → TYPE_VIEW_FOCUSED, TalkBack follows it).
     val requesters = remember(trip) { mutableMapOf<String, FocusRequester>() }
     val density = LocalDensity.current
@@ -267,13 +282,19 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                         Modifier.fillMaxSize().verticalScroll(scroll).testTag("road.list")
                             .onGloballyPositioned { content = it },
                     ) {
-                        Intro(trip, a::aboutData)
-                        Column(Modifier.fillMaxWidth().roadSection()) {
+                        Intro(trip, ui.handoffDay, a)
+                        val parkingOn = parkingAware(trip)
+                        Column(
+                            Modifier.fillMaxWidth().roadSection()
+                                .onGloballyPositioned { c -> content?.let { root -> if (root.isAttached && c.isAttached) section = root.localPositionOf(c, Offset.Zero).y.roundToInt() to c.size.height } },
+                        ) {
                             trip.daysList.forEachIndexed { di, d ->
-                                DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0) { a.dayNavigator(d.day) }
+                                DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0, parkingOn, { a.handoff(d.day) }) { a.handoffSheet(d.day) }
                                 d.stops.forEachIndexed { si, st ->
                                     StopRow(
                                         st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name,
+                                        showParking = parkingOn && parkingStop(st),
+                                        onParking = { a.parking(st) },
                                         highlighted = st.id == highlight,
                                         focusRequester = requesters.getOrPut(st.id) { FocusRequester() },
                                         onPlaced = { y, h -> if (rows[st.id] != y to h) rows[st.id] = y to h },
@@ -288,12 +309,19 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                             Spacer(Modifier.height(24.dp))
                         }
                     }
+                    // components §26.3: the car loops over the visible part of the road (z above the km posts)
+                    val (secY, secH) = section
+                    if (secH > 0 && viewportH > 0) {
+                        val top = with(density) { (secY - scroll.value).coerceAtLeast(0).toDp().value }
+                        val bottom = with(density) { (secY + secH - scroll.value).coerceAtMost(viewportH).toDp().value }
+                        CarMarker(top, bottom)
+                    }
                     Box(
                         Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(24.dp)
                             .background(Brush.verticalGradient(listOf(C.dash.raised.copy(alpha = 0f), C.dash.raised))),
                     )
                 }
-                Footer(trip, ui.minimum, a::waybill)
+                Footer(trip, ui.minimum, parkingAware(trip), a::waybill)
             }
             val t = ui.toast
             if (t != null) {
@@ -311,6 +339,8 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
             val c = ui.card
             if (c != null) CardSheet(c, windowH, a.card())
             if (ui.aboutData) AboutDataSheet(windowH, a::closeAboutData)
+            val pk = ui.parking
+            if (pk != null) ParkingSheet(pk, windowH, a::closeParking)
         }
     }
 }
@@ -514,7 +544,8 @@ private fun TitleSign(trip: TripDto, bearing8: String, modifier: Modifier) {
 }
 
 @Composable
-private fun Intro(trip: TripDto, onAbout: () -> Unit) {
+private fun Intro(trip: TripDto, handoffDay: Int, a: RoadActions) {
+    val onAbout = a::aboutData
     // S-21 / 5.5 §2.2: L1 at the list top, L2 +6, L3 +8, road column 18 below L3 (padding 4 + margin 14).
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         // N-07: the 29.4 line box exactly (no font padding, trimmed line height), so the chips land at +6.
@@ -532,14 +563,18 @@ private fun Intro(trip: TripDto, onAbout: () -> Unit) {
             InfoChip(crewShort(trip.input.crew.adults, trip.input.crew.children, trip.input.crew.dog))
             InfoChip(stringResource(R.string.road_chip_pace, RuFormat.thousands(trip.input.dailyKm)))
         }
-        Txt(stringResource(R.string.road_intro), T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp))
+        // 5.5 §10.1: «Вести в навигаторе» under the chips (a link carries one day → the sheet on today's day)
+        HandoffCta(handoffDay, { a.handoff(handoffDay) }, { a.handoffSheet(handoffDay) }, Modifier.padding(top = 6.dp))
+        Txt(stringResource(R.string.road_intro), T.body.mdTight, C.text.secondary, Modifier.padding(top = 4.dp))
         // 5.5 §9 (S3-FINAL P1-02): the open-data notice is a muted info line, not a warning plate; with a synthetic
         // route both notes share one line (`route_approx_open_data`)
+        // 5.5 §10.2: rows mark open data with the dotted ring; the legend is said once here (with «О данных»)
+        val ringRows = trip.daysList.any { d -> d.stops.any { !it.verified } }
         val openData = trip.warnings.firstOrNull { it.code == "UNVERIFIED_PLACES" || it.level == "info" }
         val infoText = when {
-            trip.approxDistances && openData != null -> stringResource(R.string.route_approx_open_data)
+            trip.approxDistances && openData != null && !ringRows -> stringResource(R.string.route_approx_open_data)
             trip.approxDistances -> stringResource(R.string.route_approx)
-            openData != null -> openData.message
+            openData != null && !ringRows -> openData.message
             else -> null
         }
         if (infoText != null) {
@@ -554,6 +589,8 @@ private fun Intro(trip: TripDto, onAbout: () -> Unit) {
                 ) { Txt(stringResource(R.string.route_approx_more), T.body.mdStrong, C.navi.label) }
             }
         }
+        Legends(ringRows && !trip.approxDistances, posts = trip.daysList.any { d -> d.stops.any { it.kmDriven != null } }, onAbout)
+        if (ringRows && trip.approxDistances) Legends(true, posts = false, onAbout = {}) // «О данных» is on the line above
         // S3-QA P1-06: one plate per night — the engine sentence, then the night's «Ближайшая подходящая: …» note
         val seen = mutableSetOf<String>()
         // S3-QA2: with more than one night plate each one says which night («Ночь 2: не нашли …»)
@@ -589,55 +626,55 @@ private fun Intro(trip: TripDto, onAbout: () -> Unit) {
     }
 }
 
-/** 5.5 §2.4: asphalt x 14…60, 3 dp edges, lane dashes 32 / 64 from the section top (one global phase). */
+/**
+ * 5.5 §10.8: the road column x 10…62 (3 dp white edges), centre dashes at x 36 (32 / 64, one global phase);
+ * the car lane is x 13–31, the km posts x 37–59.
+ */
 private fun Modifier.roadSection(): Modifier = drawBehind {
     val dp = 1.dp.toPx()
-    drawRect(C.scene.road, Offset(14 * dp, 0f), Size(46 * dp, size.height))
-    drawRect(C.scene.roadEdge, Offset(14 * dp, 0f), Size(3 * dp, size.height))
-    drawRect(C.scene.roadEdge, Offset(57 * dp, 0f), Size(3 * dp, size.height))
+    drawRect(C.scene.road, Offset(10 * dp, 0f), Size(52 * dp, size.height))
+    drawRect(C.scene.roadEdge, Offset(10 * dp, 0f), Size(3 * dp, size.height))
+    drawRect(C.scene.roadEdge, Offset(59 * dp, 0f), Size(3 * dp, size.height))
     var y = 0f
     while (y < size.height) {
-        drawRect(C.scene.roadEdge, Offset(35.5f * dp, y), Size(3 * dp, minOf(32 * dp, size.height - y)))
+        drawRect(C.scene.roadEdge, Offset(34.5f * dp, y), Size(3 * dp, minOf(32 * dp, size.height - y)))
         y += 64 * dp
     }
 }
 
-/** Per row: the 14 × 3 connector stub at x 60, row top + 38 (`color.interior.pole`). */
+/** Per row: the 8 × 3 connector stub at x 60, row top + 30 (`color.interior.pole`), from the road to the sign. */
 private fun Modifier.connector(): Modifier = drawBehind {
     val dp = 1.dp.toPx()
-    drawRect(C.interior.pole, Offset(60 * dp, 38 * dp), Size(14 * dp, 3 * dp))
+    drawRect(C.interior.pole, Offset(60 * dp, 30 * dp), Size(8 * dp, 3 * dp))
 }
 
 @Composable
-private fun DayHeader(day: DayDto, home: Boolean, first: Boolean, onNavigator: () -> Unit) {
+private fun DayHeader(day: DayDto, home: Boolean, first: Boolean, parkingOn: Boolean, onGo: () -> Unit, onSheet: () -> Unit) {
     val hours = (day.driveMin / 60.0).roundToInt()
     val meta = if (home) stringResource(R.string.road_day_meta_home, RuFormat.thousands(day.km))
     else stringResource(R.string.road_day_meta, RuFormat.thousands(day.km), hours)
-    val cd = stringResource(R.string.cd_road_day, day.day, day.km.toString(), hours, pluralStringResource(R.plurals.plural_hour, hours))
+    val cd = stringResource(R.string.cd_road_day, day.day, day.km.toString(), hours, pluralStringResource(R.plurals.plural_hour, hours)) +
+        if (parkingOn) ". " + dayParkingCd(day) else ""
     Row(
-        // S-21: day 1 starts at the road top (margin 0), later days 6 below the previous row; 10 to row 1.
-        Modifier.fillMaxWidth().padding(start = 72.dp, end = 16.dp, top = if (first) 0.dp else 6.dp, bottom = 10.dp)
-            .semantics(mergeDescendants = true) { heading(); contentDescription = cd },
-        verticalAlignment = Alignment.Bottom,
+        // S-21 / 5.5 §10.7: day 1 starts at the road top, later days 6 below the previous row; 10 to row 1.
+        Modifier.fillMaxWidth().padding(start = 66.dp, end = 12.dp, top = if (first) 0.dp else 6.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Txt(stringResource(R.string.road_day, day.day), T.title.sm, C.accent.yellow)
-        Txt(meta, T.body.sm, C.text.muted, Modifier.weight(1f), maxLines = 1)
-        // OI-26 / CEO 4: «в навигатор ↗» right, touch 44 centred on the header; offline: «в навигатор», disabled look.
-        val linkCd = stringResource(R.string.cd_road_day_navigator, day.day)
-        Box(
-            Modifier.height(DesignTokens.size.touchMin).layout { m, c ->
-                // the 44 dp touch box centred on the 19.5 dp header line without growing the header
-                val p = m.measure(c)
-                val line = 20.dp.roundToPx()
-                layout(p.width, line) { p.place(0, (line - p.height) / 2) }
-            }.clickable(role = Role.Button, onClick = onNavigator)
-                .semantics { contentDescription = linkCd }.testTag("road.day.${day.day}.navigator"),
-            contentAlignment = Alignment.Center,
+        Row(
+            Modifier.weight(1f).semantics(mergeDescendants = true) { heading(); contentDescription = cd },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            // 5.13 §3: the link keeps its look offline (an installed app opens offline; the web fallback says why)
-            Txt(stringResource(R.string.road_day_navigator), T.body.smStrong, C.navi.label, maxLines = 1)
+            Txt(stringResource(R.string.road_day, day.day), T.title.sm, C.accent.yellow, maxLines = 1)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Txt(meta, T.body.sm, C.text.muted, maxLines = 1)
+                // 5.5 §10.6: the day's parking under the meta («≈ 500 ₽ + ?»)
+                if (parkingOn) DayParking(day)
+            }
         }
+        // 5.5 §10.1: «вести» replaces «в навигатор ↗» → the hand-off sheet on this day
+        DayGoButton(day.day, onGo, onSheet)
     }
 }
 
@@ -655,14 +692,19 @@ private fun StopRow(
     onReport: () -> Unit,
     onTap: (() -> Unit)?,
     onHotel: () -> Unit,
+    showParking: Boolean = false,
+    onParking: () -> Unit = {},
     onReplace: () -> Unit,
 ) {
-    val line1 = if (first || s.kind == "start") stringResource(R.string.road_start)
+    val start = first || s.kind == "start"
+    val line1 = if (start) stringResource(R.string.road_start)
     else stringResource(R.string.road_ahead_km, RuFormat.thousands(s.kmFromPrev))
-    val unverified = if (!s.verified) stringResource(R.string.common_join_dot) + stringResource(R.string.common_unverified) else ""
     val time = RuFormat.clock(s.arriveAt ?: s.departAt) ?: ""
     val name = stopName(s)
-    val note = s.note ?: s.reason
+    val note = noteWithAmenities(s)
+    val kmPost = if (start) null else s.kmDriven
+    val openDataCd = if (!s.verified) stringResource(R.string.cd_open_data) else null
+    val kmCd = kmPost?.let { stringResource(R.string.cd_road_km_post, RuFormat.thousands(it)) }
     val cost: String? = when (s.kind) {
         "sight" -> if (s.costRub == 0) stringResource(R.string.road_free) else rub(s.costRub)
         "food", "overnight" -> rub(s.costRub)
@@ -670,7 +712,9 @@ private fun StopRow(
         "fuel" -> if (s.costRub > 0) rub(s.costRub) else null
         else -> null
     }
-    val cd = listOfNotNull(line1 + unverified, time, name, note, cost).joinToString(", ")
+    val kindCd = app.verst.feature.common.kindWord(s.poiKind)?.lowercase()
+    val parkingCd = if (showParking) stringResource(R.string.cd_road_parking_inline, parkingInline(s.parking)).substringBefore(". ") else null
+    val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, cost, parkingCd).joinToString(", ")
     val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
     // S3-R1: the restored row flashes `accent.yellow` at 14 % and fades (reduced motion: on, then off).
     val reduced = LocalReducedMotion.current
@@ -716,26 +760,65 @@ private fun StopRow(
             .focusable()
             .testTag("road.stop.${s.id}"),
     ) {
-        Box(Modifier.padding(start = 72.dp).widthIn(min = 68.dp), contentAlignment = Alignment.TopCenter) {
+        // 5.5 §10.8 decision B: the km post in the post zone x 37–59, row top + 4 (the row's top padding is 8)
+        Box(Modifier.width(66.dp)) {
+            if (kmPost != null) KmPost(kmPost, Modifier.padding(start = 37.dp).offset(y = (-4).dp))
+        }
+        // the sign column 66–132 (city signs with their 2 dp outline may overflow it by a dp each side)
+        Box(Modifier.width(66.dp).wrapContentWidth(Alignment.CenterHorizontally, unbounded = true), contentAlignment = Alignment.TopCenter) {
             RoadSign(s.sign, s.name, s.tags)
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(Modifier.fillMaxWidth()) {
-                Txt(line1 + unverified, T.body.sm, C.text.muted, Modifier.weight(1f), maxLines = 1)
+                Txt(line1, T.body.sm, C.text.muted, Modifier.weight(1f), maxLines = 1)
                 Txt(time, T.body.sm, C.text.muted, align = TextAlign.End)
             }
             Txt(name, T.title.md, C.text.primary, maxLines = 2)
-            if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note)
+            // 5.5 §10.7 part 3: one tag row (StretchTag before the KindTag, then the open-data ring); sights only
+            app.verst.feature.common.TagRow(
+                if (s.kind == "sight") s.poiKind else null,
+                if (s.stretch) s.dwellMin.takeIf { it > 0 } ?: 30 else null,
+                openData = !s.verified,
+                modifier = Modifier.padding(vertical = 1.dp).testTag("road.tags.${s.id}"),
+            )
+            if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note, maxLines = 2)
             val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
-            if (cost != null || canReplace || hotel) {
-                Row(Modifier.fillMaxWidth().padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Txt(cost ?: "", T.body.mdStrong, C.accent.yellow, Modifier.weight(1f))
-                    if (hotel) HotelButton(booked, if (booked) stringResource(R.string.cd_road_booked) else stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
-                    else if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
+            if (cost != null || canReplace || hotel || showParking) {
+                CostsLine(cost, s.parking, showParking, "road.stop.${s.id}", onParking) {
+                    if (hotel) HotelAction(booked, if (booked) stringResource(R.string.cd_road_booked) else stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
+                    else if (canReplace) QuietAction(stringResource(R.string.road_swap), stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onClick = onReplace)
                 }
             }
         }
     }
+}
+
+/** 5.5 §10.4 / §10.7: rest amenities live inside the description («… Есть: туалет · столы · навес»). */
+@Composable
+private fun noteWithAmenities(s: StopDto): String? {
+    val note = s.note ?: s.reason
+    if (s.amenities.isEmpty()) return note
+    val words = s.amenities.mapNotNull {
+        when (it) {
+            "toilets", "toilet" -> stringResource(R.string.road_amenity_toilet)
+            "tables", "picnic_table" -> stringResource(R.string.road_amenity_tables)
+            "shelter" -> stringResource(R.string.road_amenity_shelter)
+            "cafe" -> stringResource(R.string.road_amenity_cafe)
+            "playground" -> stringResource(R.string.road_amenity_playground)
+            else -> null
+        }
+    }
+    if (words.isEmpty()) return note
+    val line = stringResource(R.string.road_rest_amenities, words.joinToString(" · ")).replaceFirstChar { it.uppercase() }
+    return if (note.isNullOrBlank()) line else "${note.trimEnd()} $line"
+}
+
+/** components §26.2: hotels «выбрать отель →» 12/600 `navi.label`; booked «Забронировано ✓». */
+@Composable
+private fun HotelAction(booked: Boolean, cd: String, tag: String, onClick: () -> Unit) {
+    QuietAction(
+        stringResource(if (booked) R.string.road_booked else R.string.road_pick_hotel), cd, tag, C.navi.label, onClick,
+    ) { if (booked) GlyphIcon(Glyph.CHECK, C.navi.label, 14.dp, Modifier.padding(start = 4.dp)) }
 }
 
 /** components §2.6 `SwapButton` «заменить»: h 36 (touch 44), outline, `type.body.smStrong`. */
@@ -775,13 +858,17 @@ private fun HotelButton(booked: Boolean, cd: String, tag: String, onClick: () ->
 }
 
 @Composable
-private fun stopName(s: StopDto): String = when (s.kind) {
-    "overnight" -> stringResource(R.string.road_name_night, s.name)
+private fun stopName(s: StopDto): String = when {
+    s.kind == "overnight" -> stringResource(R.string.road_name_night, s.name)
+    // 5.5 §10.4: a fun stop reads «Разминка · …» (unless the engine already said so)
+    s.stretch && !s.name.startsWith(StretchPrefix) -> stringResource(R.string.road_stretch_name, s.name)
     else -> s.name
 }
 
+private const val StretchPrefix = "Разминка"
+
 @Composable
-private fun Footer(trip: TripDto, minimum: Boolean, onClick: () -> Unit) {
+private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick: () -> Unit) {
     val c = trip.cost
     val fit = trip.budgetFit
     val budget = c.budgetRub
@@ -795,7 +882,9 @@ private fun Footer(trip: TripDto, minimum: Boolean, onClick: () -> Unit) {
     }
     val total = rub(c.totalRub)
     val perPerson = stringResource(R.string.road_waybill_per_person, RuFormat.thousands(c.perPersonRub))
-    val cd = stringResource(R.string.cd_road_waybill, RuFormat.thousands(c.totalRub)) + ". " + perPerson
+    val parkingRub = if (parkingOn) c.lines.firstOrNull { it.key == "parking" }?.rub ?: trip.daysList.sumOf { parkingOf(it).rub } else null
+    val cd = stringResource(R.string.cd_road_waybill, RuFormat.thousands(c.totalRub)) + ". " + perPerson +
+        (parkingRub?.let { ". " + stringResource(R.string.road_footer_parking) + " " + stringResource(R.string.common_estimate_rub, RuFormat.thousands(it)) } ?: "")
     Row(
         Modifier
             .fillMaxWidth()
@@ -829,9 +918,11 @@ private fun Footer(trip: TripDto, minimum: Boolean, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Txt(total, T.amount, C.text.onLight, Modifier.testTag("road.total.amount"), maxLines = 1)
                 Spacer(Modifier.weight(1f))
-                Txt(perPerson, T.body.smStrong, C.text.onLightMuted, Modifier.padding(start = 8.dp), maxLines = 1, align = TextAlign.End)
+                // 5.5 §10.6: with parking the right block says «из них парковки»; the per-person line yields
+                if (parkingRub == null) Txt(perPerson, T.body.smStrong, C.text.onLightMuted, Modifier.padding(start = 8.dp), maxLines = 1, align = TextAlign.End)
             }
         }
+        if (parkingRub != null) FooterParking(parkingRub)
         Spacer(Modifier.width(12.dp))
         Icon(R.drawable.ic_arrow_right, C.text.onLight, 22.dp)
     }

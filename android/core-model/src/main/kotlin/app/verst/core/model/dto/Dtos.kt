@@ -72,7 +72,42 @@ data class StopDto(
     /** Overnight stops: up to 3 hotels (the engine's choice first) and the selected one (5.7). */
     val hotelOptions: List<HotelOptionDto> = emptyList(),
     val selectedHotelId: String? = null,
-)
+    /** API v3 (ADR-0015 §7): driven km from the trip start (detours included) and the rest of the trip. */
+    val kmDriven: Int? = null,
+    val kmLeft: Int? = null,
+    /** API v3 (ADR-0015 §2): the whitelist kind of a sight (`museum`, `park`, …) — `kind` is the stop kind. */
+    val poiKind: String? = null,
+    val quality: Int? = null,
+    /** API v3 (ADR-0015 §5): a «Весело и познавательно» stop and whom it is for (child / dog / adults). */
+    val funFor: List<String> = emptyList(),
+    /** API v3 (ADR-0015 §4): the zone tariff of the stop; null with a parking-aware engine = unknown. */
+    val parking: ParkingDto? = null,
+    /** Rest areas: what OSM says is there (`toilets`, `tables`, `shelter`, `cafe`, `playground`). */
+    val amenities: List<String> = emptyList(),
+) {
+    /** A «Разминка» stop of the fun mood (5.5 §10.4). */
+    val stretch: Boolean get() = funFor.isNotEmpty()
+}
+
+/**
+ * ADR-0015 §4 stop parking: `rub` = the stay (rounded to 10 ₽), `rubPerHour` the zone rate, `source`
+ * zone | osm | free | unknown. The Russian texts are optional engine extras for the sheet (5.5 §10.6).
+ */
+@Serializable
+data class ParkingDto(
+    val rubPerHour: Int? = null,
+    val rub: Int? = null,
+    val source: String? = null,
+    val hours: Double? = null,
+    val zoneRu: String? = null,
+    val whereRu: String? = null,
+    val sundayRu: String? = null,
+    val freeRu: String? = null,
+    val noteRu: String? = null,
+) {
+    val free: Boolean get() = source == "free" || (rub == 0 && source != "unknown")
+    val known: Boolean get() = free || (rub != null && source != "unknown")
+}
 
 /** A 5.7 hotel option: price per night for the whole crew, distance route → hotel for the exit sign. */
 @Serializable
@@ -126,6 +161,8 @@ data class CostLineDto(
     val asOf: String? = null,
     val enabled: Boolean = true,
     val breakdown: List<CostBreakdownDto> = emptyList(),
+    /** ADR-0015 §4 «Парковки»: stops without tariff data («+ ещё 2 места без данных»). */
+    val unknownCount: Int = 0,
 )
 
 @Serializable

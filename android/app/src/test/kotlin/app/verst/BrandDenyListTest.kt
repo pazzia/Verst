@@ -39,7 +39,9 @@ object BrandDenyList {
 
     fun hits(text: String): List<String> {
         val t = allowed.fold(text) { acc, a -> acc.replace(a, "") }
-        return brands.filter { t.contains(it, ignoreCase = true) }.map { "«$it» in «${text.take(80)}»" }
+        // A brand starts a word: «Суточно» is a brand, «круглосуточно» (5.11 hours «круглосуточно») is not.
+        return brands.filter { b -> Regex("(?<!\\p{L})" + Regex.escape(b), RegexOption.IGNORE_CASE).containsMatchIn(t) }
+            .map { "«$it» in «${text.take(80)}»" }
     }
 
     /** Every text of a semantics tree (unmerged), for the rendered-screen check. */

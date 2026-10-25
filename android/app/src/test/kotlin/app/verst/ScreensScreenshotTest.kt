@@ -22,6 +22,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -332,6 +333,86 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("road.total").assertExists()
         compose.onNodeWithTag("road.save").assertExists()
         compose.onNodeWithText("Дорога впереди").assertExists()
+    }
+
+    /**
+     * S4 fixture (API v3 shape, the engine milestone with tags/parking is pending): G02 with `kmDriven`, whitelist
+     * kinds on sights, one «Разминка» fun stop, one open-data sight, zone parking on sights (one unknown), free
+     * parking at rest areas / nights, rest amenities, and the «Парковки» line.
+     */
+    private fun s4Trip(): TripDto {
+        val t = snapshot("G02_golden_ring")
+        var driven = 0
+        var sights = 0
+        val kinds = listOf("monastery", "kremlin", "museum", "park", "nature", "viewpoint")
+        val days = t.daysList.map { d ->
+            d.copy(stops = d.stops.map { st ->
+                driven += st.kmFromPrev
+                val sight = st.kind == "sight"
+                val k = if (sight) sights++ else -1
+                st.copy(
+                    kmDriven = driven, kmLeft = (t.km - driven).coerceAtLeast(0),
+                    poiKind = if (sight) kinds[k % kinds.size] else null,
+                    funFor = if (k == 1) listOf("child") else emptyList(),
+                    dwellMin = if (k == 1) 30 else st.dwellMin,
+                    verified = if (k == 2) false else st.verified,
+                    parking = when {
+                        sight && k == 3 -> null
+                        sight -> app.verst.core.model.dto.ParkingDto(rubPerHour = 150, rub = 300, source = "zone", hours = 2.0, zoneRu = "платная зона", whereRu = "у входа и на соседних улицах")
+                        st.kind == "rest" -> app.verst.core.model.dto.ParkingDto(rub = 0, source = "free", freeRu = "площадка отдыха у трассы")
+                        st.kind == "overnight" -> app.verst.core.model.dto.ParkingDto(rub = 0, source = "free", freeRu = "у гостиницы, на ночь")
+                        else -> null
+                    },
+                    amenities = if (st.kind == "rest") listOf("toilets", "tables", "shelter") else emptyList(),
+                )
+            })
+        }
+        val parkingRub = days.sumOf { d -> d.stops.sumOf { it.parking?.rub ?: 0 } }
+        val lines = t.cost.lines.filter { it.key != "reserve" } +
+            app.verst.core.model.dto.CostLineDto("parking", "Парковки", parkingRub, "${days.sumOf { d -> d.stops.count { it.parking?.rubPerHour != null } }} стоянки", unknownCount = 2) +
+            t.cost.lines.filter { it.key == "reserve" }
+        return t.copy(daysList = days, cost = t.cost.copy(lines = lines))
+    }
+
+    @Test
+    fun roadS4Top() {
+        shot("road", "s4-top") { RoadScreen(RoadUi(s4Trip(), "NE"), noRoad) }
+        compose.onNodeWithTag("road.handoff").assertExists()
+        compose.onNodeWithTag("road.day.1.navigator").assertExists()
+        compose.onNodeWithTag("road.day.1.parking", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.legend.kmpost", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("не проверено", substring = true).assertDoesNotExist()
+    }
+
+    /** The long list at once: km posts, tags (Разминка, kinds, the open-data ring), costs lines with the P part. */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h2400dp-port-xxhdpi")
+    fun roadS4Rows() {
+        shot("road", "s4-rows", 390, 2400) { RoadScreen(RoadUi(s4Trip(), "NE"), noRoad) }
+        assertTrue(compose.onAllNodesWithTag("road.kmpost", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithTag("tag.kind", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithTag("tag.stretch", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithText("Разминка", substring = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithTag("tag.opendata", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithText("туалет", substring = true).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun roadS4ParkingSheet() {
+        val trip = s4Trip()
+        val stop = trip.daysList.flatMap { it.stops }.first { it.parking?.rubPerHour != null }
+        shot("road", "s4-parking-sheet") { RoadScreen(RoadUi(trip, "NE", parking = stop), noRoad) }
+        compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("150", substring = true)
+        compose.onNodeWithTag("parking.ok").assertExists()
+    }
+
+    @Test
+    fun roadS4ParkingSheetUnknown() {
+        val trip = s4Trip()
+        val stop = trip.daysList.flatMap { it.stops }.first { it.kind == "sight" && it.parking == null }
+        shot("road", "s4-parking-unknown") { RoadScreen(RoadUi(trip, "NE", parking = stop), noRoad) }
+        compose.onAllNodesWithText("уточните", substring = true).fetchSemanticsNodes().isNotEmpty().let(::assertTrue)
     }
 
     @Test

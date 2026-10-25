@@ -53,6 +53,16 @@ data class NightUnitDto(
 @Serializable
 data class MealUnitDto(val day: Int, val meal: String, val stopId: String? = null, val checkRub: Int)
 
+/** ADR-0015 §4 `cost.units.parking[]`: one stop's stay, already rounded half-up to 10 ₽; `rub` null = unknown. */
+@Serializable
+data class ParkingUnitDto(
+    val stopId: String,
+    val rubPerHour: Int? = null,
+    val hours: Double? = null,
+    val rub: Int? = null,
+    val source: String = "unknown",
+)
+
 @Serializable
 data class TicketUnitDto(val stopId: String, val placeId: String? = null, val name: String = "", val adultRub: Int, val childRub: Int)
 
@@ -71,6 +81,8 @@ data class CostUnitsDto(
     val assumedChildAge: Int = 8,
     val childFoodWeightUnder7: String = "0.50",
     val moodJustDrive: Boolean = false,
+    /** API v3: empty for an engine without parking (then there is no «Парковки» line at all). */
+    val parking: List<ParkingUnitDto> = emptyList(),
 )
 
 /** `Alternative.units` (A§16.6): what a replace changes in the cost. */
@@ -86,6 +98,8 @@ data class AltUnitsDto(
     val priceRub: String? = null,
     val regionName: String = "",
     val tripKmDelta: Int = 0,
+    /** API v3: the alternative's own parking stay (rounded), when the engine knows it. */
+    val parkingRub: Int? = null,
 )
 
 @Serializable
@@ -95,7 +109,7 @@ data class CostCrew(val adults: Int, val children: Int = 0, val dog: Boolean = f
 data class CostOverridesDto(val hotelByStop: Map<String, String> = emptyMap(), val replaced: Map<String, AltUnitsDto> = emptyMap())
 
 data class CostNumbers(
-    /** Line rubs by key: fuel, tolls, lodging, food, tickets, reserve. */
+    /** Line rubs by key: fuel, tolls, lodging, food, tickets, parking (API v3, when the units have it), reserve. */
     val lines: Map<String, Int>,
     val subtotalRub: Int,
     val totalRub: Int,
@@ -215,6 +229,13 @@ object CostCalculator {
         val ticketExact = tickets.fold(BigDecimal.ZERO) { a, t -> a + BigDecimal(crew.adults * t.adult + crew.children * t.child) }
         val ticketsRub = roundTo(ticketExact, step)
         lines["tickets"] = ticketsRub
+
+        // ---- parking (ADR-0015 §4): Σ of the per-stop stays (integers, already rounded); unknown stays add 0.
+        // A replaced stop takes the alternative's stay when known; the engine's answer then overwrites it.
+        if (u.parking.isNotEmpty()) {
+            val parking = u.parking.sumOf { p -> ov.replaced[p.stopId]?.parkingRub ?: p.rub ?: 0 }
+            lines["parking"] = roundTo(BigDecimal(parking), step)
+        }
 
         // ---- totals (A§7.2)
         val subtotal = lines.values.sum()

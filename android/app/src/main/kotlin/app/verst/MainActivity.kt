@@ -186,7 +186,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 private fun Screens(flow: VerstFlow, context: Context) {
     val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
         flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
-        flow.report != null || flow.cityPicker != null
+        flow.report != null || flow.cityPicker != null || flow.roadParking != null
     BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
@@ -310,6 +310,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         aboutData = flow.aboutData,
                         minimum = flow.showingMinimum,
                         tappable = flow::tappable,
+                        parking = flow.roadParking,
+                        handoffDay = flow.handoffDay(r.trip),
                     ),
                     object : RoadActions {
                         override fun back() {
@@ -339,6 +341,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun reportStop(stop: app.verst.core.model.dto.StopDto) = flow.openReport(stop)
                         override fun topRow(id: String?, scrollY: Int) = flow.roadTop(id, scrollY)
                         override fun focusShown() = flow.roadFocusShown()
+                        override fun parking(stop: StopDto) = flow.openParking(stop)
+                        override fun closeParking() = flow.closeParking()
                     },
                 )
             }

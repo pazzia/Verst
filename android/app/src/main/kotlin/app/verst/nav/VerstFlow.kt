@@ -210,6 +210,8 @@ class VerstFlow(
         private set
     /** 5.12 §3 «О данных» sheet. */
     var aboutData by mutableStateOf(false)
+    /** 5.5 §10.6: the stop whose ParkingSheet is open (Road ahead). */
+    var roadParking: StopDto? by mutableStateOf(null)
         private set
 
     // ---- 5.8 budget fit
@@ -629,6 +631,10 @@ class VerstFlow(
         }
         if (aboutData) {
             aboutData = false
+            return true
+        }
+        if (roadParking != null) {
+            roadParking = null
             return true
         }
         if (report != null) {
@@ -1336,6 +1342,26 @@ class VerstFlow(
 
     fun openAboutData() {
         aboutData = true
+    }
+
+    fun openParking(stop: StopDto) {
+        roadParking = stop
+    }
+
+    fun closeParking() {
+        roadParking = null
+    }
+
+    /**
+     * 5.5 §10.1: the day «Вести в навигаторе» starts with — the trip's day of today when the trip is under way
+     * (start date ≤ today ≤ last day), else day 1.
+     */
+    fun handoffDay(trip: app.verst.core.model.dto.TripDto, today: java.time.LocalDate = java.time.LocalDate.now()): Int {
+        val first = trip.daysList.firstOrNull()?.day ?: 1
+        val start = (trip.daysList.firstOrNull()?.startAt ?: trip.input.startAt)?.takeIf { it.length >= 10 }
+            ?.let { runCatching { java.time.LocalDate.parse(it.substring(0, 10)) }.getOrNull() } ?: return first
+        val n = java.time.temporal.ChronoUnit.DAYS.between(start, today).toInt() + first
+        return if (trip.daysList.any { it.day == n }) n else first
     }
 
     fun closeAboutData() {
