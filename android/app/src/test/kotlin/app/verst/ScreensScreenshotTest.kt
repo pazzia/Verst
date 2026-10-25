@@ -748,7 +748,7 @@ class ScreensScreenshotTest {
     fun walkRyumochnye() {
         walkShot("city_route-ryumochnye.json", "ryumochnye")
         compose.onNodeWithTag("walk.responsible", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("Пейте умеренно, чередуйте с водой и едой. За руль — только трезвым.").assertExists()
+        compose.onNodeWithText("Пейте умеренно, чередуйте с водой и едой. За руль\u00A0— только трезвым.").assertExists() // S3-FINAL P2-01: NBSP before the dash
     }
 
     // ---------------------------------------------------------------------------------------- 5.12 location / addresses
