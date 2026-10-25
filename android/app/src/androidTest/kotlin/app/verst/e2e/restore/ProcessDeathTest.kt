@@ -71,8 +71,12 @@ class ProcessDeathTest {
         compose.onNodeWithTag("windshield.navi").performClick()
         waitTag("navigator.to")
         compose.onNodeWithTag("navigator.to").performTextInput("Яро")
-        waitTag("navigator.suggestion.0")
-        compose.onNodeWithTag("navigator.suggestion.0").performScrollTo().performClick()
+        // the town, not the first row: with the catalogue loaded a POI («Ярославский вокзал», in Москва) can lead
+        // the list, and a trip to it ends on the Drive error (the runs 94 / 101 / 112 flake)
+        compose.waitUntil(15_000) { flow.suggestions.any { it.name == "Ярославль" } }
+        val i = flow.suggestions.indexOfFirst { it.name == "Ярославль" }
+        android.util.Log.i("VerstE2e", "ProcessDeath suggestions: ${flow.suggestions.map { "${it.kind}:${it.name}" }}")
+        compose.onNodeWithTag("navigator.suggestion.$i").performScrollTo().performClick()
         waitTag("navigator.start", 10_000)
         compose.onNodeWithTag("navigator.start").performClick()
         waitTag("instruments.start")
