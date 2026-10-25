@@ -1,0 +1,29 @@
+# GraphHopper on the maps VM (ADR-0017, SPEC §11 "Map services"). Not used by CI (routing.yml runs the jar).
+#
+#   GH_BIND=10.0.0.5 docker compose up -d graphhopper            # serve /data/current
+#   docker compose run --rm build central+volga /data/next 10g   # build a new graph next to it (README.md)
+#
+# GraphHopper has no authentication: publish it on the private network address only (GH_BIND), never on 0.0.0.0
+# of a public interface. verst-api reaches it as VERST_GRAPHHOPPER_URL=http://<GH_BIND>:8989.
+services:
+  graphhopper:
+    build: .
+    image: verst/graphhopper:11.0
+    restart: unless-stopped
+    environment:
+      # The graph lives on the heap (RAM_STORE); README.md "Sizing" gives the heap per region.
+      JAVA_OPTS: ${GH_JAVA_OPTS:--Xmx8g -Xms8g}
+    volumes:
+      - ${GH_DATA:-/srv/verst/routing}:/data
+    ports:
+      - "${GH_BIND:-127.0.0.1}:8989:8989"
+    # 8990 (admin: metrics, health) stays inside the container network unless needed for Prometheus.
+    stop_grace_period: 30s
+
+  build:
+    profiles: [build]
+    image: verst/graphhopper:11.0
+    entrypoint: ["/srv/graphhopper/build_graph.sh"]
+    command: ["central+volga", "/data/next", "10g"]
+    volumes:
+      - ${GH_DATA:-/srv/verst/routing}:/data

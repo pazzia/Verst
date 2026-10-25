@@ -2257,3 +2257,69 @@ appendix B). Developer, on branch ccr-013d3489-181fz2. Not committed.
   because `card_desc_source` and the engine's `nameRu` both carry «Описание:». It is a one-line fix in either
   place.
 - Legal owns `docs/legal/*`: R-01/R-09/R-10 and the brief still name `assets/licences/data.txt` and «[ссылка]».
+
+## Investor-readiness / ENG-01
+
+Real road routing, week 2 slice. Architect, on branch ccr-013d3489-181fz2 (not committed). Design:
+`docs/adr/0017-real-road-routing-graphhopper.md`. Backlog: `docs/backlog-investor-readiness.md` § ENG-01.
+
+Status: adapter, server config, CI workflow and ADR done; the real-graph numbers need one run of
+`.github/workflows/routing.yml` (manual). Nothing is wired into the app or the goldens.
+
+### Files
+- `backend/planner/verst_planner/adapters/graphhopper/` — `mapping.py` (pure GraphHopper JSON → `Route`),
+  `transport.py` (stdlib `urllib`, deadline-bounded), `routing.py` (`GraphHopperRouting`, `GraphHopperSettings`).
+- `backend/planner/tests/unit/test_graphhopper.py` (36 tests) and `backend/planner/tests/data/graphhopper/*.json`
+  (12 responses recorded from a real GraphHopper 11.0 server on a synthetic mini map).
+- `infra/routing/`: `config.yml`, `custom_models/avoid_tolls.json`, `build_graph.sh`, `Dockerfile`,
+  `docker-compose.yml`, `check_routes.py`, `references.json`, `README.md`, `dev/make_mini_osm.py`,
+  `dev/record_fixtures.sh`.
+- `.github/workflows/routing.yml` (`workflow_dispatch` only).
+
+### Decisions (ADR-0017)
+- GraphHopper 11.0 (Apache-2.0), jar from Maven Central with a pinned sha256; our own Docker image (upstream has none).
+- Two CH profiles, `car` and `car_avoid_tolls` (`toll == ALL` → priority ×0.01), instead of a per-request custom
+  model; no turn costs; `index.max_region_search: 8` so GraphHopper snaps up to ~3 km and the adapter applies the
+  2 km rule.
+- VM: all of Russia. CI: Central + Volga merged (Казань is in the Volga FD; a Central-only graph cannot route it).
+- The phone never calls GraphHopper and the on-device engine does no I/O: online, Kotlin fetches the route from
+  verst-api `POST /v1/route` and passes it in (`PrefetchedRouting`, ENG-04); offline, the demo flavour stays on
+  `HybridRouting` (labelled), the beta flavour shows no synthetic trip unless `allowSyntheticOffline` is on.
+
+### Deviations from A§5.3.1 (for the Manager to fold into `docs/architecture.md`)
+1. Avoid tolls = profile `car_avoid_tolls` (CH), not `custom_model` + `ch.disable` (would need LM).
+2. `details` adds `leg_distance` (exact waypoint indices); `snap_preventions` = motorway, tunnel, bridge, ferry.
+3. The 2 km snap rule is enforced by the adapter (`Unreachable(i, snap_km)`); `ConnectionNotFound` is resolved to
+   the failing leg by routing the legs one by one.
+4. The polyline is densified to ≤ 1 km segments (GraphHopper sends a straight 16 km motorway as one segment).
+5. `graph.encoded_values` adds `road_class_link`; `street_ref` is a built-in path detail, not an encoded value.
+6. The adapter lives in `verst_planner.adapters.graphhopper` (stdlib), not `verst_api.adapters` (does not exist yet).
+7. Logs round coordinates to 2 decimals (R-07 asks 2 for stored trips; A§ said 3 for logs) and scrub GraphHopper's
+   error messages, which quote the request coordinates in full.
+
+### Commands (sandbox, Python 3.13.17, OpenJDK 21.0.12)
+- `cd backend/planner && python3 -m unittest tests.unit.test_graphhopper` → `Ran 36 tests` / `OK`.
+- `cd backend/planner && python3 -m unittest discover` → `Ran 503 tests` / `OK` (includes the other week-2
+  agents' tests on this working tree); `git status backend/planner/tests/golden` → clean (goldens byte-identical).
+- `make lint-planner` → `All checks passed!`; `make typecheck-planner` → `Success: no issues found in 75 source
+  files`; `mypy --strict tests/unit/test_graphhopper.py` → no issues; `ruff check infra/routing` → passed.
+- `python3 tools/stdlib_coverage.py` → total 97.6 %; `adapters/graphhopper`: mapping 98.2 %, routing 99.3 %,
+  transport 91.8 %.
+- `infra/routing/dev/record_fixtures.sh graphhopper-web-11.0.jar` → 12 fixtures, HTTP 200 ×6 / 400 ×6
+  (sha1 of the jar = Maven's `4cba3d3b…`).
+- `yaml.safe_load(routing.yml)` → OK; `actionlint` 1.7.12 with shellcheck → exit 0; `shellcheck build_graph.sh
+  dev/record_fixtures.sh` → clean; `docker compose config --quiet` → OK.
+- Docker: image built (jar copied in: this sandbox's TLS proxy breaks curl inside `docker build`), `docker compose
+  up -d graphhopper` on the mini graph → `healthy`, `id` → uid 10001; `GraphHopperRouting.from_env(...)` against
+  it → 19.954 km with the М-11 toll detail, 20.989 km avoiding tolls.
+- `build_graph.sh central …` with a curl shim serving the mini map as PBF → import OK, `build.json` written.
+- `check_routes.py` against a stub serving `HybridRouting` in GraphHopper's format → exit 0; 4 routes, 3 full
+  plans on `russia_v1` in 83–164 ms (p50).
+
+### Only CI or the VM can verify
+- Real km vs references (±7 % published, ±3 % once `yandexKm` is filled by a person), refs М-8/М-12/М-7/Р-132,
+  М-12 toll km ≥ 200, routing p95 ≤ 1 s, plan p95 ≤ 10 s with real routes.
+- Extract download, `osmium merge` of two districts, import time, graph size, server RSS (sizing in
+  `infra/routing/README.md` is an estimate until then), the graph cache.
+- After the run: download `routing-recordings`, review, add the real responses as
+  `backend/planner/tests/data/graphhopper/real/*.json` with a test each (week 3).
