@@ -72,6 +72,7 @@ class Sprint4DataTest {
             for (i in flow.seats.indices) flow.seats[i] = Seat.EMPTY
             flow.dog = false
             flow.pickMood(Mood.FUN)
+            flow.budgetIndex = app.verst.core.model.BudgetPresets.indexOf(40_000)
             flow.pickCityDog(false)
             while (flow.back()) Unit
         }
@@ -140,6 +141,8 @@ class Sprint4DataTest {
         compose.runOnUiThread {
             flow.pickMood(mood)
             if (dailyKm != null) flow.stepKm(dailyKm - flow.dailyKm)
+            // the review cases have no budget (G14, G17, G18): «не важно», so no no-fit screen
+            flow.budgetIndex = app.verst.core.model.BudgetPresets.lastIndex
         }
         compose.onNodeWithTag("instruments.start").performClick()
         compose.waitUntil(120_000) { flow.top == Route.Road || flow.top == Route.NoFit }

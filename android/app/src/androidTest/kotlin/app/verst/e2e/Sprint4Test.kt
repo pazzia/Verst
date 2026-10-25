@@ -274,6 +274,8 @@ class Sprint4Test {
         compose.waitUntil(15_000) { flow.gps == GpsState.On && flow.origin.label == "Ярославль" }
         compose.onNodeWithTag("windshield.city").performClick()
         waitTag("city.preset.overview", 20_000)
+        // the city values persist between visits (bug c): start this journey from 4 h
+        compose.runOnUiThread { flow.setCityDuration(240) }
         shot("110-city-start")
         compose.onNodeWithTag("city.go").performClick()
         compose.waitUntil(30_000) { flow.top == Route.Walk }

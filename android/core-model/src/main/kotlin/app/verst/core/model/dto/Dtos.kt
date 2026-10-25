@@ -88,9 +88,16 @@ data class StopDto(
     val whyRu: String? = null,
     val photoSource: String? = null,
 ) {
-    /** A «Разминка» stop of the fun mood (5.5 §10.4). */
-    val stretch: Boolean get() = funFor.isNotEmpty()
+    /**
+     * A «Разминка» stop of the fun mood (5.5 §10.4): `funFor` (ADR-0015 §5) or, as the engine sends it today, a
+     * sight with a `rest.fun.*` reason («Весело и познавательно: 30 минут — …»).
+     */
+    val stretch: Boolean get() = funFor.isNotEmpty() ||
+        (kind == "sight" && listOfNotNull(reason, note).any { it.startsWith(FunReasonPrefix) })
 }
+
+/** The engine's `rest.fun.*` reason text starts with the mood's name (reasons.ru.json). */
+const val FunReasonPrefix = "Весело и познавательно"
 
 /**
  * ADR-0015 §4 stop parking: `rub` = the stay (rounded to 10 ₽), `rubPerHour` the zone rate, `source`
