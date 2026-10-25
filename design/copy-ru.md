@@ -561,7 +561,7 @@ Every key of `backend/planner/verst_planner/resources/reasons.ru.json` (52 keys)
 | `warning.FUEL_GAP` | На участке {km} км мало заправок — заправьтесь заранее | km | Road-ahead plates / day lines, Drive warning step | На участке 40 км мало заправок — заправьтесь заранее | 53 | OK |
 | `warning.DAY_OVER_BUDGET` | День {day} получился длинным — можно убрать остановку | day | Road-ahead plates / day lines, Drive warning step | День 2 получился длинным — можно убрать остановку | 49 | R-5: key says "budget", text is about time; rename to `DAY_TOO_LONG` at the next contract version |
 | `warning.TOLLS_UNAVOIDABLE` | Без платных дорог не проехать — платный участок учтён в расчёте | — | Road-ahead plates / day lines, Drive warning step | Без платных дорог не проехать — платный участок учтён в расчёте | 63 | OK |
-| `warning.UNVERIFIED_PLACES` | Часть мест по открытым данным — не проверены | — | Road-ahead plates / day lines, Drive warning step | Часть мест по открытым данным — не проверены | 44 | OK |
+| `warning.UNVERIFIED_PLACES` | Места — из открытых данных: часы и цены уточняйте | — | **Info line, not a warning plate** (5.5 §9): under the chips with the `info` icon + «О данных», like `route_approx`; never on the Drive warning step | Часть мест по открытым данным — не проверены | 48 | **CHANGE (S3-FINAL P1-02)** — Architect: update `reasons.ru.json` |
 | `warning.STOP_CLOSED` | «{name}» в этот день закрыт — убрали из маршрута | name | Road-ahead plates / day lines, Drive warning step | «Ипатьевский монастырь» в этот день закрыт — убрали из маршрута | 78 | OK — shown as a day line on 5.5 (day-level warning) |
 
 ## 12. Engine UI strings — `strings.ru.json`
@@ -924,6 +924,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `addr_rate` | Подождите секунду и попробуйте ещё раз | if the 1 req/s bucket is empty |
 | `addr_attribution` | © OpenStreetMap | under address results (ODbL) |
 | `route_approx` | Расстояния приблизительные | Road ahead line when `approxDistances = true` |
+| `route_approx_open_data` | Расстояния приблизительные · места из открытых данных | one info line when both `approxDistances` and `UNVERIFIED_PLACES` apply; followed by the «О данных» link (S3-FINAL) |
 | `route_approx_more` | О данных | link → «О данных» |
 | `about_data_title` | О данных | screen |
 | `about_data_body` | Города и места — Wikidata (CC0). Бары и адреса — © участники OpenStreetMap (ODbL). Фото — Wikimedia Commons, у каждого своя лицензия и автор. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные. | |
