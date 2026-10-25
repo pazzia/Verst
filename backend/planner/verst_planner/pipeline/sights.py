@@ -29,6 +29,7 @@ FAR_DETOUR_KM = 10.0
 BIG_CITY_POPULATION = 1_000_000
 BIG_CITY_CENTRE_KM = 12.0  # no transit sight this close to a million-city centre
 OWN_CITY_KM = 25.0  # a big city counts as the trip's own when an origin/destination/via is this close
+SAME_SPOT_KM = 0.4  # two sights closer than this are one stop
 RELIGIOUS = frozenset({"temple", "monastery", "church"})
 RELIGIOUS_SHARE = 0.30  # of the trip's non-template sights
 RELIGIOUS_NAME = re.compile(r"(?i)\b(" + "|".join(ru.words("sight.religious_name")) + ")")
@@ -89,7 +90,8 @@ def _day_sights(day: DayPlan) -> list[PlannedStop]:
 
 
 def diversity_ok(day: DayPlan, c: Candidate, on: bool = True) -> bool:
-    """≤ 1 religious place per 3 sights of the day, and never two sights of the same kind in a row.
+    """≤ 1 religious place per 3 sights of the day, never two sights of the same kind in a row, and never a
+    second sight within `SAME_SPOT_KM` of one already in the day.
 
     `on` is the `sights.diversity` config: on for the open-data world, off for the curated fixture worlds
     (G01-G13 keep their bytes)."""
@@ -97,6 +99,8 @@ def diversity_ok(day: DayPlan, c: Candidate, on: bool = True) -> bool:
         return True
     cat = category_of(c.place)
     sights = sorted([*_day_sights(day)], key=lambda s: s.km_at)
+    if any(haversine_km(s.point, c.place.point) < SAME_SPOT_KM for s in sights):
+        return False  # one stop covers both (Красная площадь and the Mausoleum on it)
     before = [s for s in sights if s.km_at <= c.km_at]
     after = [s for s in sights if s.km_at > c.km_at]
     for nb in before[-1:] + after[:1]:

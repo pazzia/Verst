@@ -1573,7 +1573,8 @@ API v3 is additive (`mobile.API_VERSION = 3`; the contracts stay in `docs/contra
   `quality`, `fee`, `website`; OSM hours replace the default hours text.
 - **Rules (russia_v1 only):** open-data quality threshold, no sights within 12 km of a million-city centre
   unless the trip starts/ends/stays there, ≤ 1 religious per 3 sights a day, no same kind twice in a row,
-  ≤ 30 % religious per trip; МКАД/ЦКАД in the routing graph (ЦКАД tolls not priced yet).
+  ≤ 30 % religious per trip, no second sight within 0.4 km of one already in the day (Красная площадь and
+  the Mausoleum); МКАД/ЦКАД in the routing graph (ЦКАД tolls not priced yet).
 - G01–G13 are byte-identical; G14–G17 (tests/golden/cases_s4) are rule checks on the real catalogue.
 
 ### M6 answers to the Developer's S4 questions (dev/S4 @ feb8b70)
