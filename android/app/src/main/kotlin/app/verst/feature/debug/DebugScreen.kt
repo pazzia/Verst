@@ -49,6 +49,7 @@ import app.verst.core.ui.theme.DesignTokens.type as T
 fun DebugScreen(flow: VerstFlow) {
     val app = LocalContext.current.applicationContext as VerstApp
     val status by app.engine.status.collectAsState()
+    val catalogueMs by app.engine.catalogueMs.collectAsState()
     ScreenRoot(C.dash.raised) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("debug"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             val back = stringResource(R.string.common_back_to_windshield)
@@ -77,7 +78,7 @@ fun DebugScreen(flow: VerstFlow) {
                 if (flow.debugMockLocation != null) flow.locate()
             }
             // S3-R3: real Commons files on the cards (ADR-0012 §6 URLs), before the data run brings them
-            Label(stringResource(AppR.string.debug_real_photos))
+            Label(stringResource(R.string.debug_real_photos))
             Choices(listOf("0", "1"), if (flow.debugRealPhotos) "1" else "0", "debug.photos") { flow.debugRealPhotos = it == "1" }
             flow.lastHandoff?.let { (h, target) ->
                 Txt("$target · ${h.navigator ?: h.maps ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
@@ -85,7 +86,7 @@ fun DebugScreen(flow: VerstFlow) {
             Label(stringResource(R.string.debug_label_timings))
             val s = status
             Txt(
-                if (s is EngineStatus.Ready) s.info.timings.let { "python ${it.pythonStartMs} · import ${it.importMs} · worlds ${it.worldsMs} · catalogue ${it.catalogueMs} · selfcheck ${it.selfcheckMs} · total ${it.totalMs} ms" } else s.toString(),
+                if (s is EngineStatus.Ready) s.info.timings.let { "python ${it.pythonStartMs} · import ${it.importMs} · worlds ${it.worldsMs} · selfcheck ${it.selfcheckMs} · ready ${it.totalMs} · catalogue ${catalogueMs ?: "…"} ms" } else s.toString(),
                 T.body.md, C.text.secondary,
             )
             // DEV-300: «О данных» (Wikidata CC0, OSM ODbL, Commons per-file licences, approximate distances)

@@ -50,6 +50,26 @@ def _sort(cands: list[Candidate]) -> list[Candidate]:
     return sorted(cands, key=lambda c: (c.km_at, c.place.id))
 
 
+# Real catalogue (Sprint 3): the Золотое кольцо corridor held ~1 260 candidates and the trip's engineState
+# grew from 30 KB to 240 KB. Per 10 km of route only the best sights and food places are kept (by rating,
+# then detour); the fixture worlds never reach these caps, so G01-G13 are unchanged.
+THIN_BUCKET_KM = 10.0
+THIN_CAP = {PlaceType.SIGHT: 10, PlaceType.FOOD: 8}  # fixture maximum: 8 and 6
+
+
+def _thin(cands: list[Candidate], cap: int | None) -> list[Candidate]:
+    if cap is None:
+        return cands
+    by: dict[int, list[Candidate]] = {}
+    for c in cands:
+        by.setdefault(int(c.km_at // THIN_BUCKET_KM), []).append(c)
+    out: list[Candidate] = []
+    for lst in by.values():
+        lst.sort(key=lambda c: (-c.place.rating_internal, c.detour_min, c.place.id, c.km_at))
+        out.extend(lst[:cap])
+    return out
+
+
 def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corridor:
     cfg = ctx.cfg
     ck = cfg.corridor_km
@@ -111,8 +131,8 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
     return Corridor(
         route=route,
         index=index,
-        sights=_sort(buckets[PlaceType.SIGHT]),
-        food=_sort(buckets[PlaceType.FOOD]),
+        sights=_sort(_thin(buckets[PlaceType.SIGHT], THIN_CAP.get(PlaceType.SIGHT))),
+        food=_sort(_thin(buckets[PlaceType.FOOD], THIN_CAP.get(PlaceType.FOOD))),
         fuel=_sort(buckets[PlaceType.FUEL]),
         rest=_sort(buckets[PlaceType.REST]),
         lodgings=_sort(lodgings),

@@ -34,6 +34,7 @@ adb uninstall "$APP_ID" >/dev/null 2>&1 || true
 adb uninstall "$TEST_ID" >/dev/null 2>&1 || true
 adb install -r -t "$APP_APK" 2>&1 | tee "$OUT/install-app.txt"
 adb install -r -t "$TEST_APK" 2>&1 | tee "$OUT/install-test.txt"
+adb logcat -G 16M 2>/dev/null || true  # S3-R4: the 19-test main run outgrew the default ring buffer
 adb logcat -c
 
 # Cold start of the launcher activity, measured by the system (TotalTime = first frame).

@@ -52,6 +52,29 @@ def setup():
     mobile.set_clock("golden")
 
 
+def poi_id(q, near):
+    rows = json.loads(mobile.geo_search(R, q, near["lat"], near["lon"], 5, '["poi"]'))["result"]
+    return rows[0]["id"]
+
+
+def town_without_bars():
+    """A small catalogue town with no bar within 6 km (the NOT_ENOUGH_POIS example), deterministic."""
+    from verst_planner.geo.distance import haversine_km
+
+    cat = mobile._CATALOGUE[0]
+    for t in sorted(cat.towns, key=lambda t: (t.population, t.id)):
+        if t.population >= 5000 and all(haversine_km(t.point, b.point) > 6 for b in cat.bars):
+            return {"lat": t.point.lat, "lon": t.point.lon, "label": t.name}
+    raise AssertionError("no town without bars")
+
+
+def bar_in(near):
+    from verst_planner.geo.distance import haversine_km
+
+    cat = mobile._CATALOGUE[0]
+    return min(cat.bars, key=lambda b: (haversine_km(b.point, LatLon(near["lat"], near["lon"])), b.id)).id
+
+
 def trip_input(origin, destination, **extra):
     return json.dumps(
         {"origin": origin, "destination": destination, "crew": {"adults": 2}, "dailyKm": 500, **extra}
@@ -186,7 +209,7 @@ call(
     request_id="c-walk-6",
     input_json=json.dumps(
         {
-            "start": {"lat": 56.8587, "lon": 35.9176, "label": "Тверь"},
+            "start": town_without_bars(),
             "preset": "beer",
             "adultConfirmed": True,
         }
@@ -199,29 +222,6 @@ call(
     request_id="c-walk-7",
     input_json=json.dumps({"start": {"lat": 61.5, "lon": 90.0, "label": "тайга"}, "preset": "overview"}),
 )
-
-
-def poi_id(q, near):
-    rows = json.loads(mobile.geo_search(R, q, near["lat"], near["lon"], 5, '["poi"]'))["result"]
-    return rows[0]["id"]
-
-
-def town_without_bars():
-    """A small catalogue town with no bar within 6 km (the NOT_ENOUGH_POIS example), deterministic."""
-    from verst_planner.geo.distance import haversine_km
-
-    cat = mobile._CATALOGUE[0]
-    for t in sorted(cat.towns, key=lambda t: (t.population, t.id)):
-        if t.population >= 5000 and all(haversine_km(t.point, b.point) > 6 for b in cat.bars):
-            return {"lat": t.point.lat, "lon": t.point.lon, "label": t.name}
-    raise AssertionError("no town without bars")
-
-
-def bar_in(near):
-    from verst_planner.geo.distance import haversine_km
-
-    cat = mobile._CATALOGUE[0]
-    return min(cat.bars, key=lambda b: (haversine_km(b.point, LatLon(near["lat"], near["lon"])), b.id)).id
 
 
 call("poi_details-sight", "poi_details", world=R, place_id=poi_id("Эрмитаж", SPB))

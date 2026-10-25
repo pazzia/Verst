@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.assertIsEnabled
@@ -268,7 +269,9 @@ class Sprint3Test {
         assertTrue(w.stops.size >= 2)
         shot("68-walk-result")
         compose.waitUntil(10_000) { flow.walkHandoff != null }
-        compose.onNodeWithTag("walk.handoff", useUnmergedTree = true).performClick()
+        // one button, or one per part when the engine split a long walk
+        val hTag = if ((flow.walkHandoff?.parts?.size ?: 1) > 1) "walk.handoff.1" else "walk.handoff"
+        compose.onNodeWithTag(hTag, useUnmergedTree = true).performScrollTo().performClick()
         compose.waitUntil(5_000) { flow.lastHandoff != null }
         val (links, target) = flow.lastHandoff!!
         Log.i("VerstE2e", "S3-4 walk handoff $target ${links.web}")
@@ -429,5 +432,107 @@ class Sprint3Test {
         assertEquals(listOf(true, false), mine.map { it.online })
         assertEquals("Билет уже 600 ₽", mine[0].comment)
         assertEquals(sight.placeId, mine[1].placeId)
+    }
+
+    // ------------------------------------------------------------------------------------ S3-R4 real catalogue
+
+    /** R4: «Куда угодно» finds big towns across the country and a small one (offline catalogue `geo_search`). */
+    @Test
+    fun r4NavigatorFindsTownsAcrossRussia() {
+        waitTag("windshield.navi")
+        compose.onNodeWithTag("windshield.navi").performClick()
+        waitTag("navigator.to")
+        for ((i, name) in listOf("Екатеринбург", "Владивосток", "Казань", "Сочи", "Мышкин").withIndex()) {
+            compose.onNodeWithTag("navigator.to").performTextClearance()
+            compose.onNodeWithTag("navigator.to").performTextInput(name)
+            compose.waitUntil(10_000) { flow.suggestions.any { it.name == name } }
+            val row = flow.suggestions.indexOfFirst { it.name == name }
+            val s = flow.suggestions[row]
+            Log.i("VerstE2e", "R4 search «$name» → row $row ${s.kind} ${s.subtitle} pop=${s.population}")
+            assertTrue("$name is a town", s.kind == "city" || s.kind == "town")
+            waitTag("navigator.suggestion.$row")
+            if (name == "Владивосток" || name == "Мышкин") shot("90-search-${if (name == "Мышкин") "myshkin" else "vladivostok"}")
+        }
+    }
+
+    /** R4: a sight card on Золотое кольцо with a REAL catalogue photo (no debug override) and its author / licence. */
+    @Test
+    fun r4RealCatalogueCardPhotoWithCredit() {
+        assertTrue("the debug override defaults off", !flow.debugRealPhotos)
+        val stops = goldenRingRoad()
+        var loaded = 0
+        var shots = 0
+        for (s in stops.filter { it.kind == "sight" && it.placeId != null }.take(8)) {
+            compose.onNodeWithTag("road.stop.${s.id}").performScrollTo().performClick()
+            waitTag("card")
+            compose.waitUntil(30_000) { flow.card?.ui?.loading == false && (has("photo.loaded") || has("photo.error") || has("photo.none")) }
+            val img = flow.card?.ui?.details?.image
+            val state = when {
+                has("photo.loaded") -> "loaded"
+                has("photo.error") -> "error"
+                else -> "none"
+            }
+            Log.i("VerstE2e", "R4 card ${s.placeId} «${s.name}» $state author=${img?.credit?.author} licence=${img?.credit?.licence} url=${img?.card}")
+            if (state == "loaded" && img?.credit?.author != null && img.credit?.licence != null) {
+                loaded++
+                compose.onNodeWithTag("photo.credit", useUnmergedTree = true).assertExists()
+                Thread.sleep(500) // photoFadeIn
+                if (shots < 4) shot("91-card-real-${shots++}")
+            }
+            back()
+            compose.waitUntil(5_000) { flow.card == null }
+        }
+        assertTrue("≥ 1 real photo with author and licence on Золотое кольцо, got $loaded", loaded >= 1)
+    }
+
+    private fun walkIn(town: String, lat: Double, lon: Double, preset: String, shotName: String): Boolean {
+        compose.runOnUiThread {
+            while (flow.back()) Unit
+            // adults only (an 18+ preset with a child in the crew shows the «не с детьми» toast instead of the gate)
+            flow.frontAdult = true
+            for (i in flow.seats.indices) flow.seats[i] = Seat.EMPTY
+            flow.debugMockLocation = GeoPoint(town, lat, lon)
+            flow.locate()
+        }
+        compose.waitUntil(20_000) { flow.gps == GpsState.On && flow.origin.label == town }
+        waitTag("windshield.city")
+        compose.onNodeWithTag("windshield.city").performClick()
+        compose.waitUntil(20_000) { !flow.cityLoading && (flow.cityPresets?.town?.name == town || flow.cityError != null) }
+        val p = flow.cityPresets?.presets?.firstOrNull { it.preset == preset }
+        Log.i("VerstE2e", "R4 presets $town: ${flow.cityPresets?.presets?.map { "${it.preset}:${it.available}:${it.count}" }} tz=${flow.cityPresets?.town?.tz}")
+        if (p == null || !p.available) return false
+        waitTag("city.preset.$preset")
+        // the plate tap itself is covered by S3-4; here the preset is chosen through the flow (a plate half under
+        // the caption row must not decide a data journey)
+        compose.runOnUiThread { flow.selectCityPreset(preset) }
+        if (p.adultOnly) {
+            compose.waitUntil(5_000) { flow.ageGate != null || flow.toast != null }
+            Log.i("VerstE2e", "R4 age gate $town/$preset gate=${flow.ageGate} toast=${flow.toast} children=${flow.children}")
+            waitTag("agegate")
+            shot("$shotName-agegate")
+            compose.onNodeWithTag("agegate.yes", useUnmergedTree = true).performClick()
+        }
+        compose.waitUntil(5_000) { flow.cityPreset == preset }
+        compose.onNodeWithTag("city.go").performClick()
+        compose.waitUntil(30_000) { flow.top == Route.Walk }
+        waitTag("walk.total")
+        val w = flow.walk!!
+        Log.i("VerstE2e", "R4 walk $town/$preset «${w.titleRu}» ${w.walkKm} km ${w.durationMin} min ${w.stops.size} stops start=${w.startAt} tz=${w.tz} shorter=${w.shorter} stops=${w.stops.map { it.nameRu }}")
+        assertTrue("$town/$preset has stops", w.stops.size >= 2)
+        shot(shotName)
+        return true
+    }
+
+    /** R4: Казань «Обзорный», Санкт-Петербург «Музейный», «Пивной» in a town ≥ 100 k (the first that has it). */
+    @Test
+    fun r4WalksKazanSpbAndBeer() {
+        assertTrue("Казань overview", walkIn("Казань", 55.7963, 49.1088, "overview", "92-walk-kazan-overview"))
+        assertTrue("СПб museums", walkIn("Санкт-Петербург", 59.9386, 30.3141, "museums", "93-walk-spb-museums"))
+        val beer = listOf(
+            Triple("Санкт-Петербург", 59.9386, 30.3141), Triple("Москва", 55.7558, 37.6173),
+            Triple("Екатеринбург", 56.8389, 60.6057), Triple("Новосибирск", 55.0302, 82.9204), Triple("Казань", 55.7963, 49.1088),
+        ).withIndex().firstOrNull { (i, c) -> walkIn(c.first, c.second, c.third, "beer", "94-walk-beer-$i") }?.value // ASCII file names
+        Log.i("VerstE2e", "R4 beer walk in ${beer?.first}")
+        assertTrue("a «Пивной» walk in a town ≥ 100 k", beer != null)
     }
 }

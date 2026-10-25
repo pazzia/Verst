@@ -123,10 +123,8 @@ class MobileV2Test(unittest.TestCase):
         self.assertEqual(fail(mobile.city_route(R, "e1", walk(preset="beer")))["field"], "adultConfirmed")
         far = json.dumps({"start": {"lat": 61.5, "lon": 90.0}, "preset": "overview"})
         self.assertEqual(fail(mobile.city_route(R, "e2", far))["code"], "NO_CITY")
-        tver = json.dumps(
-            {"start": {"lat": 56.8587, "lon": 35.9176}, "preset": "beer", "adultConfirmed": True}
-        )
-        self.assertEqual(fail(mobile.city_route(R, "e3", tver))["code"], "NOT_ENOUGH_POIS")
+        dry = json.dumps({"start": self._town_without_bars(), "preset": "beer", "adultConfirmed": True})
+        self.assertEqual(fail(mobile.city_route(R, "e3", dry))["code"], "NOT_ENOUGH_POIS")
         self.assertEqual(fail(mobile.city_route(R, "e4", "[]"))["code"], "INVALID_INPUT")
         self.assertEqual(
             fail(mobile.city_route(R, "e5", json.dumps({"preset": "overview"})))["field"], "start"

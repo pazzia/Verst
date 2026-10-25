@@ -497,6 +497,7 @@ Engine plurals (`strings.ru.json`): `plural.day`, `plural.minute`, `plural.meal`
 | `error_unreachable` | `UNREACHABLE` | Не нашли дорогу на машине до этой точки |  |
 | `error_too_short` | `TOO_SHORT` | Слишком близко для поездки на машине |  |
 | `error_no_lodging` | `NO_LODGING` | Не нашли ночёвку с вашими условиями — показали ближайшую подходящую | = engine `warning.NO_LODGING` |
+| `road_night_prefix` | — | Ночь {n}: {text} | Road-ahead plate when more than one night has a warning: «Ночь 2: не нашли ночёвку с вашими условиями — показали ближайшую подходящую» (first letter of `{text}` lowercased after the colon); a single plate stays without the prefix (S3-QA2) |
 | `error_rate_limited` | `RATE_LIMITED` | Слишком много запросов, подождите минуту |  |
 | `error_upstream` | `UPSTREAM` | Сервис маршрутов временно недоступен |  |
 | `error_network` | (client) | Нет связи с сервером. Проверьте интернет и попробуйте ещё раз |  |
@@ -713,6 +714,7 @@ Keys for the on-device mock build (architecture-android-mvp M§9, ADR-0010). Spe
 | `debug_reset_yes` | Сбросить | |
 | `debug_reset_no` | Отмена | |
 | `debug_mock_location` | Имитация местоположения | debug panel: mock location picker (S3-QA, was pending) |
+| `debug_real_photos` | Настоящие фото Commons | debug panel toggle (S3-QA2, was pending) |
 
 ## 15. Sprint 3 — budget fit, cards, «По городу», location and addresses, hand-off
 
@@ -863,6 +865,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `walk_title` | {town}: {name} | 5.11 title sign, e.g. «Ярославль: обзорная прогулка» = engine `titleRu` |
 | `walk_heading` | Прогулка | 5.11 h1 |
 | `walk_chip_duration` | {h} ч | chips |
+| `walk_chip_duration_text` | {dur} ч | chip with pre-formatted hours: «5,5 ч», «4 ч» (decimal comma, no trailing «,0»); use instead of `walk_chip_duration` when the duration is not whole (S3-QA2) |
 | `walk_chip_km` | ≈ {km} км пешком | |
 | `walk_chip_back` | с возвратом к старту | |
 | `walk_header` | Старт {start} · финиш ≈ {finish} | above the first row |

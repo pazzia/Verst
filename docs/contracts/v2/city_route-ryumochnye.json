@@ -32,18 +32,13 @@
    "startAt": "2026-10-23T18:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T20:26",
+   "endAt": "2026-10-23T21:58",
    "tz": "Europe/Moscow",
-   "walkKm": 2.4,
-   "walkMin": 32,
-   "durationMin": 147,
+   "walkKm": 4.1,
+   "walkMin": 54,
+   "durationMin": 239,
    "requestedDurationMin": 240,
-   "shorter": {
-    "reason": "places",
-    "requestedMin": 240,
-    "actualMin": 147,
-    "messageRu": "Получилось 2 ч 30 мин вместо 4 ч — больше открытых мест рядом нет"
-   },
+   "shorter": null,
    "returnToStart": true,
    "start": {
     "lat": 57.6261,
@@ -58,17 +53,17 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "n9002",
-     "kind": "ryumochnaya",
-     "nameRu": "Рюмочная (пример) у Волги",
-     "lat": 57.629,
-     "lon": 39.896,
-     "arriveAt": "2026-10-23T18:13",
-     "departAt": "2026-10-23T18:38",
-     "dwellMin": 25,
-     "walkKmFromPrev": 1.0,
-     "walkMinFromPrev": 13,
-     "costRub": 600,
+     "poiId": "n5582314321",
+     "kind": "bar",
+     "nameRu": "Hygge",
+     "lat": 57.62576,
+     "lon": 39.88933,
+     "arriveAt": "2026-10-23T18:05",
+     "departAt": "2026-10-23T18:45",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 5,
+     "costRub": 1000,
      "hoursVerified": false,
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
@@ -76,17 +71,17 @@
     },
     {
      "id": "w02",
-     "poiId": "n9003",
-     "kind": "ryumochnaya",
-     "nameRu": "Рюмочная (пример) на Кирова",
-     "lat": 57.627,
-     "lon": 39.893,
-     "arriveAt": "2026-10-23T18:43",
-     "departAt": "2026-10-23T19:08",
-     "dwellMin": 25,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 5,
-     "costRub": 600,
+     "poiId": "n3829018962",
+     "kind": "bar",
+     "nameRu": "Коктейль",
+     "lat": 57.62593,
+     "lon": 39.88952,
+     "arriveAt": "2026-10-23T18:45",
+     "departAt": "2026-10-23T19:25",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.0,
+     "walkMinFromPrev": 0,
+     "costRub": 1000,
      "hoursVerified": false,
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
@@ -94,17 +89,17 @@
     },
     {
      "id": "w03",
-     "poiId": "n9001",
-     "kind": "ryumochnaya",
-     "nameRu": "Рюмочная (пример) на Советской",
-     "lat": 57.6262,
-     "lon": 39.889,
-     "arriveAt": "2026-10-23T19:12",
-     "departAt": "2026-10-23T19:37",
-     "dwellMin": 25,
-     "walkKmFromPrev": 0.3,
-     "walkMinFromPrev": 4,
-     "costRub": 600,
+     "poiId": "n6195063585",
+     "kind": "pub",
+     "nameRu": "Бутер BRO pub",
+     "lat": 57.62629,
+     "lon": 39.88929,
+     "arriveAt": "2026-10-23T19:26",
+     "departAt": "2026-10-23T20:06",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.1,
+     "walkMinFromPrev": 1,
+     "costRub": 1200,
      "hoursVerified": false,
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
@@ -112,17 +107,35 @@
     },
     {
      "id": "w04",
-     "poiId": "n9004",
+     "poiId": "n3691286916",
      "kind": "pub",
-     "nameRu": "Паб (пример) «Старый мост»",
-     "lat": 57.624,
-     "lon": 39.887,
-     "arriveAt": "2026-10-23T19:42",
-     "departAt": "2026-10-23T20:22",
+     "nameRu": "Пинта",
+     "lat": 57.63033,
+     "lon": 39.89056,
+     "arriveAt": "2026-10-23T20:14",
+     "departAt": "2026-10-23T20:54",
      "dwellMin": 40,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 5,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 8,
      "costRub": 1200,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w05",
+     "poiId": "n13996171990",
+     "kind": "ryumochnaya",
+     "nameRu": "Рюмочная \"Цех\"",
+     "lat": 57.63671,
+     "lon": 39.8773,
+     "arriveAt": "2026-10-23T21:11",
+     "departAt": "2026-10-23T21:36",
+     "dwellMin": 25,
+     "walkKmFromPrev": 1.4,
+     "walkMinFromPrev": 18,
+     "costRub": 600,
      "hoursVerified": false,
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
@@ -130,7 +143,7 @@
     }
    ],
    "cost": {
-    "totalRub": 3000,
+    "totalRub": 5000,
     "lines": [
      {
       "key": "tickets",
@@ -138,7 +151,7 @@
      },
      {
       "key": "drinks",
-      "rub": 3000
+      "rub": 5000
      }
     ],
     "budgetRub": null
@@ -147,10 +160,6 @@
     {
      "code": "HOURS_UNVERIFIED",
      "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
-    },
-    {
-     "code": "SHORTER_THAN_ASKED",
-     "messageRu": "Получилось 2 ч 30 мин вместо 4 ч — больше открытых мест рядом нет"
     }
    ],
    "responsibleNoteRu": "Пейте умеренно, чередуйте с водой и едой. За руль — только трезвым.",
@@ -160,20 +169,24 @@
      39.8845
     ],
     [
-     57.629,
-     39.896
+     57.62576,
+     39.88933
     ],
     [
-     57.627,
-     39.893
+     57.62593,
+     39.88952
     ],
     [
-     57.6262,
-     39.889
+     57.62629,
+     39.88929
     ],
     [
-     57.624,
-     39.887
+     57.63033,
+     39.89056
+    ],
+    [
+     57.63671,
+     39.8773
     ],
     [
      57.6261,

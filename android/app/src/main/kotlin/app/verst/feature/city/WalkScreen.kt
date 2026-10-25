@@ -189,7 +189,8 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
     Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Txt(stringResource(R.string.walk_heading), T.display, C.text.primary, Modifier.semantics { heading() })
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            InfoChip(stringResource(R.string.walk_chip_duration, (w.durationMin + 30) / 60))
+            // S3-QA2: half hours with the decimal comma («5,5 ч»), whole hours without «,0»
+            InfoChip(stringResource(R.string.walk_chip_duration_text, hours(w.durationMin)))
             InfoChip(stringResource(R.string.walk_chip_km, km(w.walkKm)))
             if (w.returnToStart) InfoChip(stringResource(R.string.walk_chip_back))
             if (w.adultOnly) {
@@ -213,7 +214,8 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         val label = if (ui.target == HandoffTarget.Maps || ui.target == HandoffTarget.MapsDryRun) stringResource(R.string.handoff_maps_walk) else stringResource(R.string.handoff_web)
         if (parts.size > 1) {
             parts.forEach { p ->
-                WideButton("$label · " + stringResource(R.string.handoff_part, p.index, parts.size), "walk.handoff.${p.index}", walker = true, onClick = { a.handoff(p.index) })
+                // the part on its own line: «Открыть Яндекс Карты в браузере» / «Часть 1 из 2» (never clipped)
+                WideButton(label, "walk.handoff.${p.index}", walker = true, height = 60.dp, sub = stringResource(R.string.handoff_part, p.index, parts.size), onClick = { a.handoff(p.index) })
             }
         } else {
             WideButton(label, "walk.handoff", walker = true, enabled = true, onClick = { a.handoff(1) })
@@ -248,8 +250,11 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
     }
 }
 
-/** Whole hours, the same rounding as the duration chip (`walk_chip_duration`), so the note and the chip agree. */
-private fun hours(min: Int): String = ((min + 30) / 60).toString()
+/** Hours to the nearest half: «4», «5,5» (the chip `walk_chip_duration_text` and the `walk_shorter` note agree). */
+private fun hours(min: Int): String {
+    val halves = (min / 30.0).roundToInt()
+    return if (halves % 2 == 0) (halves / 2).toString() else "${halves / 2},5"
+}
 
 /** One decimal below 10 km without a trailing zero («6», «5,8»); whole km from 10 (S3-QA P2-01). */
 private fun km(v: Double): String {
@@ -264,7 +269,7 @@ private fun distance(km: Double): String =
 
 /** components §22 walk button / §2 `SecondaryButton`. */
 @Composable
-private fun WideButton(text: String, tag: String, walker: Boolean = false, enabled: Boolean = true, height: Dp = 48.dp, onClick: () -> Unit) {
+private fun WideButton(text: String, tag: String, walker: Boolean = false, enabled: Boolean = true, height: Dp = 48.dp, sub: String? = null, onClick: () -> Unit) {
     val shape = RoundedCornerShape(DesignTokens.radius.r12)
     Row(
         Modifier.fillMaxWidth().height(height).clip(shape).background(C.dash.control).border(DesignTokens.stroke.w1, C.dash.outline, shape)
@@ -276,7 +281,14 @@ private fun WideButton(text: String, tag: String, walker: Boolean = false, enabl
             WalkerIcon(C.accent.yellow, 18.dp)
             Spacer(Modifier.width(8.dp))
         }
-        Txt(text, T.button.md, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
+        if (sub == null) {
+            Txt(text, T.button.md, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
+        } else {
+            androidx.compose.foundation.layout.Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Txt(text, T.button.md, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
+                Txt(sub, T.body.sm, C.text.secondary, maxLines = 1)
+            }
+        }
     }
 }
 

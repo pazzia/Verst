@@ -460,7 +460,9 @@ class ScreensScreenshotTest {
 
     @Test
     fun cardHotelArea() {
-        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-hotel.json", EngineJson::poiDetails)
+        // the placeholder state, deterministically: no URL (the runner has internet, Coil could load the real file)
+        val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-hotel.json", EngineJson::poiDetails)
+        val d = real.copy(image = real.image?.copy(card = null, thumb = null))
         val night = snapshot("G02_golden_ring").daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
         shot("card", "hotel-area") { CardOverRoad(card(d.nameRu, "hotel", "hotel", d, night.hotelOptions.first())) }
         compose.onNodeWithTag("card.fictional", useUnmergedTree = true).assertExists()
@@ -588,7 +590,10 @@ class ScreensScreenshotTest {
     fun cityPresets() {
         shot("city", "presets") { app.verst.feature.city.CityScreen(cityUi(), noCity) }
         compose.onNodeWithTag("city.preset.overview", useUnmergedTree = true).assertExists()
-        compose.onNodeWithTag("city.preset.beer", useUnmergedTree = true).assertDoesNotExist() // `available: false` is hidden
+        // `available: false` is hidden (read from the contract: the real catalogue decides which)
+        val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets).presets
+        presets.filter { !it.available }.forEach { compose.onNodeWithTag("city.preset.${it.preset}", useUnmergedTree = true).assertDoesNotExist() }
+        presets.filter { it.available }.forEach { compose.onNodeWithTag("city.preset.${it.preset}", useUnmergedTree = true).assertExists() }
     }
 
     @Test
@@ -626,7 +631,9 @@ class ScreensScreenshotTest {
         val w = v2<app.verst.core.model.dto.WalkRouteDto>(file, EngineJson::walkRoute)
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-walk.json", EngineJson::handoff)
         shot("walk", state) { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, h, HandoffTarget.Browser, saved = false, building = false), noWalk) }
-        compose.onNodeWithTag("walk.handoff", useUnmergedTree = true).assertExists()
+        // one button, or one per part when the engine split the walk (real catalogue: 2 parts)
+        val tag = if (h.parts.size > 1) "walk.handoff.1" else "walk.handoff"
+        compose.onNodeWithTag(tag, useUnmergedTree = true).assertExists()
     }
 
     @Test
@@ -644,11 +651,19 @@ class ScreensScreenshotTest {
 
     @Test
     fun walkShorterThanAsked() {
-        // S3-QA P1-02: 4 ч asked, 2,5 ч built → the note; «≈ 2,4 км» without a trailing zero rule check
-        walkShot("city_route-ryumochnye.json", "shorter")
-        compose.onNodeWithTag("walk.shorter", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("вместо", substring = true).assertExists() // the deck string uses NBSPs before «ч»
+        // S3-QA P1-02 on every walk contract: the note shows exactly when the engine says the walk is shorter
+        val files = listOf("city_route-shorter.json", "city_route-ryumochnye.json", "city_route-overview.json")
+        val walks = files.map { v2<app.verst.core.model.dto.WalkRouteDto>(it, EngineJson::walkRoute) }
+        val current = androidx.compose.runtime.mutableStateOf(walks[0])
+        compose.setContent { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(current.value, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        for ((f, w) in files.zip(walks)) {
+            compose.runOnIdle { current.value = w }
+            compose.waitForIdle()
+            val shown = compose.onAllNodes(androidx.compose.ui.test.hasTestTag("walk.shorter"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+            assertEquals(f, w.shorterThanAsked, shown)
+        }
     }
+
 
     @Test
     fun walkTomorrow() {

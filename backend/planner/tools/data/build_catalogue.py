@@ -53,7 +53,7 @@ RESOURCES = PLANNER / "verst_planner" / "resources"
 
 # Wikidata class → POI kind, in priority order (a POI with several roots takes the first listed kind).
 CLASS_KIND: tuple[tuple[str, str], ...] = (
-    ("Q12035", "kremlin"),  # kremlin
+    ("Q263274", "kremlin"),  # kremlin (run 6 re-resolved; Q12035 is a spider)
     ("Q57821", "kremlin"),  # fortification
     ("Q23413", "kremlin"),  # castle
     ("Q44613", "monastery"),  # monastery
@@ -66,7 +66,7 @@ CLASS_KIND: tuple[tuple[str, str], ...] = (
     ("Q22698", "park"),  # park
     ("Q1107656", "park"),  # garden
     ("Q6017969", "viewpoint"),  # scenic viewpoint
-    ("Q1501717", "embankment"),  # embankment / promenade
+    ("Q1851368", "embankment"),  # waterfront «набережная» (run 6; Q1501717 is an HIV trial)
     ("Q174782", "square"),  # town square
     ("Q2319498", "attraction"),  # architectural landmark
     ("Q570116", "attraction"),  # tourist attraction
@@ -159,6 +159,47 @@ def fixture_points(
 # ------------------------------------------------------------------------------------------- build
 
 
+# Run 7 took the subclasses of «город России» (547 classes) and with them villages, districts, historic
+# centres and numbered military towns. A town needs ≥ 800 people and a plain town name.
+MIN_TOWN_POPULATION = 800  # Чекалин, the smallest town, has ~900
+MAX_TOWN_WORDS = 3
+NOT_A_TOWN = re.compile(
+    r"[()«»]|район|километр|-\d|^\d|^[a-zа-яё]|^(Деревня|Село|Посёлок|Поселок|Станица|Хутор|Курорт)\b"
+)
+
+
+def is_town(t: dict[str, Any]) -> bool:
+    name = str(t.get("name") or "")
+    return (
+        int(t.get("population") or 0) >= MIN_TOWN_POPULATION
+        and len(name.split()) <= MAX_TOWN_WORDS
+        and NOT_A_TOWN.search(name) is None
+    )
+
+
+EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+URL = re.compile(r"(https?://|www\.)\S+", re.I)
+
+
+def clean_author(author: str) -> str | None:
+    """Commons «Artist» without markup, e-mail addresses (run 3: «…@yandex.ru») and URLs."""
+    text = re.sub(r"<[^>]+>", "", author)
+    text = URL.sub("", EMAIL.sub("", text))
+    text = re.sub(r"\s+", " ", re.sub(r"\(\s*\)|\[\s*\]", "", text)).strip(" ,;:-–—")
+    return text[:AUTHOR_MAX] or None
+
+
+TRAILING_PAREN = re.compile(r"\s*\(([^()]*)\)$")
+
+
+def poi_name(name: str, town: str) -> str:
+    """«Площадь Свободы (Казань)» → «Площадь Свободы» in Казань (the Wikidata disambiguation suffix)."""
+    m = TRAILING_PAREN.search(name)
+    if m and norm(m.group(1)) == norm(town) and m.start() > 0:
+        return name[: m.start()]
+    return name
+
+
 def poi_kind(roots: Iterable[str]) -> str | None:
     have = set(roots)
     for q, kind in CLASS_KIND:
@@ -198,13 +239,15 @@ def build(
     forms = load_json(raw_dir / "forms.json", {})
     sources = load_json(raw_dir / "sources.json", {})
 
-    # ---- towns: dedupe by qid (largest population wins), ISO 3166-2:RU regions only
+    # ---- towns: dedupe by qid (largest population wins), ISO 3166-2:RU regions only, real towns only
+    region_fix = {name: code for name, code in read_tsv(HERE / "region_overrides.tsv")}
     by_qid: dict[str, dict[str, Any]] = {}
     region_names: dict[str, str] = {}
     for t in raw_towns:
-        code = t.get("regionIso")
-        if code not in tz or not t.get("name"):
+        code = t.get("regionIso") or region_fix.get(t.get("name") or "")
+        if code not in tz or not t.get("name") or not is_town(t):
             continue
+        t = {**t, "regionIso": code}
         region_names.setdefault(code, t.get("regionName") or code)
         old = by_qid.get(t["qid"])
         if old is None or (t.get("population") or 0) > (old.get("population") or 0):
@@ -261,7 +304,7 @@ def build(
             return None, None
         author = c.get("author")
         if author:
-            author = re.sub(r"<[^>]+>", "", author).strip()[:AUTHOR_MAX] or None
+            author = clean_author(author)
         key = (author, c.get("licence"), c.get("url"))
         if key not in credit_idx:
             credit_idx[key] = len(credit_list)
@@ -328,7 +371,7 @@ def build(
             poi_rows.append(
                 {
                     "id": r["qid"],
-                    "name": r["name"],
+                    "name": poi_name(r["name"], town["name"]),
                     "desc": desc[:DESC_MAX] if desc else None,
                     "kind": POI_KINDS.index(r["_kind"]),
                     "lat": to_coord(r["lat"]),

@@ -32,7 +32,7 @@ EXPECT: dict[str, tuple[str, ...]] = {
     "Q7930989": ("city", "town"),
     "Q183342": ("federal",),
     "Q159": ("russia",),
-    "Q12035": ("kremlin",),
+    "Q263274": ("kremlin",),
     "Q57821": ("fortification", "fortress"),
     "Q23413": ("castle",),
     "Q44613": ("monastery",),
@@ -45,13 +45,62 @@ EXPECT: dict[str, tuple[str, ...]] = {
     "Q22698": ("park",),
     "Q1107656": ("garden",),
     "Q6017969": ("viewpoint", "scenic", "lookout"),
-    "Q1501717": ("embankment", "promenade", "quay"),
+    "Q1851368": ("waterfront", "embankment", "promenade", "quay"),
     "Q174782": ("square",),
     "Q2319498": ("landmark",),
     "Q570116": ("tourist attraction", "attraction"),
 }
+# Russian labels to re-resolve a class whose id fails the check (run 3: Q12035 is a spider, Q1501717 an HIV
+# trial): the class with this ru label that has the most instances in Russia (`resolve_query`).
+RU_LABEL: dict[str, str] = {
+    "Q263274": "кремль",
+    "Q57821": "фортификационное сооружение",
+    "Q23413": "замок",
+    "Q44613": "монастырь",
+    "Q33506": "музей",
+    "Q16970": "церковь",
+    "Q2977": "собор",
+    "Q4989906": "памятник",
+    "Q5003624": "мемориал",
+    "Q179700": "статуя",
+    "Q22698": "парк",
+    "Q1107656": "сад",
+    "Q6017969": "смотровая площадка",
+    "Q1851368": "набережная",
+    "Q174782": "площадь",
+    "Q2319498": "достопримечательность",
+    "Q570116": "туристическая достопримечательность",
+}
 RADIUS_KM = ((1_000_000, 10.0), (100_000, 6.0), (20_000, 4.0), (0, 2.0))
 CAPITALS = {"Москва": 15.0, "Санкт-Петербург": 15.0}
+# Run 3 had 1 058 towns but no Екатеринбург, Челябинск or Владивосток (their P31 is a subclass of «город
+# России», hence the subclasses in Q_SUBCLASSES); the towns step now fails when one of these is missing.
+MUST_HAVE = (
+    "Москва",
+    "Санкт-Петербург",
+    "Новосибирск",
+    "Екатеринбург",
+    "Казань",
+    "Нижний Новгород",
+    "Челябинск",
+    "Красноярск",
+    "Самара",
+    "Уфа",
+    "Ростов-на-Дону",
+    "Омск",
+    "Краснодар",
+    "Воронеж",
+    "Пермь",
+    "Волгоград",
+    "Владивосток",
+    "Ярославль",
+    "Калининград",
+    "Иркутск",
+    "Хабаровск",
+    "Мурманск",
+    "Суздаль",
+    "Сочи",
+)
 POINT = re.compile(r"Point\(([-0-9.eE]+) ([-0-9.eE]+)\)")
 
 
@@ -89,6 +138,30 @@ def class_check(bindings: list[dict[str, Any]]) -> dict[str, Any]:
         if not any(k in labels.get(q, "").lower() for k in keys)
     }
     return {"labels": labels, "mismatches": bad, "ok": not bad}
+
+
+def pick_resolved(bindings: list[dict[str, Any]]) -> str | None:
+    """The class with the most Russian instances among the label matches (ties: the smaller id)."""
+    best: tuple[int, str] | None = None
+    for b in bindings:
+        q = qid(val(b, "c") or "")
+        n = int(val(b, "n") or 0)
+        if q and n > 0 and (best is None or (-n, q) < (-best[0], best[1])):
+            best = (n, q)
+    return best[1] if best else None
+
+
+def resolve_classes(report: dict[str, Any], query: Any) -> dict[str, str]:
+    """{wrong id: resolved id} for the mismatches that have a ru label; `query(sparql) -> bindings`."""
+    out = {}
+    for q in sorted(report["mismatches"]):
+        label = RU_LABEL.get(q)
+        if label is None:
+            continue
+        got = pick_resolved(query(Q_RESOLVE.format(label=label)))
+        if got is not None and got != q:
+            out[q] = got
+    return out
 
 
 def towns_from_bindings(bindings: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -172,6 +245,11 @@ def pois_from_bindings(bindings: list[dict[str, Any]], town_qid: str) -> list[di
     return sorted(acc.values(), key=lambda p: p["qid"])
 
 
+def missing_towns(towns: list[dict[str, Any]]) -> list[str]:
+    names = {t["name"] for t in towns}
+    return [n for n in MUST_HAVE if n not in names]
+
+
 def radius_for(t: dict[str, Any]) -> float:
     if t["name"] in CAPITALS:
         return CAPITALS[t["name"]]
@@ -181,6 +259,14 @@ def radius_for(t: dict[str, Any]) -> float:
 # ------------------------------------------------------------------------------------------- queries
 
 Q_CLASSES = """SELECT ?c ?label WHERE {{ VALUES ?c {{ {ids} }} ?c rdfs:label ?label . FILTER(LANG(?label) = "en") }}"""
+
+Q_RESOLVE = """SELECT ?c (COUNT(DISTINCT ?i) AS ?n) WHERE {{
+  ?c rdfs:label "{label}"@ru .
+  ?i wdt:P31 ?c ; wdt:P17 wd:Q159 .
+}} GROUP BY ?c ORDER BY DESC(?n) LIMIT 5"""
+
+# Run 6: `wdt:P31/wdt:P279*` inside the towns query timed out (504); the subclasses come first, then VALUES.
+Q_SUBCLASSES = """SELECT DISTINCT ?c WHERE {{ VALUES ?root {{ {roots} }} ?c wdt:P279* ?root . }}"""
 
 Q_TOWNS = """SELECT ?town ?townLabel ?coord ?pop ?popDate ?iso ?regionLabel ?image WHERE {{
   VALUES ?cls {{ {classes} }}
@@ -218,24 +304,42 @@ def main(argv: list[str]) -> int:
     if cmd == "classes":
         ids = " ".join(f"wd:{q}" for q in EXPECT)
         report = class_check(sparql(Q_CLASSES.format(ids=ids), pacer))
+        resolved = resolve_classes(report, lambda q: sparql(q, pacer)) if not report["ok"] else {}
+        if resolved:
+            labels = sparql(Q_CLASSES.format(ids=" ".join(f"wd:{q}" for q in resolved.values())), pacer)
+            report["resolvedLabels"] = class_check(labels)["labels"]
+        report["resolved"] = resolved
+        report["unresolved"] = sorted(set(report["mismatches"]) - set(resolved))
         (out / "class_check.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), "utf-8")
-        print(json.dumps(report["mismatches"], ensure_ascii=False))
-        return 0 if report["ok"] else 2
+        (out / "classes_resolved.json").write_text(json.dumps(resolved, indent=1), "utf-8")
+        print(json.dumps({"mismatches": report["mismatches"], "resolved": resolved}, ensure_ascii=False))
+        # Green when every wrong id was re-resolved (the POIs use the resolved ids; copy them into CLASS_KIND
+        # and EXPECT afterwards); the run fails at the end (data.yml) only for unresolved ids.
+        return 0 if not report["unresolved"] else 2
     if cmd == "towns":
-        q = Q_TOWNS.format(classes=" ".join(f"wd:{c}" for c in TOWN_CLASSES), country=COUNTRY)
+        subs = sparql(Q_SUBCLASSES.format(roots=" ".join(f"wd:{c}" for c in TOWN_CLASSES)), pacer)
+        classes = sorted({qid(val(b, "c") or "") for b in subs} | set(TOWN_CLASSES))
+        print(f"town classes: {len(classes)}", flush=True)
+        q = Q_TOWNS.format(classes=" ".join(f"wd:{c}" for c in classes if c), country=COUNTRY)
         towns = towns_from_bindings(sparql(q, pacer))
         (out / "towns.json").write_text(json.dumps(towns, ensure_ascii=False), "utf-8")
-        print(f"towns: {len(towns)}")
-        return 0
+        missing = missing_towns(towns)
+        print(f"towns: {len(towns)}; missing must-have: {missing}")
+        return 0 if not missing else 4
     if cmd == "pois":
         towns = json.loads((out / "towns.json").read_text("utf-8"))
-        roots = " ".join(f"wd:{q}" for q in CLASS_IDS)
+        resolved_path = out / "classes_resolved.json"
+        resolved = json.loads(resolved_path.read_text("utf-8")) if resolved_path.exists() else {}
+        back = {new: old for old, new in resolved.items()}
+        roots = " ".join(f"wd:{resolved.get(q, q)}" for q in CLASS_IDS)
         pois: list[dict[str, Any]] = []
         failed = []
         for i, t in enumerate(sorted(towns, key=lambda t: -(t.get("population") or 0))):
             q = Q_POIS.format(lat=t["lat"], lon=t["lon"], radius=radius_for(t), roots=roots)
             try:
-                pois += pois_from_bindings(sparql(q, pacer), t["qid"])
+                for p in pois_from_bindings(sparql(q, pacer), t["qid"]):
+                    p["roots"] = sorted({back.get(r, r) for r in p["roots"]})  # canonical CLASS_KIND ids
+                    pois.append(p)
             except Exception as e:  # one town must not sink the run; reported in sources.json
                 failed.append({"qid": t["qid"], "name": t["name"], "error": repr(e)[:200]})
             if i % 50 == 0:

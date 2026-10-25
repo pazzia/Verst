@@ -71,7 +71,9 @@ def summary(results: dict[int, list[tuple[str, bool, str]]], total_images: int) 
         "rates": rates,
         "threshold": THRESHOLD,
         "ok": rates.get(str(CARD_WIDTH), 1.0) >= THRESHOLD,
-        "failures": {str(w): [{"file": f, "status": s} for f, ok, s in r if not ok] for w, r in results.items()},
+        "failures": {
+            str(w): [{"file": f, "status": s} for f, ok, s in r if not ok] for w, r in results.items()
+        },
     }
 
 

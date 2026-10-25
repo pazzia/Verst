@@ -418,6 +418,7 @@
     <string name="error_unreachable">Не нашли дорогу на машине до этой точки</string>
     <string name="error_too_short">Слишком близко для поездки на машине</string>
     <string name="error_no_lodging">Не нашли ночёвку с вашими условиями — показали ближайшую подходящую</string>
+    <string name="road_night_prefix">Ночь %1$d: %2$s</string>
     <string name="error_rate_limited">Слишком много запросов, подождите минуту</string>
     <string name="error_upstream">Сервис маршрутов временно недоступен</string>
     <string name="error_network">Нет связи с сервером. Проверьте интернет и попробуйте ещё раз</string>
@@ -459,6 +460,7 @@
     <string name="debug_reset_yes">Сбросить</string>
     <string name="debug_reset_no">Отмена</string>
     <string name="debug_mock_location">Имитация местоположения</string>
+    <string name="debug_real_photos">Настоящие фото Commons</string>
     <string name="budget_nofit_title">Не помещается в бюджет</string>
     <string name="budget_nofit_sign">%1$s ₽</string>
     <string name="budget_nofit_min">Даже самый экономный вариант — ≈ %1$s ₽</string>
@@ -591,6 +593,7 @@
     <string name="walk_title">%1$s: %2$s</string>
     <string name="walk_heading">Прогулка</string>
     <string name="walk_chip_duration">%1$d ч</string>
+    <string name="walk_chip_duration_text">%1$s ч</string>
     <string name="walk_chip_km">≈ %1$s км пешком</string>
     <string name="walk_chip_back">с возвратом к старту</string>
     <string name="walk_header">Старт %1$s · финиш ≈ %2$s</string>

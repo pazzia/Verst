@@ -81,6 +81,20 @@ fun containFor(w: Int, h: Int, hasAlpha: Boolean): Boolean {
     return w < 320 || h < 200 || aspect < 0.45f || aspect > 3.2f || hasAlpha
 }
 
+/** True when the bitmap really has see-through pixels: a 9 × 9 grid plus the edges is sampled (cheap). */
+internal fun transparent(b: android.graphics.Bitmap): Boolean {
+    if (!b.hasAlpha()) return false
+    val w = b.width
+    val h = b.height
+    if (w <= 0 || h <= 0) return false
+    for (i in 0..8) for (j in 0..8) {
+        val x = ((w - 1) * i) / 8
+        val y = ((h - 1) * j) / 8
+        if (android.graphics.Color.alpha(b.getPixel(x, y)) < 250) return true
+    }
+    return false
+}
+
 /**
  * components §18 `PhotoFrame`: fixed 3 : 2, radius 12, mat fill, hairline over the image; crop (portrait keeps the
  * top, bias −0.35) or contain on the mat; the credit line on the scrim (crop) or under the frame (contain /
@@ -119,7 +133,8 @@ fun PhotoFrame(
             val bmp = (d as? BitmapDrawable)?.bitmap
             val w = d.intrinsicWidth
             val h = d.intrinsicHeight
-            PhotoState.Loaded(painter, containFor(w, h, bmp?.hasAlpha() == true), h.toFloat() / w.coerceAtLeast(1) > 1.05f)
+            // an alpha channel is not transparency: opaque PNG collages crop like photos (S3-R4, real catalogue)
+            PhotoState.Loaded(painter, containFor(w, h, bmp?.let { transparent(it) } == true), h.toFloat() / w.coerceAtLeast(1) > 1.05f)
         }
         is AsyncImagePainter.State.Error -> if (offline) PhotoState.Offline else PhotoState.Error
         else -> PhotoState.Loading

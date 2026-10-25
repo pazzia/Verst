@@ -1407,3 +1407,74 @@ specs; `tools/sync_design_tokens.py` run: `color.overlay.returnFlash`, `motion.r
   Example.jpg, the flag as a hotel area photo).
 - Ask for the Designer: the Пермь synthetic route shows three identical «Не нашли ночёвку…» plates (one per
   night). A day prefix (a key such as `road_warning_day` «Ночь {n}: …») would tell them apart.
+## ARCH-302 — real catalogue (M3)
+- `verst_planner/resources/catalogue_*.json.gz` = `wd-20261025-r7.1`: **1 114 towns, 11 817 POIs (9 608 with a
+  photo), 3 284 bars**, 0.67 MB. It replaces the sample, so `russia_v1` (the app's `DefaultWorld`) is the real
+  country now. G01–G13 run on the fixture worlds and are unchanged.
+- Contracts v2 were regenerated from the real data (ids are Wikidata Q-ids / OSM `n…`/`w…`). On `russia_v1`
+  the CEO case gives 26 300 ₽ (fits; G13 on the fixture world stays 27 400 ₽).
+- Every `town` object carries `tz`; `city_presets` gives `now`, `startAt` and `startsTomorrow` (S3-QA above).
+- Photo URLs: 50/50 resolve at 800/400 px in CI. Expect real photos on cards; the placeholder states remain for
+  the ~19 % of POIs without a P18 image and for offline use.
+- Rebuilding: `data.yml` (push to `data-request`) → `bot/data-<n>` (catalogue + report) and `bot/raw-<n>` (raw
+  responses). The builder is rerunnable in the sandbox from `bot/raw-<n>` (see ADR-0012 As-built).
+- Timings (sandbox desktop): engine import 133 ms, `load_catalogue` 206 ms, plan Москва → Екатеринбург 557 ms,
+  СПб → Сочи 406 ms, `city_route` 4 h in Казань 63 ms, `geo_search` 2 ms. A phone is about 5× slower.
+
+## S3-R4 — Sprint 3, round R4 (branch dev/S3-R4 from main 6c071d5)
+Inputs merged:
+- arch/sprint-3 @ 0539a1e: the real catalogue wd-20261025-r7.1 (1 114 towns, 11 817 POIs, 9 608 with Commons
+  photos, 3 284 bars), with the v2 contracts regenerated. Backend, contracts and data.yml are taken exactly as the
+  Architect's tree; backend `make check`: 408 tests OK.
+- des/S3-QA2 @ 9f92c56: `walk_chip_duration_text`, `road_night_prefix`, `debug_real_photos`.
+  `strings_pending_copy.xml` is now empty.
+
+### Copy
+- Walk chip «3,5 ч», and the `walk_shorter` note in the same half-hour format.
+- «Ночь N: не нашли …» when more than one night has a NO_LODGING plate. The substitute from the night's note
+  stays as the plate's second line.
+
+### Real catalogue fixes
+- The walk / preset screenshot tests read availability and the hand-off part count from the contracts. The real
+  Ярославль walk is split into 2 parts, and «По рюмочным» is unavailable there now.
+- The shorter-walk shot checks every walk contract against the engine's `shorter`.
+- PhotoFrame: «contain» now needs real transparency (a 9 × 9 pixel sample), not just an alpha channel. The opaque
+  PNG collage of Ярославль (the hotel area photo) now crops like every other photo.
+- Walk part buttons: «Открыть Яндекс Карты в браузере» on line 1 and «Часть 1 из 2» on line 2 (was clipped).
+
+### Startup (S3-R4)
+- Run 70, catalogue at boot: «ready» took 3.7 s in the startup test and 7.6 s on the first launch after install
+  (Python 1.8 s, import 3.2 s, catalogue 2.0 s).
+- Over the 3 s line, so the engine now reports «ready» after the fixture worlds + self-check. The catalogue and
+  a second self-check (for its time zones) load right after on the `verst-python` thread. Every engine call is a
+  suspending call on that one thread, so the first answers queue behind the catalogue and the Windshield shows
+  its shimmer meanwhile.
+- Run 71 (emulator):
+
+  | Launch | Ready | Catalogue (background) |
+  | --- | --- | --- |
+  | First after install | 4.2 s (Python extraction alone 3.0 s) | 0.6 s |
+  | Startup test | 2.8 s | 1.4 s |
+  | Later boots | 0.8–1.8 s | 0.5–0.9 s |
+
+  Plan Золотое кольцо took 4.0 s, a walk 0.25 s and the CEO plan 4.2 s.
+- `EngineStartupTest` records `readyMs` and `catalogueMs`, and asserts ready ≤ 5 s and catalogue ≤ 3 s.
+
+### Journeys on the real catalogue (e2e)
+- S3-1: the CEO case is 26 300 ₽ (fits).
+- R4 search (`geo_search`, offline): Екатеринбург, Владивосток, Казань, Сочи and Мышкин (pop. 5 647) are all
+  the first row.
+- R4 cards: real catalogue photos with author and licence, debug override off. 6 of 7 Golden Ring sights loaded;
+  Музей шоколада has no photo, so it shows «Фото пока нет».
+- R4 walks:
+  - Казань «Обзорный»: 5.7 km, 10 stops, free.
+  - СПб «Музейный»: Эрмитаж, Кунсткамера, Меншиковский дворец, 6 ч.
+  - СПб «Пивной»: 18+ gate, 18:00, shorter 3,5 ч of 4.
+- The walk journeys choose presets through the flow with an adults-only crew. The plate tap is covered by S3-4.
+- logcat ring 16 MB: the 19-test main run outgrew the default buffer and hid one failure's logs.
+
+### Asks
+- Architect:
+  - Commons `author` fields can be whole sentences («This photo was taken by Anton Zelenov. Please credit
+    this…»); the credit line ellipsizes them. A cleanup in the data build would help.
+  - The СПб «Музейный» walk is 3 stops in 6 h, which is plausible (long dwells), for a look.

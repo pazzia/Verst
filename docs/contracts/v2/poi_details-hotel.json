@@ -18,10 +18,14 @@
    "lat": 57.631526230397746,
    "lon": 39.904632398365415,
    "image": {
-    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Yaroslavl_Strelka.jpg?width=800",
-    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Yaroslavl_Strelka.jpg?width=400",
-    "page": "https://commons.wikimedia.org/wiki/File:Yaroslavl_Strelka.jpg",
-    "credit": null,
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Yarolslav_colage.png?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Yarolslav_colage.png?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:Yarolslav_colage.png",
+    "credit": {
+     "author": "User:Veinarde, User:Gnesener1900, User:PetarM, User:Monedula",
+     "licence": "CC BY 3.0",
+     "licenceUrl": "https://creativecommons.org/licenses/by/3.0"
+    },
     "isArea": true,
     "labelRu": "Фото района: Ярославль · Wikimedia Commons"
    },

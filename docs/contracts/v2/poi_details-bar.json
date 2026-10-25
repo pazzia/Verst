@@ -3,23 +3,23 @@
   "function": "poi_details",
   "args": {
    "world": "russia_v1",
-   "place_id": "n9001"
+   "place_id": "n4173420817"
   }
  },
  "response": {
   "ok": true,
   "result": {
-   "id": "n9001",
+   "id": "n4173420817",
    "kind": "bar",
-   "poiKind": "ryumochnaya",
-   "nameRu": "Рюмочная (пример) на Советской",
+   "poiKind": "bar",
+   "nameRu": "Rocks",
    "descriptionRu": null,
    "townName": "Ярославль",
-   "lat": 57.6262,
-   "lon": 39.889,
+   "lat": 57.62637,
+   "lon": 39.88885,
    "image": null,
    "hours": {
-    "textRu": "Mo-Su 12:00-24:00",
+    "textRu": "Часы работы уточняйте",
     "verified": false
    },
    "ticket": null,
