@@ -1012,7 +1012,26 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `road_amenity_playground` | детская площадка | |
 | `road_break_title` | Перерыв {min} мин | the fallback break (ADR-0015 §5), at most one per day with a note |
 | `road_break_note` | Остановитесь, где удобно: размяться и сменить водителя | only on the first break of the day; later breaks have no note |
-| `road_parking_paid` | ≈ {rate} ₽/ч · ≈ {amount} ₽ за стоянку | `P` line under a stop; `{amount}` = engine `parking.rub` |
+| `road_parking_plate_paid` | ≈ {amount} ₽ | supplementary plate under the «P» sign; `{amount}` = engine `parking.rub` |
+| `road_parking_plate_free` | бесплатно | |
+| `road_parking_plate_unknown` | ? | `parking: null` |
+| `road_parking_detail` | парковка · {detail} | text line after the note |
+| `road_parking_zone` | {zone} · ≈ {rate} ₽/ч × {h} ч | `{zone}` = engine zone name, default `road_parking_zone_default` |
+| `road_parking_zone_default` | платная зона | |
+| `road_parking_unknown` | нет данных — уточните на месте | |
+| `road_parking_day` | ≈ {amount} ₽ | day header, after a small «P» |
+| `road_parking_day_unknown` | ≈ {amount} ₽ + ? | some stops of the day without data |
+| `cd_road_parking_day` | Парковки за день: примерно {amount} рублей | add `cd_road_parking_day_unknown` when needed |
+| `cd_road_parking_day_unknown` | и {k} без данных | |
+| `road_footer_parking` | из них парковки | footer right block; the amount below it |
+| `road_parking_sheet_label` | ПАРКОВКА | `ParkingSheet` |
+| `road_parking_row_rate` | Тариф | |
+| `road_parking_row_stay` | Стоим | |
+| `road_parking_row_sunday` | Воскресенье | |
+| `road_parking_row_where` | Где | |
+| `road_parking_note` | ≈ — цена примерная. Сумма уже в путевом листе и в бюджете. | big cities add the engine note («тарифы в центре меняются в течение дня») |
+| `road_parking_ok` | Понятно | |
+| `road_parking_paid` | ≈ {rate} ₽/ч · ≈ {amount} ₽ за стоянку | card fact / TalkBack long form |
 | `road_parking_free` | бесплатно рядом | `source = free` |
 | `road_parking_free_entrance` | бесплатно у входа | OSM parking with `fee=no` ≤ 100 m |
 | `road_parking_hotel` | у гостиницы · бесплатно | hotel fact, not a cost |
@@ -1025,7 +1044,7 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | Key | Text | Notes |
 | --- | --- | --- |
 | `waybill_parking` | Парковки | line title, `P` sign before it |
-| `waybill_parking_formula` | стоянок: {k} · ≈ {dur} · {towns} | engine `formula` wins when present |
+| `waybill_parking_formula` | платных стоянок: {k} · ≈ {dur} · {towns} | engine `formula` wins when present; `{towns}` «5 городов» or the names when ≤ 2 |
 | `waybill_parking_unknown` | + ещё {k} без данных | after the formula when `unknownCount > 0` |
 | `waybill_parking_row` | {place}, {h} ч × {rate} | breakdown row (expanded) |
 | `waybill_parking_note` | Ночёвки и бесплатные стоянки — 0 ₽. Тарифы средние по городу. | under the breakdown |

@@ -21,11 +21,12 @@ a{color:#FFD23F}a:hover{color:#FFE27A}
 button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
 </style>
 </helmet>
-<!-- Sprint 4 · 5.5 Road ahead (design/screens/5.5-road-ahead.md §10). Preset «Весело и познавательно», crew 2 взр · 1 реб · пёс.
+<!-- Sprint 4 · 5.5 Road ahead (design/screens/5.5-road-ahead.md §10; parking per §10.6 after the CEO review). Every stop where the car
+     is left has a «P» road sign with a cost plate (≈ 300 ₽ / бесплатно / ?) under its stop sign; tap a P sign → S4-Road-Parking. Preset «Весело и познавательно», crew 2 взр · 1 реб · пёс.
      New: «Вести в навигаторе» (whole trip) and «Вести: день N» (→ S4-Handoff), the odometer tag under each sign (km from the start),
      the category tag, parking lines «P …», stretch stops at interesting places instead of bare roadside stops, a rest row with
      what is actually there, and the subtle «open data» mark (dotted ring after the tag) instead of «не проверено» text. -->
-<div style="width: 390px; height: 2760px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+<div style="width: 390px; height: 3260px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
   <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 132px; overflow: hidden">
     <div style="position: absolute; inset: 0 0 auto 0; height: 50px; background: #2B2850"></div>
     <div style="position: absolute; left: 0; right: 0; top: 50px; height: 34px; background: #8E4A6B"></div>
@@ -73,7 +74,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
         <div>
           <div style="margin: 6px 16px 10px 72px; display: flex; align-items: center; gap: 8px">
             <span style="font-weight: 700; font-size: 15px; color: #FFD23F">{{d.name}}</span>
-            <span style="flex: 1; font-size: 12px; color: #8C8C93">{{d.meta}}</span>
+            <span style="flex: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; color: #8C8C93">{{d.meta}}</span><span style="display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #B9C6D3"><span aria-hidden="true" style="width: 16px; height: 16px; border-radius: 3px; background: #1E4FA3; color: #F4F4F0; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center">P</span>{{d.park}}</span></span>
             <a href="S4-Handoff.dc.html" aria-label="Вести в навигаторе: {{d.name}}" style="min-height: 36px; padding: 0 10px; border-radius: 18px; border: 1px solid #FFD23F; color: #FFD23F; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 5px; text-decoration: none"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="#FFD23F"><path d="M3 11l18-8-8 18-2-8z"></path></svg>вести</a>
           </div>
           <sc-for list="{{d.rows}}" as="r" hint-placeholder-count="4">
@@ -104,6 +105,10 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
                   </span>
                 </sc-if>
                 <span style="{{r.odoStyle}}">{{r.odo}}</span>
+                <a href="S4-Road-Parking.dc.html" aria-label="{{r.pCd}}" style="{{r.pWrap}}">
+                  <span style="width: 32px; height: 32px; box-sizing: border-box; border-radius: 4px; background: #1E4FA3; padding: 2px; display: block"><span style="width: 100%; height: 100%; box-sizing: border-box; border: 1.5px solid #F4F4F0; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: #F4F4F0; font-weight: 700; font-size: 20px; line-height: 1">P</span></span>
+                  <span style="{{r.pPlate}}">{{r.pCost}}</span>
+                </a>
               </div>
               <div style="min-width: 0; padding-left: 4px; display: flex; flex-direction: column; gap: 3px">
                 <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #8C8C93">
@@ -116,7 +121,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
                 </div>
                 <div style="font-size: 13px; line-height: 1.4; color: #C4C4CA">{{r.note}}</div>
                 <div style="{{r.amenStyle}}">{{r.amen}}</div>
-                <div style="{{r.parkStyle}}"><span aria-hidden="true" style="width: 18px; height: 18px; border-radius: 3px; background: #1E4FA3; color: #F4F4F0; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">P</span><span>{{r.park}}</span></div>
+                <div style="{{r.parkStyle}}">{{r.park}}</div>
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px">
                   <span style="font-weight: 600; font-size: 13px; color: #FFD23F">{{r.cost}}</span>
                   <sc-if value="{{r.isHotel}}" hint-placeholder-val="{{false}}">
@@ -137,13 +142,14 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
   <a href="S4-Waybill.dc.html" style="position: absolute; left: 16px; right: 16px; bottom: 24px; height: 64px; border-radius: 12px; background: #F4F4F0; color: #141416; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; text-decoration: none">
     <span style="display: flex; flex-direction: column">
       <span style="display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #55565C">ПУТЕВОЙ ЛИСТ · <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#55565C" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>В БЮДЖЕТЕ</span>
-      <span style="font-weight: 700; font-size: 22px">≈ 32 100 ₽</span>
+      <span style="font-weight: 700; font-size: 22px">≈ 32 700 ₽</span>
     </span>
+    <span style="margin-left: auto; margin-right: 10px; display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; font-weight: 600; color: #55565C; text-align: right"><span style="display: flex; align-items: center; gap: 4px"><span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 2px; background: #1E4FA3; color: #F4F4F0; font-weight: 700; font-size: 10px; display: flex; align-items: center; justify-content: center">P</span>из них парковки</span><span style="font-size: 14px; color: #141416">≈ 1 620 ₽</span></span>
     <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M13 5l7 7-7 7"></path></svg>
   </a>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2760}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":3260}}'>
 class Component extends DCLogic {
   renderVals() {
     const n = '\u00a0', t = '\u202f', hide = 'display:none';
@@ -167,30 +173,38 @@ class Component extends DCLogic {
         odo: o.odo + n + 'км', odoStyle: 'min-width:50px;height:20px;padding:0 4px;box-sizing:border-box;border-radius:3px;background:#000;border:1px solid #3A3A42;color:#F4F4F0;font-family:IBM Plex Mono,monospace;font-weight:600;font-size:11px;display:flex;align-items:center;justify-content:center;letter-spacing:.02em',
         tags: o.tags || [], tagRow: (o.tags || []).length ? 'display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:1px 0' : hide,
         unv: o.unv ? 'width:12px;height:12px;border-radius:50%;border:1.5px dotted #8C8C93;box-sizing:border-box;display:inline-block' : hide,
-        park: o.park || '', parkStyle: o.park ? 'display:flex;align-items:center;gap:6px;font-size:13px;color:#B9C6D3' : hide,
+        park: o.p ? 'парковка · ' + o.p[2] : '', parkStyle: o.p ? 'font-size:13px;color:#B9C6D3' : hide,
+        pWrap: o.p ? 'display:flex;flex-direction:column;align-items:center;gap:0;text-decoration:none' : hide,
+        pCost: o.p ? o.p[1] : '',
+        pPlate: o.p ? 'margin-top:-1px;min-width:44px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:2px;background:#F4F4F0;border:1.5px solid #141416;color:' + (o.p[0] === 'unknown' ? '#55565C' : '#141416') + ';font-weight:700;font-size:' + (o.p[1].length > 7 ? 10 : 11) + 'px;display:flex;align-items:center;justify-content:center;white-space:nowrap' : hide,
+        pCd: o.p ? 'Парковка: ' + (o.p[0] === 'paid' ? 'примерно ' + o.p[1].replace('≈' + n, '') : o.p[1] === '?' ? 'нет данных' : o.p[1]) + '. ' + o.p[2] + '. Подробнее' : '',
         amen: o.amen || '', amenStyle: o.amen ? 'font-size:12px;color:#8FA4B8' : hide
       };
     };
+    const paid = (rub, rate, h, zone) => ['paid', '≈' + n + rub + n + '₽', (zone || 'платная зона') + ' · ≈' + n + rate + n + '₽/ч × ' + h + n + 'ч'];
+    const free = (why) => ['free', 'бесплатно', why];
+    const unk = ['unknown', '?', 'нет данных — уточните на месте'];
     const days = [
-      { name: 'День 1', meta: '265' + n + 'км · ≈' + n + '4' + n + 'ч за рулём', rows: [
+      { name: 'День 1', meta: '265' + n + 'км · ≈' + n + '4' + n + 'ч за рулём', park: '≈' + n + '500' + n + '₽ + ?', parkCd: 'Парковки за день: примерно 500 рублей и одно место без данных', rows: [
         r('city', 'старт', '08:00', 'Москва', 'Выезд по Ярославскому шоссе, до пробок.', '', { sign: 'МОСКВА', odo: 0 }),
-        r('brown', 'через 73' + n + 'км', '09:05', 'Троице-Сергиева лавра', 'Полтора часа на осмотр. Собака ждёт с одним из взрослых.', 'вход свободный', { odo: 73, tags: [tag('МОНАСТЫРЬ')], park: '≈' + n + '150' + n + '₽/ч · ≈' + n + '300' + n + '₽ за стоянку' }),
-        r('brown', 'через 62' + n + 'км', '11:00', 'Разминка · Музей «Ботик Петра I»', 'Ребёнку — первый корабль флота, собаке — берег Плещеева озера. 8 мин от трассы.', '≈' + n + '400' + n + '₽', { icon: 'estate', odo: 135, tags: [tag('РАЗМИНКА 30' + n + 'МИН', 'stretch'), tag('МУЗЕЙ')], park: 'бесплатно у входа' }),
-        r('food', 'через 5' + n + 'км', '11:50', 'Обед · Переславль-Залесский', 'Кафе у Плещеева озера, есть детское меню.', '≈' + n + '1' + t + '800' + n + '₽', { odo: 140 }),
-        r('brown', 'через 66' + n + 'км', '13:40', 'Ростовский кремль', 'Прогулка по стенам и у озера Неро.', '≈' + n + '900' + n + '₽', { icon: 'kremlin', odo: 206, tags: [tag('КРЕМЛЬ')], park: '≈' + n + '100' + n + '₽/ч · ≈' + n + '200' + n + '₽ за стоянку' }),
-        r('rest', 'через 34' + n + 'км', '15:00', 'Отдых · площадка у М-8', '15 минут размяться перед Ярославлем.', '0' + n + '₽', { odo: 240, amen: 'есть: туалет · столы · навес' }),
-        r('hotel', 'через 25' + n + 'км', '16:00', 'Ночёвка · Ярославль', 'Отель, где можно с собакой. Вечером — Стрелка.', '≈' + n + '6' + t + '000' + n + '₽', { odo: 265, park: 'у гостиницы · бесплатно' })
+        r('brown', 'через 73' + n + 'км', '09:05', 'Троице-Сергиева лавра', 'Полтора часа на осмотр. Собака ждёт с одним из взрослых.', 'вход свободный', { odo: 73, tags: [tag('МОНАСТЫРЬ')], p: paid(300, 150, 2) }),
+        r('brown', 'через 62' + n + 'км', '11:00', 'Разминка · Музей «Ботик Петра I»', 'Ребёнку — первый корабль флота, собаке — берег Плещеева озера. 8 мин от трассы.', '≈' + n + '400' + n + '₽', { icon: 'estate', odo: 135, tags: [tag('РАЗМИНКА 30' + n + 'МИН', 'stretch'), tag('МУЗЕЙ')], p: free('у входа, своя стоянка музея') }),
+        r('food', 'через 5' + n + 'км', '11:50', 'Обед · Переславль-Залесский', 'Кафе у Плещеева озера, есть детское меню.', '≈' + n + '1' + t + '800' + n + '₽', { odo: 140, p: unk }),
+        r('brown', 'через 66' + n + 'км', '13:40', 'Ростовский кремль', 'Прогулка по стенам и у озера Неро.', '≈' + n + '900' + n + '₽', { icon: 'kremlin', odo: 206, tags: [tag('КРЕМЛЬ')], p: paid(200, 100, 2) }),
+        r('rest', 'через 34' + n + 'км', '15:00', 'Отдых · площадка у М-8', '15 минут размяться перед Ярославлем.', '0' + n + '₽', { odo: 240, amen: 'есть: туалет · столы · навес', p: free('площадка отдыха у трассы') }),
+        r('hotel', 'через 25' + n + 'км', '16:00', 'Ночёвка · Ярославль', 'Отель, где можно с собакой. Вечером — Стрелка.', '≈' + n + '6' + t + '000' + n + '₽', { odo: 265, p: free('у гостиницы, на ночь') })
       ] },
-      { name: 'День 2', meta: '340' + n + 'км · ≈' + n + '5' + n + 'ч', rows: [
-        r('brown', 'через 80' + n + 'км', '10:30', 'Ипатьевский монастырь', 'Кострома, а после — торговые ряды.', '≈' + n + '500' + n + '₽', { odo: 345, tags: [tag('МОНАСТЫРЬ')], park: '≈' + n + '100' + n + '₽/ч · ≈' + n + '200' + n + '₽ за стоянку' }),
-        r('brown', 'через 48' + n + 'км', '12:20', 'Разминка · Музей сыра, Кострома', 'Ребёнку — мастер-класс и дегустация, 5 мин от трассы. Собака ждёт с одним из взрослых.', '≈' + n + '1' + t + '200' + n + '₽', { icon: 'museum', odo: 393, tags: [tag('РАЗМИНКА 40' + n + 'МИН', 'stretch'), tag('ИНТЕРАКТИВНЫЙ')], park: 'бесплатно рядом', unv: true }),
-        r('brown', 'через 70' + n + 'км', '14:30', 'Разминка · парк «Плёсские высоты»', 'Собаке — простор, всем — левитановские виды над Волгой. 12 мин от трассы.', 'вход свободный', { icon: 'nature', odo: 463, tags: [tag('РАЗМИНКА 30' + n + 'МИН', 'stretch'), tag('ПРИРОДА')] }),
-        r('hotel', 'через 142' + n + 'км', '17:30', 'Ночёвка · Суздаль', 'Гостевой дом в центре, ужин рядом.', '≈' + n + '6' + t + '000' + n + '₽', { odo: 605, park: 'у гостиницы · бесплатно' })
+      { name: 'День 2', meta: '340' + n + 'км · ≈' + n + '5' + n + 'ч', park: '≈' + n + '200' + n + '₽', rows: [
+        r('brown', 'через 80' + n + 'км', '10:30', 'Ипатьевский монастырь', 'Кострома, а после — торговые ряды.', '≈' + n + '500' + n + '₽', { odo: 345, tags: [tag('МОНАСТЫРЬ')], p: paid(200, 100, 2) }),
+        r('brown', 'через 48' + n + 'км', '12:20', 'Разминка · Музей сыра, Кострома', 'Ребёнку — мастер-класс и дегустация, 5 мин от трассы. Собака ждёт с одним из взрослых.', '≈' + n + '1' + t + '200' + n + '₽', { icon: 'museum', odo: 393, tags: [tag('РАЗМИНКА 40' + n + 'МИН', 'stretch'), tag('ИНТЕРАКТИВНЫЙ')], p: free('на улице рядом'), unv: true }),
+        r('brown', 'через 70' + n + 'км', '14:30', 'Разминка · парк «Плёсские высоты»', 'Собаке — простор, всем — левитановские виды над Волгой. 12 мин от трассы.', 'вход свободный', { icon: 'nature', odo: 463, tags: [tag('РАЗМИНКА 30' + n + 'МИН', 'stretch'), tag('ПРИРОДА')], p: free('у входа в парк') }),
+        r('hotel', 'через 142' + n + 'км', '17:30', 'Ночёвка · Суздаль', 'Гостевой дом в центре, ужин рядом.', '≈' + n + '6' + t + '000' + n + '₽', { odo: 605, p: free('во дворе гостевого дома') })
       ] },
-      { name: 'День 3', meta: '220' + n + 'км · домой', rows: [
-        r('brown', 'через 35' + n + 'км', '10:00', 'Золотые ворота', 'Владимир: ворота и Успенский собор рядом.', '≈' + n + '600' + n + '₽', { icon: 'kremlin', odo: 640, tags: [tag('ПАМЯТНИК')], park: '≈' + n + '80' + n + '₽/ч · ≈' + n + '160' + n + '₽ за стоянку' }),
+      { name: 'День 3', meta: '220' + n + 'км · домой', park: '≈' + n + '920' + n + '₽', rows: [
+        r('brown', 'через 35' + n + 'км', '10:00', 'Золотые ворота', 'Владимир: ворота и Успенский собор рядом.', '≈' + n + '600' + n + '₽', { icon: 'kremlin', odo: 640, tags: [tag('ПАМЯТНИК')], p: paid(160, 80, 2) }),
         r('fuel', 'через 60' + n + 'км', '11:30', 'АЗС на М-7', 'Последняя заправка до дома.', '≈' + n + '1' + t + '700' + n + '₽', { odo: 700 }),
-        r('city', 'через 125' + n + 'км', '15:30', 'Москва', 'Дома к вечеру, без ночной трассы.', '', { sign: 'МОСКВА', odo: 825 })
+        r('brown', 'через 100' + n + 'км', '13:30', 'Парк «Зарядье», Москва', 'По пути домой: парящий мост и вид на Кремль. С собакой можно.', 'вход свободный', { icon: 'nature', odo: 800, tags: [tag('ПАРК')], p: paid(760, 380, 2, 'центр Москвы, дорогая зона') }),
+        r('city', 'через 25' + n + 'км', '16:30', 'Москва', 'Дома к вечеру, без ночной трассы.', '', { sign: 'МОСКВА', odo: 825 })
       ] }
     ];
     return { days };

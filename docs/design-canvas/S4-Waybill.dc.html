@@ -63,13 +63,13 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
       <button type="button" aria-expanded="{{parkOpen}}" onClick="{{togglePark}}" style="width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 70px; border: none; border-bottom: 1px solid #9FB0BE; background: transparent; padding: 0; cursor: pointer; font-family: inherit; color: #22313D; text-align: left; min-height: 44px">
         <span style="padding: 3px 6px; border-right: 1px solid #22313D; display: flex; flex-direction: column">
           <span style="font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 15px; height: 15px; border-radius: 2px; background: #1E4FA3; color: #F4F4F0; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; justify-content: center">P</span>Парковки<span aria-hidden="true" style="font-size: 10px; color: #5B7186">{{parkChevron}}</span></span>
-          <span style="font-family: 'Marck Script', cursive; font-size: 15px; color: #1B3FA0; line-height: 1.15">стоянок: 6 · ≈ 8 ч · Сергиев Посад, Ростов, Кострома, Владимир</span>
+          <span style="font-family: 'Marck Script', cursive; font-size: 15px; color: #1B3FA0; line-height: 1.15">платных стоянок: 5 · ≈ 10 ч · 5 городов · + ещё 1 без данных</span>
           <span style="{{parkListStyle}}">
             <sc-for list="{{parks}}" as="p" hint-placeholder-count="6"><span style="display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: #22313D"><span>{{p.n}}</span><span style="font-family: 'Marck Script', cursive; font-size: 14px; color: #1B3FA0">{{p.v}}</span></span></sc-for>
             <span style="font-size: 10px; color: #5B7186">Ночёвки и бесплатные стоянки — 0 ₽. Тарифы средние по городу.</span>
           </span>
         </span>
-        <span style="padding: 3px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; align-self: center">1 060</span>
+        <span style="padding: 3px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; align-self: center">1 620</span>
       </button>
       <button type="button" role="switch" aria-checked="{{reserveOn}}" onClick="{{toggle}}" style="width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 70px; border: none; border-bottom: 1.5px solid #22313D; background: transparent; padding: 0; cursor: pointer; font-family: inherit; color: #22313D; text-align: left; min-height: 44px">
         <span style="padding: 3px 6px; border-right: 1px solid #22313D; display: flex; align-items: center; gap: 8px">
@@ -78,9 +78,9 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
         </span>
         <span style="padding: 3px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; align-self: center">{{reserve}}</span>
       </button>
-      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 100px; align-items: center">
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 140px; align-items: center">
         <span style="padding: 6px; font-weight: 700; font-size: 14px">ИТОГО</span>
-        <span style="padding: 4px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 26px; color: #1B3FA0">{{total}}</span>
+        <span style="padding: 4px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 26px; color: #1B3FA0; white-space: nowrap">{{total}}</span>
       </div>
     </div>
 
@@ -111,7 +111,7 @@ class Component extends DCLogic {
       ['Питание', '3 чел. × 5 приёмов × 600', 9000],
       ['Билеты', 'кремли и музеи на троих', 3000]
     ];
-    const base = items.reduce((s, i) => s + i[2], 0) + 1060;
+    const base = items.reduce((s, i) => s + i[2], 0) + 1620;
     const on = this.state.reserve;
     const res = Math.round(base * 0.1 / 10) * 10;
     const total = Math.round((on ? base + res : base) / 100) * 100;
@@ -129,8 +129,9 @@ class Component extends DCLogic {
         { n: 'Ростов · кремль, 2 ч × 100', v: '200' },
         { n: 'Кострома · монастырь, 2 ч × 100', v: '200' },
         { n: 'Владимир · ворота, 2 ч × 80', v: '160' },
-        { n: 'Переславль, Кострома (сыр), Плёс', v: '0' },
-        { n: 'Прочие короткие стоянки', v: '200' }
+        { n: 'Москва · «Зарядье», 2 ч × 380', v: '760' },
+        { n: 'Бесплатно: Ботик, площадка у М-8, музей сыра, Плёс, 2 ночёвки', v: '0' },
+        { n: 'Обед в Переславле — нет данных', v: '?' }
       ],
       total: '≈ ' + fmt(total),
       left: '≈ ' + fmt(40000 - total)

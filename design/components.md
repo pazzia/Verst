@@ -698,7 +698,11 @@ Radio card, min-h 56, padding 10 12, radius 12, gap 12. Off: fill `dash.face` `#
 | `StretchTag` | as `KindTag` with `stretch.*` colours; always before the kind tag |
 | Open-data ring | 12 × 12, 1.5 dp dotted `text.muted` circle after the tags; legend once under the chips; TalkBack `cd_open_data` on the row |
 | `OdometerTag` | under the sign, gap 6; min-w `size.odometerTagW` 50, h 20, padding 0 4, radius 3, fill `odometer.fill`, 1 dp `odometer.border`, `type.tag.odometer` `text.primary`, centred |
-| Parking line | `P` square 18 (radius 3, `sign.blue`, white 13/700 «P») + text 13 `#B9C6D3`, gap 6 |
+| Parking detail line | text 13 `#B9C6D3` «парковка · …» after the note (the sign carries the «P») |
+| `ParkingSign` (§26.1) | Under the odometer tag (gap 6), centred in the 68 sign column. Plate: 32 × 32, radius 4, `sign.blue`, padding 2, inner border 1.5 dp `sign.white` radius 3, «P» 20/700 white. Supplementary plate attached (−1 dp overlap): min-w 44, h 18, padding 0 4, radius 2, fill `sign.white`, 1.5 dp `sign.black`, 11/700 `text.onLight` (10 when the text is longer than 7 chars; unknown «?» in `text.onLightMuted`). The whole group is a button (min touch 44 × 52) → `ParkingSheet`; TalkBack «Парковка: примерно 300 рублей. Платная зона… Подробнее» |
+| `ParkingSheet` | `BottomSheet`: sign 52 + plate 24 (14/700) left; label «ПАРКОВКА» 11, stop name `type.title.lg`, detail 13 `#B9C6D3`; a settings plate with rows (min-h 44, key `text.secondary`, value 600 right); note 12 muted; «Понятно» secondary button h 52 |
+| Day parking total | under the day meta: P 16 (radius 3) + 12/600 `#B9C6D3` |
+| Footer parking | right block before the arrow: P 14 + «из них парковки» 12/600 `text.onLightMuted`, amount 14/700 `text.onLight` |
 | Rest amenities | 12 `#8FA4B8`, one line under the note |
 
 ## 27. City start controls (5.10 §10)
