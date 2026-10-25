@@ -2053,3 +2053,92 @@ Commands (working tree):
   exits 1. `errors.txt` holds the 2 FAIL lines.
 - `yaml.safe_load(android.yml)` → jobs `planner, build, e2e, release, ci-logs`.
 - `combine_run.py` with a failed planner → `conclusion: failure`, `release: skipped` in the table.
+
+## Investor-readiness / DATA-01
+
+Our place facts kept apart from OSM. Architect, on branch ccr-013d3489-181fz2. Backlog:
+`docs/backlog-investor-readiness.md` § DATA-01 (and the views for DATA-04). Decision record:
+`docs/adr/0018-verst-facts-apart-from-osm.md`.
+
+Status: done, except the schema note in `docs/architecture.md` §9.2, which the Manager integrates (DATA-01
+acceptance item 1). The engine is untouched. Goldens: `git status backend/planner/tests/golden` is clean.
+
+### Files
+- `backend/migrations/sql/0002_place_provenance.sql`: runs once, inside the Alembic transaction (ADR-0008).
+  Reference rows are upserts.
+- `backend/migrations/sql/0002_place_provenance.down.sql`: the lossy reverse for `alembic downgrade`
+  (architecture §9.4).
+- `backend/planner/tests/test_schema_separation.py`: rules R1–R7, stdlib DDL parser.
+- `.github/workflows/planner.yml`: `backend/migrations/**` is added to the push paths, so a migration-only
+  change on `main` runs the test. Pull requests already ran it.
+
+### What 0002 does (ADR-0018 §3, §5)
+- **OSM by id only.** `core.place.osm_id` and `core.town.osm_id` move to `core.place_osm_ref` /
+  `core.town_osm_ref` (`osm_type`, `osm_id bigint`, `match_method`, `linked_at`, `linked_by`), then they are
+  dropped. `source = 'osm'` is gone. The migration aborts if such a row exists.
+- **Provenance.** `core.evidence` has one row per observed fact; it mirrors the curator sheet «Доказательства».
+  `core.place_check` is the verification log; the latest `pass` sets `verified_at`/`verified_by`.
+  `core.curator` holds pseudonymous ids (`cur-01`, `sys-users`, `sys-partner`, `legacy-0001`). The e-mail in the
+  old `verified_by` is discarded.
+- **Curator gaps closed:** `core.place_tag` (yes / no / unknown + conditions), `core.place_fuel`,
+  `core.place_photo` (author, licence, rights), `core.road` (11 federal roads seeded) + `core.place_road`
+  (km post, direction) + `core.ready_route_road`.
+- **Caches.** `tags`, `photo_keys`, `verified_at`, `verified_by` are computed by the trigger `place_derive`.
+  Direct writes are overwritten.
+- **Gates.** No `live`, and no curator `pass`, while `core.place_missing_evidence(id)` is not empty.
+- **Defaults.** `breakfast_included` is nullable (NULL = unknown). `geom` is nullable for non-live rows.
+  New `NOT VALID` live rules: hours present; sight ticket or `free_entry`.
+- **KPI (DATA-04):** `core.place_verified`, `core.place_route_membership`, `core.kpi_verified_total`,
+  `core.kpi_verified_by_route`, `core.kpi_verified_by_corridor`. Buckets: < 90 d, 90–180 d, stale.
+  `core.place_evidence_missing` is the curator's queue.
+
+### Why the test lives in the planner suite
+- `backend/api/tests/db/` (architecture §13) does not exist yet. It needs a PostGIS container (DEV-B02).
+- The planner suite is the only Python suite that CI runs: `make check` in planner.yml, and the planner job of
+  android.yml. A stdlib file in `backend/planner/tests/` therefore runs in the normal discovery path with no new
+  dependency.
+- It sits next to `tests/test_layering.py`, which is also a repository-structure test.
+- When the API DB tests exist, the file can move there unchanged.
+
+### Commands and results (2026-10-25)
+- `cd backend/planner && python3 -m unittest discover` → `Ran 503 tests` / `OK`. The count includes work by other
+  roles in this tree. 6 of the tests are new here.
+- `python3 -m unittest tests.test_schema_separation -v` → 6 tests OK:
+  - the rules hold on 0001+0002;
+  - the same rules flag 0001 (`osm_id` ×2, `'osm'` source, `verified_by` not a curator, no evidence);
+  - 13 injected violations are caught;
+  - the parser sees the 0002 model;
+  - the parser fails closed on 4 unknown DDL forms;
+  - the 0001 sha256 is pinned.
+- `make lint-planner typecheck-planner` → `All checks passed!` / `Success: no issues found in 75 source files`.
+- **PostgreSQL:** `which psql postgres` → `/usr/bin/psql` only. The server binaries of `postgresql-16` (16.15) are
+  pre-installed in `/usr/lib/postgresql/16/bin`. PostGIS is not installed, and nothing was installed.
+  - Setup: a throwaway cluster, `initdb` + `pg_ctl` as user `postgres` under `/var/lib/postgresql`, unix socket
+    only. It was stopped and deleted afterwards.
+  - Shim: 0001 was applied with `geometry`/`geography` shimmed as domains over `point` (a text substitution for
+    the dry run only). 0002 uses no PostGIS function, so it ran unmodified.
+  - Results:
+    - 0001 + seeds + 0002 → OK on an empty DB.
+    - Legacy rows (`osm_id` n42/w77/r123, an e-mail in `verified_by`, tags, two photo keys) → OSM ids moved to
+      `*_osm_ref` as node 42 / way 77 / relation 123; `verified_by = legacy-0001`; tags kept as `yes`; photos
+      kept as legacy drafts, `photo_keys = {}`; no `osm` column is left outside `*_osm_ref`.
+    - A `source = 'osm'` row → `ERROR: ADR-0018: 1 core.place rows have source = osm …`, rolled back (no
+      `evidence` table exists afterwards).
+    - Scenario: 29/29 checks (18 expected rejections, 11 assertions). Among them: the live gate and check gate
+      list the missing evidence; an openstreetmap.org URL is refused; `geom` from `reviews` is refused; dogs
+      «до 10 кг» do not reach `tags`; a direct `tags` write is overwritten; fuel rows only on `fuel`, and the
+      type change is blocked; an unlicensed live photo is refused; the KPI views give total `all 2 (1 fresh / 1
+      ageing)`, route `golden-ring` 2, corridor М-8 1 and М-2 0; deleting the only `pass` of a live place is
+      refused; 0001's auto-hide still works and removes the place from the KPI.
+    - `up → down`: sorted `pg_dump -s` equals that of 0001 (the re-added `osm_id` is the last column);
+      `osm_id` values are restored. `up` then applies again.
+
+### For the Manager
+- `docs/architecture.md` §9.2 needs a schema note pointing to ADR-0018 / 0002 (DATA-01 acceptance item 1).
+  §9.1 should add the new tables to `core`. §9.5 Directus: the «stamp `verified_at/by`» flow becomes a
+  `place_check` insert; the cached columns are read-only; the map widget is not a coordinate source (ADR-0018 §9).
+- Lawyer: add ADR-0018 §11 L1–L5 to the brief §5. L4 (sight hours and fee from two layers) also needs a CEO
+  decision.
+- Data Curator: checklist §2.4, §5.1.4 and §6 map to the new tables (ADR-0018 §9). The coordinate-source rule
+  (§4) may slow down hotels with no published coordinates. Measure it in the W3 test task (ADR-0018 §12 q1).
+- Engine follow-ups E-1…E-6 (ADR-0018 §10) each change plans. They need their own task and regenerated goldens.

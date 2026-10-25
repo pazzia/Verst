@@ -1001,6 +1001,9 @@ Ids: `uuid` (`gen_random_uuid()`) for curated entities and devices; trips use te
 
 ### 9.2 DDL (`backend/migrations/sql/0001_initial.sql`)
 
+> **DATA-01 (2026-10-25): superseded in part by migration `0002_place_provenance.sql` and [ADR-0018](adr/0018-verst-facts-apart-from-osm.md).** Verst's own facts live apart from OSM: `place.osm_id` / `town.osm_id` move to `core.place_osm_ref` / `core.town_osm_ref` (reference only), `source = 'osm'` is removed, per-fact proof is in `core.evidence` (OSM URLs rejected), checks in `core.place_check`, curators are pseudonymous (`core.curator`), tags are tri-state with conditions, photos carry author and licence, places carry road and km post, and DATA-04 KPI views exist. `tags`, `photo_keys`, `verified_at`, `verified_by` on `core.place` are trigger-maintained caches, so the engine/API contract is unchanged. Breakfast is NULL = unknown. The DDL below is 0001 as written; read ADR-0018 §3–§5 for what 0002 changes. Directus (§9.5): «Проверено» inserts a `place_check` row; the four cached columns are read-only; the map widget is not a coordinate source until LEG-01 answers. Separation is enforced by `backend/planner/tests/test_schema_separation.py`.
+
+
 ```sql
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
