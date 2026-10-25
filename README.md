@@ -11,6 +11,7 @@ Verst is an Android road-trip planner for Russia. It builds a multi-day car trip
 | `docs/architecture.md` | Architecture: containers, planner design and algorithms, DB schema, API, Android, infra, testing |
 | `docs/adr/` | Architecture decision records |
 | `docs/backlog-sprint1.md` | Sprint 1 tasks with acceptance criteria |
+| `docs/backlog-investor-readiness.md` | 90-day investor-readiness backlog: demand proof, real data, revenue signal, legal, team |
 | `backend/planner/` | `verst_planner`: the pure-Python route and cost engine (stdlib only), fake adapters, fixture worlds, golden trips |
 | `backend/api/` | FastAPI service (Sprint 2, needs package registry access) |
 | `backend/migrations/` | PostgreSQL 16 + PostGIS schema (SQL-first, Alembic) |
