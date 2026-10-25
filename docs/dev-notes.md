@@ -1729,3 +1729,25 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   `parking_reserve_budget`.
 - The other stops' parking is not re-priced after a replace, even when their arrival moves. That matches
   tickets and keeps the offline recompute exact.
+
+## S4 — M6 wired (dev/S4, arch/s4-engine @ 3df7005 merged)
+- **Parking:** the P part shows on every sight of a trip with parking data (the engine prices sights; null = «P ?»)
+  and on any other stop that carries a `parking` object. Fixture worlds have no «Парковки» line and draw no P at
+  all — that is the data, not a gate. The sheet's detail is the engine's `zoneRu` sentence (or `freeRu`);
+  rows Тариф / Стоим / Воскресенье (`sundayRu`) / Где (`whereRu`).
+- **CostCalculator rule 5:** the replaced stop's unit is removed; an alternative with `parkingSource` puts its own
+  unit in its place (or appends it when the replaced stop had none). All 52 cases incl. the 7 `parking_*` pass
+  through `CostCalculatorContractTest`.
+- **Rows:** `amenities` tags (wc, cafe_at_fuel, playground, walk, view, ev_charger, 24h) read in Russian inside
+  the description; `parking` is the P part. The engine's «не проверено» reason part is filtered out (the ring).
+- **Card:** `extractRu` / `extractSource` (deck lines for Wikipedia / Wikivoyage, «Описание: <source> ·
+  <licence>» otherwise), `image.source = geosearch` → «ФОТО РЯДОМ» with the engine's `labelRu`; OSM hours read in
+  Russian («вт–вс 10:00–18:00; пн выходной»), anything still Latin is dropped; «Почему здесь» parts in lower case.
+- **Walks:** `unlimited` drives the untimed layout; `crewNotesRu` become info plates (the dog one only without the
+  dog plate); `hours.source = default` makes no «открыто» claim; engine notes are split on « · » (no duplicate
+  dog sentence); a «custom» suggestion uses the engine's `titleRu`; suggestions count `stops`.
+- **requestKey:** answers are still ordered by a sequence number (one engine thread). On top, the app learns
+  `input → requestKey` from every answer: an answer whose key is not the key of the request sent is dropped, and a
+  filter round trip back to the walk on screen sends nothing (`walkRequestKeyDropsStaleAnswersAndSkipsSameRequests`).
+- Sprint4Test now requires an untimed «без ограничения» walk with hours on every stop, and a dog walk with no
+  indoor stop when the town offers «Прогулка с собакой».
