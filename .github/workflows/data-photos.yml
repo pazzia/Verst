@@ -1,0 +1,44 @@
+# Release S3 (5.9 §3 area photos): size, MIME type and categories of the shipped catalogue's Commons files,
+# without rerunning the whole data pipeline. Trigger from the sandbox:
+#   git push origin HEAD:data-photos-request --force
+# Result: branch bot/photos-<run_number> with backend/planner/tools/data/report/photo_meta.json.gz.
+name: data-photos
+on:
+  push:
+    branches: [data-photos-request]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  meta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Commons size, MIME and categories
+        run: |
+          mkdir -p "$RUNNER_TEMP/raw"
+          python3 backend/planner/tools/data/fetch_photo_meta.py "$RUNNER_TEMP/raw" \
+            backend/planner/verst_planner/resources 2>&1 | tee "$RUNNER_TEMP/raw/log.txt"
+      - name: Push to bot/photos-${{ github.run_number }}
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "verst-ci"
+          git config user.email "verst-ci@users.noreply.github.com"
+          git checkout --orphan "bot/photos-${{ github.run_number }}"
+          git rm -rq --cached .
+          mkdir -p out
+          gzip -9 -c "$RUNNER_TEMP/raw/photo_meta.json" > out/photo_meta.json.gz || true
+          cp "$RUNNER_TEMP/raw/log.txt" out/log.txt
+          git add -f out
+          git commit -qm "data: Commons photo meta, run ${{ github.run_id }}"
+          git push origin "bot/photos-${{ github.run_number }}"

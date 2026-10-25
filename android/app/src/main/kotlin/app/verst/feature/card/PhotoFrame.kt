@@ -55,7 +55,7 @@ import app.verst.core.ui.theme.DesignTokens.type as T
 enum class Placeholder { MUSEUM, CHURCH, PARK, MONUMENT, VIEW, BAR, CITY }
 
 fun placeholderFor(poiKind: String?, kind: String? = null): Placeholder = when (poiKind ?: kind) {
-    "museum", "gallery" -> Placeholder.MUSEUM
+    "museum", "gallery", "theatre", "theater" -> Placeholder.MUSEUM
     "church", "monastery", "kremlin", "cathedral" -> Placeholder.CHURCH
     "park", "garden" -> Placeholder.PARK
     "monument", "memorial", "square" -> Placeholder.MONUMENT

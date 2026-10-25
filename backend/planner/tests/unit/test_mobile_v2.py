@@ -135,6 +135,33 @@ class MobileV2Test(unittest.TestCase):
         self.assertEqual(fail(mobile.city_route(R, "e7", walk()))["code"], "CANCELLED")
         self.assertEqual(fail(mobile.city_presets(R, None, None))["code"], "INVALID_INPUT")  # type: ignore[arg-type]
 
+    def test_area_photos_are_single_photographs(self) -> None:
+        """S3-FINAL P1-04 (5.9 §3): no area photo is a collage, map, flag, coat of arms or blocked file."""
+        import re
+
+        from verst_planner.adapters.catalogue import CataloguePorts
+
+        w = mobile._WORLDS[R]
+        self.assertIsInstance(w.fakes, CataloguePorts)
+        cat = mobile._CATALOGUE[0]
+        words = re.compile(
+            r"collage|colage|montage|коллаж|\bmaps?\b|карта|\bflags?\b|флаг|coat of arms|герб"
+            r"|\.(svg|png|gif)$",
+            re.I,
+        )
+        kept = 0
+        for t in w.world.towns.values():
+            file, _credit = mobile._area_photo(w, t)
+            if file is None:
+                continue
+            kept += 1
+            with self.subTest(town=t.name_ru, file=file):
+                self.assertNotIn(file, cat.area_blocked)
+                self.assertIsNone(words.search(file))
+        if cat.version != "sample":
+            self.assertTrue(cat.area_blocked)
+            self.assertGreaterEqual(kept, 900)  # 971 of 1 116 in wd-20261025-r7.2
+
     @staticmethod
     def _town_without_bars() -> dict[str, float]:
         from verst_planner.geo.distance import haversine_km

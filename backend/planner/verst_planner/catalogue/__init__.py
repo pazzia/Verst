@@ -116,6 +116,8 @@ class Catalogue:
     credits: list[Credit]
     links: dict[str, FixtureLink]
     sources: dict[str, Any] = field(default_factory=dict)
+    area_blocked: frozenset[str] = frozenset()
+    """Files that must not be shown as an area photo (5.9 §3: collages, maps, flags, small or very wide)."""
     town_by_id: dict[str, CatTown] = field(default_factory=dict)
     poi_by_id: dict[str, CatPoi] = field(default_factory=dict)
     bar_by_id: dict[str, CatBar] = field(default_factory=dict)
@@ -265,6 +267,7 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any) -> Catalogue:
         credits=credits,
         links=links,
         sources=dict(meta.get("sources", {})),
+        area_blocked=frozenset(str(f) for f in meta.get("areaBlock", [])),
     )
 
 

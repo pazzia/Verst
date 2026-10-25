@@ -152,6 +152,8 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
                 Column(
                     Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).testTag("walk.list").onGloballyPositioned { content = it },
                 ) {
+                    // S3-FINAL P2-02: every stop has default hours → the top line says it once, rows stay quiet
+                    val allDefaultHours = w.stops.filter { it.poiId != null }.let { st -> st.isNotEmpty() && st.all { !it.hoursVerified } }
                     Intro(ui, a)
                     Column(Modifier.fillMaxWidth().walkColumn()) {
                         val start = RuFormat.clock(w.startAt) ?: ""
@@ -162,7 +164,7 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
                         )
                         EndRow(stringResource(R.string.walk_start_row), w.start.label ?: w.townName ?: "", start)
                         w.stops.forEach { s ->
-                            WalkStopRow(s, w.people, s.id == highlight, requesters.getOrPut(s.id) { FocusRequester() }, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y }) { a.stop(s) }
+                            WalkStopRow(s, w.people, s.id == highlight, allDefaultHours, requesters.getOrPut(s.id) { FocusRequester() }, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y }) { a.stop(s) }
                         }
                         val fin = w.finish
                         if (fin != null) EndRow(stringResource(R.string.walk_finish_row), fin.label ?: "", finish)
@@ -232,7 +234,8 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
                 Box(Modifier.size(22.dp).clip(CircleShape).background(C.sign.white), contentAlignment = Alignment.Center) {
                     Txt(stringResource(R.string.city_badge_18), T.caption.bold, C.text.onLight)
                 }
-                Txt(stringResource(R.string.walk_responsible), T.body.md, C.text.primary)
+                // S3-FINAL P2-01: «За руль — только трезвым» never breaks before the dash
+                Txt(stringResource(R.string.walk_responsible).replace(" —", "\u00A0—"), T.body.md, C.text.primary)
             }
         }
         for (warn in w.warnings) {
@@ -249,6 +252,9 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         }
     }
 }
+
+/** The engine's per-stop default-hours note (`walk.note.hours`). */
+private const val HOURS_NOTE = "Часы работы уточняйте"
 
 /** Hours to the nearest half: «4», «5,5» (the chip `walk_chip_duration_text` and the `walk_shorter` note agree). */
 private fun hours(min: Int): String {
@@ -341,7 +347,7 @@ private fun EndRow(kind: String, name: String, time: String) {
 }
 
 @Composable
-private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, focusRequester: FocusRequester, content: () -> LayoutCoordinates?, onPlaced: (Int) -> Unit, onTap: () -> Unit) {
+private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, hideHoursNote: Boolean = false, focusRequester: FocusRequester, content: () -> LayoutCoordinates?, onPlaced: (Int) -> Unit, onTap: () -> Unit) {
     val line = stringResource(R.string.walk_next, distance(s.walkKmFromPrev), s.walkMinFromPrev)
     val time = RuFormat.clock(s.arriveAt) ?: ""
     val cost = if (s.costRub > 0) stringResource(R.string.walk_footer_total, RuFormat.thousands(s.costRub)) else null
@@ -377,7 +383,7 @@ private fun WalkStopRow(s: WalkStopDto, people: Int, focused: Boolean, focusRequ
                 Txt(time, T.body.sm, C.text.muted, align = TextAlign.End)
             }
             Txt(s.nameRu, T.title.md, C.text.primary, maxLines = 2)
-            s.noteRu?.takeIf { it.isNotBlank() }?.let { Txt(it, T.body.md, C.text.note) }
+            s.noteRu?.takeIf { it.isNotBlank() && !(hideHoursNote && it == HOURS_NOTE) }?.let { Txt(it, T.body.md, C.text.note) }
             if (cost != null) Txt(cost, T.body.mdStrong, C.accent.yellow)
         }
     }

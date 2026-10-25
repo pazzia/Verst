@@ -647,6 +647,7 @@
     <string name="addr_rate">Подождите секунду и попробуйте ещё раз</string>
     <string name="addr_attribution">© OpenStreetMap</string>
     <string name="route_approx">Расстояния приблизительные</string>
+    <string name="route_approx_open_data">Расстояния приблизительные · места из открытых данных</string>
     <string name="route_approx_more">О данных</string>
     <string name="about_data_title">О данных</string>
     <string name="about_data_body">Города и места — Wikidata (CC0). Бары и адреса — © участники OpenStreetMap (ODbL). Фото — Wikimedia Commons, у каждого своя лицензия и автор. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные.</string>

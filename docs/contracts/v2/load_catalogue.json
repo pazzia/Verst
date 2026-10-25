@@ -6,7 +6,7 @@
  "response": {
   "ok": true,
   "result": {
-   "version": "wd-20261025-r7.1",
+   "version": "wd-20261025-r7.2",
    "builtAt": "2026-10-25",
    "towns": 1114,
    "pois": 11817,

@@ -17,6 +17,7 @@ from typing import Any
 from verst_planner.city.presets import (
     ADULT_PRESETS,
     BAR_DEFAULT_HOURS,
+    BIG_MUSEUM_DWELL,
     BIG_MUSEUM_SITELINKS,
     DIVERSITY,
     DRINK_KINDS,
@@ -26,6 +27,8 @@ from verst_planner.city.presets import (
     HERITAGE_BONUS,
     INTERESTS,
     MAX_LEG_KM,
+    MUSEUM_DWELL_CAP_MIN,
+    MUSEUM_WALK_DWELL,
     PACES,
     PRESET_TABLE,
     PRESETS,
@@ -82,6 +85,7 @@ class Candidate:
     dwell_min: int
     has_photo: bool
     weight: float
+    long_visit: bool = False  # a big museum seen in ≤ 2 h: the stop says «только главное»
 
     @property
     def base_score(self) -> float:
@@ -214,11 +218,20 @@ def caps_for(inp: WalkInput) -> dict[str, int]:
 
 def dwell_for(kind: str, sitelinks: int, inp: WalkInput) -> int:
     base = DWELL[kind]
-    if kind == "museum" and sitelinks >= BIG_MUSEUM_SITELINKS:
-        base = 90
+    big = kind == "museum" and sitelinks >= BIG_MUSEUM_SITELINKS
+    if big:
+        base = BIG_MUSEUM_DWELL
+    if kind == "museum" and inp.preset == "museums":
+        if big:  # a fixed, round visit («за 1 ч 30 мин — только главное»), whatever the pace
+            return min(MUSEUM_DWELL_CAP_MIN, BIG_MUSEUM_DWELL)
+        return max(5, min(MUSEUM_DWELL_CAP_MIN, round(MUSEUM_WALK_DWELL * PACES[inp.pace][1])))
     if kind == "museum" and inp.preset == "overview":
         base = min(base, PRESET_TABLE["overview"].museum_dwell_cap or base)
     return max(5, round(base * PACES[inp.pace][1]))
+
+
+def long_visit(kind: str, sitelinks: int) -> bool:
+    return kind == "museum" and sitelinks >= BIG_MUSEUM_SITELINKS
 
 
 def drink_cost(kind: str, adults: int) -> int:
@@ -268,7 +281,12 @@ class Solver:
     def _caps_ok(self, seq: Sequence[int]) -> bool:
         museums = sum(1 for i in seq if self.c[i].kind == "museum")
         drinks = sum(1 for i in seq if self.c[i].kind in DRINK_KINDS)
-        return museums <= self.caps.get("museum", 99) and drinks <= self.caps.get("drinks", 99)
+        others = len(seq) - museums - drinks
+        return (
+            museums <= self.caps.get("museum", 99)
+            and drinks <= self.caps.get("drinks", 99)
+            and others <= self.caps.get("others", 99)
+        )
 
     def _open_from(self, i: int, arrive: float) -> float | None:
         """The earliest visit start ≥ `arrive` (waiting ≤ `MAX_WAIT_MIN`) whose whole dwell is open."""

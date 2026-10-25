@@ -71,6 +71,8 @@ jobs:
           python3 backend/planner/tools/data/build_catalogue.py "$RAW" --out "$FIRST"
       - name: Photo credits (Commons)
         run: python3 backend/planner/tools/data/fetch_commons_meta.py "$RAW" "$FIRST" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Photo size, MIME and categories (Commons; 5.9 §3 area photos)
+        run: python3 backend/planner/tools/data/fetch_photo_meta.py "$RAW" "$FIRST" 2>&1 | tee -a "$RAW/log.txt"
       - name: Final build
         run: |
           python3 backend/planner/tools/data/build_catalogue.py "$RAW" --out "$OUT" \

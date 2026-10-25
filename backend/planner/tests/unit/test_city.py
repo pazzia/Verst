@@ -97,8 +97,9 @@ class InputTest(unittest.TestCase):
         w = weights_for(inp(preset="custom", interests=["museums"]))
         self.assertEqual((w["museum"], w["church"], w["bar"]), (1.0, 0.15, 0.0))
         self.assertEqual(caps_for(inp(preset="custom", interests=["parks"]))["drinks"], 5)
-        self.assertEqual(caps_for(inp(preset="museums"))["museum"], 4)
-        self.assertEqual(dwell_for("museum", 50, inp(preset="museums")), round(90 * 1.25))
+        self.assertEqual(caps_for(inp(preset="museums"))["museum"], 5)
+        self.assertEqual(dwell_for("museum", 50, inp(preset="museums")), 90)  # big museum: flat 90 min
+        self.assertEqual(dwell_for("museum", 5, inp(preset="museums")), round(50 * 1.25))
         self.assertEqual(dwell_for("museum", 50, inp()), 45)
         self.assertEqual(rounded_start(NOW), datetime(2026, 10, 23, 9, 15))
         self.assertLessEqual(P.radius_km(480, 5.5), 6.0)

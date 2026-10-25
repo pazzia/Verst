@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -407,8 +408,17 @@ class Sprint3Test {
         compose.onNodeWithTag("report.send").assertIsNotEnabled()
         compose.onNodeWithTag("report.reason.price").performClick()
         compose.onNodeWithTag("report.send").assertIsEnabled()
-        compose.onNodeWithTag("report.comment").performTextInput("Билет уже 600 ₽")
+        // S3-FINAL P1-03: the sheet opens with the IME down — all four reasons and «ОТПРАВИТЬ» visible
+        Thread.sleep(400)
+        compose.onNodeWithTag("report.reason.other", useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithTag("report.send").assertIsDisplayed()
         shot("84-report-sheet")
+        compose.onNodeWithTag("report.comment").performClick()
+        compose.onNodeWithTag("report.comment").performTextInput("Билет уже 600 ₽")
+        // IME + bring-into-view: the button stays on screen above the keyboard
+        compose.waitUntil(3_000) { runCatching { compose.onNodeWithTag("report.send").assertIsDisplayed(); true }.getOrDefault(false) }
+        Thread.sleep(300)
+        shot("84b-report-comment")
         compose.onNodeWithTag("report.send").performScrollTo().performClick()
         compose.waitUntil(5_000) { flow.report == null && flow.toast == app.verst.nav.Toast.ReportThanks }
         compose.waitUntil(5_000) { focused("road.stop.${sight.id}") }
@@ -534,5 +544,60 @@ class Sprint3Test {
         ).withIndex().firstOrNull { (i, c) -> walkIn(c.first, c.second, c.third, "beer", "94-walk-beer-$i") }?.value // ASCII file names
         Log.i("VerstE2e", "R4 beer walk in ${beer?.first}")
         assertTrue("a «Пивной» walk in a town ≥ 100 k", beer != null)
+    }
+
+    /** S3-RELEASE: a real photo seen online stays on the card offline (64 MB disk cache); an unseen one says so. */
+    @Test
+    fun r5OfflineCachedPhotoStillShows() {
+        val ctx = InstrumentationRegistry.getInstrumentation().targetContext
+        val loader = coil.Coil.imageLoader(ctx)
+        loader.memoryCache?.clear()
+        loader.diskCache?.clear()
+        val stops = goldenRingRoad()
+        val sights = stops.filter { it.kind == "sight" && it.placeId != null }
+        // online: the first sight with a real photo loads (and is written to the disk cache)
+        var cached: app.verst.core.model.dto.StopDto? = null
+        for (s in sights) {
+            compose.onNodeWithTag("road.stop.${s.id}").performScrollTo().performClick()
+            waitTag("card")
+            compose.waitUntil(30_000) { flow.card?.ui?.loading == false && (has("photo.loaded") || has("photo.error") || has("photo.none")) }
+            val ok = has("photo.loaded")
+            back()
+            compose.waitUntil(5_000) { flow.card == null }
+            if (ok) { cached = s; break }
+        }
+        assertTrue("a sight with a real photo", cached != null)
+        Thread.sleep(1_500) // the disk cache write
+        loader.memoryCache?.clear() // only the disk cache may answer offline
+        compose.runOnUiThread { flow.setOffline(true) }
+        try {
+            compose.onNodeWithTag("road.stop.${cached!!.id}").performScrollTo().performClick()
+            waitTag("card")
+            compose.waitUntil(15_000) { flow.card?.ui?.loading == false && (has("photo.loaded") || has("photo.offline") || has("photo.error")) }
+            Log.i("VerstE2e", "R5 offline cached ${cached.placeId}: loaded=${has("photo.loaded")} offline=${has("photo.offline")}")
+            assertTrue("the cached photo shows offline", has("photo.loaded"))
+            Thread.sleep(500)
+            shot("95-card-offline-cached")
+            back()
+            compose.waitUntil(5_000) { flow.card == null }
+            // an unseen sight with a photo URL → «Фото загрузится, когда будет интернет»
+            for (s in sights.dropWhile { it.id != cached.id }.drop(1)) {
+                compose.onNodeWithTag("road.stop.${s.id}").performScrollTo().performClick()
+                waitTag("card")
+                compose.waitUntil(15_000) { flow.card?.ui?.loading == false && (has("photo.loaded") || has("photo.offline") || has("photo.none") || has("photo.error")) }
+                val url = flow.card?.ui?.details?.image?.card
+                if (url != null) {
+                    Log.i("VerstE2e", "R5 offline uncached ${s.placeId}: offline=${has("photo.offline")}")
+                    assertTrue("an unseen photo offline says so", has("photo.offline"))
+                    shot("96-card-offline-uncached")
+                    back()
+                    break
+                }
+                back()
+                compose.waitUntil(5_000) { flow.card == null }
+            }
+        } finally {
+            compose.runOnUiThread { flow.setOffline(false) }
+        }
     }
 }

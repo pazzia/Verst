@@ -70,8 +70,8 @@ fun servicePictogram(sign: String): Int = when (sign) {
 /** Tourist pictogram from the place tags. */
 fun touristPictogram(tags: List<String>): Int = when {
     "kremlin" in tags -> R.drawable.ic_tourist_kremlin
-    "monastery" in tags -> R.drawable.ic_tourist_monastery
-    "museum" in tags -> R.drawable.ic_tourist_museum
+    "monastery" in tags || "church" in tags || "cathedral" in tags -> R.drawable.ic_tourist_monastery
+    "museum" in tags || "theatre" in tags || "theater" in tags || "gallery" in tags -> R.drawable.ic_tourist_museum
     "view" in tags -> R.drawable.ic_tourist_view
     "walk" in tags -> R.drawable.ic_tourist_walk
     else -> R.drawable.ic_tourist_generic

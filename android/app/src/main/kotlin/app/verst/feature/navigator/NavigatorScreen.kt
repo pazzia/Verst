@@ -141,6 +141,16 @@ fun NavigatorScreen(
         onPick(it)
     }
     val imeUp = WindowInsets.isImeVisible
+    // 5.12 §5.5 (S3-FINAL P1-01): a GPS fix that sets ОТКУДА hides the IME and clears focus together
+    var lastGps by remember { mutableStateOf(ui.gps) }
+    LaunchedEffect(ui.gps) {
+        if (ui.gps == GpsState.On && lastGps != GpsState.On) {
+            focus.clearFocus(force = true)
+            inputFocused = false
+            keyboard?.hide()
+        }
+        lastGps = ui.gps
+    }
     LaunchedEffect(imeUp, inputFocused) {
         // 5.12 §5: no field has focus (a GPS fix set ОТКУДА) → the IME goes down; the delay skips focus hand-overs
         if (imeUp && !inputFocused) {
@@ -151,7 +161,8 @@ fun NavigatorScreen(
     ScreenRoot(C.dash.base, statusBar = C.sky.band1) {
         Column(Modifier.fillMaxSize().imePadding()) {
             // While typing (focused field + IME) the scene strip collapses so the results stay above the keyboard.
-            val typing = inputFocused && WindowInsets.isImeVisible
+            // S3-FINAL P1-01: the IME up is the typing layout even without a focused field (never an empty bar)
+            val typing = WindowInsets.isImeVisible
             if (!typing) {
                 Box(Modifier.fillMaxWidth().height(150.dp)) {
                     SkyStrip(150.dp, bands = NavigatorSky, groundTop = 104f, road = NavigatorRoad)

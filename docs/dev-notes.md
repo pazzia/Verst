@@ -1478,3 +1478,72 @@ Inputs merged:
   - Commons `author` fields can be whole sentences («This photo was taken by Anton Zelenov. Please credit
     this…»); the credit line ellipsizes them. A cleanup in the data build would help.
   - The СПб «Музейный» walk is 3 stops in 6 h, which is plausible (long dwells), for a look.
+
+## Release S3 engine polish (arch/release-s3 from main be0a266)
+- **Photo credits** (`build_catalogue.clean_author`): Commons «Artist» → a short name (≤ 40 chars, ≤ 4 words):
+  no HTML, URLs, e-mails, «This photo was taken by …», «Original uploader was …», «Own work», camera
+  locations, licences or timestamps; otherwise `author: null` and the label stays «Фото: Wikimedia Commons ·
+  <licence>». Before: 191 of 3 503 credits were sentence-like or > 40 chars (max 60, cut mid-word); after: 0
+  of 3 354 (15 without author). `test_credits_are_short_names` checks the whole catalogue.
+- **Museum walks** («Музейный»): a museum gets 50 min × pace, a big one (≥ 40 sitelinks) a flat 90 min with
+  the stop note «Большой музей: за 1 ч 30 мин — только главное»; up to 5 museums and at most 2 short sights
+  (churches, monuments, squares) between them. 6 h: СПб 3 → 5 stops (Русский музей, Эрмитаж, Кунсткамера, Спас
+  на Крови, Невский); Москва 3 → 5, Казань 3 → 5, Ярославль 3 → 5; 4 h: 2 → 4 everywhere.
+- **Open-data notice (S3-FINAL P1-2)**: `UNVERIFIED_PLACES` reads «Места — из открытых данных: часы и цены
+  уточняйте» and carries `"level": "info"` (5.5 §9: the info line, not a yellow plate). Warnings without
+  `level` are warnings.
+- **Area photos (S3-FINAL P1-4, 5.9 §3)**: `meta.areaBlock` lists the files that may not be «Фото района»:
+  collages/montages/maps/flags/coats of arms by file name or by a category that says what the file is
+  («Montages of Ufa», «Flags of …»), non-JPEG/TIFF/WebP, < 800 px wide, aspect > 2.5. The hotel card uses the
+  town photo, else the best square/embankment/viewpoint/park photo of the town, else none (city placeholder).
+  **971 of 1 116 towns keep an area photo** (943 own, 28 fallback; was 1 085 incl. collages such as
+  «Yarolslav colage.png» → now «Red Square in Yaroslavl 01.jpg», Казань → «Freedom Square, Kazan»).
+  Sizes and categories come from `data-photos.yml` (bot/photos-1; also a step of `data.yml`).
+- Catalogue `wd-20261025-r7.2` (rebuilt from bot/raw-7 + bot/photos-1): 0.676 MB. G01–G13 byte-identical.
+- `test_cancel_from_other_thread` pinned to the case clock (it failed on main once the system date passed
+  G03's start).
+
+## S3-RELEASE (branch dev/S3-RELEASE from main be0a266)
+Inputs merged:
+- des/S3-FINAL @ fe8cd87: final QA, no P0; specs 5.5 §9, 5.9 §3, 5.12 §5 and components §22 updated; no
+  token change.
+- arch/release-s3 @ b5b23c2: short photo credits, museum walks with 4–5 stops, open-data `level: info`,
+  single-photograph area photos, catalogue r7.2. Backend taken exactly as the Architect's tree; `make check` OK.
+
+### S3-FINAL P1 (Android)
+- P1-01: a GPS fix (gps → On) clears focus and hides the IME together. The IME being up is the typing layout
+  even without a focused field (header + field fixed), so the panel never collapses to an empty bar.
+- P1-02:
+  - `UNVERIFIED_PLACES`, and every warning with `level: "info"`, is a muted info line (`info` 14 + `type.body.sm`
+    `text.muted` + «О данных») under the intro.
+  - With a synthetic route both notes share one line: `route_approx_open_data`.
+  - Yellow plates are left for warnings about this trip.
+- P1-03: the report sheet has no autofocus, so the IME stays down until the comment is tapped. The comment +
+  «ОТПРАВИТЬ» then follow the IME inset (`BringIntoViewRequester`, re-run on every inset change).
+- P1-04 (area photos) is the Architect's. With r7.2, Ярославль «У Стрелки» shows a single street photograph.
+
+### P2 done
+- NBSP before «—» in the responsible line.
+- No per-row «Часы работы уточняйте» when every stop has default hours (the top line says it once).
+- Theatre → museum pictogram, church / cathedral → the monastery pictogram (sign and placeholder).
+- Card descriptions that only repeat the kind line («площадь в г. Иваново») are hidden; others are capitalised
+  and end with a full stop.
+- A credit without a usable author reads «Фото: Wikimedia Commons · <licence>».
+- Left as is: P2-05 (two hand-off parts on 4–6 h walks, «acceptable for release») and P2-06 (bar plate
+  instead of the frame).
+
+### Tests made independent of the regenerated data
+- V2ContractsTest: licences, walk hand-off parts, preset availability, and the optional area photo.
+- The engine-shorter shot sets a shorter result on the contract walk (r7.2 museum walks fill the asked time).
+- The responsible-line shot expects the NBSP.
+
+### New e2e checks
+- **Offline-cached photo** (`r5OfflineCachedPhotoStillShows`):
+  - Coil's memory + disk caches are cleared first.
+  - A real photo is seen online (Троице-Сергиева лавра), then the memory cache is cleared and the app goes
+    offline.
+  - The same card still shows the photo from the 64 MB disk cache (screen 95).
+  - An unseen sight with a photo URL (Ростовский кремль) shows «Фото загрузится, когда будет интернет» (96).
+- **Report sheet:**
+  - 84: the sheet as opened, with the IME down and all four reasons + the button visible.
+  - 84b: after a tap in the comment, with the button above the IME.

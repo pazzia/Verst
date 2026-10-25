@@ -81,7 +81,6 @@ TOURIST_TOP = 60
 TOWN_MATCH_KM = 15.0
 PLACE_MATCH_KM = 1.5
 DESC_MAX = 120
-AUTHOR_MAX = 60
 BRANDED_TAGS = ("brand", "brand:wikidata", "brand:ru")
 RYUMKA = re.compile(r"рюмочн", re.IGNORECASE)
 
@@ -181,12 +180,107 @@ EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
 URL = re.compile(r"(https?://|www\.)\S+", re.I)
 
 
+# Release S3: Commons «Artist» fields are free text («This photography was created by Artem Topchiy (user
+# Art-top)», «… Original uploader was … at ru.wikipedia», «Own work», camera coordinates). The card shows a
+# short name only; anything that does not reduce to one is dropped (the card then says «Wikimedia Commons»).
+AUTHOR_MAX = 40
+AUTHOR_MAX_WORDS = 4
+AT_EMAIL = re.compile(r"\S+\s*\[at\]\s*\S+", re.I)
+CUT_AT = re.compile(
+    r"\s*(?:,\s*)?(?:\boriginal uploader\b|\buploaded\b|\bcamera location\b|\bother photos\b|\bplease\b"
+    r"|\bwith permission\b|\+?\s*\bmodified by\b|\bchanges by\b|\bderivative work\b|\blicen[cs]ed?\b"
+    r"|\bcc[ -]by\b|\bpublic domain\b|,?\s*автор памятника|,?\s*скульптор\b|,?\s*архитектор\w*\b"
+    r"|\barchitects?\b|\bfor\b|\bfrom\b|\bat \w+ wikipedia\b|\bat [a-z]{2}\.wiki\w*|\bс викисклада\b"
+    r"|\bиспользуя\b|\d{1,2}:\d{2}\b).*$",
+    re.I,
+)
+SEP = r"(?:\s*(?:\bby\b|:|-)\s*|\s+)"
+LEAD = re.compile(
+    r"^(?:this (?:photo(?:graph)?y?|image|picture) (?:was|is) (?:taken|created|made|shot) by\s+"
+    r"|(?:photo(?:graph)?y?|photographer|image|picture|author|creator|автор(?: фото)?|фото(?:граф)?)"
+    + SEP
+    + r"|(?:(?:russian|english) wikipedia )?(?:[a-z]{2,3}:)?(?:user|uzer|участник|creator)\s*[:\s]\s*)+",
+    re.I,
+)
+NO_AUTHOR = re.compile(
+    r"^(?:own work|собственная работа|(?:unknown(?: photographer| author)?\s*)+|неизвестен|неизвестный автор"
+    r"|anonymous|see below|see description|wikimedia commons|(?:made|taken) by the uploader|the uploader|(?:this|it) is\b.*)\.?$",
+    re.I,
+)
+UPLOADER_ONLY = re.compile(
+    r"^(?:(?:the )?original uploader was (.+?) at \S+|no machine-readable author provided\.?\s*(.+?)~\w+)",
+    re.I,
+)
+PARENS = re.compile(r"\s*[(\[][^()\[\]]*[)\]]|\s*[(\[][^()\[\]]*$")
+
+
 def clean_author(author: str) -> str | None:
-    """Commons «Artist» without markup, e-mail addresses (run 3: «…@yandex.ru») and URLs."""
-    text = re.sub(r"<[^>]+>", "", author)
-    text = URL.sub("", EMAIL.sub("", text))
-    text = re.sub(r"\s+", " ", re.sub(r"\(\s*\)|\[\s*\]", "", text)).strip(" ,;:-–—")
-    return text[:AUTHOR_MAX] or None
+    """A short name from a Commons «Artist» field, or None (no markup, URLs, e-mails, sentences, licences)."""
+    import html
+
+    text = html.unescape(re.sub(r"<[^>]+>", " ", author))
+    text = URL.sub(" ", EMAIL.sub(" ", AT_EMAIL.sub(" ", text)))
+    text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"^\S+\.(?:jpe?g|png|tiff?|gif|svg|webp)\s*:\s*", "", text, flags=re.I)  # «X.jpg: Name»
+    text = text.lstrip(" .,;:")
+    m = UPLOADER_ONLY.match(text)
+    if m:  # «The original uploader was Digr at Russian Wikipedia.» → «Digr»
+        text = m.group(1) or m.group(2)
+    text = CUT_AT.sub("", text)
+    # the first sentence: a full stop after a word of 4+ letters followed by a capitalised word
+    text = re.split(r"(?<=[^\W\d_]{3})\.\s+(?=[A-ZА-ЯЁ])", text, maxsplit=1)[0]
+    text = PARENS.sub("", text)
+    text = LEAD.sub("", text.strip()).replace("_", " ")
+    text = re.sub(r"\s+", " ", text).strip(" ,;:-–—/.+«»\"'")
+    if not text or NO_AUTHOR.match(text):
+        return None
+    if len(text) > AUTHOR_MAX or len(text.split()) > AUTHOR_MAX_WORDS:
+        first = re.split(r"\s*[;,/]\s*", text)[0].strip(" .")
+        text = LEAD.sub("", first)
+    if not text or NO_AUTHOR.match(text) or len(text) > AUTHOR_MAX or len(text.split()) > AUTHOR_MAX_WORDS:
+        return None
+    if not re.search(r"[^\W\d_]{2}", text):  # «???», «1987»
+        return None
+    if re.search(r"(?:^|\s)[A-ZА-ЯЁ]$", text):  # «Чурилов Д. А» → «Чурилов Д. А.»
+        text += "."
+    return text
+
+
+# S3-FINAL P1-04 (5.9 §3): an area photo is one photograph of a street, square or embankment, never a collage,
+# montage, map, flag, coat of arms, diagram or a very wide panorama, and at least 800 px wide.
+AREA_MIN_WIDTH = 800
+AREA_MAX_ASPECT = 2.5
+AREA_MIMES = ("image/jpeg", "image/tiff", "image/webp")
+NOT_AREA = re.compile(
+    r"collage|montage|коллаж|монтаж|mosaic|composite|\bmaps?\b|\bkarta\b|карта|схема|\bplan\b|\bflags?\b|флаг"
+    r"|coats? of arms|\bcoa\b|герб|emblem|эмблем|\blogos?\b|логотип|diagram|диаграмм|\bseals?\b|locator|location map"
+    r"|\bstamps?\b|марк[аи] почт|postage|banknote|coin|монет|\bsvg\b|\.svg$|\.png$|\.gif$",
+    re.I,
+)
+
+# A category says what the file IS («Montages of Ufa», «Flags of …», «Coats of arms of …»), not what is in it
+# («Photographs of flags of Russia in …», «Flag tower (Peter & Paul Fortress)» stay allowed).
+CAT_NOT_AREA = re.compile(
+    r"collage|montage|коллаж|монтаж|^(?:flags?|coats? of arms|maps?|logos?|diagrams?|locator maps?|seals?"
+    r"|emblems?|gerbs?)(?:\s+(?:of|in)\b|$)",
+    re.I,
+)
+
+
+def area_ok(file: str, meta: dict[str, Any] | None) -> bool:
+    """May this Commons file be shown as «Фото района»? File name, categories, MIME type and size decide."""
+    if NOT_AREA.search(file.replace("_", " ")):
+        return False
+    if meta is None:
+        return True  # no Commons metadata (sandbox sample): the file name rule only
+    if any(CAT_NOT_AREA.search(c) for c in meta.get("cats") or []):
+        return False
+    mime, w, h = meta.get("mime"), meta.get("w"), meta.get("h")
+    if mime is not None and mime not in AREA_MIMES:
+        return False
+    if w is not None and w < AREA_MIN_WIDTH:
+        return False
+    return not (w and h and w / h > AREA_MAX_ASPECT)
 
 
 TRAILING_PAREN = re.compile(r"\s*\(([^()]*)\)$")
@@ -426,6 +520,12 @@ def build(
     for fid in sorted(links):
         image, credit = image_and_credit(links[fid].get("image"))
         meta_links[fid] = {"wikidata": links[fid]["wikidata"], "image": image, "credit": credit}
+    # area photos (5.9 §3): the files that may NOT stand for a town's area on a hotel card
+    photo_meta = load_json(raw_dir / "photo_meta.json", {})
+    used = {r["image"] for r in town_rows + poi_rows if r.get("image")} | {
+        v["image"] for v in meta_links.values() if v.get("image")
+    }
+    area_block = sorted(f for f in used if not area_ok(f, photo_meta.get(f)))
     meta = {
         "v": FORMAT_VERSION,
         "version": version,
@@ -435,6 +535,8 @@ def build(
         "barKinds": list(BAR_KINDS),
         "credits": credit_list,
         "links": meta_links,
+        "areaBlock": area_block,
+        "areaChecked": bool(photo_meta),
         "sources": sources,
     }
     return {
