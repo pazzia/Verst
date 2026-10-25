@@ -1,0 +1,33 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-14",
+   "input_json": {
+    "start": {
+     "lat": 55.55,
+     "lon": 98.66667,
+     "label": "Алзамай"
+    },
+    "preset": "beer",
+    "adultConfirmed": true,
+    "durationMin": 240
+   }
+  }
+ },
+ "response": {
+  "ok": false,
+  "error": {
+   "code": "NOT_ENOUGH_POIS",
+   "message": "not enough places for preset 'beer'",
+   "field": "preset",
+   "reason": null,
+   "pointIndex": null,
+   "roadKm": null,
+   "detail": null,
+   "suggestions": []
+  },
+  "ms": 0
+ }
+}

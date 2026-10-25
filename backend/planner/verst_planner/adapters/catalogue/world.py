@@ -58,6 +58,16 @@ def poi_rating(sitelinks: int) -> float:
 POI_CATEGORY = {"church": "temple"}
 
 
+def _hours_ok(text: str) -> bool:
+    from verst_planner.hours import parse
+
+    try:
+        parse(text)
+    except Exception:
+        return False
+    return True
+
+
 def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
     ticket = POI_TICKETS.get(p.kind)
     tags = set(POI_TAGS[p.kind])
@@ -74,7 +84,7 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
         address=None,
         region_code=region,
         town_id=town_id,
-        opening_hours=POI_HOURS.get(p.kind),
+        opening_hours=p.hours if p.hours and _hours_ok(p.hours) else POI_HOURS.get(p.kind),
         dwell_min=dwell,
         avg_check_rub=None,
         price_night_rub=None,

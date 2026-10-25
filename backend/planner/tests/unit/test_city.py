@@ -79,7 +79,7 @@ class InputTest(unittest.TestCase):
             ({"crew": []}, "crew"),
             ({"crew": {"adults": 0}}, "crew"),
             ({"preset": "beer"}, "adultConfirmed"),
-            ({"preset": "beer", "adultConfirmed": True, "crew": {"adults": 2, "children": 1}}, "preset"),
+            ({"crew": {"adults": 1, "dog": "yes"}}, "crew.dog"),
             ({"adultConfirmed": "yes"}, "adultConfirmed"),
             ({"startAt": "завтра"}, "startAt"),
             ({"startAt": "2030-01-01T10:00"}, "startAt"),
@@ -95,7 +95,26 @@ class InputTest(unittest.TestCase):
 
     def test_weights_caps_dwell_start(self) -> None:
         w = weights_for(inp(preset="custom", interests=["museums"]))
-        self.assertEqual((w["museum"], w["church"], w["bar"]), (1.0, 0.15, 0.0))
+        self.assertEqual((w["museum"], w["church"], w["bar"]), (1.0, 0.0, 0.0))  # interests filter (S4 b3)
+        from dataclasses import replace
+
+        wide = weights_for(replace(inp(preset="custom", interests=["museums"]), widened=True))
+        self.assertEqual((wide["museum"], wide["church"], wide["bar"]), (1.0, 0.15, 0.0))
+        kids = parse_input(
+            {
+                "start": {"lat": START.lat, "lon": START.lon},
+                "preset": "beer",
+                "adultConfirmed": True,
+                "crew": {"adults": 2, "children": 1, "dog": True},
+            },
+            NOW,
+        )
+        self.assertEqual((kids.children, kids.dog), (1, True))  # 18+ by the age answer; children never block
+        self.assertIsNone(
+            parse_input(
+                {"start": {"lat": START.lat, "lon": START.lon}, "durationMin": None}, NOW
+            ).duration_min
+        )
         self.assertEqual(caps_for(inp(preset="custom", interests=["parks"]))["drinks"], 5)
         self.assertEqual(caps_for(inp(preset="museums"))["museum"], 5)
         self.assertEqual(dwell_for("museum", 50, inp(preset="museums")), 90)  # big museum: flat 90 min

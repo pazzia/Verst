@@ -46,6 +46,17 @@
      "titleRu": "Музейный"
     },
     {
+     "preset": "dog_walk",
+     "available": true,
+     "count": 5,
+     "startAt": "2026-10-23T09:00",
+     "startsTomorrow": false,
+     "defaultDurationMin": 120,
+     "defaultPace": "normal",
+     "adultOnly": false,
+     "titleRu": "Прогулка с собакой"
+    },
+    {
      "preset": "ryumochnye",
      "available": false,
      "count": 1,

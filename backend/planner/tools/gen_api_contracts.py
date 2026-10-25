@@ -224,6 +224,50 @@ call(
 )
 
 
+# API v3 (ADR-0015 §6): the group, the dog walk, «без ограничения», crew warnings, checked suggestions
+KZN = {"lat": 55.7963, "lon": 49.1088, "label": "Казань, Кремлёвская ул."}
+call(
+    "city_route-dog-walk",
+    "city_route",
+    world=R,
+    request_id="c-walk-10",
+    input_json=json.dumps({"start": KZN, "preset": "dog_walk", "crew": {"adults": 2, "dog": True}}),
+)
+call(
+    "city_route-unlimited",
+    "city_route",
+    world=R,
+    request_id="c-walk-11",
+    input_json=json.dumps({"start": KZN, "preset": "overview", "durationMin": None, "crew": {"adults": 2}}),
+)
+call(
+    "city_route-beer-with-child",
+    "city_route",
+    world=R,
+    request_id="c-walk-12",
+    input_json=json.dumps(
+        {"start": KZN, "preset": "beer", "adultConfirmed": True, "crew": {"adults": 2, "children": 1}}
+    ),
+)
+call(
+    "city_route-museums-with-dog",
+    "city_route",
+    world=R,
+    request_id="c-walk-13",
+    input_json=json.dumps(
+        {"start": KZN, "preset": "museums", "durationMin": 240, "crew": {"adults": 2, "dog": True}}
+    ),
+)
+call(
+    "city_route-error-suggestions",
+    "city_route",
+    world=R,
+    request_id="c-walk-14",
+    input_json=json.dumps(
+        {"start": town_without_bars(), "preset": "beer", "adultConfirmed": True, "durationMin": 240}
+    ),
+)
+
 call("poi_details-sight", "poi_details", world=R, place_id=poi_id("Эрмитаж", SPB))
 call("poi_details-fixture-sight", "poi_details", world=R, place_id="pl_yar_ilya")
 call("poi_details-hotel", "poi_details", world=R, place_id="pl_yar_hotel_strelka")

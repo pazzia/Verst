@@ -68,6 +68,7 @@ RULES: dict[str, tuple[str, ...]] = {
         "verst_planner.explain.ru",
         "verst_planner.resources",
         "verst_planner.parking",
+        "verst_planner.hours",
     ),
     # Sprint 4 (ADR-0015 §4): the static parking model
     "verst_planner.parking": (

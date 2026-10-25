@@ -1,0 +1,434 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-11",
+   "input_json": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "preset": "overview",
+    "durationMin": null,
+    "crew": {
+     "adults": 2
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-11",
+   "titleRu": "Казань: обзорная прогулка",
+   "townId": "t_kazan",
+   "townName": "Казань",
+   "townPrep": "Казани",
+   "preset": "overview",
+   "startAt": "2026-10-23T09:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": null,
+   "unlimited": true,
+   "tz": "Europe/Moscow",
+   "walkKm": 9.4,
+   "walkMin": 126,
+   "durationMin": null,
+   "requestedDurationMin": null,
+   "crewNotesRu": [],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "finish": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "Q13205949",
+     "kind": "monument",
+     "nameRu": "Памятник Мусе Джалилю",
+     "lat": 55.79611,
+     "lon": 49.10833,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 10,
+     "walkKmFromPrev": 0.0,
+     "walkMinFromPrev": 1,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w02",
+     "poiId": "Q2655072",
+     "kind": "church",
+     "nameRu": "Петропавловский собор",
+     "lat": 55.79361,
+     "lon": 49.11321,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 7,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "08:00–20:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w03",
+     "poiId": "Q1634187",
+     "kind": "attraction",
+     "nameRu": "Султановская мечеть",
+     "lat": 55.784,
+     "lon": 49.109,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 1.4,
+     "walkMinFromPrev": 19,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w04",
+     "poiId": "Q4308855",
+     "kind": "monument",
+     "nameRu": "Мухаммадия",
+     "lat": 55.78205,
+     "lon": 49.11078,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 10,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 4,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w05",
+     "poiId": "Q2528801",
+     "kind": "attraction",
+     "nameRu": "Мечеть аль-Марджани",
+     "lat": 55.77972,
+     "lon": 49.1175,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 9,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w06",
+     "poiId": "Q3585726",
+     "kind": "church",
+     "nameRu": "Храм Воздвижения Святого Креста",
+     "lat": 55.78306,
+     "lon": 49.1275,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.9,
+     "walkMinFromPrev": 13,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "08:00–20:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w07",
+     "poiId": "Q21643726",
+     "kind": "monument",
+     "nameRu": "Памятник Габдулле Тукаю",
+     "lat": 55.78528,
+     "lon": 49.12,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 10,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 9,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w08",
+     "poiId": "Q4071782",
+     "kind": "attraction",
+     "nameRu": "Астрономическая обсерватория Казанского университета",
+     "lat": 55.79083,
+     "lon": 49.11917,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.8,
+     "walkMinFromPrev": 11,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w09",
+     "poiId": "Q4365764",
+     "kind": "square",
+     "nameRu": "Площадь Свободы",
+     "lat": 55.79694,
+     "lon": 49.125,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 10,
+     "walkKmFromPrev": 1.0,
+     "walkMinFromPrev": 13,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w10",
+     "poiId": "pl_kaz_kremlin",
+     "kind": "kremlin",
+     "nameRu": "Казанский кремль",
+     "lat": 55.803535,
+     "lon": 49.119986,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 50,
+     "walkKmFromPrev": 1.0,
+     "walkMinFromPrev": 14,
+     "costRub": 0,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "08:00–22:00",
+      "openNow": true,
+      "source": "curated"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w11",
+     "poiId": "Q4207773",
+     "kind": "monastery",
+     "nameRu": "Казанский Богородицкий монастырь",
+     "lat": 55.79939,
+     "lon": 49.11389,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 50,
+     "walkKmFromPrev": 0.8,
+     "walkMinFromPrev": 10,
+     "costRub": 600,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w12",
+     "poiId": "Q185568",
+     "kind": "church",
+     "nameRu": "Благовещенский собор Казанского кремля",
+     "lat": 55.79979,
+     "lon": 49.1058,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 9,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "08:00–20:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    }
+   ],
+   "cost": {
+    "totalRub": 600,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 600
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     55.7963,
+     49.1088
+    ],
+    [
+     55.79611,
+     49.10833
+    ],
+    [
+     55.79361,
+     49.11321
+    ],
+    [
+     55.784,
+     49.109
+    ],
+    [
+     55.78205,
+     49.11078
+    ],
+    [
+     55.77972,
+     49.1175
+    ],
+    [
+     55.78306,
+     49.1275
+    ],
+    [
+     55.78528,
+     49.12
+    ],
+    [
+     55.79083,
+     49.11917
+    ],
+    [
+     55.79694,
+     49.125
+    ],
+    [
+     55.803535,
+     49.119986
+    ],
+    [
+     55.79939,
+     49.11389
+    ],
+    [
+     55.79979,
+     49.1058
+    ],
+    [
+     55.7963,
+     49.1088
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "townId": null,
+    "preset": "overview",
+    "durationMin": null,
+    "interests": [],
+    "pace": "normal",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T09:00",
+    "crew": {
+     "adults": 2,
+     "children": 0
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   }
+  },
+  "ms": 0
+ }
+}

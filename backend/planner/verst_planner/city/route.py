@@ -7,7 +7,15 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
-from verst_planner.city.presets import ADULT_PRESETS, DRINK_KINDS, DWELL, MEAL_RUB, PACES
+from verst_planner.city.presets import (
+    ADULT_PRESETS,
+    DRINK_KINDS,
+    DWELL,
+    INDOOR_KINDS,
+    MEAL_RUB,
+    PACES,
+    UNLIMITED_MIN,
+)
 from verst_planner.city.walk import Candidate, Solver, WalkInput, caps_for, hm, polyline, r1
 from verst_planner.domain.errors import PlannerError
 from verst_planner.domain.model import LatLon
@@ -25,6 +33,7 @@ class NotEnoughPois(PlannerError):
     def __init__(self, preset: str) -> None:
         super().__init__(f"not enough places for preset {preset!r}")
         self.field = "preset"
+        self.suggestions: list[dict[str, Any]] = []  # set by the bridge: checked, never the current values
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,7 +45,28 @@ class WalkTown:
 
 
 def _meal(inp: WalkInput) -> bool:
-    return inp.preset == "custom" and "food" in inp.interests and inp.duration_min >= MEAL_MIN_DURATION
+    return (
+        inp.preset == "custom"
+        and "food" in inp.interests
+        and (inp.duration_min is None or inp.duration_min >= MEAL_MIN_DURATION)
+    )
+
+
+def _budget_min(inp: WalkInput) -> int:
+    return UNLIMITED_MIN if inp.duration_min is None else inp.duration_min
+
+
+def _hours_today(c: Candidate, day: datetime) -> dict[str, Any]:
+    """ADR-0015 §6: today's opening hours of a stop (OSM `opening_hours`, curated, or the kind's default)."""
+    if c.hours is None or c.hours.always:
+        return {"todayRu": ru.text("walk.hours.always"), "openNow": True, "source": c.hours_source}
+    spans = c.hours.day_intervals(day.weekday())
+    if not spans:
+        return {"todayRu": ru.text("walk.hours.closed"), "openNow": False, "source": c.hours_source}
+    text = ", ".join(
+        f"{lo // 60:02d}:{lo % 60:02d}\u2013{(hi // 60) % 24:02d}:{hi % 60:02d}" for lo, hi in spans
+    )
+    return {"todayRu": text, "openNow": c.hours.is_open(day), "source": c.hours_source}
 
 
 def build_walk(
@@ -55,8 +85,9 @@ def build_walk(
     meal_rub = MEAL_RUB * (inp.adults + inp.children) if meal else 0
     finish = inp.start if inp.return_to_start else None
     budget = None if inp.budget_rub is None else inp.budget_rub - meal_rub
+    unlimited = inp.duration_min is None
     solver = Solver(
-        cands, inp.start, finish, inp.duration_min - meal_min, speed, start_dt, budget, caps_for(inp), cancel
+        cands, inp.start, finish, _budget_min(inp) - meal_min, speed, start_dt, budget, caps_for(inp), cancel
     )
     order = solver.solve()
     if len(order) < 2:
@@ -66,7 +97,7 @@ def build_walk(
     shift = 0.0
     meal_after = None
     if meal:
-        half = inp.duration_min / 2
+        half = _budget_min(inp) / 2
         meal_after = min(range(len(order)), key=lambda k: (abs(ev.legs[k].depart - half), k))
     tickets = drinks = 0
     verified_all = True
@@ -88,14 +119,15 @@ def build_walk(
                 "nameRu": c.name,
                 "lat": round(c.point.lat, 6),
                 "lon": round(c.point.lon, 6),
-                "arriveAt": hm(arrive),
-                "departAt": hm(depart),
+                "arriveAt": None if unlimited else hm(arrive),
+                "departAt": None if unlimited else hm(depart),
                 "dwellMin": c.dwell_min,
                 "walkKmFromPrev": r1(leg.walk_km),
                 "walkMinFromPrev": round(leg.walk_min),
                 "costRub": c.cost_rub,
                 "hoursVerified": c.hours_verified,
-                "noteRu": _stop_note(c),
+                "hours": _hours_today(c, arrive),
+                "noteRu": _stop_note(c, inp),
                 "hasPhoto": c.has_photo,
                 "tappable": True,
             }
@@ -111,13 +143,14 @@ def build_walk(
                     "nameRu": ru.text("walk.meal"),
                     "lat": round(c.point.lat, 6),
                     "lon": round(c.point.lon, 6),
-                    "arriveAt": hm(meal_start),
-                    "departAt": hm(meal_start + timedelta(minutes=meal_min)),
+                    "arriveAt": None if unlimited else hm(meal_start),
+                    "departAt": None if unlimited else hm(meal_start + timedelta(minutes=meal_min)),
                     "dwellMin": meal_min,
                     "walkKmFromPrev": 0.0,
                     "walkMinFromPrev": 0,
                     "costRub": meal_rub,
                     "hoursVerified": True,
+                    "hours": None,
                     "noteRu": None,
                     "hasPhoto": False,
                     "tappable": False,
@@ -136,9 +169,17 @@ def build_walk(
     alcohol = inp.preset in ADULT_PRESETS or any(cands[ci].kind in DRINK_KINDS for ci in order)
     duration = round(ev.total_min + shift)
     total_rub = tickets + drinks + meal_rub
-    shorter = _shorter(inp, duration, total_rub)
+    unused = sum(1 for i, c in enumerate(cands) if i not in set(order) and c.weight > 0)
+    shorter = None if unlimited else _shorter(inp, duration, total_rub, unused)
     if shorter is not None:
         warnings.append({"code": "SHORTER_THAN_ASKED", "messageRu": shorter["messageRu"]})
+    # ADR-0015 §6 crew warnings: never a block, always said
+    if alcohol and inp.children:
+        warnings.append({"code": "CHILD_BARS", "messageRu": ru.text("walk.warning.child_bars")})
+    indoor = [cands[ci].name for ci in order if cands[ci].kind in INDOOR_KINDS]
+    if inp.dog and indoor:
+        warnings.append({"code": "DOG_INDOOR", "messageRu": ru.text("walk.warning.dog_indoor")})
+    notes = _crew_notes(inp, bool(indoor))
     start_obj = {
         "lat": round(inp.start.lat, 6),
         "lon": round(inp.start.lon, 6),
@@ -156,12 +197,15 @@ def build_walk(
         "startAt": hm(start_dt),
         "startsTomorrow": starts_tomorrow,
         "startNoteRu": ru.text("walk.tomorrow", time=start_dt.strftime("%H:%M")) if starts_tomorrow else None,
-        "endAt": hm(end),
+        "endAt": None if unlimited else hm(end),
+        "unlimited": unlimited,
         "tz": town.tz,
         "walkKm": r1(ev.walk_km),
         "walkMin": round(ev.walk_min),
-        "durationMin": duration,
+        "durationMin": None if unlimited else duration,
         "requestedDurationMin": inp.duration_min,
+        "crewNotesRu": notes,
+        "interestsWidened": inp.widened,
         "shorter": shorter,
         "returnToStart": inp.return_to_start,
         "start": start_obj,
@@ -176,8 +220,22 @@ def build_walk(
     }
 
 
-def _stop_note(c: Candidate) -> str | None:
+def _crew_notes(inp: WalkInput, indoor: bool) -> list[str]:
+    """Adaptation notes for the group (ADR-0015 §6)."""
+    out = []
+    if inp.children:
+        out.append(ru.text("walk.crew.child"))
+    if inp.dog:
+        out.append(ru.text("walk.crew.dog_indoor" if indoor else "walk.crew.dog"))
+    if inp.widened:
+        out.append(ru.text("walk.crew.widened"))
+    return out
+
+
+def _stop_note(c: Candidate, inp: WalkInput) -> str | None:
     notes = []
+    if inp.dog and c.kind in INDOOR_KINDS:
+        notes.append(ru.text("walk.note.dog_indoor"))
     if c.long_visit:
         notes.append(ru.text("walk.note.long_visit", time=ru.fmt_duration(c.dwell_min)))
     if not c.hours_verified:
@@ -189,13 +247,16 @@ def _quarter(minutes: int) -> int:
     return max(15, (minutes + 7) // 15 * 15)
 
 
-def _shorter(inp: WalkInput, duration: int, total_rub: int) -> dict[str, Any] | None:
-    """Why the walk is ≥ 30 min shorter than asked (P1-2), or None."""
+def _shorter(inp: WalkInput, duration: int, total_rub: int, unused: int) -> dict[str, Any] | None:
+    """Why the walk is ≥ 30 min shorter than asked (P1-2), or None. Honest (S4 bug b3): «places» only when
+    no candidate is left; candidates left over but not fitting = «reach» (too far apart to walk)."""
+    assert inp.duration_min is not None
     if inp.duration_min - duration < SHORTER_MIN:
         return None
-    reason = (
-        "budget" if inp.budget_rub is not None and total_rub >= BUDGET_BOUND * inp.budget_rub else "places"
-    )
+    if inp.budget_rub is not None and total_rub >= BUDGET_BOUND * inp.budget_rub:
+        reason = "budget"
+    else:
+        reason = "reach" if unused else "places"
     actual, requested = ru.fmt_duration(_quarter(duration)), ru.fmt_duration(inp.duration_min)
     return {
         "reason": reason,

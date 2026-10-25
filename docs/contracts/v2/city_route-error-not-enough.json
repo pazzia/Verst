@@ -24,7 +24,8 @@
    "reason": null,
    "pointIndex": null,
    "roadKm": null,
-   "detail": null
+   "detail": null,
+   "suggestions": []
   },
   "ms": 0
  }

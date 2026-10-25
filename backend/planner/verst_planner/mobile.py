@@ -29,6 +29,7 @@ CLI: ``python3 -m verst_planner.mobile selftest [--world PATH …]`` runs the wh
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import sys
 import threading
@@ -178,7 +179,7 @@ def _envelope(fn: Callable[[], Any]) -> str:
         except TooShort as e:
             body = {"ok": False, "error": _error(e.code, str(e), roadKm=e.road_km)}
         except NotEnoughPois as e:
-            body = {"ok": False, "error": _error(e.code, str(e), field=e.field)}
+            body = {"ok": False, "error": _error(e.code, str(e), field=e.field, suggestions=e.suggestions)}
         except PlannerError as e:
             body = {"ok": False, "error": _error(e.code, str(e))}
         except EngineFailure as e:
@@ -992,6 +993,23 @@ def _walk_town(w: _World, start: LatLon, town_id: str | None) -> Town:
     return hit[1]
 
 
+def _safe_hours(text: str | None) -> Any:
+    if not text:
+        return None
+    try:
+        return parse_hours(text)
+    except Exception:  # an OSM value outside the supported subset: the kind's default applies
+        return None
+
+
+def _osm_hours(place_id: str) -> str | None:
+    """The OSM `opening_hours` of a catalogue POI (ADR-0015 §3), if the data build found one."""
+    if not _CATALOGUE:
+        return None
+    poi = _CATALOGUE[0].poi_by_id.get(place_id)
+    return poi.hours if poi is not None else None
+
+
 def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
     weights = weights_for(inp)
     crew_tickets = inp.adults, inp.children
@@ -1003,7 +1021,8 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
         weight = weights.get(kind, 0.0)
         if weight <= 0:
             continue
-        hours = parse_hours(p.opening_hours) if p.opening_hours else None
+        hours = _safe_hours(p.opening_hours)
+        osm_hours = _osm_hours(p.id) is not None and hours is not None
         adult = p.ticket_adult_rub or 0
         child = p.ticket_child_rub if p.ticket_child_rub is not None else adult
         cost = 0 if Tag.FREE_ENTRY in p.tags else crew_tickets[0] * adult + crew_tickets[1] * child
@@ -1016,7 +1035,10 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                 popularity=max(0.0, min(1.0, (p.rating_internal - 3.5) / 1.5)),
                 heritage=False,
                 hours=hours,
-                hours_verified=p.source is Source.CURATED and p.opening_hours is not None,
+                hours_verified=(p.source is Source.CURATED and p.opening_hours is not None) or osm_hours,
+                hours_source="curated"
+                if p.source is Source.CURATED and p.opening_hours is not None
+                else ("osm" if osm_hours else "default"),
                 cost_rub=cost,
                 dwell_min=dwell_for(kind, _sitelinks(p.id), inp),
                 long_visit=inp.preset == "museums" and long_visit(kind, _sitelinks(p.id)),
@@ -1085,26 +1107,82 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
             raise PlanCancelled()
         _CANCELS[rid] = token
     try:
-        speed = city_presets_mod.PACES[inp.pace][0]
-        cands = _candidates(w, inp, city_presets_mod.radius_km(inp.duration_min, speed))
-        if inp.start_at is not None:
-            start_dt, tomorrow = inp.start_at, inp.start_at.date() > now_local.date()
-        else:
-            start_dt, tomorrow = planned_start(now_local, inp.preset, inp.interests, inp.duration_min)
-        return build_walk(
-            inp,
-            cands,
-            WalkTown(town.id, town.name_ru, ru.prepositional(town), tz),
-            start_dt,
-            ENGINE_VERSION,
-            f"wlk_{rid}",
-            token,
-            tomorrow,
-        )
+        wt = WalkTown(town.id, town.name_ru, ru.prepositional(town), tz)
+        try:
+            return _solve_walk(w, inp, wt, now_local, f"wlk_{rid}", token)
+        except NotEnoughPois as e:
+            e.suggestions = _walk_suggestions(w, inp, wt, now_local, token)
+            raise
     finally:
         with _LOCK:
             if _CANCELS.get(rid) is token:
                 del _CANCELS[rid]
+
+
+def _walk_candidates(w: _World, inp: WalkInput) -> tuple[WalkInput, list[Candidate]]:
+    """The candidates; a custom walk whose interests give < 2 places widens to other sights (flagged)."""
+    radius = city_presets_mod.radius_km(inp.duration_min, city_presets_mod.PACES[inp.pace][0])
+    cands = _candidates(w, inp, radius)
+    if inp.preset == "custom" and not inp.widened:
+        sights = [c for c in cands if c.kind not in city_presets_mod.DRINK_KINDS]
+        if len(sights) < 2:
+            inp = dataclasses.replace(inp, widened=True)
+            cands = _candidates(w, inp, radius)
+    return inp, cands
+
+
+def _solve_walk(
+    w: _World, inp: WalkInput, wt: WalkTown, now_local: datetime, route_id: str, token: CancelToken
+) -> dict[str, Any]:
+    inp, cands = _walk_candidates(w, inp)
+    if inp.start_at is not None:
+        start_dt, tomorrow = inp.start_at, inp.start_at.date() > now_local.date()
+    else:
+        start_dt, tomorrow = planned_start(now_local, inp.preset, inp.interests, inp.duration_min or 120)
+    return build_walk(inp, cands, wt, start_dt, ENGINE_VERSION, route_id, token, tomorrow)
+
+
+MAX_SUGGESTIONS = 3
+
+
+def _walk_suggestions(
+    w: _World, inp: WalkInput, wt: WalkTown, now_local: datetime, token: CancelToken
+) -> list[dict[str, Any]]:
+    """ADR-0015 §6 / S4 bug c: what would work instead, each one solved and never the current value."""
+    trials: list[tuple[dict[str, Any], WalkInput]] = []
+    if inp.exclude:
+        trials.append(({"clearExclude": True}, dataclasses.replace(inp, exclude=frozenset())))
+    if inp.duration_min is not None:
+        for d in city_presets_mod.DURATIONS:
+            if d > inp.duration_min:
+                trials.append(({"durationMin": d}, dataclasses.replace(inp, duration_min=d)))
+        trials.append(({"durationMin": None}, dataclasses.replace(inp, duration_min=None)))
+    for p in ("dog_walk", "overview", "custom") if inp.dog else ("overview", "custom"):
+        if p == inp.preset:
+            continue
+        table = city_presets_mod.PRESET_TABLE.get(p)
+        trials.append(
+            (
+                {"preset": p},
+                dataclasses.replace(
+                    inp,
+                    preset=p,
+                    interests=("history", "architecture", "parks", "views") if p == "custom" else (),
+                    duration_min=table.default_duration if table else inp.duration_min,
+                    widened=False,
+                ),
+            )
+        )
+    out: list[dict[str, Any]] = []
+    for label, trial in trials:
+        if len(out) >= MAX_SUGGESTIONS:
+            break
+        try:
+            r = _solve_walk(w, trial, wt, now_local, "probe", token)
+        except NotEnoughPois:
+            continue
+        out.append({**label, "stops": len(r["stops"])})
+    return out
 
 
 def city_route(world: str, request_id: str, input_json: str) -> str:

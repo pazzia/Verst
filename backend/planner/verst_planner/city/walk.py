@@ -32,6 +32,7 @@ from verst_planner.city.presets import (
     PACES,
     PRESET_TABLE,
     PRESETS,
+    UNLIMITED_MAX_STOPS,
     WALK_FACTOR,
     custom_weights,
 )
@@ -44,6 +45,7 @@ from verst_planner.hours import parse as parse_hours
 
 MAX_MOVES = 200
 MAX_WAIT_MIN = 60
+PAIR_POOL = 25  # pair insertion considers the 25 best candidates
 WAIT_STEP_MIN = 5
 # Daytime windows in the town's local time (ADR-0013 "Start time", spec 5.11 §9): a walk starts no earlier
 # than the opening and ends by the closing hour; when that no longer fits today, at tomorrow's opening.
@@ -59,7 +61,7 @@ class WalkInput:
     label: str
     town_id: str | None
     preset: str
-    duration_min: int
+    duration_min: int | None  # None = «без ограничения» (ADR-0015 §6: no timetable)
     interests: tuple[str, ...]
     pace: str
     budget_rub: int | None
@@ -69,6 +71,8 @@ class WalkInput:
     children: int
     adult_confirmed: bool
     exclude: frozenset[str]
+    dog: bool = False
+    widened: bool = False  # the interests gave < 2 places: other sights joined at 0.15
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,6 +90,7 @@ class Candidate:
     has_photo: bool
     weight: float
     long_visit: bool = False  # a big museum seen in ≤ 2 h: the stop says «только главное»
+    hours_source: str = "default"  # "osm" | "curated" | "default" (ADR-0015 §6)
 
     @property
     def base_score(self) -> float:
@@ -137,12 +142,14 @@ def parse_input(d: dict[str, Any], tz_now_local: datetime) -> WalkInput:
     preset = d.get("preset", "overview")
     if preset not in PRESETS:
         raise InvalidInput("preset", "unknown")
-    duration = _int(
-        d.get("durationMin", PRESET_TABLE[preset].default_duration if preset in PRESET_TABLE else 240),
-        "durationMin",
+    raw_duration = d.get(
+        "durationMin", PRESET_TABLE[preset].default_duration if preset in PRESET_TABLE else 240
     )
-    if duration not in DURATIONS:
-        raise InvalidInput("durationMin", "out_of_range")
+    duration: int | None = None
+    if raw_duration is not None:  # null = «без ограничения»
+        duration = _int(raw_duration, "durationMin")
+        if duration not in DURATIONS:
+            raise InvalidInput("durationMin", "out_of_range")
     interests = d.get("interests") or []
     if not isinstance(interests, list) or any(i not in INTERESTS for i in interests):
         raise InvalidInput("interests", "unknown")
@@ -163,14 +170,13 @@ def parse_input(d: dict[str, Any], tz_now_local: datetime) -> WalkInput:
         raise InvalidInput("crew", "not_object")
     adults = _int(crew.get("adults", 1), "crew.adults")
     children = _int(crew.get("children", 0), "crew.children")
+    dog = _bool(crew.get("dog", False), "crew.dog")
     if not 1 <= adults <= 8 or not 0 <= children <= 7 or adults + children > 8:
         raise InvalidInput("crew", "out_of_range")
     confirmed = _bool(d.get("adultConfirmed", False), "adultConfirmed")
     alcohol = preset in ADULT_PRESETS or (preset == "custom" and "bars" in interests)
-    if alcohol and not confirmed:
+    if alcohol and not confirmed:  # 18+ by the user's age answer only; children get a warning, not a block
         raise InvalidInput("adultConfirmed", "required")
-    if alcohol and children:
-        raise InvalidInput("preset", "children")
     start_at = d.get("startAt")
     when = None
     if start_at is not None:
@@ -201,19 +207,21 @@ def parse_input(d: dict[str, Any], tz_now_local: datetime) -> WalkInput:
         children=children,
         adult_confirmed=confirmed,
         exclude=frozenset(exclude),
+        dog=dog,
     )
 
 
 def weights_for(inp: WalkInput) -> dict[str, float]:
     if inp.preset == "custom":
-        return custom_weights(inp.interests)
+        return custom_weights(inp.interests, inp.widened)
     return dict(PRESET_TABLE[inp.preset].weights)
 
 
 def caps_for(inp: WalkInput) -> dict[str, int]:
-    if inp.preset == "custom":
-        return {"museum": 4, "drinks": 5}
-    return dict(PRESET_TABLE[inp.preset].caps)
+    caps = {"museum": 4, "drinks": 5} if inp.preset == "custom" else dict(PRESET_TABLE[inp.preset].caps)
+    if inp.duration_min is None:
+        caps["stops"] = UNLIMITED_MAX_STOPS
+    return caps
 
 
 def dwell_for(kind: str, sitelinks: int, inp: WalkInput) -> int:
@@ -283,7 +291,8 @@ class Solver:
         drinks = sum(1 for i in seq if self.c[i].kind in DRINK_KINDS)
         others = len(seq) - museums - drinks
         return (
-            museums <= self.caps.get("museum", 99)
+            len(seq) <= self.caps.get("stops", 99)
+            and museums <= self.caps.get("museum", 99)
             and drinks <= self.caps.get("drinks", 99)
             and others <= self.caps.get("others", 99)
         )
@@ -356,6 +365,35 @@ class Solver:
         return total
 
     def _insert_pass(self, seq: list[int], by_ratio: bool = True) -> bool:
+        """The best single insertion; on a round trip the reversed order is tried too (S4 walk-filters b3:
+        [Памятник, Бюст, Бюст] cannot reach Гребнево, the same walk backwards can)."""
+        if self.finish is not None and len(seq) > 1 and self.finish == self.start:
+            rev = seq[::-1]
+            a, b = list(seq), list(rev)
+            ok_a, ok_b = self._insert_once(a, by_ratio), self._insert_once(b, by_ratio)
+            if ok_a and ok_b:
+                pick = a if self._better(a, b, by_ratio, seq) else b
+            elif ok_a or ok_b:
+                pick = a if ok_a else b
+            else:
+                return False
+            seq[:] = pick
+            return True
+        return self._insert_once(seq, by_ratio)
+
+    def _better(self, a: list[int], b: list[int], by_ratio: bool, base: list[int]) -> bool:
+        ea, eb = self.evaluate(a), self.evaluate(b)
+        sa, sb = self.score(a), self.score(b)
+        if by_ratio:
+            t0 = self.evaluate(base).total_min
+            ra, rb = (
+                (sa - self.score(base)) / max(1e-6, ea.total_min - t0),
+                (sb - self.score(base)) / max(1e-6, eb.total_min - t0),
+            )
+            return (ra, -ea.total_min) >= (rb, -eb.total_min)
+        return (sa, -ea.total_min) >= (sb, -eb.total_min)
+
+    def _insert_once(self, seq: list[int], by_ratio: bool = True) -> bool:
         used = set(seq)
         base_ev = self.evaluate(seq)
         base_t = (base_ev.total_min - base_ev.wait_min) if seq else 0.0
@@ -381,6 +419,41 @@ class Solver:
         if best is None:
             return False
         seq.insert(best[3], best[4])
+        return True
+
+    def _insert_pair_pass(self, seq: list[int], by_ratio: bool = True) -> bool:
+        """Insert two stops at once (S4 walk-filters bug b3): a cluster behind the 2.5 km leg cap (Гребнево
+        from central Фрязино) is reachable only through a stepping stone, which one-at-a-time insertion never
+        adds when the stepping stone alone is not worth it. Tried only when no single stop fits."""
+        used = set(seq)
+        base_ev = self.evaluate(seq)
+        base_t = (base_ev.total_min - base_ev.wait_min) if seq else 0.0
+        base_s = self.score(seq)
+        pool = [ci for ci in range(len(self.c)) if ci not in used and self.c[ci].weight > 0]
+        pool = sorted(pool, key=lambda ci: (-self.c[ci].base_score, self.c[ci].id))[:PAIR_POOL]
+        best: tuple[float, float, str, str, int, int, int] | None = None
+        for pos in range(len(seq) + 1):
+            prev = seq[pos - 1] if pos > 0 else -1
+            for ci in pool:
+                if self._dist(prev, ci) > MAX_LEG_KM:
+                    continue
+                for cj in pool:
+                    if cj == ci or self.d[ci][cj] > MAX_LEG_KM:
+                        continue
+                    new = [*seq[:pos], ci, cj, *seq[pos:]]
+                    ev = self.evaluate(new)
+                    if not ev.ok:
+                        continue
+                    dt = max(1e-6, ev.total_min - base_t)
+                    ds = self.score(new) - base_s
+                    if ds <= 0:
+                        continue
+                    key = (-ds / dt if by_ratio else -ds, dt, self.c[ci].id, self.c[cj].id, pos, ci, cj)
+                    if best is None or key < best:
+                        best = key
+        if best is None:
+            return False
+        seq[best[4] : best[4]] = [best[5], best[6]]
         return True
 
     def _dist(self, a: int, b: int) -> float:
@@ -462,7 +535,9 @@ class Solver:
         while moves < MAX_MOVES:
             self.cancel.check()
             changed = False
-            while moves < MAX_MOVES and self._insert_pass(seq, by_ratio):
+            while moves < MAX_MOVES and (
+                self._insert_pass(seq, by_ratio) or self._insert_pair_pass(seq, by_ratio)
+            ):
                 moves += 1
                 changed = True
             while moves < MAX_MOVES and self._two_opt(seq):
