@@ -331,6 +331,64 @@ class VerstFlowTest {
         assertEquals(stops[2].id, again.roadTopId)
     }
 
+    /**
+     * 5.13 §5 (S4): the sheet on a day → Карты get the whole day (unsigned), «До след.» → the Навигатор gets the
+     * next point only; «Запомнить выбор» then opens the remembered app straight from «вести».
+     */
+    @Test
+    fun handoffSheetUnsignedRoutesAndRememberedChoice() = runTest {
+        val gw = FakeGateway()
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        val opened = mutableListOf<Triple<HandoffApp, String?, String?>>()
+        flow.handoffLauncher = object : HandoffLauncher {
+            override fun navigatorInstalled() = true
+            override fun mapsInstalled() = true
+            override fun open(links: app.verst.core.model.dto.HandoffLinksDto, walk: Boolean) = HandoffTarget.None
+            override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
+                opened += Triple(app, uri, web)
+                return if (app == HandoffApp.NAVI) HandoffTarget.Navigator else HandoffTarget.Maps
+            }
+        }
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        val day = flow.result!!.trip.daysList.first()
+        val local = app.verst.core.model.NaviLinks.day(day)!!
+        flow.handoff(day.day)
+        settle()
+        assertEquals(day.day, flow.handoffSheet!!.day)
+        assertNotNull(flow.handoffSheet!!.handoff)
+        flow.handoffPick(HandoffApp.MAPS)
+        assertNull(flow.handoffSheet)
+        assertEquals(Triple(HandoffApp.MAPS, local.mapsApp, local.web), opened.single())
+        assertEquals(Toast.HandoffOpen(navi = false), flow.toast)
+        // «До след.»: the Навигатор to the next point only (no vias)
+        flow.openHandoffSheet(day.day); settle()
+        flow.handoffScope(null)
+        flow.handoffPick(HandoffApp.NAVI)
+        val navi = opened.last()
+        assertEquals(HandoffApp.NAVI, navi.first)
+        assertTrue(navi.second!!.startsWith("yandexnavi://build_route_on_map?lat_to="))
+        assertFalse(navi.second!!.contains("lat_via_0"))
+        // unsigned, even the day scope never sends the whole day to the Навигатор
+        flow.openHandoffSheet(day.day); settle()
+        flow.handoffPick(HandoffApp.NAVI)
+        assertFalse(opened.last().second!!.contains("lat_via_0"))
+        // «Запомнить выбор»: the next «вести» opens Карты directly; a long-press still opens the sheet
+        flow.openHandoffSheet(day.day); settle()
+        flow.toggleHandoffRemember()
+        flow.handoffPick(HandoffApp.MAPS)
+        val n = opened.size
+        flow.handoff(day.day); settle()
+        assertNull(flow.handoffSheet)
+        assertEquals(n + 1, opened.size)
+        assertEquals(HandoffApp.MAPS, opened.last().first)
+        flow.openHandoffSheet(day.day); settle()
+        assertNotNull(flow.handoffSheet)
+        flow.back()
+        assertNull(flow.handoffSheet)
+    }
+
     @Test
     fun handoffDayMenuStopMenuTargetsAndFallbacks() = runTest {
         val gw = FakeGateway()

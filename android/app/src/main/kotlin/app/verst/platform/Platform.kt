@@ -118,6 +118,29 @@ class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
         }
     }
 
+    override fun openIn(app: app.verst.nav.HandoffApp, uri: String?, web: String?): HandoffTarget {
+        if (app == app.verst.nav.HandoffApp.NAVI) {
+            return if (uri != null && navigatorInstalled() && start(uri, NaviLinks.NAVI_PACKAGE)) HandoffTarget.Navigator else HandoffTarget.None
+        }
+        if (uri != null && mapsInstalled() && start(uri, NaviLinks.MAPS_PACKAGE)) return HandoffTarget.Maps
+        val w = web ?: return HandoffTarget.None
+        return try {
+            activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(w)).addCategory(Intent.CATEGORY_BROWSABLE))
+            HandoffTarget.Browser
+        } catch (e: ActivityNotFoundException) {
+            Log.w(TAG, "no browser for $w", e)
+            HandoffTarget.None
+        }
+    }
+
+    override fun openStore(app: app.verst.nav.HandoffApp) {
+        val pkg = if (app == app.verst.nav.HandoffApp.NAVI) NaviLinks.NAVI_PACKAGE else NaviLinks.MAPS_PACKAGE
+        val market = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg"))
+        if (runCatching { activity.startActivity(market) }.isFailure) {
+            runCatching { activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$pkg"))) }
+        }
+    }
+
     private fun start(uri: String, pkg: String): Boolean = try {
         activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri)).setPackage(pkg))
         true

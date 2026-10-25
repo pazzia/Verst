@@ -65,6 +65,7 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     is app.verst.nav.Toast.HandoffWeb -> stringResource(if (t.walk) R.string.handoff_toast_web_walk else R.string.handoff_toast_web)
     app.verst.nav.Toast.HandoffOffline -> stringResource(R.string.handoff_offline)
     app.verst.nav.Toast.HandoffFailed -> stringResource(R.string.handoff_failed)
+    is app.verst.nav.Toast.HandoffOpen -> stringResource(if (t.navi) R.string.handoff_open_navi else R.string.handoff_open_maps)
     is app.verst.nav.Toast.LocationDenied -> stringResource(R.string.loc_denied_plate, t.town)
     app.verst.nav.Toast.LocationBlocked -> stringResource(R.string.loc_blocked)
     is app.verst.nav.Toast.LocationTimeout -> stringResource(R.string.loc_timeout, t.town)

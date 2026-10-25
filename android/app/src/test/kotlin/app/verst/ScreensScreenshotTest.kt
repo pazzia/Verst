@@ -29,6 +29,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -470,6 +471,29 @@ class ScreensScreenshotTest {
         val night = trip.daysList.flatMap { it.stops }.filter { it.kind == "overnight" }[1]
         shot("road", "focus-restored") { RoadScreen(RoadUi(trip, "NE", focus = RoadFocus(night.id, null, 1)), noRoad) }
         compose.onNodeWithTag("road.stop.${night.id}", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    /** 5.13 §5 (S4) unsigned: day 1 → Карты first with «весь день», Навигатор the next point with the 5-a-day note. */
+    @Test
+    fun handoffSheetDayUnsigned() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = true, naviInstalled = true, signed = false, remember = false)
+        shot("handoff", "s4-day-unsigned") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
+        compose.onNodeWithTag("handoff.maps.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.navi.note", useUnmergedTree = true).assertTextContains("5 раз", substring = true)
+        compose.onNodeWithTag("handoff.tab.1").assertIsSelected()
+    }
+
+    /** «До след.» with the Навигатор not installed: it dims with «Установить…»; Карты (web) keeps its place. */
+    @Test
+    fun handoffSheetNextNaviMissing() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(null, h, 1), mapsInstalled = false, naviInstalled = false, signed = false, remember = true)
+        shot("handoff", "s4-next-missing") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
+        compose.onNodeWithTag("handoff.navi.install", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.maps.note", useUnmergedTree = true).assertTextContains("браузере", substring = true)
+        compose.onNodeWithTag("handoff.tab.next").assertIsSelected()
+        compose.onNodeWithTag("handoff.remember").assertIsOn()
     }
 
     @Test

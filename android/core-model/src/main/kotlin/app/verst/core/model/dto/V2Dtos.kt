@@ -128,13 +128,34 @@ data class PoiDetailsDto(
 data class HandoffPointDto(val lat: Double, val lon: Double, val nameRu: String? = null, val role: String? = null)
 
 @Serializable
-data class HandoffLinksDto(val navigator: String? = null, val maps: String? = null, val web: String? = null)
+data class HandoffLinksDto(
+    val navigator: String? = null,
+    val maps: String? = null,
+    val web: String? = null,
+    /** API v3 (ADR-0015 §1): the Навигатор to the next point only (unsigned launches are limited to 5 a day). */
+    val navigatorNext: String? = null,
+)
 
 @Serializable
-data class HandoffPartDto(val index: Int = 1, val points: List<HandoffPointDto> = emptyList(), val links: HandoffLinksDto = HandoffLinksDto())
+data class HandoffPartDto(
+    val index: Int = 1,
+    val points: List<HandoffPointDto> = emptyList(),
+    val links: HandoffLinksDto = HandoffLinksDto(),
+    /** API v3: the next point of the day (the target of `navigatorNext`). */
+    val next: HandoffPointDto? = null,
+    /** API v3 with `signing`: the link strings the app signs (SHA256withRSA) and appends `&signature=` to. */
+    val toSign: Map<String, String>? = null,
+)
 
 @Serializable
-data class HandoffDto(val mode: String, val day: Int? = null, val parts: List<HandoffPartDto> = emptyList(), val truncated: Boolean = false)
+data class HandoffDto(
+    val mode: String,
+    val day: Int? = null,
+    val parts: List<HandoffPartDto> = emptyList(),
+    val truncated: Boolean = false,
+    /** API v3: the engine's recommended order (`maps`, `navigatorNext`, `web` while unsigned). */
+    val order: List<String> = emptyList(),
+)
 
 // ------------------------------------------------------------------------------------------ city (ADR-0013)
 

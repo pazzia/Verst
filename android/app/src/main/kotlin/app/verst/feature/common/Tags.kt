@@ -74,7 +74,7 @@ fun StretchTag(minutes: Int, modifier: Modifier = Modifier) {
 @Composable
 fun OpenDataRing(modifier: Modifier = Modifier) {
     Box(
-        modifier.size(12.dp).clearAndSetSemantics {}.testTag("tag.opendata").drawBehind {
+        modifier.size(12.dp).testTag("tag.opendata").clearAndSetSemantics {}.drawBehind {
             val w = 1.5.dp.toPx()
             drawCircle(
                 C.text.muted, radius = size.minDimension / 2 - w / 2,

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -163,7 +164,10 @@ fun CityScreen(ui: CityUi, a: CityActions) {
                     CityWarnings(ui, a)
                     ui.few?.let { f ->
                         Spacer(Modifier.height(10.dp))
-                        FewPlate(f, ui.selected, ui.excludedCount, a::suggestion)
+                        // the plate answers ПОШЛИ: bring it (with its suggestions) into view above the caption row
+                        val bring = androidx.compose.runtime.remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+                        androidx.compose.runtime.LaunchedEffect(f) { runCatching { bring.bringIntoView() } }
+                        Box(Modifier.bringIntoViewRequester(bring)) { FewPlate(f, ui.selected, ui.excludedCount, a::suggestion) }
                     }
                     // 6. СКОЛЬКО ГУЛЯЕМ
                     SectionLabel(stringResource(R.string.city_duration_label))
@@ -294,7 +298,7 @@ private fun Caption(ui: CityUi, a: CityActions) {
                 Txt(
                     if (ui.durationMin == null) "$name${stringResource(R.string.common_join_dot)}${stringResource(R.string.city_duration_unlimited)}"
                     else stringResource(R.string.city_caption_title, name, ui.durationMin / 60),
-                    T.title.lg, C.text.primary, Modifier.testTag("city.caption"), maxLines = 1,
+                    T.title.lg, C.text.primary, Modifier.testTag("city.caption"), maxLines = 2, // «Пивной · без ограничения»
                 )
                 val crew = crewLine(ui.adults, ui.children, ui.dog)
                 Txt(

@@ -153,6 +153,8 @@ data class RoadUi(
     val parking: StopDto? = null,
     /** 5.5 §10.1: the day «Вести в навигаторе» starts with (today's day of a running trip, else 1). */
     val handoffDay: Int = 1,
+    /** 5.13 §5: the open hand-off sheet. */
+    val handoff: HandoffSheetUi? = null,
 )
 
 /** S3-R1 (CEO 2.1): the row to bring back ([focusId], highlighted) or the top row to restore ([topId]); [seq] = a return. */
@@ -204,6 +206,15 @@ interface RoadActions {
     /** 5.5 §10.6: the P part of a row → the ParkingSheet. */
     fun parking(stop: StopDto) = Unit
     fun closeParking() = Unit
+
+    /** 5.13 §5 the hand-off sheet's actions. */
+    fun handoffSheet(): HandoffSheetActions = object : HandoffSheetActions {
+        override fun scope(day: Int?) = Unit
+        override fun pick(app: app.verst.nav.HandoffApp) = Unit
+        override fun install(app: app.verst.nav.HandoffApp) = Unit
+        override fun remember() = Unit
+        override fun close() = Unit
+    }
 }
 
 /** 5.5 Road ahead: the day-by-day signs of the plan, «заменить» (D-6), save/share, the Waybill footer. */
@@ -341,6 +352,8 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
             if (ui.aboutData) AboutDataSheet(windowH, a::closeAboutData)
             val pk = ui.parking
             if (pk != null) ParkingSheet(pk, windowH, a::closeParking)
+            val hs = ui.handoff
+            if (hs != null) HandoffSheetView(trip, hs, windowH, a.handoffSheet())
         }
     }
 }
@@ -765,7 +778,7 @@ private fun StopRow(
             if (kmPost != null) KmPost(kmPost, Modifier.padding(start = 37.dp).offset(y = (-4).dp))
         }
         // the sign column 66–132 (city signs with their 2 dp outline may overflow it by a dp each side)
-        Box(Modifier.width(66.dp).wrapContentWidth(Alignment.CenterHorizontally, unbounded = true), contentAlignment = Alignment.TopCenter) {
+        Box(Modifier.widthIn(min = 66.dp), contentAlignment = Alignment.TopCenter) {
             RoadSign(s.sign, s.name, s.tags)
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -915,14 +928,15 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
                     Txt(label, T.body.smStrong, if (over) C.paper.inkRed else C.text.onLightMuted, Modifier.testTag(if (over) "road.over" else "road.label"), maxLines = 1)
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.Bottom) {
                 Txt(total, T.amount, C.text.onLight, Modifier.testTag("road.total.amount"), maxLines = 1)
                 Spacer(Modifier.weight(1f))
-                // 5.5 §10.6: with parking the right block says «из них парковки»; the per-person line yields
-                if (parkingRub == null) Txt(perPerson, T.body.smStrong, C.text.onLightMuted, Modifier.padding(start = 8.dp), maxLines = 1, align = TextAlign.End)
+                // 5.5 §10.6: with parking the right block (under the label line) says «из них парковки»;
+                // the per-person line yields to it
+                if (parkingRub != null) FooterParking(parkingRub)
+                else Txt(perPerson, T.body.smStrong, C.text.onLightMuted, Modifier.padding(start = 8.dp), maxLines = 1, align = TextAlign.End)
             }
         }
-        if (parkingRub != null) FooterParking(parkingRub)
         Spacer(Modifier.width(12.dp))
         Icon(R.drawable.ic_arrow_right, C.text.onLight, 22.dp)
     }

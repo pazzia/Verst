@@ -79,6 +79,9 @@ data class DefaultsDto(
     val walkAdults: Int = 2,
     val walkChildren: Int = 0,
     val walkDog: Boolean = false,
+    /** 5.13 §5 «Запомнить выбор» and the remembered app (MAPS / NAVI). */
+    val handoffRemember: Boolean = false,
+    val handoffApp: String? = null,
 )
 
 @Serializable

@@ -48,6 +48,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -177,16 +178,22 @@ private fun parkingCd(p: ParkingDto?): String {
  * Fuel has the price only. The P part keeps a 36 × 44 touch box.
  */
 @Composable
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 internal fun CostsLine(price: String?, parking: ParkingDto?, showParking: Boolean, tag: String, onParking: () -> Unit, action: @Composable () -> Unit) {
-    Row(Modifier.fillMaxWidth().defaultMinSize(minHeight = 36.dp), verticalAlignment = Alignment.CenterVertically) {
-        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+    // «A costs line may wrap instead of truncating» (components §31): the action drops to the next line when needed
+    androidx.compose.foundation.layout.FlowRow(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 36.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Row(Modifier.height(36.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             if (price != null) Txt(price, T.body.mdStrong, C.accent.yellow, maxLines = 1)
             if (price != null && showParking) Txt("·", T.body.mdStrong, C.interior.pole, maxLines = 1)
             if (showParking) {
                 val unknown = parking?.known != true
                 val cd = parkingCd(parking)
                 Row(
-                    Modifier.defaultMinSize(minWidth = 36.dp, minHeight = DesignTokens.size.touchMin)
+                    Modifier.touch36().defaultMinSize(minWidth = 36.dp)
                         .clickable(role = Role.Button, onClick = onParking)
                         .semantics(mergeDescendants = true) { contentDescription = cd }
                         .testTag("$tag.parking")
@@ -199,15 +206,23 @@ internal fun CostsLine(price: String?, parking: ParkingDto?, showParking: Boolea
                 }
             }
         }
-        action()
+        Box(Modifier.height(36.dp), contentAlignment = Alignment.Center) { action() }
     }
+}
+
+/** A 44 dp touch box that lays out 36 high (the costs line is min-h 36; the touch target keeps 44). */
+internal fun Modifier.touch36(): Modifier = this.layout { m, c ->
+    val t = DesignTokens.size.touchMin.roundToPx()
+    val p = m.measure(c.copy(minHeight = t, maxHeight = if (c.hasBoundedHeight) maxOf(t, c.maxHeight) else t))
+    val h = 36.dp.roundToPx()
+    layout(p.width, h) { p.place(0, (h - p.height) / 2) }
 }
 
 /** components §26.2 quiet action «заменить» (12/600 muted, no border, min-h 36, touch 44). */
 @Composable
 internal fun QuietAction(text: String, cd: String, tag: String, color: androidx.compose.ui.graphics.Color = C.text.muted, onClick: () -> Unit, trailing: @Composable () -> Unit = {}) {
     Row(
-        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onClick)
+        Modifier.touch36().clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }.testTag(tag).padding(start = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -313,7 +328,7 @@ internal fun BoxScope.CarMarker(top: Float, bottom: Float) {
     }
     Canvas(
         Modifier.offset(x = 13.dp, y = (top + y).dp).size(DesignTokens.size.carMarkerW, DesignTokens.size.carMarkerH)
-            .clearAndSetSemantics {}.testTag("road.car"),
+            .testTag("road.car").clearAndSetSemantics {},
     ) {
         val d = 1.dp.toPx()
         // halo: a soft drop shadow, then the 1 dp light outline
