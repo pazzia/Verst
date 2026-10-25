@@ -649,11 +649,19 @@ class ScreensScreenshotTest {
 
     @Test
     fun walkShorterThanAsked() {
-        // S3-QA P1-02: 4 ч asked, 2,5 ч built → the note; «≈ 2,4 км» without a trailing zero rule check
-        walkShot("city_route-ryumochnye.json", "shorter")
-        compose.onNodeWithTag("walk.shorter", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("вместо", substring = true).assertExists() // the deck string uses NBSPs before «ч»
+        // S3-QA P1-02 on every walk contract: the note shows exactly when the engine says the walk is shorter
+        val files = listOf("city_route-shorter.json", "city_route-ryumochnye.json", "city_route-overview.json")
+        val walks = files.map { v2<app.verst.core.model.dto.WalkRouteDto>(it, EngineJson::walkRoute) }
+        val current = androidx.compose.runtime.mutableStateOf(walks[0])
+        compose.setContent { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(current.value, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        for ((f, w) in files.zip(walks)) {
+            compose.runOnIdle { current.value = w }
+            compose.waitForIdle()
+            val shown = compose.onAllNodes(androidx.compose.ui.test.hasTestTag("walk.shorter"), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+            assertEquals(f, w.shorterThanAsked, shown)
+        }
     }
+
 
     @Test
     fun walkTomorrow() {
