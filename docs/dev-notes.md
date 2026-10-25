@@ -1701,3 +1701,54 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   - On the road: Покрова на Нерли (крюк ≈ 30 мин) and Глухово.
   - In Казань: the Kremlin cathedral, Храм всех религий, Иске Таш.
   - Нижний is out of reach: 55–60 min off M-12, beyond 45.
+
+### M9: data and engine polish before the CEO build (incl. the Designer's QA, des/S4-QA @ f4d2487)
+**API v3 additions (all bridge or open-data only; G01–G13 byte-identical)**
+- **`poiKind` + `poiKindRu`** on trip sight stops, alternatives' stops, walk stops, `poi_details` and geo
+  search. `poiKindRu` is the label to show («Храм», «Памятник», «Музей», «Кремль», «Парк», «Вид»,
+  «Природа», «Детская площадка», «Достопримечательность»…). Please show it as given rather than mapping
+  the kind yourself. The church kind is now `temple` everywhere.
+- **Kind rules, one rule for labels and the diversity rules (first match wins):**
+  1. The strong classes stay: playground, zoo, theatre, interactive, monastery.
+  2. «Смотровая / Вид на …» is a viewpoint.
+  3. Name words, in order: музей → museum; беседка / ротонда / дворец / палаты / замок → attraction;
+     монастырь / лавра / подворье → monastery; церковь / собор / храм → temple; кремль / крепость →
+     kremlin; памятник / ворота / стела / курган → monument; озеро / залив / заповедник → nature;
+     набережная; площадь; парк / сад / сквер.
+  4. A park or nature item whose description says «музей» is a museum (Коломенское).
+  5. A castle without «кремль» in its name is an attraction.
+  - `tests/unit/test_poi_kinds.py` pins 36 famous places, including the Designer's list.
+  - Audit of the 87 distinct sights in 80 trips (20 routes × 2 crews × 2 moods): fixed the Казанский
+    кремль cathedral, Михайловский замок, Майендорф, Приокско-Террасный, Чебоксарский залив and
+    Пятницкое подворье.
+- **`funFor`** on fun stops: `["child"|"dog"|"adults"]`, the groups the stop suits. Please stop parsing
+  the reason text.
+- **`parking`** on every stop where the car is left: sights, cafés and rest areas (`rub: null` = unknown
+  tariff → «P ?»). `null` on a roadside break, a fuel pump or the overnight. The «Парковки» line now
+  includes cafés and rest areas in paid zones.
+- **`placeSource`** (curated | wikidata | osm) and **`placeAttributionRu`** «Данные о месте: © участники
+  OpenStreetMap» for OSM-only places and bars (ODbL), on stops, walk stops and `poi_details`.
+
+**Engine (open-data world)**
+- **No bare names.** Roadside breaks and the generated rest areas and fuel stations carry the nearest
+  town within 15 km («Площадка отдыха у Можги»), else the road and km («Площадка отдыха, М-12, 330 км»),
+  else the km («Остановка у дороги, 332 км»).
+- **Fun stops** need quality ≥ 0.30. Playgrounds are allowed, now named after their town, and are only
+  for a crew with a child. A sight used as a break follows the diversity rules. Two sights of one kind
+  that become neighbours after the drops are repaired.
+
+**Data (`wd-20261025-r7.4`)**
+- Text tidying: no space before punctuation, no duplicated commas, the first letter capitalised. The
+  catalogue-wide test is in `test_poi_kinds.py`.
+- «Детская площадка в Клину», or «Детская площадка, Благовещенск» when the prepositional form is unknown.
+  At most 3 playgrounds per town, named ones first.
+- OSM-only POIs (other than playgrounds) need quality ≥ 0.30, i.e. a photo or a text: no bare «Паровоз»
+  at 0.25. The catalogue drops from 19 675 to 10 922 POIs, 0.85 MB.
+
+**Catalogue load:** 0.54–0.68 s → 0.24–0.25 s in the sandbox (≈ −60 %).
+- The cyclic GC is paused during the load, then the result is frozen.
+- Tag sets, ratings and hours checks are shared or cached.
+- The geo-search index is built on the first query.
+- There are ≈ 45 % fewer POI rows.
+- On the emulator's 3–5× factor that is ≈ 0.8–1.3 s, against the 1.5 s target. Please measure it on the
+  device.

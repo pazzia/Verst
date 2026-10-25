@@ -75,7 +75,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w02",
@@ -98,7 +102,11 @@
      },
      "noteRu": null,
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "kremlin",
+     "poiKindRu": "Кремль",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     },
     {
      "id": "w03",
@@ -121,7 +129,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w04",
@@ -144,7 +156,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "attraction",
+     "poiKindRu": "Достопримечательность",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w05",
@@ -167,7 +183,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w06",
@@ -190,7 +210,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w07",
@@ -213,7 +237,11 @@
      },
      "noteRu": null,
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w08",
@@ -236,7 +264,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w09",
@@ -259,7 +291,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w10",
@@ -282,7 +318,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w11",
@@ -305,7 +345,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w12",
@@ -328,7 +372,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     }
    ],
    "cost": {

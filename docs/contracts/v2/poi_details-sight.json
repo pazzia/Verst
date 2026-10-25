@@ -12,9 +12,10 @@
    "id": "Q4357088",
    "kind": "sight",
    "poiKind": "museum",
+   "poiKindRu": "Музей",
    "nameRu": "Эрмитаж-Выборг",
    "descriptionRu": null,
-   "extractRu": "Эрмитаж-Выборг — филиал Государственного Эрмитажа и выставочный центр в Выборге , открывшийся в июне 2010 года.",
+   "extractRu": "Эрмитаж-Выборг — филиал Государственного Эрмитажа и выставочный центр в Выборге, открывшийся в июне 2010 года.",
    "extractSource": {
     "key": "wikipedia",
     "nameRu": "Описание: Википедия",
@@ -54,7 +55,9 @@
    "attributionRu": [
     "Описание: Википедия"
    ],
-   "wikidataId": "Q4357088"
+   "wikidataId": "Q4357088",
+   "placeSource": "wikidata",
+   "placeAttributionRu": null
   },
   "ms": 0
  }

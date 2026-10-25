@@ -220,10 +220,28 @@ SENTENCE = re.compile(r"^(.+?[.!?])(?:\s|$)")
 WORD = re.compile(r"[A-Za-zА-Яа-яЁё]{4,}")
 
 
+SPACE_BEFORE = re.compile(r"\s+([,.;:!?»)…])")
+SPACE_AFTER = re.compile(r"([«(])\s+")
+
+
+def tidy(text: str | None) -> str | None:
+    """M9 text cleanup for names and texts: one space, none before punctuation («хозяйства , в» →
+    «хозяйства, в», «Покрове .» → «Покрове.»), none inside «» and (), the first letter capitalised
+    («дом Ипатьева» → «Дом Ипатьева»)."""
+    if not text:
+        return text
+    t = re.sub(r"\s+", " ", text).strip()
+    t = SPACE_AFTER.sub(r"\1", SPACE_BEFORE.sub(r"\1", t))
+    t = re.sub(r"[,;:](?=[,.;:!?])", "", t)  # «Ср, , сб» → «Ср, сб»; «…», .» → «…».»
+    t = re.sub(r"([,;:])(?=[^\s\d»),.;:!?])", r"\1 ", t)  # «а,б» → «а, б» (not «1,5»)
+    return t[:1].upper() + t[1:] if t[:1].islower() else t
+
+
 def first_sentence(text: str | None, limit: int = EXTRACT_MAX) -> str | None:
     if not text:
         return None
     t = re.sub(r"\s+", " ", re.sub(r"\([^)]*\)", "", text)).strip()  # drop (dates, transliterations)
+    t = tidy(t) or ""
     m = SENTENCE.match(t)
     out = m.group(1) if m else t
     if len(out) > limit:
@@ -357,7 +375,7 @@ OSM_KIND = (
 )
 OSM_RADIUS_KM = 8.0
 PLAYGROUND_KM = 3.0
-PLAYGROUNDS_PER_TOWN = 6
+PLAYGROUNDS_PER_TOWN = 3
 OSM_PER_TOWN = 25
 
 
@@ -433,4 +451,5 @@ __all__ = [
     "osm_name_ok",
     "quality",
     "refine_kind",
+    "tidy",
 ]

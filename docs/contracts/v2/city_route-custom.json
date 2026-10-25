@@ -78,7 +78,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w02",
@@ -101,7 +105,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     },
     {
      "id": "w03",
@@ -124,7 +132,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     },
     {
      "id": "w04",
@@ -143,7 +155,9 @@
      "hours": null,
      "noteRu": null,
      "hasPhoto": false,
-     "tappable": false
+     "tappable": false,
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w05",
@@ -166,7 +180,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "viewpoint",
+     "poiKindRu": "Вид",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     }
    ],
    "cost": {

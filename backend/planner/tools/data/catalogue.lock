@@ -1,26 +1,26 @@
 {
- "version": "wd-20261025-r7.3",
+ "version": "wd-20261025-r7.4",
  "builtAt": "2026-10-25",
  "counts": {
   "towns": 1114,
-  "pois": 19675,
+  "pois": 10922,
   "bars": 3284,
   "links": 79,
   "credits": 3646
  },
- "totalBytes": 1051673,
+ "totalBytes": 853197,
  "files": {
   "catalogue_meta.json.gz": {
-   "bytes": 103768,
-   "sha256": "0a2642e6da9702f52bca08ef333aae15a07dcf777f644c4a4991a69e3714f73b"
+   "bytes": 97753,
+   "sha256": "3d9ec542095b31320a9908bfc1b821d16b98de408a39e77ca015a3145c113fbf"
   },
   "catalogue_towns.json.gz": {
    "bytes": 52995,
    "sha256": "9ff68f042d50dc7c803c8725493f94efc82e7e5d5452889a850c9c91b460f22f"
   },
   "catalogue_pois.json.gz": {
-   "bytes": 822023,
-   "sha256": "4860babf4f82b5e351a2b885cae23fc642097e9e95eae00ef9f2ac29a7e2535e"
+   "bytes": 629562,
+   "sha256": "2a06b3e79f33db931cbfe26cd10e8bc853b1e28f2dc38b48a7cd19d9f52f0c7d"
   },
   "catalogue_bars.json.gz": {
    "bytes": 72887,

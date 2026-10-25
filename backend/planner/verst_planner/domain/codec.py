@@ -469,7 +469,7 @@ def stop_to_json(s: ScheduledStop) -> Json:
         "alternativesNote": s.alternatives_note_ru,
         "hotelOptions": [_hotel_option_to_json(h) for h in s.hotel_options],
         "selectedHotelId": s.selected_hotel_id,
-    }
+    } | ({"funFor": list(s.fun_for)} if s.fun_for else {})  # only on fun stops: G01-G13 keep their bytes
 
 
 def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
@@ -498,6 +498,7 @@ def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
         alternatives=tuple(_alternative_from_json(a) for a in d["alternatives"]),
         hotel_options=tuple(_hotel_option_from_json(h) for h in d["hotelOptions"]),
         selected_hotel_id=d["selectedHotelId"],
+        fun_for=tuple(d.get("funFor", ())),
         alternatives_note_ru=d.get("alternativesNote"),
     )
 

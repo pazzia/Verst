@@ -78,7 +78,9 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w02",
@@ -101,7 +103,9 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w03",
@@ -124,7 +128,9 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w04",
@@ -147,7 +153,9 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w05",
@@ -170,7 +178,9 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     }
    ],
    "cost": {

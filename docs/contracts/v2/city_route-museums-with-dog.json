@@ -78,7 +78,11 @@
      },
      "noteRu": "С собакой внутрь обычно нельзя · Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w02",
@@ -101,7 +105,11 @@
      },
      "noteRu": "С собакой внутрь обычно нельзя · Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w03",
@@ -124,7 +132,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w04",
@@ -147,7 +159,11 @@
      },
      "noteRu": "С собакой внутрь обычно нельзя · Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     }
    ],
    "cost": {

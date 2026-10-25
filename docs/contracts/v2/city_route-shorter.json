@@ -37,7 +37,7 @@
    "tz": "Europe/Moscow",
    "walkKm": 9.1,
    "walkMin": 156,
-   "durationMin": 478,
+   "durationMin": 477,
    "requestedDurationMin": 480,
    "crewNotesRu": [],
    "interestsWidened": false,
@@ -75,7 +75,11 @@
      },
      "noteRu": null,
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     },
     {
      "id": "w02",
@@ -98,7 +102,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w03",
@@ -121,7 +129,11 @@
      },
      "noteRu": null,
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "monastery",
+     "poiKindRu": "Монастырь",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     },
     {
      "id": "w04",
@@ -144,7 +156,11 @@
      },
      "noteRu": null,
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w05",
@@ -153,8 +169,8 @@
      "nameRu": "Беседка на Волжской набережной",
      "lat": 57.62994,
      "lon": 39.89631,
-     "arriveAt": "2026-10-23T16:25",
-     "departAt": "2026-10-23T16:37",
+     "arriveAt": "2026-10-23T16:24",
+     "departAt": "2026-10-23T16:36",
      "dwellMin": 12,
      "walkKmFromPrev": 0.3,
      "walkMinFromPrev": 5,
@@ -167,7 +183,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "attraction",
+     "poiKindRu": "Достопримечательность",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w06",
@@ -176,8 +196,8 @@
      "nameRu": "Церковь Ильи Пророка",
      "lat": 57.629717,
      "lon": 39.892888,
-     "arriveAt": "2026-10-23T16:41",
-     "departAt": "2026-10-23T17:43",
+     "arriveAt": "2026-10-23T16:40",
+     "departAt": "2026-10-23T17:42",
      "dwellMin": 62,
      "walkKmFromPrev": 0.3,
      "walkMinFromPrev": 5,
@@ -190,7 +210,11 @@
      },
      "noteRu": null,
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     }
    ],
    "cost": {

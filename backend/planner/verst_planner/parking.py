@@ -145,8 +145,16 @@ class ParkingModel:
             if c.sunday_free and c.sunday_free_below_rub:
                 sunday = "free" if band.day_rub < c.sunday_free_below_rub else "paid_here"
             zone = ParkingInfo(
-                "zone", rub, c.city, band.radius_km, band.day_rub, band.night_rub, c.day_from, c.day_to,
-                sunday, c.holidays_free,
+                "zone",
+                rub,
+                c.city,
+                band.radius_km,
+                band.day_rub,
+                band.night_rub,
+                c.day_from,
+                c.day_to,
+                sunday,
+                c.holidays_free,
             )
             if c.holidays_free and arrive_local.strftime("%m-%d") in self.holidays:
                 return dataclasses.replace(zone, source="free", rub_per_hour=0, free_reason="holiday")

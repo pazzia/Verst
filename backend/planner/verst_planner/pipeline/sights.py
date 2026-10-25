@@ -7,6 +7,7 @@ rests out of the budget (A§16.2); the budget rule is A§16.5 (`max(day_budget_m
 
 from __future__ import annotations
 
+import itertools
 import math
 import re
 
@@ -49,13 +50,64 @@ TAG_CATEGORY = (
 )
 
 
+def _words(key: str) -> re.Pattern[str]:
+    return re.compile(r"(?i)(?:^|[\s«\"(-])(?:" + "|".join(map(re.escape, ru.words(key))) + ")")
+
+
+# M9 name rules, first match wins: a heritage temple is «Храм», gates and monuments are «Памятник», a museum
+# only when it is primarily one («Золотые ворота» are a monument, «Церковь Покрова на Нерли» a temple)
+VIEW_START = re.compile(
+    r"(?i)^(?:" + "|".join(map(re.escape, ru.words("sight.kind_words.viewpoint_start"))) + ")"
+)
+NAME_RULES: tuple[tuple[re.Pattern[str], str], ...] = (
+    (_words("sight.kind_words.museum"), "museum"),
+    (_words("sight.kind_words.pavilion"), "attraction"),  # a pavilion called a temple is not one
+    (_words("sight.kind_words.monastery"), "monastery"),
+    (_words("sight.kind_words.temple"), "temple"),  # a cathedral inside a kremlin is a temple
+    (_words("sight.kind_words.kremlin"), "kremlin"),
+    (_words("sight.kind_words.monument"), "monument"),
+    (_words("sight.kind_words.nature"), "nature"),
+    (_words("sight.kind_words.embankment"), "embankment"),
+    (_words("sight.kind_words.square"), "square"),
+    (_words("sight.kind_words.park"), "park"),
+)
+STRONG_KINDS = frozenset({"playground", "zoo", "theatre", "interactive", "monastery"})
+MUSEUM_DESC = _words("sight.kind_words.museum")
+
+
+def kind_of(name: str, base: str, desc: str | None = None) -> str:
+    """The category of a sight from its base kind (catalogue class or curated tags) and its name.
+
+    Strong classes (playground, zoo, theatre, interactive, monastery) stay. Otherwise a view
+    (a «Смотровая» by a cathedral) is a viewpoint, then the first name rule wins, then an open-data park
+    or nature item described as a museum is a museum (Коломенское, a museum-reserve)."""
+    base = POI_CATEGORY_OF.get(base, base)
+    if base in STRONG_KINDS:
+        return base
+    if VIEW_START.search(name):
+        return "viewpoint"
+    for rx, kind in NAME_RULES:
+        if rx.search(name):
+            return kind
+    if desc and base in ("nature", "park", "attraction") and MUSEUM_DESC.search(desc):
+        return "museum"
+    if base == "kremlin":  # a castle class without «кремль» in the name (Майендорф, Михайловский замок)
+        return "attraction"
+    return base
+
+
+POI_CATEGORY_OF = {"church": "temple"}
+
+
 def category_of(p: Place) -> str:
-    """The ADR-0015 kind of a sight: the catalogue's, else from the curated tags and name."""
+    """The ADR-0015 kind of a sight (M9: one rule for the card label and the diversity rules)."""
     if p.category is not None:
-        return p.category
-    if RELIGIOUS_NAME.search(p.name_ru) and not ({Tag.MONASTERY, Tag.VIEW} & p.tags):
-        return "temple"  # a view of a cathedral is a viewpoint, not a temple
-    return next((cat for tag, cat in TAG_CATEGORY if tag in p.tags), "attraction")
+        base = p.category
+        desc = p.description_ru if p.source is Source.OSM else None
+    else:
+        base = next((cat for tag, cat in TAG_CATEGORY if tag in p.tags), "attraction")
+        desc = None
+    return kind_of(p.name_ru, base, desc)
 
 
 def effective_quality(p: Place) -> float:
@@ -265,6 +317,35 @@ def plan_sights(
                     day.stops.pop(i)
     if ctx.cfg.sights.diversity:
         trip_religious_repair(days)
+        adjacent_kind_repair(days)
+
+
+def adjacent_kind_repair(days: list[DayPlan]) -> None:
+    """After the drops, two sights of one kind can become neighbours: drop the lower-scored droppable one
+    (never a template sight)."""
+    for d in days:
+        while True:
+            sights = sorted(
+                (i for i, s in enumerate(d.stops) if s.kind is StopKind.SIGHT and s.place is not None),
+                key=lambda i: d.stops[i].km_at,
+            )
+            pair = next(
+                (
+                    (a, b)
+                    for a, b in itertools.pairwise(sights)
+                    if category_of(d.stops[a].place) == category_of(d.stops[b].place)  # type: ignore[arg-type]
+                    and (_droppable(d.stops[a]) or _droppable(d.stops[b]))
+                ),
+                None,
+            )
+            if pair is None:
+                break
+            cands = [i for i in pair if _droppable(d.stops[i])]
+            d.stops.pop(min(cands, key=lambda i: (d.stops[i].score, -d.stops[i].km_at)))
+
+
+def _droppable(s: PlannedStop) -> bool:
+    return s.pool == "sight" and not s.fixed
 
 
 def _with_moved_lunch(

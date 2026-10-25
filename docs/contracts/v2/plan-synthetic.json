@@ -82,7 +82,7 @@
         "sign": "tourist",
         "placeId": "Q1381934",
         "townId": "Q887",
-        "name": "дом Ипатьева",
+        "name": "Дом Ипатьева",
         "note": "не проверено",
         "lat": 56.84439,
         "lon": 60.60897,
@@ -106,9 +106,6 @@
         "selectedHotelId": null,
         "kmDriven": 1,
         "kmLeft": 392,
-        "poiKind": "attraction",
-        "whyRu": "Объект культурного наследия · Статьи в 30 языковых разделах Википедии",
-        "photoSource": "p18",
         "parking": {
          "rub": null,
          "rubPerHour": null,
@@ -118,7 +115,13 @@
          "whereRu": "Парковка в 285 м от объекта",
          "sundayRu": null,
          "freeRu": null
-        }
+        },
+        "poiKind": "attraction",
+        "poiKindRu": "Достопримечательность",
+        "whyRu": "Объект культурного наследия · Статьи в 30 языковых разделах Википедии",
+        "photoSource": "p18",
+        "placeSource": "wikidata",
+        "placeAttributionRu": null
        },
        {
         "id": "d1s03",
@@ -152,9 +155,6 @@
         "selectedHotelId": null,
         "kmDriven": 7,
         "kmLeft": 386,
-        "poiKind": "park",
-        "whyRu": "Объект культурного наследия",
-        "photoSource": "p18",
         "parking": {
          "rub": null,
          "rubPerHour": null,
@@ -164,7 +164,13 @@
          "whereRu": "Парковка в 294 м от объекта",
          "sundayRu": null,
          "freeRu": null
-        }
+        },
+        "poiKind": "park",
+        "poiKindRu": "Парк",
+        "whyRu": "Объект культурного наследия",
+        "photoSource": "p18",
+        "placeSource": "wikidata",
+        "placeAttributionRu": null
        },
        {
         "id": "d1s04",
@@ -174,7 +180,7 @@
         "sign": "rest",
         "placeId": "syn_r_5692955_6199951",
         "townId": null,
-        "name": "Площадка отдыха",
+        "name": "Площадка отдыха у Сухой Лога",
         "note": null,
         "lat": 56.92955,
         "lon": 61.99951,
@@ -219,7 +225,7 @@
            "sign": "fuel",
            "placeId": "syn_f_5691910_6183549",
            "townId": null,
-           "name": "АЗС у трассы",
+           "name": "АЗС у трассы у Сухой Лога",
            "note": null,
            "lat": 56.9191,
            "lon": 61.83549,
@@ -336,7 +342,7 @@
            "sign": "fuel",
            "placeId": "syn_f_5697136_6265560",
            "townId": null,
-           "name": "АЗС у трассы",
+           "name": "АЗС у трассы у Камышлова",
            "note": null,
            "lat": 56.97136,
            "lon": 62.6556,
@@ -434,7 +440,17 @@
         "kmLeft": 284,
         "amenities": [
          "wc"
-        ]
+        ],
+        "parking": {
+         "rub": 0,
+         "rubPerHour": 0,
+         "hours": 1,
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
+        }
        },
        {
         "id": "d1s05",
@@ -444,7 +460,7 @@
         "sign": "rest",
         "placeId": "syn_r_5699227_6298364",
         "townId": null,
-        "name": "Площадка отдыха",
+        "name": "Площадка отдыха, 183 км",
         "note": null,
         "lat": 56.99227,
         "lon": 62.98364,
@@ -489,7 +505,7 @@
            "sign": "fuel",
            "placeId": "syn_f_5697136_6265560",
            "townId": null,
-           "name": "АЗС у трассы",
+           "name": "АЗС у трассы у Камышлова",
            "note": null,
            "lat": 56.97136,
            "lon": 62.6556,
@@ -606,7 +622,7 @@
            "sign": "fuel",
            "placeId": "syn_f_5702363_6347571",
            "townId": null,
-           "name": "АЗС у трассы",
+           "name": "АЗС у трассы, 221 км",
            "note": null,
            "lat": 57.02363,
            "lon": 63.47571,
@@ -704,7 +720,17 @@
         "kmLeft": 208,
         "amenities": [
          "wc"
-        ]
+        ],
+        "parking": {
+         "rub": 0,
+         "rubPerHour": 0,
+         "hours": 1,
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
+        }
        },
        {
         "id": "d1s06",
@@ -750,7 +776,11 @@
            "placeId": "syn_c_Q196603_0",
            "priceRub": "61.50",
            "regionName": "Свердловская область",
-           "tripKmDelta": 1
+           "tripKmDelta": 1,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s06",
@@ -780,7 +810,17 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -853,7 +893,17 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 245,
-        "kmLeft": 148
+        "kmLeft": 148,
+        "parking": {
+         "rub": 0,
+         "rubPerHour": 0,
+         "hours": 1,
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
+        }
        },
        {
         "id": "d1s07",
@@ -863,7 +913,7 @@
         "sign": "rest",
         "placeId": "syn_r_5711771_6495191",
         "townId": null,
-        "name": "Площадка отдыха",
+        "name": "Площадка отдыха, 335 км",
         "note": null,
         "lat": 57.11771,
         "lon": 64.95191,
@@ -908,7 +958,7 @@
            "sign": "fuel",
            "placeId": "syn_f_5707589_6429582",
            "townId": null,
-           "name": "АЗС у трассы",
+           "name": "АЗС у трассы, 284 км",
            "note": null,
            "lat": 57.07589,
            "lon": 64.29582,
@@ -1025,7 +1075,7 @@
            "sign": "fuel",
            "placeId": "syn_f_5712816_6511594",
            "townId": null,
-           "name": "АЗС у трассы",
+           "name": "АЗС у трассы, 348 км",
            "note": null,
            "lat": 57.12816,
            "lon": 65.11594,
@@ -1123,7 +1173,17 @@
         "kmLeft": 49,
         "amenities": [
          "wc"
-        ]
+        ],
+        "parking": {
+         "rub": 0,
+         "rubPerHour": 0,
+         "hours": 1,
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
+        }
        },
        {
         "id": "d1s08",
@@ -1203,9 +1263,6 @@
            "alternativesNote": null,
            "hotelOptions": [],
            "selectedHotelId": null,
-           "poiKind": "church",
-           "whyRu": "Объект культурного наследия",
-           "photoSource": "p18",
            "parking": {
             "rub": 30,
             "rubPerHour": 30,
@@ -1215,7 +1272,13 @@
             "whereRu": "Парковка в 84 м от объекта",
             "sundayRu": null,
             "freeRu": null
-           }
+           },
+           "poiKind": "temple",
+           "poiKindRu": "Храм",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "placeSource": "wikidata",
+           "placeAttributionRu": null
           },
           "dayPatch": [
            {
@@ -1335,9 +1398,6 @@
            "alternativesNote": null,
            "hotelOptions": [],
            "selectedHotelId": null,
-           "poiKind": "church",
-           "whyRu": "Объект культурного наследия",
-           "photoSource": "p18",
            "parking": {
             "rub": 40,
             "rubPerHour": 40,
@@ -1347,7 +1407,13 @@
             "whereRu": "Парковка в 29 м от объекта",
             "sundayRu": null,
             "freeRu": null
-           }
+           },
+           "poiKind": "temple",
+           "poiKindRu": "Храм",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "placeSource": "wikidata",
+           "placeAttributionRu": null
           },
           "dayPatch": [
            {
@@ -1468,9 +1534,6 @@
            "alternativesNote": null,
            "hotelOptions": [],
            "selectedHotelId": null,
-           "poiKind": "attraction",
-           "whyRu": "Объект культурного наследия",
-           "photoSource": "p18",
            "parking": {
             "rub": 50,
             "rubPerHour": 50,
@@ -1480,7 +1543,13 @@
             "whereRu": "Парковка в 121 м от объекта",
             "sundayRu": null,
             "freeRu": null
-           }
+           },
+           "poiKind": "temple",
+           "poiKindRu": "Храм",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "placeSource": "wikidata",
+           "placeAttributionRu": null
           },
           "dayPatch": [
            {
@@ -1554,9 +1623,6 @@
         "selectedHotelId": null,
         "kmDriven": 390,
         "kmLeft": 3,
-        "poiKind": "museum",
-        "whyRu": "Объект культурного наследия",
-        "photoSource": "p18",
         "parking": {
          "rub": 80,
          "rubPerHour": 40,
@@ -1566,7 +1632,13 @@
          "whereRu": "Парковка в 212 м от объекта",
          "sundayRu": null,
          "freeRu": null
-        }
+        },
+        "poiKind": "museum",
+        "poiKindRu": "Музей",
+        "whyRu": "Объект культурного наследия",
+        "photoSource": "p18",
+        "placeSource": "wikidata",
+        "placeAttributionRu": null
        },
        {
         "id": "d1s09",
@@ -1680,13 +1752,33 @@
        "enabled": true,
        "breakdown": [
         {
-         "label": "дом Ипатьева",
+         "label": "Дом Ипатьева",
          "formula": "цена неизвестна",
          "rub": 0
         },
         {
          "label": "Шарташские каменные палатки",
          "formula": "цена неизвестна",
+         "rub": 0
+        },
+        {
+         "label": "Площадка отдыха",
+         "formula": "бесплатно",
+         "rub": 0
+        },
+        {
+         "label": "Площадка отдыха",
+         "formula": "бесплатно",
+         "rub": 0
+        },
+        {
+         "label": "Кафе «Огонёк»",
+         "formula": "бесплатно",
+         "rub": 0
+        },
+        {
+         "label": "Площадка отдыха",
+         "formula": "бесплатно",
          "rub": 0
         },
         {
@@ -1751,7 +1843,7 @@
        {
         "stopId": "d1s02",
         "placeId": "Q1381934",
-        "name": "дом Ипатьева",
+        "name": "Дом Ипатьева",
         "adultRub": 0,
         "childRub": 0
        },
@@ -1789,7 +1881,7 @@
       "parking": [
        {
         "stopId": "d1s02",
-        "name": "дом Ипатьева",
+        "name": "Дом Ипатьева",
         "rubPerHour": null,
         "hours": 1,
         "rub": null,
@@ -1802,6 +1894,38 @@
         "hours": 1,
         "rub": null,
         "source": "unknown"
+       },
+       {
+        "stopId": "d1s04",
+        "name": "Площадка отдыха",
+        "rubPerHour": 0,
+        "hours": 1,
+        "rub": 0,
+        "source": "free"
+       },
+       {
+        "stopId": "d1s05",
+        "name": "Площадка отдыха",
+        "rubPerHour": 0,
+        "hours": 1,
+        "rub": 0,
+        "source": "free"
+       },
+       {
+        "stopId": "d1s06",
+        "name": "Кафе «Огонёк»",
+        "rubPerHour": 0,
+        "hours": 1,
+        "rub": 0,
+        "source": "free"
+       },
+       {
+        "stopId": "d1s07",
+        "name": "Площадка отдыха",
+        "rubPerHour": 0,
+        "hours": 1,
+        "rub": 0,
+        "source": "free"
        },
        {
         "stopId": "d1s08",
@@ -2995,28 +3119,10 @@
        "regionCode": "RU-SVE"
       },
       {
-       "placeId": "osm_n7775529485",
-       "kmAt": 10.71462706627994,
-       "lateralKm": 11.431639289664998,
-       "detourKm": 29.722262153128998,
-       "detourMin": 47,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w60279631",
-       "kmAt": 15.692685292141459,
-       "lateralKm": 6.493049350819245,
-       "detourKm": 16.881928312130036,
-       "detourMin": 27,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_n2896437783",
-       "kmAt": 16.015504624836165,
-       "lateralKm": 6.209517162502648,
-       "detourKm": 16.144744622506884,
+       "placeId": "osm_w256186717",
+       "kmAt": 15.96417628945718,
+       "lateralKm": 6.090680483466461,
+       "detourKm": 15.8357692570128,
        "detourMin": 26,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
@@ -3027,15 +3133,6 @@
        "lateralKm": 6.128438114523714,
        "detourKm": 15.933939097761657,
        "detourMin": 26,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_n1831398575",
-       "kmAt": 16.09923495046195,
-       "lateralKm": 6.738360710531751,
-       "detourKm": 17.519737847382554,
-       "detourMin": 28,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -3058,101 +3155,11 @@
        "regionCode": "RU-SVE"
       },
       {
-       "placeId": "osm_n4912379221",
-       "kmAt": 16.52344541130222,
-       "lateralKm": 11.994370869421969,
-       "detourKm": 31.18536426049712,
-       "detourMin": 49,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w1212881933",
-       "kmAt": 16.546151936473635,
-       "lateralKm": 6.019278642877633,
-       "detourKm": 15.650124471481845,
-       "detourMin": 25,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w81519885",
-       "kmAt": 16.763168352920594,
-       "lateralKm": 6.306533080887506,
-       "detourKm": 16.39698601030752,
-       "detourMin": 27,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w372930686",
-       "kmAt": 16.80797063767439,
-       "lateralKm": 6.128751065360858,
-       "detourKm": 15.934752769938232,
-       "detourMin": 26,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w926128967",
-       "kmAt": 17.482348701516216,
-       "lateralKm": 6.324909577228892,
-       "detourKm": 16.44476490079512,
-       "detourMin": 27,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w317076864",
-       "kmAt": 17.67035239862495,
-       "lateralKm": 1.574845675339369,
-       "detourKm": 4.09459875588236,
-       "detourMin": 8,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w1423539189",
-       "kmAt": 17.831400281674355,
-       "lateralKm": 6.777001592566955,
-       "detourKm": 17.620204140674083,
-       "detourMin": 28,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w1423539190",
-       "kmAt": 20.156991988127754,
-       "lateralKm": 7.253023638925504,
-       "detourKm": 18.857861461206312,
-       "detourMin": 30,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
        "placeId": "osm_n11476690906",
        "kmAt": 52.996539960090686,
        "lateralKm": 10.144397439448877,
        "detourKm": 26.37543334256708,
        "detourMin": 42,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w87822680",
-       "kmAt": 53.17026259140605,
-       "lateralKm": 8.355926281109426,
-       "detourKm": 21.72540833088451,
-       "detourMin": 35,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_n5407408323",
-       "kmAt": 53.7011361181785,
-       "lateralKm": 9.395543636381488,
-       "detourKm": 24.42841345459187,
-       "detourMin": 39,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -3166,15 +3173,6 @@
        "regionCode": "RU-SVE"
       },
       {
-       "placeId": "osm_n2329414004",
-       "kmAt": 54.103929817106355,
-       "lateralKm": 8.435223450355721,
-       "detourKm": 21.931580970924877,
-       "detourMin": 35,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
        "placeId": "osm_w1236097161",
        "kmAt": 54.26858040299184,
        "lateralKm": 9.140558166920119,
@@ -3184,20 +3182,11 @@
        "regionCode": "RU-SVE"
       },
       {
-       "placeId": "osm_n1846933959",
-       "kmAt": 64.07808181143122,
-       "lateralKm": 14.379356052043892,
-       "detourKm": 37.386325735314124,
-       "detourMin": 58,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_n1239090216",
-       "kmAt": 66.54632524722405,
-       "lateralKm": 12.571350436923865,
-       "detourKm": 32.68551113600205,
-       "detourMin": 51,
+       "placeId": "osm_w666332112",
+       "kmAt": 66.80385031372784,
+       "lateralKm": 12.751348713987769,
+       "detourKm": 33.1535066563682,
+       "detourMin": 52,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -3211,119 +3200,11 @@
        "regionCode": "RU-SVE"
       },
       {
-       "placeId": "osm_w58082724",
-       "kmAt": 66.94921337310306,
-       "lateralKm": 13.337968228052885,
-       "detourKm": 34.6787173929375,
-       "detourMin": 54,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w83113479",
-       "kmAt": 67.13889330507381,
-       "lateralKm": 13.407329860056914,
-       "detourKm": 34.85905763614797,
-       "detourMin": 54,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w58082729",
-       "kmAt": 67.41165493398762,
-       "lateralKm": 13.328780002167665,
-       "detourKm": 34.65482800563593,
-       "detourMin": 54,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w58082725",
-       "kmAt": 67.53608276357286,
-       "lateralKm": 13.3629625994557,
-       "detourKm": 34.743702758584824,
-       "detourMin": 54,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w58082728",
-       "kmAt": 67.9733834598358,
-       "lateralKm": 13.25590306068694,
-       "detourKm": 34.465347957786044,
-       "detourMin": 54,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w58082730",
-       "kmAt": 68.25160214488628,
-       "lateralKm": 13.193548425340392,
-       "detourKm": 34.30322590588502,
-       "detourMin": 53,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w170188023",
-       "kmAt": 68.59624913696909,
-       "lateralKm": 13.683894229069338,
-       "detourKm": 35.57812499558028,
-       "detourMin": 55,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_n1249566227",
-       "kmAt": 109.64650028971238,
-       "lateralKm": 2.7653232737516875,
-       "detourKm": 7.1898405117543875,
-       "detourMin": 13,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w156991915",
-       "kmAt": 109.75187535371495,
-       "lateralKm": 2.5301266018752493,
-       "detourKm": 6.578329164875648,
-       "detourMin": 12,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w93151031",
-       "kmAt": 109.82865608485001,
-       "lateralKm": 2.405841418230468,
-       "detourKm": 6.255187687399218,
-       "detourMin": 11,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w86326180",
-       "kmAt": 109.92736321070323,
-       "lateralKm": 2.615303605462798,
-       "detourKm": 6.799789374203275,
-       "detourMin": 12,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_n10885894423",
-       "kmAt": 110.53428225168159,
-       "lateralKm": 0.3735834073236031,
-       "detourKm": 0.9713168590413681,
-       "detourMin": 3,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_n1603900884",
-       "kmAt": 110.55924549205945,
-       "lateralKm": 0.5027849030991004,
-       "detourKm": 1.307240748057661,
-       "detourMin": 4,
+       "placeId": "osm_n1780145620",
+       "kmAt": 68.26072659539105,
+       "lateralKm": 12.819792174130978,
+       "detourKm": 33.33145965274054,
+       "detourMin": 52,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -3351,15 +3232,6 @@
        "lateralKm": 2.46403322579809,
        "detourKm": 6.406486387075034,
        "detourMin": 12,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w860653762",
-       "kmAt": 111.83537998284744,
-       "lateralKm": 9.671581406499241,
-       "detourKm": 25.14611165689803,
-       "detourMin": 40,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -3427,28 +3299,10 @@
        "regionCode": "RU-SVE"
       },
       {
-       "placeId": "osm_w114308887",
-       "kmAt": 159.7114506764437,
-       "lateralKm": 14.040149992231537,
-       "detourKm": 36.504389979802,
-       "detourMin": 57,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
        "placeId": "Q125698449",
        "kmAt": 159.9543553215262,
        "lateralKm": 14.085894566337712,
        "detourKm": 36.623325872478055,
-       "detourMin": 57,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_n1295141192",
-       "kmAt": 160.44126828354453,
-       "lateralKm": 13.986018010323276,
-       "detourKm": 36.36364682684052,
        "detourMin": 57,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
@@ -3459,33 +3313,6 @@
        "lateralKm": 10.67793921679898,
        "detourKm": 27.76264196367735,
        "detourMin": 44,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w437550356",
-       "kmAt": 237.24779190258903,
-       "lateralKm": 3.4748811663733643,
-       "detourKm": 9.034691032570748,
-       "detourMin": 16,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w594660832",
-       "kmAt": 237.61651182415937,
-       "lateralKm": 2.998997109873728,
-       "detourKm": 7.797392485671693,
-       "detourMin": 14,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w436926331",
-       "kmAt": 237.6581215331678,
-       "lateralKm": 4.128255904191319,
-       "detourKm": 10.733465350897431,
-       "detourMin": 18,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -3517,15 +3344,6 @@
        "regionCode": "RU-SVE"
       },
       {
-       "placeId": "osm_w617334622",
-       "kmAt": 240.36072916909808,
-       "lateralKm": 3.2038301072833497,
-       "detourKm": 8.32995827893671,
-       "detourMin": 14,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
        "placeId": "Q65126382",
        "kmAt": 240.53585535051312,
        "lateralKm": 3.1654105839793814,
@@ -3535,29 +3353,11 @@
        "regionCode": "RU-SVE"
       },
       {
-       "placeId": "osm_w571553456",
-       "kmAt": 240.78435625539004,
-       "lateralKm": 2.6740034929376293,
-       "detourKm": 6.952409081637836,
-       "detourMin": 12,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
        "placeId": "osm_w830090901",
        "kmAt": 241.7852994410134,
        "lateralKm": 2.6938179853394986,
        "detourKm": 7.003926761882696,
        "detourMin": 13,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "osm_w751334698",
-       "kmAt": 242.00158056956764,
-       "lateralKm": 2.3367734380944447,
-       "detourKm": 6.075610939045556,
-       "detourMin": 11,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -4002,7 +3802,7 @@
      ]
     }
    },
-   "shareText": "Екатеринбург → Тюмень · 393 км · 1 день\nДень 1 · 393 км\n08:00 Екатеринбург\n08:02 дом Ипатьева\n08:39 Шарташские каменные палатки\n10:41 Площадка отдыха\n12:02 Площадка отдыха\n13:14 Кафе «Огонёк»\n15:37 Площадка отдыха\n16:36 Краеведческий музей «Городская Дума»\n17:56 Тюмень\nИтого ≈ 4 300 ₽ на 2 чел.",
+   "shareText": "Екатеринбург → Тюмень · 393 км · 1 день\nДень 1 · 393 км\n08:00 Екатеринбург\n08:02 Дом Ипатьева\n08:39 Шарташские каменные палатки\n10:41 Площадка отдыха у Сухой Лога\n12:02 Площадка отдыха, 183 км\n13:14 Кафе «Огонёк»\n15:37 Площадка отдыха, 335 км\n16:36 Краеведческий музей «Городская Дума»\n17:56 Тюмень\nИтого ≈ 4 300 ₽ на 2 чел.",
    "pricesMonthRu": "октябрь",
    "pricesYear": "2026",
    "townPrepRu": {

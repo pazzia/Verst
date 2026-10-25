@@ -27,7 +27,9 @@
    "attributionRu": [
     "© участники OpenStreetMap"
    ],
-   "wikidataId": null
+   "wikidataId": null,
+   "placeSource": "osm",
+   "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
   },
   "ms": 0
  }
