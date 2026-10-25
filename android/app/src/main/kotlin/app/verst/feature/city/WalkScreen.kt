@@ -189,7 +189,8 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
     Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Txt(stringResource(R.string.walk_heading), T.display, C.text.primary, Modifier.semantics { heading() })
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            InfoChip(stringResource(R.string.walk_chip_duration, (w.durationMin + 30) / 60))
+            // S3-QA2: half hours with the decimal comma («5,5 ч»), whole hours without «,0»
+            InfoChip(stringResource(R.string.walk_chip_duration_text, hours(w.durationMin)))
             InfoChip(stringResource(R.string.walk_chip_km, km(w.walkKm)))
             if (w.returnToStart) InfoChip(stringResource(R.string.walk_chip_back))
             if (w.adultOnly) {
@@ -248,8 +249,11 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
     }
 }
 
-/** Whole hours, the same rounding as the duration chip (`walk_chip_duration`), so the note and the chip agree. */
-private fun hours(min: Int): String = ((min + 30) / 60).toString()
+/** Hours to the nearest half: «4», «5,5» (the chip `walk_chip_duration_text` and the `walk_shorter` note agree). */
+private fun hours(min: Int): String {
+    val halves = (min / 30.0).roundToInt()
+    return if (halves % 2 == 0) (halves / 2).toString() else "${halves / 2},5"
+}
 
 /** One decimal below 10 km without a trailing zero («6», «5,8»); whole km from 10 (S3-QA P2-01). */
 private fun km(v: Double): String {

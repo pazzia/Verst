@@ -548,11 +548,18 @@ private fun Intro(trip: TripDto, onAbout: () -> Unit) {
         }
         // S3-QA P1-06: one plate per night — the engine sentence, then the night's «Ближайшая подходящая: …» note
         val seen = mutableSetOf<String>()
+        // S3-QA2: with more than one night plate each one says which night («Ночь 2: не нашли …»)
+        val nightPlates = trip.warnings.count { it.code == "NO_LODGING" && it.message != null }
+        val nightPrefix = stringResource(R.string.road_night_prefix)
         for (w in trip.warnings) {
-            val msg = w.message ?: continue
-            if (!seen.add("${w.code}|${w.day}|$msg")) continue
+            val raw = w.message ?: continue
+            if (!seen.add("${w.code}|${w.day}|$raw")) continue
+            val night = w.day
+            val msg = if (w.code == "NO_LODGING" && nightPlates > 1 && night != null) {
+                String.format(nightPrefix, night, raw.replaceFirstChar { it.lowercase() })
+            } else raw
             val second = if (w.code == "NO_LODGING" && w.day != null) {
-                trip.daysList.firstOrNull { it.day == w.day }?.stops?.lastOrNull { it.kind == "overnight" }?.note?.takeIf { it.isNotBlank() && it != msg }
+                trip.daysList.firstOrNull { it.day == w.day }?.stops?.lastOrNull { it.kind == "overnight" }?.note?.takeIf { it.isNotBlank() && it != raw }
             } else null
             Row(
                 Modifier.fillMaxWidth().padding(top = 4.dp)
