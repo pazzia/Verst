@@ -673,7 +673,7 @@ class ScreensScreenshotTest {
     @Test
     fun cardS4OsmOnly() {
         val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
-        val d = real.copy(poiKind = "park", image = null, descriptionRu = null, ticket = null, descSource = "osm", whyRu = null)
+        val d = real.copy(poiKind = "park", image = null, descriptionRu = null, extractRu = null, extractSource = null, ticket = null, descSource = "osm", whyRu = null)
         shot("card", "s4-osm-only") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
         compose.onNodeWithTag("photo.illustration.none", useUnmergedTree = true).assertExists()
     }
