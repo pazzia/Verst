@@ -495,16 +495,16 @@ internal fun androidx.compose.foundation.layout.BoxScope.AboutDataSheet(windowH:
     }
     var full by remember { mutableStateOf(false) }
     val open: (String) -> Unit = { url -> runCatching { uri.openUri(url) } }
+    // BottomSheet already scrolls its content (a weighted verticalScroll column); a second weighted scroll column
+    // here measured at 0 height inside it and hid the whole body (CI run 125).
     BottomSheet(stringResource(R.string.about_data_title), onClose, "aboutdata", windowH) {
-        Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
-            Txt(stringResource(R.string.about_data_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 8.dp))
-            DataLink(stringResource(R.string.about_data_copy), "aboutdata.copy") { open(DataLicence.CATALOGUE_COPY) }
-            DataLink(stringResource(R.string.about_data_odbl), "aboutdata.odbl") { open(DataLicence.ODBL) }
-            DataLink(stringResource(R.string.about_data_osm), "aboutdata.osm") { open(DataLicence.OSM_COPYRIGHT) }
-            if (notice != null) {
-                DataLink(stringResource(if (full) R.string.about_data_notice_hide else R.string.about_data_notice), "aboutdata.notice", external = false) { full = !full }
-                if (full) Txt(notice, T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("aboutdata.notice.text"))
-            }
+        Txt(stringResource(R.string.about_data_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 8.dp))
+        DataLink(stringResource(R.string.about_data_copy), "aboutdata.copy") { open(DataLicence.CATALOGUE_COPY) }
+        DataLink(stringResource(R.string.about_data_odbl), "aboutdata.odbl") { open(DataLicence.ODBL) }
+        DataLink(stringResource(R.string.about_data_osm), "aboutdata.osm") { open(DataLicence.OSM_COPYRIGHT) }
+        if (notice != null) {
+            DataLink(stringResource(if (full) R.string.about_data_notice_hide else R.string.about_data_notice), "aboutdata.notice", external = false) { full = !full }
+            if (full) Txt(notice, T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("aboutdata.notice.text"))
         }
     }
 }
