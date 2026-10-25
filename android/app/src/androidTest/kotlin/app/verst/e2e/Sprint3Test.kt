@@ -269,7 +269,9 @@ class Sprint3Test {
         assertTrue(w.stops.size >= 2)
         shot("68-walk-result")
         compose.waitUntil(10_000) { flow.walkHandoff != null }
-        compose.onNodeWithTag("walk.handoff", useUnmergedTree = true).performClick()
+        // one button, or one per part when the engine split a long walk
+        val hTag = if ((flow.walkHandoff?.parts?.size ?: 1) > 1) "walk.handoff.1" else "walk.handoff"
+        compose.onNodeWithTag(hTag, useUnmergedTree = true).performScrollTo().performClick()
         compose.waitUntil(5_000) { flow.lastHandoff != null }
         val (links, target) = flow.lastHandoff!!
         Log.i("VerstE2e", "S3-4 walk handoff $target ${links.web}")

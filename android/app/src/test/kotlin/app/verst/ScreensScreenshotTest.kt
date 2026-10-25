@@ -588,7 +588,10 @@ class ScreensScreenshotTest {
     fun cityPresets() {
         shot("city", "presets") { app.verst.feature.city.CityScreen(cityUi(), noCity) }
         compose.onNodeWithTag("city.preset.overview", useUnmergedTree = true).assertExists()
-        compose.onNodeWithTag("city.preset.beer", useUnmergedTree = true).assertDoesNotExist() // `available: false` is hidden
+        // `available: false` is hidden (read from the contract: the real catalogue decides which)
+        val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets).presets
+        presets.filter { !it.available }.forEach { compose.onNodeWithTag("city.preset.${it.preset}", useUnmergedTree = true).assertDoesNotExist() }
+        presets.filter { it.available }.forEach { compose.onNodeWithTag("city.preset.${it.preset}", useUnmergedTree = true).assertExists() }
     }
 
     @Test
@@ -626,7 +629,9 @@ class ScreensScreenshotTest {
         val w = v2<app.verst.core.model.dto.WalkRouteDto>(file, EngineJson::walkRoute)
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-walk.json", EngineJson::handoff)
         shot("walk", state) { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, h, HandoffTarget.Browser, saved = false, building = false), noWalk) }
-        compose.onNodeWithTag("walk.handoff", useUnmergedTree = true).assertExists()
+        // one button, or one per part when the engine split the walk (real catalogue: 2 parts)
+        val tag = if (h.parts.size > 1) "walk.handoff.1" else "walk.handoff"
+        compose.onNodeWithTag(tag, useUnmergedTree = true).assertExists()
     }
 
     @Test
