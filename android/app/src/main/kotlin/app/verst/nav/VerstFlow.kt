@@ -350,7 +350,8 @@ class VerstFlow(
     var dog by mutableStateOf(false)
     var dailyKm by mutableStateOf(300)
     var budgetIndex by mutableStateOf(BudgetPresets.indexOf(40_000))
-    var mood: Mood? by mutableStateOf(null)
+    /** 5.3 §9: always one selected; `fun` for a new trip (children no longer pre-select «Спокойно»). */
+    var mood: Mood by mutableStateOf(Mood.FUN)
     private var moodTouched = false
 
     // ---- engine figures (P0: one trip, one distance)
@@ -513,7 +514,7 @@ class VerstFlow(
         dog = false
         dailyKm = 300
         budgetIndex = BudgetPresets.indexOf(40_000)
-        mood = null
+        mood = Mood.FUN
         locationAsked = false
         originFromGps = false
         originAddress = null
@@ -882,12 +883,11 @@ class VerstFlow(
             Seat.ADULT -> Seat.CHILD
             Seat.CHILD -> Seat.EMPTY
         }
-        if (!moodTouched) mood = if (children > 0) Mood.CALM else null
     }
 
     fun pickMood(m: Mood) {
         moodTouched = true
-        mood = if (mood == m) null else m
+        mood = m
     }
 
     fun stepKm(delta: Int) {
@@ -1756,14 +1756,14 @@ class VerstFlow(
         onWalkInputChanged()
     }
 
-    fun setCityAdults(n: Int) {
+    fun pickCityAdults(n: Int) {
         val v = n.coerceIn(1, 9)
         if (v == cityAdults) return
         cityAdults = v
         onWalkInputChanged()
     }
 
-    fun setCityChildren(n: Int) {
+    fun pickCityChildren(n: Int) {
         val v = n.coerceIn(0, 9)
         if (v == cityChildren) return
         cityChildren = v
@@ -1771,7 +1771,7 @@ class VerstFlow(
     }
 
     /** The dog toggle; «Собака останется дома» = off (a dog walk then falls back to the overview). */
-    fun setCityDog(on: Boolean) {
+    fun pickCityDog(on: Boolean) {
         if (on == cityDog) return
         cityDog = on
         if (!on && cityPreset == DOG_WALK) visibleCityPresets().firstOrNull { !it.adultOnly }?.let { selectDefaults(it) }
@@ -2329,7 +2329,7 @@ class VerstFlow(
 
     private fun defaultsNow() = DefaultsDto(
         frontAdult = frontAdult, seats = seats.map { it.name }, dog = dog, dailyKm = if (dailyKmTouched) dailyKm else null,
-        budgetIndex = budgetIndex, mood = mood?.name, moodTouched = moodTouched,
+        budgetIndex = budgetIndex, mood = mood.name, moodTouched = moodTouched,
         originLabel = origin.label, originLat = origin.lat, originLon = origin.lon, originGen = originGen,
         locationAsked = locationAsked, originFromGps = originFromGps,
         walkAdults = cityAdults, walkChildren = cityChildren, walkDog = cityDog,
@@ -2344,7 +2344,7 @@ class VerstFlow(
             dailyKmTouched = true
         }
         budgetIndex = d.budgetIndex.coerceIn(0, BudgetPresets.lastIndex)
-        mood = d.mood?.let { runCatching { Mood.valueOf(it) }.getOrNull() }
+        mood = Mood.parse(d.mood) ?: Mood.FUN
         moodTouched = d.moodTouched
         locationAsked = d.locationAsked
         originFromGps = d.originFromGps

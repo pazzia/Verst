@@ -200,7 +200,19 @@ const val DefaultWorld = "russia_v1"
 /** The golden-test world (G01–G12) and the e2e parity world. */
 const val GoldenWorld = "central_russia_v1"
 
-enum class Mood(val wire: String) { CALM("calm"), MORE_STOPS("more_stops"), JUST_DRIVE("just_drive") }
+/** 5.3 §9 «КАК ЕДЕМ» (ADR-0015 §5): v2 `more_stops` is read back as [FUN]; the app never sends it again. */
+enum class Mood(val wire: String) {
+    CALM("calm"), FUN("fun"), JUST_DRIVE("just_drive");
+
+    companion object {
+        /** A stored name or wire value («MORE_STOPS» / "more_stops" of Sprint 3 → [FUN]); null when unknown. */
+        fun parse(v: String?): Mood? = when (v) {
+            null -> null
+            "MORE_STOPS", "more_stops" -> FUN
+            else -> entries.firstOrNull { it.name == v || it.wire == v }
+        }
+    }
+}
 
 /** Budget presets of 5.3 §3 (`null` = «не важно»). */
 val BudgetPresets: List<Int?> = listOf(20_000, 30_000, 40_000, 60_000, 80_000, null)

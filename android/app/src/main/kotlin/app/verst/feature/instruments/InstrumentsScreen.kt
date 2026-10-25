@@ -25,6 +25,9 @@ import app.verst.core.ui.components.LocalReducedMotion
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
@@ -163,11 +166,15 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                         BudgetWell(ui, a, Modifier.weight(1f).fillMaxHeight())
                     }
                     Txt(stringResource(R.string.instruments_mood_label), T.label.md, C.text.muted, Modifier.padding(top = 16.dp))
-                    Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ToggleChip(stringResource(R.string.instruments_mood_calm), ui.mood == Mood.CALM, { a.mood(Mood.CALM) })
-                        ToggleChip(stringResource(R.string.instruments_mood_more), ui.mood == Mood.MORE_STOPS, { a.mood(Mood.MORE_STOPS) })
+                    // 5.3 §9: three radio cards in the radiogroup «Как едем», always one selected
+                    Column(
+                        Modifier.padding(top = 8.dp).selectableGroup().testTag("instruments.moods"),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        MoodCard(Mood.CALM, ui.mood == Mood.CALM, null, a)
+                        MoodCard(Mood.FUN, ui.mood == Mood.FUN, funCrew(ui.children, ui.dog), a)
+                        MoodCard(Mood.JUST_DRIVE, ui.mood == Mood.JUST_DRIVE, null, a)
                     }
-                    ToggleChip(stringResource(R.string.instruments_mood_drive), ui.mood == Mood.JUST_DRIVE, { a.mood(Mood.JUST_DRIVE) }, Modifier.padding(top = 8.dp))
                     Spacer(Modifier.height(16.dp))
                 }
                 // 5.3 §1: content scrolls under a 16 dp fade above the caption row.
@@ -200,7 +207,10 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                         ui.budgetStatus == null -> stringResource(R.string.budget_instruments_fits, RuFormat.thousands(total))
                         else -> stringResource(R.string.budget_instruments_fitted, RuFormat.thousands(total))
                     }
-                    Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp).testTag("instruments.meta"), maxLines = 1)
+                    // 5.3 §9: the meta ends with the preset name in lower case («… · весело и познавательно»)
+                    val moodWord = ui.mood?.let { moodTitle(it).lowercase() }
+                    val metaLine = if (km != null && moodWord != null) meta + stringResource(R.string.common_join_dot) + moodWord else meta
+                    Txt(metaLine, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp).testTag("instruments.meta"), maxLines = 2)
                     if (suffix != null) {
                         Txt(
                             suffix, T.body.mdTight, if (ui.budgetOutcome == "no_fit") C.accent.redText else C.text.secondary,
@@ -214,6 +224,72 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
         }
     }
 }
+
+@Composable
+private fun moodTitle(m: Mood): String = stringResource(
+    when (m) {
+        Mood.CALM -> R.string.instruments_mood_calm
+        Mood.FUN -> R.string.instruments_mood_more
+        Mood.JUST_DRIVE -> R.string.instruments_mood_drive
+    },
+)
+
+/** 5.3 §9: the selected fun card's line from the crew in the mirror (child → dog → adults only). */
+@Composable
+private fun funCrew(children: Int, dog: Boolean): String {
+    val parts = buildList {
+        if (children > 0) add(stringResource(R.string.instruments_mood_fun_child))
+        if (dog) add(stringResource(R.string.instruments_mood_fun_dog))
+        if (isEmpty()) add(stringResource(R.string.instruments_mood_fun_adults))
+    }
+    return stringResource(R.string.instruments_mood_fun_crew, parts.joinToString("; "))
+}
+
+/** components §25 `MoodCard`: a radio card (min-h 56, padding 10 12, radius 12, gap 12). */
+@Composable
+private fun MoodCard(m: Mood, selected: Boolean, crewLine: String?, a: InstrumentsActions) {
+    val shape = RoundedCornerShape(12.dp)
+    val sub = stringResource(
+        when (m) {
+            Mood.CALM -> R.string.instruments_mood_calm_sub
+            Mood.FUN -> R.string.instruments_mood_fun_sub
+            Mood.JUST_DRIVE -> R.string.instruments_mood_drive_sub
+        },
+    )
+    Row(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp).clip(shape)
+            // the on fill #1F1F17 has no token yet (dev-notes S4): dash.face + the 2 dp yellow border
+            .background(C.dash.face)
+            .border(if (selected) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (selected) C.accent.yellow else C.dash.controlAlt, shape)
+            .selectable(selected, role = Role.RadioButton, onClick = { a.mood(m) })
+            .testTag("instruments.mood.${m.wire}")
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            Modifier.size(20.dp).drawBehind {
+                val r = size.minDimension / 2
+                if (selected) {
+                    val w = 6.dp.toPx()
+                    drawCircle(C.accent.yellow, r - w / 2, style = Stroke(w))
+                } else {
+                    val w = 2.dp.toPx()
+                    drawCircle(C.dash.outlineDashed, r - w / 2, style = Stroke(w))
+                }
+            },
+        )
+        Column(Modifier.weight(1f)) {
+            Txt(moodTitle(m), MoodTitle, C.text.primary, maxLines = 1)
+            Txt(sub, T.body.smRelaxed, C.text.secondary, Modifier.padding(top = 2.dp))
+            if (selected && crewLine != null) {
+                Txt(crewLine, T.body.smStrong, C.accent.yellow, Modifier.padding(top = 4.dp).testTag("instruments.mood.crew"))
+            }
+        }
+    }
+}
+
+private val MoodTitle = T.field.md.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.W700)
 
 @Composable
 private fun summary(ui: InstrumentsUi): String {

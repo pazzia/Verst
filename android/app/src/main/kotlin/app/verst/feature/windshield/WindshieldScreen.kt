@@ -23,6 +23,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +67,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.verst.core.model.RuFormat
 import app.verst.core.model.SavedTripDto
 import app.verst.core.model.dto.ReadyRouteDto
@@ -85,7 +92,10 @@ import app.verst.nav.WindshieldData
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
-private val DashHeight = 324.dp
+/** 5.1 §9 (Sprint 4): the dashboard rose 20 dp for the walking entry (top 500 at 844). */
+private val DashHeight = 344.dp
+/** Navigator 20 + 96, gap 12, `CityEntryPlate` 64, 12: where the caption region starts. */
+private val DashFixed = 204.dp
 private const val SavedTripsWarn = app.verst.core.model.SavedTrips.WARN_FROM
 
 /** Everything the Windshield draws (stateless; the caller maps `VerstFlow` into it). */
@@ -136,8 +146,10 @@ fun WindshieldScreen(
 ) {
     ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
-            val sceneH = maxHeight - DashHeight + 20.dp
             var signBottom by remember { mutableStateOf(290f) }
+            // 5.1 §9: at 360 × 640 the plate stays and the caption row scrolls under the fade instead
+            val dashH = (maxHeight - (signBottom + 4f).dp).coerceIn(DashFixed + 40.dp, DashHeight)
+            val sceneH = maxHeight - dashH + 20.dp
             WindshieldScene(sceneH, gantry = true, gantryTop = minOf(286f, signBottom - 4f), overlay = ui.tripsSheet)
             Mirror(crewShort(ui.adults, ui.children, ui.dog), ui.adults, ui.children, ui.dog, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
             val density = androidx.compose.ui.platform.LocalDensity.current
@@ -146,7 +158,7 @@ fun WindshieldScreen(
                 Modifier.padding(start = 20.dp, end = 20.dp, top = 84.dp).fillMaxWidth()
                     .onGloballyPositioned { c -> signBottom = with(density) { (c.positionInParent().y + c.size.height).toDp().value } },
             )
-            Dashboard(ui, onStart, onNavigator, trips::open, onDebug, onCity, onYouAre, Modifier.align(Alignment.BottomCenter))
+            Dashboard(ui, dashH, onStart, onNavigator, trips::open, onDebug, onCity, onYouAre, Modifier.align(Alignment.BottomCenter))
             if (ui.tripsSheet && ui.trips.isNotEmpty()) TripsSheet(ui.trips, maxHeight, trips)
         }
     }
@@ -217,24 +229,47 @@ private fun TripRow(t: SavedTripDto, index: Int, onDelete: () -> Unit, onClick: 
     }
 }
 
-/** 5.10 §2 «По городу · пешком» plate (the «Мои поездки» plate style, `walker` icon). */
+/**
+ * components §24 `CityEntryPlate` (5.1 §9): a GOST 5.33-style blue plate, h 64, the white square with the black
+ * `walker`, title + sub, chevron. Pressed: darker fill, shorter shadow, 1 dp down. TalkBack `cd_windshield_city`.
+ */
 @Composable
-private fun CityPlate(onClick: () -> Unit) {
+private fun CityEntryPlate(town: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val cd = stringResource(R.string.cd_windshield_city, town)
+    val source = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val pressed by source.collectIsPressedAsState()
+    val outer = RoundedCornerShape(DesignTokens.radius.r8)
+    val inner = RoundedCornerShape(5.dp)
     Box(
-        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onClick).testTag("windshield.city"),
-        contentAlignment = Alignment.CenterStart,
+        modifier
+            .fillMaxWidth()
+            .height(DesignTokens.size.cityEntryH)
+            .graphicsLayer { translationY = if (pressed) 1.dp.toPx() else 0f }
+            .shadow(if (pressed) 2.dp else 8.dp, outer, ambientColor = C.sign.black, spotColor = C.sign.black)
+            .clip(outer)
+            // #173E82 pressed has no token yet (dev-notes S4): `sign.blueSelected` is the nearest
+            .background(if (pressed) C.sign.blueSelected else C.sign.blue)
+            .clickable(source, indication = null, role = Role.Button, onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = cd }
+            .testTag("windshield.city")
+            .padding(3.dp)
+            .border(DesignTokens.stroke.w2, C.sign.white, inner)
+            .padding(horizontal = 12.dp),
     ) {
-        Row(
-            Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            app.verst.core.ui.components.WalkerIcon(C.text.secondary, 16.dp)
-            Txt(stringResource(R.string.city_entry), T.body.mdStrong, C.text.secondary, maxLines = 1)
-            Txt(stringResource(R.string.city_entry_sub), T.body.sm, C.text.muted, maxLines = 1)
+        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.size(38.dp).clip(RoundedCornerShape(3.dp)).background(C.sign.white), contentAlignment = Alignment.Center) {
+                app.verst.core.ui.components.WalkerIcon(C.sign.black, 28.dp)
+            }
+            Column(Modifier.weight(1f)) {
+                Txt(stringResource(R.string.windshield_city_title), CityTitle, C.sign.white, maxLines = 1)
+                Txt(stringResource(R.string.windshield_city_sub, town), T.body.sm, C.sign.blueText, maxLines = 1)
+            }
+            GlyphIcon(Glyph.RIGHT, C.sign.white, 18.dp)
         }
     }
 }
+
+private val CityTitle = T.title.md.copy(fontSize = 19.sp)
 
 /** 5.1 §4.4 «Мои поездки · N» plate (bookmark 16, outline, 36 high, 44 touch). */
 @Composable
@@ -420,41 +455,53 @@ private fun RouteRow(r: ReadyRouteDto, km: Int?, selected: Boolean, index: Int, 
 }
 
 @Composable
-private fun Dashboard(ui: WindshieldUi, onStart: () -> Unit, onNavigator: () -> Unit, onTrips: () -> Unit, onDebug: () -> Unit, onCity: () -> Unit, onYouAre: () -> Unit, modifier: Modifier) {
+private fun Dashboard(
+    ui: WindshieldUi, height: androidx.compose.ui.unit.Dp, onStart: () -> Unit, onNavigator: () -> Unit, onTrips: () -> Unit,
+    onDebug: () -> Unit, onCity: () -> Unit, onYouAre: () -> Unit, modifier: Modifier,
+) {
     val routes = (ui.data as? WindshieldData.Routes)?.routes
     val selected = routes?.getOrNull(ui.selected)
-    Box(modifier.fillMaxWidth().height(DashHeight).dashboardSurface()) {
-        NaviEntry(ui.origin, ui.data is WindshieldData.NoRoutes, onNavigator, onDebug, onYouAre, Modifier.padding(start = 18.dp, end = 18.dp, top = 22.dp).fillMaxWidth())
-        Row(
-            Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = 22.dp, end = 20.dp, bottom = 56.dp)
-                .height(DesignTokens.size.startMOuter),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // N-02: the column (label / title / meta / 8 / plate) is centred on the start button, even when taller.
-            Column(Modifier.weight(1f).padding(end = 14.dp).wrapContentHeight(unbounded = true).semantics(mergeDescendants = true) {}) {
-                val (label, title, meta) = when {
-                    selected != null -> Triple(stringResource(R.string.windshield_selected_label), selected.title, readyMeta(selected))
-                    ui.data is WindshieldData.Loading -> Triple(stringResource(R.string.windshield_selected_label), null, null)
-                    else -> Triple(
-                        stringResource(R.string.windshield_no_routes_label),
-                        stringResource(R.string.windshield_no_routes_title),
-                        stringResource(R.string.windshield_no_routes_meta),
+    Column(modifier.fillMaxWidth().height(height).dashboardSurface().padding(start = 18.dp, end = 18.dp, top = 20.dp)) {
+        NaviEntry(ui.origin, ui.data is WindshieldData.NoRoutes, onNavigator, onDebug, onYouAre, Modifier.fillMaxWidth())
+        // 5.1 §9: the walking entry under the navigator (gap 12), as strong as it — by car / on foot
+        CityEntryPlate(ui.origin, onCity, Modifier.padding(top = 12.dp))
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                Row(
+                    Modifier.fillMaxWidth().padding(start = 4.dp, end = 2.dp, top = 22.dp, bottom = 38.dp).height(DesignTokens.size.startMOuter),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // N-02: the column (label / title / meta / 8 / plate) is centred on the start button, even when taller.
+                    Column(Modifier.weight(1f).padding(end = 14.dp).wrapContentHeight(unbounded = true).semantics(mergeDescendants = true) {}) {
+                        val (label, title, meta) = when {
+                            selected != null -> Triple(stringResource(R.string.windshield_selected_label), selected.title, readyMeta(selected))
+                            ui.data is WindshieldData.Loading -> Triple(stringResource(R.string.windshield_selected_label), null, null)
+                            else -> Triple(
+                                stringResource(R.string.windshield_no_routes_label),
+                                stringResource(R.string.windshield_no_routes_title),
+                                stringResource(R.string.windshield_no_routes_meta),
+                            )
+                        }
+                        Txt(label, T.label.md, C.text.muted, maxLines = 1)
+                        if (title != null) Txt(title, T.title.xl, C.text.primary, maxLines = 1) else PlaceholderPlate(160.dp, 20.dp, C.dash.controlAlt, Modifier.padding(vertical = 4.dp))
+                        if (meta != null) Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp), maxLines = 2) else PlaceholderPlate(120.dp, 12.dp, C.dash.controlAlt)
+                        // «Мои поездки» stays in the caption column; the small «По городу» plate is gone (5.1 §9)
+                        if (ui.trips.isNotEmpty()) {
+                            Spacer(Modifier.height(4.dp)) // 8 dp to the plate box (the 44 dp touch box adds 4)
+                            TripsPlate(ui.trips.size, onTrips)
+                        }
+                    }
+                    StartButton(
+                        StartSize.M, stringResource(R.string.common_go), enabled = selected != null,
+                        cd = if (selected != null) stringResource(R.string.cd_start_route, selected.title) else stringResource(R.string.cd_start_disabled_destination),
+                        onClick = onStart, modifier = Modifier.testTag("windshield.start"),
                     )
                 }
-                Txt(label, T.label.md, C.text.muted, maxLines = 1)
-                if (title != null) Txt(title, T.title.xl, C.text.primary, maxLines = 1) else PlaceholderPlate(160.dp, 20.dp, C.dash.controlAlt, Modifier.padding(vertical = 4.dp))
-                if (meta != null) Txt(meta, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp), maxLines = 2) else PlaceholderPlate(120.dp, 12.dp, C.dash.controlAlt)
-                Spacer(Modifier.height(4.dp)) // 8 dp to the plate box (the 44 dp touch box adds 4)
-                // 5.10 §2: «По городу · пешком» after «Мои поездки» on the same row (gap 8); alone without trips
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (ui.trips.isNotEmpty()) TripsPlate(ui.trips.size, onTrips)
-                    CityPlate(onCity)
-                }
             }
-            StartButton(
-                StartSize.M, stringResource(R.string.common_go), enabled = selected != null,
-                cd = if (selected != null) stringResource(R.string.cd_start_route, selected.title) else stringResource(R.string.cd_start_disabled_destination),
-                onClick = onStart, modifier = Modifier.testTag("windshield.start"),
+            // 5.1 §1: the caption row scrolls under a 16 dp fade when the window is short
+            Box(
+                Modifier.align(Alignment.TopCenter).fillMaxWidth().height(16.dp)
+                    .background(Brush.verticalGradient(listOf(C.dash.raised, C.dash.raised.copy(alpha = 0f)))),
             )
         }
     }
@@ -470,13 +517,13 @@ private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, o
             .clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("windshield.navi")
-            .padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 16.dp)
-            .defaultMinSize(minHeight = 134.dp - 32.dp), // N-12 / S-24: the panel is 134 high (D3)
+            // 5.1 §9: the panel shrinks to its content, h 96 (bezel 6 + padding 9 12, label, 7, field 46)
+            .padding(start = 18.dp, end = 18.dp, top = 15.dp, bottom = 15.dp),
     ) {
         Row(Modifier.fillMaxWidth()) {
             // DEV-127 hidden entry: a 2 s long-press on «НАВИГАТОР» opens the debug panel.
             Txt(
-                stringResource(R.string.windshield_navi_label), T.label.md, C.navi.label,
+                stringResource(R.string.windshield_navi_label_car), T.label.md, C.navi.label,
                 Modifier.weight(1f).testTag("windshield.debug").pointerInput(Unit) {
                     detectTapGestures(onPress = {
                         val released = withTimeoutOrNull(2_000) { tryAwaitRelease() }
@@ -492,9 +539,9 @@ private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, o
         }
         Row(
             Modifier
-                .padding(top = 12.dp)
+                .padding(top = 7.dp)
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(46.dp)
                 .clip(RoundedCornerShape(DesignTokens.radius.r10))
                 .background(C.navi.field)
                 // 5.1 §4.7 (S-09): no routes nearby → the field is the way on, yellow 2 dp border (static frame).
@@ -513,7 +560,6 @@ private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, o
                 Txt(stringResource(R.string.windshield_field_sub), T.body.sm, C.navi.labelSecondary, maxLines = 1)
             }
         }
-        Txt(stringResource(R.string.windshield_hint), T.body.sm, C.navi.labelSecondary, Modifier.padding(top = 8.dp), maxLines = 1)
     }
 }
 

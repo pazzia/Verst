@@ -26,6 +26,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -225,6 +227,34 @@ class ScreensScreenshotTest {
             )
         }
         compose.onNodeWithText("3 взрослых · 1 ребёнок · собака").assertExists() // Russian plural rules (ru locale)
+    }
+
+    /** 5.3 §9 (S4): the three MoodCards, fun selected with a child and the dog → the yellow crew line (tall window). */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1060dp-port-xxhdpi")
+    fun instrumentsFunMoodWithChildAndDog() {
+        shot("instruments", "s4-mood-fun-child-dog", 390, 1060) {
+            InstrumentsScreen(
+                InstrumentsUi("Золотое кольцо", "Москва", true, 761, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.FUN, days = 3, originGen = "Москвы"),
+                noActions,
+            )
+        }
+        compose.onNodeWithTag("instruments.mood.crew", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Под ваш экипаж", substring = true).assertExists()
+        compose.onNodeWithTag("instruments.mood.fun").assertIsSelected()
+        compose.onNodeWithTag("instruments.mood.calm").assertIsNotSelected()
+        compose.onNodeWithText("весело и познавательно", substring = true).assertExists() // the caption meta suffix
+    }
+
+    @Test
+    fun instrumentsJustDriveAdults() {
+        shot("instruments", "s4-mood-just-drive") {
+            InstrumentsScreen(
+                InstrumentsUi("Москва → Казань", "Москва", false, 820, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 500, 2, Mood.JUST_DRIVE, days = 2, originGen = "Москвы"),
+                noActions,
+            )
+        }
+        compose.onNodeWithTag("instruments.mood.crew", useUnmergedTree = true).assertDoesNotExist()
     }
 
     @Test

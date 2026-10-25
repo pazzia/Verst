@@ -786,10 +786,10 @@ class VerstFlowTest {
         settle()
         // the dog walk shows only with the dog, first
         assertFalse(flow.visibleCityPresets().any { it.preset == "dog_walk" })
-        flow.setCityDog(true)
+        flow.pickCityDog(true)
         assertEquals("dog_walk", flow.visibleCityPresets().first().preset)
-        flow.setCityChildren(1)
-        flow.setCityAdults(3)
+        flow.pickCityChildren(1)
+        flow.pickCityAdults(3)
         // 18+: the age question only; a child does not block the drink preset
         flow.selectCityPreset("beer")
         assertNotNull(flow.ageGate)
