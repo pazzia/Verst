@@ -1969,3 +1969,22 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   - New shot 124-fryazino-ring-day1-rostov.
   - The e2e asserts that the Ростовский кремль is on the ring.
 - **Designer P1s** (des/S4-QA P1-01..05) were done in cf7d54a / 5328f79; nothing is open from that list.
+
+### S4-RELEASE (Developer): parking totals with unknown stops (Manager, shot 124)
+- **The issue:** on the Golden Ring, Ростовский кремль and Трапезная у кремля show «P ?» while the
+  footer said «из них парковки бесплатно».
+- **The rule:** one function, `parkingTotal(rub, unknown, known)` in RoadParts, now serves the Road
+  footer, the day headers and the Waybill line:
+  - no unknown stops → «бесплатно» (0) or «≈ N ₽»;
+  - unknown stops and N > 0 → «≈ N ₽ + ?»;
+  - unknown stops and N = 0 with some known free stays → «бесплатно + ?»;
+  - no stop with data at all → «?».
+- **Waybill sum column:** it is numeric (70 dp, like «Платные дороги 0»), so it shows «N + ?», and «0 + ?»
+  for the free-plus-unknown case. «бесплатно + ?» does not fit there.
+- **Strings:** `road_parking_free_unknown` «бесплатно + ?» is added to core-ui strings as app-only copy.
+  Designer: please adopt it into copy-ru.md.
+- **Unit tests:**
+  - ScreensScreenshotTest `parkingTotalRuleNeverClaimsFreeOrExactWithUnknowns` covers the rule over a grid.
+  - `parkingFreePlusUnknownOnRoadAndWaybill` checks the footer and a day header for «бесплатно + ?».
+  - `parkingFreePlusUnknownWaybillLine` checks «0 + ?».
+  - `parkingSumPlusUnknownFooter` checks «≈ N ₽ + ?».

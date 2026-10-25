@@ -31,6 +31,7 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import app.verst.core.model.DefaultOrigin
@@ -50,7 +51,10 @@ import app.verst.core.model.SavedTrips
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.StopDto
 import app.verst.core.model.dto.TripDto
+import app.verst.feature.road.ParkingTotal
 import app.verst.feature.road.RoadActions
+import app.verst.feature.road.parkingOf
+import app.verst.feature.road.parkingTotal
 import app.verst.feature.road.RoadFocus
 import app.verst.nav.GpsState
 import app.verst.nav.HandoffTarget
@@ -388,6 +392,78 @@ class ScreensScreenshotTest {
         // parity: the line = Σ known stays = the Road-ahead footer
         val known = trip.daysList.flatMap { it.stops }.sumOf { it.parking?.rub ?: 0 }
         assertEquals(known, trip.cost.lines.first { it.key == "parking" }.rub)
+    }
+
+    /**
+     * S4-RELEASE (Manager, Golden Ring shot 124: «P ?» on Ростовский кремль but «из них парковки бесплатно»): while any
+     * stop's parking is unknown no total claims free or exact — footer, day headers and the Waybill line.
+     */
+    @Test
+    fun parkingTotalRuleNeverClaimsFreeOrExactWithUnknowns() {
+        assertEquals(ParkingTotal.FREE, parkingTotal(0, 0, 3))
+        assertEquals(ParkingTotal.SUM, parkingTotal(380, 0, 2))
+        assertEquals(ParkingTotal.SUM_PLUS_UNKNOWN, parkingTotal(380, 1, 2))
+        assertEquals(ParkingTotal.FREE_PLUS_UNKNOWN, parkingTotal(0, 2, 2))
+        assertEquals(ParkingTotal.UNKNOWN, parkingTotal(0, 1, 0))
+        for (rub in listOf(0, 80, 380)) for (unknown in 1..3) for (known in 0..3) {
+            val t = parkingTotal(rub, unknown, known)
+            assertTrue("$rub/$unknown/$known → $t", t != ParkingTotal.FREE && t != ParkingTotal.SUM)
+        }
+    }
+
+    /** The Golden Ring case: the known stays are free, two stops unknown → «бесплатно + ?» / «0 + ?», never «бесплатно». */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1200dp-port-xxhdpi")
+    fun parkingFreePlusUnknownOnRoadAndWaybill() {
+        val base = s4Trip()
+        val days = base.daysList.map { d ->
+            d.copy(stops = d.stops.map { st ->
+                val p = st.parking
+                if (p != null && p.known) st.copy(parking = app.verst.core.model.dto.ParkingDto(rub = 0, source = "free", freeRu = "бесплатно у входа")) else st
+            })
+        }
+        val trip = base.copy(daysList = days, cost = base.cost.copy(lines = base.cost.lines.map { if (it.key == "parking") it.copy(rub = 0) else it }))
+        val sum = parkingOf(trip)
+        assertTrue("fixture has unknown and free stops: $sum", sum.unknown > 0 && sum.known > 0 && sum.rub == 0)
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        val freePlus = ctx.getString(UiR.string.road_parking_free_unknown)
+        val free = ctx.getString(UiR.string.road_parking_inline_free)
+        shot("road", "s4-parking-free-unknown") { RoadScreen(RoadUi(trip, "NE"), noRoad) }
+        compose.onNodeWithTag("road.total.parking.value", useUnmergedTree = true).assertTextEquals(freePlus)
+        // every day header follows the same rule
+        trip.daysList.forEach { d ->
+            val p = parkingOf(d)
+            if (p.unknown > 0) assertTrue("day ${d.day}: $p", parkingTotal(p) != ParkingTotal.FREE)
+        }
+        assertTrue(compose.onAllNodesWithText(freePlus, useUnmergedTree = true).fetchSemanticsNodes().size >= 2) // footer + a day
+        assertTrue("no bare «$free» total", compose.onAllNodesWithTag("road.total.parking.value", useUnmergedTree = true).fetchSemanticsNodes().none { n ->
+            n.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)?.joinToString("") == free
+        })
+    }
+
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1200dp-port-xxhdpi")
+    fun parkingFreePlusUnknownWaybillLine() {
+        val base = s4Trip()
+        val trip = base.copy(
+            daysList = base.daysList.map { d -> d.copy(stops = d.stops.map { st -> if (st.parking?.known == true) st.copy(parking = app.verst.core.model.dto.ParkingDto(rub = 0, source = "free")) else st }) },
+            cost = base.cost.copy(lines = base.cost.lines.map { if (it.key == "parking") it.copy(rub = 0) else it }),
+        )
+        shot("waybill", "s4-parking-free-unknown", 390, 1200) { WaybillScreen(WaybillUi(trip, 1, false, null), noWaybill) }
+        compose.onNodeWithTag("waybill.sum.parking", useUnmergedTree = true).assertTextEquals("0 + ?")
+    }
+
+    /** Paid + unknown (the s4 fixture): footer «≈ N ₽ + ?», Waybill «N + ?». */
+    @Test
+    fun parkingSumPlusUnknownFooter() {
+        val trip = s4Trip()
+        val sum = parkingOf(trip)
+        val line = trip.cost.lines.first { it.key == "parking" }.rub
+        assertTrue(sum.unknown > 0 && line > 0)
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        shot("road", "s4-parking-sum-unknown") { RoadScreen(RoadUi(trip, "NE"), noRoad) }
+        compose.onNodeWithTag("road.total.parking.value", useUnmergedTree = true)
+            .assertTextEquals(ctx.getString(UiR.string.road_parking_day_unknown, app.verst.core.model.RuFormat.thousands(line)))
     }
 
     /** M6+ contract (a Moscow zone stop): the engine's P part, the sheet from `zoneRu` / `whereRu` / `sundayRu`. */

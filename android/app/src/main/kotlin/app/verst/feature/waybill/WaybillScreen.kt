@@ -261,7 +261,9 @@ private fun TableHeader() {
 /** components §11 `CostLine`: name + chevron, the engine formula in hand, the sum; expands to the breakdown. */
 @Composable
 private fun CostLine(line: CostLineDto, expanded: Boolean, onClick: () -> Unit) {
-    val sum = RuFormat.thousands(line.rub)
+    // S4-RELEASE: the same rule as the Road footer and day headers — no exact or zero sum while a stop is unknown.
+    // The column is numeric (70 dp, like «Платные дороги 0»), so «бесплатно + ?» reads «0 + ?» here.
+    val sum = RuFormat.thousands(line.rub) + if (unknown > 0) " + ?" else ""
     val state = stringResource(if (expanded) R.string.cd_waybill_collapse else R.string.cd_waybill_expand)
     val cd = stringResource(R.string.cd_waybill_line, line.title, sum, line.formula, state)
     Column(
@@ -281,7 +283,7 @@ private fun CostLine(line: CostLineDto, expanded: Boolean, onClick: () -> Unit) 
                 }
                 Txt(line.formula, T.hand.sm, C.paper.ink, Modifier.testTag("waybill.formula.${line.key}"))
             }
-        }, right = { Txt(sum, T.hand.md, C.paper.ink, align = TextAlign.End, maxLines = 1) })
+        }, right = { Txt(sum, T.hand.md, C.paper.ink, Modifier.testTag("waybill.sum.parking"), align = TextAlign.End, maxLines = 1) })
         if (expanded) {
             line.breakdown.forEachIndexed { i, b ->
                 val sep = stringResource(R.string.common_join_dot)
@@ -308,7 +310,9 @@ private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onC
     val unknownStops = stops.filter { it.parking?.known != true }
     // S4-QA P1-01: the same count as the Road ahead rows and day headers (every left-the-car stop without a tariff)
     val unknown = unknownStops.size
-    val sum = RuFormat.thousands(line.rub)
+    // S4-RELEASE: the same rule as the Road footer and day headers — no exact or zero sum while a stop is unknown.
+    // The column is numeric (70 dp, like «Платные дороги 0»), so «бесплатно + ?» reads «0 + ?» here.
+    val sum = RuFormat.thousands(line.rub) + if (unknown > 0) " + ?" else ""
     val hoursOf = { s: app.verst.core.model.dto.StopDto -> kotlin.math.ceil(s.parking?.hours ?: (s.dwellMin / 60.0)).toInt().coerceAtLeast(1) }
     val formula = line.formula.replace(Regex("""\s*[+·]?\s*(\+\s*)?ещё \d+ без данных"""), "").trim().ifBlank {
         val h = paid.sumOf(hoursOf)
@@ -335,7 +339,7 @@ private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onC
                 Txt(formula, T.hand.sm, C.paper.ink, Modifier.testTag("waybill.formula.parking"))
                 if (unknownLine != null) Txt(unknownLine, T.hand.sm, C.paper.ink, Modifier.testTag("waybill.parking.unknown"))
             }
-        }, right = { Txt(sum, T.hand.md, C.paper.ink, align = TextAlign.End, maxLines = 1) })
+        }, right = { Txt(sum, T.hand.md, C.paper.ink, Modifier.testTag("waybill.sum.parking"), align = TextAlign.End, maxLines = 1) })
         if (expanded) {
             val rows = buildList<Pair<String, String>> {
                 if (line.breakdown.isNotEmpty()) {

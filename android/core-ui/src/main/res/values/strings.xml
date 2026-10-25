@@ -727,6 +727,8 @@
     <string name="road_parking_unknown">нет данных — уточните на месте</string>
     <string name="road_parking_day">≈ %1$s ₽</string>
     <string name="road_parking_day_unknown">≈ %1$s ₽ + ?</string>
+    <!-- S4-RELEASE (Manager): some stops unknown, the known ones free (app-only, dev-notes) -->
+    <string name="road_parking_free_unknown">бесплатно + ?</string>
     <string name="cd_road_parking_day">Парковки за день: примерно %1$s рублей</string>
     <string name="cd_road_parking_day_unknown">и %1$d без данных</string>
     <string name="road_footer_parking">из них парковки</string>

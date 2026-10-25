@@ -91,12 +91,45 @@ internal fun parkingAware(trip: TripDto): Boolean =
  */
 internal fun showsParking(s: StopDto): Boolean = parkingStop(s) && (s.parking != null || s.kind == "sight")
 
-/** Σ known stays of a day and the count of stops without data. */
-internal data class ParkingSum(val rub: Int, val unknown: Int)
+/** Σ known stays of a day, the count of stops without data and of stops with data. */
+internal data class ParkingSum(val rub: Int, val unknown: Int, val known: Int = 0)
 
-internal fun parkingOf(day: DayDto): ParkingSum {
-    val stops = day.stops.filter(::showsParking)
-    return ParkingSum(stops.sumOf { it.parking?.takeIf(ParkingDto::known)?.rub ?: 0 }, stops.count { it.parking?.known != true })
+internal fun parkingOf(stops: List<StopDto>): ParkingSum {
+    val leave = stops.filter(::showsParking)
+    return ParkingSum(
+        leave.sumOf { it.parking?.takeIf(ParkingDto::known)?.rub ?: 0 },
+        leave.count { it.parking?.known != true },
+        leave.count { it.parking?.known == true },
+    )
+}
+
+internal fun parkingOf(day: DayDto): ParkingSum = parkingOf(day.stops)
+
+internal fun parkingOf(trip: TripDto): ParkingSum = parkingOf(trip.daysList.flatMap { it.stops })
+
+/**
+ * S4-RELEASE: one rule for the Road footer, the day headers and the Waybill line. While any stop's parking is
+ * unknown the total never claims «бесплатно» or an exact sum: «≈ N ₽ + ?», or «бесплатно + ?» when the known
+ * stays are free, or «?» when no stop has data.
+ */
+internal enum class ParkingTotal { FREE, SUM, SUM_PLUS_UNKNOWN, FREE_PLUS_UNKNOWN, UNKNOWN }
+
+internal fun parkingTotal(rub: Int, unknown: Int, known: Int): ParkingTotal = when {
+    unknown == 0 -> if (rub == 0) ParkingTotal.FREE else ParkingTotal.SUM
+    rub > 0 -> ParkingTotal.SUM_PLUS_UNKNOWN
+    known > 0 -> ParkingTotal.FREE_PLUS_UNKNOWN
+    else -> ParkingTotal.UNKNOWN
+}
+
+internal fun parkingTotal(p: ParkingSum, rub: Int = p.rub): ParkingTotal = parkingTotal(rub, p.unknown, p.known)
+
+@Composable
+internal fun parkingTotalText(p: ParkingSum, rub: Int = p.rub): String = when (parkingTotal(p, rub)) {
+    ParkingTotal.FREE -> stringResource(R.string.road_parking_inline_free) // not «≈ 0 ₽»
+    ParkingTotal.SUM -> stringResource(R.string.road_parking_day, RuFormat.thousands(rub))
+    ParkingTotal.SUM_PLUS_UNKNOWN -> stringResource(R.string.road_parking_day_unknown, RuFormat.thousands(rub))
+    ParkingTotal.FREE_PLUS_UNKNOWN -> stringResource(R.string.road_parking_free_unknown)
+    ParkingTotal.UNKNOWN -> stringResource(R.string.road_parking_inline_unknown)
 }
 
 /** components §26 `HandoffCta`: yellow, full width, min-h 60: navigator arrow 26, title 18/700, sub 12/600, chevron. */
@@ -266,13 +299,7 @@ internal fun QuietAction(text: String, cd: String, tag: String, color: androidx.
 /** The day header's parking line: P 16 + «≈ 500 ₽» / «≈ 500 ₽ + ?» (12/600 `navi.text`). */
 @Composable
 internal fun DayParking(day: DayDto) {
-    val p = parkingOf(day)
-    val text = when {
-        p.rub == 0 && p.unknown == 0 -> stringResource(R.string.road_parking_inline_free) // not «≈ 0 ₽»
-        p.rub == 0 -> stringResource(R.string.road_parking_inline_unknown)
-        p.unknown > 0 -> stringResource(R.string.road_parking_day_unknown, RuFormat.thousands(p.rub))
-        else -> stringResource(R.string.road_parking_day, RuFormat.thousands(p.rub))
-    }
+    val text = parkingTotalText(parkingOf(day))
     Row(Modifier.testTag("road.day.${day.day}.parking"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         PGlyph(16.dp)
         Txt(text, T.body.smStrong, C.navi.text, maxLines = 1)
@@ -289,15 +316,14 @@ internal fun dayParkingCd(day: DayDto): String {
 
 /** The footer block «P из них парковки / ≈ 1 620 ₽» (components §26). */
 @Composable
-internal fun FooterParking(rub: Int) {
+internal fun FooterParking(rub: Int, sum: ParkingSum = ParkingSum(rub, 0, 0)) {
     Column(Modifier.padding(start = 10.dp).testTag("road.total.parking"), horizontalAlignment = Alignment.End) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             PGlyph(14.dp)
             Txt(stringResource(R.string.road_footer_parking), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
         }
         Txt(
-            if (rub == 0) stringResource(R.string.road_parking_inline_free) else stringResource(R.string.common_estimate_rub, RuFormat.thousands(rub)),
-            T.paper.total, C.text.onLight, maxLines = 1, align = TextAlign.End,
+            parkingTotalText(sum, rub), T.paper.total, C.text.onLight, Modifier.testTag("road.total.parking.value"), maxLines = 1, align = TextAlign.End,
         )
     }
 }

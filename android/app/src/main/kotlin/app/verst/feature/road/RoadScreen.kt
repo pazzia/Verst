@@ -902,9 +902,11 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
     }
     val total = rub(c.totalRub)
     val perPerson = stringResource(R.string.road_waybill_per_person, RuFormat.thousands(c.perPersonRub))
-    val parkingRub = if (parkingOn) c.lines.firstOrNull { it.key == "parking" }?.rub ?: trip.daysList.sumOf { parkingOf(it).rub } else null
+    val parkingSum = parkingOf(trip)
+    val parkingRub = if (parkingOn) c.lines.firstOrNull { it.key == "parking" }?.rub ?: parkingSum.rub else null
+    val parkingText = parkingRub?.let { parkingTotalText(parkingSum, it) }
     val cd = stringResource(R.string.cd_road_waybill, RuFormat.thousands(c.totalRub)) + ". " + perPerson +
-        (parkingRub?.let { ". " + stringResource(R.string.road_footer_parking) + " " + stringResource(R.string.common_estimate_rub, RuFormat.thousands(it)) } ?: "")
+        (parkingText?.let { ". " + stringResource(R.string.road_footer_parking) + " " + it } ?: "")
     Row(
         Modifier
             .fillMaxWidth()
@@ -940,7 +942,7 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
                 Spacer(Modifier.weight(1f))
                 // 5.5 §10.6: with parking the right block (under the label line) says «из них парковки»;
                 // the per-person line yields to it
-                if (parkingRub != null) FooterParking(parkingRub)
+                if (parkingRub != null) FooterParking(parkingRub, parkingSum)
                 else Txt(perPerson, T.body.smStrong, C.text.onLightMuted, Modifier.padding(start = 8.dp), maxLines = 1, align = TextAlign.End)
             }
         }
