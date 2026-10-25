@@ -398,9 +398,10 @@ private fun CrewPlates(ui: WalkUi, a: WalkActions) {
     }
     if ("CHILD_ADAPTED" in codes) WalkInfoPlate(stringResource(R.string.walk_info_child), "walk.info.child")
     if ("CHILD_MUSEUMS" in codes) WalkInfoPlate(stringResource(R.string.walk_info_child_museums), "walk.info.childmuseums")
-    if ("DOG_ADAPTED" in codes || w.preset == DOG_WALK) WalkInfoPlate(stringResource(R.string.walk_info_dog), "walk.info.dog")
-    // M4 crew notes; the dog one only when the dog plate above does not already say it
-    w.crewNotesRu.filterNot { dogPlate && it.contains("собак", ignoreCase = true) }.forEachIndexed { i, n -> WalkInfoPlate(n, "walk.crew.note.$i") }
+    val dogInfo = "DOG_ADAPTED" in codes || w.preset == DOG_WALK
+    if (dogInfo) WalkInfoPlate(stringResource(R.string.walk_info_dog), "walk.info.dog")
+    // M4 crew notes; the dog one only when no dog plate above already speaks about the dog
+    w.crewNotesRu.filterNot { (dogPlate || dogInfo) && it.contains("собак", ignoreCase = true) }.forEachIndexed { i, n -> WalkInfoPlate(n, "walk.crew.note.$i") }
 }
 
 /** components §29 `WalkFilterChip`: h 36, radius 18, dashed-outline look, chevron-down. */

@@ -244,8 +244,12 @@ internal fun QuietAction(text: String, cd: String, tag: String, color: androidx.
 @Composable
 internal fun DayParking(day: DayDto) {
     val p = parkingOf(day)
-    val text = if (p.unknown > 0) stringResource(R.string.road_parking_day_unknown, RuFormat.thousands(p.rub))
-    else stringResource(R.string.road_parking_day, RuFormat.thousands(p.rub))
+    val text = when {
+        p.rub == 0 && p.unknown == 0 -> stringResource(R.string.road_parking_inline_free) // not «≈ 0 ₽»
+        p.rub == 0 -> stringResource(R.string.road_parking_inline_unknown)
+        p.unknown > 0 -> stringResource(R.string.road_parking_day_unknown, RuFormat.thousands(p.rub))
+        else -> stringResource(R.string.road_parking_day, RuFormat.thousands(p.rub))
+    }
     Row(Modifier.testTag("road.day.${day.day}.parking"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         PGlyph(16.dp)
         Txt(text, T.body.smStrong, C.navi.text, maxLines = 1)
