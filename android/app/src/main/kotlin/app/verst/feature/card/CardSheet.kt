@@ -80,6 +80,8 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             img == null -> if (area) d?.townName?.let { stringResource(R.string.card_photo_area, it) } else null
             area -> img.labelRu ?: stringResource(R.string.card_photo_area, d?.townName ?: "")
             img.credit?.author != null -> stringResource(R.string.card_photo_credit, img.credit!!.author!!, img.credit!!.licence ?: "")
+            // release-s3: no usable author → «Фото: Wikimedia Commons · CC BY-SA 4.0» (the licence stays)
+            img.credit?.licence != null -> stringResource(R.string.card_photo_credit_short) + stringResource(R.string.common_join_dot) + img.credit!!.licence!!
             else -> stringResource(R.string.card_photo_credit_short)
         }
         val town = d?.townName ?: ""

@@ -535,7 +535,7 @@ private fun Intro(trip: TripDto, onAbout: () -> Unit) {
         Txt(stringResource(R.string.road_intro), T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp))
         // 5.5 §9 (S3-FINAL P1-02): the open-data notice is a muted info line, not a warning plate; with a synthetic
         // route both notes share one line (`route_approx_open_data`)
-        val openData = trip.warnings.firstOrNull { it.code == "UNVERIFIED_PLACES" }
+        val openData = trip.warnings.firstOrNull { it.code == "UNVERIFIED_PLACES" || it.level == "info" }
         val infoText = when {
             trip.approxDistances && openData != null -> stringResource(R.string.route_approx_open_data)
             trip.approxDistances -> stringResource(R.string.route_approx)
@@ -560,7 +560,7 @@ private fun Intro(trip: TripDto, onAbout: () -> Unit) {
         val nightPlates = trip.warnings.count { it.code == "NO_LODGING" && it.message != null }
         val nightPrefix = stringResource(R.string.road_night_prefix)
         for (w in trip.warnings) {
-            if (w.code == "UNVERIFIED_PLACES") continue // the info line above
+            if (w.code == "UNVERIFIED_PLACES" || w.level == "info") continue // the info line above
             val raw = w.message ?: continue
             if (!seen.add("${w.code}|${w.day}|$raw")) continue
             val night = w.day

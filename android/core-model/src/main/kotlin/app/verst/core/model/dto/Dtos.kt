@@ -143,7 +143,13 @@ data class CostDto(
 )
 
 @Serializable
-data class WarningDto(val code: String, val day: Int? = null, val message: String? = null)
+data class WarningDto(
+    val code: String,
+    val day: Int? = null,
+    val message: String? = null,
+    /** release-s3: `"info"` = a notice (5.5 §9 info line, not a yellow plate); absent = a warning about this trip. */
+    val level: String? = null,
+)
 
 @Serializable
 data class CrewDto(val adults: Int = 1, val children: Int = 0, val dog: Boolean = false)
