@@ -1,0 +1,45 @@
+{"Q12035": "Titanoecid spider", "Q1501717": "HIV trial in Libya"}
+towns: 1070
+retry 1/4 in 5s: Expecting property name enclosed in double quotes: line 424498 column 6 (char 13520476)
+pois: 0/1070 towns, 9247 rows, 0 failed
+pois: 50/1070 towns, 28118 rows, 0 failed
+pois: 100/1070 towns, 32268 rows, 0 failed
+pois: 150/1070 towns, 35315 rows, 0 failed
+pois: 200/1070 towns, 37241 rows, 0 failed
+pois: 250/1070 towns, 38849 rows, 0 failed
+pois: 300/1070 towns, 40800 rows, 0 failed
+pois: 350/1070 towns, 41541 rows, 0 failed
+pois: 400/1070 towns, 43252 rows, 0 failed
+pois: 450/1070 towns, 44220 rows, 0 failed
+pois: 500/1070 towns, 45734 rows, 0 failed
+pois: 550/1070 towns, 46352 rows, 0 failed
+pois: 600/1070 towns, 46914 rows, 0 failed
+pois: 650/1070 towns, 47904 rows, 0 failed
+pois: 700/1070 towns, 48554 rows, 0 failed
+pois: 750/1070 towns, 49397 rows, 0 failed
+pois: 800/1070 towns, 50459 rows, 0 failed
+pois: 850/1070 towns, 51096 rows, 0 failed
+pois: 900/1070 towns, 52211 rows, 0 failed
+pois: 950/1070 towns, 53123 rows, 0 failed
+pois: 1000/1070 towns, 54128 rows, 0 failed
+pois: 1050/1070 towns, 54936 rows, 0 failed
+pois: 55529 rows, 0 towns failed
+forms: 1070 towns; fixture oracle 47/48
+-rw-r--r-- 1 runner runner 4187472293 Oct 25 01:19 /home/runner/work/_temp/ru.osm.pbf
+bars: 4677 rows from 9019 named features, 157 towns (extract)
+credits: 50/9553
+credits: 1050/9553
+credits: 2050/9553
+credits: 3050/9553
+credits: 4050/9553
+credits: 5050/9553
+credits: 6050/9553
+credits: 7050/9553
+credits: 8050/9553
+credits: 9050/9553
+credits: 9553 of 9553 files
+photos width=800: 50/50
+photos width=400: 50/50
+photos width=500: 50/50
+photos width=960: 50/50
+{"800": 1.0, "400": 1.0, "500": 1.0, "960": 1.0}

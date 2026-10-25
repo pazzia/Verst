@@ -1,0 +1,88 @@
+{
+ "version": "wd-20261025-r3",
+ "builtAt": "2026-10-25",
+ "counts": {
+  "towns": 1058,
+  "pois": 10736,
+  "bars": 2780,
+  "links": 78,
+  "credits": 3272
+ },
+ "totalBytes": 617627,
+ "files": {
+  "catalogue_meta.json.gz": {
+   "bytes": 43968,
+   "sha256": "be25e26ac4f19894ae1261e22c26ec517f490129b468f6aaf7c8eb607ae65ca0"
+  },
+  "catalogue_towns.json.gz": {
+   "bytes": 50576,
+   "sha256": "e7514e958ee179dea4ffd89fb36c58f0c0e01c7df5b81c96580c8a3b61c5a3d2"
+  },
+  "catalogue_pois.json.gz": {
+   "bytes": 461214,
+   "sha256": "3e57542707466c99f4c00527915b71af9892068bc653dbfc595696b6389fe2c4"
+  },
+  "catalogue_bars.json.gz": {
+   "bytes": 61869,
+   "sha256": "58eadff13bccbbfe01b1312f9dd1ef0fed2f966e9fb6a9e5541609ea9648de1b"
+  }
+ },
+ "sources": {
+  "wikidata": "query.wikidata.org",
+  "overpass": "overpass-api.de",
+  "commons": "commons.wikimedia.org",
+  "fetchedAt": "2026-10-25T01:21:00+00:00",
+  "run": "40147661656"
+ },
+ "classCheck": {
+  "labels": {
+   "Q159": "Russia",
+   "Q2977": "cathedral",
+   "Q12035": "Titanoecid spider",
+   "Q16970": "church building",
+   "Q23413": "castle",
+   "Q22698": "park",
+   "Q33506": "museum",
+   "Q44613": "monastery",
+   "Q57821": "fortification",
+   "Q174782": "square",
+   "Q179700": "statue",
+   "Q183342": "federal city of Russia",
+   "Q570116": "tourist attraction",
+   "Q1107656": "garden",
+   "Q5003624": "memorial",
+   "Q4989906": "monument",
+   "Q1501717": "HIV trial in Libya",
+   "Q2319498": "architectural landmark",
+   "Q6017969": "scenic viewpoint",
+   "Q7930989": "city or town"
+  },
+  "mismatches": {
+   "Q12035": "Titanoecid spider",
+   "Q1501717": "HIV trial in Libya"
+  },
+  "ok": false
+ },
+ "forms": {
+  "total": 48,
+  "match": 47,
+  "misses": [
+   {
+    "name": "Пушкино",
+    "got": {
+     "gen": "Пушкина",
+     "prep": "Пушкине"
+    },
+    "want": [
+     "Пушкино",
+     "Пушкино"
+    ]
+   }
+  ],
+  "pymorphy3": "2.0.2"
+ },
+ "failedTowns": {
+  "pois": [],
+  "bars": []
+ }
+}
