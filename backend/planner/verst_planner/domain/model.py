@@ -183,6 +183,12 @@ class Place:
     breakfast_included: bool = True
     family_price_rub: int | None = None
     """Price per night of a family room (≤ 4 guests, ADR-0011); None = `price_night_rub x 1.4`."""
+    category: str | None = None
+    """ADR-0015 §2 kind of an open-data sight (museum, temple, park, …); None = derived from the tags."""
+    quality: float | None = None
+    """ADR-0015 §2 quality score 0..1 of an open-data sight; None = curated (no threshold)."""
+    heritage: bool = False
+    """An open-data sight with a heritage designation (Wikidata P1435)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -458,6 +464,18 @@ class TicketUnit:
 
 
 @dataclass(frozen=True, slots=True)
+class ParkingUnit:
+    """ADR-0015 §4: paid parking at one car stop. `rub_per_hour` None = unknown (no zone, no OSM charge)."""
+
+    stop_id: str
+    name_ru: str
+    rub_per_hour: int | None
+    hours: int
+    rub: int | None  # round10(rub_per_hour x hours); 0 = free; None = unknown
+    source: str  # "zone" | "osm" | "free" | "unknown"
+
+
+@dataclass(frozen=True, slots=True)
 class CostUnits:
     fuel: FuelUnits
     tolls: tuple[TollUnit, ...]
@@ -473,7 +491,9 @@ class CostUnits:
     as_of: tuple[tuple[str, str], ...] = ()
     """`(line key, "YYYY-MM")` freshness per line, so offline recompute keeps `CostLine.as_of`."""
     mood_just_drive: bool = False
-    """Mood is already «Просто доехать» (then the `just_drive` overspend hint is not offered)."""
+    """Mood is already «Только доехать» (then the `just_drive` overspend hint is not offered)."""
+    parking: tuple[ParkingUnit, ...] = ()
+    """ADR-0015 §4 per-stop parking; empty = no parking data (no «Парковки» line, fixture worlds)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -490,6 +510,9 @@ class AltUnits:
     region_name_ru: str = ""
     trip_km_delta: int = 0
     """`round(day km of the trial day) - round(day km of the current day)` (A§16.11.4 rule 2)."""
+    parking: ParkingUnit | None = None
+    """API v3 (ADR-0015 §4): the alternative's own parking at its arrival and dwell, when the trip is priced
+    with a parking model; None = no parking data (no line) or not a car-parked stop (rest, food, fuel)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -542,6 +565,8 @@ class ScheduledStop:
     selected_hotel_id: str | None
     alternatives_note_ru: str | None = None
     """A§16.6: «Других вариантов…» / «Нашли только один…» when fewer than two alternatives were found."""
+    fun_for: tuple[str, ...] = ()
+    """ADR-0015 §5 (API v3 `funFor`): who a «Весело и познавательно» stop is for — child, dog, adults."""
 
 
 @dataclass(frozen=True, slots=True)

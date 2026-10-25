@@ -1,5 +1,6 @@
 package app.verst.feature.debug
 
+import app.verst.data.net.OnlineStats
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -82,6 +83,14 @@ fun DebugScreen(flow: VerstFlow) {
             Choices(listOf("0", "1"), if (flow.debugRealPhotos) "1" else "0", "debug.photos") { flow.debugRealPhotos = it == "1" }
             flow.lastHandoff?.let { (h, target) ->
                 Txt("$target · ${h.navigator ?: h.maps ?: h.web}", T.body.sm, C.text.secondary, Modifier.testTag("debug.handoff"))
+            }
+            // ADR-0016 OR-8: online failures go here, never to the user (host · requests / failures / blocked / dropped)
+            val online = OnlineStats.snapshot()
+            if (online.isNotEmpty()) {
+                Txt(
+                    online.entries.joinToString("\n") { e -> val h: OnlineStats.Host = e.value; "${e.key} · ${h.requests} / ${h.failures} / ${h.blocked} / ${h.dropped} · ${h.lastCode ?: "—"} · ${h.lastMs} ms" },
+                    T.body.sm, C.text.secondary, Modifier.testTag("debug.online"),
+                )
             }
             Label(stringResource(R.string.debug_label_timings))
             val s = status

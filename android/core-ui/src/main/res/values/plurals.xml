@@ -73,6 +73,12 @@
         <item quantity="many">мест</item>
         <item quantity="other">места</item>
     </plurals>
+    <plurals name="plural_point">
+        <item quantity="one">точка</item>
+        <item quantity="few">точки</item>
+        <item quantity="many">точек</item>
+        <item quantity="other">точки</item>
+    </plurals>
     <plurals name="plural_person">
         <item quantity="one">человек</item>
         <item quantity="few">человека</item>
@@ -102,5 +108,12 @@
         <item quantity="few">рубля</item>
         <item quantity="many">рублей</item>
         <item quantity="other">рубля</item>
+    </plurals>
+    <!-- S4 dev: the Waybill parking formula «· 5 городов» -->
+    <plurals name="plural_town">
+        <item quantity="one">город</item>
+        <item quantity="few">города</item>
+        <item quantity="many">городов</item>
+        <item quantity="other">города</item>
     </plurals>
 </resources>

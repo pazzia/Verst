@@ -186,7 +186,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 private fun Screens(flow: VerstFlow, context: Context) {
     val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
         flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
-        flow.report != null
+        flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null
     BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
@@ -310,6 +310,13 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         aboutData = flow.aboutData,
                         minimum = flow.showingMinimum,
                         tappable = flow::tappable,
+                        parking = flow.roadParking,
+                        handoffDay = flow.handoffDay(r.trip),
+                        handoff = flow.handoffSheet?.let {
+                            app.verst.feature.road.HandoffSheetUi(
+                                it, flow.handoffLauncher?.mapsInstalled() == true, flow.navigatorInstalled, flow.handoffSigned, flow.handoffRemember,
+                            )
+                        },
                     ),
                     object : RoadActions {
                         override fun back() {
@@ -339,6 +346,17 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun reportStop(stop: app.verst.core.model.dto.StopDto) = flow.openReport(stop)
                         override fun topRow(id: String?, scrollY: Int) = flow.roadTop(id, scrollY)
                         override fun focusShown() = flow.roadFocusShown()
+                        override fun parking(stop: StopDto) = flow.openParking(stop)
+                        override fun closeParking() = flow.closeParking()
+                        override fun handoff(day: Int) = flow.handoff(day)
+                        override fun handoffSheet(day: Int) = flow.openHandoffSheet(day)
+                        override fun handoffSheet(): app.verst.feature.road.HandoffSheetActions = object : app.verst.feature.road.HandoffSheetActions {
+                            override fun scope(day: Int?) = flow.handoffScope(day)
+                            override fun pick(which: app.verst.nav.HandoffApp) = flow.handoffPick(which)
+                            override fun install(which: app.verst.nav.HandoffApp) = flow.handoffInstall(which)
+                            override fun remember() = flow.toggleHandoffRemember()
+                            override fun close() = flow.closeHandoffSheet()
+                        }
                     },
                 )
             }
@@ -417,7 +435,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 town = flow.cityPresets?.town?.name,
                 startLabel = flow.cityStart?.label ?: flow.originAddress ?: flow.origin.label,
                 fromGps = flow.cityStart == null && flow.originFromGps,
-                presets = flow.cityPresets?.presets.orEmpty(),
+                presets = flow.visibleCityPresets(),
                 loading = flow.cityLoading,
                 error = flow.cityError,
                 selected = flow.cityPreset,
@@ -429,27 +447,35 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 customSheet = flow.cityCustomSheet,
                 ageGate = flow.ageGate != null,
                 building = flow.walkBuilding,
-                children = flow.children > 0,
+                adults = flow.cityAdults,
+                children = flow.cityChildren,
+                dog = flow.cityDog,
                 startTime = walkStart(flow).label,
                 startTomorrow = walkStart(flow).tomorrow,
+                few = flow.walkFew,
+                picker = flow.cityPicker,
             ),
             object : app.verst.feature.city.CityActions {
                 override fun back() {
                     flow.back()
                 }
                 override fun changeStart() = flow.cityChangeStart()
-                override fun preset(p: String) = flow.selectCityPreset(p)
                 override fun go() = flow.buildWalk()
-                override fun duration(min: Int) = flow.setCityDuration(min)
                 override fun interest(i: String) = flow.toggleCityInterest(i)
-                override fun pace(p: String) = flow.pickCityPace(p)
-                override fun budget(rub: Int?) = flow.pickCityBudget(rub)
                 override fun toggleReturn() = flow.toggleCityReturn()
                 override fun closeCustom() = flow.closeCityCustom()
                 override fun buildCustom() = flow.buildCustomWalk()
                 override fun age(yes: Boolean) = flow.answerAge(yes)
-                override fun longer() = flow.walkLonger()
-                override fun otherPreset() = flow.selectCityPreset("custom")
+                override fun suggestion(s: app.verst.core.model.dto.WalkSuggestion) = flow.applyWalkSuggestion(s)
+                override fun openPicker(p: app.verst.nav.CityPicker) = flow.openCityPicker(p)
+                override fun duration(min: Int?) = flow.setCityDuration(min)
+                override fun preset(p: String) = flow.selectCityPreset(p)
+                override fun adults(n: Int) = flow.pickCityAdults(n)
+                override fun children(n: Int) = flow.pickCityChildren(n)
+                override fun dog(on: Boolean) = flow.pickCityDog(on)
+                override fun pace(p: String) = flow.pickCityPace(p)
+                override fun budget(rub: Int?) = flow.pickCityBudget(rub)
+                override fun closePicker() = flow.openCityPicker(null)
             },
         )
         Route.Walk -> {
@@ -462,6 +488,11 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         w, flow.walkHandoff, flow.walkTarget, saved = flow.savedWalkId != null, building = flow.walkBuilding,
                         card = flow.card?.takeIf { it.source == app.verst.nav.CardSource.WALK }?.ui, toast = flow.toast,
                         focusId = flow.walkFocusId, focusSeq = flow.walkFocusSeq,
+                        filters = app.verst.feature.city.PickerUi(
+                            flow.cityDurationMin, flow.visibleCityPresets(), flow.cityPreset,
+                            flow.cityAdults, flow.cityChildren, flow.cityDog, flow.cityPace, flow.cityBudget,
+                        ),
+                        picker = flow.cityPicker, otherNone = flow.walkOtherNone, few = flow.walkFew,
                     ),
                     object : app.verst.feature.city.WalkActions {
                         override fun back() {
@@ -474,6 +505,16 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun other() = flow.otherWalk()
                         override fun card(): app.verst.feature.card.CardActions = cardActions(flow, context)
                         override fun focusShown() = flow.walkFocusShown()
+                        override fun openPicker(p: app.verst.nav.CityPicker) = flow.openCityPicker(p)
+                        override fun suggestion(s: app.verst.core.model.dto.WalkSuggestion) = flow.applyWalkSuggestion(s)
+                        override fun duration(min: Int?) = flow.setCityDuration(min)
+                        override fun preset(p: String) = flow.selectCityPreset(p)
+                        override fun adults(n: Int) = flow.pickCityAdults(n)
+                        override fun children(n: Int) = flow.pickCityChildren(n)
+                        override fun dog(on: Boolean) = flow.pickCityDog(on)
+                        override fun pace(p: String) = flow.pickCityPace(p)
+                        override fun budget(rub: Int?) = flow.pickCityBudget(rub)
+                        override fun closePicker() = flow.openCityPicker(null)
                     },
                 )
             }
@@ -508,5 +549,5 @@ private fun walkStart(flow: VerstFlow): app.verst.core.model.WalkStart.Start {
         val s = app.verst.core.model.WalkStart.fromEngine(at, zone, now) ?: return@let null
         s.copy(tomorrow = pr.startsTomorrow ?: s.tomorrow)
     }?.let { return it }
-    return app.verst.core.model.WalkStart.of(flow.cityPreset, flow.cityInterests, flow.cityDurationMin, now)
+    return app.verst.core.model.WalkStart.of(flow.cityPreset, flow.cityInterests, flow.cityDurationMin ?: 240, now)
 }

@@ -35,12 +35,15 @@
    "startAt": "2026-10-23T09:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T12:54",
+   "endAt": "2026-10-23T12:59",
+   "unlimited": false,
    "tz": "Europe/Moscow",
-   "walkKm": 5.0,
-   "walkMin": 86,
-   "durationMin": 235,
+   "walkKm": 4.8,
+   "walkMin": 83,
+   "durationMin": 240,
    "requestedDurationMin": 240,
+   "crewNotesRu": [],
+   "interestsWidened": false,
    "shorter": null,
    "returnToStart": true,
    "start": {
@@ -56,129 +59,132 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "Q4204534",
-     "kind": "monument",
-     "nameRu": "Исторический центр Ярославля",
-     "lat": 57.62361,
-     "lon": 39.8875,
-     "arriveAt": "2026-10-23T09:07",
-     "departAt": "2026-10-23T09:19",
-     "dwellMin": 12,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 7,
+     "poiId": "Q19908952",
+     "kind": "park",
+     "nameRu": "Демидовский сад",
+     "lat": 57.62504,
+     "lon": 39.89724,
+     "arriveAt": "2026-10-23T09:17",
+     "departAt": "2026-10-23T10:01",
+     "dwellMin": 44,
+     "walkKmFromPrev": 1.0,
+     "walkMinFromPrev": 17,
      "costRub": 0,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w02",
-     "poiId": "Q4426361",
-     "kind": "square",
-     "nameRu": "Советская площадь",
-     "lat": 57.62651,
-     "lon": 39.89351,
-     "arriveAt": "2026-10-23T09:30",
-     "departAt": "2026-10-23T09:42",
-     "dwellMin": 12,
-     "walkKmFromPrev": 0.6,
-     "walkMinFromPrev": 11,
-     "costRub": 0,
-     "hoursVerified": false,
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w03",
      "poiId": "pl_yar_embankment",
      "kind": "viewpoint",
      "nameRu": "Волжская набережная",
      "lat": 57.627909,
      "lon": 39.899599,
-     "arriveAt": "2026-10-23T09:50",
-     "departAt": "2026-10-23T10:09",
+     "arriveAt": "2026-10-23T10:08",
+     "departAt": "2026-10-23T10:27",
      "dwellMin": 19,
      "walkKmFromPrev": 0.5,
-     "walkMinFromPrev": 9,
+     "walkMinFromPrev": 8,
      "costRub": 0,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     },
     {
-     "id": "w04",
+     "id": "w03",
      "poiId": "pl_yar_strelka",
      "kind": "viewpoint",
      "nameRu": "Стрелка и Волжская набережная",
      "lat": 57.633335,
      "lon": 39.909665,
-     "arriveAt": "2026-10-23T10:28",
-     "departAt": "2026-10-23T10:47",
+     "arriveAt": "2026-10-23T10:46",
+     "departAt": "2026-10-23T11:05",
      "dwellMin": 19,
      "walkKmFromPrev": 1.1,
      "walkMinFromPrev": 19,
      "costRub": 0,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     },
     {
-     "id": "w05",
+     "id": "w04",
      "poiId": null,
      "kind": "meal",
      "nameRu": "Обед — кафе рядом",
      "lat": 57.633335,
      "lon": 39.909665,
-     "arriveAt": "2026-10-23T10:47",
-     "departAt": "2026-10-23T11:43",
+     "arriveAt": "2026-10-23T11:05",
+     "departAt": "2026-10-23T12:01",
      "dwellMin": 56,
      "walkKmFromPrev": 0.0,
      "walkMinFromPrev": 0,
      "costRub": 600,
      "hoursVerified": true,
+     "hours": null,
      "noteRu": null,
      "hasPhoto": false,
-     "tappable": false
+     "tappable": false,
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
-     "id": "w06",
+     "id": "w05",
      "poiId": "pl_yar_tower",
      "kind": "viewpoint",
      "nameRu": "Власьевская башня",
      "lat": 57.628813,
      "lon": 39.887855,
-     "arriveAt": "2026-10-23T12:14",
-     "departAt": "2026-10-23T12:33",
+     "arriveAt": "2026-10-23T12:32",
+     "departAt": "2026-10-23T12:51",
      "dwellMin": 19,
      "walkKmFromPrev": 1.8,
      "walkMinFromPrev": 31,
      "costRub": 0,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w07",
-     "poiId": "Q4343231",
-     "kind": "monument",
-     "nameRu": "Памятник Леониду Трефолеву",
-     "lat": 57.62761,
-     "lon": 39.88794,
-     "arriveAt": "2026-10-23T12:36",
-     "departAt": "2026-10-23T12:48",
-     "dwellMin": 12,
-     "walkKmFromPrev": 0.2,
-     "walkMinFromPrev": 3,
-     "costRub": 0,
-     "hoursVerified": false,
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "viewpoint",
+     "poiKindRu": "Вид",
+     "placeSource": "curated",
+     "placeAttributionRu": null
     }
    ],
    "cost": {
@@ -208,12 +214,8 @@
      39.8845
     ],
     [
-     57.62361,
-     39.8875
-    ],
-    [
-     57.62651,
-     39.89351
+     57.62504,
+     39.89724
     ],
     [
      57.627909,
@@ -226,10 +228,6 @@
     [
      57.628813,
      39.887855
-    ],
-    [
-     57.62761,
-     39.88794
     ],
     [
      57.6261,
@@ -257,11 +255,13 @@
     "startAt": "2026-10-23T09:00",
     "crew": {
      "adults": 1,
-     "children": 0
+     "children": 0,
+     "dog": false
     },
     "adultConfirmed": false,
     "exclude": []
-   }
+   },
+   "requestKey": "66ad7000494d1d23"
   },
   "ms": 0
  }

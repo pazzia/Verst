@@ -308,6 +308,48 @@ object DesignTokens {
             /** «Впритык» text and dot (= accent.yellow) */
             val tight: Color = Color(0xFFFFD23F)
         }
+        object kind {
+            /** Category tag fill (МУЗЕЙ, ПАРК…) on rows and cards (Sprint 4) */
+            val fill: Color = Color(0xFF2A1E17)
+            /** Category tag border (= tourist brown) */
+            val border: Color = Color(0xFF6B3E26)
+            /** Category tag text (AA on fill) */
+            val text: Color = Color(0xFFE0B48F)
+        }
+        object stretch {
+            /** «РАЗМИНКА N МИН» tag fill (fun preset stops) */
+            val fill: Color = Color(0xFF2B2A12)
+            /** «РАЗМИНКА» tag border */
+            val border: Color = Color(0xFF8A7A1E)
+            /** «РАЗМИНКА» tag text (= accent.yellow) */
+            val text: Color = Color(0xFFFFD23F)
+        }
+        object hours {
+            /** Opening hours «открыто» text / dot (Sprint 4 walks, cards) */
+            val open: Color = Color(0xFF7FD38A)
+            /** «открыто» pill fill */
+            val openFill: Color = Color(0xFF7FD38A).copy(alpha = 0.12f)
+            /** «сегодня закрыто» text (= accent.redText) */
+            val closed: Color = Color(0xFFE6604A)
+            /** «закрыто» pill fill */
+            val closedFill: Color = Color(0xFFE6604A).copy(alpha = 0.14f)
+            /** «часы не указаны» (= text.secondary) */
+            val unknown: Color = Color(0xFFB9B9C0)
+        }
+        object info {
+            /** Green info plate fill: how the walk was adapted to the crew */
+            val fill: Color = Color(0xFF1C2A1E)
+            /** Green info plate border */
+            val border: Color = Color(0xFF2F4A33)
+            /** Green info plate check disc */
+            val mark: Color = Color(0xFF7FD38A)
+        }
+        object odometer {
+            /** Odometer tag under a Road-ahead sign («193 км») */
+            val fill: Color = Color(0xFF000000)
+            /** Odometer tag border (= dash.outline) */
+            val border: Color = Color(0xFF3A3A42)
+        }
         object overlay {
             /** Scrim behind bottom sheets and dialogs (new) */
             val scrim: Color = Color(0xFF000000).copy(alpha = 0.6f)
@@ -776,6 +818,49 @@ object DesignTokens {
             platformStyle = NoFontPadding,
             lineHeightStyle = CenteredLineHeight,
         )
+        object tag {
+            /** Category / «РАЗМИНКА» tag (uppercase copy) */
+            val kind: TextStyle = TextStyle(
+                fontFamily = DesignTokens.font.plexSansCondensed,
+                fontWeight = FontWeight.W700,
+                fontSize = 11.sp,
+                lineHeight = 14.3.sp,
+                letterSpacing = 0.06.em,
+                platformStyle = NoFontPadding,
+                lineHeightStyle = CenteredLineHeight,
+            )
+            /** Odometer tag «193 км» under a Road-ahead sign */
+            val odometer: TextStyle = TextStyle(
+                fontFamily = DesignTokens.font.plexMono,
+                fontWeight = FontWeight.W600,
+                fontSize = 11.sp,
+                lineHeight = 14.3.sp,
+                letterSpacing = 0.em,
+                fontFeatureSettings = "tnum",
+                platformStyle = NoFontPadding,
+                lineHeightStyle = CenteredLineHeight,
+            )
+            /** Opening-hours line on a timed walk / card */
+            val hours: TextStyle = TextStyle(
+                fontFamily = DesignTokens.font.plexSansCondensed,
+                fontWeight = FontWeight.W600,
+                fontSize = 12.sp,
+                lineHeight = 15.6.sp,
+                letterSpacing = 0.em,
+                platformStyle = NoFontPadding,
+                lineHeightStyle = CenteredLineHeight,
+            )
+            /** Opening-hours pill on an untimed walk («без ограничения») */
+            val hoursLg: TextStyle = TextStyle(
+                fontFamily = DesignTokens.font.plexSansCondensed,
+                fontWeight = FontWeight.W700,
+                fontSize = 14.sp,
+                lineHeight = 18.2.sp,
+                letterSpacing = 0.em,
+                platformStyle = NoFontPadding,
+                lineHeightStyle = CenteredLineHeight,
+            )
+        }
         /** Odometer digits */
         val odometer: TextStyle = TextStyle(
             fontFamily = DesignTokens.font.plexMono,
@@ -1114,6 +1199,30 @@ object DesignTokens {
         val presetH: Dp = 76.dp
         /** Street-name plate height */
         val streetPlateH: Dp = 64.dp
+        /** Category tag height */
+        val kindTagH: Dp = 20.dp
+        /** Odometer tag min width */
+        val odometerTagW: Dp = 50.dp
+        /** Odometer tag height */
+        val odometerTagH: Dp = 20.dp
+        /** Road-ahead «Вести в навигаторе» button min height */
+        val handoffCtaH: Dp = 60.dp
+        /** Windshield «По городу пешком» plate height */
+        val cityEntryH: Dp = 64.dp
+        /** City-start crew stepper cell height */
+        val crewCellH: Dp = 118.dp
+        /** Untimed walk hours pill height */
+        val hoursPillH: Dp = 24.dp
+        /** Road-ahead car marker width */
+        val carMarkerW: Dp = 18.dp
+        /** Road-ahead car marker height */
+        val carMarkerH: Dp = 32.dp
+        /** Km post plate width */
+        val kmPostW: Dp = 22.dp
+        /** Km post plate height */
+        val kmPostH: Dp = 26.dp
+        /** Road-ahead road column width (incl. edges) */
+        val roadW: Dp = 52.dp
         /** Bottom-sheet handle width (new) */
         val sheetHandleW: Dp = 36.dp
         /** Bottom-sheet handle height (new) */
@@ -1469,6 +1578,28 @@ object DesignTokens {
             const val fromAlpha: Float = 0.7f
             const val toAlpha: Float = 1.0f
             const val infinite: Boolean = true
+        }
+        object shimmerDelay {
+            const val durationMs: Int = 300
+            val easing: Easing = DesignTokens.motion.easing.linear
+            const val infinite: Boolean = false
+        }
+        object rebuildPulse {
+            const val durationMs: Int = 1200
+            val easing: Easing = DesignTokens.motion.easing.easeInOut
+            const val fromAlpha: Float = 0.35f
+            const val toAlpha: Float = 0.6f
+            const val infinite: Boolean = true
+        }
+        object walkRebuild {
+            const val durationMs: Int = 400
+            val easing: Easing = DesignTokens.motion.easing.linear
+            const val infinite: Boolean = false
+        }
+        object cityEntryPress {
+            const val durationMs: Int = 90
+            val easing: Easing = DesignTokens.motion.easing.standard
+            const val infinite: Boolean = false
         }
         object limitSignIn {
             const val durationMs: Int = 400

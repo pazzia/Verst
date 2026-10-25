@@ -29,6 +29,34 @@
    },
    {
     "kind": "poi",
+    "name": "Эрмитаж-Казань",
+    "subtitle": "место · Республика Татарстан",
+    "lat": 55.79848,
+    "lon": 49.10606,
+    "id": "Q20592524",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Республика Татарстан",
+    "poiKind": "museum",
+    "hasPhoto": true
+   },
+   {
+    "kind": "poi",
+    "name": "Эрмитаж (гостиница, Екатеринбург)",
+    "subtitle": "место · Свердловская область",
+    "lat": 56.83452,
+    "lon": 60.60629,
+    "id": "Q55462853",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Свердловская область",
+    "poiKind": "monument",
+    "hasPhoto": true
+   },
+   {
+    "kind": "poi",
     "name": "Эрмитаж Кусково",
     "subtitle": "место · Московская область",
     "lat": 55.73731,
@@ -54,20 +82,6 @@
     "regionRu": "Санкт-Петербург",
     "poiKind": "museum",
     "hasPhoto": true
-   },
-   {
-    "kind": "poi",
-    "name": "Сад «Эрмитаж»",
-    "subtitle": "место · Республика Татарстан",
-    "lat": 55.79056,
-    "lon": 49.12889,
-    "id": "Q16693784",
-    "nameGenRu": null,
-    "namePrepRu": null,
-    "population": null,
-    "regionRu": "Республика Татарстан",
-    "poiKind": "park",
-    "hasPhoto": false
    }
   ],
   "ms": 0

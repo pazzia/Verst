@@ -11,11 +11,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
+from verst_planner import resources
 from verst_planner.adapters.catalogue.synthetic import cafes_for, hotels_for
 from verst_planner.adapters.fake.prices import FakePriceRepository
-from verst_planner.adapters.fake.world import FakeWorld
+from verst_planner.adapters.fake.world import Edge, FakeWorld, Node
 from verst_planner.catalogue import Catalogue, CatPoi
-from verst_planner.domain.enums import PlaceStatus, PlaceType, Source, Tag
+from verst_planner.domain.enums import PlaceStatus, PlaceType, RoadClass, Source, Tag
 from verst_planner.domain.model import LatLon, PartnerIds, Place, RegionInfo, Town
 
 WORLD_ID = "russia_v1"
@@ -31,6 +32,12 @@ POI_TAGS: dict[str, frozenset[Tag]] = {
     "embankment": frozenset({Tag.VIEW, Tag.WALK}),
     "square": frozenset({Tag.WALK}),
     "attraction": frozenset({Tag.WALK}),
+    # Sprint 4 kinds (ADR-0015 §2)
+    "theatre": frozenset({Tag.WALK}),  # the building and its square; a show is not a road-trip stop
+    "zoo": frozenset({Tag.WALK}),
+    "nature": frozenset({Tag.WALK, Tag.VIEW}),
+    "interactive": frozenset(),
+    "playground": frozenset({Tag.PLAYGROUND, Tag.WALK}),
 }
 POI_DWELL = {
     "museum": 75,
@@ -43,21 +50,73 @@ POI_DWELL = {
     "embankment": 20,
     "square": 15,
     "attraction": 30,
+    "theatre": 15,
+    "zoo": 90,
+    "nature": 40,
+    "interactive": 60,
+    "playground": 20,
 }
-POI_HOURS = {"museum": "Tu-Su 10:00-18:00", "church": "Mo-Su 08:00-20:00"}
-POI_TICKETS = {"museum": (400, 200), "kremlin": (300, 150), "monastery": (300, 150)}
+POI_HOURS = {
+    "museum": "Tu-Su 10:00-18:00",
+    "church": "Mo-Su 08:00-20:00",
+    "zoo": "Mo-Su 09:00-19:00",
+    "interactive": "Tu-Su 10:00-19:00",
+}
+POI_TICKETS = {
+    "museum": (400, 200),
+    "kremlin": (300, 150),
+    "monastery": (300, 150),
+    "zoo": (500, 250),
+    "interactive": (500, 300),
+}
 BIG_MUSEUM_SITELINKS = 40
 
 
+_RATING: dict[int, float] = {}
+
+
 def poi_rating(sitelinks: int) -> float:
-    return round(3.6 + 1.3 * min(1.0, math.log10(1 + sitelinks) / math.log10(1 + 150)), 2)
+    r = _RATING.get(sitelinks)
+    if r is None:
+        r = _RATING[sitelinks] = round(
+            3.6 + 1.3 * min(1.0, math.log10(1 + sitelinks) / math.log10(1 + 150)), 2
+        )
+    return r
+
+
+# catalogue kind → ADR-0015 §2 category (the diversity rules count «temple» and «monastery» as religious)
+POI_CATEGORY = {"church": "temple"}
+_HOURS_OK: dict[str, bool] = {}
+
+
+def _hours_ok(text: str) -> bool:
+    ok = _HOURS_OK.get(text)
+    if ok is None:
+        from verst_planner.hours import parse
+
+        try:
+            parse(text)
+            ok = True
+        except Exception:
+            ok = False
+        _HOURS_OK[text] = ok
+    return ok
+
+
+_NO_PARTNERS = PartnerIds(None, None)
+_TAGS: dict[tuple[str, bool], frozenset[Tag]] = {}
+
+
+def _tags(kind: str, free: bool) -> frozenset[Tag]:
+    """The kind's tags (+ FREE_ENTRY), one shared frozenset per (kind, free): 20 k POIs, a few dozen sets."""
+    t = _TAGS.get((kind, free))
+    if t is None:
+        t = _TAGS[(kind, free)] = POI_TAGS[kind] | ({Tag.FREE_ENTRY} if free else frozenset())
+    return t
 
 
 def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
-    ticket = POI_TICKETS.get(p.kind)
-    tags = set(POI_TAGS[p.kind])
-    if ticket is None:
-        tags.add(Tag.FREE_ENTRY)
+    ticket = None if p.fee is False else POI_TICKETS.get(p.kind)  # OSM fee=no: free entry
     dwell = POI_DWELL[p.kind]
     if p.kind == "museum" and p.sitelinks >= BIG_MUSEUM_SITELINKS:
         dwell = 90
@@ -69,19 +128,22 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
         address=None,
         region_code=region,
         town_id=town_id,
-        opening_hours=POI_HOURS.get(p.kind),
+        opening_hours=p.hours if p.hours and _hours_ok(p.hours) else POI_HOURS.get(p.kind),
         dwell_min=dwell,
         avg_check_rub=None,
         price_night_rub=None,
         ticket_adult_rub=ticket[0] if ticket else None,
         ticket_child_rub=ticket[1] if ticket else None,
         rating_internal=poi_rating(p.sitelinks),
-        tags=frozenset(tags),
+        tags=_tags(p.kind, ticket is None),
         description_ru=p.desc,
-        partner_ids=PartnerIds(None, None),
+        partner_ids=_NO_PARTNERS,
         source=Source.OSM,
         verified_at=None,
         status=PlaceStatus.LIVE,
+        category=POI_CATEGORY.get(p.kind, p.kind),
+        quality=p.quality,
+        heritage=p.heritage,
     )
 
 
@@ -106,6 +168,40 @@ class CatalogueWorld:
     poi_kind: dict[str, str] = field(default_factory=dict)
     """Composed sight id → catalogue POI kind (fixture sights from their tags)."""
     synthetic_towns: set[str] = field(default_factory=set)
+
+
+def with_bypasses(
+    fixture: FakeWorld,
+) -> tuple[dict[str, Node], list[Edge], dict[str, list[tuple[Edge, str]]]]:
+    """The fixture graph plus `resources/bypass_roads.json` (МКАД, ЦКАД; ADR-0015 §2), for `russia_v1`."""
+    import json
+
+    doc = json.loads(resources.read_text("bypass_roads.json"))
+    nodes = dict(fixture.nodes)
+    for n in doc["nodes"]:
+        nodes[n["id"]] = Node(n["id"], LatLon(float(n["lat"]), float(n["lon"])), n["region"])
+    edges = list(fixture.edges)
+    adjacency = {k: list(v) for k, v in fixture.adjacency.items()}
+    for e in doc["edges"]:
+        a, b = e["from"], e["to"]
+        edge = Edge(
+            index=len(edges),
+            a=a,
+            b=b,
+            pa=nodes[a].point,
+            pb=nodes[b].point,
+            km=float(e["km"]),
+            speed_kmh=float(e["speedKmh"]),
+            road_class=RoadClass(e["roadClass"]),
+            ref=e.get("ref"),
+            toll=bool(e.get("toll", False)),
+        )
+        edges.append(edge)
+        adjacency.setdefault(a, []).append((edge, b))
+        adjacency.setdefault(b, []).append((edge, a))
+    for lst in adjacency.values():
+        lst.sort(key=lambda eo: (eo[1], eo[0].index))
+    return nodes, edges, adjacency
 
 
 def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> CatalogueWorld:
@@ -163,12 +259,13 @@ def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> Cat
         out.qid_of_place[place.id] = p.id
         out.poi_kind[place.id] = p.kind
 
+    nodes, edges, adjacency = with_bypasses(fixture)
     out.world = FakeWorld(
         id=world_id,
         as_of=fixture.as_of,
         regions=regions,
-        nodes=fixture.nodes,
-        edges=fixture.edges,
+        nodes=nodes,
+        edges=edges,
         towns=towns,
         town_node=fixture.town_node,
         places=places,
@@ -177,7 +274,7 @@ def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> Cat
         ready_routes=fixture.ready_routes,
         food_check_by_population=fixture.food_check_by_population,
         lodging_night_by_population=fixture.lodging_night_by_population,
-        adjacency=fixture.adjacency,
+        adjacency=adjacency,
     )
     return out
 

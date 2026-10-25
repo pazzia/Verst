@@ -33,12 +33,17 @@
    "startAt": "2026-10-23T10:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T15:56",
+   "endAt": "2026-10-23T15:58",
+   "unlimited": false,
    "tz": "Europe/Moscow",
-   "walkKm": 4.5,
-   "walkMin": 77,
-   "durationMin": 357,
+   "walkKm": 3.4,
+   "walkMin": 59,
+   "durationMin": 359,
    "requestedDurationMin": 360,
+   "crewNotesRu": [
+    "С ребёнком: берите воду и перекус, на длинных отрезках — пауза."
+   ],
+   "interestsWidened": false,
    "shorter": null,
    "returnToStart": true,
    "start": {
@@ -54,101 +59,173 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "Q382500",
+     "poiId": "Q907366",
      "kind": "monument",
-     "nameRu": "Невский проспект",
-     "lat": 59.93667,
-     "lon": 30.315,
-     "arriveAt": "2026-10-23T10:04",
-     "departAt": "2026-10-23T10:16",
+     "nameRu": "Александровская колонна",
+     "lat": 59.93917,
+     "lon": 30.31583,
+     "arriveAt": "2026-10-23T10:02",
+     "departAt": "2026-10-23T10:14",
      "dwellMin": 12,
-     "walkKmFromPrev": 0.3,
-     "walkMinFromPrev": 5,
+     "walkKmFromPrev": 0.1,
+     "walkMinFromPrev": 3,
      "costRub": 0,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w02",
-     "poiId": "Q211043",
-     "kind": "museum",
-     "nameRu": "Русский музей",
-     "lat": 59.93868,
-     "lon": 30.33239,
-     "arriveAt": "2026-10-23T10:39",
-     "departAt": "2026-10-23T12:09",
-     "dwellMin": 90,
-     "walkKmFromPrev": 1.3,
-     "walkMinFromPrev": 22,
-     "costRub": 1000,
-     "hoursVerified": false,
-     "noteRu": "Большой музей: за 1 ч 30 мин — только главное · Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w03",
-     "poiId": "Q215208",
-     "kind": "church",
-     "nameRu": "Храм Спаса на Крови",
-     "lat": 59.94,
-     "lon": 30.32861,
-     "arriveAt": "2026-10-23T12:14",
-     "departAt": "2026-10-23T12:39",
-     "dwellMin": 25,
-     "walkKmFromPrev": 0.3,
-     "walkMinFromPrev": 6,
-     "costRub": 0,
-     "hoursVerified": false,
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w04",
      "poiId": "Q132783",
      "kind": "museum",
      "nameRu": "Государственный Эрмитаж",
      "lat": 59.94056,
      "lon": 30.31361,
-     "arriveAt": "2026-10-23T12:57",
-     "departAt": "2026-10-23T14:27",
+     "arriveAt": "2026-10-23T10:18",
+     "departAt": "2026-10-23T11:48",
      "dwellMin": 90,
-     "walkKmFromPrev": 1.1,
-     "walkMinFromPrev": 19,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 4,
      "costRub": 1000,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Большой музей: за 1 ч 30 мин — только главное · Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
-     "id": "w05",
+     "id": "w03",
+     "poiId": "Q2025062",
+     "kind": "museum",
+     "nameRu": "Зоологический музей Зоологического института РАН",
+     "lat": 59.9426,
+     "lon": 30.3056,
+     "arriveAt": "2026-10-23T12:00",
+     "departAt": "2026-10-23T13:02",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 11,
+     "costRub": 1000,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w04",
      "poiId": "Q1277585",
      "kind": "museum",
      "nameRu": "Кунсткамера",
      "lat": 59.94167,
      "lon": 30.30444,
-     "arriveAt": "2026-10-23T14:40",
-     "departAt": "2026-10-23T15:42",
+     "arriveAt": "2026-10-23T13:04",
+     "departAt": "2026-10-23T14:06",
      "dwellMin": 62,
-     "walkKmFromPrev": 0.7,
-     "walkMinFromPrev": 12,
+     "walkKmFromPrev": 0.2,
+     "walkMinFromPrev": 3,
      "costRub": 1000,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w05",
+     "poiId": "Q975426",
+     "kind": "museum",
+     "nameRu": "Меншиковский дворец",
+     "lat": 59.93889,
+     "lon": 30.29583,
+     "arriveAt": "2026-10-23T14:19",
+     "departAt": "2026-10-23T15:21",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 13,
+     "costRub": 1000,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "11:00–18:00",
+      "openNow": true,
+      "source": "osm"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "attraction",
+     "poiKindRu": "Достопримечательность",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w06",
+     "poiId": "Q672444",
+     "kind": "monument",
+     "nameRu": "Медный всадник",
+     "lat": 59.93656,
+     "lon": 30.30217,
+     "arriveAt": "2026-10-23T15:31",
+     "departAt": "2026-10-23T15:43",
+     "dwellMin": 12,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 10,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     }
    ],
    "cost": {
-    "totalRub": 3000,
+    "totalRub": 4000,
     "lines": [
      {
       "key": "tickets",
-      "rub": 3000
+      "rub": 4000
      }
     ],
     "budgetRub": null
@@ -166,24 +243,28 @@
      30.3141
     ],
     [
-     59.93667,
-     30.315
-    ],
-    [
-     59.93868,
-     30.33239
-    ],
-    [
-     59.94,
-     30.32861
+     59.93917,
+     30.31583
     ],
     [
      59.94056,
      30.31361
     ],
     [
+     59.9426,
+     30.3056
+    ],
+    [
      59.94167,
      30.30444
+    ],
+    [
+     59.93889,
+     30.29583
+    ],
+    [
+     59.93656,
+     30.30217
     ],
     [
      59.9386,
@@ -207,11 +288,13 @@
     "startAt": "2026-10-23T10:00",
     "crew": {
      "adults": 2,
-     "children": 1
+     "children": 1,
+     "dog": false
     },
     "adultConfirmed": false,
     "exclude": []
-   }
+   },
+   "requestKey": "007b8f9ee17efa50"
   },
   "ms": 0
  }

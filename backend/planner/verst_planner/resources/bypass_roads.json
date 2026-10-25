@@ -1,0 +1,29 @@
+{
+  "_comment": "ADR-0015 §2: the Moscow ring roads for russia_v1 only (the fixture worlds keep their 46-node graph). Without them a leg between two radial highways (М-7 → М-8) ran through the MSK node, i.e. the Kremlin. Coordinates are the approximate crossings with the radials; km follow the roads (>= 0.95 × straight line). ЦКАД is a toll road in reality; its tariff is not modelled yet (toll=false, dev-notes S4).",
+  "nodes": [
+    {"id": "MKAD_M8", "lat": 55.888, "lon": 37.715, "region": "RU-MOW"},
+    {"id": "MKAD_M4", "lat": 55.5925, "lon": 37.7265, "region": "RU-MOW"},
+    {"id": "MKAD_M2", "lat": 55.5745, "lon": 37.5985, "region": "RU-MOW"},
+    {"id": "CKAD_M8", "lat": 56.15, "lon": 37.96, "region": "RU-MOS"},
+    {"id": "CKAD_M4", "lat": 55.30, "lon": 37.85, "region": "RU-MOS"},
+    {"id": "CKAD_M2", "lat": 55.17, "lon": 37.48, "region": "RU-MOS"}
+  ],
+  "edges": [
+    {"from": "MKAD_M8", "to": "PUS", "km": 17, "speedKmh": 70, "roadClass": "trunk", "ref": "М-8"},
+    {"from": "MKAD_M8", "to": "M12_MKAD", "km": 17, "speedKmh": 60, "roadClass": "motorway", "ref": "МКАД"},
+    {"from": "M12_MKAD", "to": "NOG", "km": 40, "speedKmh": 80, "roadClass": "trunk", "ref": "М-7"},
+    {"from": "M12_MKAD", "to": "MKAD_M4", "km": 27, "speedKmh": 60, "roadClass": "motorway", "ref": "МКАД"},
+    {"from": "MKAD_M4", "to": "DOM", "km": 18, "speedKmh": 80, "roadClass": "motorway", "ref": "М-4"},
+    {"from": "MKAD_M4", "to": "MKAD_M2", "km": 9, "speedKmh": 60, "roadClass": "motorway", "ref": "МКАД"},
+    {"from": "MKAD_M2", "to": "POD", "km": 17, "speedKmh": 70, "roadClass": "trunk", "ref": "М-2"},
+    {"from": "PUS", "to": "CKAD_M8", "km": 18, "speedKmh": 90, "roadClass": "trunk", "ref": "М-8"},
+    {"from": "CKAD_M8", "to": "SPS", "km": 21, "speedKmh": 90, "roadClass": "trunk", "ref": "М-8"},
+    {"from": "CKAD_M8", "to": "NOG", "km": 52, "speedKmh": 110, "roadClass": "motorway", "ref": "ЦКАД"},
+    {"from": "NOG", "to": "CKAD_M4", "km": 78, "speedKmh": 110, "roadClass": "motorway", "ref": "ЦКАД"},
+    {"from": "DOM", "to": "CKAD_M4", "km": 18, "speedKmh": 100, "roadClass": "motorway", "ref": "М-4"},
+    {"from": "CKAD_M4", "to": "KSH", "km": 58, "speedKmh": 110, "roadClass": "motorway", "ref": "М-4"},
+    {"from": "CKAD_M4", "to": "CKAD_M2", "km": 30, "speedKmh": 110, "roadClass": "motorway", "ref": "ЦКАД"},
+    {"from": "POD", "to": "CKAD_M2", "km": 31, "speedKmh": 100, "roadClass": "motorway", "ref": "М-2"},
+    {"from": "CKAD_M2", "to": "SER", "km": 30, "speedKmh": 110, "roadClass": "motorway", "ref": "М-2"}
+  ]
+}

@@ -1,0 +1,2 @@
+{"id": "G15", "titleRu": "Фрязино, Золотое кольцо по кругу, 2 взр., 400 км/день (ADR-0015 §2)", "clock": "2026-10-23T09:00:00+03:00",
+ "input": {"origin": {"lat": 55.9606, "lon": 38.0456, "label": "Фрязино"}, "readyRouteId": "rr_golden_ring", "crew": {"adults": 2}, "dailyKm": 400}}

@@ -1,0 +1,37 @@
+{
+  "_comment": "ADR-0015 §4 street-parking tariff zones, hand-reviewed. Concentric bands around the city centre approximate the official zone maps (parking.mos.ru, parking.spb.ru); the published day rate of the band is used (Moscow dynamic pricing 0-800 ₽/h is not modelled). Review yearly; asOf is shown on the cost line.",
+  "asOf": "2026-06",
+  "sources": [
+    "https://shop.renlife.ru/articles/parkovochnaya-politika-moskvy-v-2026",
+    "https://www.fontanka.ru/2025/12/26/76192793/"
+  ],
+  "cities": [
+    {
+      "city": "Москва",
+      "centre": [55.7539, 37.6208],
+      "bands": [
+        {"radiusKm": 2.0, "dayRub": 380, "nightRub": 200},
+        {"radiusKm": 6.0, "dayRub": 200, "nightRub": 80},
+        {"radiusKm": 17.0, "dayRub": 80, "nightRub": 60}
+      ],
+      "day": ["08:00", "21:00"],
+      "sundayFree": true,
+      "sundayFreeBelowRub": 380,
+      "holidaysFree": true
+    },
+    {
+      "city": "Санкт-Петербург",
+      "centre": [59.9386, 30.3141],
+      "bands": [
+        {"radiusKm": 2.5, "dayRub": 360, "nightRub": 0},
+        {"radiusKm": 5.0, "dayRub": 200, "nightRub": 0}
+      ],
+      "day": ["08:00", "20:00"],
+      "sundayFree": false,
+      "sundayFreeBelowRub": 0,
+      "holidaysFree": false
+    }
+  ],
+  "holidays": ["01-01", "01-02", "01-03", "01-04", "01-05", "01-06", "01-07", "01-08", "02-23", "03-08", "05-01", "05-09", "06-12", "11-04"],
+  "osmRadiusKm": 0.3
+}

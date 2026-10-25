@@ -679,3 +679,83 @@ The action block stays pinned at the bottom when the body scrolls.
 ## 23. `AgeGateDialog` (5.10)
 
 `NaviDialog` (§16): `age_gate_title`, `age_gate_body`, primary `YellowButton` `age_gate_yes` «Да, мне есть 18», secondary `age_gate_no` «Нет». Shown **every time** an alcohol preset or the «бары» interest is chosen (not remembered, DEV-306); «Нет» sends no request. No birthday input; nothing leaves the phone.
+
+## 24. `CityEntryPlate` (5.1 §9, Sprint 4)
+
+Blue plate like a GOST 5.33 «пешеходная зона» sign: fill `sign.blue`, radius 8, padding 3, inner 2 dp white border radius 5, h `size.cityEntryH` 64, shadow 0 6 14 α .4. Content padding 0 12, gap 12: white square 38 (radius 3) with `walker` 28 black; title 19/700 + sub 12 `#D6E0F5`, single line, ellipsis; chevron 18 white. Pressed: fill `#173E82`, shadow 0 2 4, translate 1 dp. Touch = the whole plate. TalkBack `cd_windshield_city`.
+
+## 25. `MoodCard` (5.3 §9)
+
+Radio card, min-h 56, padding 10 12, radius 12, gap 12. Off: fill `dash.face` `#1C1C1F`, 1 dp `dash.controlAlt`. On: fill `#1F1F17`, 2 dp `accent.yellow`. Radio 20: off 2 dp `dash.outlineDashed`; on a 6 dp yellow ring. Title 16/700, sub 12/16 `text.secondary` (wraps), crew line 12/16 600 `accent.yellow` on the selected fun card only. `role=radio` in a radiogroup «Как едем».
+
+## 26. Road-ahead additions (5.5 §10)
+
+| Control | Spec |
+| --- | --- |
+| `HandoffCta` | Full width, min-h `size.handoffCtaH` 60, radius 12, fill `accent.yellow`, padding 8 16, gap 12: navigator arrow 26 filled `text.onLight`; title 18/700 `text.onLight`, sub 12/600 `#4A3D0A`; chevron 18. Pressed `#E6BD38` |
+| Day «вести» | min-h 36, padding 0 10, radius 18, 1 dp `accent.yellow`, text 12/600 yellow + arrow 12 |
+| `KindTag` | h `size.kindTagH` 20, padding 0 6, radius 4, fill `kind.fill`, 1 dp `kind.border`, `type.tag.kind` `kind.text`, uppercase copy |
+| `StretchTag` | as `KindTag` with `stretch.*` colours; always before the kind tag |
+| Open-data ring | 12 × 12, 1.5 dp dotted `text.muted` circle after the tags; legend once under the chips; TalkBack `cd_open_data` on the row |
+| `OdometerTag` | under the sign, gap 6; min-w `size.odometerTagW` 50, h 20, padding 0 4, radius 3, fill `odometer.fill`, 1 dp `odometer.border`, `type.tag.odometer` `text.primary`, centred |
+| Parking detail line | text 13 `#B9C6D3` «парковка · …» after the note (the sign carries the «P») |
+| `ParkingSign` (§26.1) | Under the odometer tag (gap 6), centred in the 68 sign column. Plate: 32 × 32, radius 4, `sign.blue`, padding 2, inner border 1.5 dp `sign.white` radius 3, «P» 20/700 white. Supplementary plate attached (−1 dp overlap): min-w 44, h 18, padding 0 4, radius 2, fill `sign.white`, 1.5 dp `sign.black`, 11/700 `text.onLight` (10 when the text is longer than 7 chars; unknown «?» in `text.onLightMuted`). The whole group is a button (min touch 44 × 52) → `ParkingSheet`; TalkBack «Парковка: примерно 300 рублей. Платная зона… Подробнее» |
+| `ParkingSheet` | `BottomSheet`: sign 52 + plate 24 (14/700) left; label «ПАРКОВКА» 11, stop name `type.title.lg`, detail 13 `#B9C6D3`; a settings plate with rows (min-h 44, key `text.secondary`, value 600 right); note 12 muted; «Понятно» secondary button h 52 |
+| Day parking total | under the day meta: P 16 (radius 3) + 12/600 `#B9C6D3` |
+| Footer parking | right block before the arrow: P 14 + «из них парковки» 12/600 `text.onLightMuted`, amount 14/700 `text.onLight` |
+| Rest amenities | 12 `#8FA4B8`, one line under the note |
+
+## 27. City start controls (5.10 §10)
+
+| Control | Spec |
+| --- | --- |
+| `StartField` | min-h 60, padding 8 8 8 14, radius 12, fill `navi.field` `#16222C`, 2 dp `accent.yellow`; locate icon 22 yellow; text column (17/700 + 12 `#8FA4B8`); «изменить» button h 40, padding 0 12, radius 8, fill `dash.control`, pencil 16 + 13/600. One touch target; focus ring as other fields |
+| `CrewCell` | grid of 3, gap 8; fill `dash.well`, 3 dp `dash.control`, radius 14, padding 8 6; label 12/600 `text.secondary`, value 24/700, steppers 44 × 44 (radius 10, fill `dash.controlAlt`, inset shadow −3 `dash.keyShadow`). Dog cell = one toggle button: paw 34 (`#C99A5B` filled when on, outline `text.muted` when off), border `#C99A5B` when on |
+
+## 28. Walk plates (5.10, 5.11)
+
+| Control | Spec |
+| --- | --- |
+| `WalkWarningPlate` | padding 10 12, radius 10, 1 dp `accent.yellow`, 13/18.2; yellow disc 18 with «!»; optional actions row (buttons h 36, radius 8, fill `dash.control`, 1 dp `dash.outline`, 12/600), indented 28 |
+| `WalkInfoPlate` | same geometry; fill `info.fill`, 1 dp `info.border`, disc 18 `info.mark` with a check |
+| Responsible plate | unchanged (18+ disc), always first |
+
+## 29. Walk result controls (5.11 §10)
+
+| Control | Spec |
+| --- | --- |
+| `WalkFilterChip` | h 36, padding 0 10 0 12, radius 18, fill `dash.face`, 1 dp `dash.outlineDashed`, 13/600 + chevron-down 12 `text.muted`; opens its picker sheet |
+| Rebuild pill | over the column at y +30, left 72 / right 16, h 44, radius 22, fill `dash.control`, 1 dp `dash.outline`; dot 10 yellow pulsing (`motion.rebuildPulse`) + `walk_rebuilding` 14/600. The column underneath at α 0.35 |
+| `HoursPill` | untimed: h `size.hoursPillH` 24, padding 0 8, radius 12, `type.tag.hoursLg`, clock 13; open `hours.open` on `hours.openFill`, closed `hours.closed` on `hours.closedFill`, unknown `hours.unknown` on `dash.control`. Timed: the same text without the pill, `type.tag.hours` |
+| «Другой вариант» | as before; the disabled end state: dashed `dash.outline`, text `#55565C`, plus `walk_other_none_note` 12 muted centred |
+| Suggestion button | min-h 52, padding 8 12, radius 10, fill `dash.control`, 1 dp `dash.outline`; title 15/700, sub 12 muted |
+
+## 30. `HandoffAppCard` and the sheet (5.13 §5)
+
+Tabs: segmented control, fill `dash.well`, radius 12, padding 4, gap 4; tab min-h 40, radius 9, 13/600; selected fill `text.primary` with `text.onLight`. Card: min-h 72, padding 12, radius 12, gap 12; app glyph in a 40 white square (radius 10; pin for Карты, arrow for Навигатор — glyphs, no logos); title 17/700 + badge (h 20, yellow, 11/700); sub 13/17 `#C4C4CA`; note 12 (`#8FA4B8`, or yellow for «Установить…»); out-arrow 16. Recommended: fill `#1F2A14`, 2 dp yellow. Not installed: α 0.55, glyph square `dash.controlAlt`. Remember switch 44 × 26.
+
+### 26.2 After the second CEO review (5.5 §10.7)
+
+`OdometerTag` and `ParkingSign` (§26, §26.1) are **retired** on Road ahead (tokens kept for the Instruments odometer).
+
+| Control | Spec |
+| --- | --- |
+| `CostsLine` | flex row, min-h 36, space-between. Left (nowrap, gap 5, 13/600): price `accent.yellow` · separator `#55565C` · P part. Right: quiet action |
+| P part | button, min touch 36 × 44, padding 0 2: glyph 15 × 15 (radius 3, `sign.blue`, «P» 11/700 white) + text 13/600 `#B9C6D3` (unknown «?» `text.muted`). TalkBack «Парковка: примерно 300 рублей. Подробнее» → `ParkingSheet` |
+| Quiet action | «заменить»: text 12/600 `text.muted`, no border/fill, padding-left 6, min-h 36; hotels «выбрать отель →» 12/600 `#7FA6D9` |
+| `KmPost` (decision B) | absolute at row top + 4, x 37 (post zone, 5.5 §10.8), z 2: plate 22 × 26 `sign.white`, 1.5 dp `sign.black`, radius 2; number Plex Mono 10/600 (−0.02 em) + «км» 8/700 `text.onLight`; post 4 × 10 white with 1 dp black sides; no label (legend under the chips: mini post 18 × 16 + `road_km_post_legend`) |
+
+### 26.3 `CarMarker`
+
+18 × 32 dp vector, drawn in the road's car lane (inside the left edge line, screen x 13–31), z 3; ≥ 6 dp clear of the km posts. Body: rounded rect 14.5 × 30, radius 5, fill `accent.yellow`, stroke 1.5 `text.onLight`; rear window 9 × 3.5 (top) and windscreen trapezoid (bottom) in `text.onLight` α 0.85; roof 8 × 8 radius 2 `#FFE27A`; wheels 3 × 6 radius 1 `text.onLight` at y 6 and 20 on both sides; headlights 3 × 1.6 `text.primary` at the bottom. Halo: 1 dp `text.primary` drop shadow + 0 3 4 black α 0.6. Motion `motion.carMarker`; reduced motion: parked at the top of the visible road.
+
+## 31. Online values (5.5 §10.9)
+
+No visible state machine. Two pieces only:
+
+| Control | Spec |
+| --- | --- |
+| Shimmer pill | only for a first-time fetch that takes > 300 ms (`motion.shimmerDelay`): inline, the width of the expected value (row P part 44 × 12), radius 6, fill `dash.controlAlt`, band `dash.outline` with `motion.shimmer`. Never while refreshing a known value |
+| Deferred value | `online_later` «уточним при интернете», `text.muted`, same type size as the value it stands in for; no icon. A costs line may wrap instead of truncating |
+
+Retired from the draft: live dot, freshness label, offline banner, live/cached sheet rows.

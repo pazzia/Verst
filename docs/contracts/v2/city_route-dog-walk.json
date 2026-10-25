@@ -1,0 +1,207 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-10",
+   "input_json": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "preset": "dog_walk",
+    "crew": {
+     "adults": 2,
+     "dog": true
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-10",
+   "titleRu": "Казань: прогулка с собакой",
+   "townId": "t_kazan",
+   "townName": "Казань",
+   "townPrep": "Казани",
+   "preset": "dog_walk",
+   "startAt": "2026-10-23T09:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T10:58",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 4.4,
+   "walkMin": 59,
+   "durationMin": 119,
+   "requestedDurationMin": 120,
+   "crewNotesRu": [
+    "С собакой: вода, пакеты и поводок; маршрут без закрытых мест."
+   ],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "finish": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "Q30890544",
+     "kind": "embankment",
+     "nameRu": "Кремлёвская набережная",
+     "lat": 55.80383,
+     "lon": 49.11676,
+     "arriveAt": "2026-10-23T09:16",
+     "departAt": "2026-10-23T09:31",
+     "dwellMin": 15,
+     "walkKmFromPrev": 1.3,
+     "walkMinFromPrev": 17,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w02",
+     "poiId": "Q4493322",
+     "kind": "park",
+     "nameRu": "Фуксовский сад",
+     "lat": 55.79973,
+     "lon": 49.12991,
+     "arriveAt": "2026-10-23T09:48",
+     "departAt": "2026-10-23T10:23",
+     "dwellMin": 35,
+     "walkKmFromPrev": 1.2,
+     "walkMinFromPrev": 16,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w03",
+     "poiId": "Q55655321",
+     "kind": "monument",
+     "nameRu": "Памятник Ленину",
+     "lat": 55.79654,
+     "lon": 49.12505,
+     "arriveAt": "2026-10-23T10:31",
+     "departAt": "2026-10-23T10:41",
+     "dwellMin": 10,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 8,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    }
+   ],
+   "cost": {
+    "totalRub": 0,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     55.7963,
+     49.1088
+    ],
+    [
+     55.80383,
+     49.11676
+    ],
+    [
+     55.79973,
+     49.12991
+    ],
+    [
+     55.79654,
+     49.12505
+    ],
+    [
+     55.7963,
+     49.1088
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "townId": null,
+    "preset": "dog_walk",
+    "durationMin": 120,
+    "interests": [],
+    "pace": "normal",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T09:00",
+    "crew": {
+     "adults": 2,
+     "children": 0,
+     "dog": true
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   },
+   "requestKey": "3526300f881a981e"
+  },
+  "ms": 0
+ }
+}

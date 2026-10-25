@@ -12,6 +12,10 @@ from verst_planner import resources
 RESOURCES = resources.DIR
 
 TEMPLATE_KEYS: tuple[str, ...] = (
+    "rest.roadside_again",
+    "rest.fun.child",
+    "rest.fun.dog",
+    "rest.fun.adults",
     "overnight.shift.hotels",
     "overnight.shift.quality",
     "overnight.shift.evening",
@@ -39,6 +43,7 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "sight.default",
     "sight.dog_waits",
     "sight.osm",
+    "sight.detour",
     "start.default",
     "finish.home",
     "finish.default",

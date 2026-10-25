@@ -6,6 +6,7 @@ implement; `tests/contract/cost_recompute_cases.json` pins it.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from decimal import Decimal
 
@@ -22,6 +23,7 @@ from verst_planner.domain.model import (
     Crew,
     FuelRegionUnit,
     NightUnit,
+    ParkingUnit,
     TicketUnit,
 )
 
@@ -79,6 +81,25 @@ def effective_tickets(units: CostUnits, ov: CostOverrides) -> list[TicketUnit]:
         _alt_ticket(sid, a)
         for sid, a in ov.replaced.items()
         if sid not in ticketed and a.adult_rub is not None
+    ]
+    return out
+
+
+def effective_parking(units: CostUnits, ov: CostOverrides) -> list[ParkingUnit]:
+    """The parking units after the replaces, in stop order: a replaced stop's unit becomes the
+    alternative's (renamed to its stop id) or goes; an alternative of a stop without parking is appended."""
+    out: list[ParkingUnit] = []
+    for x in units.parking:
+        alt = ov.replaced.get(x.stop_id)
+        if alt is None:
+            out.append(x)
+        elif alt.parking is not None:
+            out.append(dataclasses.replace(alt.parking, stop_id=x.stop_id, name_ru=alt.name_ru))
+    parked = {x.stop_id for x in units.parking}
+    out += [
+        dataclasses.replace(a.parking, stop_id=sid, name_ru=a.name_ru)
+        for sid, a in ov.replaced.items()
+        if sid not in parked and a.parking is not None
     ]
     return out
 
@@ -258,6 +279,25 @@ def recompute(
             tuple(ticket_rows),
         )
     )
+
+    # ---- parking (ADR-0015 §4, API v3): Σ known per-stop amounts (already rounded to 10 ₽), inside the
+    # subtotal and so the reserve base. A replaced stop takes the alternative's own parking unit
+    # (`AltUnits.parking`, JSON `parkingRub`…) in its place; an alternative without one (a rest stop
+    # replacing nothing parked, or no parking data) contributes nothing. No units = no line (no data).
+    if units.parking:
+        parks = effective_parking(units, ov)
+        known = [x for x in parks if x.rub is not None]
+        unknown = len(parks) - len(known)
+        lines.append(
+            CostLine(
+                CostKey.PARKING,
+                fm.title(CostKey.PARKING, fuel_t, units.reserve_frac),
+                sum(x.rub or 0 for x in known),
+                fm.parking_formula(known, unknown),
+                _as_of(units, CostKey.PARKING, units.fuel.as_of),
+                tuple(fm.parking_row(x) for x in parks),
+            )
+        )
 
     # ---- totals (A§7.2)
     subtotal = sum(line.rub for line in lines)

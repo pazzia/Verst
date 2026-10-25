@@ -65,12 +65,14 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     is app.verst.nav.Toast.HandoffWeb -> stringResource(if (t.walk) R.string.handoff_toast_web_walk else R.string.handoff_toast_web)
     app.verst.nav.Toast.HandoffOffline -> stringResource(R.string.handoff_offline)
     app.verst.nav.Toast.HandoffFailed -> stringResource(R.string.handoff_failed)
+    is app.verst.nav.Toast.HandoffOpen -> stringResource(if (t.navi) R.string.handoff_open_navi else R.string.handoff_open_maps)
     is app.verst.nav.Toast.LocationDenied -> stringResource(R.string.loc_denied_plate, t.town)
     app.verst.nav.Toast.LocationBlocked -> stringResource(R.string.loc_blocked)
     is app.verst.nav.Toast.LocationTimeout -> stringResource(R.string.loc_timeout, t.town)
     app.verst.nav.Toast.LocationOff -> stringResource(R.string.loc_off)
     app.verst.nav.Toast.AddressRate -> stringResource(R.string.addr_rate)
     app.verst.nav.Toast.CityKids -> stringResource(R.string.city_kids_toast)
+    app.verst.nav.Toast.WalkRebuildFailed -> stringResource(R.string.walk_rebuild_failed)
     app.verst.nav.Toast.ReportThanks -> stringResource(R.string.report_thanks)
     app.verst.nav.Toast.ReportQueued -> stringResource(R.string.report_queued)
     is app.verst.nav.Toast.Booked -> stringResource(R.string.exit_booked_badge) // 5.7 renders its own copy with the town
@@ -82,5 +84,6 @@ fun toastAction(t: app.verst.nav.Toast): String? = when (t) {
     app.verst.nav.Toast.LocationBlocked -> stringResource(R.string.loc_settings)
     app.verst.nav.Toast.LocationOff -> stringResource(R.string.loc_turn_on)
     is app.verst.nav.Toast.LocationDenied -> stringResource(R.string.loc_choose)
+    app.verst.nav.Toast.WalkRebuildFailed -> stringResource(R.string.walk_rebuild_retry)
     else -> null
 }

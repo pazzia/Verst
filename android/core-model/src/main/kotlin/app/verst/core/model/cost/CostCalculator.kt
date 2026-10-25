@@ -53,6 +53,17 @@ data class NightUnitDto(
 @Serializable
 data class MealUnitDto(val day: Int, val meal: String, val stopId: String? = null, val checkRub: Int)
 
+/** ADR-0015 §4 `cost.units.parking[]`: one stop's stay, already rounded half-up to 10 ₽; `rub` null = unknown. */
+@Serializable
+data class ParkingUnitDto(
+    val stopId: String,
+    val name: String = "",
+    val rubPerHour: Int? = null,
+    val hours: Double? = null,
+    val rub: Int? = null,
+    val source: String = "unknown",
+)
+
 @Serializable
 data class TicketUnitDto(val stopId: String, val placeId: String? = null, val name: String = "", val adultRub: Int, val childRub: Int)
 
@@ -71,6 +82,8 @@ data class CostUnitsDto(
     val assumedChildAge: Int = 8,
     val childFoodWeightUnder7: String = "0.50",
     val moodJustDrive: Boolean = false,
+    /** API v3: empty for an engine without parking (then there is no «Парковки» line at all). */
+    val parking: List<ParkingUnitDto> = emptyList(),
 )
 
 /** `Alternative.units` (A§16.6): what a replace changes in the cost. */
@@ -86,6 +99,14 @@ data class AltUnitsDto(
     val priceRub: String? = null,
     val regionName: String = "",
     val tripKmDelta: Int = 0,
+    /**
+     * API v3 (M6, rule 5): the alternative's own parking, present only when the trip has parking data;
+     * [parkingRub] null = an unknown price. Without [parkingSource] the replaced stop simply loses its parking.
+     */
+    val parkingRub: Int? = null,
+    val parkingRubPerHour: Int? = null,
+    val parkingHours: Double? = null,
+    val parkingSource: String? = null,
 )
 
 @Serializable
@@ -95,7 +116,7 @@ data class CostCrew(val adults: Int, val children: Int = 0, val dog: Boolean = f
 data class CostOverridesDto(val hotelByStop: Map<String, String> = emptyMap(), val replaced: Map<String, AltUnitsDto> = emptyMap())
 
 data class CostNumbers(
-    /** Line rubs by key: fuel, tolls, lodging, food, tickets, reserve. */
+    /** Line rubs by key: fuel, tolls, lodging, food, tickets, parking (API v3, when the units have it), reserve. */
     val lines: Map<String, Int>,
     val subtotalRub: Int,
     val totalRub: Int,
@@ -147,6 +168,18 @@ object CostCalculator {
         }
         val ticketed = u.tickets.map { it.stopId }.toSet()
         ov.replaced.forEach { (sid, a) -> if (sid !in ticketed && a.adultRub != null) out += altTicket(a) }
+        return out
+    }
+
+    /** M6 rule 5: the parking units after the replacements of [ov]. */
+    fun parkingAfter(units: List<ParkingUnitDto>, ov: CostOverridesDto): List<ParkingUnitDto> {
+        val out = units.filter { it.stopId !in ov.replaced }.toMutableList()
+        for ((sid, a) in ov.replaced) {
+            val src = a.parkingSource ?: continue
+            val unit = ParkingUnitDto(sid, a.name, a.parkingRubPerHour, a.parkingHours, a.parkingRub, src)
+            val i = units.indexOfFirst { it.stopId == sid }
+            if (i >= 0) out.add(i.coerceAtMost(out.size), unit) else out += unit
+        }
         return out
     }
 
@@ -215,6 +248,14 @@ object CostCalculator {
         val ticketExact = tickets.fold(BigDecimal.ZERO) { a, t -> a + BigDecimal(crew.adults * t.adult + crew.children * t.child) }
         val ticketsRub = roundTo(ticketExact, step)
         lines["tickets"] = ticketsRub
+
+        // ---- parking (ADR-0015 §4, M6 rule 5): Σ known per-stop stays (integers, already rounded); unknown = 0.
+        // A replaced stop loses its unit; the alternative's own parking (when it has `parkingSource`) takes its
+        // place, or is appended when the replaced stop had none (a rest stop replaced by a sight).
+        val parkingUnits = parkingAfter(u.parking, ov)
+        if (u.parking.isNotEmpty() || parkingUnits.isNotEmpty()) {
+            lines["parking"] = roundTo(BigDecimal(parkingUnits.sumOf { it.rub ?: 0 }), step)
+        }
 
         // ---- totals (A§7.2)
         val subtotal = lines.values.sum()

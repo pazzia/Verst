@@ -32,6 +32,7 @@ from verst_planner.pipeline.timeline import Profile
 from verst_planner.ports import (
     Clock,
     GeocodingPort,
+    ParkingPort,
     PlaceRepository,
     PriceRepository,
     RegionLocator,
@@ -50,6 +51,7 @@ class Ports:
     tolls: TollRepository
     regions: RegionLocator
     geocoding: GeocodingPort
+    parking: ParkingPort | None = None  # ADR-0015 §4; None = no parking data (fixture worlds)
 
 
 def _zero_cost(stop: PlannedStop, inp: NormalizedInput) -> int:

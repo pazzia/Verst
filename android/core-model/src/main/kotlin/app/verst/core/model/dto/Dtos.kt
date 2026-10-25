@@ -72,7 +72,53 @@ data class StopDto(
     /** Overnight stops: up to 3 hotels (the engine's choice first) and the selected one (5.7). */
     val hotelOptions: List<HotelOptionDto> = emptyList(),
     val selectedHotelId: String? = null,
-)
+    /** API v3 (ADR-0015 §7): driven km from the trip start (detours included) and the rest of the trip. */
+    val kmDriven: Int? = null,
+    val kmLeft: Int? = null,
+    /** API v3 (ADR-0015 §2): the whitelist kind of a sight (`museum`, `park`, …) — `kind` is the stop kind. */
+    val poiKind: String? = null,
+    val quality: Int? = null,
+    /** API v3 (ADR-0015 §5): a «Весело и познавательно» stop and whom it is for (child / dog / adults). */
+    val funFor: List<String> = emptyList(),
+    /** API v3 (ADR-0015 §4): the zone tariff of the stop; null with a parking-aware engine = unknown. */
+    val parking: ParkingDto? = null,
+    /** Rest and fuel rows (M3): `wc`, `cafe_at_fuel`, `playground`, `walk`, `view`, `parking`, `ev_charger`, `24h`. */
+    val amenities: List<String> = emptyList(),
+    /** M6: why this sight («Объект культурного наследия · …»), and where its photo comes from (p18 … geosearch). */
+    val whyRu: String? = null,
+    val photoSource: String? = null,
+    /** M9: the engine's category label («Храм», «Музей», «Детская площадка»…), shown as given. */
+    val poiKindRu: String? = null,
+    /** M9: curated | wikidata | osm, and the ODbL line for OSM-only places. */
+    val placeSource: String? = null,
+    val placeAttributionRu: String? = null,
+) {
+    /**
+     * A «Разминка» stop of the fun mood (5.5 §10.4): `funFor` (ADR-0015 §5) or, as the engine sends it today, a
+     * sight with a `rest.fun.*` reason («Весело и познавательно: 30 минут — …»).
+     */
+    val stretch: Boolean get() = funFor.isNotEmpty()
+}
+
+/**
+ * ADR-0015 §4 stop parking: `rub` = the stay (rounded to 10 ₽), `rubPerHour` the zone rate, `source`
+ * zone | osm | free | unknown. The Russian texts are optional engine extras for the sheet (5.5 §10.6).
+ */
+@Serializable
+data class ParkingDto(
+    val rubPerHour: Int? = null,
+    val rub: Int? = null,
+    val source: String? = null,
+    val hours: Double? = null,
+    val zoneRu: String? = null,
+    val whereRu: String? = null,
+    val sundayRu: String? = null,
+    val freeRu: String? = null,
+    val noteRu: String? = null,
+) {
+    val free: Boolean get() = source == "free" || (rub == 0 && source != "unknown")
+    val known: Boolean get() = free || (rub != null && source != "unknown")
+}
 
 /** A 5.7 hotel option: price per night for the whole crew, distance route → hotel for the exit sign. */
 @Serializable
@@ -126,6 +172,8 @@ data class CostLineDto(
     val asOf: String? = null,
     val enabled: Boolean = true,
     val breakdown: List<CostBreakdownDto> = emptyList(),
+    /** ADR-0015 §4 «Парковки»: stops without tariff data («+ ещё 2 места без данных»). */
+    val unknownCount: Int = 0,
 )
 
 @Serializable
@@ -206,7 +254,50 @@ data class EngineErrorDto(
     val pointIndex: Int? = null,
     val roadKm: Double? = null,
     val detail: String? = null,
-)
+    /**
+     * API v3 (ADR-0015 §6): `NOT_ENOUGH_POIS` options the engine has checked — each differs from the request and
+     * succeeds. Kept raw: `{"durationMin": null}` (explicit null) means «без ограничения».
+     */
+    val suggestions: kotlinx.serialization.json.JsonArray? = null,
+    /** v3: how many places were found for the failed request (the «Нашли N» line). */
+    val count: Int? = null,
+    /** M6: the key of the request this error answers (NOT_ENOUGH_POIS). */
+    val requestKey: String? = null,
+) {
+    /** The engine's verified suggestions, decoded defensively (unknown shapes are skipped). */
+    val walkSuggestions: List<WalkSuggestion>
+        get() = suggestions.orEmpty().mapNotNull { WalkSuggestion.from(it) }
+}
+
+/** One `NOT_ENOUGH_POIS` suggestion: a duration (null = unlimited), a preset, or «return the removed places». */
+data class WalkSuggestion(
+    val durationMin: Int? = null,
+    val unlimited: Boolean = false,
+    val preset: String? = null,
+    val clearExclude: Boolean = false,
+    val count: Int? = null,
+    /** M6: the engine's chip text («Вернуть убранные места», «На 6 ч», «История, архитектура, парки и виды»). */
+    val titleRu: String? = null,
+) {
+    companion object {
+        fun from(e: kotlinx.serialization.json.JsonElement): WalkSuggestion? {
+            val o = e as? kotlinx.serialization.json.JsonObject ?: return null
+            fun prim(k: String) = o[k] as? kotlinx.serialization.json.JsonPrimitive
+            val count = (prim("stops") ?: prim("count"))?.content?.toIntOrNull()
+            val title = prim("titleRu")?.takeIf { it.isString }?.content?.takeIf { it.isNotBlank() }
+            return when {
+                prim("clearExclude")?.content == "true" -> WalkSuggestion(clearExclude = true, count = count, titleRu = title)
+                o.containsKey("preset") -> prim("preset")?.takeIf { it.isString }?.content?.let { WalkSuggestion(preset = it, count = count, titleRu = title) }
+                o.containsKey("durationMin") -> {
+                    val d = o["durationMin"]
+                    if (d is kotlinx.serialization.json.JsonNull) WalkSuggestion(unlimited = true, count = count, titleRu = title)
+                    else prim("durationMin")?.content?.toIntOrNull()?.let { WalkSuggestion(durationMin = it, count = count, titleRu = title) }
+                }
+                else -> null
+            }
+        }
+    }
+}
 
 /**
  * `plan` / `replace_stop` / `patch_cost` result. [tripJson] is the engine's private trip verbatim (with

@@ -49,6 +49,7 @@ from verst_planner.domain.model import (
     NightUnit,
     NormalizedInput,
     OvernightReason,
+    ParkingUnit,
     PlanWarning,
     PointInput,
     ScheduledStop,
@@ -345,7 +346,7 @@ def _hotel_option_from_json(d: Mapping[str, Any]) -> HotelOption:
 
 
 def alt_units_to_json(u: AltUnits) -> Json:
-    return {
+    out: Json = {
         "deltaKm": u.delta_km,
         "regionCode": u.region_code,
         "checkRub": u.check_rub,
@@ -356,6 +357,18 @@ def alt_units_to_json(u: AltUnits) -> Json:
         "priceRub": None if u.price_rub is None else dec_to_str(u.price_rub),
         "regionName": u.region_name_ru,
         "tripKmDelta": u.trip_km_delta,
+    }
+    if u.parking is not None:
+        out.update(_alt_parking_to_json(u.parking))
+    return out
+
+
+def _alt_parking_to_json(p: ParkingUnit) -> Json:
+    return {
+        "parkingRub": p.rub,
+        "parkingRubPerHour": p.rub_per_hour,
+        "parkingHours": p.hours,
+        "parkingSource": p.source,
     }
 
 
@@ -371,6 +384,16 @@ def alt_units_from_json(d: Mapping[str, Any]) -> AltUnits:
         price_rub=None if d.get("priceRub") is None else _dec(d["priceRub"]),
         region_name_ru=d.get("regionName", ""),
         trip_km_delta=int(d.get("tripKmDelta", 0)),
+        parking=None
+        if "parkingSource" not in d
+        else ParkingUnit(
+            "",
+            d["name"],
+            d["parkingRubPerHour"],
+            int(d["parkingHours"]),
+            d["parkingRub"],
+            d["parkingSource"],
+        ),
     )
 
 
@@ -446,7 +469,7 @@ def stop_to_json(s: ScheduledStop) -> Json:
         "alternativesNote": s.alternatives_note_ru,
         "hotelOptions": [_hotel_option_to_json(h) for h in s.hotel_options],
         "selectedHotelId": s.selected_hotel_id,
-    }
+    } | ({"funFor": list(s.fun_for)} if s.fun_for else {})  # only on fun stops: G01-G13 keep their bytes
 
 
 def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
@@ -475,6 +498,7 @@ def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
         alternatives=tuple(_alternative_from_json(a) for a in d["alternatives"]),
         hotel_options=tuple(_hotel_option_from_json(h) for h in d["hotelOptions"]),
         selected_hotel_id=d["selectedHotelId"],
+        fun_for=tuple(d.get("funFor", ())),
         alternatives_note_ru=d.get("alternativesNote"),
     )
 
@@ -583,7 +607,23 @@ def units_to_json(u: CostUnits) -> Json:
         "childFoodWeightUnder7": dec_to_str(u.child_food_weight_under7),
         "asOf": {k: v for k, v in u.as_of},
         "moodJustDrive": u.mood_just_drive,
-    }
+    } | (
+        {}
+        if not u.parking
+        else {
+            "parking": [
+                {
+                    "stopId": x.stop_id,
+                    "name": x.name_ru,
+                    "rubPerHour": x.rub_per_hour,
+                    "hours": x.hours,
+                    "rub": x.rub,
+                    "source": x.source,
+                }
+                for x in u.parking
+            ]
+        }
+    )
 
 
 def units_from_json(d: Mapping[str, Any]) -> CostUnits:
@@ -636,6 +676,10 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
         child_food_weight_under7=_dec(d["childFoodWeightUnder7"]),
         as_of=tuple((str(k), str(v)) for k, v in d.get("asOf", {}).items()),
         mood_just_drive=bool(d.get("moodJustDrive", False)),
+        parking=tuple(
+            ParkingUnit(x["stopId"], x["name"], x["rubPerHour"], x["hours"], x["rub"], x["source"])
+            for x in d.get("parking", [])
+        ),
     )
 
 

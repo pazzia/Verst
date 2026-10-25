@@ -22,10 +22,16 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import app.verst.core.model.DefaultOrigin
@@ -45,7 +51,10 @@ import app.verst.core.model.SavedTrips
 import app.verst.core.model.dto.PlanResultDto
 import app.verst.core.model.dto.StopDto
 import app.verst.core.model.dto.TripDto
+import app.verst.feature.road.ParkingTotal
 import app.verst.feature.road.RoadActions
+import app.verst.feature.road.parkingOf
+import app.verst.feature.road.parkingTotal
 import app.verst.feature.road.RoadFocus
 import app.verst.nav.GpsState
 import app.verst.nav.HandoffTarget
@@ -226,6 +235,34 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("3 взрослых · 1 ребёнок · собака").assertExists() // Russian plural rules (ru locale)
     }
 
+    /** 5.3 §9 (S4): the three MoodCards, fun selected with a child and the dog → the yellow crew line (tall window). */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1060dp-port-xxhdpi")
+    fun instrumentsFunMoodWithChildAndDog() {
+        shot("instruments", "s4-mood-fun-child-dog", 390, 1060) {
+            InstrumentsScreen(
+                InstrumentsUi("Золотое кольцо", "Москва", true, 761, true, listOf(Seat.CHILD, Seat.EMPTY, Seat.ADULT), true, 3, 1, 300, 2, Mood.FUN, days = 3, originGen = "Москвы"),
+                noActions,
+            )
+        }
+        compose.onNodeWithTag("instruments.mood.crew", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Под ваш экипаж", substring = true).assertExists()
+        compose.onNodeWithTag("instruments.mood.fun").assertIsSelected()
+        compose.onNodeWithTag("instruments.mood.calm").assertIsNotSelected()
+        compose.onNodeWithText("весело и познавательно", substring = true).assertExists() // the caption meta suffix
+    }
+
+    @Test
+    fun instrumentsJustDriveAdults() {
+        shot("instruments", "s4-mood-just-drive") {
+            InstrumentsScreen(
+                InstrumentsUi("Москва → Казань", "Москва", false, 820, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 500, 2, Mood.JUST_DRIVE, days = 2, originGen = "Москвы"),
+                noActions,
+            )
+        }
+        compose.onNodeWithTag("instruments.mood.crew", useUnmergedTree = true).assertDoesNotExist()
+    }
+
     @Test
     fun driveProgress() = shot("drive", "t1500") {
         DriveScreen(
@@ -303,6 +340,212 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("Дорога впереди").assertExists()
     }
 
+    /**
+     * S4 fixture (API v3 shape, the engine milestone with tags/parking is pending): G02 with `kmDriven`, whitelist
+     * kinds on sights, one «Разминка» fun stop, one open-data sight, zone parking on sights (one unknown), free
+     * parking at rest areas / nights, rest amenities, and the «Парковки» line.
+     */
+    private fun s4Trip(): TripDto {
+        val t = snapshot("G02_golden_ring")
+        var driven = 0
+        var sights = 0
+        val kinds = listOf("monastery", "kremlin", "museum", "park", "nature", "viewpoint")
+        val days = t.daysList.map { d ->
+            d.copy(stops = d.stops.map { st ->
+                driven += st.kmFromPrev
+                val sight = st.kind == "sight"
+                val k = if (sight) sights++ else -1
+                st.copy(
+                    kmDriven = driven, kmLeft = (t.km - driven).coerceAtLeast(0),
+                    poiKind = if (sight) kinds[k % kinds.size] else null,
+                    funFor = if (k == 1) listOf("child") else emptyList(),
+                    dwellMin = if (k == 1) 30 else st.dwellMin,
+                    verified = if (k == 2) false else st.verified,
+                    parking = when {
+                        sight && k == 3 -> null
+                        sight -> app.verst.core.model.dto.ParkingDto(rubPerHour = 150, rub = 300, source = "zone", hours = 2.0, zoneRu = "платная зона", whereRu = "у входа и на соседних улицах")
+                        st.kind == "rest" -> app.verst.core.model.dto.ParkingDto(rub = 0, source = "free", freeRu = "площадка отдыха у трассы")
+                        // M9: cafés carry an object (unknown here: «P ?»); hotels carry none (a hotel fact)
+                        st.kind == "food" -> app.verst.core.model.dto.ParkingDto(rub = null, source = "unknown")
+                        else -> null
+                    },
+                    amenities = if (st.kind == "rest" || st.kind == "fuel") listOf("toilets", "tables", "shelter") else emptyList(), // G02 has no rest areas
+                )
+            })
+        }
+        val parkingRub = days.sumOf { d -> d.stops.sumOf { it.parking?.rub ?: 0 } }
+        val lines = t.cost.lines.filter { it.key != "reserve" } +
+            app.verst.core.model.dto.CostLineDto("parking", "Парковки", parkingRub, "${days.sumOf { d -> d.stops.count { it.parking?.rubPerHour != null } }} стоянки", unknownCount = days.sumOf { d -> d.stops.count { it.kind in setOf("sight", "food", "rest", "overnight") && it.parking == null } }) +
+            t.cost.lines.filter { it.key == "reserve" }
+        return t.copy(daysList = days, cost = t.cost.copy(lines = lines))
+    }
+
+    /** 5.6 §9 (S4) «Парковки» expanded: paid rows, the free ones in one 0 row, the unknown ones with «?». */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1200dp-port-xxhdpi")
+    fun waybillS4Parking() {
+        val trip = s4Trip()
+        shot("waybill", "s4-parking", 390, 1200) { WaybillScreen(WaybillUi(trip, 1, false, "parking"), noWaybill) }
+        compose.onNodeWithTag("waybill.line.parking").assertExists()
+        compose.onNodeWithTag("waybill.parking.unknown", useUnmergedTree = true).assertExists()
+        assertTrue(compose.onAllNodesWithTag("waybill.breakdown.parking.0", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        // parity: the line = Σ known stays = the Road-ahead footer
+        val known = trip.daysList.flatMap { it.stops }.sumOf { it.parking?.rub ?: 0 }
+        assertEquals(known, trip.cost.lines.first { it.key == "parking" }.rub)
+    }
+
+    /**
+     * S4-RELEASE (Manager, Golden Ring shot 124: «P ?» on Ростовский кремль but «из них парковки бесплатно»): while any
+     * stop's parking is unknown no total claims free or exact — footer, day headers and the Waybill line.
+     */
+    @Test
+    fun parkingTotalRuleNeverClaimsFreeOrExactWithUnknowns() {
+        assertEquals(ParkingTotal.FREE, parkingTotal(0, 0, 3))
+        assertEquals(ParkingTotal.SUM, parkingTotal(380, 0, 2))
+        assertEquals(ParkingTotal.SUM_PLUS_UNKNOWN, parkingTotal(380, 1, 2))
+        assertEquals(ParkingTotal.FREE_PLUS_UNKNOWN, parkingTotal(0, 2, 2))
+        assertEquals(ParkingTotal.UNKNOWN, parkingTotal(0, 1, 0))
+        for (rub in listOf(0, 80, 380)) for (unknown in 1..3) for (known in 0..3) {
+            val t = parkingTotal(rub, unknown, known)
+            assertTrue("$rub/$unknown/$known → $t", t != ParkingTotal.FREE && t != ParkingTotal.SUM)
+        }
+    }
+
+    /** The Golden Ring case: the known stays are free, two stops unknown → «бесплатно + ?» / «0 + ?», never «бесплатно». */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1200dp-port-xxhdpi")
+    fun parkingFreePlusUnknownOnRoadAndWaybill() {
+        val base = s4Trip()
+        val days = base.daysList.map { d ->
+            d.copy(stops = d.stops.map { st ->
+                val p = st.parking
+                if (p != null && p.known) st.copy(parking = app.verst.core.model.dto.ParkingDto(rub = 0, source = "free", freeRu = "бесплатно у входа")) else st
+            })
+        }
+        val trip = base.copy(daysList = days, cost = base.cost.copy(lines = base.cost.lines.map { if (it.key == "parking") it.copy(rub = 0) else it }))
+        val sum = parkingOf(trip)
+        assertTrue("fixture has unknown and free stops: $sum", sum.unknown > 0 && sum.known > 0 && sum.rub == 0)
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        val freePlus = ctx.getString(UiR.string.road_parking_free_unknown)
+        val free = ctx.getString(UiR.string.road_parking_inline_free)
+        shot("road", "s4-parking-free-unknown") { RoadScreen(RoadUi(trip, "NE"), noRoad) }
+        compose.onNodeWithTag("road.total.parking.value", useUnmergedTree = true).assertTextEquals(freePlus)
+        // every day header follows the same rule
+        trip.daysList.forEach { d ->
+            val p = parkingOf(d)
+            if (p.unknown > 0) assertTrue("day ${d.day}: $p", parkingTotal(p) != ParkingTotal.FREE)
+        }
+        assertTrue(compose.onAllNodesWithText(freePlus, useUnmergedTree = true).fetchSemanticsNodes().size >= 2) // footer + a day
+        assertTrue("no bare «$free» total", freePlus != free) // the footer value is asserted equal to «бесплатно + ?» above
+    }
+
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1200dp-port-xxhdpi")
+    fun parkingFreePlusUnknownWaybillLine() {
+        val base = s4Trip()
+        val trip = base.copy(
+            daysList = base.daysList.map { d -> d.copy(stops = d.stops.map { st -> if (st.parking?.known == true) st.copy(parking = app.verst.core.model.dto.ParkingDto(rub = 0, source = "free")) else st }) },
+            cost = base.cost.copy(lines = base.cost.lines.map { if (it.key == "parking") it.copy(rub = 0) else it }),
+        )
+        shot("waybill", "s4-parking-free-unknown", 390, 1200) { WaybillScreen(WaybillUi(trip, 1, false, null), noWaybill) }
+        compose.onNodeWithTag("waybill.sum.parking", useUnmergedTree = true).assertTextEquals("0 + ?")
+    }
+
+    /** Paid + unknown (the s4 fixture): footer «≈ N ₽ + ?», Waybill «N + ?». */
+    @Test
+    fun parkingSumPlusUnknownFooter() {
+        val trip = s4Trip()
+        val sum = parkingOf(trip)
+        val line = trip.cost.lines.first { it.key == "parking" }.rub
+        assertTrue(sum.unknown > 0 && line > 0)
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        shot("road", "s4-parking-sum-unknown") { RoadScreen(RoadUi(trip, "NE"), noRoad) }
+        compose.onNodeWithTag("road.total.parking.value", useUnmergedTree = true)
+            .assertTextEquals(ctx.getString(UiR.string.road_parking_day_unknown, app.verst.core.model.RuFormat.thousands(line)))
+    }
+
+    /** M6+ contract (a Moscow zone stop): the engine's P part, the sheet from `zoneRu` / `whereRu` / `sundayRu`. */
+    @Test
+    fun roadM6MoscowParkingContract() {
+        val trip = v2PlanTrip("plan-moscow-parking.json").trip
+        // data-independent: since G15 the calm Москва → Тула keeps Высоцкий монастырь + Тульский кремль (free)
+        // instead of the paid Кремль — every stop with a parking object carries its P part either way
+        val withParking = trip.daysList.flatMap { it.stops }.filter { it.parking != null }
+        assertTrue("the contract has parking objects", withParking.isNotEmpty())
+        shot("road", "m6-moscow-parking") { RoadScreen(RoadUi(trip, "N"), noRoad) }
+        withParking.forEach { compose.onNodeWithTag("road.stop.${it.id}.parking", useUnmergedTree = true).assertExists() }
+        compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
+        // the line is Σ of the stops' stays
+        assertEquals(withParking.sumOf { it.parking?.rub ?: 0 }, trip.cost.lines.first { it.key == "parking" }.rub)
+        assertTrue("no «не проверено» on rows", compose.onAllNodesWithText("не проверено", substring = true, useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    fun roadM6ParkingSheetContract() {
+        val trip = v2PlanTrip("plan-moscow-parking.json").trip
+        val stops = trip.daysList.flatMap { it.stops }
+        val stop = stops.firstOrNull { (it.parking?.rub ?: 0) > 0 } ?: stops.first { it.parking != null }
+        shot("road", "m6-parking-sheet") { RoadScreen(RoadUi(trip, "N", parking = stop), noRoad) }
+        val p = stop.parking!!
+        if ((p.rubPerHour ?: 0) > 0) {
+            compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("${p.rubPerHour}", substring = true)
+        } else {
+            compose.onNodeWithTag("parking.ok", useUnmergedTree = true).assertExists()
+        }
+        if (p.sundayRu != null) assertTrue(compose.onAllNodesWithText("воскресенье", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun roadS4Top() {
+        shot("road", "s4-top") { RoadScreen(RoadUi(s4Trip(), "NE"), noRoad) }
+        compose.onNodeWithTag("road.handoff").assertExists()
+        compose.onNodeWithTag("road.day.1.navigator").assertExists()
+        compose.onNodeWithTag("road.day.1.parking", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.legend.kmpost", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("не проверено", substring = true).assertDoesNotExist()
+    }
+
+    /** The long list at once: km posts, tags (Разминка, kinds, the open-data ring), costs lines with the P part. */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h2400dp-port-xxhdpi")
+    fun roadS4Rows() {
+        shot("road", "s4-rows", 390, 2400) { RoadScreen(RoadUi(s4Trip(), "NE"), noRoad) }
+        assertTrue(compose.onAllNodesWithTag("road.kmpost", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithTag("tag.kind", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithTag("tag.stretch", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithText("Разминка", substring = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithTag("tag.opendata", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithText("туалет", substring = true).fetchSemanticsNodes().isNotEmpty())
+        // S4-QA P1-01 + M9: cafés have a P part («P ?» when unknown); fuel and the hotel have none
+        val trip = s4Trip()
+        trip.daysList.flatMap { it.stops }.filter { it.kind == "food" }.take(2).forEach { st ->
+            compose.onNodeWithTag("road.stop.${st.id}.parking", useUnmergedTree = true).assertExists()
+        }
+        trip.daysList.flatMap { it.stops }.filter { it.kind == "fuel" || it.kind == "overnight" }.take(2).forEach { st ->
+            compose.onNodeWithTag("road.stop.${st.id}.parking", useUnmergedTree = true).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun roadS4ParkingSheet() {
+        val trip = s4Trip()
+        val stop = trip.daysList.flatMap { it.stops }.first { it.parking?.rubPerHour != null }
+        shot("road", "s4-parking-sheet") { RoadScreen(RoadUi(trip, "NE", parking = stop), noRoad) }
+        compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("платная зона", substring = true)
+        assertTrue(compose.onAllNodesWithText("150", substring = true).fetchSemanticsNodes().isNotEmpty()) // the tariff row
+        compose.onNodeWithTag("parking.ok").assertExists()
+    }
+
+    @Test
+    fun roadS4ParkingSheetUnknown() {
+        val trip = s4Trip()
+        val stop = trip.daysList.flatMap { it.stops }.first { it.kind == "sight" && it.parking == null }
+        shot("road", "s4-parking-unknown") { RoadScreen(RoadUi(trip, "NE", parking = stop), noRoad) }
+        compose.onNodeWithTag("parking.note", useUnmergedTree = true).assertTextContains("Тариф неизвестен", substring = true) // S4-QA P1-04
+        compose.onAllNodesWithText("уточните", substring = true).fetchSemanticsNodes().isNotEmpty().let(::assertTrue)
+    }
+
     @Test
     fun roadNoLodging() = shot("road", "no-lodging") { RoadScreen(RoadUi(snapshot("G05_edge_no_dog_lodging"), "E"), noRoad) }
 
@@ -358,6 +601,29 @@ class ScreensScreenshotTest {
         val night = trip.daysList.flatMap { it.stops }.filter { it.kind == "overnight" }[1]
         shot("road", "focus-restored") { RoadScreen(RoadUi(trip, "NE", focus = RoadFocus(night.id, null, 1)), noRoad) }
         compose.onNodeWithTag("road.stop.${night.id}", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    /** 5.13 §5 (S4) unsigned: day 1 → Карты first with «весь день», Навигатор the next point with the 5-a-day note. */
+    @Test
+    fun handoffSheetDayUnsigned() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = true, naviInstalled = true, signed = false, remember = false)
+        shot("handoff", "s4-day-unsigned") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
+        compose.onNodeWithTag("handoff.maps.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.navi.note", useUnmergedTree = true).assertTextContains("5 раз", substring = true)
+        compose.onNodeWithTag("handoff.tab.1").assertIsSelected()
+    }
+
+    /** «До след.» with the Навигатор not installed: it dims with «Установить…»; Карты (web) keeps its place. */
+    @Test
+    fun handoffSheetNextNaviMissing() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(null, h, 1), mapsInstalled = false, naviInstalled = false, signed = false, remember = true)
+        shot("handoff", "s4-next-missing") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
+        compose.onNodeWithTag("handoff.navi.install", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.maps.note", useUnmergedTree = true).assertTextContains("браузере", substring = true)
+        compose.onNodeWithTag("handoff.tab.next").assertIsSelected()
+        compose.onNodeWithTag("handoff.remember").assertIsOn()
     }
 
     @Test
@@ -474,6 +740,39 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("card.sign", useUnmergedTree = true).assertExists()
     }
 
+    /** 5.9 §9 (S4) level 4: no photo → the category illustration; «Почему здесь», the source line, fact chips. */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1000dp-port-xxhdpi")
+    fun cardS4IllustrationAndChips() {
+        val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
+        val d = real.copy(
+            poiKind = "museum", image = null, verified = false,
+            descriptionRu = "Музей под открытым небом: избы, церкви и мельницы XVII–XIX веков, свезённые со всей области.",
+            whyRu = "объект наследия федерального значения · есть в Викигиде", descSource = "wikipedia",
+            hours = app.verst.core.model.dto.PoiHoursDto(textRu = "11:00–20:00", verified = false, todayRu = "11:00–20:00", openNow = true),
+            dogsAllowed = false,
+            parking = app.verst.core.model.dto.ParkingDto(rubPerHour = 80, rub = 160, source = "zone"),
+        )
+        shot("card", "s4-illustration-chips", 390, 1000) { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
+        compose.onNodeWithTag("photo.illustration", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("photo.illustration.none", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("card.why", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.desc.source", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.facts", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.opendata", useUnmergedTree = true).assertExists()
+        assertTrue(compose.onAllNodesWithText("не проверено", substring = true).fetchSemanticsNodes().isEmpty())
+    }
+
+    /** Level 5 (OSM-only): no photo and no description → the illustration with «фото пока нет». */
+    @Test
+    fun cardS4OsmOnly() {
+        val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
+        val d = real.copy(poiKind = "park", image = null, descriptionRu = null, extractRu = null, extractSource = null, ticket = null, descSource = "osm", whyRu = null, wikidataId = null, attributionRu = emptyList())
+        shot("card", "s4-osm-only") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
+        compose.onNodeWithTag("photo.illustration.none", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.osm", useUnmergedTree = true).assertExists() // S4-QA P1-05 (ODbL)
+    }
+
     @Test
     fun cardBar() {
         val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-bar.json", EngineJson::poiDetails)
@@ -566,23 +865,32 @@ class ScreensScreenshotTest {
         override fun changeStart() = Unit
         override fun preset(p: String) = Unit
         override fun go() = Unit
-        override fun duration(min: Int) = Unit
         override fun interest(i: String) = Unit
-        override fun pace(p: String) = Unit
-        override fun budget(rub: Int?) = Unit
         override fun toggleReturn() = Unit
         override fun closeCustom() = Unit
         override fun buildCustom() = Unit
         override fun age(yes: Boolean) = Unit
-        override fun longer() = Unit
-        override fun otherPreset() = Unit
+        override fun suggestion(s: app.verst.core.model.dto.WalkSuggestion) = Unit
+        override fun openPicker(p: app.verst.nav.CityPicker) = Unit
     }
 
-    private fun cityUi(error: String? = null, custom: Boolean = false, age: Boolean = false, building: Boolean = false, children: Boolean = false): app.verst.feature.city.CityUi {
+    private val dogPreset = app.verst.core.model.dto.CityPresetDto(preset = "dog_walk", count = 9, defaultDurationMin = 120, titleRu = "Прогулка с собакой")
+
+    private fun cityUi(
+        error: String? = null, custom: Boolean = false, age: Boolean = false, building: Boolean = false, children: Int = 0, dog: Boolean = false,
+        selected: String = "overview", duration: Int? = 240, few: app.verst.nav.WalkFew? = null, picker: app.verst.nav.CityPicker? = null,
+    ): app.verst.feature.city.CityUi {
         val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets)
+        // M6 contracts carry «Прогулка с собакой» themselves; it shows only with the dog, first
+        val dogP = presets.presets.firstOrNull { it.preset == "dog_walk" } ?: dogPreset
+        val shown = presets.presets.filter { it.available && it.preset != "dog_walk" }.let { if (dog) listOf(dogP) + it else it }
         return app.verst.feature.city.CityUi(
-            if (error == "NO_CITY") null else presets.town?.name, if (error == "NO_CITY") "Толбухино" else "Советская пл., 1", true, if (error == "NO_CITY") emptyList() else presets.presets, false, error, "overview",
-            240, listOf("parks", "views"), "normal", null, true, custom, age, building, children, "11:00",
+            town = if (error == "NO_CITY") null else presets.town?.name,
+            startLabel = if (error == "NO_CITY") "Толбухино" else "Советская пл., 1",
+            fromGps = true, presets = if (error == "NO_CITY") emptyList() else shown, loading = false, error = error, selected = selected,
+            durationMin = duration, interests = listOf("parks", "views"), pace = "normal", budget = null, returnToStart = true,
+            customSheet = custom, ageGate = age, building = building, adults = 2, children = children, dog = dog, startTime = "11:00",
+            few = few, picker = picker,
         )
     }
 
@@ -590,22 +898,43 @@ class ScreensScreenshotTest {
     fun cityPresets() {
         shot("city", "presets") { app.verst.feature.city.CityScreen(cityUi(), noCity) }
         compose.onNodeWithTag("city.preset.overview", useUnmergedTree = true).assertExists()
-        // `available: false` is hidden (read from the contract: the real catalogue decides which)
-        val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets).presets
-        presets.filter { !it.available }.forEach { compose.onNodeWithTag("city.preset.${it.preset}", useUnmergedTree = true).assertDoesNotExist() }
-        presets.filter { it.available }.forEach { compose.onNodeWithTag("city.preset.${it.preset}", useUnmergedTree = true).assertExists() }
+        compose.onNodeWithTag("city.start", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.crew.dog", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.duration.unlimited", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.pref.pace", useUnmergedTree = true).assertExists()
     }
 
     @Test
-    fun cityKidsBlocked() = shot("city", "kids-blocked") { app.verst.feature.city.CityScreen(cityUi(children = true), noCity) }
+    fun cityChildAndBeerWarns() {
+        // S4: children never block a preset — the walk is allowed and the plate says what to expect
+        shot("city", "child-beer") { app.verst.feature.city.CityScreen(cityUi(children = 1, selected = "beer"), noCity) }
+        compose.onNodeWithTag("city.warn.childbars", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.go").assertIsEnabled()
+    }
 
     @Test
-    fun cityCustomSheet() = shot("city", "custom-sheet") { app.verst.feature.city.CityScreen(cityUi(custom = true), noCity) }
+    fun cityDogWalkFirst() {
+        shot("city", "dog") { app.verst.feature.city.CityScreen(cityUi(dog = true, selected = "museums"), noCity) }
+        compose.onNodeWithTag("city.preset.dog_walk", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.warn.dogindoor", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun cityUnlimited() {
+        shot("city", "unlimited") { app.verst.feature.city.CityScreen(cityUi(duration = null), noCity) }
+        compose.onNodeWithText("без расписания", substring = true).assertExists()
+    }
+
+    @Test
+    fun cityCustomSheet() = shot("city", "custom-sheet") { app.verst.feature.city.CityScreen(cityUi(custom = true, selected = "custom"), noCity) }
+
+    @Test
+    fun cityPacePicker() = shot("city", "pace-picker") { app.verst.feature.city.CityScreen(cityUi(picker = app.verst.nav.CityPicker.PACE), noCity) }
 
     @Test
     fun cityAgeGate() {
         shot("city", "age-gate") { app.verst.feature.city.CityScreen(cityUi(age = true), noCity) }
-        compose.onNodeWithText("Маршрут для взрослых").assertExists()
+        compose.onNodeWithText("Вам есть 18?").assertExists()
     }
 
     @Test
@@ -615,7 +944,28 @@ class ScreensScreenshotTest {
     fun cityNoCity() = shot("city", "no-city") { app.verst.feature.city.CityScreen(cityUi(error = "NO_CITY"), noCity) }
 
     @Test
-    fun cityNotEnough() = shot("city", "not-enough") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS"), noCity) }
+    fun cityNotEnoughWithEngineSuggestions() {
+        // 5.11 §10.5: only the engine's verified suggestions — never «Гулять 4 ч» while 4 ч is selected
+        val few = app.verst.nav.WalkFew(
+            480, false,
+            listOf(
+                app.verst.core.model.dto.WalkSuggestion(durationMin = 360, count = 7),
+                app.verst.core.model.dto.WalkSuggestion(unlimited = true, count = 9),
+                app.verst.core.model.dto.WalkSuggestion(preset = "overview", count = 12),
+            ),
+            5,
+        )
+        shot("city", "not-enough") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS", duration = 480, few = few), noCity) }
+        compose.onNodeWithTag("walk.few.0", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Гулять 8 ч").assertDoesNotExist()
+    }
+
+    @Test
+    fun cityNotEnoughWithoutSuggestions() {
+        val few = app.verst.nav.WalkFew(240, false, emptyList(), null)
+        shot("city", "not-enough-none") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS", few = few), noCity) }
+        compose.onNodeWithText("Гулять", substring = true).assertDoesNotExist()
+    }
 
     private val noWalk = object : app.verst.feature.city.WalkActions {
         override fun back() = Unit
@@ -638,6 +988,65 @@ class ScreensScreenshotTest {
 
     @Test
     fun walkOverview() = walkShot("city_route-overview.json", "overview")
+
+    private fun walkFilters(dog: Boolean = false, children: Int = 0, duration: Int? = 240) = app.verst.feature.city.PickerUi(
+        duration, v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets).presets.filter { it.available },
+        "overview", 2, children, dog, "normal", null,
+    )
+
+    private fun walkS4(state: String, ui: (app.verst.core.model.dto.WalkRouteDto) -> app.verst.feature.city.WalkUi) {
+        val w = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        shot("walk", state) { app.verst.feature.city.WalkScreen(ui(w), noWalk) }
+    }
+
+    @Test
+    fun walkFilterBarAndRebuilding() {
+        walkS4("rebuilding") { w -> app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = true, filters = walkFilters()) }
+        compose.onNodeWithTag("walk.filter.duration", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("walk.rebuilding", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun walkOtherNone() {
+        walkS4("other-none") { w -> app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(), otherNone = true) }
+        compose.onNodeWithTag("walk.other.none", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("walk.other", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun walkFewOnTheWalkScreen() {
+        val few = app.verst.nav.WalkFew(480, false, listOf(app.verst.core.model.dto.WalkSuggestion(durationMin = 240, count = 6), app.verst.core.model.dto.WalkSuggestion(clearExclude = true, count = 3)), 4)
+        walkS4("few") { w -> app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(duration = 480), few = few) }
+        compose.onNodeWithTag("walk.few", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("walk.total", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun walkUntimedWithHoursPills() {
+        val w0 = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        val hours = listOf(
+            app.verst.core.model.dto.WalkHoursDto(todayRu = "10:00–18:00", openNow = true),
+            app.verst.core.model.dto.WalkHoursDto(openNow = false, closedDayRu = "вторник"),
+            app.verst.core.model.dto.WalkHoursDto(allDay = true),
+            null,
+        )
+        val w = w0.copy(
+            startAt = null, endAt = null,
+            stops = w0.stops.mapIndexed { i, st -> st.copy(arriveAt = null, departAt = null, hours = hours[i % hours.size], poiKind = listOf("museum", "park", "square", "monument")[i % 4]) },
+        )
+        shot("walk", "untimed") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(duration = null)), noWalk) }
+        compose.onNodeWithText("Порядок по пути", substring = true).assertExists()
+        compose.onAllNodes(androidx.compose.ui.test.hasTestTag("hours.pill"), useUnmergedTree = true).fetchSemanticsNodes().let { assertTrue("pills ${it.size}", it.size >= 3) }
+    }
+
+    @Test
+    fun walkDogWarning() {
+        val w0 = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        val w = w0.copy(stops = w0.stops.mapIndexed { i, st -> if (i == 0) st.copy(poiKind = "museum") else st })
+        shot("walk", "dog-warning") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(dog = true)), noWalk) }
+        compose.onNodeWithTag("walk.warn.dog", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("С собакой внутрь нельзя.", substring = true).assertExists()
+    }
 
     @Test
     fun walkFreeFooter() {

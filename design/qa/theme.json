@@ -802,10 +802,126 @@
    "hex": "#FFD23F"
   },
   {
-   "item": "color.overlay.scrim",
+   "item": "color.kind.fill",
    "state": "palette",
    "x": 162.5,
    "y": 1099.0,
+   "hex": "#2A1E17"
+  },
+  {
+   "item": "color.kind.border",
+   "state": "palette",
+   "x": 227.5,
+   "y": 1099.0,
+   "hex": "#6B3E26"
+  },
+  {
+   "item": "color.kind.text",
+   "state": "palette",
+   "x": 292.5,
+   "y": 1099.0,
+   "hex": "#E0B48F"
+  },
+  {
+   "item": "color.stretch.fill",
+   "state": "palette",
+   "x": 357.5,
+   "y": 1099.0,
+   "hex": "#2B2A12"
+  },
+  {
+   "item": "color.stretch.border",
+   "state": "palette",
+   "x": 32.5,
+   "y": 1159.0,
+   "hex": "#8A7A1E"
+  },
+  {
+   "item": "color.stretch.text",
+   "state": "palette",
+   "x": 97.5,
+   "y": 1159.0,
+   "hex": "#FFD23F"
+  },
+  {
+   "item": "color.hours.open",
+   "state": "palette",
+   "x": 162.5,
+   "y": 1159.0,
+   "hex": "#7FD38A"
+  },
+  {
+   "item": "color.hours.openFill",
+   "state": "palette",
+   "x": 227.5,
+   "y": 1159.0,
+   "hex": "#212B24",
+   "tol": 1,
+   "alpha": 0.12
+  },
+  {
+   "item": "color.hours.closed",
+   "state": "palette",
+   "x": 292.5,
+   "y": 1159.0,
+   "hex": "#E6604A"
+  },
+  {
+   "item": "color.hours.closedFill",
+   "state": "palette",
+   "x": 357.5,
+   "y": 1159.0,
+   "hex": "#311F1D",
+   "tol": 1,
+   "alpha": 0.14
+  },
+  {
+   "item": "color.hours.unknown",
+   "state": "palette",
+   "x": 32.5,
+   "y": 1219.0,
+   "hex": "#B9B9C0"
+  },
+  {
+   "item": "color.info.fill",
+   "state": "palette",
+   "x": 97.5,
+   "y": 1219.0,
+   "hex": "#1C2A1E"
+  },
+  {
+   "item": "color.info.border",
+   "state": "palette",
+   "x": 162.5,
+   "y": 1219.0,
+   "hex": "#2F4A33"
+  },
+  {
+   "item": "color.info.mark",
+   "state": "palette",
+   "x": 227.5,
+   "y": 1219.0,
+   "hex": "#7FD38A"
+  },
+  {
+   "item": "color.odometer.fill",
+   "state": "palette",
+   "x": 292.5,
+   "y": 1219.0,
+   "hex": "#000000"
+  },
+  {
+   "item": "color.odometer.border",
+   "state": "palette",
+   "x": 357.5,
+   "y": 1219.0,
+   "hex": "#3A3A42"
+  },
+  {
+   "item": "color.overlay.scrim",
+   "state": "palette",
+   "x": 32.5,
+   "y": 1279.0,
    "hex": "#080809",
    "tol": 1,
    "alpha": 0.6
@@ -813,15 +929,15 @@
   {
    "item": "color.overlay.focus",
    "state": "palette",
-   "x": 227.5,
-   "y": 1099.0,
+   "x": 97.5,
+   "y": 1279.0,
    "hex": "#FFD23F"
   },
   {
    "item": "color.overlay.returnFlash",
    "state": "palette",
-   "x": 292.5,
-   "y": 1099.0,
+   "x": 162.5,
+   "y": 1279.0,
    "hex": "#352F1C",
    "tol": 1,
    "alpha": 0.14

@@ -17,6 +17,7 @@ from verst_planner.adapters.catalogue.world import WORLD_ID, CatalogueWorld, com
 from verst_planner.adapters.fake import GOLDEN_CLOCK, FakePriceRepository, FakeTollRepository, FixedClock
 from verst_planner.geo.grid import GridIndex
 from verst_planner.geo.roadmodel import RoadModel
+from verst_planner.parking import OsmParking, ParkingModel
 
 __all__ = [
     "WORLD_ID",
@@ -39,6 +40,7 @@ class CataloguePorts(NamedTuple):
     regions: RegionByNearestTown
     clock: FixedClock
     world: CatalogueWorld
+    parking: ParkingModel | None = None  # ADR-0015 §4
 
 
 def road_model() -> RoadModel:
@@ -66,4 +68,7 @@ def build_catalogue_ports(cw: CatalogueWorld, now: datetime = GOLDEN_CLOCK) -> C
         regions=regions,
         clock=FixedClock(now),
         world=cw,
+        parking=ParkingModel.from_resources(
+            [OsmParking(p.point, p.rub_per_hour) for p in cw.catalogue.parking]
+        ),
     )

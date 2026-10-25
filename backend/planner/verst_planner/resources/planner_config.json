@@ -22,7 +22,7 @@
   "drive_time_factor": 1.10,
   "day_start_first": "08:00",
   "day_start_next": "09:00",
-  "day_budget_min": {"calm": 540, "more_stops": 600, "just_drive": 600},
+  "day_budget_min": {"calm": 540, "more_stops": 600, "just_drive": 600, "fun": 600},
   "split": {
     "window_lo": 0.70,
     "window_hi": 1.05,
@@ -30,7 +30,8 @@
     "widened_lo": 0.40,
     "widened_hi": 1.30,
     "template_hi": 1.05,
-    "template_lo": 0.90
+    "template_lo": 0.90,
+    "honour_template": 0
   },
   "overnight_score": {
     "w_h": 3.0,
@@ -42,7 +43,7 @@
     "h_no_parking_weight": 0.5,
     "family_room_min_people": 3
   },
-  "overnight_eta_allowance_min": {"calm": 120, "more_stops": 150, "just_drive": 30},
+  "overnight_eta_allowance_min": {"calm": 120, "more_stops": 150, "just_drive": 30, "fun": 150},
   "fuel": {
     "usable_frac": 0.8,
     "start_frac": 1.0,
@@ -54,7 +55,7 @@
     "skip_near_finish_frac": 0.10,
     "coffee_after_drive_min": 60
   },
-  "rest_interval_min": {"calm": 120, "more_stops": 90, "just_drive": 180},
+  "rest_interval_min": {"calm": 120, "more_stops": 90, "just_drive": 180, "fun": 90},
   "rest": {
     "window_before_min": 30,
     "widen_before_min": 60,
@@ -77,8 +78,9 @@
   "lunch_window": ["12:00", "14:30"],
   "lunch_sweet_spot": ["12:30", "13:30"],
   "sights": {
-    "max_per_day": {"calm": 2, "more_stops": 4, "just_drive": 0},
-    "min_score": 2.0
+    "max_per_day": {"calm": 2, "more_stops": 4, "just_drive": 0, "fun": 4},
+    "min_score": 2.0,
+    "diversity": 0
   },
   "alternatives": {"window_min": 45, "max": 3, "cluster_km": 2.0},
   "cost": {

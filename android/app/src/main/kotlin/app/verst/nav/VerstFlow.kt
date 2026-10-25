@@ -30,6 +30,7 @@ import app.verst.core.model.DefaultsDto
 import app.verst.core.model.LastTripDto
 import app.verst.core.model.NaviHandoff
 import app.verst.core.model.NaviLinks
+import app.verst.core.model.LatLon
 import app.verst.core.model.HandoffArgs
 import app.verst.core.model.WalkRequest
 import app.verst.core.model.EngineJson
@@ -46,6 +47,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import app.verst.core.ui.theme.DesignTokens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -93,6 +95,8 @@ sealed interface Toast {
     data class HandoffWeb(val walk: Boolean) : Toast
     data object HandoffOffline : Toast
     data object HandoffFailed : Toast
+    /** 5.13 §5: «Открываем Яндекс Карты / Навигатор» (1 s) before the app opens. */
+    data class HandoffOpen(val navi: Boolean) : Toast
 
     /** 5.12 location toasts ([town] = the origin that stays). */
     data class LocationDenied(val town: String) : Toast
@@ -105,6 +109,9 @@ sealed interface Toast {
 
     /** 5.10: an 18+ preset with children in the crew. */
     data object CityKids : Toast
+
+    /** S4 5.11 §10.2: the rebuild failed — the previous walk stays; «Повторить». */
+    data object WalkRebuildFailed : Toast
 
     /** D-7: «Спасибо, проверим» (online) / «Отправим, когда появится сеть» (offline, queued). */
     data object ReportThanks : Toast
@@ -195,6 +202,15 @@ class VerstFlow(
         private set
     var dayHandoff: HandoffDto? by mutableStateOf(null)
         private set
+    /** 5.13 §5 (S4) the hand-off sheet, and «Запомнить выбор» (persisted with the defaults). */
+    var handoffSheet: HandoffSheet? by mutableStateOf(null)
+        private set
+    var handoffRemember by mutableStateOf(false)
+        private set
+    var handoffRememberedApp: HandoffApp? by mutableStateOf(null)
+        private set
+    /** ADR-0015 §1: the signing key has not arrived; unsigned → Карты get the whole day, Навигатор the next point. */
+    var handoffSigned = false
 
     // ---- 5.9 cards
     var card: CardState? by mutableStateOf(null)
@@ -206,6 +222,8 @@ class VerstFlow(
         private set
     /** 5.12 §3 «О данных» sheet. */
     var aboutData by mutableStateOf(false)
+    /** 5.5 §10.6: the stop whose ParkingSheet is open (Road ahead). */
+    var roadParking: StopDto? by mutableStateOf(null)
         private set
 
     // ---- 5.8 budget fit
@@ -237,8 +255,33 @@ class VerstFlow(
         private set
     var cityPreset by mutableStateOf("overview")
         private set
-    var cityDurationMin by mutableStateOf(240)
+    /** null = «без ограничения» (S4, ADR-0015 §6). */
+    var cityDurationMin: Int? by mutableStateOf(240)
         private set
+    /** S4: values the user chose are kept — a preset's defaults only fill what was never touched. */
+    private var cityDurationTouched = false
+    private var cityPaceTouched = false
+    /** S4 5.10 §10: the walk's own crew (not the car's), remembered for walks only. */
+    var cityAdults by mutableStateOf(2)
+        private set
+    var cityChildren by mutableStateOf(0)
+        private set
+    var cityDog by mutableStateOf(false)
+        private set
+    /** S4 5.11 §10.2: «Другой вариант» found nothing new — the button is disabled until the input changes. */
+    var walkOtherNone by mutableStateOf(false)
+        private set
+    /** S4 5.11 §10.5 / 5.10: `NOT_ENOUGH_POIS` with the engine's verified suggestions (never guessed here). */
+    var walkFew: WalkFew? by mutableStateOf(null)
+        private set
+    /** M6: request input → the engine's `requestKey` (stale answers and same-request rebuilds). */
+    private val walkKeyByInput = HashMap<String, String>()
+    /** S4: which picker sheet is open (5.10 prefs, 5.11 filter bar). */
+    var cityPicker: CityPicker? by mutableStateOf(null)
+        private set
+    private var walkSeq = 0
+    private var rebuildJob: Job? = null
+    private var lastOtherAdded: List<String> = emptyList()
     val cityInterests = mutableStateListOf<String>()
     var cityPace by mutableStateOf("normal")
         private set
@@ -323,7 +366,8 @@ class VerstFlow(
     var dog by mutableStateOf(false)
     var dailyKm by mutableStateOf(300)
     var budgetIndex by mutableStateOf(BudgetPresets.indexOf(40_000))
-    var mood: Mood? by mutableStateOf(null)
+    /** 5.3 §9: always one selected; `fun` for a new trip (children no longer pre-select «Спокойно»). */
+    var mood: Mood by mutableStateOf(Mood.FUN)
     private var moodTouched = false
 
     // ---- engine figures (P0: one trip, one distance)
@@ -486,7 +530,7 @@ class VerstFlow(
         dog = false
         dailyKm = 300
         budgetIndex = BudgetPresets.indexOf(40_000)
-        mood = null
+        mood = Mood.FUN
         locationAsked = false
         originFromGps = false
         originAddress = null
@@ -587,6 +631,10 @@ class VerstFlow(
             answerAge(false)
             return true
         }
+        if (cityPicker != null) {
+            cityPicker = null
+            return true
+        }
         if (cityCustomSheet) {
             cityCustomSheet = false
             return true
@@ -597,6 +645,14 @@ class VerstFlow(
         }
         if (aboutData) {
             aboutData = false
+            return true
+        }
+        if (roadParking != null) {
+            roadParking = null
+            return true
+        }
+        if (handoffSheet != null) {
+            closeHandoffSheet()
             return true
         }
         if (report != null) {
@@ -647,9 +703,11 @@ class VerstFlow(
         dismissToast()
         when (top) {
             Route.Drive -> cancelPlan()
-            Route.City -> {
+            Route.City, Route.Walk -> {
+                rebuildJob?.cancel()
                 walkJob?.cancel()
                 walkBuilding = false
+                cityPicker = null
             }
             Route.Navigator -> if (editingFrom) {
                 editingFrom = false
@@ -849,12 +907,11 @@ class VerstFlow(
             Seat.ADULT -> Seat.CHILD
             Seat.CHILD -> Seat.EMPTY
         }
-        if (!moodTouched) mood = if (children > 0) Mood.CALM else null
     }
 
     fun pickMood(m: Mood) {
         moodTouched = true
-        mood = if (mood == m) null else m
+        mood = m
     }
 
     fun stepKm(delta: Int) {
@@ -1081,6 +1138,124 @@ class VerstFlow(
         launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false)
     }
 
+    // ---- 5.13 §5 (S4) the hand-off sheet
+
+    /** «Вести в навигаторе» / a day's «вести»: the remembered app directly, else the sheet on [day]. */
+    fun handoff(day: Int) {
+        val app = handoffRememberedApp
+        if (handoffRemember && app != null) {
+            val r = result ?: return
+            val session = tripSession
+            scope.launch {
+                val h = dayHandoffOf(r, day) ?: return@launch
+                if (session == tripSession) launchApp(app, h, next = false)
+            }
+        } else {
+            openHandoffSheet(day)
+        }
+    }
+
+    /** The sheet on [day] (a long-press always opens it, even with «Запомнить выбор»). */
+    fun openHandoffSheet(day: Int) {
+        val r = result ?: return
+        handoffSheet = HandoffSheet(day, null, day)
+        loadSheet(r, day)
+    }
+
+    private fun loadSheet(r: PlanResultDto, day: Int) {
+        val session = tripSession
+        scope.launch {
+            val h = dayHandoffOf(r, day)
+            val cur = handoffSheet
+            if (session == tripSession && cur != null && cur.handoffDay == day) handoffSheet = cur.copy(handoff = h)
+        }
+    }
+
+    private suspend fun dayHandoffOf(r: PlanResultDto, day: Int): HandoffDto? =
+        engineHandoff(r.tripJson, HandoffArgs.day(day)) ?: r.trip.daysList.firstOrNull { it.day == day }?.let { NaviLinks.day(it) }?.toDto(day)
+
+    /** A tab: «День N» or «До след.» ([day] = null, the next point of the sheet's day). */
+    fun handoffScope(day: Int?) {
+        val cur = handoffSheet ?: return
+        val r = result ?: return
+        if (day == null) {
+            handoffSheet = cur.copy(day = null)
+        } else if (day != cur.handoffDay) {
+            handoffSheet = HandoffSheet(day, null, day)
+            loadSheet(r, day)
+        } else {
+            handoffSheet = cur.copy(day = day)
+        }
+    }
+
+    fun closeHandoffSheet() {
+        handoffSheet = null
+        roadFocusSeq += 1
+    }
+
+    fun toggleHandoffRemember() {
+        handoffRemember = !handoffRemember
+        if (!handoffRemember) handoffRememberedApp = null
+    }
+
+    /** A card of the sheet: open that app (and remember it when «Запомнить выбор» is on). */
+    fun handoffPick(app: HandoffApp) {
+        val cur = handoffSheet ?: return
+        val h = cur.handoff ?: return
+        if (handoffRemember) handoffRememberedApp = app
+        handoffSheet = null
+        launchApp(app, h, next = cur.day == null)
+        roadFocusSeq += 1
+    }
+
+    fun handoffInstall(app: HandoffApp) {
+        handoffLauncher?.openStore(app)
+    }
+
+    /** The Навигатор / Карты link of [h]: unsigned the Навигатор gets the next point only (ADR-0015 §1). */
+    private fun launchApp(app: HandoffApp, h: HandoffDto, next: Boolean) {
+        val part = h.parts.firstOrNull() ?: return
+        val l = part.links
+        val nextPt = part.next ?: part.points.firstOrNull { it.role != "origin" }
+        // a pre-v3 / local hand-off has no `next`: the day's first stop after its start
+        val nextMaps = nextPt?.let { runCatching { LatLon(it.lat, it.lon) }.getOrNull() }
+            ?: h.day?.let { d -> result?.trip?.daysList?.firstOrNull { it.day == d } }?.stops?.drop(1)
+                ?.firstOrNull { it.lat != null && it.lon != null }?.let { runCatching { LatLon(it.lat!!, it.lon!!) }.getOrNull() }
+        val uri: String?
+        val web: String?
+        when (app) {
+            HandoffApp.NAVI -> {
+                uri = if (next || !handoffSigned) l.navigatorNext ?: nextMaps?.let { NaviLinks.naviRoute(null, it, emptyList()) } else l.navigator
+                web = null
+            }
+            HandoffApp.MAPS -> {
+                uri = if (next && nextMaps != null) NaviLinks.mapsAppRoute(listOf(nextMaps)) else l.maps
+                web = if (next && nextMaps != null) NaviLinks.webRoute(listOf(nextMaps)) else l.web
+            }
+        }
+        val mapsApp = handoffLauncher?.mapsInstalled() == true
+        if (app == HandoffApp.MAPS && !mapsApp && !connectivity.online) {
+            showToast(Toast.HandoffOffline)
+            return
+        }
+        val target = if (debugHandoffDryRun) {
+            when {
+                app == HandoffApp.NAVI -> HandoffTarget.NavigatorDryRun
+                mapsApp -> HandoffTarget.MapsDryRun
+                else -> HandoffTarget.BrowserDryRun
+            }
+        } else {
+            handoffLauncher?.openIn(app, uri, web) ?: HandoffTarget.None
+        }
+        lastHandoff = HandoffLinksDto(navigator = if (app == HandoffApp.NAVI) uri else null, maps = if (app == HandoffApp.MAPS) uri else null, web = web) to target
+        when (target) {
+            HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> showToast(Toast.HandoffOpen(navi = true))
+            HandoffTarget.Maps, HandoffTarget.MapsDryRun -> showToast(Toast.HandoffOpen(navi = false))
+            HandoffTarget.Browser, HandoffTarget.BrowserDryRun -> showToast(Toast.HandoffWeb(false))
+            HandoffTarget.None -> showToast(Toast.HandoffFailed)
+        }
+    }
+
     /** D-5 stop menu on a long-press of a row. */
     fun openStopMenu(stop: StopDto) {
         val r = result ?: return
@@ -1296,12 +1471,33 @@ class VerstFlow(
     fun cardRemoveWalkStop() {
         val c = card ?: return
         card = null
-        c.poiId?.let { walkExclude += it }
-        buildWalk(keepScreen = true)
+        c.poiId?.let { if (it !in walkExclude) walkExclude += it }
+        lastOtherAdded = listOfNotNull(c.poiId)
+        buildWalk(WalkBuild.REMOVE)
     }
 
     fun openAboutData() {
         aboutData = true
+    }
+
+    fun openParking(stop: StopDto) {
+        roadParking = stop
+    }
+
+    fun closeParking() {
+        roadParking = null
+    }
+
+    /**
+     * 5.5 §10.1: the day «Вести в навигаторе» starts with — the trip's day of today when the trip is under way
+     * (start date ≤ today ≤ last day), else day 1.
+     */
+    fun handoffDay(trip: app.verst.core.model.dto.TripDto, today: java.time.LocalDate = java.time.LocalDate.now()): Int {
+        val first = trip.daysList.firstOrNull()?.day ?: 1
+        val start = (trip.daysList.firstOrNull()?.startAt ?: trip.input.startAt)?.takeIf { it.length >= 10 }
+            ?.let { runCatching { java.time.LocalDate.parse(it.substring(0, 10)) }.getOrNull() } ?: return first
+        val n = java.time.temporal.ChronoUnit.DAYS.between(start, today).toInt() + first
+        return if (trip.daysList.any { it.day == n }) n else first
     }
 
     fun closeAboutData() {
@@ -1450,6 +1646,7 @@ class VerstFlow(
             Toast.LocationBlocked -> openAppSettings?.invoke()
             Toast.LocationOff -> openLocationSettings?.invoke()
             is Toast.LocationDenied -> if (top == Route.Navigator) startEditFrom()
+            Toast.WalkRebuildFailed -> retryWalk()
             else -> Unit
         }
     }
@@ -1563,8 +1760,10 @@ class VerstFlow(
                 }
                 app.verst.data.net.AddressResult.Offline -> addressState = AddressState.Offline
                 is app.verst.data.net.AddressResult.Failed -> {
+                    // S4-QA P1-02: online and failed → the quiet «попробуйте ещё раз» (never an error screen);
+                    // gone offline meanwhile → the offline hint
                     addressResults = emptyList()
-                    addressState = AddressState.None
+                    addressState = if (connectivity.online) AddressState.Failed else AddressState.Offline
                 }
             }
         }
@@ -1578,10 +1777,13 @@ class VerstFlow(
 
     // ------------------------------------------------------------------------------------------ «По городу» (5.10)
 
-    /** Windshield «По городу · пешком» → 5.10; the start = the GPS origin or the last chosen point. */
+    /** Windshield «По городу пешком» → 5.10; the start = the GPS origin or the last chosen point. */
     fun openCity() {
         walkExclude.clear()
         cityError = null
+        walkFew = null
+        walkOtherNone = false
+        cityPicker = null
         push(Route.City)
         if (!locationAsked && locator?.granted() != true && debugMockLocation == null) locationSheet = true
         loadCityPresets()
@@ -1600,12 +1802,9 @@ class VerstFlow(
             when (val r = gateway.cityPresets(p)) {
                 is EngineResult.Ok -> {
                     cityPresets = r.value
-                    val available = r.value.presets.filter { it.available }
-                    if (available.none { it.preset == cityPreset }) {
-                        available.firstOrNull { !it.adultOnly }?.let { selectDefaults(it) }
-                    } else {
-                        available.firstOrNull { it.preset == cityPreset }?.let { if (cityPreset != "custom") cityDurationMin = it.defaultDurationMin }
-                    }
+                    val available = visibleCityPresets()
+                    val current = available.firstOrNull { it.preset == cityPreset }
+                    if (current == null) available.firstOrNull { !it.adultOnly }?.let { selectDefaults(it) } else selectDefaults(current)
                 }
                 is EngineResult.Err -> {
                     cityPresets = null
@@ -1616,42 +1815,56 @@ class VerstFlow(
         }
     }
 
-    private fun selectDefaults(p: app.verst.core.model.dto.CityPresetDto) {
-        cityPreset = p.preset
-        cityDurationMin = p.defaultDurationMin
-        p.defaultPace?.let { cityPace = it }
+    /**
+     * 5.10 §10 step 4: the city's presets, «Прогулка с собакой» (`dog_walk`) first and only with the dog, «Свой
+     * маршрут» last. Children never hide or disable a preset.
+     */
+    fun visibleCityPresets(): List<app.verst.core.model.dto.CityPresetDto> {
+        val all = cityPresets?.presets.orEmpty().filter { it.available && (it.preset != DOG_WALK || cityDog) }
+        return all.sortedBy { CityPresetOrder.indexOf(it.preset).let { i -> if (i < 0) 90 else i } }
     }
 
-    /** «изменить» on the start line → the ОТКУДА search; the pick comes back here. */
+    /** A preset's defaults fill only what the user has not chosen (S4: custom values persist). */
+    private fun selectDefaults(p: app.verst.core.model.dto.CityPresetDto) {
+        cityPreset = p.preset
+        if (!cityDurationTouched) cityDurationMin = p.defaultDurationMin
+        if (!cityPaceTouched) p.defaultPace?.let { cityPace = it }
+    }
+
+    /** «изменить» on the start field → the ОТКУДА search; the pick comes back here. */
     fun cityChangeStart() {
         cityPickingStart = true
         openNavigator()
         startEditFrom()
     }
 
-    /** A preset plate: 18+ asks every time (children in the crew → blocked); «Свой маршрут» opens the sheet. */
+    /**
+     * A preset plate: 18+ asks «Вам есть 18?» every time (S4: children never block — the walk carries a warning);
+     * «Свой маршрут» opens the sheet with the user's own values.
+     */
     fun selectCityPreset(preset: String) {
         val p = cityPresets?.presets?.firstOrNull { it.preset == preset } ?: return
-        cityError = if (cityError == "NOT_ENOUGH_POIS") null else cityError
         if (preset == "custom") {
-            selectDefaults(p)
+            if (cityPreset != "custom") {
+                selectDefaults(p)
+                onWalkInputChanged()
+            }
             cityCustomSheet = true
             return
         }
         if (p.adultOnly) {
-            if (children > 0) {
-                showToast(Toast.CityKids)
-                return
-            }
             adultConfirmed = false
             ageGate = AgeGate(preset = preset)
             return
         }
         adultConfirmed = false
-        selectDefaults(p)
+        if (cityPreset != preset) {
+            selectDefaults(p)
+            onWalkInputChanged()
+        }
     }
 
-    /** «Да, мне есть 18» applies the pending choice; «Нет» undoes it — and no request is sent. */
+    /** «Да» applies the pending choice; «Нет» keeps the previous preset — and no request is sent. */
     fun answerAge(yes: Boolean) {
         val g = ageGate ?: return
         ageGate = null
@@ -1662,42 +1875,79 @@ class VerstFlow(
         } else if (g.interest != null && g.interest !in cityInterests) {
             cityInterests += g.interest
         }
+        onWalkInputChanged()
     }
 
-    fun setCityDuration(min: Int) {
+    /** null = «без ограничения». */
+    fun setCityDuration(min: Int?) {
+        cityDurationTouched = true
+        if (cityDurationMin == min) return
         cityDurationMin = min
+        onWalkInputChanged()
     }
 
     fun toggleCityInterest(i: String) {
         if (i in cityInterests) {
-            if (cityInterests.size > 1) cityInterests -= i
+            if (cityInterests.size > 1) {
+                cityInterests -= i
+                onWalkInputChanged()
+            }
             return
         }
         if (i == "bars") {
-            if (children > 0) {
-                showToast(Toast.CityKids)
-                return
-            }
             ageGate = AgeGate(interest = i)
             return
         }
         cityInterests += i
+        onWalkInputChanged()
     }
 
     fun pickCityPace(p: String) {
+        cityPaceTouched = true
+        if (cityPace == p) return
         cityPace = p
+        onWalkInputChanged()
     }
 
     fun pickCityBudget(rub: Int?) {
+        if (cityBudget == rub) return
         cityBudget = rub
+        onWalkInputChanged()
     }
 
     fun toggleCityReturn() {
         cityReturn = !cityReturn
+        onWalkInputChanged()
+    }
+
+    fun pickCityAdults(n: Int) {
+        val v = n.coerceIn(1, 9)
+        if (v == cityAdults) return
+        cityAdults = v
+        onWalkInputChanged()
+    }
+
+    fun pickCityChildren(n: Int) {
+        val v = n.coerceIn(0, 9)
+        if (v == cityChildren) return
+        cityChildren = v
+        onWalkInputChanged()
+    }
+
+    /** The dog toggle; «Собака останется дома» = off (a dog walk then falls back to the overview). */
+    fun pickCityDog(on: Boolean) {
+        if (on == cityDog) return
+        cityDog = on
+        if (!on && cityPreset == DOG_WALK) visibleCityPresets().firstOrNull { !it.adultOnly }?.let { selectDefaults(it) }
+        onWalkInputChanged()
     }
 
     fun closeCityCustom() {
         cityCustomSheet = false
+    }
+
+    fun openCityPicker(p: CityPicker?) {
+        cityPicker = p
     }
 
     /** «Собрать прогулку» in the custom sheet. */
@@ -1711,18 +1961,41 @@ class VerstFlow(
         start = cityStartPoint,
         preset = cityPreset,
         durationMin = cityDurationMin,
+        unlimited = cityDurationMin == null,
         interests = if (cityPreset == "custom") cityInterests.toList() else emptyList(),
         pace = cityPace,
-        budgetRub = if (cityPreset == "custom") cityBudget else null,
+        budgetRub = cityBudget,
         returnToStart = cityReturn,
-        adults = adults,
-        children = children,
+        adults = cityAdults,
+        children = cityChildren,
+        dog = cityDog,
         adultConfirmed = adultConfirmed,
         exclude = walkExclude.toList(),
     )
 
-    /** ПОШЛИ / «Собрать прогулку» / «Другой вариант» → `city_route` (cancellable) → 5.11. */
-    fun buildWalk(keepScreen: Boolean = false) {
+    /**
+     * 5.11 §10.2 (fixes the S4 bugs a, b): any change of preset, duration, crew, pace, interests, budget or the
+     * return clears `exclude`; on the walk screen the walk rebuilds 400 ms after the last change.
+     */
+    private fun onWalkInputChanged() {
+        walkExclude.clear()
+        lastOtherAdded = emptyList()
+        walkOtherNone = false
+        if (top == Route.Walk) {
+            rebuildJob?.cancel()
+            rebuildJob = scope.launch {
+                delay(DesignTokens.motion.walkRebuild.durationMs.toLong())
+                buildWalk(WalkBuild.FILTER)
+            }
+        }
+    }
+
+    /**
+     * ПОШЛИ / «Собрать прогулку» ([WalkBuild.GO]), a filter change on 5.11 ([WalkBuild.FILTER]), «Другой вариант»
+     * ([WalkBuild.OTHER]) → `city_route` (cancellable). A newer request supersedes an older one. On 5.11 the
+     * previous walk stays while rebuilding and after a failure: the screen never leaves 5.11 by itself.
+     */
+    fun buildWalk(mode: WalkBuild = WalkBuild.GO) {
         val p = cityPresets?.presets?.firstOrNull { it.preset == cityPreset }
         if (p?.adultOnly == true && !adultConfirmed) {
             ageGate = AgeGate(preset = cityPreset)
@@ -1730,26 +2003,70 @@ class VerstFlow(
         }
         walkJob?.cancel()
         walkBuilding = true
-        cityError = null
+        if (mode == WalkBuild.GO) {
+            cityError = null
+            walkFew = null
+        }
         val req = walkRequest()
+        // M6 `requestKey`: the engine's key of a request we sent before (learned from its answer). A filter change
+        // that leads back to the walk on screen sends nothing; an answer whose key is not the sent one is stale.
+        val input = req.toInputJson()
+        val sentKey = walkKeyByInput[input]
+        if (mode == WalkBuild.FILTER && sentKey != null && sentKey == walk?.requestKey && walkFew == null) {
+            walkBuilding = false
+            return
+        }
         val id = UUID.randomUUID().toString()
+        val seq = ++walkSeq
         walkJob = scope.launch {
-            when (val r = gateway.cityRoute(id, req)) {
+            val r = gateway.cityRoute(id, req)
+            if (seq != walkSeq) return@launch // superseded by a newer request
+            val key = when (r) {
+                is EngineResult.Ok -> r.value.requestKey
+                is EngineResult.Err -> r.error.requestKey
+            }
+            if (key != null) {
+                if (sentKey != null && key != sentKey) {
+                    walkBuilding = false
+                    return@launch // an answer to another request: stale
+                }
+                if (walkKeyByInput.size > 64) walkKeyByInput.clear()
+                walkKeyByInput[input] = key
+            }
+            val onWalk = top == Route.Walk
+            when (r) {
                 is EngineResult.Ok -> {
                     walk = r.value
+                    walkFew = null
+                    cityError = null
                     walkHandoff = null
                     walkFocusId = null
                     savedWalkId = null
-                    if (top != Route.Walk) push(Route.Walk)
+                    if (!onWalk) push(Route.Walk)
                     loadWalkHandoff()
                 }
                 is EngineResult.Err -> when (r.error.code) {
                     "CANCELLED" -> Unit
-                    "NO_CITY", "NOT_ENOUGH_POIS" -> {
-                        cityError = r.error.code
-                        if (keepScreen && top == Route.Walk) back()
+                    "NOT_ENOUGH_POIS" -> when {
+                        mode == WalkBuild.REMOVE -> {
+                            // removing it leaves too few places: keep the walk as it is
+                            walkExclude.removeAll(lastOtherAdded.toSet())
+                            lastOtherAdded = emptyList()
+                            showToast(Toast.WalkRebuildFailed)
+                        }
+                        mode == WalkBuild.OTHER -> {
+                            // no new places: keep this walk, give the stops back, disable «Другой вариант»
+                            walkExclude.removeAll(lastOtherAdded.toSet())
+                            lastOtherAdded = emptyList()
+                            walkOtherNone = true
+                        }
+                        else -> {
+                            walkFew = WalkFew(req.durationMin, req.unlimited, r.error.walkSuggestions, r.error.count)
+                            if (!onWalk) cityError = r.error.code
+                        }
                     }
-                    else -> showToast(Toast.EngineFailed)
+                    "NO_CITY" -> if (onWalk) showToast(Toast.WalkRebuildFailed) else cityError = r.error.code
+                    else -> showToast(if (onWalk) Toast.WalkRebuildFailed else Toast.EngineFailed)
                 }
             }
             walkBuilding = false
@@ -1759,15 +2076,36 @@ class VerstFlow(
     /** «Другой вариант»: the same walk without the current stops. */
     fun otherWalk() {
         val w = walk ?: return
-        walkExclude += w.stops.mapNotNull { it.poiId }
-        buildWalk(keepScreen = true)
+        if (walkOtherNone || walkBuilding) return
+        lastOtherAdded = w.stops.mapNotNull { it.poiId }.filter { it !in walkExclude }
+        walkExclude += lastOtherAdded
+        buildWalk(WalkBuild.OTHER)
     }
 
-    /** `NOT_ENOUGH_POIS` «Гулять N ч»: the next duration. */
-    fun walkLonger() {
-        cityDurationMin = (WalkDurations.firstOrNull { it > cityDurationMin } ?: WalkDurations.last())
+    /** A verified `NOT_ENOUGH_POIS` suggestion → apply it and build again (never an app-made guess). */
+    fun applyWalkSuggestion(sg: app.verst.core.model.dto.WalkSuggestion) {
+        when {
+            sg.clearExclude -> walkExclude.clear()
+            sg.unlimited -> {
+                cityDurationTouched = true
+                cityDurationMin = null
+            }
+            sg.durationMin != null -> {
+                cityDurationTouched = true
+                cityDurationMin = sg.durationMin
+            }
+            sg.preset != null -> cityPresets?.presets?.firstOrNull { it.preset == sg.preset }?.let { selectDefaults(it) }
+        }
+        if (!sg.clearExclude) walkExclude.clear()
+        walkOtherNone = false
+        walkFew = null
         cityError = null
-        buildWalk()
+        buildWalk(if (top == Route.Walk) WalkBuild.FILTER else WalkBuild.GO)
+    }
+
+    /** The rebuild-failed toast «Повторить». */
+    fun retryWalk() {
+        buildWalk(if (top == Route.Walk) WalkBuild.FILTER else WalkBuild.GO)
     }
 
     private fun loadWalkHandoff() {
@@ -2038,7 +2376,13 @@ class VerstFlow(
         toast = t
         toastJob?.cancel()
         toastJob = scope.launch {
-            delay(if (t is Toast.Replaced || t is Toast.TripDeleted || t is Toast.Booked) 6_000 else 3_000)
+            delay(
+                when {
+                    t is Toast.Replaced || t is Toast.TripDeleted || t is Toast.Booked -> 6_000
+                    t is Toast.HandoffOpen -> 1_000 // 5.13 §5: a 1 s toast, then the app
+                    else -> 3_000
+                },
+            )
             toast = null
             if (t is Toast.Replaced) undoTrip = null
             if (t is Toast.TripDeleted) lastDeleted = null
@@ -2175,9 +2519,11 @@ class VerstFlow(
 
     private fun defaultsNow() = DefaultsDto(
         frontAdult = frontAdult, seats = seats.map { it.name }, dog = dog, dailyKm = if (dailyKmTouched) dailyKm else null,
-        budgetIndex = budgetIndex, mood = mood?.name, moodTouched = moodTouched,
+        budgetIndex = budgetIndex, mood = mood.name, moodTouched = moodTouched,
         originLabel = origin.label, originLat = origin.lat, originLon = origin.lon, originGen = originGen,
         locationAsked = locationAsked, originFromGps = originFromGps,
+        walkAdults = cityAdults, walkChildren = cityChildren, walkDog = cityDog,
+        handoffRemember = handoffRemember, handoffApp = handoffRememberedApp?.name,
     )
 
     private fun applyDefaults(d: DefaultsDto) {
@@ -2189,10 +2535,15 @@ class VerstFlow(
             dailyKmTouched = true
         }
         budgetIndex = d.budgetIndex.coerceIn(0, BudgetPresets.lastIndex)
-        mood = d.mood?.let { runCatching { Mood.valueOf(it) }.getOrNull() }
+        mood = Mood.parse(d.mood) ?: Mood.FUN
         moodTouched = d.moodTouched
         locationAsked = d.locationAsked
         originFromGps = d.originFromGps
+        cityAdults = d.walkAdults.coerceIn(1, 9)
+        cityChildren = d.walkChildren.coerceIn(0, 9)
+        cityDog = d.walkDog
+        handoffRemember = d.handoffRemember
+        handoffRememberedApp = d.handoffApp?.let { n -> HandoffApp.entries.firstOrNull { it.name == n } }
         val o = GeoPoint(d.originLabel, d.originLat, d.originLon)
         if (o != origin) {
             origin = o
@@ -2300,7 +2651,23 @@ interface HandoffLauncher {
     fun navigatorInstalled(): Boolean
     fun mapsInstalled(): Boolean = false
     fun open(links: HandoffLinksDto, walk: Boolean): HandoffTarget
+
+    /**
+     * 5.13 §5 (S4): open exactly the app the user chose with [uri]; Карты without the app → [web] in the browser;
+     * Навигатор without the app → [HandoffTarget.None] (the sheet offers the store instead).
+     */
+    fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget =
+        open(if (app == HandoffApp.NAVI) HandoffLinksDto(navigator = uri) else HandoffLinksDto(maps = uri, web = web), walk = app == HandoffApp.MAPS)
+
+    /** «Установить из магазина приложений». */
+    fun openStore(app: HandoffApp) = Unit
 }
+
+/** The two hand-off apps of the S4 sheet (5.13 §5). */
+enum class HandoffApp { MAPS, NAVI }
+
+/** 5.13 §5: the open hand-off sheet: [day] or the «До след.» scope ([day] = null), and the engine's day hand-off. */
+data class HandoffSheet(val day: Int?, val handoff: HandoffDto? = null, val handoffDay: Int = day ?: 1)
 
 /** The phone's position (5.12: `LocationManager`; FusedLocation needs Play services the mock does not ship). */
 interface Locator {
@@ -2324,10 +2691,34 @@ data class CardState(val source: CardSource, val rowId: String, val poiId: Strin
 data class AgeGate(val preset: String? = null, val interest: String? = null)
 
 /** 5.12 §2 address search state under the ОТКУДА / КУДА field. */
-enum class AddressState { Idle, Searching, Done, None, Offline }
+/**
+ * [Failed]: online, but the service failed (timeout, 5xx, garbage, breaker) → `addr_failed` «Не получилось найти
+ * адрес — попробуйте ещё раз» (5.5 §10.9, S4-QA P1-02); «уточним при интернете» is for [Offline] only.
+ */
+enum class AddressState { Idle, Searching, Done, None, Offline, Failed }
 
 /** 5.10 «СКОЛЬКО ГУЛЯЕМ» chips, minutes. */
 val WalkDurations = listOf(120, 240, 360, 480)
+
+/** S4 (ADR-0015 §6): the dog preset; shown first, and only with the dog in the walk's crew. */
+const val DOG_WALK = "dog_walk"
+
+/** 5.10 §10 step 4: preset order (unknown presets after these, «Свой маршрут» last). */
+val CityPresetOrder = listOf(DOG_WALK, "overview", "museums", "ryumochnye", "beer", "custom")
+
+/** How a walk is requested (5.11 §10.2): it decides what a `NOT_ENOUGH_POIS` does. */
+enum class WalkBuild { GO, FILTER, OTHER, REMOVE }
+
+/** `NOT_ENOUGH_POIS` for the request ([durationMin], [unlimited]) with the engine's verified suggestions. */
+data class WalkFew(
+    val durationMin: Int?,
+    val unlimited: Boolean,
+    val suggestions: List<app.verst.core.model.dto.WalkSuggestion>,
+    val count: Int?,
+)
+
+/** The picker sheets of 5.10 (prefs) and 5.11 (filter bar). */
+enum class CityPicker { DURATION, PRESET, CREW, BUDGET, PACE }
 
 private val ADDRESS_WORDS = listOf("ул", "пр", "пер", "д", "просп", "наб", "пл", "ш")
 

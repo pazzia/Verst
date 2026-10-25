@@ -75,6 +75,13 @@ data class DefaultsDto(
     /** S3-R1 GPS: the location rationale was answered (allow / «не разрешать»); the origin came from GPS. */
     val locationAsked: Boolean = false,
     val originFromGps: Boolean = false,
+    /** S4 (5.10 §10): the walk's own crew, remembered for walks only. */
+    val walkAdults: Int = 2,
+    val walkChildren: Int = 0,
+    val walkDog: Boolean = false,
+    /** 5.13 §5 «Запомнить выбор» and the remembered app (MAPS / NAVI). */
+    val handoffRemember: Boolean = false,
+    val handoffApp: String? = null,
 )
 
 @Serializable

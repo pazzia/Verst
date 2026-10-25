@@ -5,3 +5,7 @@ json:links.navigator
 json:links.maps
 json:links.web
 android:handoff_*
+json:links.navigatorNext
+json:toSign.navigator
+json:toSign.navigatorNext
+json:toSign.maps

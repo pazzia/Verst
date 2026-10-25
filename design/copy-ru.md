@@ -215,10 +215,10 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `instruments_budget_any` | не важно | |
 | `instruments_gauge_empty` | E | fuel gauge letter at the red end (components §6, Latin as on a real dashboard); `cd` not needed: the gauge node speaks the budget |
 | `instruments_gauge_full` | F | fuel gauge letter at the full end |
-| `instruments_mood_label` | НАСТРОЕНИЕ | |
-| `instruments_mood_calm` | Спокойно, с детьми | |
-| `instruments_mood_more` | Побольше остановок | |
-| `instruments_mood_drive` | Просто доехать | = engine `hint.just_drive` wording |
+| `instruments_mood_label` | КАК ЕДЕМ | Sprint 4: was «НАСТРОЕНИЕ» (5.3 §9) |
+| `instruments_mood_calm` | Спокойно | engine `calm`; Sprint 4: no longer pre-selected by children |
+| `instruments_mood_more` | Весело и познавательно | engine `fun` (v2 `more_stops` maps to it, ADR-0015 §5); key kept, text replaced |
+| `instruments_mood_drive` | Только доехать | engine `just_drive`; = `hint.just_drive` wording (Architect: «Попробуйте режим «Только доехать»») |
 | `instruments_settings` | Машина и выезд | plate |
 | `instruments_settings_summary` | {fuel} · {consumption} л · {day} {time} | «АИ-95 · 8,0 л · сб 08:00» |
 | `instruments_ready_label` | ВСЁ ГОТОВО К ВЫЕЗДУ | |
@@ -379,7 +379,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `waybill_issued` | Выдано | |
 | `waybill_left` | Остаток | |
 | `waybill_over` | Перерасход | |
-| `waybill_over_hint` | Дешевле: другая ночёвка, меньше музеев или «Просто доехать» | engine `hint.*` are the long forms (§10) |
+| `waybill_over_hint` | Дешевле: другая ночёвка, меньше музеев или «Только доехать» | engine `hint.*` are the long forms (§10) |
 | `waybill_footnote_sample` | Пример расчёта: цены средние по трассе на {month} {year}, точные — при бронировании. | `{month}` = engine `months` (nominative), e.g. «октябрь 2026» |
 | `waybill_footnote_real` | Расчёт: цены средние по трассе на {month} {year}, точные — при бронировании. | after real data (SPEC 5.6) |
 | `waybill_save` | Сохранить офлайн | |
@@ -479,6 +479,7 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `plural_via` | заезд | заезда | заездов | заезда |
 | `plural_stage` | этап | этапа | этапов | этапа |
 | `plural_place` | место | места | мест | места |
+| `plural_point` | точка | точки | точек | точки |
 | `plural_person` | человек | человека | человек | человека |
 | `plural_hour` | час | часа | часов | часа |
 | `plural_minute` | минута | минуты | минут | минуты |
@@ -950,3 +951,227 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `handoff_cd_navigator` | Открыть маршрут в Яндекс Навигаторе | TalkBack (key kept in the `handoff_` space) |
 | `handoff_cd_maps_walk` | Открыть маршрут пешком в Яндекс Картах | |
 | `handoff_cd_web` | Открыть маршрут на карте в браузере | |
+
+## 16. Sprint 4 — CEO feedback on build 83 (design for approval)
+
+Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.13; components §24–§30; mockups `docs/design-canvas/S4-*.dc.html`. Aligned with ADR-0015 (arch/sprint-4). Brand rule unchanged: «Яндекс» only in `handoff_*` keys.
+
+### 16.1 Windshield (5.1 §9)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `windshield_navi_label_car` | НАВИГАТОР · НА МАШИНЕ | navigator panel label, so the two modes read as a pair |
+| `windshield_city_title` | По городу пешком | blue `CityEntryPlate` under the navigator |
+| `windshield_city_sub` | {town} · 2–8 ч или без ограничения | `{town}` = the origin town (nominative) |
+| `cd_windshield_city` | По городу пешком. {town}, от двух до восьми часов или без ограничения. Открыть | |
+
+### 16.2 Instruments presets (5.3 §9)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `instruments_mood_calm_sub` | меньше остановок, но длинные перерывы; короче перегоны | |
+| `instruments_mood_fun_sub` | каждые полтора часа — остановка у интересного места рядом с трассой: размяться и посмотреть | |
+| `instruments_mood_drive_sub` | только заправки, еда и ночёвки — без достопримечательностей | |
+| `instruments_mood_fun_crew` | Под ваш экипаж: {list} | under the selected fun preset; `{list}` joins the next keys with «, » |
+| `instruments_mood_fun_child` | с ребёнком — площадки, зоопарки и интерактивные музеи | |
+| `instruments_mood_fun_dog` | с собакой — парки и природа | |
+| `instruments_mood_fun_adults` | музеи, виды, кремли и природа | adults only: the whole `{list}` |
+
+### 16.3 Road ahead (5.5 §10)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `road_handoff_cta` | Вести в навигаторе | yellow button under the chips → hand-off sheet (5.13 §5) |
+| `road_handoff_cta_sub` | по дням · начнём с дня {n} | `{n}` = today's day (1 before the trip) |
+| `road_handoff_day` | вести | day-header outline button |
+| `cd_road_handoff_day` | Вести в навигаторе: день {n} | |
+| `road_odometer` | {km} км | km post number (variant B) = engine `kmDriven`; the odometer tag is retired (5.5 §10.7) |
+| `road_meta_driven` | {ahead} · пройдено {km} км | variant A — **not used** (CEO chose B) |
+| `road_km_post_label` | пройдено | **not used** (S4 QA: the label collided with the sign) |
+| `road_km_post_legend` | — столбик у дороги: сколько км пройдено от старта | legend under the chips, after a mini post |
+| `cd_road_km_post` | пройдено {km} километров | TalkBack |
+| `road_parking_inline_paid` | ≈ {amount} ₽ | P part of the costs line |
+| `road_parking_inline_free` | бесплатно | |
+| `road_parking_inline_unknown` | ? | |
+| `cd_road_parking_inline` | Парковка: {value}. Подробнее | `{value}` «примерно 300 рублей» / «бесплатно» / «нет данных» |
+| `cd_road_odometer` | пройдено {km} километров от старта | TalkBack, read after «через …» |
+| `kind_museum` | МУЗЕЙ | category tags (ADR-0015 §2 whitelist); rows, cards, walks |
+| `kind_kremlin` | КРЕМЛЬ | |
+| `kind_monastery` | МОНАСТЫРЬ | |
+| `kind_temple` | ХРАМ | |
+| `kind_park` | ПАРК | |
+| `kind_nature` | ПРИРОДА | |
+| `kind_viewpoint` | ВИД | |
+| `kind_square` | ПЛОЩАДЬ | |
+| `kind_embankment` | НАБЕРЕЖНАЯ | |
+| `kind_theatre` | ТЕАТР | |
+| `kind_zoo` | ЗООПАРК | |
+| `kind_interactive` | ИНТЕРАКТИВНЫЙ | science centres, children's museums |
+| `kind_playground` | ПЛОЩАДКА | fun preset / walks only |
+| `kind_monument` | ПАМЯТНИК | |
+| `road_stretch_tag` | РАЗМИНКА {min} МИН | yellow tag on a fun-preset stop |
+| `road_stretch_name` | Разминка · {name} | row name of a fun-preset stop |
+| `road_from_road` | {min} мин от трассы | appended to the engine reason (`rest.fun.*`) when the app composes it |
+| `road_rest_amenities` | есть: {list} | rest row second line from OSM tags; hidden when nothing is known |
+| `road_amenity_toilet` | туалет | |
+| `road_amenity_tables` | столы | |
+| `road_amenity_shelter` | навес | |
+| `road_amenity_cafe` | кафе | |
+| `road_amenity_playground` | детская площадка | |
+| `road_break_title` | Перерыв {min} мин | the fallback break (ADR-0015 §5), at most one per day with a note |
+| `road_break_note` | Остановитесь, где удобно: размяться и сменить водителя | only on the first break of the day; later breaks have no note |
+| `road_parking_plate_paid` | ≈ {amount} ₽ | supplementary plate under the «P» sign; `{amount}` = engine `parking.rub` |
+| `road_parking_plate_free` | бесплатно | |
+| `road_parking_plate_unknown` | ? | `parking: null` |
+| `road_parking_detail` | парковка · {detail} | text line after the note |
+| `road_parking_zone` | {zone} · ≈ {rate} ₽/ч × {h} ч | `{zone}` = engine zone name, default `road_parking_zone_default` |
+| `road_parking_zone_default` | платная зона | |
+| `road_parking_unknown` | нет данных — уточните на месте | |
+| `road_parking_day` | ≈ {amount} ₽ | day header, after a small «P» |
+| `road_parking_day_unknown` | ≈ {amount} ₽ + ? | some stops of the day without data |
+| `cd_road_parking_day` | Парковки за день: примерно {amount} рублей | add `cd_road_parking_day_unknown` when needed |
+| `cd_road_parking_day_unknown` | и {k} без данных | |
+| `road_footer_parking` | из них парковки | footer right block; the amount below it |
+| `road_parking_sheet_label` | ПАРКОВКА | `ParkingSheet` |
+| `road_parking_row_rate` | Тариф | |
+| `road_parking_row_stay` | Стоим | |
+| `road_parking_row_sunday` | Воскресенье | |
+| `road_parking_row_where` | Где | |
+| `road_parking_note` | ≈ — цена примерная. Сумма уже в путевом листе и в бюджете. | big cities add the engine note («тарифы в центре меняются в течение дня») |
+| `road_parking_ok` | Понятно | |
+| `road_parking_paid` | ≈ {rate} ₽/ч · ≈ {amount} ₽ за стоянку | card fact / TalkBack long form |
+| `road_parking_free` | бесплатно рядом | `source = free` |
+| `road_parking_free_entrance` | бесплатно у входа | OSM parking with `fee=no` ≤ 100 m |
+| `road_parking_hotel` | у гостиницы · бесплатно | hotel fact, not a cost |
+| `cd_road_parking` | Парковка примерно {rate} рублей в час, за стоянку примерно {amount} рублей | |
+| `road_open_data_legend` | — из открытых данных, часы уточняйте | legend after the dotted-ring mark, once under the chips |
+| `cd_open_data` | данные из открытых источников, часы уточняйте | TalkBack for the dotted ring on a row |
+
+### 16.4 Waybill (5.6 §9)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `waybill_parking` | Парковки | line title, `P` sign before it |
+| `waybill_parking_formula` | платных стоянок: {k} · ≈ {dur} · {towns} | engine `formula` wins when present; `{towns}` «5 городов» or the names when ≤ 2 |
+| `waybill_parking_unknown` | + ещё {k} без данных | after the formula when `unknownCount > 0` |
+| `waybill_parking_row` | {place}, {h} ч × {rate} | breakdown row (expanded) |
+| `waybill_parking_note` | Ночёвки и бесплатные стоянки — 0 ₽. Тарифы средние по городу. | under the breakdown |
+| `budget_lever_parking_free` | бесплатные парковки | ADR-0015 §4 lever `parking_free` |
+
+### 16.5 Hand-off chooser (5.13 §5) — brand-bearing, `handoff_*` only
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `handoff_sheet_title` | Вести в навигаторе | |
+| `handoff_scope_day` | День {n} | tab |
+| `handoff_scope_next` | До след. | tab; TalkBack `handoff_cd_scope_next` |
+| `handoff_cd_scope_next` | До следующей точки | |
+| `handoff_day_line` | {from} → {to} · {km} км · {points} | `{points}` = `plural_point` |
+| `handoff_next_line` | Следующая точка: {name} · {km} км | |
+| `handoff_app_maps` | Яндекс Карты | card title |
+| `handoff_app_navi` | Яндекс Навигатор | card title |
+| `handoff_badge_day` | весь день | yellow badge on the app that takes the whole day |
+| `handoff_maps_day` | все {points} дня по порядку; в Картах нажмите «В путь» — поведут с голосом | unsigned and signed |
+| `handoff_maps_next` | маршрут до точки, с голосом | |
+| `handoff_navi_next` | только до следующей точки: {name}, {km} км | unsigned (ADR-0015 §1) |
+| `handoff_navi_day` | все {points} дня, сразу ведёт с голосом | signed |
+| `handoff_navi_limit` | по ссылке открывается до 5 раз в сутки, потом — в браузере | unsigned only |
+| `handoff_explain_unsigned` | Навигатор пока принимает от нас только одну точку, поэтому весь день с остановками ведут Карты — в них тоже есть ведение с голосом. | |
+| `handoff_explain_signed` | Навигатор получает весь день: старт, финиш и до 8 остановок между ними. Карты — запасной вариант. | |
+| `handoff_maps_missing` | не установлены — откроем карту в браузере | |
+| `handoff_navi_missing` | не установлен | |
+| `handoff_install` | Установить из магазина приложений | opens the store page |
+| `handoff_remember` | Запомнить выбор | then the Road button opens the chosen app directly; long-press it to choose again |
+| `handoff_walk_cta` | Вести пешком в Яндекс Картах | 5.11 |
+| `handoff_open_maps` | Открываем Яндекс Карты | toast (1 s) before leaving the app |
+| `handoff_open_navi` | Открываем Яндекс Навигатор | |
+
+### 16.6 Cards with little data (5.9 §9)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `card_why` | Почему здесь: {why} | engine `whyRu` |
+| `card_desc_wikipedia` | Описание: Википедия · CC BY-SA | link to the article |
+| `card_desc_wikivoyage` | Описание: Викигид · CC BY-SA | |
+| `card_photo_nearby_label` | ФОТО РЯДОМ | label over a Commons geosearch photo |
+| `card_photo_nearby_credit` | Фото рядом с местом · Wikimedia Commons · {author} · {licence} | |
+| `card_illustration_none` | фото пока нет | small caption in the category illustration, **only** when the place has no text either |
+| `hours_today_open` | сегодня {hours} · открыто | walks and cards |
+| `hours_open_until` | открыто до {time} | timed walk row |
+| `hours_closed` | сегодня закрыто | |
+| `hours_closed_day` | сегодня закрыто · {weekday} | untimed walk |
+| `hours_24` | круглосуточно | |
+| `hours_unknown` | часы не указаны | |
+| `card_dogs_no` | с собакой — нельзя | fact chip |
+| `card_dogs_yes` | с собакой можно | |
+| `card_parking_free` | P бесплатно у входа | fact chip |
+| `card_parking_paid` | P ≈ {rate} ₽/ч | fact chip |
+| `card_open_data` | часы и цены — из открытых данных, уточняйте | once, after the facts; only when a fact is open data |
+
+### 16.7 «По городу» start and the walk (5.10 §10, 5.11 §10)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `city_start_label` | СТАРТ ПРОГУЛКИ | |
+| `city_start_here` | {town} · вы здесь | second line of the start field |
+| `cd_city_start` | Старт прогулки: {place}. Изменить | |
+| `city_crew_label` | КТО ИДЁТ | |
+| `city_crew_adults` | Взрослые | |
+| `city_crew_kids` | Дети | |
+| `city_crew_dog` | Собака | |
+| `city_crew_dog_on` | с нами | |
+| `city_crew_dog_off` | нет | |
+| `city_type_label` | КАКАЯ ПРОГУЛКА | |
+| `city_preset_dog` | Прогулка с собакой | first preset when the dog is on (ADR-0015 §6 `dog_walk`) |
+| `city_preset_dog_sub` | парки, набережные, виды | |
+| `city_duration_unlimited` | без ограничения | duration chip; `durationMin = null` |
+| `city_duration_hint_timed` | Соберём расписание: когда куда прийти и когда финиш | |
+| `city_duration_hint_untimed` | Без расписания: порядок мест по пути и часы работы каждого | |
+| `city_prefs_label` | ПОЖЕЛАНИЯ И ОГРАНИЧЕНИЯ | |
+| `city_pref_budget` | Бюджет на всех | |
+| `city_pref_pace` | Темп | |
+| `city_pref_return` | Вернуться к старту | |
+| `city_caption_untimed` | {crew} · без расписания | caption meta |
+| `age_gate_question` | Вам есть 18? | the whole dialog (CEO 3); `age_gate_title` / `age_gate_body` / `city_kids_*` are retired |
+| `age_gate_yes_short` | Да | |
+| `walk_warn_child_bars` | Ребёнку может быть некомфортно: в бары с детьми обычно не пускают. | engine `CHILD_BARS` |
+| `walk_warn_dog_bars` | С собакой в бары обычно нельзя. Оставьте собаку дома или выберите прогулку с собакой. | engine `DOG_INDOOR`, drink presets |
+| `walk_warn_dog_indoor` | С собакой в музеи и кафе обычно нельзя. Оставьте собаку дома или выберите прогулку с собакой. | other presets, before the walk is built (5.10) |
+| `walk_warn_dog_count` | С собакой в музеи и бары обычно нельзя — таких мест на маршруте: {k} | on the result |
+| `walk_action_dog_walk` | Прогулка с собакой | plate action |
+| `walk_action_dog_home` | Собака останется дома | plate action: `dog = false`, rebuild |
+| `walk_action_overview` | Обзорная прогулка вместо этой | plate action under `walk_warn_child_bars` |
+| `walk_info_child` | С ребёнком: добавили детскую площадку и кафе с детским меню. | green info plate |
+| `walk_info_child_museums` | С ребёнком: взяли интерактивные музеи и паузы каждые полтора часа. | |
+| `walk_info_dog` | С собакой: парки, набережные, виды и площади — без закрытых помещений. | |
+| `walk_stop_dog_no` | С собакой внутрь нельзя. | per indoor stop, end of its note |
+| `walk_untimed_header` | Порядок по пути · заходите, куда открыто | replaces «Старт … · финиш …» |
+| `walk_untimed_facts` | Без расписания · {places} по пути · ≈ {km} км | `{places}` = `plural_place` |
+| `walk_filters_cd` | Условия прогулки | toolbar pane title |
+| `walk_rebuilding` | Пересобираем прогулку… | over the dimmed previous walk |
+| `walk_rebuild_failed` | Не получилось пересобрать — оставили прежний вариант | toast with `walk_rebuild_retry` |
+| `walk_rebuild_retry` | Повторить | |
+| `walk_other_none` | Других вариантов нет | disabled «Другой вариант» |
+| `walk_other_none_note` | С этими условиями показали все варианты. Поменяйте время или прогулку выше. | |
+| `walk_few_title` | Для {dur} рядом мало мест | `NOT_ENOUGH_POIS`; replaces `city_not_enough_*` |
+| `walk_few_body` | Нашли {found} — это примерно {span}. Проверили, что сработает: | `{found}` = `plural_place` |
+| `walk_few_duration` | Гулять {dur} | engine suggestion `durationMin` |
+| `walk_few_duration_sub` | хватит на {found} | |
+| `walk_few_unlimited` | Без ограничения | engine suggestion `durationMin: null` |
+| `walk_few_unlimited_sub` | {found} без расписания | |
+| `walk_few_preset` | {preset} вместо этой прогулки | engine suggestion `preset` |
+| `walk_few_preset_sub` | {found} рядом | |
+| `walk_few_clear` | Вернуть убранные места | engine suggestion `clearExclude` |
+| `walk_few_clear_sub` | вы убрали {found} — вернём их в подбор | |
+
+### 16.8 Online data (5.5 §10.9) — under the hood
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `online_later` | уточним при интернете | the only visible trace of missing online data: quiet inline text in the value's spot |
+| `online_failed` | Не получилось загрузить — попробуйте ещё раз | online, server error / unreadable answer (never `online_later`) |
+| `addr_failed` | Не получилось найти адрес — попробуйте ещё раз | address search, online error |
+| `road_parking_note_unknown` | Тариф неизвестен — в путевом листе это место «без данных», в сумму не входит. | parking sheet note for «P ?» |
+| `cd_parking_loading` | Парковка: загружаем | TalkBack for the shimmer (first-time fetch > 300 ms only) |
+
+Retired with the CEO decision (no live spaces, no visible states): `online_loading`, `online_updated_*`, `online_need_check`, `online_banner`, `online_cached_note`, `parking_live_*`, `parking_row_free_*`, `parking_free_*`, `parking_offline_*`, `parking_none_*` (the no-data sheet keeps `road_parking_unknown`), `parking_loading_note`, `cd_parking_live`.

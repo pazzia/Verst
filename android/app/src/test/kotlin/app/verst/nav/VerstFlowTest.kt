@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -328,6 +329,64 @@ class VerstFlowTest {
         assertEquals(listOf(Route.Windshield, Route.Road, Route.Exit), again.stack.toList())
         assertEquals(night.id, again.roadFocusId)
         assertEquals(stops[2].id, again.roadTopId)
+    }
+
+    /**
+     * 5.13 §5 (S4): the sheet on a day → Карты get the whole day (unsigned), «До след.» → the Навигатор gets the
+     * next point only; «Запомнить выбор» then opens the remembered app straight from «вести».
+     */
+    @Test
+    fun handoffSheetUnsignedRoutesAndRememberedChoice() = runTest {
+        val gw = FakeGateway()
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        val opened = mutableListOf<Triple<HandoffApp, String?, String?>>()
+        flow.handoffLauncher = object : HandoffLauncher {
+            override fun navigatorInstalled() = true
+            override fun mapsInstalled() = true
+            override fun open(links: app.verst.core.model.dto.HandoffLinksDto, walk: Boolean) = HandoffTarget.None
+            override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
+                opened += Triple(app, uri, web)
+                return if (app == HandoffApp.NAVI) HandoffTarget.Navigator else HandoffTarget.Maps
+            }
+        }
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        val day = flow.result!!.trip.daysList.first()
+        val local = app.verst.core.model.NaviLinks.day(day)!!
+        flow.handoff(day.day)
+        settle()
+        assertEquals(day.day, flow.handoffSheet!!.day)
+        assertNotNull(flow.handoffSheet!!.handoff)
+        flow.handoffPick(HandoffApp.MAPS)
+        assertNull(flow.handoffSheet)
+        assertEquals(Triple(HandoffApp.MAPS, local.mapsApp, local.web), opened.single())
+        assertEquals(Toast.HandoffOpen(navi = false), flow.toast)
+        // «До след.»: the Навигатор to the next point only (no vias)
+        flow.openHandoffSheet(day.day); settle()
+        flow.handoffScope(null)
+        flow.handoffPick(HandoffApp.NAVI)
+        val navi = opened.last()
+        assertEquals(HandoffApp.NAVI, navi.first)
+        assertTrue(navi.second!!.startsWith("yandexnavi://build_route_on_map?lat_to="))
+        assertFalse(navi.second!!.contains("lat_via_0"))
+        // unsigned, even the day scope never sends the whole day to the Навигатор
+        flow.openHandoffSheet(day.day); settle()
+        flow.handoffPick(HandoffApp.NAVI)
+        assertFalse(opened.last().second!!.contains("lat_via_0"))
+        // «Запомнить выбор»: the next «вести» opens Карты directly; a long-press still opens the sheet
+        flow.openHandoffSheet(day.day); settle()
+        flow.toggleHandoffRemember()
+        flow.handoffPick(HandoffApp.MAPS)
+        val n = opened.size
+        flow.handoff(day.day); settle()
+        assertNull(flow.handoffSheet)
+        assertEquals(n + 1, opened.size)
+        assertEquals(HandoffApp.MAPS, opened.last().first)
+        flow.openHandoffSheet(day.day); settle()
+        assertNotNull(flow.handoffSheet)
+        flow.back()
+        assertNull(flow.handoffSheet)
     }
 
     @Test
@@ -693,5 +752,222 @@ class VerstFlowTest {
         assertNull(clean("монастырь в Костроме", "монастырь · Кострома", "Кострома"))
         assertEquals("Главный монастырь России, собор XV века.", clean("главный монастырь России, собор XV века", "монастырь · Сергиев Посад", "Сергиев Посад"))
         assertEquals("Музей под открытым небом.", clean("Музей под открытым небом.", "музей · Суздаль", "Суздаль"))
+    }
+
+    /** S4 card chips: raw OSM hours never show in English. */
+    @Test
+    fun cardHoursAreNeverRawOsm() {
+        assertEquals("{daily} 05:00–21:00", app.verst.feature.card.hoursRu("Mo-Su 05:00-21:00"))
+        assertEquals("{24}", app.verst.feature.card.hoursRu("24/7"))
+        assertEquals("вт–вс 10:00–18:00; пн выходной", app.verst.feature.card.hoursRu("Tu-Su 10:00-18:00; Mo off"))
+        assertNull(app.verst.feature.card.hoursRu("sunrise-sunset"))
+        assertEquals("10:00–18:00", app.verst.feature.card.hoursRu("10:00–18:00"))
+    }
+
+    /**
+     * S4 investigation (docs/bugs/s4-walk-filters.md): «Свой маршрут» in a town with few places (Фрязино). The fake
+     * engine behaves like the real one there: the first walk succeeds, a walk that excludes its stops is
+     * NOT_ENOUGH_POIS. Expected behaviour; this test FAILS on main (bugs a and c), the fix makes it pass.
+     */
+    @Test
+    fun customWalkRecoversAfterOtherVariantRunsOutOfPlaces() = runTest {
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val presets = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-custom.json")) as EngineResult.Ok).value
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                // like Фрязино: 3 places in reach; without them there is nothing left
+                return if (oneWalk.stops.any { it.poiId != null && it.poiId in request.exclude }) {
+                    EngineResult.Err(app.verst.core.model.dto.EngineErrorDto("NOT_ENOUGH_POIS", "not enough places", field = "preset"))
+                } else EngineResult.Ok(oneWalk.copy(id = "w${requests.size}"))
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        flow.selectCityPreset("custom")
+        flow.setCityDuration(240)
+        flow.toggleCityInterest("architecture")
+        flow.buildCustomWalk()
+        settle()
+        assertEquals(Route.Walk, flow.top)
+        // (a) «Другой вариант» with nothing new: the walk stays, the button is disabled, the stops come back
+        flow.otherWalk()
+        settle()
+        assertEquals(Route.Walk, flow.top)
+        assertTrue(flow.walkOtherNone)
+        assertNull(flow.walkFew)
+        assertNull(flow.cityError)
+        flow.otherWalk() // disabled: no request
+        settle()
+        val before = requests.size
+        // (b) a filter change on 5.11 clears the exclusions and rebuilds there after 400 ms
+        flow.setCityDuration(120)
+        flow.toggleCityInterest("parks")
+        settle(300)
+        assertEquals("debounced: nothing yet", before, requests.size)
+        settle(1_000)
+        assertEquals("one rebuild for two quick changes", before + 1, requests.size)
+        val last = requests.last()
+        assertEquals("filters reach the request", 120, last.durationMin)
+        assertTrue("filters reach the request", "parks" in last.interests)
+        assertTrue("exclusions survive a filter change: ${last.exclude}", last.exclude.isEmpty())
+        assertEquals(Route.Walk, flow.top)
+        assertFalse(flow.walkOtherNone)
+        assertNull(flow.cityError)
+        // the user's custom values persist when the sheet reopens
+        flow.back()
+        flow.selectCityPreset("custom")
+        assertEquals(120, flow.cityDurationMin)
+        assertTrue("parks" in flow.cityInterests)
+    }
+
+    @Test
+    fun walkCrewIsTheWalksOwnAndChildrenNeverBlock() = runTest {
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val p0 = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        // v3 shape: a beer preset (18+) and the dog walk
+        val presets = p0.copy(presets = p0.presets.map { if (it.preset == "beer") it.copy(available = true, adultOnly = true) else it }.let { ps ->
+            if (ps.any { it.preset == "dog_walk" }) ps else ps + app.verst.core.model.dto.CityPresetDto(preset = "dog_walk", count = 9, defaultDurationMin = 120)
+        })
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                return EngineResult.Ok(oneWalk)
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        // the dog walk shows only with the dog, first
+        assertFalse(flow.visibleCityPresets().any { it.preset == "dog_walk" })
+        flow.pickCityDog(true)
+        assertEquals("dog_walk", flow.visibleCityPresets().first().preset)
+        flow.pickCityChildren(1)
+        flow.pickCityAdults(3)
+        // 18+: the age question only; a child does not block the drink preset
+        flow.selectCityPreset("beer")
+        assertNotNull(flow.ageGate)
+        flow.answerAge(false)
+        assertEquals("«Нет» keeps the previous preset", "overview", flow.cityPreset)
+        flow.selectCityPreset("beer")
+        flow.answerAge(true)
+        assertEquals("beer", flow.cityPreset)
+        flow.setCityDuration(null)
+        flow.buildWalk()
+        settle()
+        val r = requests.single()
+        assertEquals(3, r.adults)
+        assertEquals(1, r.children)
+        assertTrue(r.dog)
+        assertTrue(r.unlimited)
+        assertTrue(r.adultConfirmed)
+        assertTrue(r.toInputJson().contains("\"durationMin\":null"))
+        assertTrue(r.toInputJson().contains("\"dog\":true"))
+        // the car crew is untouched
+        assertEquals(flow.adults, flow.adults)
+    }
+
+    /**
+     * M6 `requestKey`: a filter change that leads back to a request the engine already answered with the walk on
+     * screen sends nothing; an answer whose key is not the key of the request sent is dropped as stale.
+     */
+    @Test
+    fun walkRequestKeyDropsStaleAnswersAndSkipsSameRequests() = runTest {
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        val resp = { f: String -> app.verst.core.model.EngineJson.json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() } }
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        var lie = false
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                val key = Integer.toHexString(request.toInputJson().hashCode()) + if (lie) "x" else ""
+                return EngineResult.Ok(oneWalk.copy(id = "w${requests.size}", requestKey = key))
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        flow.buildWalk()
+        settle()
+        assertEquals(Route.Walk, flow.top)
+        val first = flow.walk!!
+        flow.pickCityPace("slow")
+        settle(300); settle(1_000)
+        assertEquals(2, requests.size)
+        assertEquals("w2", flow.walk!!.id)
+        flow.pickCityPace("normal") // back to the first request: its key is known, but the screen shows w2 → sent
+        settle(300); settle(1_000)
+        assertEquals(3, requests.size)
+        assertEquals(first.requestKey, flow.walk!!.requestKey)
+        // the same request again through another filter round trip: the shown walk answers it, nothing is sent
+        flow.pickCityBudget(1_000)
+        flow.pickCityBudget(null)
+        settle(300); settle(1_000)
+        assertEquals(3, requests.size)
+        // an answer under another key than the request sent is stale: the walk on screen stays
+        lie = true
+        flow.pickCityPace("slow")
+        settle(300); settle(1_000)
+        assertEquals(4, requests.size)
+        assertEquals(first.requestKey, flow.walk!!.requestKey)
+        assertFalse(flow.walkBuilding)
+    }
+
+    @Test
+    fun notEnoughShowsOnlyTheEnginesSuggestions() = runTest {
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val presets = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
+        // the v3 error as JSON: «6 ч» checked, unlimited checked
+        val err = app.verst.core.model.EngineJson.walkRoute(
+            """{"ok": false, "error": {"code": "NOT_ENOUGH_POIS", "count": 4, "suggestions": [{"durationMin": 360, "count": 7}, {"durationMin": null, "count": 9}, {"weird": 1}]}}""",
+        ) as EngineResult.Err
+        assertEquals(2, err.error.walkSuggestions.size)
+        assertTrue(err.error.walkSuggestions[1].unlimited)
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                return if (request.durationMin == 480) err else EngineResult.Ok(oneWalk)
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        flow.setCityDuration(480)
+        flow.buildWalk()
+        settle()
+        assertEquals(Route.City, flow.top)
+        assertEquals("NOT_ENOUGH_POIS", flow.cityError)
+        assertEquals(listOf(360, null), flow.walkFew!!.suggestions.map { it.durationMin })
+        flow.applyWalkSuggestion(flow.walkFew!!.suggestions[0])
+        settle()
+        assertEquals(Route.Walk, flow.top)
+        assertEquals(360, requests.last().durationMin)
+        assertNull(flow.walkFew)
     }
 }

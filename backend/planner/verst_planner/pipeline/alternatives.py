@@ -23,6 +23,7 @@ from verst_planner.domain.model import (
     Candidate,
     DayPlan,
     NormalizedInput,
+    ParkingUnit,
     Place,
     PlannedStop,
     ReplaceableKinds,
@@ -282,13 +283,34 @@ def alt_units(new: PlannedStop, old: PlannedStop, inp: NormalizedInput, ctx: Pla
 
 
 def delta_rub(
-    new: PlannedStop, old: PlannedStop, units: AltUnits, inp: NormalizedInput, ctx: PlanContext
+    new: PlannedStop,
+    old: PlannedStop,
+    units: AltUnits,
+    inp: NormalizedInput,
+    ctx: PlanContext,
+    park_delta: int = 0,
 ) -> int:
-    """`round_to(Δ stop cost excl. fuel stops + Δ detour_km x consumption / 100 x price(region of c), 10)`."""
+    """`round_to(Δ stop cost excl. fuel stops + Δ detour_km x consumption / 100 x price(region of c)
+    + Δ parking, 10)`; Δ parking = the known parking of the new stop - that of the old one (API v3)."""
     cons = Decimal(repr(inp.vehicle.consumption_l_per_100km))
     price = units.price_rub if units.price_rub is not None else Decimal(0)
     fuel = Decimal(repr(units.delta_km)) * cons / 100 * price
-    return _round10(_exact_cost(new, inp, ctx) - _exact_cost(old, inp, ctx) + fuel)
+    return _round10(_exact_cost(new, inp, ctx) - _exact_cost(old, inp, ctx) + fuel + park_delta)
+
+
+PARKED = frozenset({StopKind.SIGHT, StopKind.FOOD, StopKind.REST})  # = engine.PARKED_KINDS
+
+
+def _parking_at(s: PlannedStop, slot: Slot, sid: str, day: DayPlan, ctx: PlanContext) -> ParkingUnit | None:
+    """The stop's parking unit as `engine._parking` prices it; None without a parking port."""
+    model = ctx.ports.parking
+    if model is None or s.kind not in PARKED or s.place is None or slot.arrive is None:
+        return None
+    return model.unit(sid, s.name_ru, s.point, local(slot.arrive, day.tz), s.dwell_min)
+
+
+def _park_rub(p: ParkingUnit | None) -> int:
+    return 0 if p is None or p.rub is None else p.rub
 
 
 def _score(fam: str, c: Candidate, trial: Trial, inp: NormalizedInput, ctx: PlanContext) -> float:
@@ -391,16 +413,18 @@ def alternatives_for_day(
                 ctx,
                 sid=ids[i],
             )
+            park = _parking_at(t.stop, t.slots[t.index], ids[i], day, ctx)
             units = dataclasses.replace(
-                alt_units(t.stop, old, inp, ctx), trip_km_delta=_day_km(t.plan) - _day_km(day)
+                alt_units(t.stop, old, inp, ctx), trip_km_delta=_day_km(t.plan) - _day_km(day), parking=park
             )
+            park_delta = _park_rub(park) - _park_rub(_parking_at(old, old_slot, ids[i], day, ctx))
             alts.append(
                 Alternative(
                     id=f"alt_{rendered.id}_{place.id}",
                     place_id=place.id,
                     name_ru=place.name_ru,
                     delta_min=round_half_up((day_end(t.slots) - end0).total_seconds() / 60),
-                    delta_rub=delta_rub(t.stop, old, units, inp, ctx),
+                    delta_rub=delta_rub(t.stop, old, units, inp, ctx, park_delta),
                     shift_min=_shift(t, slots, stops),
                     stop=dataclasses.replace(rendered, alternatives=()),
                     units=units,

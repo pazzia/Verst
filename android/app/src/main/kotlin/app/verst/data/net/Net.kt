@@ -23,19 +23,37 @@ object Net {
         chain.proceed(chain.request().newBuilder().header("User-Agent", USER_AGENT).build())
     }
 
-    fun client(): OkHttpClient = OkHttpClient.Builder()
+    /** ADR-0016 OR-6: one breaker for the whole app (per host). */
+    val breaker = CircuitBreaker()
+
+    /**
+     * ADR-0016 OR-1: connect 3 s, read 5 s per attempt; the call (both attempts with the jitter) ends by
+     * [callTimeoutMs]. The interceptor adds the one retry, the breaker and the debug counters (OR-6, OR-8).
+     */
+    fun client(
+        connectMs: Long = 3_000,
+        readMs: Long = 5_000,
+        callTimeoutMs: Long = 13_500,
+        guard: OnlineInterceptor = OnlineInterceptor(breaker),
+    ): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(userAgent)
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
-        .callTimeout(10, TimeUnit.SECONDS) // 5.9 §4: «Фото не загрузилось» after 10 s
+        .addInterceptor(guard)
+        .connectTimeout(connectMs, TimeUnit.MILLISECONDS)
+        .readTimeout(readMs, TimeUnit.MILLISECONDS)
+        .callTimeout(callTimeoutMs, TimeUnit.MILLISECONDS)
         .build()
 
     @Volatile private var http: OkHttpClient? = null
     val okHttp: OkHttpClient get() = http ?: synchronized(this) { http ?: client().also { http = it } }
 
+    /** Photos: 10 s in total (5.9 §4 «Фото не загрузилось»), the same rules otherwise. */
+    @Volatile private var photoHttp: OkHttpClient? = null
+    val photos: OkHttpClient
+        get() = photoHttp ?: synchronized(this) { photoHttp ?: okHttp.newBuilder().callTimeout(10, TimeUnit.SECONDS).build().also { photoHttp = it } }
+
     /** Coil with the shared client and a 64 MB disk cache in `cacheDir/images` (nothing bundled in the APK). */
     fun imageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
-        .okHttpClient { okHttp }
+        .okHttpClient { photos }
         .memoryCache { MemoryCache.Builder(context).maxSizePercent(0.15).build() }
         .diskCache { DiskCache.Builder().directory(File(context.cacheDir, "images")).maxSizeBytes(IMAGE_CACHE_BYTES).build() }
         .respectCacheHeaders(false) // Commons files never change under the same name; offline needs the cache

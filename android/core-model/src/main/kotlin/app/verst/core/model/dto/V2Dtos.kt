@@ -93,10 +93,19 @@ data class PoiImageDto(
     val credit: PhotoCreditDto? = null,
     val isArea: Boolean = false,
     val labelRu: String? = null,
+    /** API v3 (ADR-0015 §3): `p18` | `wikipedia` | `nearby` (Commons geosearch ≤ 300 m → «ФОТО РЯДОМ»). */
+    val source: String? = null,
 )
 
 @Serializable
-data class PoiHoursDto(val textRu: String? = null, val verified: Boolean = false)
+data class PoiHoursDto(
+    val textRu: String? = null,
+    val verified: Boolean = false,
+    /** API v3: today's hours («11:00–20:00»), open now, round the clock. */
+    val todayRu: String? = null,
+    val openNow: Boolean? = null,
+    val allDay: Boolean = false,
+)
 
 @Serializable
 data class PoiTicketDto(val adultRub: Int? = null, val childRub: Int? = null, val estimate: Boolean = false)
@@ -120,7 +129,34 @@ data class PoiDetailsDto(
     val verified: Boolean = true,
     val attributionRu: List<String> = emptyList(),
     val wikidataId: String? = null,
-)
+    /** API v3 (ADR-0015 §2): «объект наследия федерального значения · есть в Викигиде». */
+    val whyRu: String? = null,
+    /** API v3 (ADR-0015 §3): where [descriptionRu] comes from: `wikipedia` | `wikivoyage` | `osm` | `wikidata`. */
+    val descSource: String? = null,
+    val dogsAllowed: Boolean? = null,
+    val parking: ParkingDto? = null,
+    /** M6 `poi_details` v3: the text (Wikipedia / Wikivoyage / OSM …) and where it comes from; the data level 1–4. */
+    val extractRu: String? = null,
+    val extractSource: ExtractSourceDto? = null,
+    val cardLevel: Int? = null,
+    val quality: Int? = null,
+    val fee: String? = null,
+    val website: String? = null,
+    /** M9: the place's data comes from OpenStreetMap (ODbL attribution on the card). */
+    val osmSource: Boolean? = null,
+    /** M9: the category label as given; curated | wikidata | osm and the ODbL line for OSM-only places. */
+    val poiKindRu: String? = null,
+    val placeSource: String? = null,
+    val placeAttributionRu: String? = null,
+) {
+    /** The card text: the v3 extract, else the Sprint 3 description. */
+    val textRu: String? get() = extractRu?.takeIf { it.isNotBlank() } ?: descriptionRu
+    /** `wikipedia` | `wikivoyage` | `osm` | `wikidata` … */
+    val textSource: String? get() = extractSource?.key ?: descSource
+}
+
+@Serializable
+data class ExtractSourceDto(val key: String? = null, val nameRu: String? = null, val licence: String? = null)
 
 // ------------------------------------------------------------------------------------------ hand-off (ADR-0014)
 
@@ -128,13 +164,34 @@ data class PoiDetailsDto(
 data class HandoffPointDto(val lat: Double, val lon: Double, val nameRu: String? = null, val role: String? = null)
 
 @Serializable
-data class HandoffLinksDto(val navigator: String? = null, val maps: String? = null, val web: String? = null)
+data class HandoffLinksDto(
+    val navigator: String? = null,
+    val maps: String? = null,
+    val web: String? = null,
+    /** API v3 (ADR-0015 §1): the Навигатор to the next point only (unsigned launches are limited to 5 a day). */
+    val navigatorNext: String? = null,
+)
 
 @Serializable
-data class HandoffPartDto(val index: Int = 1, val points: List<HandoffPointDto> = emptyList(), val links: HandoffLinksDto = HandoffLinksDto())
+data class HandoffPartDto(
+    val index: Int = 1,
+    val points: List<HandoffPointDto> = emptyList(),
+    val links: HandoffLinksDto = HandoffLinksDto(),
+    /** API v3: the next point of the day (the target of `navigatorNext`). */
+    val next: HandoffPointDto? = null,
+    /** API v3 with `signing`: the link strings the app signs (SHA256withRSA) and appends `&signature=` to. */
+    val toSign: Map<String, String>? = null,
+)
 
 @Serializable
-data class HandoffDto(val mode: String, val day: Int? = null, val parts: List<HandoffPartDto> = emptyList(), val truncated: Boolean = false)
+data class HandoffDto(
+    val mode: String,
+    val day: Int? = null,
+    val parts: List<HandoffPartDto> = emptyList(),
+    val truncated: Boolean = false,
+    /** API v3: the engine's recommended order (`maps`, `navigatorNext`, `web` while unsigned). */
+    val order: List<String> = emptyList(),
+)
 
 // ------------------------------------------------------------------------------------------ city (ADR-0013)
 
@@ -177,9 +234,26 @@ data class WalkStopDto(
     val noteRu: String? = null,
     val hasPhoto: Boolean = false,
     val tappable: Boolean = true,
+    /** API v3: today's hours (untimed walks show them as a pill; timed ones as «открыто до …»). */
+    val hours: WalkHoursDto? = null,
+    /** API v3: the whitelist kind (ADR-0015 §2) for the `KindTag`; the old `kind` stays the pictogram key. */
+    val poiKind: String? = null,
+    /** API v3: `osm | wikidata | default` — replaces `hoursVerified`. */
+    val hoursSource: String? = null,
+    /** M9: the category label to show as given, and where the place comes from. */
+    val poiKindRu: String? = null,
+    val placeSource: String? = null,
 ) {
     val isBar: Boolean get() = kind in BarKinds
+    /** Indoor places a dog usually may not enter (5.11 §10.4 `walk_stop_dog_no`). */
+    val indoor: Boolean get() = isBar || (poiKind ?: kind) in IndoorKinds
 }
+
+/** `stops[].hours` (v3): «10:00–18:00» today, open now (null = unknown), where the hours come from. */
+@Serializable
+data class WalkHoursDto(val todayRu: String? = null, val openNow: Boolean? = null, val source: String? = null, val closedDayRu: String? = null, val allDay: Boolean = false)
+
+val IndoorKinds = setOf("museum", "theatre", "interactive", "gallery", "cafe")
 
 val BarKinds = setOf("bar", "ryumochnaya", "pub", "craft", "beer")
 
@@ -223,12 +297,23 @@ data class WalkRouteDto(
     val input: JsonObject? = null,
     /** Architect (S3-QA P0-01), when it lands: the walk was moved to the next day's window. */
     @kotlinx.serialization.SerialName("startsTomorrow") val startsTomorrowFlag: Boolean? = null,
+    /** API v3: a hash of the input; a result whose key is not the current request's is stale (5.11 §10.2). */
+    val requestKey: String? = null,
     /** Architect S3-QA P1-02: why the walk is shorter than asked (null = it is not). */
     val shorter: WalkShorterDto? = null,
     val requestedDurationMin: Int? = null,
+    /** M4: «без ограничения» answered (no times; `durationMin`, `endAt`, the stop times are null). */
+    val unlimited: Boolean = false,
+    /** M4: crew notes («С собакой: в закрытые места кто-то зайдёт один…»). */
+    val crewNotesRu: List<String> = emptyList(),
+    val interestsWidened: Boolean = false,
     @Transient val json: String = "",
 ) {
     val adultOnly: Boolean get() = responsibleNoteRu != null
+
+    /** «без ограничения» (v3 `durationMin: null`): no times, the hours of each place instead. */
+    val untimed: Boolean get() = unlimited || input?.get("durationMin") is kotlinx.serialization.json.JsonNull ||
+        (startAt == null && stops.isNotEmpty() && stops.all { it.arriveAt == null })
 
     /**
      * S3-QA P0-01: the walk starts on a later day than «now» in the town's time zone. The engine's flag

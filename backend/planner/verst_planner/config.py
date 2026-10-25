@@ -25,6 +25,7 @@ class MoodInts:
     calm: int
     more_stops: int
     just_drive: int
+    fun: int  # «Весело и познавательно» (ADR-0015 §5); `more_stops` is the v2 legacy value
 
     def of(self, mood: Mood) -> int:
         return int(getattr(self, mood.value))
@@ -60,6 +61,10 @@ class SplitCfg:
     widened_hi: float
     template_hi: float
     template_lo: float
+    honour_template: int = 0
+    """M9 (Manager): a ready route keeps its template's minimum days and night towns even when the daily km
+    would allow fewer days (1 = on: the open-data world; the budget fitter may still pick the short variant).
+    Off for the fixture worlds, so G01-G13 keep their bytes."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,6 +119,9 @@ class DwellCfg:
 class SightsCfg:
     max_per_day: MoodInts
     min_score: float
+    diversity: int = 0
+    """ADR-0015 §2 diversity rules (1 = on): on for the open-data world `russia_v1`, off for the curated
+    fixture worlds (their sights were picked by hand; G01-G13 keep their bytes)."""
 
 
 @dataclass(frozen=True, slots=True)

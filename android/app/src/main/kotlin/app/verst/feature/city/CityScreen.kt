@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -64,21 +65,26 @@ import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
 import app.verst.feature.common.NaviDialog
 import app.verst.feature.common.ScreenRoot
-import app.verst.nav.WalkDurations
+import app.verst.nav.CityPicker
+import app.verst.nav.DOG_WALK
+import app.verst.nav.WalkFew
+import app.verst.core.model.dto.WalkSuggestion
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
 /** 5.10 state (stateless; `VerstRoot` maps `VerstFlow` into it). */
 data class CityUi(
     val town: String?,
-    /** «Советская пл., 1» / «Ярославль» — what the start line names. */
+    /** «Советская пл., 1» / «Ярославль» — what the start field names. */
     val startLabel: String,
     val fromGps: Boolean,
+    /** The visible presets in display order (`VerstFlow.visibleCityPresets`). */
     val presets: List<CityPresetDto>,
     val loading: Boolean,
     val error: String?,
     val selected: String,
-    val durationMin: Int,
+    /** null = «без ограничения». */
+    val durationMin: Int?,
     val interests: List<String>,
     val pace: String,
     val budget: Int?,
@@ -86,32 +92,41 @@ data class CityUi(
     val customSheet: Boolean,
     val ageGate: Boolean,
     val building: Boolean,
-    val children: Boolean,
+    val adults: Int = 2,
+    val children: Int = 0,
+    val dog: Boolean = false,
     val startTime: String,
     /** S3-QA P0-01: the start is the next day's window opening. */
     val startTomorrow: Boolean = false,
-)
+    /** `NOT_ENOUGH_POIS` with the engine's suggestions. */
+    val few: WalkFew? = null,
+    val picker: CityPicker? = null,
+    val excludedCount: Int = 0,
+) {
+    val pickerUi: PickerUi get() = PickerUi(durationMin, presets, selected, adults, children, dog, pace, budget)
+}
 
-interface CityActions {
+interface CityActions : PickerActions {
     fun back()
     fun changeStart()
-    fun preset(p: String)
     fun go()
-    fun duration(min: Int)
     fun interest(i: String)
-    fun pace(p: String)
-    fun budget(rub: Int?)
     fun toggleReturn()
     fun closeCustom()
     fun buildCustom()
     fun age(yes: Boolean)
-    fun longer()
-    fun otherPreset()
+    fun suggestion(s: WalkSuggestion)
+    fun openPicker(p: CityPicker)
+    override fun duration(min: Int?) = Unit
+    override fun adults(n: Int) = Unit
+    override fun children(n: Int) = Unit
+    override fun dog(on: Boolean) = Unit
+    override fun pace(p: String) = Unit
+    override fun budget(rub: Int?) = Unit
+    override fun closePicker() = Unit
 }
 
-private val PresetOrder = listOf("overview", "museums", "ryumochnye", "beer", "custom")
-
-/** 5.10 «По городу»: stepping out of the car — the evening street, the street plate, the brown preset plates. */
+/** 5.10 «По городу» (S4 §10): a fresh walk setup — start, who goes, which walk, how long, wishes. */
 @Composable
 fun CityScreen(ui: CityUi, a: CityActions) {
     ScreenRoot(C.city.sky, statusBar = C.city.sky) {
@@ -126,151 +141,124 @@ fun CityScreen(ui: CityUi, a: CityActions) {
                     StreetPlate(ui.town, ui.startLabel, Modifier.padding(start = 20.dp, top = 44.dp))
                 }
                 Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
-                    Spacer(Modifier.height(15.dp))
-                    Txt(stringResource(R.string.city_title), T.display, C.text.primary, Modifier.semantics { heading() })
-                    Row(Modifier.fillMaxWidth().padding(top = 6.dp).defaultMinSize(minHeight = 44.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Txt(stringResource(R.string.city_start, ui.startLabel), T.body.mdTight, C.text.secondary, Modifier.weight(1f).testTag("city.start"), maxLines = 2)
-                        Box(
-                            Modifier.height(44.dp).clickable(role = Role.Button, onClick = a::changeStart).testTag("city.change"),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Box(
-                                Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 10.dp),
-                                contentAlignment = Alignment.Center,
-                            ) { Txt(stringResource(R.string.city_start_change), T.body.smStrong, C.text.secondary) }
-                        }
-                    }
-                    Spacer(Modifier.height(12.dp))
+                    // 2. СТАРТ ПРОГУЛКИ — one target → the 5.12 search
+                    SectionLabel(stringResource(R.string.city_start_label))
+                    StartField(ui, a::changeStart)
+                    // 3. КТО ИДЁТ
+                    SectionLabel(stringResource(R.string.city_crew_label))
+                    CrewCells(ui.adults, ui.children, ui.dog, a::adults, a::children, a::dog)
+                    // 4. КАКАЯ ПРОГУЛКА (+ the errors)
+                    SectionLabel(stringResource(R.string.city_type_label))
                     when {
                         ui.error == "NO_CITY" -> StatePlate(
                             stringResource(R.string.city_no_city_title), stringResource(R.string.city_no_city_body),
                             listOf(stringResource(R.string.city_no_city_action) to a::changeStart), "city.nocity",
                         )
-                        ui.error == "NOT_ENOUGH_POIS" -> StatePlate(
-                            stringResource(R.string.city_not_enough_title), stringResource(R.string.city_not_enough_body),
-                            listOf(
-                                stringResource(R.string.city_not_enough_longer, ((WalkDurations.firstOrNull { it > ui.durationMin } ?: WalkDurations.last()) / 60)) to a::longer,
-                                stringResource(R.string.city_not_enough_other) to a::otherPreset,
-                            ),
-                            "city.notenough",
-                        )
-                        else -> {
-                            Txt(stringResource(R.string.city_presets_label), T.label.md, C.text.muted)
-                            Spacer(Modifier.height(8.dp))
-                            if (ui.loading && ui.presets.isEmpty()) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    PlaceholderPlate(170.dp, DesignTokens.size.presetH, C.dash.controlAlt)
-                                    PlaceholderPlate(170.dp, DesignTokens.size.presetH, C.dash.controlAlt)
-                                }
-                            } else {
-                                PresetGrid(ui, a)
-                            }
+                        ui.loading && ui.presets.isEmpty() -> Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            PlaceholderPlate(170.dp, DesignTokens.size.presetH, C.dash.controlAlt)
+                            PlaceholderPlate(170.dp, DesignTokens.size.presetH, C.dash.controlAlt)
                         }
+                        else -> PresetGrid(ui.presets, ui.selected, a::preset)
                     }
+                    // 5. warnings (informative: ПОШЛИ stays on)
+                    CityWarnings(ui, a)
+                    ui.few?.let { f ->
+                        Spacer(Modifier.height(10.dp))
+                        // the plate answers ПОШЛИ: bring it (with its suggestions) into view above the caption row
+                        val bring = androidx.compose.runtime.remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+                        androidx.compose.runtime.LaunchedEffect(f) { runCatching { bring.bringIntoView() } }
+                        Box(Modifier.bringIntoViewRequester(bring)) { FewPlate(f, ui.selected, ui.excludedCount, a::suggestion) }
+                    }
+                    // 6. СКОЛЬКО ГУЛЯЕМ
+                    SectionLabel(stringResource(R.string.city_duration_label))
+                    DurationChips(ui.durationMin, a::duration)
+                    // 7. ПОЖЕЛАНИЯ И ОГРАНИЧЕНИЯ
+                    SectionLabel(stringResource(R.string.city_prefs_label))
+                    PrefsPlate(ui, a)
                     Spacer(Modifier.height(16.dp))
                 }
                 Caption(ui, a)
             }
             if (ui.customSheet) CustomSheet(ui, windowH, a)
+            ui.picker?.let { CityPickerSheet(it, ui.pickerUi, windowH, a) }
             if (ui.ageGate) {
+                // S4: only the question, «Нет» / «Да» of equal width
                 NaviDialog(
-                    stringResource(R.string.age_gate_title), stringResource(R.string.age_gate_body),
-                    stringResource(R.string.age_gate_yes), stringResource(R.string.age_gate_no), "agegate",
-                    { a.age(true) }, { a.age(false) },
+                    stringResource(R.string.age_gate_question), "",
+                    stringResource(R.string.age_gate_yes_short), stringResource(R.string.age_gate_no), "agegate",
+                    { a.age(true) }, { a.age(false) }, sideBySide = true,
                 )
             }
         }
     }
 }
 
+/** components §27 `StartField`: locate icon, the address, «Москва · вы здесь», «изменить» — one target. */
 @Composable
-private fun PresetGrid(ui: CityUi, a: CityActions) {
-    // only the presets the city supports (`available`); «Свой маршрут» always last
-    val shown = ui.presets.filter { it.available }.sortedBy { PresetOrder.indexOf(it.preset).let { i -> if (i < 0) 99 else i } }
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        shown.chunked(2).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                row.forEach { p -> PresetPlate(p, p.preset == ui.selected, ui.children, Modifier.weight(1f)) { a.preset(p.preset) } }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-@Composable
-internal fun presetName(p: String, fallback: String = ""): String = when (p) {
-    "overview" -> stringResource(R.string.city_preset_overview)
-    "museums" -> stringResource(R.string.city_preset_museums)
-    "ryumochnye" -> stringResource(R.string.city_preset_ryumochnye)
-    "beer" -> stringResource(R.string.city_preset_beer)
-    "custom" -> stringResource(R.string.city_preset_custom)
-    else -> fallback
-}
-
-@Composable
-private fun presetSub(p: CityPresetDto, kidsBlocked: Boolean): String {
-    val h = p.defaultDurationMin / 60
-    if (p.adultOnly && kidsBlocked) return stringResource(R.string.city_kids_blocked)
-    return when (p.preset) {
-        "overview" -> stringResource(R.string.city_preset_overview_sub, h)
-        "museums" -> stringResource(R.string.city_preset_museums_sub, h)
-        "ryumochnye" -> stringResource(R.string.city_preset_ryumochnye_sub, h)
-        "beer" -> stringResource(R.string.city_preset_beer_sub, h)
-        else -> stringResource(R.string.city_preset_custom_sub)
-    }
-}
-
-/** components §21 `PresetPlate`: the brown tourist plate, pictogram, name, sub; 18+ badge; selected outline + check. */
-@Composable
-private fun PresetPlate(p: CityPresetDto, selected: Boolean, children: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val custom = p.preset == "custom"
-    val disabled = p.adultOnly && children
-    val name = presetName(p.preset, p.titleRu)
-    val sub = presetSub(p, children)
-    val cd = if (p.adultOnly) stringResource(R.string.cd_city_preset_18, name, sub) else stringResource(R.string.cd_city_preset, name, sub)
-    val shape = RoundedCornerShape(DesignTokens.radius.r5)
-    Box(
-        modifier.height(DesignTokens.size.presetH)
-            .then(if (selected) Modifier.border(2.dp, C.accent.yellow, RoundedCornerShape(DesignTokens.radius.r5 + 2.dp)).padding(2.dp) else Modifier)
-            .clip(shape)
-            .background(if (custom) Color.Transparent else C.sign.brown)
-            .then(
-                if (custom) {
-                    Modifier.drawBehind {
-                        drawRoundRect(
-                            C.sign.white, style = Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f))),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(DesignTokens.radius.r5.toPx()),
-                        )
-                    }
-                } else {
-                    Modifier.padding(3.dp).border(DesignTokens.stroke.w2, C.sign.white, RoundedCornerShape(DesignTokens.radius.r3))
-                },
-            )
-            .selectable(selected, role = Role.RadioButton, onClick = onClick)
-            .semantics(mergeDescendants = true) { contentDescription = cd }
-            .testTag("city.preset.${p.preset}")
-            .padding(horizontal = 12.dp, vertical = 6.dp) // 10 in the spec; the 3 dp inner border leaves no room for 24 + 2 lines
-            .alpha(if (disabled) 0.45f else 1f),
+private fun StartField(ui: CityUi, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(DesignTokens.radius.r12)
+    val cd = stringResource(R.string.cd_city_start, ui.startLabel)
+    Row(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 60.dp).clip(shape).background(C.navi.field)
+            .border(2.dp, C.accent.yellow, shape).clickable(role = Role.Button, onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = cd }.testTag("city.start")
+            .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        val icon = when (p.preset) {
-            "overview" -> Glyph.BINOCULARS
-            "museums" -> Glyph.MUSEUM
-            "ryumochnye" -> Glyph.GLASS
-            "beer" -> Glyph.MUG
-            else -> Glyph.GEAR
+        GlyphIcon(Glyph.LOCATE, C.accent.yellow, 22.dp)
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Txt(ui.startLabel, T.title.sm, C.text.primary, Modifier.testTag("city.start.label"), maxLines = 1)
+            if (ui.fromGps && ui.town != null) Txt(stringResource(R.string.city_start_here, ui.town), T.body.sm, C.navi.labelSecondary, maxLines = 1)
+            else if (ui.town != null && ui.town != ui.startLabel) Txt(ui.town, T.body.sm, C.navi.labelSecondary, maxLines = 1)
         }
-        GlyphIcon(icon, C.sign.white, 24.dp, Modifier.align(Alignment.TopStart))
-        Column(Modifier.align(Alignment.BottomStart)) {
-            Txt(name, T.title.sm, C.sign.white, maxLines = 1)
-            Txt(sub, T.body.sm, C.mirror.label, maxLines = 1)
+        Row(
+            Modifier.height(40.dp).clip(RoundedCornerShape(DesignTokens.radius.r8)).background(C.dash.control).padding(horizontal = 12.dp).testTag("city.change"),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            GlyphIcon(Glyph.PENCIL, C.text.secondary, 16.dp)
+            Txt(stringResource(R.string.city_start_change), T.body.smStrong, C.text.secondary, maxLines = 1)
         }
-        Row(Modifier.align(Alignment.TopEnd), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (p.adultOnly) {
-                Box(Modifier.size(22.dp).clip(CircleShape).background(C.sign.white), contentAlignment = Alignment.Center) {
-                    Txt(stringResource(R.string.city_badge_18), T.caption.bold, C.text.onLight, maxLines = 1)
-                }
-            }
-            if (selected) GlyphIcon(Glyph.CHECK, C.accent.yellow, 16.dp)
+    }
+}
+
+/** 5.10 §10 step 5: what may get in the way, from the walk's crew and the chosen preset. */
+@Composable
+private fun CityWarnings(ui: CityUi, a: CityActions) {
+    val drink = ui.selected in setOf("ryumochnye", "beer") || (ui.selected == "custom" && "bars" in ui.interests)
+    val indoor = ui.selected == "museums"
+    val dogWalk = ui.presets.any { it.preset == DOG_WALK }
+    val dogActions = buildList {
+        if (dogWalk) add(stringResource(R.string.walk_action_dog_walk) to { a.preset(DOG_WALK) })
+        add(stringResource(R.string.walk_action_dog_home) to { a.dog(false) })
+    }
+    Column(Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (ui.children > 0 && drink) WalkWarningPlate(stringResource(R.string.walk_warn_child_bars), "city.warn.childbars")
+        if (ui.dog && drink) WalkWarningPlate(stringResource(R.string.walk_warn_dog_bars), "city.warn.dogbars", dogActions)
+        if (ui.dog && indoor) WalkWarningPlate(stringResource(R.string.walk_warn_dog_indoor), "city.warn.dogindoor", dogActions)
+    }
+}
+
+/** 5.10 §10 step 7: «Бюджет на всех ›», «Темп ›», «Вернуться к старту» (switch). */
+@Composable
+private fun PrefsPlate(ui: CityUi, a: CityActions) {
+    val shape = RoundedCornerShape(DesignTokens.radius.r12)
+    Column(Modifier.fillMaxWidth().clip(shape).background(C.dash.control).border(DesignTokens.stroke.w1, C.dash.outline, shape)) {
+        PrefRow(stringResource(R.string.city_pref_budget), budgetLabel(ui.budget), "city.pref.budget") { a.openPicker(CityPicker.BUDGET) }
+        Box(Modifier.fillMaxWidth().height(1.dp).background(C.dash.outline))
+        PrefRow(stringResource(R.string.city_pref_pace), paceLabel(ui.pace), "city.pref.pace") { a.openPicker(CityPicker.PACE) }
+        Box(Modifier.fillMaxWidth().height(1.dp).background(C.dash.outline))
+        Row(
+            Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp)
+                .toggleable(ui.returnToStart, role = Role.Switch, onValueChange = { a.toggleReturn() }).testTag("city.return").padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Txt(stringResource(R.string.city_pref_return), T.body.mdStrong, C.text.primary, Modifier.weight(1f))
+            Box(
+                Modifier.size(44.dp, 26.dp).clip(RoundedCornerShape(13.dp)).background(if (ui.returnToStart) C.accent.yellow else C.dash.controlAlt),
+                contentAlignment = if (ui.returnToStart) Alignment.CenterEnd else Alignment.CenterStart,
+            ) { Box(Modifier.padding(3.dp).size(20.dp).clip(CircleShape).background(if (ui.returnToStart) C.text.onLight else C.text.secondary)) }
         }
     }
 }
@@ -301,69 +289,48 @@ private fun Caption(ui: CityUi, a: CityActions) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f).padding(end = 14.dp).semantics(mergeDescendants = true) {}) {
+            Txt(stringResource(R.string.city_caption_label), T.label.md, C.text.muted)
             if (ui.building) {
-                // 5.10 §7: the caption shimmers with «Собираем прогулку…»
-                Txt(stringResource(R.string.city_caption_label), T.label.md, C.text.muted)
                 Txt(stringResource(R.string.city_building), T.title.lg, C.text.primary, Modifier.testTag("city.building"), maxLines = 1)
                 PlaceholderPlate(140.dp, 12.dp, C.dash.controlAlt, Modifier.padding(top = 4.dp))
             } else {
-                Txt(stringResource(R.string.city_caption_label), T.label.md, C.text.muted)
+                val name = presetName(ui.selected, ui.selected)
                 Txt(
-                    stringResource(R.string.city_caption_title, presetName(ui.selected, ui.selected), ui.durationMin / 60),
-                    T.title.lg, C.text.primary, Modifier.testTag("city.caption"), maxLines = 1,
+                    if (ui.durationMin == null) "$name${stringResource(R.string.common_join_dot)}${stringResource(R.string.city_duration_unlimited)}"
+                    else stringResource(R.string.city_caption_title, name, ui.durationMin / 60),
+                    T.title.lg, C.text.primary, Modifier.testTag("city.caption"), maxLines = 2, // «Пивной · без ограничения»
                 )
-                if (ui.town != null) {
-                    Txt(
-                        stringResource(if (ui.startTomorrow) R.string.city_caption_meta_tomorrow else R.string.city_caption_meta, ui.town, ui.startTime),
-                        T.body.mdTight, C.text.secondary, Modifier.testTag("city.caption.meta"), maxLines = 1,
-                    )
-                }
+                val crew = crewLine(ui.adults, ui.children, ui.dog)
+                Txt(
+                    when {
+                        ui.durationMin == null -> stringResource(R.string.city_caption_untimed, crew)
+                        ui.startTomorrow -> stringResource(R.string.city_caption_meta_tomorrow, crew, ui.startTime)
+                        else -> stringResource(R.string.city_caption_meta, crew, ui.startTime)
+                    },
+                    T.body.mdTight, C.text.secondary, Modifier.testTag("city.caption.meta"), maxLines = 1,
+                )
             }
         }
         val label = stringResource(R.string.city_go)
         StartButton(
-            StartSize.M, label, enabled = ui.error != "NO_CITY" && ui.presets.any { it.available } && !ui.building, cd = label,
+            StartSize.M, label, enabled = ui.error != "NO_CITY" && ui.presets.isNotEmpty() && !ui.building, cd = label,
             onClick = a::go, modifier = Modifier.testTag("city.go"), walker = true, loading = ui.building,
         )
     }
 }
 
-/** 5.10 §5 «Свой маршрут». */
+/** 5.10 §5 «Свой маршрут»: the interests (duration, pace, budget and the return live on 5.10 itself). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun BoxScope.CustomSheet(ui: CityUi, windowH: Dp, a: CityActions) {
     BottomSheet(stringResource(R.string.city_custom_title), a::closeCustom, "city.custom", windowH) {
-        Label(stringResource(R.string.city_duration_label))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            WalkDurations.forEach { m -> ParamChip(stringResource(R.string.city_duration, m / 60), ui.durationMin == m, "city.duration.$m") { a.duration(m) } }
-        }
         Label(stringResource(R.string.city_interests_label))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Interests.forEach { (key, res) -> ParamChip(stringResource(res), key in ui.interests, "city.interest.$key", multi = true) { a.interest(key) } }
         }
-        Label(stringResource(R.string.city_pace_label))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("slow" to R.string.city_pace_slow, "normal" to R.string.city_pace_normal, "fast" to R.string.city_pace_fast).forEach { (k, res) ->
-                ParamChip(stringResource(res), ui.pace == k, "city.pace.$k") { a.pace(k) }
-            }
-        }
-        Label(stringResource(R.string.city_budget_label))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(2_000, 5_000, 10_000).forEach { v -> ParamChip(stringResource(R.string.city_budget_value, RuFormat.thousands(v)), ui.budget == v, "city.budget.$v") { a.budget(v) } }
-            ParamChip(stringResource(R.string.instruments_budget_any), ui.budget == null, "city.budget.any") { a.budget(null) }
-        }
-        Row(
-            Modifier.fillMaxWidth().padding(top = 16.dp).defaultMinSize(minHeight = 44.dp)
-                .toggleable(ui.returnToStart, role = Role.Switch, onValueChange = { a.toggleReturn() }).testTag("city.return"),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Txt(stringResource(R.string.city_return_label), T.body.mdStrong, C.text.primary, Modifier.weight(1f))
-            Box(
-                Modifier.size(44.dp, 26.dp).clip(RoundedCornerShape(13.dp)).background(if (ui.returnToStart) C.accent.yellow else C.dash.control),
-                contentAlignment = if (ui.returnToStart) Alignment.CenterEnd else Alignment.CenterStart,
-            ) { Box(Modifier.padding(3.dp).size(20.dp).clip(CircleShape).background(if (ui.returnToStart) C.text.onLight else C.text.secondary)) }
-        }
-        Spacer(Modifier.height(14.dp))
+        Label(stringResource(R.string.city_duration_label))
+        DurationChips(ui.durationMin, a::duration, hint = false)
+        Spacer(Modifier.height(18.dp))
         Box(
             Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.accent.yellow)
                 .clickable(role = Role.Button, onClick = a::buildCustom).testTag("city.build"),
@@ -384,19 +351,6 @@ private val Interests = listOf(
 
 @Composable
 private fun Label(text: String) = Txt(text, T.label.md, C.text.muted, Modifier.padding(top = 16.dp, bottom = 6.dp))
-
-/** components §21 `ParamChips` (the `MoodChip` look): h 44, radius 22. */
-@Composable
-private fun ParamChip(text: String, on: Boolean, tag: String, multi: Boolean = false, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(22.dp)
-    Box(
-        Modifier.height(44.dp).clip(shape).background(if (on) C.accent.yellow else C.dash.control)
-            .border(DesignTokens.stroke.w1, if (on) C.accent.yellow else C.dash.outline, shape)
-            .then(if (multi) Modifier.toggleable(on, role = Role.Checkbox, onValueChange = { onClick() }) else Modifier.selectable(on, role = Role.RadioButton, onClick = onClick))
-            .testTag(tag).padding(horizontal = 14.dp),
-        contentAlignment = Alignment.Center,
-    ) { Txt(text, T.body.mdStrong, if (on) C.text.onLight else C.text.secondary, maxLines = 1) }
-}
 
 /** components §21 `StreetPlate`: «пешком · Ярославль» / the street (+ the house square when there is a number). */
 @Composable

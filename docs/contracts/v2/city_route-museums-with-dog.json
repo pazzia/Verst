@@ -1,0 +1,243 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-13",
+   "input_json": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "preset": "museums",
+    "durationMin": 240,
+    "crew": {
+     "adults": 2,
+     "dog": true
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-13",
+   "titleRu": "Казань: музейный маршрут",
+   "townId": "t_kazan",
+   "townName": "Казань",
+   "townPrep": "Казани",
+   "preset": "museums",
+   "startAt": "2026-10-23T10:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T13:57",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 1.5,
+   "walkMin": 26,
+   "durationMin": 238,
+   "requestedDurationMin": 240,
+   "crewNotesRu": [
+    "С собакой: в закрытые места кто-то зайдёт один, остальные подождут снаружи."
+   ],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "finish": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "Q4315032",
+     "kind": "museum",
+     "nameRu": "Национальный музей Республики Татарстан",
+     "lat": 55.79556,
+     "lon": 49.11016,
+     "arriveAt": "2026-10-23T10:02",
+     "departAt": "2026-10-23T11:04",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.2,
+     "walkMinFromPrev": 3,
+     "costRub": 800,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "С собакой внутрь обычно нельзя · Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w02",
+     "poiId": "Q4314887",
+     "kind": "museum",
+     "nameRu": "Хазинэ",
+     "lat": 55.7986,
+     "lon": 49.106,
+     "arriveAt": "2026-10-23T11:14",
+     "departAt": "2026-10-23T12:16",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 10,
+     "costRub": 800,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "С собакой внутрь обычно нельзя · Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w03",
+     "poiId": "Q185568",
+     "kind": "church",
+     "nameRu": "Благовещенский собор Казанского кремля",
+     "lat": 55.79979,
+     "lon": 49.1058,
+     "arriveAt": "2026-10-23T12:19",
+     "departAt": "2026-10-23T12:44",
+     "dwellMin": 25,
+     "walkKmFromPrev": 0.2,
+     "walkMinFromPrev": 3,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "08:00–20:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w04",
+     "poiId": "Q48946892",
+     "kind": "museum",
+     "nameRu": "Музей исламской культуры",
+     "lat": 55.79806,
+     "lon": 49.105,
+     "arriveAt": "2026-10-23T12:48",
+     "departAt": "2026-10-23T13:50",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 4,
+     "costRub": 800,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "С собакой внутрь обычно нельзя · Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    }
+   ],
+   "cost": {
+    "totalRub": 2400,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 2400
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    },
+    {
+     "code": "DOG_INDOOR",
+     "messageRu": "С собакой в музеи и бары обычно нельзя — кто-то останется снаружи."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     55.7963,
+     49.1088
+    ],
+    [
+     55.79556,
+     49.11016
+    ],
+    [
+     55.7986,
+     49.106
+    ],
+    [
+     55.79979,
+     49.1058
+    ],
+    [
+     55.79806,
+     49.105
+    ],
+    [
+     55.7963,
+     49.1088
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "townId": null,
+    "preset": "museums",
+    "durationMin": 240,
+    "interests": [],
+    "pace": "slow",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T10:00",
+    "crew": {
+     "adults": 2,
+     "children": 0,
+     "dog": true
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   },
+   "requestKey": "f32688de8e59b048"
+  },
+  "ms": 0
+ }
+}

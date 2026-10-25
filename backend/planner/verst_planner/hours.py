@@ -52,6 +52,10 @@ class OpeningHours:
                 merged.append((a, b))
         return merged
 
+    def day_intervals(self, weekday: int) -> tuple[Interval, ...]:
+        """The open intervals of a weekday (0 = Monday), minutes from midnight (end may exceed 1440)."""
+        return self.week[weekday]
+
     def is_open(self, local_dt: datetime) -> bool:
         """Open at this instant (closing time itself is closed)."""
         t = local_dt.replace(tzinfo=None, second=0, microsecond=0)

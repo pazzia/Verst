@@ -29,7 +29,7 @@ class EnumTest(unittest.TestCase):
             PlaceType: ["sight", "food", "fuel", "rest", "lodging"],
             Source: ["curated", "osm", "partner"],
             PlaceStatus: ["draft", "live", "hidden"],
-            Mood: ["calm", "more_stops", "just_drive"],
+            Mood: ["calm", "more_stops", "just_drive", "fun"],
             FuelType: ["ai92", "ai95", "dt"],
             RoadClass: ["motorway", "trunk", "primary", "secondary", "other"],
             StopKind: ["start", "sight", "food", "fuel", "rest", "overnight", "via", "finish"],
@@ -45,7 +45,7 @@ class EnumTest(unittest.TestCase):
                 "STOP_CLOSED",
             ],
             StageKey: ["split", "lodging", "hours", "fuel", "cost", "budget"],
-            CostKey: ["fuel", "tolls", "lodging", "food", "tickets", "reserve"],
+            CostKey: ["fuel", "tolls", "lodging", "food", "tickets", "parking", "reserve"],
         }
         for enum_cls, values in expected.items():
             with self.subTest(enum=enum_cls.__name__):

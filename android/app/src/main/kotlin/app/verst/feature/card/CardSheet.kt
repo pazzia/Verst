@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,13 +74,26 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
     val d = ui.details
     val name = d?.nameRu ?: ui.name
     BottomSheet(name, a::close, "card", windowH, pane = stringResource(R.string.cd_card, name), leading = { CardMiniSign(ui) }) {
-        Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.padding(top = 0.dp).testTag("card.kind"))
+        // 5.9 §9: the KindTag + the kind/place line; «Почему здесь: …» when the engine says why
+        val tagWord = if (ui.kind == "sight") d?.poiKindRu?.uppercase() ?: app.verst.feature.common.kindWord(d?.poiKind) else null
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (tagWord != null) app.verst.feature.common.KindTag(tagWord)
+            Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("card.kind"), maxLines = 1)
+        }
+        d?.whyRu?.takeIf { it.isNotBlank() }?.let {
+            // «Почему здесь: объект культурного наследия · …» (the engine starts each part with a capital)
+            val why = it.split(" · ").joinToString(" · ") { p -> if (p.length > 1 && p[1].isLowerCase()) p.replaceFirstChar { c -> c.lowercase() } else p }
+            Txt(stringResource(R.string.card_why, why), T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("card.why"))
+        }
         Spacer(Modifier.height(12.dp))
         val img = d?.image
         val area = ui.kind == "hotel" || img?.isArea == true
         val credit = when {
             img == null -> if (area) d?.townName?.let { stringResource(R.string.card_photo_area, it) } else null
             area -> img.labelRu ?: stringResource(R.string.card_photo_area, d?.townName ?: "")
+            // 5.9 §9 level 3: a Commons photo ≤ 300 m from the place
+            img.source == "geosearch" || img.source == "nearby" -> img.labelRu
+                ?: stringResource(R.string.card_photo_nearby_credit, img.credit?.author ?: "Wikimedia Commons", img.credit?.licence ?: "")
             img.credit?.author != null -> stringResource(R.string.card_photo_credit, img.credit!!.author!!, img.credit!!.licence ?: "")
             // release-s3: no usable author → «Фото: Wikimedia Commons · CC BY-SA 4.0» (the licence stays)
             img.credit?.licence != null -> stringResource(R.string.card_photo_credit_short) + stringResource(R.string.common_join_dot) + img.credit!!.licence!!
@@ -86,6 +101,8 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
         }
         val town = d?.townName ?: ""
         var photoShown by remember(img?.card) { mutableStateOf(false) }
+        val descText = d?.textRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kindLine(ui), d?.townName) }
+        val illWord = if (!area && ui.kind != "bar") (tagWord ?: kindLine(ui).substringBefore(" · ").uppercase()) else null
         PhotoFrame(
             url = if (ui.loading) null else img?.card,
             placeholder = if (area) Placeholder.CITY else placeholderFor(d?.poiKind, ui.kind),
@@ -95,6 +112,9 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             contentDescription = if (area) stringResource(R.string.cd_card_photo_area, town) else stringResource(R.string.cd_card_photo, name),
             onCredit = img?.page?.let { p -> { a.openPage(p) } },
             onShown = { photoShown = it },
+            plate = if (img?.source == "geosearch" || img?.source == "nearby") stringResource(R.string.card_photo_nearby_label) else null,
+            // levels 4–5: the category illustration; «фото пока нет» only without a description (OSM-only)
+            illustration = illWord?.let { Illustration(it, caption = descText.isNullOrBlank()) },
         )
         if (ui.kind == "hotel") {
             // 5.9 §3: «на фото район, а не она» only while the area photo is on screen
@@ -104,16 +124,32 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             )
         }
         // the fictional status is said once (S3-QA P1-05): no engine «Демо: вымышленная гостиница» line
-        val desc = d?.descriptionRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kindLine(ui), d?.townName) }
+        val desc = descText
+        if (desc.isNullOrBlank() && ui.offline && ui.kind == "sight" && d?.wikidataId != null && d.textSource != "osm") {
+            // ADR-0016 OR-4 / CEO S4: an online-only value is missing offline → the quiet line in its place
+            Txt(stringResource(R.string.online_later), T.body.md, C.text.muted, Modifier.padding(top = 12.dp).testTag("card.later"))
+        }
         if (!desc.isNullOrBlank()) {
             var more by remember(desc) { mutableStateOf(false) }
             Txt(desc, T.body.md, C.text.note, Modifier.padding(top = 12.dp).clickable { more = !more }, maxLines = if (more) Int.MAX_VALUE else 6)
-        }
-        val facts = facts(ui)
-        if (facts.isNotEmpty()) {
-            Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                facts.forEach { Txt(it, T.body.sm, C.text.secondary) }
+            // the source line under the text (a link to the page when the engine has it)
+            val src = when (d?.textSource) {
+                "wikipedia" -> stringResource(R.string.card_desc_wikipedia)
+                "wikivoyage" -> stringResource(R.string.card_desc_wikivoyage)
+                "osm" -> stringResource(R.string.card_osm)
+                else -> d?.extractSource?.nameRu?.let { n -> stringResource(R.string.card_desc_source, listOfNotNull(n, d?.extractSource?.licence).joinToString(" · ")) }
             }
+            if (src != null) Txt(src, T.caption.md, C.text.muted, Modifier.padding(top = 4.dp).testTag("card.desc.source"))
+        }
+        if (ui.kind == "hotel") {
+            val facts = facts(ui)
+            if (facts.isNotEmpty()) {
+                Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    facts.forEach { Txt(it, T.body.sm, C.text.secondary) }
+                }
+            }
+        } else {
+            FactChips(ui)
         }
         val action: Pair<String, () -> Unit>? = when {
             ui.kind == "hotel" && !ui.walkStop -> stringResource(R.string.card_pick_hotel) to a::pickHotel
@@ -133,8 +169,66 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
                 contentAlignment = Alignment.CenterStart,
             ) { Txt(stringResource(R.string.card_report), T.body.smStrong, C.text.muted, maxLines = 1) }
         }
-        if (d?.attributionRu?.isNotEmpty() == true || ui.kind == "bar") {
-            Txt(stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
+        // S4-QA P1-05 (ODbL): any place whose data comes from OSM says so, at every card level — unless the source
+        // line under the text already did
+        val osmShown = !desc.isNullOrBlank() && d?.textSource == "osm"
+        if (osmData(ui) && !osmShown) {
+            Txt(d?.placeAttributionRu ?: stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
+        }
+    }
+}
+
+/**
+ * 5.9 §9 facts as chips (min-h 28, radius 14): hours (green open / red closed), ticket, dogs, parking (blue tint);
+ * one open-data line with the dotted ring when any fact is open data. «не проверено» is never shown.
+ */
+@Composable
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+private fun FactChips(ui: CardUi) {
+    val d = ui.details ?: return
+    val chips = mutableListOf<Triple<String, androidx.compose.ui.graphics.Color, androidx.compose.ui.graphics.Color>>()
+    val h = d.hours
+    if (h != null) {
+        when {
+            h.allDay -> chips += Triple(stringResource(R.string.hours_24), C.hours.open, C.hours.openFill)
+            h.openNow == true && h.todayRu != null -> chips += Triple(stringResource(R.string.hours_today_open, h.todayRu ?: ""), C.hours.open, C.hours.openFill)
+            h.openNow == false -> chips += Triple(stringResource(R.string.hours_closed), C.hours.closed, C.hours.closedFill)
+            !h.textRu.isNullOrBlank() -> hoursRu(h.textRu!!)?.let { chips += Triple(it.replace("{24}", stringResource(R.string.hours_24)).replace("{daily}", stringResource(R.string.card_hours_daily)), C.text.secondary, C.dash.control) }
+        }
+    }
+    val t = d.ticket
+    if (t != null && (t.adultRub ?: 0) > 0) {
+        var line = stringResource(R.string.card_ticket, RuFormat.thousands(t.adultRub ?: 0), RuFormat.thousands(t.childRub ?: 0))
+        if (t.estimate) line += stringResource(R.string.common_join_dot) + stringResource(R.string.card_price_estimate)
+        chips += Triple(line, C.text.secondary, C.dash.control)
+    } else if (t != null && ui.kind == "sight") {
+        chips += Triple(stringResource(R.string.card_ticket_free), C.text.secondary, C.dash.control)
+    }
+    d.dogsAllowed?.let { chips += Triple(stringResource(if (it) R.string.card_dogs_yes else R.string.card_dogs_no), C.text.secondary, C.dash.control) }
+    val p = d.parking
+    if (p != null && p.known) {
+        val text = if (p.free) stringResource(R.string.card_parking_free) else stringResource(R.string.card_parking_paid, RuFormat.thousands(p.rubPerHour ?: 0))
+        chips += Triple(text, C.navi.text, C.sign.blue.copy(alpha = 0.25f))
+    }
+    if (d.heritage) chips += Triple(stringResource(R.string.card_heritage), C.text.secondary, C.dash.control)
+    if (chips.isNotEmpty()) {
+        androidx.compose.foundation.layout.FlowRow(
+            Modifier.padding(top = 10.dp).fillMaxWidth().testTag("card.facts"),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            chips.forEach { (text, fg, bg) ->
+                Box(
+                    Modifier.defaultMinSize(minHeight = 28.dp).clip(RoundedCornerShape(14.dp)).background(bg).padding(horizontal = 10.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.Center,
+                ) { Txt(text, T.body.smStrong, fg) }
+            }
+        }
+    }
+    if (!d.verified || h?.verified == false) {
+        Row(Modifier.padding(top = 8.dp).testTag("card.opendata"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            app.verst.feature.common.OpenDataRing()
+            Txt(stringResource(R.string.card_open_data), T.body.sm, C.text.muted)
         }
     }
 }
@@ -143,7 +237,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
 @Composable
 private fun CardMiniSign(ui: CardUi) {
     if (ui.kind == "bar") BarSign(ui.tags.firstOrNull() ?: "bar")
-    else Box(Modifier.scaled(0.7f)) { RoadSign(ui.sign, ui.name, ui.tags) }
+    else Box(Modifier.scaled(0.7f)) { RoadSign(ui.sign, ui.name, app.verst.feature.common.signTags(ui.details?.poiKind, ui.tags)) }
 }
 
 @Composable
@@ -154,6 +248,33 @@ private fun SecondaryButton(text: String, tag: String, onClick: () -> Unit) {
             .background(C.dash.control).clickable(role = Role.Button, onClick = onClick).testTag(tag),
         contentAlignment = Alignment.Center,
     ) { Txt(text, T.button.md, C.text.primary, maxLines = 1) }
+}
+
+/**
+ * The place's data comes (partly) from OpenStreetMap: the engine's OSM attribution, an OSM text or photo, a bar, or a
+ * sight known only from the OSM layer (no Wikidata item, not a curated place).
+ */
+internal fun osmData(ui: CardUi): Boolean {
+    val d = ui.details
+    return ui.kind == "bar" || d?.osmSource == true || d?.placeSource == "osm" || d?.placeAttributionRu != null || d?.attributionRu?.any { it.contains("OpenStreetMap") } == true || d?.textSource == "osm" ||
+        d?.image?.source == "osm" || (ui.kind == "sight" && d != null && d.wikidataId == null && !d.id.startsWith("pl_"))
+}
+
+/**
+ * Raw OSM `opening_hours` must never reach the card in English («Mo-Su 05:00-21:00»): the daily form becomes
+ * «{daily} 05:00–21:00», `24/7` → «{24}»; anything else with Latin letters is dropped (the open-data line stays).
+ */
+internal fun hoursRu(text: String): String? {
+    val t = text.trim()
+    if (t == "24/7") return "{24}"
+    Regex("""^Mo-Su (\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$""").matchEntire(t)?.let { m -> return "{daily} ${m.groupValues[1]}–${m.groupValues[2]}" }
+    // OSM day abbreviations → Russian («Tu-Su 10:00-18:00; Mo off» → «вт–вс 10:00–18:00; пн выходной»)
+    val days = mapOf("Mo" to "пн", "Tu" to "вт", "We" to "ср", "Th" to "чт", "Fr" to "пт", "Sa" to "сб", "Su" to "вс", "PH" to "праздники")
+    var r = Regex("""\b(Mo|Tu|We|Th|Fr|Sa|Su|PH)\b""").replace(t) { days.getValue(it.value) }
+    r = r.replace(Regex("""\boff\b|\bclosed\b"""), "выходной")
+    r = Regex("""(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})""").replace(r) { "${it.groupValues[1]}–${it.groupValues[2]}" }
+    r = Regex("""([а-я]{2})-([а-я]{2})""").replace(r) { "${it.groupValues[1]}–${it.groupValues[2]}" }
+    return if (r.any { it in 'A'..'Z' || it in 'a'..'z' }) null else r
 }
 
 /**
@@ -177,6 +298,9 @@ private fun kindLine(ui: CardUi): String {
     val d = ui.details
     val town = d?.townName
     if (ui.kind == "hotel") return stringResource(R.string.card_kind_hotel, town ?: "")
+    // M9: the engine's label as given for sights («музей · Коломна»); the local words for bars and old data
+    val label = d?.poiKindRu?.takeIf { ui.kind == "sight" }?.lowercase()
+    if (label != null) return if (town.isNullOrBlank()) label else stringResource(R.string.card_kind_line, label, town)
     val word = when (d?.poiKind) {
         "museum" -> stringResource(R.string.card_kind_museum)
         "church" -> stringResource(R.string.card_kind_church)
@@ -191,7 +315,9 @@ private fun kindLine(ui: CardUi): String {
         "pub" -> stringResource(R.string.card_kind_pub)
         "craft" -> stringResource(R.string.card_kind_craft)
         "bar", "beer" -> stringResource(R.string.card_kind_bar)
-        else -> if (ui.kind == "bar") stringResource(R.string.card_kind_bar) else stringResource(R.string.card_kind_sight)
+        // S4 kinds without a card word (playground, zoo, interactive, nature, theatre, temple…): the tag word
+        else -> if (ui.kind == "bar") stringResource(R.string.card_kind_bar)
+        else app.verst.feature.common.kindWord(d?.poiKind)?.lowercase() ?: stringResource(R.string.card_kind_sight)
     }
     return if (town.isNullOrBlank()) word else stringResource(R.string.card_kind_line, word, town)
 }

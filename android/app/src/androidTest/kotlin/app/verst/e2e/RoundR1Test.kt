@@ -152,21 +152,42 @@ class RoundR1Test {
         goldenRingRoad()
         val r = flow.result!!
         val gateway = app.verst.engine.ChaquopyPlannerGateway(E2e.engine, app.verst.core.model.DefaultWorld)
-        // 5.13: the day link → the day menu «В навигатор: день 1» → the engine's links (ADR-0014).
+        // 5.13 §5 (S4): «вести» of day 1 → the hand-off sheet with the engine's v3 links (ADR-0015 §1).
         compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).performClick()
-        waitTag("daymenu")
-        compose.waitUntil(10_000) { flow.dayHandoff != null }
-        shot("42-day-menu")
-        compose.onNodeWithTag("daymenu.go", useUnmergedTree = true).performClick()
+        waitTag("handoff")
+        compose.waitUntil(10_000) { flow.handoffSheet?.handoff != null }
+        shot("42-handoff-sheet")
+        val engineDay = kotlinx.coroutines.runBlocking { gateway.handoff(r.tripJson, app.verst.core.model.HandoffArgs.day(1)) }
+        val dayLinks = (engineDay as app.verst.core.model.EngineResult.Ok).value.parts.first().links
+        assertEquals(dayLinks, flow.handoffSheet!!.handoff!!.parts.first().links)
+        assertTrue(dayLinks.maps!!.startsWith("yandexmaps://maps.yandex.ru/?rtext="))
+        assertTrue(dayLinks.navigatorNext!!.startsWith("yandexnavi://build_route_on_map?lat_to="))
+        assertTrue(dayLinks.web!!.startsWith("https://yandex.ru/maps/?rtext="))
+        // unsigned: Карты first with the whole day («весь день»)
+        compose.onNodeWithTag("handoff.maps.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.maps", useUnmergedTree = true).performClick()
         compose.waitUntil(5_000) { flow.lastHandoff != null }
         val (links, target) = flow.lastHandoff!!
-        Log.i("VerstE2e", "handoff day 1 $target navi=${links.navigator} web=${links.web}")
-        assertEquals(if (flow.navigatorInstalled) HandoffTarget.NavigatorDryRun else HandoffTarget.BrowserDryRun, target)
-        val engineDay = kotlinx.coroutines.runBlocking { gateway.handoff(r.tripJson, app.verst.core.model.HandoffArgs.day(1)) }
-        assertEquals((engineDay as app.verst.core.model.EngineResult.Ok).value.parts.first().links, links)
-        assertTrue(links.navigator!!.startsWith("yandexnavi://build_route_on_map?"))
-        assertTrue(links.navigator!!.contains("lat_via_0="))
-        assertTrue(links.web!!.startsWith("https://yandex.ru/maps/?rtext="))
+        Log.i("VerstE2e", "handoff day 1 $target maps=${links.maps} web=${links.web}")
+        val mapsApp = flow.handoffLauncher?.mapsInstalled() == true
+        assertEquals(if (mapsApp) HandoffTarget.MapsDryRun else HandoffTarget.BrowserDryRun, target)
+        assertEquals(dayLinks.maps, links.maps)
+        assertEquals(dayLinks.web, links.web)
+        // «До след.» → the Навигатор gets the next point only
+        compose.onNodeWithTag("road.handoff", useUnmergedTree = true).performScrollTo().performClick()
+        waitTag("handoff")
+        compose.waitUntil(10_000) { flow.handoffSheet?.handoff != null }
+        compose.onNodeWithTag("handoff.tab.next", useUnmergedTree = true).performClick()
+        compose.waitUntil(5_000) { flow.handoffSheet?.day == null }
+        shot("42b-handoff-next")
+        if (flow.navigatorInstalled) {
+            compose.onNodeWithTag("handoff.navi", useUnmergedTree = true).performClick()
+            compose.waitUntil(5_000) { flow.lastHandoff?.second == HandoffTarget.NavigatorDryRun }
+            assertEquals(dayLinks.navigatorNext, flow.lastHandoff!!.first.navigator)
+        } else {
+            compose.onNodeWithTag("handoff.navi.install", useUnmergedTree = true).assertExists()
+            compose.runOnUiThread { flow.closeHandoffSheet() }
+        }
 
         // Long-press a row → D-5 → «Открыть в навигаторе отсюда».
         val stop = r.trip.daysList.first().stops[1]
@@ -181,14 +202,14 @@ class RoundR1Test {
         val engineStop = kotlinx.coroutines.runBlocking { gateway.handoff(r.tripJson, app.verst.core.model.HandoffArgs.fromStop(stop.id)) }
         assertEquals((engineStop as app.verst.core.model.EngineResult.Ok).value.parts.first().links, from)
 
-        // Offline without a navigator app: the link keeps its look; the tap explains it (5.13 §3).
+        // Offline without the Карты app: the button keeps its look; the tap explains it (5.13 §3).
         compose.runOnUiThread { flow.setOffline(true) }
         val before = flow.lastHandoff
-        compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).performClick()
-        waitTag("daymenu")
-        compose.waitUntil(10_000) { flow.dayHandoff != null }
-        compose.onNodeWithTag("daymenu.go", useUnmergedTree = true).performClick()
-        if (!flow.navigatorInstalled) {
+        compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).performScrollTo().performClick()
+        waitTag("handoff")
+        compose.waitUntil(10_000) { flow.handoffSheet?.handoff != null }
+        compose.onNodeWithTag("handoff.maps", useUnmergedTree = true).performClick()
+        if (flow.handoffLauncher?.mapsInstalled() != true) {
             compose.onNodeWithText("открыть карту в браузере", substring = true).assertExists()
             assertEquals(before, flow.lastHandoff)
         }

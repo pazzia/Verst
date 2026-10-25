@@ -18,7 +18,14 @@ one case below. `CostOverrides.replaced[stop_id] = AltUnits` applies, in this or
    null) a `TicketUnit(stop_id, place_id, name_ru, adult_rub, child_rub ?? adult_rub)` is added (this
    covers a rest/coffee replaced by a short sight); `free_entry` sights carry 0/0.
    (cases: replaced_sight, replaced_sight_free, replaced_rest_by_sight, replaced_sight_by_rest)
-5. Lines, reserve, total, per person and remaining then follow A§7.2 unchanged.
+5. Parking (API v3, ADR-0015 §4; only when `CostUnits.parking` is non-empty): the replaced stop's
+   `ParkingUnit` is removed; if the alternative carries its own parking (`parkingSource` present, with
+   `parkingRub` / `parkingRubPerHour` / `parkingHours`), a unit with the replaced stop's id takes its place
+   (appended when the replaced stop had none, e.g. a rest stop replaced by a sight). The line is
+   Σ known `rub` (null = unknown price, counted 0); it is inside the subtotal, so inside the reserve base
+   and the budget check. (cases: parking_replaced_stop, parking_replaced_by_alt, parking_alt_unknown,
+   parking_rest_replaced_by_sight, parking_reserve_budget)
+6. Lines, reserve, total, per person and remaining then follow A§7.2 unchanged.
 """
 
 import copy
@@ -185,6 +192,12 @@ def expected(units, crew, reserve_on, budget, overrides):
         "food": r(food, 10),
         "tickets": r(tickets, 10),
     }
+    # ADR-0015 §4 (API v3): Σ known per-stop parking (rub already rounded to 10 by the engine); a replaced
+    # stop's parking is swapped for the alternative's own (rule 5); no `parking` units = no line
+    if units.get("parking"):
+        parks = [x["rub"] for x in units["parking"] if x["stopId"] not in replaced]
+        parks += [a["parkingRub"] for a in replaced.values() if "parkingSource" in a]
+        lines["parking"] = sum(x for x in parks if x is not None)
     subtotal = sum(lines.values())
     lines["reserve"] = r(D(units["reserveFrac"]) * subtotal, 10)
     total = r(subtotal + (lines["reserve"] if reserve_on else 0), 100)
@@ -453,7 +466,14 @@ case(
 )
 
 
-def alt(region_code, delta, check=None, adult=None, child=None, price=None, region_name="", trip_delta=0):
+def alt(
+    region_code, delta, check=None, adult=None, child=None, price=None, region_name="", trip_delta=0, park=None
+):
+    extra = {}
+    if park is not None:  # (rub per hour or None, hours, source)
+        rate, hours, source = park
+        rub = None if rate is None else int(r(D(rate * hours), 10))
+        extra = {"parkingRub": rub, "parkingRubPerHour": rate, "parkingHours": hours, "parkingSource": source}
     return {
         "tripKmDelta": trip_delta,
         "deltaKm": delta,
@@ -465,7 +485,7 @@ def alt(region_code, delta, check=None, adult=None, child=None, price=None, regi
         "placeId": "pl_alt",
         "priceRub": price,
         "regionName": region_name,
-    }
+    } | extra
 
 
 case(
@@ -585,6 +605,50 @@ case(
     crew=FAMILY,
     reserve_on=False,
     budget=30000,
+)
+
+def park(stop, name, rate, hours, source):
+    rub = None if rate is None else int(r(D(rate * hours), 10))
+    return {"stopId": stop, "name": name, "rubPerHour": rate, "hours": hours, "rub": rub, "source": source}
+
+
+PARKING = [
+    park("d1s02", "Московский Кремль", 380, 2, "zone"),
+    park("d1s04", "Троице-Сергиева лавра", 0, 2, "free"),
+    park("d2s02", "Набережная", None, 1, "unknown"),
+    park("d2s03", "Музей", 55, 1, "osm"),
+]
+case("parking_known_free_unknown", "ADR-0015 §4: 760 + 0 + unknown + 60 = 820", units=mod(parking=PARKING))
+case(
+    "parking_replaced_stop",
+    "rule 5: a replaced stop loses its parking; an alternative without parkingSource adds none: 0 + 60 = 60",
+    units=mod(parking=PARKING),
+    overrides={"replaced": {"d1s02": alt("RU-MOS", 0.0)}},
+)
+case(
+    "parking_replaced_by_alt",
+    "rule 5: the alternative's own parking (200 ₽/h x 2 h) replaces the Kremlin's 760: 400 + 0 + 60 = 460",
+    units=mod(parking=PARKING),
+    overrides={"replaced": {"d1s02": alt("RU-MOS", 0.4, adult=500, child=0, park=(200, 2, "zone"))}},
+)
+case(
+    "parking_alt_unknown",
+    "rule 5: an alternative at paid parking with an unknown price counts 0: 0 + 0 + 60 = 60",
+    units=mod(parking=PARKING),
+    overrides={"replaced": {"d1s02": alt("RU-MOS", 0.4, adult=0, child=0, park=(None, 1, "unknown"))}},
+)
+case(
+    "parking_rest_replaced_by_sight",
+    "rule 5: a rest stop (no parking unit) replaced by a sight appends its parking: 820 + 80 = 900",
+    units=mod(parking=PARKING),
+    overrides={"replaced": {"d2s01": alt("RU-YAR", 0.8, adult=250, child=100, park=(80, 1, "zone"))}},
+)
+case("parking_all_free", "every stop free: a 0 ₽ line", units=mod(parking=[PARKING[1]]))
+case(
+    "parking_reserve_budget",
+    "parking counts in the subtotal, the reserve and the budget check",
+    units=mod(parking=PARKING),
+    budget=20000,
 )
 
 TEXT = (

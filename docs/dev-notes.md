@@ -1547,3 +1547,444 @@ Inputs merged:
 - **Report sheet:**
   - 84: the sheet as opened, with the IME down and all four reasons + the button visible.
   - 84b: after a tap in the comment, with the button above the IME.
+
+## S4 — Sprint 4, Android side (branch dev/S4 from main cf8f335)
+
+Inputs: design `des/sprint-4` @ a405594 (tokens synced with `tools/sync_design_tokens.py`), engine
+`arch/s4-engine` M0 (b1f9fb7 API v3: `kmDriven`/`kmLeft`, Карты-first hand-off with `navigatorNext`, mood `fun`,
+merged), ADR-0015/0016 on `arch/sprint-4`, `docs/bugs/s4-walk-filters.md`. Later engine milestones (stop `poiKind`,
+`parking`, `units.parking`, walks with `crew.dog` / `durationMin: null` / `hours` / `requestKey`,
+`NOT_ENOUGH_POIS.suggestions`, `poi_details.whyRu`) are built against the ADR contracts and test fixtures; every new
+field is optional, so the M0 engine and saved trips render as before.
+
+### City mode from scratch (5.10, 5.11)
+- 5.10 does not take the car crew, mood or budget: its own adults / children / dog (persisted in the defaults),
+  the start field, the 18+ question only («Вам есть 18?», side-by-side Нет / Да; no child block anywhere),
+  2 / 4 / 6 / 8 ч or «без ограничения» (`durationMin: null`), `dog_walk` shown only with the dog.
+- Warnings are informative plates (child + bars, dog + indoor stops); ПОШЛИ stays on.
+- Bugs (a)(b)(c) fixed: any input change clears `exclude`; on 5.11 a change rebuilds in place after 400 ms
+  (`Пересобираем прогулку…` over the dimmed last result; stale answers dropped by a sequence number, `requestKey`
+  when the engine sends it); a failed or empty rebuild never leaves 5.11 (toast + «Повторить», or the
+  «Другой вариант» note); NOT_ENOUGH shows only the engine's suggestions; the custom values survive back + reopen.
+  The @Ignore'd test is now `customWalkRecoversAfterOtherVariantRunsOutOfPlaces`.
+- Untimed walks: header «Порядок по пути…», hours pills per stop, no clock times.
+- Decision: the 5.10 caption title may wrap to 2 lines («Пивной · без ограничения» does not fit one at 390).
+- Decision: the «мало мест» plate is brought into view when it appears (it answered ПОШЛИ).
+
+### Windshield, Instruments
+- `CityEntryPlate` under a 96 dp navigator panel («НАВИГАТОР · НА МАШИНЕ», hint line dropped); dashboard 344.
+  On short windows the dashboard shrinks to keep the sign clear and the caption row scrolls under the fade.
+- Three `MoodCard`s; `fun` is the default; v2 `more_stops` (saved defaults) reads as `fun`; the app never sends
+  `more_stops`. The caption meta ends with the mood in lower case (2 lines allowed).
+
+### Road ahead (5.5 §10, variant B)
+- `HandoffCta` (today's day of a running trip, else 1) and the day «вести» → the hand-off sheet; long-press always
+  opens the sheet.
+- Rows: tag row (`StretchTag` «РАЗМИНКА 30 МИН» for `funFor` stops, `KindTag` for sights, the dotted ring for open
+  data — «не проверено» is gone), description ≤ 2 lines with rest amenities inside it, one costs line
+  (price · P part → `ParkingSheet`; the line wraps instead of truncating).
+- P parts / day and footer totals show only with a parking-aware engine (a «Парковки» line or any stop
+  `parking`); then a parking stop without data reads «P ?». Parking stops: sight, food, rest, overnight.
+- Km posts at x 37 (post zone), the car (components §26.3) loops over the visible road in the car lane x 13–31,
+  parked at the top under reduced motion; the road column is x 10–62.
+- Decision: the ParkingSheet uses the standard `BottomSheet` title row (the stop name) and puts «ПАРКОВКА» with the
+  detail next to the big sign.
+
+### Hand-off (ADR-0015 §1, 5.13 §5)
+- Unsigned (no key yet): day tabs → Карты first with the whole day (`links.maps` / `web`), Навигатор gets
+  `navigatorNext` only (or a local next-point link for pre-v3 hand-offs); «До след.» → Навигатор first.
+  `handoffSigned` is the switch for the signed build (the RSA signing over `toSign` is not written yet: no key).
+- Not installed: Навигатор dims with «Установить из магазина приложений» (market:// then the Play web page);
+  Карты keeps its place and opens the web route. «Запомнить выбор» is persisted with the defaults.
+- The Sprint 3 day menu code stays for the stop menu path; the day link no longer opens it.
+
+### Waybill, CostCalculator
+- «Парковки» after «Билеты»: P 15, the engine formula (else built from the stops), «+ ещё N без данных»; expanded:
+  paid rows, the free stops in one 0 row, the unknown ones with «?», the note. Lever `parking_free` is named.
+- `CostCalculator`: `lines["parking"] = Σ units.parking[].rub` (unknown = 0), inside the subtotal, so in the
+  reserve base and ИТОГО; a replaced stop takes `AltUnits.parkingRub` when given. `ParkingCostTest` pins it until
+  `cost_recompute_cases.json` gains the 4 parking cases (Architect).
+
+### Card at data levels 1–5 (5.9 §9)
+- KindTag + kind line, «Почему здесь: …» (`whyRu`), «ФОТО РЯДОМ» for `image.source = nearby`, the category
+  illustration (kind mat, 135° stripe, sign 92 with the pictogram, the kind word) instead of «нет фото»; «фото пока
+  нет» only without a description. Source line under the text; facts as chips; one open-data line with the ring.
+- Offline with no description for a Wikidata place: «уточним при интернете» in its place.
+
+### Online data (ADR-0016 OR-1…OR-8)
+- One OkHttp client: connect 3 s, read 5 s per attempt, call 13.5 s (two attempts + jitter); photos 10 s total.
+  `OnlineInterceptor`: one retry with 0.5–1.5 s jitter for GET on an I/O error or 5xx (never 4xx/429), the per-host
+  `CircuitBreaker` (3 failures / 60 s → 5 min), `OnlineStats` counters in the debug panel. `jsonBodyOrNull`
+  drops non-JSON and > 1 MB bodies; parse errors become «no data».
+- An address search that fails is «уточним при интернете» (`AddressState.Later`), never «ничего не нашли».
+- Tests: `OnlineRulesTest` (MockWebServer: airplane, slow, 500/503/429, HTML, truncated, wrong types, 5 MB,
+  disconnect, breaker) and `Sprint4Test` on the emulator (airplane journey with 0 requests, slow, 500 + garbage).
+- Not done: cached parking with age (no live parking — CEO), the online Wikipedia summary fetch (nothing to
+  fetch yet, so the card shows the offline text only).
+
+### Found on the emulator
+- Card hours chip showed raw OSM «Mo-Su 05:00-21:00»: `hoursRu` turns the daily form into «ежедневно 05:00–21:00»,
+  `24/7` into «круглосуточно», and drops anything else with Latin letters.
+- «без ограничения» on the M0 engine: `city_route` rejects `durationMin: null` → the Sprint 3 engine toast on 5.10
+  (the walk milestone of `arch/s4-engine` fixes it; `Sprint4Test` logs the answer and only checks no error screen).
+- The first ProcessDeath failure (run 94) followed the Sprint4Test crashes in the same instrumentation; with those
+  fixed it passes (run 95). It now logs the crew/route and takes a failure screenshot.
+
+### Tokens missing in the deck (used the nearest)
+- MoodCard on fill #1F1F17, HandoffAppCard recommended #1F2A14 → `dash.face` + the 2 dp yellow border;
+  CityEntryPlate pressed #173E82 → `sign.blueSelected`; HandoffCta pressed #E6BD38 → yellow at 90 %; car roof
+  #FFE27A → white 35 % over the yellow. `type.title.md` is 17 in the tokens, the spec says 19 for the city plate
+  title (used 19).
+## Sprint 4 engine (arch/s4-engine from main cf8f335) — contract changes for the Developer
+API v3 is additive (`mobile.API_VERSION = 3`; the contracts stay in `docs/contracts/v2/`, 38 files).
+- **Trip stops:** `kmDriven` (driven km from the trip start, detours included) and `kmLeft`; the last stop has
+  `kmDriven == trip.km`. Rest and fuel rows have `amenities` (wc, cafe_at_fuel, playground, walk, view, parking,
+  ev_charger, 24h). A second roadside break of a day reads only «Перерыв 15 минут.».
+- **Hand-off (car):** `order = ["maps", "navigatorNext", "web"]`; `parts[0].links.navigatorNext` (the next point
+  only) and `parts[0].next`; `links.navigator` (the whole day) stays for a signed build. `options.signing =
+  {"client": id}` adds `&client=` to the app links and returns `toSign` (sign each string with SHA256withRSA,
+  Base64, URL-encode, append `&signature=`).
+- **Moods:** `mood: "fun"` «Весело и познавательно» (interesting stops in the rest slots, ≤ 15 min detour, for the
+  crew; reason «Весело и познавательно: …»). The UI shows «Спокойно» (`calm`), «Весело и познавательно»
+  (`fun`), «Только доехать» (`just_drive`); `more_stops` stays accepted for saved trips.
+- **Parking:** a «Парковки» cost line (`key: "parking"`) with per-stop `breakdown` and
+  `cost.units.parking[] = {stopId, name, rubPerHour, hours, rub, source}` (`rub` null = unknown). Present only
+  in `russia_v1`. CostCalculator: see «M6 answers» §3 below (superseded).
+- **Walks:** `crew.dog`; children never block a drink walk (`CHILD_BARS` warning); `DOG_INDOOR` warning and
+  stop `noteRu`; `crewNotesRu`; preset `dog_walk` «Прогулка с собакой»; `durationMin: null` = «без ограничения»
+  (`unlimited: true`, no `arriveAt/departAt/endAt/durationMin`, ≤ 12 stops); every stop has `hours: {todayRu,
+  openNow, source}`; `interestsWidened`; `shorter.reason` gains `reach`; `NOT_ENOUGH_POIS.suggestions[]` with
+  `clearExclude` / `durationMin` (null = unlimited) / `preset` and `stops` — each solved, never the current
+  value. The app still resets `exclude` on any parameter change (docs/bugs/s4-walk-filters.md a).
+- **POI card:** `poi_details` gains `extractRu`, `extractSource {key, nameRu, licence}`, `cardLevel` 1–4,
+  `quality`, `fee`, `website`; OSM hours replace the default hours text.
+- **Rules (russia_v1 only):** open-data quality threshold, no sights within 12 km of a million-city centre
+  unless the trip starts/ends/stays there, ≤ 1 religious per 3 sights a day, no same kind twice in a row,
+  ≤ 30 % religious per trip, no second sight within 0.4 km of one already in the day (Красная площадь and
+  the Mausoleum); МКАД/ЦКАД in the routing graph (ЦКАД tolls not priced yet).
+- G01–G13 are byte-identical; G14–G17 (tests/golden/cases_s4) are rule checks on the real catalogue.
+
+### M6 answers to the Developer's S4 questions (dev/S4 @ feb8b70)
+Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost cases:
+`tests/contract/cost_recompute_cases.json` (52, 7 `parking_*`).
+
+**1. Walks** (`city_route`)
+- Unlimited: send `durationMin: null`. Accepted since M4 (dac11bb); M0 rejected it. Result: `unlimited: true`,
+  `durationMin: null`, `endAt: null`, stops `arriveAt/departAt: null`, ≤ 12 stops; `requestedDurationMin` echoes
+  the request. See `city_route-unlimited.json`.
+- Dog walk: `preset: "dog_walk"` (title «Прогулка с собакой», outdoor kinds only) and `crew.dog: true` on any
+  preset. A dog with an indoor stop gives the `DOG_INDOOR` warning and the stop `noteRu`. The input echo now has
+  `crew.dog`. See `city_route-dog-walk.json` and `city_route-museums-with-dog.json`.
+- Today's hours per stop: `stops[].hours = {todayRu, openNow, source}`. `todayRu` is «10:00–18:00», «24 часа»
+  or «Сегодня закрыто». `source` is `curated` | `osm` | `default`; with `default`, show «часы уточняйте».
+- NOT_ENOUGH suggestions: `error.suggestions[]`, at most 3. Each one was solved before it is offered, and none
+  repeats the current value. Fields: `clearExclude: true` | `durationMin` (int or null = unlimited) |
+  `preset`, plus `stops` (the stop count it gives) and `titleRu` (the chip text: «Вернуть убранные места»,
+  «На 6 ч», «Без ограничения по времени», «Обзорная прогулка»…). Apply the fields; leave the rest of the form
+  as it is. See `city_route-error-suggestions.json` (a beer walk in Миасс).
+- Stale-result key: `result.requestKey`, also `error.requestKey` on NOT_ENOUGH_POIS. It is 16 hex digits over
+  the normalised request (world, start, town, preset, duration, sorted interests, pace, budget, return,
+  explicit `startAt`, crew incl. dog, adultConfirmed, exclude). The clock is not in it. Keep the key of the
+  last request you sent and drop any answer whose key differs; equal keys mean the same request.
+
+**2. Stop categories, parking, rest amenities, why, photo** (trip stops of `plan` / `replace_stop` /
+`patch_cost`, added in the bridge, also on `alternatives[].stop`)
+- `kind` stays the stop type (sight/rest/food/fuel/overnight/…). **`poiKind` is confirmed**: on sight stops
+  only. It is the same vocabulary as `poi_details.poiKind` and `geo_search` rows (museum, kremlin, monastery,
+  temple, park, viewpoint, embankment, square, monument, theatre, zoo, nature, interactive, playground,
+  attraction…). The generic catalogue «attraction» is narrowed to the ADR-0015 category where the name or tags
+  allow it.
+- `parking` on sight stops: `{rub, rubPerHour, hours, source, zoneRu, whereRu, sundayRu, freeRu}` or null
+  (no parking data: fixture worlds). The names are yours:
+  - `zoneRu`: the zone or the evidence, e.g. «Москва: платная зона до 2 км от центра, 380 ₽/ч с 08:00 до
+    21:00, ночью 200 ₽/ч», «Платная парковка по данным OpenStreetMap», «Платных зон рядом нет».
+  - `whereRu`: where the car stands.
+  - `sundayRu`: the Sunday and holiday rule; zones only, else null.
+  - `freeRu`: why it is free at this arrival («Бесплатно: воскресенье» / праздничный день / ночью / вне
+    платных зон), or null when paid.
+  The sheet texts are on the stop, not in `cost.units.parking[]`. Those units stay numeric
+  (`{stopId, name, rubPerHour, hours, rub, source}`, `source` zone | osm | unknown | free) because they are
+  the CostCalculator input. See `plan-moscow-parking.json` (the Kremlin, 380 ₽).
+- `amenities` on rest/fuel rows: unchanged since M3.
+- `whyRu` on sight stops and in `poi_details`: one line, or null for curated sights and when the data is
+  silent. Parts are joined with « · »: «Объект культурного наследия», «Советует Викигид», «Статьи в N языковых
+  разделах Википедии».
+- Photo source: `photoSource` on sight stops, and `poi_details.image.source`. Values: `p18` (the item's own
+  image), `wikipedia` (the article image), `osm` (the `wikimedia_commons` tag), `geosearch` (a Commons photo
+  taken near the place), `area` (the hotel card's area photo). For `geosearch`, `image.labelRu` already says
+  «Фото поблизости: Wikimedia Commons · автор…».
+
+**3. Cost parity** (`cost/recompute.py`, rule 5 of `tools/gen_cost_contract.py`)
+- Parking is inside the subtotal, so it is inside the reserve base and the budget check. **Confirmed.**
+- A replaced stop takes the alternative's own parking. **Your assumption is now the rule.** The alternative's
+  `units` carry `parkingRub` (null = unknown price), `parkingRubPerHour`, `parkingHours` and `parkingSource`,
+  only when the trip has parking data. CostCalculator:
+  1. Remove the replaced stop's `ParkingUnit`.
+  2. If `parkingSource` is present, put `{stopId: <replaced stop>, name: alt.name, rubPerHour, hours, rub,
+     source}` in its place. If the replaced stop had no unit (a rest stop replaced by a sight), append it.
+  3. The line is Σ known `rub`.
+  The engine's `replace_stop` bakes the same thing into the units. `alternatives[].deltaRub` includes Δ
+  parking, and it stays in after a crew change. Cases: `parking_replaced_stop` (no `parkingSource` → none),
+  `parking_replaced_by_alt` (460), `parking_alt_unknown` (60), `parking_rest_replaced_by_sight` (900),
+  `parking_reserve_budget`.
+- The other stops' parking is not re-priced after a replace, even when their arrival moves. That matches
+  tickets and keeps the offline recompute exact.
+
+## S4 — M6 wired (dev/S4, arch/s4-engine @ 3df7005 merged)
+- **Parking:** the P part shows on every sight of a trip with parking data (the engine prices sights; null = «P ?»)
+  and on any other stop that carries a `parking` object. Fixture worlds have no «Парковки» line and draw no P at
+  all — that is the data, not a gate. The sheet's detail is the engine's `zoneRu` sentence (or `freeRu`);
+  rows Тариф / Стоим / Воскресенье (`sundayRu`) / Где (`whereRu`).
+- **CostCalculator rule 5:** the replaced stop's unit is removed; an alternative with `parkingSource` puts its own
+  unit in its place (or appends it when the replaced stop had none). All 52 cases incl. the 7 `parking_*` pass
+  through `CostCalculatorContractTest`.
+- **Rows:** `amenities` tags (wc, cafe_at_fuel, playground, walk, view, ev_charger, 24h) read in Russian inside
+  the description; `parking` is the P part. The engine's «не проверено» reason part is filtered out (the ring).
+- **Card:** `extractRu` / `extractSource` (deck lines for Wikipedia / Wikivoyage, «Описание: <source> ·
+  <licence>» otherwise), `image.source = geosearch` → «ФОТО РЯДОМ» with the engine's `labelRu`; OSM hours read in
+  Russian («вт–вс 10:00–18:00; пн выходной»), anything still Latin is dropped; «Почему здесь» parts in lower case.
+- **Walks:** `unlimited` drives the untimed layout; `crewNotesRu` become info plates (the dog one only without the
+  dog plate); `hours.source = default` makes no «открыто» claim; engine notes are split on « · » (no duplicate
+  dog sentence); a «custom» suggestion uses the engine's `titleRu`; suggestions count `stops`.
+- **requestKey:** answers are still ordered by a sequence number (one engine thread). On top, the app learns
+  `input → requestKey` from every answer: an answer whose key is not the key of the request sent is dropped, and a
+  filter round trip back to the walk on screen sends nothing (`walkRequestKeyDropsStaleAnswersAndSkipsSameRequests`).
+- Sprint4Test now requires an untimed «без ограничения» walk with hours on every stop, and a dog walk with no
+  indoor stop when the town offers «Прогулка с собакой».
+### Sprint 4 data (catalogue wd-20261025-r7.3: run-7 raw files plus `bot/extras-1`)
+- **Shipped data:** 19 675 POIs. 8.3 k are Wikidata items; the rest are OSM-only, of which ≤ 6 playgrounds per
+  town. There are 3 284 bars and 1 114 towns. The catalogue is 1.05 MB, and 1.29 MB with the worlds and
+  resources, against the 2.5 MB limit.
+- **Card levels:** 4 = 258, 3 ≈ 4.8 k, 2 ≈ 3.9 k, 1 ≈ 11.2 k (mostly OSM playgrounds and parks).
+- **Extracts:** 4.7 k from Wikipedia, 0.55 k from Wikidata, 0.35 k from OSM. Wikivoyage listings name only
+  136 items.
+- **Photo sources:** p18 8.2 k; geosearch only 39. A nearby Commons photo is used only when its title shares
+  the place's own words (two words when the name has two or more) and its class word. The looser match put
+  «улица Шевченко» on «Памятник Тарасу Шевченко».
+- **Builder excludes:**
+  - names that are not sights: estate parts («Ограда…», «Главный дом…»), cafés, bare «Особняк», addresses
+    ending in a house number;
+  - POIs whose «(Город)» is more than 40 km away from their coordinates;
+  - OSM names without Cyrillic or that are generic, and minor natural features;
+  - websites that are map-service redirects.
+- **Engine, open-data world only:**
+  - The corridor keeps the best sights by quality, plus up to 4 more per 10 km within a 15-minute detour,
+    for the fun stops.
+  - The fun mood ranks the widened rest window together with the narrow one.
+  - A playground is never a fun stop without a child.
+  - Churches are never used as rest breaks.
+  - A view of a cathedral is a viewpoint, not a temple.
+- **Known limit:** the M-12 and M-4 trips get few sights and fun stops. The motorways bypass the towns:
+  Vladimir, Гороховец and Козьмодемьянск are 20–60 min away, and the quality bar is 0.40. On M-11
+  (Москва → СПб) the fun stops do appear. G17 therefore runs on M-11.
+
+### M8: the tiered detour budget (Manager's decision on the M-12 / M-4 sparsity; open-data world only)
+- **Detour budget for sights.** The quality bar stays at 0.40.
+  - q ≥ 0.70: up to 45 min, at most 1 such sight per day.
+  - 0.55 ≤ q < 0.70: up to 25 min.
+  - Below 0.55: the old rule, a detour of at most 10 km.
+  - Curated sights use their rating on the same scale (3.6 → 0, 4.9 → 1).
+  - The order is now quality first, with the detour costing about 0.15 per 45 min.
+- **Million-city centres.** A q ≥ 0.70 sight within the 45-minute budget may be a transit stop in a
+  million-city centre. Moscow and St Petersburg (≥ 4 M) never are, because the detour model cannot see their
+  centre traffic. The Фрязино ring still never touches Красная площадь.
+- **Sight order and the lunch.** Secular sights are chosen first over the whole trip; religious ones follow
+  while the trip stays ≤ 30 % religious. A sight that only pushes the lunch out of its window gets the lunch
+  re-planned.
+- **Fun stops.** When nothing is within 15 min in the rest window, a stop up to 30 min away is allowed.
+- **Stop text.** Every sight with a detour ≥ 10 min ends with «Крюк ≈ N мин.» (rounded to 5). Detours count
+  inside the day limit as before.
+- **Rest planner fix.** It no longer inserts the same roadside break up to 200 times when the break cannot
+  shorten a gap (a break point inside a long detour). This was only seen on the day-budget copy.
+- **G14 (Фрязино → Екатеринбург, child, 600 km/day):**
+  - Day 1: Владимир, Золотые ворота (крюк ≈ 35 мин).
+  - Day 4: Екатеринбург.
+  - 1 playground in the trip.
+  - **Days 2–3 cannot have a quality sight inside the pace.** Day 2 is 480 km: Козьмодемьянск (q 0.61,
+    24 min) needs 99 min, and only about 45 min are free; Нижний is 59 min off the road. Day 3 is 552 km and
+    has no eligible sight at all: Сарапул's best is q 0.53 at 46 min, and the road passes neither Казань nor
+    Елабуга.
+- **G18 (Москва → Казань by M-12):** 8 sights, 7 of them with q ≥ 0.40.
+  - In Moscow: the Kremlin, Измайловский парк.
+  - On the road: Покрова на Нерли (крюк ≈ 30 мин) and Глухово.
+  - In Казань: the Kremlin cathedral, Храм всех религий, Иске Таш.
+  - Нижний is out of reach: 55–60 min off M-12, beyond 45.
+
+## S4 — M7 (d0b49b1) and M8 (433183a) merged; real-data review (run 111)
+- `Sprint4DataTest` plans the review cases on the r7.3 catalogue with no budget («не важно») and logs every stop:
+  Фрязино Золотое кольцо (757 km, 18 000 ₽), Москва → Тула (Коломенское, P 80 ₽ zone), Москва → Казань
+  (Спасская башня P 380 ₽; Церковь Покрова на Нерли «Крюк ≈ 30 мин.»; 20 900 ₽ for 2 adults, calm, 500 km/day),
+  Москва → СПб fun with a child and the dog, Фрязино → Екатеринбург day 1 (Золотые ворота, Владимир, «Крюк ≈ 35
+  мин.»), Фрязино custom 4 h, Казань «без ограничения» (12 stops) and «Прогулка с собакой» (outdoor only), and
+  sight cards until levels 1–4 are all seen.
+- The engine marks fun stops by the `rest.fun.*` reason, not by `funFor` (ADR-0015 §5): the app reads «Разминка»
+  from the reason prefix «Весело и познавательно» as well.
+- Card kind line: the S4 kinds without a card word use the tag word («площадка · Высоковск»).
+- Footer / day parking with nothing to pay read «бесплатно».
+- For the Architect (data): fun stops on M-11 are unnamed «Детская площадка» rows and a «Паровоз»; Фрязино →
+  Екатеринбург days 3–4 have no sight and a bare «Остановка у дороги» (5.5 §10.4 says never again); «дом Ипатьева»
+  starts lower case; Wikipedia extracts keep spaces before punctuation («хозяйства , в», «Покрове .»); Фрязино
+  custom 4 h with the remembered interest «история» gives 5 stops (2 ч 45 мин).
+- Decision: the background catalogue budget in `EngineStartupTest` goes from 3 000 to 4 000 ms. r7.3 is twice the
+  size (catalogue_pois 822 KB gz), 1.8–2.0 s warm and 3.3 s on a cold CI emulator; the first screen does not wait
+  for it. For the Architect: a slimmer or lazier catalogue load.
+- ProcessDeath (fresh process, Москва → Ярославль) sometimes stops on Drive 0.6 s after ПОЕХАЛИ with an error CTA
+  (runs 94, 101, 112; green in 95, 96, 103, 111). The test now logs the Drive error to identify it.
+
+## S4-RELEASE (branch dev/S4-RELEASE from dev/S4 4058edd; des/S4-QA @ f4d2487 merged)
+- **P1-01:** every left-the-car stop (sight, food, rest area, night) has a P part in a parking-aware trip, «P ?»
+  without a tariff; fuel never. Day headers count the same stops («≈ N ₽ + ?»), and the Waybill «+ ещё N без
+  данных» uses the same count and lists every unknown stop with «?» (also after the engine's breakdown).
+- **P1-02:** an address search that fails online reads `addr_failed`; «Ищем адрес…» while it runs; the offline
+  hint only offline (also when the connection drops during the call). `online_later` stays offline-only (the card).
+- **P1-03:** the costs line is a custom layout: the action is pinned right on the first line; price · P part share
+  the rest, and the P part moves under the price (no separator) when it does not fit.
+- **P1-04:** the unknown-tariff sheet shows `road_parking_note_unknown`.
+- **P1-05:** «Данные о месте: © участники OpenStreetMap» on every card whose data is from OSM: the engine's OSM
+  attribution, an OSM text or photo, a bar, or a sight without a Wikidata item that is not curated (M9's OSM flag,
+  `osmSource`, is read as soon as it comes). The Wikipedia-only attribution no longer triggers the OSM line.
+- **P2 done:** P2-01 one pictogram table from the place kind (row sign, mini sign, illustration, walk signs);
+  P2-02 no «Часы работы уточняйте» next to known hours, note parts joined as sentences; P2-05 «Установить…» as the
+  yellow note line; P2-06 offline / failed photos use the category illustration with the state caption.
+- **P2 left:** P2-03 (one merged info line needs new copy), P2-04 (engine reason length), P2-07 (known S3 P2-05).
+### M9: data and engine polish before the CEO build (incl. the Designer's QA, des/S4-QA @ f4d2487)
+**API v3 additions (all bridge or open-data only; G01–G13 byte-identical)**
+- **`poiKind` + `poiKindRu`** on trip sight stops, alternatives' stops, walk stops, `poi_details` and geo
+  search. `poiKindRu` is the label to show («Храм», «Памятник», «Музей», «Кремль», «Парк», «Вид»,
+  «Природа», «Детская площадка», «Достопримечательность»…). Please show it as given rather than mapping
+  the kind yourself. The church kind is now `temple` everywhere.
+- **Kind rules, one rule for labels and the diversity rules (first match wins):**
+  1. The strong classes stay: playground, zoo, theatre, interactive, monastery.
+  2. «Смотровая / Вид на …» is a viewpoint.
+  3. Name words, in order: музей → museum; беседка / ротонда / дворец / палаты / замок → attraction;
+     монастырь / лавра / подворье → monastery; церковь / собор / храм → temple; кремль / крепость →
+     kremlin; памятник / ворота / стела / курган → monument; озеро / залив / заповедник → nature;
+     набережная; площадь; парк / сад / сквер.
+  4. A park or nature item whose description says «музей» is a museum (Коломенское).
+  5. A castle without «кремль» in its name is an attraction.
+  - `tests/unit/test_poi_kinds.py` pins 36 famous places, including the Designer's list.
+  - Audit of the 87 distinct sights in 80 trips (20 routes × 2 crews × 2 moods): fixed the Казанский
+    кремль cathedral, Михайловский замок, Майендорф, Приокско-Террасный, Чебоксарский залив and
+    Пятницкое подворье.
+- **`funFor`** on fun stops: `["child"|"dog"|"adults"]`, the groups the stop suits. Please stop parsing
+  the reason text.
+- **`parking`** on every stop where the car is left: sights, cafés and rest areas (`rub: null` = unknown
+  tariff → «P ?»). `null` on a roadside break, a fuel pump or the overnight. The «Парковки» line now
+  includes cafés and rest areas in paid zones.
+- **`placeSource`** (curated | wikidata | osm) and **`placeAttributionRu`** «Данные о месте: © участники
+  OpenStreetMap» for OSM-only places and bars (ODbL), on stops, walk stops and `poi_details`.
+
+**Engine (open-data world)**
+- **No bare names.** Roadside breaks and the generated rest areas and fuel stations carry the nearest
+  town within 15 km («Площадка отдыха у Можги»), else the road and km («Площадка отдыха, М-12, 330 км»),
+  else the km («Остановка у дороги, 332 км»).
+- **Fun stops** need quality ≥ 0.30. Playgrounds are allowed, now named after their town, and are only
+  for a crew with a child. A sight used as a break follows the diversity rules. Two sights of one kind
+  that become neighbours after the drops are repaired.
+
+**Data (`wd-20261025-r7.4`)**
+- Text tidying: no space before punctuation, no duplicated commas, the first letter capitalised. The
+  catalogue-wide test is in `test_poi_kinds.py`.
+- «Детская площадка в Клину», or «Детская площадка, Благовещенск» when the prepositional form is unknown.
+  At most 3 playgrounds per town, named ones first.
+- OSM-only POIs (other than playgrounds) need quality ≥ 0.30, i.e. a photo or a text: no bare «Паровоз»
+  at 0.25. The catalogue drops from 19 675 to 10 922 POIs, 0.85 MB.
+
+**Catalogue load:** 0.54–0.68 s → 0.24–0.25 s in the sandbox (≈ −60 %).
+- The cyclic GC is paused during the load, then the result is frozen.
+- Tag sets, ratings and hours checks are shared or cached.
+- The geo-search index is built on the first query.
+- There are ≈ 45 % fewer POI rows.
+- On the emulator's 3–5× factor that is ≈ 0.8–1.3 s, against the 1.5 s target. Please measure it on the
+  device.
+
+### M9 follow-up: the ring's signature sites
+- **Signature sites:** hand-curated kremlins and monasteries (Троице-Сергиева лавра, Ипатьевский
+  монастырь, Спасо-Евфимиев монастырь, the Суздаль / Ростов / Казань kremlins, Свияжск). They are tried
+  first and are exempt from the daily and the trip religious caps. The ≤ 30 % cap counts only the added
+  open-data sights.
+- **G15 Golden Ring (400 km/day, 2 days):**
+  - Day 1: Лавра and Ипатьевский (both template stops), plus Стрелка.
+  - Day 2: Ивановская филармония, Спасо-Евфимиев монастырь, Суздальский кремль, Золотые ворота.
+  - The Ростовский кремль is tried first on day 1 but does not fit the pace: the two template visits
+    already take 3 h of a 404 km day.
+
+### S4-RELEASE (Developer): M9 wired, G15 merged, catalogue measured
+- **Labels:** `poiKindRu` is shown as given, upper-cased, on Road, Walk and the card. The app's own
+  kind → word table remains only for trips saved before M9 (no `poiKindRu`). `church` → `temple` needs no
+  app change.
+- **«Разминка»:** a stop is a stretch only when `funFor` is non-empty. The reason text is no longer
+  parsed, and `ParkingCostTest` asserts that a reason alone is not a stretch.
+- **P part:** shown on leave-the-car stops when the engine sends a `parking` object (`rub: null` →
+  «P ?»), and on sights without one (old data → «P ?»). Fuel, overnight and roadside breaks: no P. The
+  engine sends null there, and hotel parking is a hotel fact.
+- **ODbL line:** `placeSource == "osm"` or a `placeAttributionRu` → the card's bottom line shows
+  `placeAttributionRu` (falls back to `card_osm`).
+- **Tag row wraps** (FlowRow) instead of clipping. Run 117 showed «РАЗМИНКА 30 МИН» + «ДЕТСКАЯ ПЛОЩ…» on
+  «Разминка · Детская площадка, Любань».
+- **e2e Москва → Казань now uses the app's default mood (FUN):**
+  - Run 117 used CALM (2 sights/day), so Покрова на Нерли was dropped and the shot showed Золотые ворота.
+  - The engine's default for G18 (no children → more_stops, 4/day) and FUN both keep Палаты Андрея
+    Боголюбского and Церковь Покрова на Нерли. Verified in the sandbox: calm 20 900 ₽ vs fun/default
+    21 600 ₽.
+- **Catalogue load on the CI emulator (run 117, logcat «VerstEngine: catalogue»):**
+  - 618, 945, 1 033, 454 and 633 ms over five cold starts. EngineStartupTest: 945 ms.
+  - Before M9: 1.8–3.3 s. The target is ≤ 1.5 s: met.
+  - The EngineStartupTest budget is tightened from 4 000 to 2 000 ms (the target plus emulator jitter).
+- **Left for the Architect (data, not app):** day 2 of the Golden Ring has «Ивановская государственная
+  филармония» (theatre) as a sight stop. That is a concert hall with no visit, an odd pick between Кострома
+  and Суздаль.
+### M9 follow-up 2: ready routes keep their template; no philharmonic as a sight
+- **Ready-route template, open-data world (`split.honour_template`):**
+  - A ready route keeps its template's night towns and days when every night town is on the route and has
+    a lodging for the crew, and no template day exceeds 105 % of the daily km. The old «too many days for
+    this daily km» rejection no longer applies.
+  - The budget fitter may still choose the short variant («· коротко»). The CEO case does: 26 400 ₽,
+    2 days, in budget.
+- **Moved lunch.** When a sight would push the lunch out of its window, a café in the sight's own town can
+  now come after the visit. In Ростов the café before the kremlin is at 11:57, after it is 13:20.
+- **Later start.** A sight in the overnight town that opens after the day starts moves the departure to its
+  opening (≤ 90 min; the day's duration does not grow).
+- **Not a sight:** a philharmonic, concert hall or house/palace of culture is not a road-trip sight unless it
+  is heritage and q ≥ 0.60. `Place.heritage` is new.
+- **G15 Golden Ring, 400 km/day:** 738 km, 3 days, 30 500 ₽.
+  - Day 1: Лавра → Плещеево озеро → Ростовский кремль → lunch Трапезная у кремля → Ярославский
+    музей-заповедник → night Ярославль.
+  - Day 2: Волжская башня → Стрелка → Костромская слобода → Ипатьевский монастырь → lunch Сбитенная →
+    night Суздаль.
+  - Day 3: Архиерейские палаты → Музей деревянного зодчества → Суздальский кремль → lunch Ресторан
+    «Клязьма» (Владимир) → Свято-Введенский монастырь → Фрязино.
+
+### S4-RELEASE (Developer): final engine e97547b merged
+- **Run 119 failed** (build, unit): `roadM6MoscowParkingContract` and `roadM6ParkingSheetContract` looked for
+  a paid stop in `plan-moscow-parking.json`. Since G15 that contract (calm Москва → Тула) keeps Высоцкий
+  монастырь and Тульский кремль, both free.
+  - The road test now checks that every stop with a parking object shows its P part and that the line is
+    their Σ.
+  - The sheet test opens the paid stop if there is one, otherwise the first stop with parking.
+- **e2e Москва → Тула** now uses the app's default mood (FUN). That keeps Московский Кремль (P 380) and
+  Коломенское (P 80) for the 125–127 shots. Sandbox: calm 3 200 ₽ vs fun 4 800 ₽.
+- **Golden Ring from Фрязино** on the default mood is 3 days (nights Ярославль / Суздаль). Day 1 is
+  Лавра → Плещеево озеро → Ростовский кремль → Трапезная → Ярославский музей-заповедник.
+  - New shot 124-fryazino-ring-day1-rostov.
+  - The e2e asserts that the Ростовский кремль is on the ring.
+- **Designer P1s** (des/S4-QA P1-01..05) were done in cf7d54a / 5328f79; nothing is open from that list.
+
+### S4-RELEASE (Developer): parking totals with unknown stops (Manager, shot 124)
+- **The issue:** on the Golden Ring, Ростовский кремль and Трапезная у кремля show «P ?» while the
+  footer said «из них парковки бесплатно».
+- **The rule:** one function, `parkingTotal(rub, unknown, known)` in RoadParts, now serves the Road
+  footer, the day headers and the Waybill line:
+  - no unknown stops → «бесплатно» (0) or «≈ N ₽»;
+  - unknown stops and N > 0 → «≈ N ₽ + ?»;
+  - unknown stops and N = 0 with some known free stays → «бесплатно + ?»;
+  - no stop with data at all → «?».
+- **Waybill sum column:** it is numeric (70 dp, like «Платные дороги 0»), so it shows «N + ?», and «0 + ?»
+  for the free-plus-unknown case. «бесплатно + ?» does not fit there.
+- **Strings:** `road_parking_free_unknown` «бесплатно + ?» is added to core-ui strings as app-only copy.
+  Designer: please adopt it into copy-ru.md.
+- **Unit tests:**
+  - ScreensScreenshotTest `parkingTotalRuleNeverClaimsFreeOrExactWithUnknowns` covers the rule over a grid.
+  - `parkingFreePlusUnknownOnRoadAndWaybill` checks the footer and a day header for «бесплатно + ?».
+  - `parkingFreePlusUnknownWaybillLine` checks «0 + ?».
+  - `parkingSumPlusUnknownFooter` checks «≈ N ₽ + ?».

@@ -38,7 +38,7 @@
     "namePrepRu": null,
     "population": null,
     "regionRu": "Санкт-Петербург",
-    "poiKind": "attraction",
+    "poiKind": "temple",
     "hasPhoto": true
    },
    {
@@ -71,16 +71,16 @@
    },
    {
     "kind": "poi",
-    "name": "Санкт-Петербургский Ольгинский детский приют трудолюбия (Павловск)",
-    "subtitle": "место · Ленинградская область",
-    "lat": 59.65403,
-    "lon": 30.40251,
-    "id": "Q118122217",
+    "name": "Санкт-Петербургский Драматический театр им. Графини С. В. Паниной",
+    "subtitle": "место · Санкт-Петербург",
+    "lat": 59.9094,
+    "lon": 30.3512,
+    "id": "Q46525210",
     "nameGenRu": null,
     "namePrepRu": null,
     "population": null,
-    "regionRu": "Ленинградская область",
-    "poiKind": "attraction",
+    "regionRu": "Санкт-Петербург",
+    "poiKind": "theatre",
     "hasPhoto": true
    }
   ],

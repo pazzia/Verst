@@ -42,6 +42,13 @@ enum class Glyph(val path: String, val strokeWidth: Float = 2f, val filled: Bool
     RIGHT("M9 6l6 6-6 6", 2.5f),
     SEARCH("M17 10.5a6.5 6.5 0 1 1-13 0a6.5 6.5 0 1 1 13 0zM15.5 15.5L20 20", 2.4f),
     NAVIGATOR("M12 3l7 18-7-4-7 4z"),
+    /** S4: the dog cell (filled), the start field «изменить», Яндекс Карты card, hours pills. */
+    PAW("M5.8 10a1.7 2.1 0 1 0 3.4 0a1.7 2.1 0 1 0-3.4 0zM14.8 10a1.7 2.1 0 1 0 3.4 0a1.7 2.1 0 1 0-3.4 0zM8.7 6.6a1.6 2 0 1 0 3.2 0a1.6 2 0 1 0-3.2 0zM12.1 6.6a1.6 2 0 1 0 3.2 0a1.6 2 0 1 0-3.2 0zM12 12c-3 0-5 3.2-5 5.2c0 1.6 1.4 2.3 2.7 2c1-.2 1.5-.6 2.3-.6s1.3.4 2.3.6c1.3.3 2.7-.4 2.7-2c0-2-2-5.2-5-5.2z", 1.5f, true),
+    PENCIL("M4 20h4L19 9l-4-4L4 16zM14 6l4 4"),
+    PIN("M12 21s-6-6.2-6-11a6 6 0 1 1 12 0c0 4.8-6 11-6 11zM14 10a2 2 0 1 1-4 0a2 2 0 1 1 4 0z"),
+    CLOCK("M21 12a9 9 0 1 1-18 0a9 9 0 1 1 18 0zM12 7v5l3 2"),
+    MINUS("M6 12h12", 2.4f),
+    PLUS("M12 6v12M6 12h12", 2.4f),
     PHOTO_NONE("M4 6h16v12H4zM4 15l4-4 4 4 3-3 5 5M3 3l18 18"),
 }
 

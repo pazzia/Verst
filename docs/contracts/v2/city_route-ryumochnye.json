@@ -33,11 +33,14 @@
    "startsTomorrow": false,
    "startNoteRu": null,
    "endAt": "2026-10-23T21:58",
+   "unlimited": false,
    "tz": "Europe/Moscow",
    "walkKm": 4.1,
    "walkMin": 54,
-   "durationMin": 239,
+   "durationMin": 238,
    "requestedDurationMin": 240,
+   "crewNotesRu": [],
+   "interestsWidened": false,
    "shorter": null,
    "returnToStart": true,
    "start": {
@@ -65,9 +68,16 @@
      "walkMinFromPrev": 5,
      "costRub": 1000,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "12:00–02:00",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w02",
@@ -83,9 +93,16 @@
      "walkMinFromPrev": 0,
      "costRub": 1000,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w03",
@@ -101,9 +118,16 @@
      "walkMinFromPrev": 1,
      "costRub": 1200,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "12:00–02:00",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w04",
@@ -119,9 +143,16 @@
      "walkMinFromPrev": 8,
      "costRub": 1200,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "12:00–23:00",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w05",
@@ -137,9 +168,16 @@
      "walkMinFromPrev": 18,
      "costRub": 600,
      "hoursVerified": false,
+     "hours": {
+      "todayRu": "09:00–23:00",
+      "openNow": true,
+      "source": "default"
+     },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": false,
-     "tappable": true
+     "tappable": true,
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     }
    ],
    "cost": {
@@ -210,11 +248,13 @@
     "startAt": "2026-10-23T18:00",
     "crew": {
      "adults": 2,
-     "children": 0
+     "children": 0,
+     "dog": false
     },
     "adultConfirmed": true,
     "exclude": []
-   }
+   },
+   "requestKey": "1f680293a609d32d"
   },
   "ms": 0
  }

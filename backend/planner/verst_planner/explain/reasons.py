@@ -102,6 +102,9 @@ def sight_reason(dwell: int, crew: Crew, source: Source) -> tuple[str, dict[str,
     return key, {"dwell": ru.duration_phrase(dwell)}
 
 
+DETOUR_NOTE_MIN = 10  # M8: a sight this far off the road says so («Крюк ≈ 35 мин.»)
+
+
 def stop_reason(
     s: PlannedStop,
     inp: NormalizedInput,
@@ -110,7 +113,23 @@ def stop_reason(
     local_time: datetime | None,
     finish_is_home: bool,
 ) -> str:
-    """Reason of a non-overnight stop; `local_time` = departure for START, arrival otherwise."""
+    """Reason of a non-overnight stop; `local_time` = departure for START, arrival otherwise. In the
+    open-data world (`sights.diversity`) a sight with a real detour ends with the honest «Крюк ≈ N мин.»."""
+    text = _stop_reason(s, inp, cfg, t, local_time, finish_is_home)
+    if cfg.sights.diversity and s.kind is StopKind.SIGHT and s.detour_min >= DETOUR_NOTE_MIN:
+        note = t.render("sight.detour", minutes=5 * round(s.detour_min / 5))
+        return f"{text} {note}" if text else note
+    return text
+
+
+def _stop_reason(
+    s: PlannedStop,
+    inp: NormalizedInput,
+    cfg: PlannerConfig,
+    t: ReasonTemplates,
+    local_time: datetime | None,
+    finish_is_home: bool,
+) -> str:
     if s.kind is StopKind.START:
         assert local_time is not None
         return t.render("start.default", time=local_time.strftime("%H:%M"))
@@ -120,7 +139,12 @@ def stop_reason(
         return t.render("finish.default")
     if s.kind is StopKind.VIA:
         return t.render("via.user")
-    if s.place is not None and s.place.source is Source.OSM and s.kind is StopKind.SIGHT:
+    if (
+        s.place is not None
+        and s.place.source is Source.OSM
+        and s.kind is StopKind.SIGHT
+        and not s.reason_key.startswith("rest.fun.")  # ADR-0015 §5: the fun stop says why it was chosen
+    ):
         return t.render("sight.osm")
     if s.kind is StopKind.SIGHT and s.fixed:
         dwell = ru.duration_phrase(s.dwell_min)

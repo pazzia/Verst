@@ -29,9 +29,9 @@
        "role": "origin"
       },
       {
-       "lat": 56.748761,
-       "lon": 38.867402,
-       "nameRu": "Никитский монастырь",
+       "lat": 56.745144,
+       "lon": 38.834647,
+       "nameRu": "Плещеево озеро",
        "role": "via"
       },
       {
@@ -47,6 +47,12 @@
        "role": "via"
       },
       {
+       "lat": 57.618865,
+       "lon": 39.894566,
+       "nameRu": "Спасо-Преображенский монастырь",
+       "role": "via"
+      },
+      {
        "lat": 57.6261,
        "lon": 39.8845,
        "nameRu": "Ярославль",
@@ -54,13 +60,25 @@
       }
      ],
      "links": {
-      "navigator": "yandexnavi://build_route_on_map?lat_to=57.626100&lon_to=39.884500&lat_from=56.317109&lon_from=38.143898&lat_via_0=56.748761&lon_via_0=38.867402&lat_via_1=57.186204&lon_via_1=39.419573&lat_via_2=57.188013&lon_via_2=39.421231",
-      "maps": "yandexmaps://maps.yandex.ru/?rtext=56.317109,38.143898~56.748761,38.867402~57.186204,39.419573~57.188013,39.421231~57.626100,39.884500&rtt=auto",
-      "web": "https://yandex.ru/maps/?rtext=56.317109,38.143898~56.748761,38.867402~57.186204,39.419573~57.188013,39.421231~57.626100,39.884500&rtt=auto"
+      "navigator": "yandexnavi://build_route_on_map?lat_to=57.626100&lon_to=39.884500&lat_from=56.317109&lon_from=38.143898&lat_via_0=56.745144&lon_via_0=38.834647&lat_via_1=57.186204&lon_via_1=39.419573&lat_via_2=57.188013&lon_via_2=39.421231&lat_via_3=57.618865&lon_via_3=39.894566",
+      "maps": "yandexmaps://maps.yandex.ru/?rtext=56.317109,38.143898~56.745144,38.834647~57.186204,39.419573~57.188013,39.421231~57.618865,39.894566~57.626100,39.884500&rtt=auto",
+      "web": "https://yandex.ru/maps/?rtext=56.317109,38.143898~56.745144,38.834647~57.186204,39.419573~57.188013,39.421231~57.618865,39.894566~57.626100,39.884500&rtt=auto",
+      "navigatorNext": "yandexnavi://build_route_on_map?lat_to=56.745144&lon_to=38.834647"
+     },
+     "next": {
+      "lat": 56.745144,
+      "lon": 38.834647,
+      "nameRu": "Плещеево озеро",
+      "role": "destination"
      }
     }
    ],
-   "truncated": false
+   "truncated": false,
+   "order": [
+    "maps",
+    "navigatorNext",
+    "web"
+   ]
   },
   "ms": 0
  }

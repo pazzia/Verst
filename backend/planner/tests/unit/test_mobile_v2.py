@@ -38,7 +38,7 @@ class MobileV2Test(unittest.TestCase):
         self.assertEqual(self.info["world"], R)
         self.assertGreater(self.info["places"], self.info["pois"])
         check = call(mobile.selfcheck())
-        self.assertEqual(check["apiVersion"], 2)
+        self.assertEqual(check["apiVersion"], 3)
         self.assertEqual(check["catalogue"]["towns"], self.info["towns"])
         self.assertIn(R, check["worlds"])
 

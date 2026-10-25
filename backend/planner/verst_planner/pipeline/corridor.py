@@ -70,6 +70,33 @@ def _thin(cands: list[Candidate], cap: int | None) -> list[Candidate]:
     return out
 
 
+NEAR_CAP = 4  # ADR-0015 §5: extra short-detour sights per bucket kept for the fun rest stops
+NEAR_DETOUR_MIN = 30  # the fun stops: 15 min, up to 30 when nothing nearer (M8)
+
+
+def _q(c: Candidate) -> float:
+    """Open-data quality, or the curated rating on the same 0..1 scale (3.6 → 0, 4.9 → 1)."""
+    q = c.place.quality
+    return q if q is not None else max(0.0, (c.place.rating_internal - 3.6) / 1.3)
+
+
+def _thin_sights(cands: list[Candidate], cap: int, open_data: bool) -> list[Candidate]:
+    """Fixture worlds: `_thin` (G01-G13 keep their bytes). Open data: the best `cap` per bucket by quality,
+    plus up to NEAR_CAP more within a NEAR_DETOUR_MIN detour, so the 15-minute fun stops have a pool."""
+    if not open_data:
+        return _thin(cands, cap)
+    by: dict[int, list[Candidate]] = {}
+    for c in cands:
+        by.setdefault(int(c.km_at // THIN_BUCKET_KM), []).append(c)
+    out: list[Candidate] = []
+    for lst in by.values():
+        lst.sort(key=lambda c: (-_q(c), c.detour_min, c.place.id, c.km_at))
+        top = lst[:cap]
+        near = [c for c in lst[cap:] if c.detour_min <= NEAR_DETOUR_MIN][:NEAR_CAP]
+        out.extend(top + near)
+    return out
+
+
 def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corridor:
     cfg = ctx.cfg
     ck = cfg.corridor_km
@@ -131,7 +158,9 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
     return Corridor(
         route=route,
         index=index,
-        sights=_sort(_thin(buckets[PlaceType.SIGHT], THIN_CAP.get(PlaceType.SIGHT))),
+        sights=_sort(
+            _thin_sights(buckets[PlaceType.SIGHT], THIN_CAP[PlaceType.SIGHT], bool(cfg.sights.diversity))
+        ),
         food=_sort(_thin(buckets[PlaceType.FOOD], THIN_CAP.get(PlaceType.FOOD))),
         fuel=_sort(buckets[PlaceType.FUEL]),
         rest=_sort(buckets[PlaceType.REST]),

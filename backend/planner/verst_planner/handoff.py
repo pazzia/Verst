@@ -11,6 +11,12 @@ Works on the JSON the app holds (a trip from `plan_to_json` or a `WalkRoute`), s
 
 Links: `navigator` (car only), `maps` (Яндекс Карты app, `rtt=auto|pd`), `web` (browser). Coordinates with 6
 decimals; `fromHere` lets the app start from the current position.
+
+API v3 (ADR-0015 §1): unsigned URL launches are limited to 5 a day per device, so the car day goes to Яндекс
+Карты with every kept point (`order` puts `maps` first) and the Навигатор gets the next point only
+(`navigatorNext`); `navigator` (the whole day) is kept for a signed build.
+`options.signing = {"client": id}` adds `client=` to every app link and lists them in `toSign`:
+the app computes the RSA signature over each string and appends `&signature=` (the key stays in the app).
 """
 
 from __future__ import annotations
@@ -64,6 +70,20 @@ def maps_links(points: list[dict[str, Any]], from_here: bool, rtt: str) -> dict[
     }
 
 
+CAR_ORDER = ("maps", "navigatorNext", "web")
+SIGNED_KEYS = ("navigator", "navigatorNext", "maps")
+
+
+def _signing(links: dict[str, str], client: str | None) -> dict[str, Any]:
+    """Add `client=` to the app links; the strings to sign are returned in `toSign` (the app signs them)."""
+    if not client:
+        return {}
+    for k in SIGNED_KEYS:
+        if k in links:
+            links[k] = f"{links[k]}&client={quote(client, safe='')}"
+    return {"toSign": {k: links[k] for k in SIGNED_KEYS if k in links}}
+
+
 def _pick_vias(cands: list[tuple[int, dict[str, Any]]]) -> tuple[list[dict[str, Any]], bool]:
     if len(cands) <= MAX_VIAS:
         return [p for _k, p in cands], False
@@ -71,7 +91,13 @@ def _pick_vias(cands: list[tuple[int, dict[str, Any]]]) -> tuple[list[dict[str, 
     return [cands[i][1] for i in sorted(ranked)], True
 
 
-def car(trip: dict[str, Any], day: int | None, from_stop_id: str | None, from_here: bool) -> dict[str, Any]:
+def car(
+    trip: dict[str, Any],
+    day: int | None,
+    from_stop_id: str | None,
+    from_here: bool,
+    client: str | None = None,
+) -> dict[str, Any]:
     days = trip.get("daysList")
     if not isinstance(days, list) or not days:
         raise HandoffError("route", "no_days")
@@ -107,15 +133,23 @@ def car(trip: dict[str, Any], day: int | None, from_stop_id: str | None, from_he
     if not from_here:
         points = [_pt(origin["lat"], origin["lon"], origin.get("name", ""), "origin"), *points]
     links = {"navigator": navigator_link(points, from_here), **maps_links(points, from_here, "auto")}
+    nxt = after[0]
+    next_pt = _pt(nxt["lat"], nxt["lon"], nxt.get("name", ""), "destination")
+    links["navigatorNext"] = navigator_link([next_pt], True)
+    part: dict[str, Any] = {"index": 1, "points": points, "links": links, "next": next_pt}
+    part.update(_signing(links, client))
     return {
         "mode": "car",
         "day": day_obj.get("day"),
-        "parts": [{"index": 1, "points": points, "links": links}],
+        "parts": [part],
         "truncated": truncated,
+        "order": list(CAR_ORDER),
     }
 
 
-def walk(route: dict[str, Any], from_stop_id: str | None, from_here: bool) -> dict[str, Any]:
+def walk(
+    route: dict[str, Any], from_stop_id: str | None, from_here: bool, client: str | None = None
+) -> dict[str, Any]:
     stops = route.get("stops")
     if not isinstance(stops, list):
         raise HandoffError("route", "no_stops")
@@ -143,9 +177,10 @@ def walk(route: dict[str, Any], from_stop_id: str | None, from_here: bool) -> di
     while True:
         cap = MAX_WALK_POINTS - (1 if first and from_here else 0)
         chunk = seq[i : i + cap]
-        parts.append(
-            {"index": len(parts) + 1, "points": chunk, "links": maps_links(chunk, from_here and first, "pd")}
-        )
+        links = maps_links(chunk, from_here and first, "pd")
+        part: dict[str, Any] = {"index": len(parts) + 1, "points": chunk, "links": links}
+        part.update(_signing(links, client))
+        parts.append(part)
         if i + len(chunk) >= len(seq):
             break
         i += len(chunk) - 1  # consecutive parts share their boundary point
@@ -161,11 +196,21 @@ def handoff(route: dict[str, Any], options: dict[str, Any]) -> dict[str, Any]:
     from_stop = options.get("fromStopId")
     if from_stop is not None and not isinstance(from_stop, str):
         raise HandoffError("fromStopId", "not_string")
+    signing = options.get("signing")
+    client = None
+    if signing is not None:
+        if (
+            not isinstance(signing, dict)
+            or not isinstance(signing.get("client"), str)
+            or not signing["client"]
+        ):
+            raise HandoffError("signing", "client_required")
+        client = signing["client"]
     if mode == "car":
         day = options.get("day")
         if day is not None and (isinstance(day, bool) or not isinstance(day, int)):
             raise HandoffError("day", "not_int")
-        return car(route, day, from_stop, from_here)
+        return car(route, day, from_stop, from_here, client)
     if mode == "walk":
-        return walk(route, from_stop, from_here)
+        return walk(route, from_stop, from_here, client)
     raise HandoffError("mode", "unknown")

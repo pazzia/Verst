@@ -31,7 +31,10 @@ from verst_planner.explain import ru
 from verst_planner.explain.reasons import stop_reason
 from verst_planner.geo.polyline import interpolate
 from verst_planner.pipeline import Corridor, PlanContext, round_half_up
+from verst_planner.pipeline.rest import fun_for, roadside_name
 from verst_planner.pipeline.timeline import Profile, Slot, day_end, local_minute
+
+SYNTHETIC_ROADSIDE = ("syn_r_", "syn_f_")  # the catalogue's generated rest areas and fuel stations
 
 REGION_STEP_KM = 10.0
 
@@ -103,6 +106,9 @@ def render_stop(
     if note is None and s.place is not None and s.place.source is Source.OSM:
         note = ru.text("note.unverified")
     town_id = s.town.id if s.town is not None else (s.place.town_id if s.place is not None else None)
+    name = s.name_ru
+    if ctx.cfg.sights.diversity and s.place is not None and s.place.id.startswith(SYNTHETIC_ROADSIDE):
+        name = roadside_name(s.km_at, s.point, None, ctx, s.name_ru)  # M9: never a bare rest area name
     return ScheduledStop(
         id=sid or stop_id(day_no, idx),
         seq=seq,
@@ -111,7 +117,7 @@ def render_stop(
         sign=sign,
         place_id=s.place.id if s.place is not None else None,
         town_id=town_id,
-        name_ru=s.name_ru,
+        name_ru=name,
         note_ru=note,
         point=s.point,
         arrive_at=arrive,
@@ -129,6 +135,7 @@ def render_stop(
         hotel_options=v.hotel_options,
         selected_hotel_id=s.place.id if s.kind is StopKind.OVERNIGHT and s.place is not None else None,
         alternatives_note_ru=v.alternatives_note,
+        fun_for=fun_for(s.place, inp) if s.reason_key.startswith("rest.fun.") and s.place is not None else (),
     )
 
 
