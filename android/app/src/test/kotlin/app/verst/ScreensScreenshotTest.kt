@@ -398,6 +398,7 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("road.stop.${kremlin.id}.parking", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
         assertEquals(380, trip.cost.lines.first { it.key == "parking" }.rub)
+        assertTrue("no «не проверено» on rows", compose.onAllNodesWithText("не проверено", substring = true, useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
     }
 
     @Test

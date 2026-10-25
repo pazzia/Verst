@@ -81,7 +81,9 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("card.kind"), maxLines = 1)
         }
         d?.whyRu?.takeIf { it.isNotBlank() }?.let {
-            Txt(stringResource(R.string.card_why, it), T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("card.why"))
+            // «Почему здесь: объект культурного наследия · …» (the engine starts each part with a capital)
+            val why = it.split(" · ").joinToString(" · ") { p -> if (p.length > 1 && p[1].isLowerCase()) p.replaceFirstChar { c -> c.lowercase() } else p }
+            Txt(stringResource(R.string.card_why, why), T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("card.why"))
         }
         Spacer(Modifier.height(12.dp))
         val img = d?.image

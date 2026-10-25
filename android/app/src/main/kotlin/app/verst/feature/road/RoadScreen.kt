@@ -809,7 +809,9 @@ private fun StopRow(
 /** 5.5 §10.4 / §10.7: rest amenities live inside the description («… Есть: туалет · столы · навес»). */
 @Composable
 private fun noteWithAmenities(s: StopDto): String? {
-    val note = s.note ?: s.reason
+    // 5.5 §10.2: the dotted ring replaces every «не проверено» on rows (the engine's reason may still say it)
+    val note = (s.note ?: s.reason)?.split(" · ")?.filterNot { it.trim().trimEnd('.').equals("не проверено", ignoreCase = true) }
+        ?.joinToString(" · ")?.takeIf { it.isNotBlank() }
     if (s.amenities.isEmpty()) return note
     val words = s.amenities.mapNotNull {
         when (it) {
