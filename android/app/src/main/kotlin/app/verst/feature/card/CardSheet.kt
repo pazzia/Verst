@@ -299,7 +299,9 @@ private fun kindLine(ui: CardUi): String {
         "pub" -> stringResource(R.string.card_kind_pub)
         "craft" -> stringResource(R.string.card_kind_craft)
         "bar", "beer" -> stringResource(R.string.card_kind_bar)
-        else -> if (ui.kind == "bar") stringResource(R.string.card_kind_bar) else stringResource(R.string.card_kind_sight)
+        // S4 kinds without a card word (playground, zoo, interactive, nature, theatre, temple…): the tag word
+        else -> if (ui.kind == "bar") stringResource(R.string.card_kind_bar)
+        else app.verst.feature.common.kindWord(d?.poiKind)?.lowercase() ?: stringResource(R.string.card_kind_sight)
     }
     return if (town.isNullOrBlank()) word else stringResource(R.string.card_kind_line, word, town)
 }

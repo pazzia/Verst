@@ -1809,3 +1809,19 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   - On the road: Покрова на Нерли (крюк ≈ 30 мин) and Глухово.
   - In Казань: the Kremlin cathedral, Храм всех религий, Иске Таш.
   - Нижний is out of reach: 55–60 min off M-12, beyond 45.
+
+## S4 — M7 (d0b49b1) and M8 (433183a) merged; real-data review (run 111)
+- `Sprint4DataTest` plans the review cases on the r7.3 catalogue with no budget («не важно») and logs every stop:
+  Фрязино Золотое кольцо (757 km, 18 000 ₽), Москва → Тула (Коломенское, P 80 ₽ zone), Москва → Казань
+  (Спасская башня P 380 ₽; Церковь Покрова на Нерли «Крюк ≈ 30 мин.»; 20 900 ₽ for 2 adults, calm, 500 km/day),
+  Москва → СПб fun with a child and the dog, Фрязино → Екатеринбург day 1 (Золотые ворота, Владимир, «Крюк ≈ 35
+  мин.»), Фрязино custom 4 h, Казань «без ограничения» (12 stops) and «Прогулка с собакой» (outdoor only), and
+  sight cards until levels 1–4 are all seen.
+- The engine marks fun stops by the `rest.fun.*` reason, not by `funFor` (ADR-0015 §5): the app reads «Разминка»
+  from the reason prefix «Весело и познавательно» as well.
+- Card kind line: the S4 kinds without a card word use the tag word («площадка · Высоковск»).
+- Footer / day parking with nothing to pay read «бесплатно».
+- For the Architect (data): fun stops on M-11 are unnamed «Детская площадка» rows and a «Паровоз»; Фрязино →
+  Екатеринбург days 3–4 have no sight and a bare «Остановка у дороги» (5.5 §10.4 says never again); «дом Ипатьева»
+  starts lower case; Wikipedia extracts keep spaces before punctuation («хозяйства , в», «Покрове .»); Фрязино
+  custom 4 h with the remembered interest «история» gives 5 stops (2 ч 45 мин).
