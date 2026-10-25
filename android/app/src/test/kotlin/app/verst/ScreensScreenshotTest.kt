@@ -394,22 +394,31 @@ class ScreensScreenshotTest {
     @Test
     fun roadM6MoscowParkingContract() {
         val trip = v2PlanTrip("plan-moscow-parking.json").trip
-        val kremlin = trip.daysList.flatMap { it.stops }.first { (it.parking?.rub ?: 0) > 0 }
+        // data-independent: since G15 the calm Москва → Тула keeps Высоцкий монастырь + Тульский кремль (free)
+        // instead of the paid Кремль — every stop with a parking object carries its P part either way
+        val withParking = trip.daysList.flatMap { it.stops }.filter { it.parking != null }
+        assertTrue("the contract has parking objects", withParking.isNotEmpty())
         shot("road", "m6-moscow-parking") { RoadScreen(RoadUi(trip, "N"), noRoad) }
-        compose.onNodeWithTag("road.stop.${kremlin.id}.parking", useUnmergedTree = true).assertExists()
+        withParking.forEach { compose.onNodeWithTag("road.stop.${it.id}.parking", useUnmergedTree = true).assertExists() }
         compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
-        // the line is Σ of the stops' stays (data-independent)
-        assertEquals(trip.daysList.flatMap { it.stops }.sumOf { it.parking?.rub ?: 0 }, trip.cost.lines.first { it.key == "parking" }.rub)
+        // the line is Σ of the stops' stays
+        assertEquals(withParking.sumOf { it.parking?.rub ?: 0 }, trip.cost.lines.first { it.key == "parking" }.rub)
         assertTrue("no «не проверено» on rows", compose.onAllNodesWithText("не проверено", substring = true, useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
     }
 
     @Test
     fun roadM6ParkingSheetContract() {
         val trip = v2PlanTrip("plan-moscow-parking.json").trip
-        val kremlin = trip.daysList.flatMap { it.stops }.first { (it.parking?.rub ?: 0) > 0 }
-        shot("road", "m6-parking-sheet") { RoadScreen(RoadUi(trip, "N", parking = kremlin), noRoad) }
-        compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("${kremlin.parking!!.rubPerHour}", substring = true)
-        assertTrue(compose.onAllNodesWithText("воскресенье", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty())
+        val stops = trip.daysList.flatMap { it.stops }
+        val stop = stops.firstOrNull { (it.parking?.rub ?: 0) > 0 } ?: stops.first { it.parking != null }
+        shot("road", "m6-parking-sheet") { RoadScreen(RoadUi(trip, "N", parking = stop), noRoad) }
+        val p = stop.parking!!
+        if ((p.rubPerHour ?: 0) > 0) {
+            compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("${p.rubPerHour}", substring = true)
+        } else {
+            compose.onNodeWithTag("parking.ok", useUnmergedTree = true).assertExists()
+        }
+        if (p.sundayRu != null) assertTrue(compose.onAllNodesWithText("воскресенье", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test

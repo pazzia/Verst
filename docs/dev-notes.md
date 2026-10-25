@@ -1954,3 +1954,18 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
     night Суздаль.
   - Day 3: Архиерейские палаты → Музей деревянного зодчества → Суздальский кремль → lunch Ресторан
     «Клязьма» (Владимир) → Свято-Введенский монастырь → Фрязино.
+
+### S4-RELEASE (Developer): final engine e97547b merged
+- **Run 119 failed** (build, unit): `roadM6MoscowParkingContract` and `roadM6ParkingSheetContract` looked for
+  a paid stop in `plan-moscow-parking.json`. Since G15 that contract (calm Москва → Тула) keeps Высоцкий
+  монастырь and Тульский кремль, both free.
+  - The road test now checks that every stop with a parking object shows its P part and that the line is
+    their Σ.
+  - The sheet test opens the paid stop if there is one, otherwise the first stop with parking.
+- **e2e Москва → Тула** now uses the app's default mood (FUN). That keeps Московский Кремль (P 380) and
+  Коломенское (P 80) for the 125–127 shots. Sandbox: calm 3 200 ₽ vs fun 4 800 ₽.
+- **Golden Ring from Фрязино** on the default mood is 3 days (nights Ярославль / Суздаль). Day 1 is
+  Лавра → Плещеево озеро → Ростовский кремль → Трапезная → Ярославский музей-заповедник.
+  - New shot 124-fryazino-ring-day1-rostov.
+  - The e2e asserts that the Ростовский кремль is on the ring.
+- **Designer P1s** (des/S4-QA P1-01..05) were done in cf7d54a / 5328f79; nothing is open from that list.

@@ -168,6 +168,12 @@ class Sprint4DataTest {
         shot("120-fryazino-ring-top")
         val sights = stops().filter { it.kind == "sight" }
         assertTrue("sights on the ring", sights.isNotEmpty())
+        // e97547b: the ring keeps its 3 template days (nights Ярославль / Суздаль); day 1 Лавра → Плещеево озеро → Ростовский кремль
+        val day1 = flow.result!!.trip.daysList.first().stops
+        Log.i("VerstE2e", "S4D ring day 1: ${day1.map { it.name }}")
+        val rostov = day1.firstOrNull { it.name.contains("Ростовский") } ?: day1.lastOrNull { it.kind == "sight" }
+        rostov?.let { scrollShot(it, "124-fryazino-ring-day1-rostov") }
+        assertTrue("Ростовский кремль on the ring", stops().any { it.name.contains("Ростовский кремль") })
         sights.getOrNull(1)?.let { scrollShot(it, "121-fryazino-ring-sights") }
         sights.getOrNull(sights.size / 2)?.let { scrollShot(it, "122-fryazino-ring-middle") }
         compose.onNodeWithTag("road.total").performClick()
@@ -179,7 +185,8 @@ class Sprint4DataTest {
     @Test
     fun s4dMoscowParkingStop() {
         compose.runOnUiThread { flow.debugResetOrigin() }
-        planTo("Тула", Mood.CALM)
+        // the app's default mood: since G15 a calm Москва → Тула keeps Высоцкий монастырь + Тульский кремль only
+        planTo("Тула", Mood.FUN)
         logTrip("moscow-tula")
         val paid = stops().firstOrNull { it.parking?.rub?.let { r -> r > 0 } == true }
         Log.i("VerstE2e", "S4D paid parking stop: ${paid?.name} ${paid?.parking}")
