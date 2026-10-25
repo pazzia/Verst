@@ -35,8 +35,8 @@
    "endAt": null,
    "unlimited": true,
    "tz": "Europe/Moscow",
-   "walkKm": 9.4,
-   "walkMin": 126,
+   "walkKm": 9.6,
+   "walkMin": 127,
    "durationMin": null,
    "requestedDurationMin": null,
    "crewNotesRu": [],
@@ -56,38 +56,15 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "Q13205949",
-     "kind": "monument",
-     "nameRu": "Памятник Мусе Джалилю",
-     "lat": 55.79611,
-     "lon": 49.10833,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 10,
-     "walkKmFromPrev": 0.0,
-     "walkMinFromPrev": 1,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": false,
-     "tappable": true
-    },
-    {
-     "id": "w02",
-     "poiId": "Q2655072",
+     "poiId": "Q185568",
      "kind": "church",
-     "nameRu": "Петропавловский собор",
-     "lat": 55.79361,
-     "lon": 49.11321,
+     "nameRu": "Благовещенский собор Казанского кремля",
+     "lat": 55.79979,
+     "lon": 49.1058,
      "arriveAt": null,
      "departAt": null,
      "dwellMin": 20,
-     "walkKmFromPrev": 0.5,
+     "walkKmFromPrev": 0.6,
      "walkMinFromPrev": 7,
      "costRub": 0,
      "hoursVerified": false,
@@ -101,15 +78,38 @@
      "tappable": true
     },
     {
-     "id": "w03",
-     "poiId": "Q1634187",
-     "kind": "attraction",
-     "nameRu": "Султановская мечеть",
-     "lat": 55.784,
-     "lon": 49.109,
+     "id": "w02",
+     "poiId": "pl_kaz_kremlin",
+     "kind": "kremlin",
+     "nameRu": "Казанский кремль",
+     "lat": 55.803535,
+     "lon": 49.119986,
      "arriveAt": null,
      "departAt": null,
-     "dwellMin": 20,
+     "dwellMin": 50,
+     "walkKmFromPrev": 1.3,
+     "walkMinFromPrev": 17,
+     "costRub": 0,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "08:00–22:00",
+      "openNow": true,
+      "source": "curated"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w03",
+     "poiId": "Q55934833",
+     "kind": "monument",
+     "nameRu": "Мергасовский дом",
+     "lat": 55.79394,
+     "lon": 49.11762,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 10,
      "walkKmFromPrev": 1.4,
      "walkMinFromPrev": 19,
      "costRub": 0,
@@ -125,14 +125,175 @@
     },
     {
      "id": "w04",
-     "poiId": "Q4308855",
+     "poiId": "Q4071782",
+     "kind": "attraction",
+     "nameRu": "Астрономическая обсерватория Казанского университета",
+     "lat": 55.79083,
+     "lon": 49.11917,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 6,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w05",
+     "poiId": "Q4089831",
+     "kind": "church",
+     "nameRu": "Богоявленский собор",
+     "lat": 55.78819,
+     "lon": 49.11892,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 5,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "08:00–20:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w06",
+     "poiId": "Q21643726",
      "kind": "monument",
-     "nameRu": "Мухаммадия",
-     "lat": 55.78205,
-     "lon": 49.11078,
+     "nameRu": "Памятник Габдулле Тукаю",
+     "lat": 55.78528,
+     "lon": 49.12,
      "arriveAt": null,
      "departAt": null,
      "dwellMin": 10,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 6,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w07",
+     "poiId": "Q3585726",
+     "kind": "church",
+     "nameRu": "Храм Воздвижения Святого Креста",
+     "lat": 55.78306,
+     "lon": 49.1275,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 9,
+     "costRub": 0,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "10:00–13:00, 15:00–19:00",
+      "openNow": true,
+      "source": "osm"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w08",
+     "poiId": "Q2528801",
+     "kind": "attraction",
+     "nameRu": "Мечеть аль-Марджани",
+     "lat": 55.77972,
+     "lon": 49.1175,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.9,
+     "walkMinFromPrev": 13,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w09",
+     "poiId": "Q1587654",
+     "kind": "attraction",
+     "nameRu": "Мечеть Нурулла",
+     "lat": 55.78291,
+     "lon": 49.11456,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 7,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w10",
+     "poiId": "Q24933508",
+     "kind": "monument",
+     "nameRu": "Дом Галиаскара Камала",
+     "lat": 55.78183,
+     "lon": 49.10752,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 10,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 8,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w11",
+     "poiId": "Q1634187",
+     "kind": "attraction",
+     "nameRu": "Султановская мечеть",
+     "lat": 55.784,
+     "lon": 49.109,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
      "walkKmFromPrev": 0.3,
      "walkMinFromPrev": 4,
      "costRub": 0,
@@ -147,178 +308,17 @@
      "tappable": true
     },
     {
-     "id": "w05",
-     "poiId": "Q2528801",
-     "kind": "attraction",
-     "nameRu": "Мечеть аль-Марджани",
-     "lat": 55.77972,
-     "lon": 49.1175,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 20,
-     "walkKmFromPrev": 0.6,
-     "walkMinFromPrev": 9,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w06",
-     "poiId": "Q3585726",
-     "kind": "church",
-     "nameRu": "Храм Воздвижения Святого Креста",
-     "lat": 55.78306,
-     "lon": 49.1275,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 20,
-     "walkKmFromPrev": 0.9,
-     "walkMinFromPrev": 13,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "08:00–20:00",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w07",
-     "poiId": "Q21643726",
-     "kind": "monument",
-     "nameRu": "Памятник Габдулле Тукаю",
-     "lat": 55.78528,
-     "lon": 49.12,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 10,
-     "walkKmFromPrev": 0.7,
-     "walkMinFromPrev": 9,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w08",
-     "poiId": "Q4071782",
-     "kind": "attraction",
-     "nameRu": "Астрономическая обсерватория Казанского университета",
-     "lat": 55.79083,
-     "lon": 49.11917,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 20,
-     "walkKmFromPrev": 0.8,
-     "walkMinFromPrev": 11,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w09",
-     "poiId": "Q4365764",
-     "kind": "square",
-     "nameRu": "Площадь Свободы",
-     "lat": 55.79694,
-     "lon": 49.125,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 10,
-     "walkKmFromPrev": 1.0,
-     "walkMinFromPrev": 13,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w10",
-     "poiId": "pl_kaz_kremlin",
-     "kind": "kremlin",
-     "nameRu": "Казанский кремль",
-     "lat": 55.803535,
-     "lon": 49.119986,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 50,
-     "walkKmFromPrev": 1.0,
-     "walkMinFromPrev": 14,
-     "costRub": 0,
-     "hoursVerified": true,
-     "hours": {
-      "todayRu": "08:00–22:00",
-      "openNow": true,
-      "source": "curated"
-     },
-     "noteRu": null,
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w11",
-     "poiId": "Q4207773",
-     "kind": "monastery",
-     "nameRu": "Казанский Богородицкий монастырь",
-     "lat": 55.79939,
-     "lon": 49.11389,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 50,
-     "walkKmFromPrev": 0.8,
-     "walkMinFromPrev": 10,
-     "costRub": 600,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
      "id": "w12",
-     "poiId": "Q185568",
+     "poiId": "Q2655072",
      "kind": "church",
-     "nameRu": "Благовещенский собор Казанского кремля",
-     "lat": 55.79979,
-     "lon": 49.1058,
+     "nameRu": "Петропавловский собор",
+     "lat": 55.79361,
+     "lon": 49.11321,
      "arriveAt": null,
      "departAt": null,
      "dwellMin": 20,
-     "walkKmFromPrev": 0.7,
-     "walkMinFromPrev": 9,
+     "walkKmFromPrev": 1.4,
+     "walkMinFromPrev": 19,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -332,11 +332,11 @@
     }
    ],
    "cost": {
-    "totalRub": 600,
+    "totalRub": 0,
     "lines": [
      {
       "key": "tickets",
-      "rub": 600
+      "rub": 0
      }
     ],
     "budgetRub": null
@@ -354,52 +354,52 @@
      49.1088
     ],
     [
-     55.79611,
-     49.10833
-    ],
-    [
-     55.79361,
-     49.11321
-    ],
-    [
-     55.784,
-     49.109
-    ],
-    [
-     55.78205,
-     49.11078
-    ],
-    [
-     55.77972,
-     49.1175
-    ],
-    [
-     55.78306,
-     49.1275
-    ],
-    [
-     55.78528,
-     49.12
-    ],
-    [
-     55.79083,
-     49.11917
-    ],
-    [
-     55.79694,
-     49.125
+     55.79979,
+     49.1058
     ],
     [
      55.803535,
      49.119986
     ],
     [
-     55.79939,
-     49.11389
+     55.79394,
+     49.11762
     ],
     [
-     55.79979,
-     49.1058
+     55.79083,
+     49.11917
+    ],
+    [
+     55.78819,
+     49.11892
+    ],
+    [
+     55.78528,
+     49.12
+    ],
+    [
+     55.78306,
+     49.1275
+    ],
+    [
+     55.77972,
+     49.1175
+    ],
+    [
+     55.78291,
+     49.11456
+    ],
+    [
+     55.78183,
+     49.10752
+    ],
+    [
+     55.784,
+     49.109
+    ],
+    [
+     55.79361,
+     49.11321
     ],
     [
      55.7963,

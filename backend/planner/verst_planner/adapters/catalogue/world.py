@@ -32,6 +32,12 @@ POI_TAGS: dict[str, frozenset[Tag]] = {
     "embankment": frozenset({Tag.VIEW, Tag.WALK}),
     "square": frozenset({Tag.WALK}),
     "attraction": frozenset({Tag.WALK}),
+    # Sprint 4 kinds (ADR-0015 §2)
+    "theatre": frozenset({Tag.WALK}),  # the building and its square; a show is not a road-trip stop
+    "zoo": frozenset({Tag.WALK}),
+    "nature": frozenset({Tag.WALK, Tag.VIEW}),
+    "interactive": frozenset(),
+    "playground": frozenset({Tag.PLAYGROUND, Tag.WALK}),
 }
 POI_DWELL = {
     "museum": 75,
@@ -44,9 +50,25 @@ POI_DWELL = {
     "embankment": 20,
     "square": 15,
     "attraction": 30,
+    "theatre": 15,
+    "zoo": 90,
+    "nature": 40,
+    "interactive": 60,
+    "playground": 20,
 }
-POI_HOURS = {"museum": "Tu-Su 10:00-18:00", "church": "Mo-Su 08:00-20:00"}
-POI_TICKETS = {"museum": (400, 200), "kremlin": (300, 150), "monastery": (300, 150)}
+POI_HOURS = {
+    "museum": "Tu-Su 10:00-18:00",
+    "church": "Mo-Su 08:00-20:00",
+    "zoo": "Mo-Su 09:00-19:00",
+    "interactive": "Tu-Su 10:00-19:00",
+}
+POI_TICKETS = {
+    "museum": (400, 200),
+    "kremlin": (300, 150),
+    "monastery": (300, 150),
+    "zoo": (500, 250),
+    "interactive": (500, 300),
+}
 BIG_MUSEUM_SITELINKS = 40
 
 
@@ -69,7 +91,7 @@ def _hours_ok(text: str) -> bool:
 
 
 def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
-    ticket = POI_TICKETS.get(p.kind)
+    ticket = None if p.fee is False else POI_TICKETS.get(p.kind)  # OSM fee=no: free entry
     tags = set(POI_TAGS[p.kind])
     if ticket is None:
         tags.add(Tag.FREE_ENTRY)

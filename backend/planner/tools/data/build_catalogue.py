@@ -49,6 +49,7 @@ from enrich import (  # noqa: E402
     in_voyage,
     osm_is_tourism,
     osm_kind,
+    osm_name_ok,
     quality,
     refine_kind,
 )
@@ -169,6 +170,15 @@ def denylist() -> list[str]:
 def denied(name: str, deny: Iterable[str]) -> bool:
     low = name.casefold()
     return any(b in low for b in deny)
+
+
+def website(tags: dict[str, str], deny: Iterable[str]) -> str | None:
+    """The OSM `website` when it is a plain http(s) link of ≤ 100 chars and no deny-listed brand (a map
+    service redirect such as link.2gis.ru is not the place's site)."""
+    url = str(tags.get("website") or "").strip()
+    if not url.startswith(("http://", "https://")) or len(url) > 100 or denied(url, deny):
+        return None
+    return url
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -521,6 +531,8 @@ def build(
                 image, credit = image_and_credit(cand)
                 src = s_ if image else None
         extract, extract_src = extract_for(r["qid"], osm, r.get("desc"), ex)
+        if extract and denied(extract, deny):
+            extract, extract_src = None, None
         hours = tags.get("opening_hours")
         if hours and hours_ok is not None and not hours_ok(hours):
             hours = None
@@ -552,7 +564,7 @@ def build(
             "extractSrc": extract_src,
             "hours": hours,
             "fee": fee,
-            "website": (tags.get("website") or None) and str(tags["website"])[:100],
+            "website": website(tags, deny),
             "level": card_level(image is not None, extract_src, hours is not None),
             "imageSrc": src,
         }
@@ -686,7 +698,7 @@ def osm_rows(
         if kind is None:
             continue
         name = tags.get("name") or ("Детская площадка" if kind == "playground" else None)
-        if not name or denied(name, deny):
+        if not name or denied(name, deny) or not osm_name_ok(name, kind, tags):
             continue
         reach = PLAYGROUND_KM if kind == "playground" else OSM_RADIUS_KM
         ci, cj = int(o["lat"] // 0.5), int(o["lon"] // 0.5)
@@ -711,6 +723,8 @@ def osm_rows(
             cand = commons_tag(tags) or geosearch_pick(x["_name"], ex.geosearch.get(x["osm"], []), meta)
             image, credit = image_and_credit(cand) if cand else (None, None)
             extract, src = extract_for(x["osm"], x, None, ex)
+            if extract and denied(extract, deny):
+                extract, src = None, None
             hours = tags.get("opening_hours")
             if hours and hours_ok is not None and not hours_ok(hours):
                 hours = None
@@ -741,7 +755,7 @@ def osm_rows(
                     "extractSrc": src,
                     "hours": hours,
                     "fee": {"yes": 1, "no": 0}.get(str(tags.get("fee", "")).lower()),
-                    "website": (tags.get("website") or None) and str(tags["website"])[:100],
+                    "website": website(tags, deny),
                     "level": card_level(image is not None, src, hours is not None),
                     "imageSrc": ("osm" if commons_tag(tags) else "geosearch") if image else None,
                 }

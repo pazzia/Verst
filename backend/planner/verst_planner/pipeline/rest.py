@@ -108,6 +108,8 @@ def fun_affinity(c: Candidate, inp: NormalizedInput) -> float:
     cat = category_of(c.place)
     if inp.crew.dog and cat in INDOOR:
         return -1.0
+    if cat == "playground" and inp.crew.children == 0:
+        return -1.0  # a playground is for a child (and dogs are not let in)
     score = 0.5 + (1.0 if cat in FUN_PREFER[fun_group(inp)] else 0.0)
     if inp.crew.children > 0 and cat in ("temple", "monastery", "church"):
         score -= 0.5
@@ -157,14 +159,18 @@ def _reason(inp: NormalizedInput, dwell: int, drove_min: float) -> tuple[str, di
     return "rest.generic", {**base, "drive": ru.duration_genitive(rounded_drive(drove_min))}
 
 
-def rest_pool(corridor: Corridor, fun: bool = False) -> list[Candidate]:
+def rest_pool(corridor: Corridor, fun: bool = False, secular: bool = False) -> list[Candidate]:
     """Rest areas, short sights and fuel stations with a cafe (A§6.8), sorted by km; also the REST
-    alternatives pool. `fun` («Весело и познавательно») adds every sight within the fun detour."""
+    alternatives pool. `fun` («Весело и познавательно») adds every sight within the fun detour. `secular`
+    (the open-data world, ADR-0015 §2): no church as a break — the religious share is the sights' budget."""
+    from verst_planner.pipeline.sights import RELIGIOUS, category_of
+
     pool = [*corridor.rest, *[c for c in corridor.fuel if Tag.CAFE_AT_FUEL in c.place.tags]]
     pool += [
         c
         for c in corridor.sights
-        if (c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL or (fun and c.detour_min <= FUN_DETOUR_MIN)
+        if ((c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL or (fun and c.detour_min <= FUN_DETOUR_MIN))
+        and not (secular and category_of(c.place) in RELIGIOUS)
     ]
     return sorted(pool, key=lambda c: (c.km_at, c.place.id))
 
@@ -244,8 +250,8 @@ class RestPool:
         self.kms = [c.km_at for c in self.cands]
 
     @classmethod
-    def of(cls, corridor: Corridor, fun: bool = False) -> RestPool:
-        return cls(rest_pool(corridor, fun), corridor.route)
+    def of(cls, corridor: Corridor, fun: bool = False, secular: bool = False) -> RestPool:
+        return cls(rest_pool(corridor, fun, secular), corridor.route)
 
     def between(self, lo: float, hi: float) -> list[Candidate]:
         return self.cands[bisect.bisect_left(self.kms, lo) : bisect.bisect_right(self.kms, hi)]
@@ -381,6 +387,10 @@ def plan_rests_day(
                 <= r + EXTENDED_AFTER + EPS
             ],
         ]
+        if inp.mood is Mood.FUN:
+            # ADR-0015 §5: an interesting stop in the widened window beats a plain rest area in the narrow one
+            # (`rest_score` carries the fun bonus); the extended window stays the last resort
+            windows = [_union(windows[0], windows[1]), windows[2]]
         chosen = None
         for cands in windows:
             for c, d0 in rank_rests(cands, inp, r):
@@ -401,6 +411,13 @@ def plan_rests_day(
             taken.add(chosen.place.id)
         added.append(chosen)
     return added
+
+
+def _union(
+    a: list[tuple[Candidate, float]], b: list[tuple[Candidate, float]]
+) -> list[tuple[Candidate, float]]:
+    seen = {id(c) for c, _d in a}
+    return a + [(c, d) for c, d in b if id(c) not in seen]
 
 
 def rank_rests(
@@ -432,7 +449,7 @@ def plan_rests(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ct
     """Stage 7 over every day (runs after lunch and sights, A§16.2)."""
     profile = ctx.profile_for(corridor.route)
     used = {s.place.id for d in days for s in d.stops if s.place is not None}
-    pool = RestPool.of(corridor, inp.mood is Mood.FUN)
+    pool = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
     for day in days:
         for s in plan_rests_day(day, pool, used, inp, ctx, profile):
             if s.place is not None:

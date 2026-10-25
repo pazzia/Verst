@@ -59,7 +59,7 @@ class S4AcceptanceTest(unittest.TestCase):
             with self.subTest(stop=s["name"]):
                 self.assertFalse(any(s["name"].casefold().startswith(b) for b in BAD_NAMES))
                 self.assertFalse(s["name"].casefold() in self.town_names, "a town filed as a sight")
-        free = [s for s in ss if not s.get("fixed")]
+        free = [s for s in ss if s.get("replaceable")]  # ready-route template sights are not replaceable
         religious = [s for s in free if self.category(s) in RELIGIOUS]
         if free:
             self.assertLessEqual(
@@ -68,7 +68,7 @@ class S4AcceptanceTest(unittest.TestCase):
         for d in trip["daysList"]:
             day = [s for s in d["stops"] if s["kind"] == "sight"]
             for a, b in itertools.pairwise(day):
-                if a.get("fixed") or b.get("fixed"):
+                if not (a.get("replaceable") and b.get("replaceable")):
                     continue
                 self.assertNotEqual(self.category(a), self.category(b), (a["name"], b["name"]))
 
@@ -86,11 +86,38 @@ class S4AcceptanceTest(unittest.TestCase):
         lines = {x["key"]: x for x in trip["cost"]["lines"]}
         self.assertIn("parking", lines)
         units = trip["cost"]["units"]["parking"]
-        self.assertGreater(lines["parking"]["rub"], 0)
         self.assertEqual(lines["parking"]["rub"], sum(u["rub"] or 0 for u in units))
+        stops = {s["id"]: s for s in sights(trip)}
+        for u in units:  # a weekday sight in the Moscow centre pays the zone; outside the zones it is free
+            s = stops[u["stopId"]]
+            in_centre = haversine_km(LatLon(s["lat"], s["lon"]), MOSCOW) <= 2.0
+            self.assertEqual(u["source"] == "zone" and u["rub"] > 0, in_centre, s["name"])
+            self.assertEqual(s["parking"]["rub"], u["rub"])
+            self.assertTrue(s["parking"]["zoneRu"])
+        kremlin = json.loads(
+            mobile.plan(
+                "russia_v1",
+                "g16b",
+                json.dumps(
+                    {
+                        "origin": {"lat": 55.7558, "lon": 37.6173, "label": "Москва"},
+                        "destination": {"lat": 54.1961, "lon": 37.6182, "label": "Тула"},
+                        "crew": {"adults": 2},
+                        "dailyKm": 500,
+                        "startAt": "2026-10-26T09:00",
+                    }
+                ),
+                None,
+            )
+        )["result"]["trip"]
+        paid = [u for u in kremlin["cost"]["units"]["parking"] if u["source"] == "zone"]
+        self.assertTrue(paid)
+        self.assertGreater(next(x for x in kremlin["cost"]["lines"] if x["key"] == "parking")["rub"], 0)
 
-    def test_g17_fun_moscow_kazan(self) -> None:
-        trip = plan("G17_moscow_kazan_fun_family")
+    def test_g17_fun_moscow_spb(self) -> None:
+        """M-11 has places within the 15-minute detour at the rest windows; M-12 and M-4 mostly do not
+        (motorway rest areas, few towns near the road) — see dev-notes «Sprint 4 data»."""
+        trip = plan("G17_moscow_spb_fun_family")
         fun = [s for s in sights(trip) if s["reason"].startswith("Весело и познавательно")]
         self.assertGreaterEqual(len(fun), 1)
         for s in fun:

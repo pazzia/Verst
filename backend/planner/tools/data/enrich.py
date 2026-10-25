@@ -53,7 +53,12 @@ class Extras:
 
 NOT_A_SIGHT = re.compile(
     r"(?i)^(школа|гимназия|лицей|детский сад|здание|администрация|больница|поликлиника|стадион|"
-    r"спорткомплекс|офис|бизнес-центр|жилой дом|дом (?:№|\d))"
+    r"спорткомплекс|офис|бизнес-центр|жилой дом|дом (?:№|\d)|дом жилой|жилые дома|жилой комплекс|"
+    # parts of an estate or a complex filed one by one: «Ограда с воротами …», «Главный дом (фундамент)»
+    r"ограда|ворота|флигель|хозяйственн|служебн|конюш|амбар|каретн|погреб|сарай|людская|главный дом|корпус|"
+    r"склад|гараж|котельная|магазин|банк$|банк \(|трансформатор|кафе|ресторан|пивная|клуб$|особняк$|"
+    r"особняк,|казарма|административное здание)"
+    r"|\b\d+\s*[А-Яа-я]?$"  # an address, not a name: «Амурская улица 201А», «2-я Московская улица 44»
 )
 RELIGIOUS_KINDS = frozenset({"church"})
 KIND_FROM_GROUP = (
@@ -245,16 +250,84 @@ def extract_for(
 
 
 def geosearch_pick(name: str, files: list[str], meta: dict[str, dict[str, Any]]) -> str | None:
-    """A nearby Commons file whose title names the POI (a word of ≥ 4 letters), a JPEG ≥ 800 px wide."""
-    words = {w.casefold() for w in WORD.findall(name)}
+    """A nearby Commons file that names the POI, a JPEG ≥ 800 px wide. The title must share the name's own
+    words (two of them when the name has two or more; «Памятник Тарасу Шевченко» is not «улица Шевченко»)
+    and its class word when the name has one («Памятник …» needs «памятник» in the title)."""
+    bare = re.sub(r"\s*\([^()]*\)\s*$", "", name)  # «Аптекарский сад (Тюмень)»: the town is not the place
+    stems = {_stem(w) for w in WORD.findall(bare)}
+    generic = {_stem(w) for w in GENERIC_WORDS}
+    own, cls = stems - generic, stems & generic
+    if not own:
+        return None
+    need = min(2, len(own))
     for f in files[:3]:
         m = meta.get(f) or {}
         if m.get("mime") not in (None, "image/jpeg") or (m.get("w") or 800) < 800:
             continue
-        title = {w.casefold() for w in WORD.findall(f)}
-        if words & title:
+        title = {_stem(w) for w in WORD.findall(f)}
+        if len(own & title) >= need and (not cls or cls & title):
             return f
     return None
+
+
+# words that name a class, not the place: a nearby «Церковь …» photo may show another church
+GENERIC_WORDS = frozenset(
+    (
+        "памятник",
+        "церковь",
+        "храм",
+        "собор",
+        "часовня",
+        "музей",
+        "парк",
+        "сквер",
+        "площадь",
+        "улица",
+        "дом",
+        "усадьба",
+        "монастырь",
+        "мемориал",
+        "здание",
+        "имени",
+        "святого",
+        "святой",
+        "успения",
+        "троицы",
+        "рождества",
+        "покрова",
+        "воскресения",
+        "николая",
+        "город",
+        "славы",
+        "советского",
+        "союза",
+        "героям",
+        "герою",
+        "воинам",
+        "погибшим",
+        "братская",
+        "могила",
+        "бывший",
+        "бывшая",
+        "башня",
+        "фонтан",
+        "стела",
+        "бюст",
+        "ограда",
+        "воротами",
+        "главный",
+        "chapel",
+        "church",
+        "museum",
+        "monument",
+        "park",
+    )
+)
+
+
+def _stem(w: str) -> str:
+    """Crude Russian stem for title matching: «Ипатьевского» and «Ипатьевский» meet at «ипать»."""
+    return w.casefold()[:5]
 
 
 def card_level(photo: bool, extract_src: str | None, hours: bool) -> int:
@@ -284,12 +357,65 @@ OSM_KIND = (
 )
 OSM_RADIUS_KM = 8.0
 PLAYGROUND_KM = 3.0
-PLAYGROUNDS_PER_TOWN = 15
+PLAYGROUNDS_PER_TOWN = 6
 OSM_PER_TOWN = 25
 
 
 def osm_kind(tags: dict[str, str]) -> str | None:
     return next((k for test, k in OSM_KIND if test(tags)), None)
+
+
+CYRILLIC = re.compile(r"[а-яё]", re.I)
+GENERIC_OSM_NAMES = frozenset(
+    (
+        "набережная",
+        "парк",
+        "сквер",
+        "сад",
+        "музей",
+        "пляж",
+        "озеро",
+        "пруд",
+        "родник",
+        "источник",
+        "поляна",
+        "горка",
+        "скала",
+        "сопка",
+        "пещера",
+        "лес",
+        "роща",
+        "вид",
+        "панорама",
+        "смотровая площадка",
+        "обзорная площадка",
+        "детская площадка",
+        "игровая площадка",
+        "выставка",
+        "водопад",
+        "смотровая",
+    )
+)
+NATURE_OK = frozenset(
+    {"waterfall", "cave_entrance", "beach", "volcano", "geyser", "arch", "cliff", "hot_spring"}
+)
+
+
+def osm_name_ok(name: str, kind: str, tags: dict[str, str]) -> bool:
+    """ADR-0015 §2 for OSM-only POIs: a Russian name that is a name (not «Набережная», «Учебный склон 1»,
+    «马占山…»); nature only when it is a sight (waterfall, cave, beach, cliff…, a reserve, or a tourism tag)."""
+    if kind == "playground" and name == "Детская площадка":
+        return True
+    if not CYRILLIC.search(name) or name.strip().casefold() in GENERIC_OSM_NAMES or name[-1:].isdigit():
+        return False
+    if kind == "nature":
+        return (
+            tags.get("natural") in NATURE_OK
+            or tags.get("leisure") == "nature_reserve"
+            or bool(tags.get("tourism"))
+            or bool(tags.get("wikipedia"))
+        )
+    return True
 
 
 __all__ = [
@@ -304,6 +430,7 @@ __all__ = [
     "in_voyage",
     "osm_is_tourism",
     "osm_kind",
+    "osm_name_ok",
     "quality",
     "refine_kind",
 ]

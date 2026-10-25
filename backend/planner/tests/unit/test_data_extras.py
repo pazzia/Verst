@@ -106,6 +106,48 @@ class ExtrasTest(unittest.TestCase):
         self.assertFalse(b.misplaced({"name": "Дом (Нигде)", "lat": 56.27, "lon": 38.09}, by_name))
         self.assertFalse(b.misplaced({"name": "Собор", "lat": 56.27, "lon": 38.09}, by_name))
 
+    def test_geosearch_pick_names_the_place(self) -> None:
+        e = load("enrich")
+        files = ["Дом № 102 по улице Шевченко (Шахты).jpg", "Памятник Тарасу Шевченко в Шахтах.jpg"]
+        self.assertEqual(e.geosearch_pick("Памятник Тарасу Шевченко", files, {}), files[1])
+        self.assertIsNone(e.geosearch_pick("Памятник Тарасу Шевченко", files[:1], {}))
+        town = ["Прокуратура ЦАО в Тюмени (2).jpg"]
+        self.assertIsNone(e.geosearch_pick("Аптекарский сад (Тюмень)", town, {}))  # the town is not the place
+        self.assertIsNone(e.geosearch_pick("Лазаревская башня", ["Башня Волкова. Смоленск.jpg"], {}))
+        small = {"Орлёнок.jpg": {"mime": "image/jpeg", "w": 640}}
+        self.assertIsNone(e.geosearch_pick("Орлёнок", ["Орлёнок.jpg"], small))
+        self.assertEqual(
+            e.geosearch_pick("Памятник Курчатову", ["Памятник Курчатову f010.jpg"], {}),
+            "Памятник Курчатову f010.jpg",
+        )
+        self.assertIsNone(
+            e.geosearch_pick("Церковь", ["Церковь.jpg"], {})
+        )  # a class word alone names nothing
+
+    def test_osm_names_and_excludes(self) -> None:
+        e = load("enrich")
+        self.assertTrue(e.osm_name_ok("Детская площадка", "playground", {}))
+        self.assertFalse(e.osm_name_ok("Набережная", "embankment", {}))
+        self.assertFalse(e.osm_name_ok("马占山历史陈列馆", "museum", {}))
+        self.assertFalse(e.osm_name_ok("Учебный склон 1", "nature", {"natural": "slope"}))
+        self.assertFalse(e.osm_name_ok("Сопка Сапёрная", "nature", {"natural": "peak"}))
+        self.assertTrue(e.osm_name_ok("Водопад Кивач", "nature", {"natural": "waterfall"}))
+        self.assertTrue(e.osm_name_ok("Новый парк", "park", {}))
+        for bad in (
+            "Амурская улица 201А",
+            "Главный дом (фундамент)",
+            "Кафе «Белоснежка»",
+            "Особняк",
+            "Дом жилой",
+        ):
+            self.assertTrue(e.NOT_A_SIGHT.search(bad), bad)
+        for good in ("Особняк Морозова", "Памятник борцам революции 1905 года", "Музей хлеба"):
+            self.assertFalse(e.NOT_A_SIGHT.search(good), good)
+        b = load("build_catalogue")
+        self.assertIsNone(b.website({"website": "https://link.2gis.ru/4.3/x"}, ["2gis"]))
+        self.assertIsNone(b.website({"website": "museum.ru"}, []))
+        self.assertEqual(b.website({"website": " https://museum.ru "}, []), "https://museum.ru")
+
     def test_commons_names(self) -> None:
         self.assertEqual(self.x.commons_name("File:Abc_def.jpg"), "Abc def.jpg")
         self.assertEqual(self.x.commons_name("https://commons.wikimedia.org/wiki/File:X_y.jpg"), "X y.jpg")

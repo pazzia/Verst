@@ -32,12 +32,12 @@
    "startAt": "2026-10-23T09:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T12:56",
+   "endAt": "2026-10-23T12:52",
    "unlimited": false,
    "tz": "Europe/Moscow",
-   "walkKm": 5.8,
-   "walkMin": 77,
-   "durationMin": 237,
+   "walkKm": 6.2,
+   "walkMin": 83,
+   "durationMin": 232,
    "requestedDurationMin": 240,
    "crewNotesRu": [],
    "interestsWidened": false,
@@ -56,16 +56,16 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "Q4343230",
+     "poiId": "Q4085572",
      "kind": "monument",
-     "nameRu": "Памятник Леониду Собинову",
-     "lat": 57.62648,
-     "lon": 39.88661,
-     "arriveAt": "2026-10-23T09:02",
-     "departAt": "2026-10-23T09:12",
+     "nameRu": "Беседка на Волжской набережной",
+     "lat": 57.62994,
+     "lon": 39.89631,
+     "arriveAt": "2026-10-23T09:14",
+     "departAt": "2026-10-23T09:24",
      "dwellMin": 10,
-     "walkKmFromPrev": 0.2,
-     "walkMinFromPrev": 2,
+     "walkKmFromPrev": 1.1,
+     "walkMinFromPrev": 14,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -74,133 +74,18 @@
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
-     "hasPhoto": false,
+     "hasPhoto": true,
      "tappable": true
     },
     {
      "id": "w02",
-     "poiId": "Q4204534",
-     "kind": "monument",
-     "nameRu": "Исторический центр Ярославля",
-     "lat": 57.62361,
-     "lon": 39.8875,
-     "arriveAt": "2026-10-23T09:17",
-     "departAt": "2026-10-23T09:27",
-     "dwellMin": 10,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 6,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w03",
-     "poiId": "Q4507592",
-     "kind": "church",
-     "nameRu": "Часовня Александра Невского",
-     "lat": 57.6254,
-     "lon": 39.89103,
-     "arriveAt": "2026-10-23T09:32",
-     "departAt": "2026-10-23T09:52",
-     "dwellMin": 20,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 5,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "08:00–20:00",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w04",
-     "poiId": "Q4426361",
-     "kind": "square",
-     "nameRu": "Советская площадь",
-     "lat": 57.62651,
-     "lon": 39.89351,
-     "arriveAt": "2026-10-23T09:56",
-     "departAt": "2026-10-23T10:06",
-     "dwellMin": 10,
-     "walkKmFromPrev": 0.3,
-     "walkMinFromPrev": 3,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w05",
-     "poiId": "Q4151348",
-     "kind": "attraction",
-     "nameRu": "Губернаторский дом",
-     "lat": 57.62792,
-     "lon": 39.8963,
-     "arriveAt": "2026-10-23T10:10",
-     "departAt": "2026-10-23T10:30",
-     "dwellMin": 20,
-     "walkKmFromPrev": 0.3,
-     "walkMinFromPrev": 4,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w06",
-     "poiId": "pl_yar_embankment",
-     "kind": "viewpoint",
-     "nameRu": "Волжская набережная",
-     "lat": 57.627909,
-     "lon": 39.899599,
-     "arriveAt": "2026-10-23T10:33",
-     "departAt": "2026-10-23T10:48",
-     "dwellMin": 15,
-     "walkKmFromPrev": 0.3,
-     "walkMinFromPrev": 3,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": false,
-     "tappable": true
-    },
-    {
-     "id": "w07",
      "poiId": "pl_yar_strelka",
      "kind": "viewpoint",
      "nameRu": "Стрелка и Волжская набережная",
      "lat": 57.633335,
      "lon": 39.909665,
-     "arriveAt": "2026-10-23T11:03",
-     "departAt": "2026-10-23T11:18",
+     "arriveAt": "2026-10-23T09:39",
+     "departAt": "2026-10-23T09:54",
      "dwellMin": 15,
      "walkKmFromPrev": 1.1,
      "walkMinFromPrev": 15,
@@ -216,38 +101,38 @@
      "tappable": true
     },
     {
-     "id": "w08",
-     "poiId": "Q4087788",
-     "kind": "church",
-     "nameRu": "Благовещенско-Вознесенский приход",
-     "lat": 57.6344,
-     "lon": 39.89135,
-     "arriveAt": "2026-10-23T11:36",
-     "departAt": "2026-10-23T11:56",
-     "dwellMin": 20,
-     "walkKmFromPrev": 1.4,
-     "walkMinFromPrev": 19,
+     "id": "w03",
+     "poiId": "pl_yar_embankment",
+     "kind": "viewpoint",
+     "nameRu": "Волжская набережная",
+     "lat": 57.627909,
+     "lon": 39.899599,
+     "arriveAt": "2026-10-23T10:09",
+     "departAt": "2026-10-23T10:24",
+     "dwellMin": 15,
+     "walkKmFromPrev": 1.1,
+     "walkMinFromPrev": 15,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "08:00–20:00",
+      "todayRu": "24 часа",
       "openNow": true,
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
+     "hasPhoto": false,
      "tappable": true
     },
     {
-     "id": "w09",
-     "poiId": "Q4238141",
-     "kind": "square",
-     "nameRu": "Красная площадь",
-     "lat": 57.63214,
-     "lon": 39.88761,
-     "arriveAt": "2026-10-23T12:02",
-     "departAt": "2026-10-23T12:12",
-     "dwellMin": 10,
+     "id": "w04",
+     "poiId": "Q4123105",
+     "kind": "attraction",
+     "nameRu": "Волжская башня",
+     "lat": 57.62501,
+     "lon": 39.90158,
+     "arriveAt": "2026-10-23T10:30",
+     "departAt": "2026-10-23T10:50",
+     "dwellMin": 20,
      "walkKmFromPrev": 0.4,
      "walkMinFromPrev": 6,
      "costRub": 0,
@@ -262,21 +147,21 @@
      "tappable": true
     },
     {
-     "id": "w10",
-     "poiId": "Q4343231",
-     "kind": "monument",
-     "nameRu": "Памятник Леониду Трефолеву",
-     "lat": 57.62761,
-     "lon": 39.88794,
-     "arriveAt": "2026-10-23T12:21",
-     "departAt": "2026-10-23T12:31",
-     "dwellMin": 10,
-     "walkKmFromPrev": 0.7,
-     "walkMinFromPrev": 9,
+     "id": "w05",
+     "poiId": "Q16715656",
+     "kind": "church",
+     "nameRu": "Церковь Николая Чудотворца в Рубленом Городе",
+     "lat": 57.62251,
+     "lon": 39.8983,
+     "arriveAt": "2026-10-23T10:56",
+     "departAt": "2026-10-23T11:16",
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 6,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "24 часа",
+      "todayRu": "08:00–20:00",
       "openNow": true,
       "source": "default"
      },
@@ -285,21 +170,44 @@
      "tappable": true
     },
     {
-     "id": "w11",
-     "poiId": "Q4398052",
-     "kind": "attraction",
-     "nameRu": "Российский академический театр драмы им. Ф. Волкова",
-     "lat": 57.62694,
-     "lon": 39.88444,
-     "arriveAt": "2026-10-23T12:35",
-     "departAt": "2026-10-23T12:55",
+     "id": "w06",
+     "poiId": "pl_yar_spaso",
+     "kind": "monastery",
+     "nameRu": "Спасо-Преображенский монастырь",
+     "lat": 57.618865,
+     "lon": 39.894566,
+     "arriveAt": "2026-10-23T11:23",
+     "departAt": "2026-10-23T12:13",
+     "dwellMin": 50,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 8,
+     "costRub": 1000,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "curated"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w07",
+     "poiId": "Q122225414",
+     "kind": "church",
+     "nameRu": "Церковь Богоявления",
+     "lat": 57.62162,
+     "lon": 39.88645,
+     "arriveAt": "2026-10-23T12:23",
+     "departAt": "2026-10-23T12:43",
      "dwellMin": 20,
-     "walkKmFromPrev": 0.3,
-     "walkMinFromPrev": 4,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 10,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "24 часа",
+      "todayRu": "08:00–20:00",
       "openNow": true,
       "source": "default"
      },
@@ -309,11 +217,11 @@
     }
    ],
    "cost": {
-    "totalRub": 0,
+    "totalRub": 1000,
     "lines": [
      {
       "key": "tickets",
-      "rub": 0
+      "rub": 1000
      }
     ],
     "budgetRub": null
@@ -331,48 +239,32 @@
      39.8845
     ],
     [
-     57.62648,
-     39.88661
-    ],
-    [
-     57.62361,
-     39.8875
-    ],
-    [
-     57.6254,
-     39.89103
-    ],
-    [
-     57.62651,
-     39.89351
-    ],
-    [
-     57.62792,
-     39.8963
-    ],
-    [
-     57.627909,
-     39.899599
+     57.62994,
+     39.89631
     ],
     [
      57.633335,
      39.909665
     ],
     [
-     57.6344,
-     39.89135
+     57.627909,
+     39.899599
     ],
     [
-     57.63214,
-     39.88761
+     57.62501,
+     39.90158
     ],
     [
-     57.62761,
-     39.88794
+     57.62251,
+     39.8983
     ],
     [
-     57.62694,
-     39.88444
+     57.618865,
+     39.894566
+    ],
+    [
+     57.62162,
+     39.88645
     ],
     [
      57.6261,

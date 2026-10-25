@@ -14,10 +14,14 @@
    "poiKind": "museum",
    "nameRu": "Эрмитаж-Выборг",
    "descriptionRu": null,
-   "extractRu": null,
-   "extractSource": null,
-   "cardLevel": 1,
-   "quality": null,
+   "extractRu": "Эрмитаж-Выборг — филиал Государственного Эрмитажа и выставочный центр в Выборге , открывшийся в июне 2010 года.",
+   "extractSource": {
+    "key": "wikipedia",
+    "nameRu": "Описание: Википедия",
+    "licence": "CC BY-SA 4.0"
+   },
+   "cardLevel": 3,
+   "quality": 54,
    "fee": null,
    "website": null,
    "townName": "Выборг",
@@ -47,7 +51,9 @@
     "estimate": true
    },
    "isFictional": false,
-   "attributionRu": [],
+   "attributionRu": [
+    "Описание: Википедия"
+   ],
    "wikidataId": "Q4357088"
   },
   "ms": 0

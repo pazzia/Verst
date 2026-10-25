@@ -18,13 +18,13 @@
    "lat": 57.631526230397746,
    "lon": 39.904632398365415,
    "image": {
-    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Red_Square_in_Yaroslavl_01.jpg?width=800",
-    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Red_Square_in_Yaroslavl_01.jpg?width=400",
-    "page": "https://commons.wikimedia.org/wiki/File:Red_Square_in_Yaroslavl_01.jpg",
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Znamenskaya_Tower_in_Yaroslavl_01.jpg?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Znamenskaya_Tower_in_Yaroslavl_01.jpg?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:Znamenskaya_Tower_in_Yaroslavl_01.jpg",
     "credit": {
-     "author": null,
-     "licence": "Public domain",
-     "licenceUrl": null
+     "author": "Florstein",
+     "licence": "CC BY-SA 4.0",
+     "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0"
     },
     "isArea": true,
     "labelRu": "Фото района: Ярославль · Wikimedia Commons",
