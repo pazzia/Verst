@@ -1777,3 +1777,35 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
 - **Known limit:** the M-12 and M-4 trips get few sights and fun stops. The motorways bypass the towns:
   Vladimir, Гороховец and Козьмодемьянск are 20–60 min away, and the quality bar is 0.40. On M-11
   (Москва → СПб) the fun stops do appear. G17 therefore runs on M-11.
+
+### M8: the tiered detour budget (Manager's decision on the M-12 / M-4 sparsity; open-data world only)
+- **Detour budget for sights.** The quality bar stays at 0.40.
+  - q ≥ 0.70: up to 45 min, at most 1 such sight per day.
+  - 0.55 ≤ q < 0.70: up to 25 min.
+  - Below 0.55: the old rule, a detour of at most 10 km.
+  - Curated sights use their rating on the same scale (3.6 → 0, 4.9 → 1).
+  - The order is now quality first, with the detour costing about 0.15 per 45 min.
+- **Million-city centres.** A q ≥ 0.70 sight within the 45-minute budget may be a transit stop in a
+  million-city centre. Moscow and St Petersburg (≥ 4 M) never are, because the detour model cannot see their
+  centre traffic. The Фрязино ring still never touches Красная площадь.
+- **Sight order and the lunch.** Secular sights are chosen first over the whole trip; religious ones follow
+  while the trip stays ≤ 30 % religious. A sight that only pushes the lunch out of its window gets the lunch
+  re-planned.
+- **Fun stops.** When nothing is within 15 min in the rest window, a stop up to 30 min away is allowed.
+- **Stop text.** Every sight with a detour ≥ 10 min ends with «Крюк ≈ N мин.» (rounded to 5). Detours count
+  inside the day limit as before.
+- **Rest planner fix.** It no longer inserts the same roadside break up to 200 times when the break cannot
+  shorten a gap (a break point inside a long detour). This was only seen on the day-budget copy.
+- **G14 (Фрязино → Екатеринбург, child, 600 km/day):**
+  - Day 1: Владимир, Золотые ворота (крюк ≈ 35 мин).
+  - Day 4: Екатеринбург.
+  - 1 playground in the trip.
+  - **Days 2–3 cannot have a quality sight inside the pace.** Day 2 is 480 km: Козьмодемьянск (q 0.61,
+    24 min) needs 99 min, and only about 45 min are free; Нижний is 59 min off the road. Day 3 is 552 km and
+    has no eligible sight at all: Сарапул's best is q 0.53 at 46 min, and the road passes neither Казань nor
+    Елабуга.
+- **G18 (Москва → Казань by M-12):** 8 sights, 7 of them with q ≥ 0.40.
+  - In Moscow: the Kremlin, Измайловский парк.
+  - On the road: Покрова на Нерли (крюк ≈ 30 мин) and Глухово.
+  - In Казань: the Kremlin cathedral, Храм всех религий, Иске Таш.
+  - Нижний is out of reach: 55–60 min off M-12, beyond 45.

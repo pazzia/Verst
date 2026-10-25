@@ -71,7 +71,7 @@ def _thin(cands: list[Candidate], cap: int | None) -> list[Candidate]:
 
 
 NEAR_CAP = 4  # ADR-0015 §5: extra short-detour sights per bucket kept for the fun rest stops
-NEAR_DETOUR_MIN = 15
+NEAR_DETOUR_MIN = 30  # the fun stops: 15 min, up to 30 when nothing nearer (M8)
 
 
 def _q(c: Candidate) -> float:

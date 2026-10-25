@@ -32,18 +32,18 @@
    "trip": {
     "id": null,
     "title": "Москва → Тула",
-    "km": 184,
+    "km": 196,
     "days": 1,
     "nights": 0,
     "roundTrip": false,
     "daysList": [
      {
       "day": 1,
-      "km": 184,
-      "driveMin": 136,
+      "km": 196,
+      "driveMin": 164,
       "tz": "Europe/Moscow",
       "startAt": "2026-10-26T09:00",
-      "endAt": "2026-10-26T13:16",
+      "endAt": "2026-10-26T14:24",
       "overBudget": false,
       "stops": [
        {
@@ -74,7 +74,7 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 0,
-        "kmLeft": 184
+        "kmLeft": 196
        },
        {
         "id": "d1s02",
@@ -82,36 +82,142 @@
         "day": 1,
         "kind": "sight",
         "sign": "tourist",
-        "placeId": "Q133274",
+        "placeId": "Q652464",
         "townId": "t_moscow",
-        "name": "Московский Кремль",
+        "name": "Коломенское",
         "note": "не проверено",
-        "lat": 55.75167,
-        "lon": 37.61778,
-        "arriveAt": "2026-10-26T09:00",
-        "departAt": "2026-10-26T10:00",
+        "lat": 55.66767,
+        "lon": 37.66657,
+        "arriveAt": "2026-10-26T09:19",
+        "departAt": "2026-10-26T09:59",
         "tz": "Europe/Moscow",
-        "kmFromPrev": 1,
-        "kmAt": 0,
-        "dwellMin": 60,
+        "kmFromPrev": 16,
+        "kmAt": 10,
+        "dwellMin": 40,
         "tags": [
+         "view",
          "walk",
-         "kremlin"
+         "free_entry"
         ],
-        "costRub": 600,
-        "reason": "По открытым данным.",
+        "costRub": 0,
+        "reason": "По открытым данным. Крюк ≈ 20 мин.",
         "verified": false,
         "replaceable": true,
         "alternatives": [
          {
+          "id": "alt_d1s02_Q133274",
+          "placeId": "Q133274",
+          "name": "Московский Кремль",
+          "deltaMin": 1,
+          "deltaRub": 850,
+          "shiftMin": 1,
+          "units": {
+           "deltaKm": -10.92,
+           "regionCode": "RU-MOW",
+           "checkRub": null,
+           "adultRub": 300,
+           "childRub": 150,
+           "name": "Московский Кремль",
+           "placeId": "Q133274",
+           "priceRub": "62.50",
+           "regionName": "Москва",
+           "tripKmDelta": -10,
+           "parkingRub": 380,
+           "parkingRubPerHour": 380,
+           "parkingHours": 1,
+           "parkingSource": "zone"
+          },
+          "stop": {
+           "id": "d1s02",
+           "seq": 2,
+           "day": 1,
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "Q133274",
+           "townId": "t_moscow",
+           "name": "Московский Кремль",
+           "note": "не проверено",
+           "lat": 55.75167,
+           "lon": 37.61778,
+           "arriveAt": "2026-10-26T09:00",
+           "departAt": "2026-10-26T10:00",
+           "tz": "Europe/Moscow",
+           "kmFromPrev": 1,
+           "kmAt": 0,
+           "dwellMin": 60,
+           "tags": [
+            "walk",
+            "kremlin"
+           ],
+           "costRub": 600,
+           "reason": "По открытым данным.",
+           "verified": false,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "poiKind": "kremlin",
+           "whyRu": "Объект культурного наследия · Статьи в 97 языковых разделах Википедии",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 380,
+            "rubPerHour": 380,
+            "hours": 1,
+            "source": "zone",
+            "zoneRu": "Москва: платная зона до 2 км от центра, 380 ₽/ч с 08:00 до 21:00, ночью 200 ₽/ч",
+            "whereRu": "Уличные места в платной зоне у объекта",
+            "sundayRu": "В воскресенье здесь тоже платно; в праздники бесплатно",
+            "freeRu": null
+           }
+          },
+          "dayPatch": [
+           {
+            "stopId": "d1s01",
+            "seq": 1,
+            "arriveAt": null,
+            "departAt": "2026-10-26T09:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d1s02",
+            "seq": 2,
+            "arriveAt": "2026-10-26T09:00",
+            "departAt": "2026-10-26T10:00",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s03",
+            "seq": 3,
+            "arriveAt": "2026-10-26T12:13",
+            "departAt": "2026-10-26T13:13",
+            "kmFromPrev": 183
+           },
+           {
+            "stopId": "d1s04",
+            "seq": 4,
+            "arriveAt": "2026-10-26T13:21",
+            "departAt": "2026-10-26T14:21",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T14:25",
+            "departAt": null,
+            "kmFromPrev": 1
+           }
+          ]
+         },
+         {
           "id": "alt_d1s02_Q2416732",
           "placeId": "Q2416732",
           "name": "Спасская башня",
-          "deltaMin": 3,
-          "deltaRub": 0,
-          "shiftMin": 3,
+          "deltaMin": 4,
+          "deltaRub": 850,
+          "shiftMin": 4,
           "units": {
-           "deltaKm": 0.558,
+           "deltaKm": -10.362,
            "regionCode": "RU-MOW",
            "checkRub": null,
            "adultRub": 300,
@@ -120,7 +226,7 @@
            "placeId": "Q2416732",
            "priceRub": "62.50",
            "regionName": "Москва",
-           "tripKmDelta": 1,
+           "tripKmDelta": -10,
            "parkingRub": 380,
            "parkingRubPerHour": 380,
            "parkingHours": 1,
@@ -188,14 +294,21 @@
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-26T12:15",
-            "departAt": "2026-10-26T13:15",
+            "arriveAt": "2026-10-26T12:16",
+            "departAt": "2026-10-26T13:16",
             "kmFromPrev": 183
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-26T13:19",
+            "arriveAt": "2026-10-26T13:24",
+            "departAt": "2026-10-26T14:24",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T14:28",
             "departAt": null,
             "kmFromPrev": 1
            }
@@ -205,11 +318,11 @@
           "id": "alt_d1s02_Q1242146",
           "placeId": "Q1242146",
           "name": "Донской монастырь",
-          "deltaMin": 3,
-          "deltaRub": -180,
-          "shiftMin": 3,
+          "deltaMin": 4,
+          "deltaRub": 670,
+          "shiftMin": 4,
           "units": {
-           "deltaKm": 0.766,
+           "deltaKm": -10.154,
            "regionCode": "RU-MOW",
            "checkRub": null,
            "adultRub": 300,
@@ -218,7 +331,7 @@
            "placeId": "Q1242146",
            "priceRub": "62.50",
            "regionName": "Москва",
-           "tripKmDelta": 1,
+           "tripKmDelta": -10,
            "parkingRub": 200,
            "parkingRubPerHour": 200,
            "parkingHours": 1,
@@ -286,65 +399,224 @@
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-26T12:15",
-            "departAt": "2026-10-26T13:15",
+            "arriveAt": "2026-10-26T12:16",
+            "departAt": "2026-10-26T13:16",
             "kmFromPrev": 179
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-26T13:19",
+            "arriveAt": "2026-10-26T13:24",
+            "departAt": "2026-10-26T14:24",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T14:28",
+            "departAt": null,
+            "kmFromPrev": 1
+           }
+          ]
+         }
+        ],
+        "alternativesNote": null,
+        "hotelOptions": [],
+        "selectedHotelId": null,
+        "kmDriven": 16,
+        "kmLeft": 180,
+        "poiKind": "nature",
+        "whyRu": "Объект культурного наследия · Статьи в 44 языковых разделах Википедии",
+        "photoSource": "p18",
+        "parking": {
+         "rub": 80,
+         "rubPerHour": 80,
+         "hours": 1,
+         "source": "zone",
+         "zoneRu": "Москва: платная зона до 17 км от центра, 80 ₽/ч с 08:00 до 21:00, ночью 60 ₽/ч",
+         "whereRu": "Уличные места в платной зоне у объекта",
+         "sundayRu": "По воскресеньям бесплатно; в праздники бесплатно",
+         "freeRu": null
+        }
+       },
+       {
+        "id": "d1s03",
+        "seq": 3,
+        "day": 1,
+        "kind": "sight",
+        "sign": "tourist",
+        "placeId": "pl_tul_kremlin",
+        "townId": "t_tula",
+        "name": "Тульский кремль",
+        "note": null,
+        "lat": 54.19671748693183,
+        "lon": 37.62497714697585,
+        "arriveAt": "2026-10-26T12:12",
+        "departAt": "2026-10-26T13:12",
+        "tz": "Europe/Moscow",
+        "kmFromPrev": 179,
+        "kmAt": 183,
+        "dwellMin": 60,
+        "tags": [
+         "walk",
+         "museum",
+         "kremlin"
+        ],
+        "costRub": 600,
+        "reason": "Час на осмотр.",
+        "verified": true,
+        "replaceable": true,
+        "alternatives": [
+         {
+          "id": "alt_d1s03_pl_tul_gingerbread",
+          "placeId": "pl_tul_gingerbread",
+          "name": "Музей «Тульский пряник»",
+          "deltaMin": -15,
+          "deltaRub": -200,
+          "shiftMin": -15,
+          "units": {
+           "deltaKm": -0.297,
+           "regionCode": "RU-TUL",
+           "checkRub": null,
+           "adultRub": 200,
+           "childRub": 100,
+           "name": "Музей «Тульский пряник»",
+           "placeId": "pl_tul_gingerbread",
+           "priceRub": "61.70",
+           "regionName": "Тульская область",
+           "tripKmDelta": 0,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
+          },
+          "stop": {
+           "id": "d1s03",
+           "seq": 3,
+           "day": 1,
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "pl_tul_gingerbread",
+           "townId": "t_tula",
+           "name": "Музей «Тульский пряник»",
+           "note": null,
+           "lat": 54.195813115198874,
+           "lon": 37.62344171758068,
+           "arriveAt": "2026-10-26T12:12",
+           "departAt": "2026-10-26T12:57",
+           "tz": "Europe/Moscow",
+           "kmFromPrev": 179,
+           "kmAt": 183,
+           "dwellMin": 45,
+           "tags": [
+            "playground",
+            "museum"
+           ],
+           "costRub": 400,
+           "reason": "45 мин на осмотр.",
+           "verified": true,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "poiKind": "museum",
+           "whyRu": null,
+           "photoSource": null,
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
+          },
+          "dayPatch": [
+           {
+            "stopId": "d1s01",
+            "seq": 1,
+            "arriveAt": null,
+            "departAt": "2026-10-26T09:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d1s02",
+            "seq": 2,
+            "arriveAt": "2026-10-26T09:19",
+            "departAt": "2026-10-26T09:59",
+            "kmFromPrev": 16
+           },
+           {
+            "stopId": "d1s03",
+            "seq": 3,
+            "arriveAt": "2026-10-26T12:12",
+            "departAt": "2026-10-26T12:57",
+            "kmFromPrev": 179
+           },
+           {
+            "stopId": "d1s04",
+            "seq": 4,
+            "arriveAt": "2026-10-26T13:05",
+            "departAt": "2026-10-26T14:05",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T14:09",
             "departAt": null,
             "kmFromPrev": 1
            }
           ]
          },
          {
-          "id": "alt_d1s02_Q658262",
-          "placeId": "Q658262",
-          "name": "Данилов монастырь",
-          "deltaMin": 8,
-          "deltaRub": -160,
-          "shiftMin": 8,
+          "id": "alt_d1s03_Q1899567",
+          "placeId": "Q1899567",
+          "name": "Успенский собор Тульского кремля",
+          "deltaMin": -49,
+          "deltaRub": -600,
+          "shiftMin": -49,
           "units": {
-           "deltaKm": 3.534,
-           "regionCode": "RU-MOW",
+           "deltaKm": -0.908,
+           "regionCode": "RU-TUL",
            "checkRub": null,
-           "adultRub": 300,
-           "childRub": 150,
-           "name": "Данилов монастырь",
-           "placeId": "Q658262",
-           "priceRub": "62.50",
-           "regionName": "Москва",
-           "tripKmDelta": 4,
-           "parkingRub": 200,
-           "parkingRubPerHour": 200,
+           "adultRub": 0,
+           "childRub": 0,
+           "name": "Успенский собор Тульского кремля",
+           "placeId": "Q1899567",
+           "priceRub": "61.70",
+           "regionName": "Тульская область",
+           "tripKmDelta": 0,
+           "parkingRub": null,
+           "parkingRubPerHour": null,
            "parkingHours": 1,
-           "parkingSource": "zone"
+           "parkingSource": "unknown"
           },
           "stop": {
-           "id": "d1s02",
-           "seq": 2,
+           "id": "d1s03",
+           "seq": 3,
            "day": 1,
            "kind": "sight",
            "sign": "tourist",
-           "placeId": "Q658262",
-           "townId": "t_moscow",
-           "name": "Данилов монастырь",
+           "placeId": "Q1899567",
+           "townId": "t_tula",
+           "name": "Успенский собор Тульского кремля",
            "note": "не проверено",
-           "lat": 55.71083,
-           "lon": 37.63056,
-           "arriveAt": "2026-10-26T09:09",
-           "departAt": "2026-10-26T10:09",
+           "lat": 54.19501,
+           "lon": 37.61998,
+           "arriveAt": "2026-10-26T12:07",
+           "departAt": "2026-10-26T12:27",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 7,
-           "kmAt": 5,
-           "dwellMin": 60,
+           "kmFromPrev": 178,
+           "kmAt": 183,
+           "dwellMin": 20,
            "tags": [
-            "walk",
-            "monastery"
+            "free_entry"
            ],
-           "costRub": 600,
+           "costRub": 0,
            "reason": "По открытым данным.",
            "verified": false,
            "replaceable": true,
@@ -352,17 +624,17 @@
            "alternativesNote": null,
            "hotelOptions": [],
            "selectedHotelId": null,
-           "poiKind": "monastery",
-           "whyRu": "Объект культурного наследия · Статьи в 27 языковых разделах Википедии",
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
            "photoSource": "p18",
            "parking": {
-            "rub": 200,
-            "rubPerHour": 200,
+            "rub": null,
+            "rubPerHour": null,
             "hours": 1,
-            "source": "zone",
-            "zoneRu": "Москва: платная зона до 6 км от центра, 200 ₽/ч с 08:00 до 21:00, ночью 80 ₽/ч",
-            "whereRu": "Уличные места в платной зоне у объекта",
-            "sundayRu": "По воскресеньям бесплатно; в праздники бесплатно",
+            "source": "unknown",
+            "zoneRu": "Платная парковка, тариф неизвестен",
+            "whereRu": "Парковка в 187 м от объекта",
+            "sundayRu": null,
             "freeRu": null
            }
           },
@@ -377,21 +649,132 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-26T09:09",
-            "departAt": "2026-10-26T10:09",
-            "kmFromPrev": 7
+            "arriveAt": "2026-10-26T09:19",
+            "departAt": "2026-10-26T09:59",
+            "kmFromPrev": 16
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-26T12:20",
-            "departAt": "2026-10-26T13:20",
-            "kmFromPrev": 180
+            "arriveAt": "2026-10-26T12:07",
+            "departAt": "2026-10-26T12:27",
+            "kmFromPrev": 178
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-26T13:24",
+            "arriveAt": "2026-10-26T12:31",
+            "departAt": "2026-10-26T13:31",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T13:35",
+            "departAt": null,
+            "kmFromPrev": 1
+           }
+          ]
+         },
+         {
+          "id": "alt_d1s03_Q4430938",
+          "placeId": "Q4430938",
+          "name": "Спасский храм",
+          "deltaMin": -49,
+          "deltaRub": -610,
+          "shiftMin": -49,
+          "units": {
+           "deltaKm": -1.183,
+           "regionCode": "RU-TUL",
+           "checkRub": null,
+           "adultRub": 0,
+           "childRub": 0,
+           "name": "Спасский храм",
+           "placeId": "Q4430938",
+           "priceRub": "61.70",
+           "regionName": "Тульская область",
+           "tripKmDelta": -1,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
+          },
+          "stop": {
+           "id": "d1s03",
+           "seq": 3,
+           "day": 1,
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "Q4430938",
+           "townId": "t_tula",
+           "name": "Спасский храм",
+           "note": "не проверено",
+           "lat": 54.22217,
+           "lon": 37.60744,
+           "arriveAt": "2026-10-26T12:05",
+           "departAt": "2026-10-26T12:25",
+           "tz": "Europe/Moscow",
+           "kmFromPrev": 175,
+           "kmAt": 180,
+           "dwellMin": 20,
+           "tags": [
+            "free_entry"
+           ],
+           "costRub": 0,
+           "reason": "По открытым данным.",
+           "verified": false,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
+          },
+          "dayPatch": [
+           {
+            "stopId": "d1s01",
+            "seq": 1,
+            "arriveAt": null,
+            "departAt": "2026-10-26T09:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d1s02",
+            "seq": 2,
+            "arriveAt": "2026-10-26T09:19",
+            "departAt": "2026-10-26T09:59",
+            "kmFromPrev": 16
+           },
+           {
+            "stopId": "d1s03",
+            "seq": 3,
+            "arriveAt": "2026-10-26T12:05",
+            "departAt": "2026-10-26T12:25",
+            "kmFromPrev": 175
+           },
+           {
+            "stopId": "d1s04",
+            "seq": 4,
+            "arriveAt": "2026-10-26T12:31",
+            "departAt": "2026-10-26T13:31",
+            "kmFromPrev": 4
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T13:35",
             "departAt": null,
             "kmFromPrev": 1
            }
@@ -401,25 +784,25 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 1,
-        "kmLeft": 183,
+        "kmDriven": 195,
+        "kmLeft": 1,
         "poiKind": "kremlin",
-        "whyRu": "Объект культурного наследия · Статьи в 97 языковых разделах Википедии",
+        "whyRu": null,
         "photoSource": "p18",
         "parking": {
-         "rub": 380,
-         "rubPerHour": 380,
+         "rub": 0,
+         "rubPerHour": 0,
          "hours": 1,
-         "source": "zone",
-         "zoneRu": "Москва: платная зона до 2 км от центра, 380 ₽/ч с 08:00 до 21:00, ночью 200 ₽/ч",
-         "whereRu": "Уличные места в платной зоне у объекта",
-         "sundayRu": "В воскресенье здесь тоже платно; в праздники бесплатно",
-         "freeRu": null
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
         }
        },
        {
-        "id": "d1s03",
-        "seq": 3,
+        "id": "d1s04",
+        "seq": 4,
         "day": 1,
         "kind": "food",
         "sign": "food",
@@ -429,10 +812,10 @@
         "note": null,
         "lat": 54.195813115198874,
         "lon": 37.621906288185514,
-        "arriveAt": "2026-10-26T12:12",
-        "departAt": "2026-10-26T13:12",
+        "arriveAt": "2026-10-26T13:20",
+        "departAt": "2026-10-26T14:20",
         "tz": "Europe/Moscow",
-        "kmFromPrev": 183,
+        "kmFromPrev": 1,
         "kmAt": 183,
         "dwellMin": 60,
         "tags": [
@@ -445,7 +828,7 @@
         "replaceable": true,
         "alternatives": [
          {
-          "id": "alt_d1s03_pl_tul_rest_kremlin",
+          "id": "alt_d1s04_pl_tul_rest_kremlin",
           "placeId": "pl_tul_rest_kremlin",
           "name": "Ресторан «Тульский»",
           "deltaMin": 2,
@@ -464,8 +847,8 @@
            "tripKmDelta": 1
           },
           "stop": {
-           "id": "d1s03",
-           "seq": 3,
+           "id": "d1s04",
+           "seq": 4,
            "day": 1,
            "kind": "food",
            "sign": "food",
@@ -475,10 +858,10 @@
            "note": null,
            "lat": 54.19762185866479,
            "lon": 37.62651257637102,
-           "arriveAt": "2026-10-26T12:13",
-           "departAt": "2026-10-26T13:13",
+           "arriveAt": "2026-10-26T13:21",
+           "departAt": "2026-10-26T14:21",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 183,
+           "kmFromPrev": 2,
            "kmAt": 183,
            "dwellMin": 60,
            "tags": [
@@ -504,28 +887,35 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-26T09:00",
-            "departAt": "2026-10-26T10:00",
-            "kmFromPrev": 1
+            "arriveAt": "2026-10-26T09:19",
+            "departAt": "2026-10-26T09:59",
+            "kmFromPrev": 16
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-26T12:13",
-            "departAt": "2026-10-26T13:13",
-            "kmFromPrev": 183
+            "arriveAt": "2026-10-26T12:12",
+            "departAt": "2026-10-26T13:12",
+            "kmFromPrev": 179
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-26T13:18",
+            "arriveAt": "2026-10-26T13:21",
+            "departAt": "2026-10-26T14:21",
+            "kmFromPrev": 2
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T14:26",
             "departAt": null,
             "kmFromPrev": 1
            }
           ]
          },
          {
-          "id": "alt_d1s03_pl_tul_cafe_pryanik",
+          "id": "alt_d1s04_pl_tul_cafe_pryanik",
           "placeId": "pl_tul_cafe_pryanik",
           "name": "Пряничная",
           "deltaMin": 1,
@@ -541,11 +931,11 @@
            "placeId": "pl_tul_cafe_pryanik",
            "priceRub": "61.70",
            "regionName": "Тульская область",
-           "tripKmDelta": 0
+           "tripKmDelta": 1
           },
           "stop": {
-           "id": "d1s03",
-           "seq": 3,
+           "id": "d1s04",
+           "seq": 4,
            "day": 1,
            "kind": "food",
            "sign": "food",
@@ -555,10 +945,10 @@
            "note": null,
            "lat": 54.194908743465916,
            "lon": 37.62344171758068,
-           "arriveAt": "2026-10-26T12:13",
-           "departAt": "2026-10-26T13:13",
+           "arriveAt": "2026-10-26T13:21",
+           "departAt": "2026-10-26T14:21",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 183,
+           "kmFromPrev": 1,
            "kmAt": 183,
            "dwellMin": 60,
            "tags": [
@@ -585,28 +975,35 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-26T09:00",
-            "departAt": "2026-10-26T10:00",
-            "kmFromPrev": 1
+            "arriveAt": "2026-10-26T09:19",
+            "departAt": "2026-10-26T09:59",
+            "kmFromPrev": 16
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-26T12:13",
-            "departAt": "2026-10-26T13:13",
-            "kmFromPrev": 183
+            "arriveAt": "2026-10-26T12:12",
+            "departAt": "2026-10-26T13:12",
+            "kmFromPrev": 179
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-26T13:17",
+            "arriveAt": "2026-10-26T13:21",
+            "departAt": "2026-10-26T14:21",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T14:25",
             "departAt": null,
             "kmFromPrev": 1
            }
           ]
          },
          {
-          "id": "alt_d1s03_pl_tul_cafe_kremlin",
+          "id": "alt_d1s04_pl_tul_cafe_kremlin",
           "placeId": "pl_tul_cafe_kremlin",
           "name": "Кафе у кремля",
           "deltaMin": 1,
@@ -622,11 +1019,11 @@
            "placeId": "pl_tul_cafe_kremlin",
            "priceRub": "61.70",
            "regionName": "Тульская область",
-           "tripKmDelta": 0
+           "tripKmDelta": 1
           },
           "stop": {
-           "id": "d1s03",
-           "seq": 3,
+           "id": "d1s04",
+           "seq": 4,
            "day": 1,
            "kind": "food",
            "sign": "food",
@@ -636,10 +1033,10 @@
            "note": null,
            "lat": 54.194908743465916,
            "lon": 37.62344171758068,
-           "arriveAt": "2026-10-26T12:13",
-           "departAt": "2026-10-26T13:13",
+           "arriveAt": "2026-10-26T13:21",
+           "departAt": "2026-10-26T14:21",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 183,
+           "kmFromPrev": 1,
            "kmAt": 183,
            "dwellMin": 60,
            "tags": [
@@ -665,21 +1062,28 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-26T09:00",
-            "departAt": "2026-10-26T10:00",
-            "kmFromPrev": 1
+            "arriveAt": "2026-10-26T09:19",
+            "departAt": "2026-10-26T09:59",
+            "kmFromPrev": 16
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-26T12:13",
-            "departAt": "2026-10-26T13:13",
-            "kmFromPrev": 183
+            "arriveAt": "2026-10-26T12:12",
+            "departAt": "2026-10-26T13:12",
+            "kmFromPrev": 179
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-26T13:17",
+            "arriveAt": "2026-10-26T13:21",
+            "departAt": "2026-10-26T14:21",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-26T14:25",
             "departAt": null,
             "kmFromPrev": 1
            }
@@ -689,12 +1093,12 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 184,
+        "kmDriven": 196,
         "kmLeft": 0
        },
        {
-        "id": "d1s04",
-        "seq": 4,
+        "id": "d1s05",
+        "seq": 5,
         "day": 1,
         "kind": "finish",
         "sign": "city",
@@ -704,7 +1108,7 @@
         "note": null,
         "lat": 54.1961,
         "lon": 37.6182,
-        "arriveAt": "2026-10-26T13:16",
+        "arriveAt": "2026-10-26T14:24",
         "departAt": null,
         "tz": "Europe/Moscow",
         "kmFromPrev": 1,
@@ -719,7 +1123,7 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 184,
+        "kmDriven": 196,
         "kmLeft": 0
        }
       ]
@@ -730,15 +1134,15 @@
       {
        "key": "fuel",
        "title": "Бензин АИ-95",
-       "rub": 910,
-       "formula": "184 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 3 регионам)",
+       "rub": 970,
+       "formula": "196 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 3 регионам)",
        "asOf": "2026-10",
        "enabled": true,
        "breakdown": [
         {
          "label": "Москва",
-         "formula": "30 км × 8 л/100 × 62,50 ₽ = 150 ₽",
-         "rub": 150
+         "formula": "41 км × 8 л/100 × 62,50 ₽ = 210 ₽",
+         "rub": 210
         },
         {
          "label": "Московская область",
@@ -747,7 +1151,7 @@
         },
         {
          "label": "Тульская область",
-         "formula": "54 км × 8 л/100 × 61,70 ₽ = 270 ₽",
+         "formula": "55 км × 8 л/100 × 61,70 ₽ = 270 ₽",
          "rub": 270
         }
        ]
@@ -790,11 +1194,11 @@
        "title": "Билеты",
        "rub": 600,
        "formula": "1 место × 2 взр.",
-       "asOf": "2026-10",
+       "asOf": "2026-09",
        "enabled": true,
        "breakdown": [
         {
-         "label": "Московский Кремль",
+         "label": "Тульский кремль",
          "formula": "2 × 300",
          "rub": 600
         }
@@ -803,22 +1207,27 @@
       {
        "key": "parking",
        "title": "Парковки",
-       "rub": 380,
+       "rub": 80,
        "formula": "1 стоянка · 1 ч по тарифам зон",
        "asOf": "2026-06",
        "enabled": true,
        "breakdown": [
         {
-         "label": "Московский Кремль",
-         "formula": "1 ч × 380 ₽/ч",
-         "rub": 380
+         "label": "Коломенское",
+         "formula": "1 ч × 80 ₽/ч",
+         "rub": 80
+        },
+        {
+         "label": "Тульский кремль",
+         "formula": "бесплатно",
+         "rub": 0
         }
        ]
       },
       {
        "key": "reserve",
        "title": "Резерв 10%",
-       "rub": 330,
+       "rub": 310,
        "formula": "на пробки и «давай заедем»",
        "asOf": "2026-10",
        "enabled": true,
@@ -826,9 +1235,9 @@
       }
      ],
      "reserveOn": true,
-     "subtotalRub": 3290,
-     "totalRub": 3600,
-     "perPersonRub": 1800,
+     "subtotalRub": 3050,
+     "totalRub": 3400,
+     "perPersonRub": 1700,
      "budgetRub": null,
      "remainingRub": null,
      "overBudget": false,
@@ -843,7 +1252,7 @@
         {
          "regionCode": "RU-MOW",
          "regionName": "Москва",
-         "km": 30.226,
+         "km": 41.146,
          "priceRub": "62.50"
         },
         {
@@ -855,12 +1264,12 @@
         {
          "regionCode": "RU-TUL",
          "regionName": "Тульская область",
-         "km": 53.891,
+         "km": 55.333,
          "priceRub": "61.70"
         }
        ],
        "asOf": "2026-10",
-       "tripKm": 184
+       "tripKm": 196
       },
       "tolls": [],
       "nights": [],
@@ -868,15 +1277,22 @@
        {
         "day": 1,
         "meal": "lunch",
-        "stopId": "d1s03",
+        "stopId": "d1s04",
         "checkRub": 700
        }
       ],
       "tickets": [
        {
         "stopId": "d1s02",
-        "placeId": "Q133274",
-        "name": "Московский Кремль",
+        "placeId": "Q652464",
+        "name": "Коломенское",
+        "adultRub": 0,
+        "childRub": 0
+       },
+       {
+        "stopId": "d1s03",
+        "placeId": "pl_tul_kremlin",
+        "name": "Тульский кремль",
         "adultRub": 300,
         "childRub": 150
        }
@@ -892,7 +1308,7 @@
        "tolls": "2026-10",
        "lodging": "2026-10",
        "food": "2026-09",
-       "tickets": "2026-10",
+       "tickets": "2026-09",
        "reserve": "2026-10",
        "parking": "2026-06"
       },
@@ -900,11 +1316,19 @@
       "parking": [
        {
         "stopId": "d1s02",
-        "name": "Московский Кремль",
-        "rubPerHour": 380,
+        "name": "Коломенское",
+        "rubPerHour": 80,
         "hours": 1,
-        "rub": 380,
+        "rub": 80,
         "source": "zone"
+       },
+       {
+        "stopId": "d1s03",
+        "name": "Тульский кремль",
+        "rubPerHour": 0,
+        "hours": 1,
+        "rub": 0,
+        "source": "free"
        }
       ]
      }
@@ -1336,7 +1760,7 @@
      "regionKm": [
       [
        "RU-MOW",
-       30.226
+       41.146
       ],
       [
        "RU-MOS",
@@ -1344,7 +1768,7 @@
       ],
       [
        "RU-TUL",
-       53.891
+       55.333
       ]
      ],
      "tollHits": [],
@@ -1380,14 +1804,14 @@
         {
          "stopId": "d1s02",
          "kind": "sight",
-         "kmAt": 0.4969152907164561,
-         "detourKm": 0.2255203287653249,
-         "detourMin": 0,
-         "dwellMin": 60,
+         "kmAt": 10.266145318645151,
+         "detourKm": 11.145627960423154,
+         "detourMin": 19,
+         "dwellMin": 40,
          "fixed": false,
          "auto": false,
-         "score": 5.29,
-         "placeId": "Q133274",
+         "score": 3.8233333333333333,
+         "placeId": "Q652464",
          "regionCode": "RU-MOW",
          "reasonKey": "sight.osm",
          "reasonParams": [],
@@ -1398,6 +1822,30 @@
         },
         {
          "stopId": "d1s03",
+         "kind": "sight",
+         "kmAt": 182.67919546101803,
+         "detourKm": 1.4419834542325136,
+         "detourMin": 9,
+         "dwellMin": 60,
+         "fixed": false,
+         "auto": false,
+         "score": 5.1000000000000005,
+         "placeId": "pl_tul_kremlin",
+         "regionCode": "RU-TUL",
+         "reasonKey": "sight.default",
+         "reasonParams": [
+          [
+           "dwell",
+           "час"
+          ]
+         ],
+         "meal": null,
+         "litres": 0.0,
+         "coffee": false,
+         "pool": "sight"
+        },
+        {
+         "stopId": "d1s04",
          "kind": "food",
          "kmAt": 182.746881199116,
          "detourKm": 0.8908234973336574,
@@ -1405,7 +1853,7 @@
          "dwellMin": 60,
          "fixed": false,
          "auto": true,
-         "score": 3.6,
+         "score": 4.1,
          "placeId": "pl_tul_cafe_samovar",
          "regionCode": "RU-TUL",
          "reasonKey": "lunch.parking",
@@ -1416,7 +1864,7 @@
          "pool": "food"
         },
         {
-         "stopId": "d1s04",
+         "stopId": "d1s05",
          "kind": "finish",
          "kmAt": 183.0,
          "detourKm": 0.0,
@@ -1646,6 +2094,42 @@
        "regionCode": "RU-MOS"
       },
       {
+       "placeId": "osm_n13394239864",
+       "kmAt": 19.273118245341106,
+       "lateralKm": 5.912845615932316,
+       "detourKm": 15.373398601424022,
+       "detourMin": 25,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
+       "placeId": "osm_n13394239863",
+       "kmAt": 19.29960440002456,
+       "lateralKm": 5.801736934822029,
+       "detourKm": 15.084516030537275,
+       "detourMin": 25,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
+       "placeId": "osm_n13394239862",
+       "kmAt": 19.30523569582347,
+       "lateralKm": 5.796669558307655,
+       "detourKm": 15.071340851599903,
+       "detourMin": 25,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
+       "placeId": "osm_n13394239865",
+       "kmAt": 19.330394857190797,
+       "lateralKm": 5.89968378130425,
+       "detourKm": 15.339177831391051,
+       "detourMin": 25,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
        "placeId": "Q4504819",
        "kmAt": 19.830861585231315,
        "lateralKm": 4.4222495295191555,
@@ -1687,6 +2171,42 @@
        "lateralKm": 7.842383916727628,
        "detourKm": 20.390198183491833,
        "detourMin": 33,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
+       "placeId": "Q131360768",
+       "kmAt": 25.202813395428663,
+       "lateralKm": 6.286830462514422,
+       "detourKm": 16.345759202537497,
+       "detourMin": 27,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
+       "placeId": "Q122998834",
+       "kmAt": 27.608668204017917,
+       "lateralKm": 5.963548223244113,
+       "detourKm": 15.505225380434695,
+       "detourMin": 25,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
+       "placeId": "Q122998823",
+       "kmAt": 27.615908011356787,
+       "lateralKm": 6.133631829811938,
+       "detourKm": 15.94744275751104,
+       "detourMin": 26,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
+       "placeId": "Q122998835",
+       "kmAt": 27.651151203207796,
+       "lateralKm": 6.039364090190901,
+       "detourKm": 15.702346634496344,
+       "detourMin": 26,
        "roadClass": "trunk",
        "regionCode": "RU-MOS"
       },
@@ -1781,6 +2301,15 @@
        "regionCode": "RU-MOS"
       },
       {
+       "placeId": "Q111358643",
+       "kmAt": 37.072075965588006,
+       "lateralKm": 5.140424494732503,
+       "detourKm": 13.36510368630451,
+       "detourMin": 22,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOS"
+      },
+      {
        "placeId": "Q4504883",
        "kmAt": 37.21000520040546,
        "lateralKm": 2.4449414852654554,
@@ -1812,15 +2341,6 @@
        "kmAt": 39.219070271774484,
        "lateralKm": 3.346334395474795,
        "detourKm": 8.700469428234467,
-       "detourMin": 15,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q124504493",
-       "kmAt": 39.26957156573832,
-       "lateralKm": 3.4173190071168276,
-       "detourKm": 8.885029418503752,
        "detourMin": 15,
        "roadClass": "trunk",
        "regionCode": "RU-MOS"
@@ -1997,6 +2517,15 @@
        "regionCode": "RU-MOS"
       },
       {
+       "placeId": "osm_w624136902",
+       "kmAt": 70.91485901611537,
+       "lateralKm": 3.042494148187024,
+       "detourKm": 7.910484785286263,
+       "detourMin": 19,
+       "roadClass": "motorway",
+       "regionCode": "RU-MOS"
+      },
+      {
        "placeId": "Q4306421",
        "kmAt": 72.8550497833359,
        "lateralKm": 0.9488615578247379,
@@ -2011,15 +2540,6 @@
        "lateralKm": 0.9414816657956088,
        "detourKm": 2.447852331068583,
        "detourMin": 11,
-       "roadClass": "motorway",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "osm_w556527149",
-       "kmAt": 73.08207353526153,
-       "lateralKm": 0.31624815244708265,
-       "detourKm": 0.8222451963624149,
-       "detourMin": 8,
        "roadClass": "motorway",
        "regionCode": "RU-MOS"
       },
@@ -2132,6 +2652,15 @@
        "regionCode": "RU-MOS"
       },
       {
+       "placeId": "Q111591143",
+       "kmAt": 97.8446234915045,
+       "lateralKm": 4.386433342329263,
+       "detourKm": 11.404726690056084,
+       "detourMin": 24,
+       "roadClass": "motorway",
+       "regionCode": "RU-MOS"
+      },
+      {
        "placeId": "Q16689800",
        "kmAt": 97.87683784212264,
        "lateralKm": 3.551033736348728,
@@ -2200,15 +2729,6 @@
        "lateralKm": 0.9507157707916317,
        "detourKm": 2.4718610040582427,
        "detourMin": 11,
-       "roadClass": "motorway",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q129075177",
-       "kmAt": 99.69113107170234,
-       "lateralKm": 0.3473734609419044,
-       "detourKm": 0.9031709984489515,
-       "detourMin": 8,
        "roadClass": "motorway",
        "regionCode": "RU-MOS"
       },
@@ -3126,7 +3646,7 @@
      ]
     }
    },
-   "shareText": "Москва → Тула · 184 км · 1 день\nДень 1 · 184 км\n09:00 Москва\n09:00 Московский Кремль\n12:12 Кафе «Самовар»\n13:16 Тула\nИтого ≈ 3 600 ₽ на 2 чел.",
+   "shareText": "Москва → Тула · 196 км · 1 день\nДень 1 · 196 км\n09:00 Москва\n09:19 Коломенское\n12:12 Тульский кремль\n13:20 Кафе «Самовар»\n14:24 Тула\nИтого ≈ 3 400 ₽ на 2 чел.",
    "pricesMonthRu": "октябрь",
    "pricesYear": "2026",
    "townPrepRu": {

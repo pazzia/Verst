@@ -30,18 +30,18 @@
    "trip": {
     "id": null,
     "title": "Екатеринбург → Тюмень",
-    "km": 381,
+    "km": 393,
     "days": 1,
     "nights": 0,
     "roundTrip": false,
     "daysList": [
      {
       "day": 1,
-      "km": 381,
-      "driveMin": 308,
+      "km": 393,
+      "driveMin": 331,
       "tz": "Asia/Yekaterinburg",
       "startAt": "2026-10-24T08:00",
-      "endAt": "2026-10-24T15:08",
+      "endAt": "2026-10-24T17:56",
       "overBudget": false,
       "stops": [
        {
@@ -72,11 +72,103 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 0,
-        "kmLeft": 381
+        "kmLeft": 393
        },
        {
         "id": "d1s02",
         "seq": 2,
+        "day": 1,
+        "kind": "sight",
+        "sign": "tourist",
+        "placeId": "Q1381934",
+        "townId": "Q887",
+        "name": "дом Ипатьева",
+        "note": "не проверено",
+        "lat": 56.84439,
+        "lon": 60.60897,
+        "arriveAt": "2026-10-24T08:02",
+        "departAt": "2026-10-24T08:32",
+        "tz": "Asia/Yekaterinburg",
+        "kmFromPrev": 1,
+        "kmAt": 0,
+        "dwellMin": 30,
+        "tags": [
+         "walk",
+         "free_entry"
+        ],
+        "costRub": 0,
+        "reason": "По открытым данным.",
+        "verified": false,
+        "replaceable": true,
+        "alternatives": [],
+        "alternativesNote": "Других вариантов в это время поблизости нет.",
+        "hotelOptions": [],
+        "selectedHotelId": null,
+        "kmDriven": 1,
+        "kmLeft": 392,
+        "poiKind": "attraction",
+        "whyRu": "Объект культурного наследия · Статьи в 30 языковых разделах Википедии",
+        "photoSource": "p18",
+        "parking": {
+         "rub": null,
+         "rubPerHour": null,
+         "hours": 1,
+         "source": "unknown",
+         "zoneRu": "Платная парковка, тариф неизвестен",
+         "whereRu": "Парковка в 285 м от объекта",
+         "sundayRu": null,
+         "freeRu": null
+        }
+       },
+       {
+        "id": "d1s03",
+        "seq": 3,
+        "day": 1,
+        "kind": "sight",
+        "sign": "tourist",
+        "placeId": "Q2036269",
+        "townId": "Q887",
+        "name": "Шарташские каменные палатки",
+        "note": "не проверено",
+        "lat": 56.84278,
+        "lon": 60.67833,
+        "arriveAt": "2026-10-24T08:39",
+        "departAt": "2026-10-24T09:19",
+        "tz": "Asia/Yekaterinburg",
+        "kmFromPrev": 6,
+        "kmAt": 6,
+        "dwellMin": 40,
+        "tags": [
+         "walk",
+         "free_entry"
+        ],
+        "costRub": 0,
+        "reason": "По открытым данным.",
+        "verified": false,
+        "replaceable": true,
+        "alternatives": [],
+        "alternativesNote": "Других вариантов в это время поблизости нет.",
+        "hotelOptions": [],
+        "selectedHotelId": null,
+        "kmDriven": 7,
+        "kmLeft": 386,
+        "poiKind": "park",
+        "whyRu": "Объект культурного наследия",
+        "photoSource": "p18",
+        "parking": {
+         "rub": null,
+         "rubPerHour": null,
+         "hours": 1,
+         "source": "unknown",
+         "zoneRu": "Платная парковка, тариф неизвестен",
+         "whereRu": "Парковка в 294 м от объекта",
+         "sundayRu": null,
+         "freeRu": null
+        }
+       },
+       {
+        "id": "d1s04",
+        "seq": 4,
         "day": 1,
         "kind": "rest",
         "sign": "rest",
@@ -86,10 +178,10 @@
         "note": null,
         "lat": 56.92955,
         "lon": 61.99951,
-        "arriveAt": "2026-10-24T09:27",
-        "departAt": "2026-10-24T09:47",
+        "arriveAt": "2026-10-24T10:41",
+        "departAt": "2026-10-24T11:01",
         "tz": "Asia/Yekaterinburg",
-        "kmFromPrev": 108,
+        "kmFromPrev": 102,
         "kmAt": 107,
         "dwellMin": 20,
         "tags": [
@@ -101,7 +193,7 @@
         "replaceable": true,
         "alternatives": [
          {
-          "id": "alt_d1s02_syn_f_5691910_6183549",
+          "id": "alt_d1s04_syn_f_5691910_6183549",
           "placeId": "syn_f_5691910_6183549",
           "name": "АЗС у трассы",
           "deltaMin": -5,
@@ -120,8 +212,8 @@
            "tripKmDelta": 0
           },
           "stop": {
-           "id": "d1s02",
-           "seq": 2,
+           "id": "d1s04",
+           "seq": 4,
            "day": 1,
            "kind": "fuel",
            "sign": "fuel",
@@ -131,10 +223,10 @@
            "note": null,
            "lat": 56.9191,
            "lon": 61.83549,
-           "arriveAt": "2026-10-24T09:17",
-           "departAt": "2026-10-24T09:32",
+           "arriveAt": "2026-10-24T10:31",
+           "departAt": "2026-10-24T10:46",
            "tz": "Asia/Yekaterinburg",
-           "kmFromPrev": 95,
+           "kmFromPrev": 90,
            "kmAt": 95,
            "dwellMin": 15,
            "tags": [
@@ -162,42 +254,63 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-24T09:17",
-            "departAt": "2026-10-24T09:32",
-            "kmFromPrev": 95
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-24T10:43",
-            "departAt": "2026-10-24T11:03",
-            "kmFromPrev": 89
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-24T12:05",
-            "departAt": "2026-10-24T12:25",
-            "kmFromPrev": 76
+            "arriveAt": "2026-10-24T10:31",
+            "departAt": "2026-10-24T10:46",
+            "kmFromPrev": 90
            },
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:02",
-            "departAt": "2026-10-24T15:02",
-            "kmFromPrev": 120
+            "arriveAt": "2026-10-24T11:57",
+            "departAt": "2026-10-24T12:17",
+            "kmFromPrev": 89
            },
            {
             "stopId": "d1s06",
             "seq": 6,
-            "arriveAt": "2026-10-24T15:03",
+            "arriveAt": "2026-10-24T13:09",
+            "departAt": "2026-10-24T14:09",
+            "kmFromPrev": 60
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:32",
+            "departAt": "2026-10-24T15:52",
+            "kmFromPrev": 99
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:31",
+            "departAt": "2026-10-24T17:46",
+            "kmFromPrev": 46
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T17:51",
             "departAt": null,
-            "kmFromPrev": 1
+            "kmFromPrev": 3
            }
           ]
          },
          {
-          "id": "alt_d1s02_syn_f_5697136_6265560",
+          "id": "alt_d1s04_syn_f_5697136_6265560",
           "placeId": "syn_f_5697136_6265560",
           "name": "АЗС у трассы",
           "deltaMin": -5,
@@ -216,8 +329,8 @@
            "tripKmDelta": 0
           },
           "stop": {
-           "id": "d1s02",
-           "seq": 2,
+           "id": "d1s04",
+           "seq": 4,
            "day": 1,
            "kind": "fuel",
            "sign": "fuel",
@@ -227,10 +340,10 @@
            "note": null,
            "lat": 56.97136,
            "lon": 62.6556,
-           "arriveAt": "2026-10-24T10:08",
-           "departAt": "2026-10-24T10:23",
+           "arriveAt": "2026-10-24T11:22",
+           "departAt": "2026-10-24T11:37",
            "tz": "Asia/Yekaterinburg",
-           "kmFromPrev": 158,
+           "kmFromPrev": 153,
            "kmAt": 158,
            "dwellMin": 15,
            "tags": [
@@ -239,7 +352,7 @@
             "24h"
            ],
            "costRub": 0,
-           "reason": "Разминка 15 минут после 2 ч 15 мин за рулём.",
+           "reason": "Разминка 15 минут после двух часов за рулём.",
            "verified": true,
            "replaceable": true,
            "alternatives": [],
@@ -258,150 +371,58 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-24T10:08",
-            "departAt": "2026-10-24T10:23",
-            "kmFromPrev": 158
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-24T10:43",
-            "departAt": "2026-10-24T11:03",
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
+           },
+           {
+            "stopId": "d1s04",
+            "seq": 4,
+            "arriveAt": "2026-10-24T11:22",
+            "departAt": "2026-10-24T11:37",
+            "kmFromPrev": 153
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-24T11:57",
+            "departAt": "2026-10-24T12:17",
             "kmFromPrev": 26
            },
            {
-            "stopId": "d1s04",
-            "seq": 4,
-            "arriveAt": "2026-10-24T12:05",
-            "departAt": "2026-10-24T12:25",
-            "kmFromPrev": 76
-           },
-           {
-            "stopId": "d1s05",
-            "seq": 5,
-            "arriveAt": "2026-10-24T14:02",
-            "departAt": "2026-10-24T15:02",
-            "kmFromPrev": 120
-           },
-           {
             "stopId": "d1s06",
             "seq": 6,
-            "arriveAt": "2026-10-24T15:03",
+            "arriveAt": "2026-10-24T13:09",
+            "departAt": "2026-10-24T14:09",
+            "kmFromPrev": 60
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:32",
+            "departAt": "2026-10-24T15:52",
+            "kmFromPrev": 99
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:31",
+            "departAt": "2026-10-24T17:46",
+            "kmFromPrev": 46
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T17:51",
             "departAt": null,
-            "kmFromPrev": 1
-           }
-          ]
-         },
-         {
-          "id": "alt_d1s02_osm_w93151031",
-          "placeId": "osm_w93151031",
-          "name": "Детская площадка",
-          "deltaMin": 11,
-          "deltaRub": 30,
-          "shiftMin": 11,
-          "units": {
-           "deltaKm": 5.735,
-           "regionCode": "RU-SVE",
-           "checkRub": null,
-           "adultRub": 0,
-           "childRub": 0,
-           "name": "Детская площадка",
-           "placeId": "osm_w93151031",
-           "priceRub": "61.50",
-           "regionName": "Свердловская область",
-           "tripKmDelta": 6,
-           "parkingRub": 0,
-           "parkingRubPerHour": 0,
-           "parkingHours": 1,
-           "parkingSource": "free"
-          },
-          "stop": {
-           "id": "d1s02",
-           "seq": 2,
-           "day": 1,
-           "kind": "sight",
-           "sign": "tourist",
-           "placeId": "osm_w93151031",
-           "townId": "Q196528",
-           "name": "Детская площадка",
-           "note": "не проверено",
-           "lat": 56.90814,
-           "lon": 62.03586,
-           "arriveAt": "2026-10-24T09:34",
-           "departAt": "2026-10-24T09:54",
-           "tz": "Asia/Yekaterinburg",
-           "kmFromPrev": 113,
-           "kmAt": 110,
-           "dwellMin": 20,
-           "tags": [
-            "playground",
-            "walk",
-            "free_entry"
-           ],
-           "costRub": 0,
-           "reason": "По открытым данным.",
-           "verified": false,
-           "replaceable": true,
-           "alternatives": [],
-           "alternativesNote": null,
-           "hotelOptions": [],
-           "selectedHotelId": null,
-           "poiKind": "playground",
-           "whyRu": null,
-           "photoSource": null,
-           "parking": {
-            "rub": 0,
-            "rubPerHour": 0,
-            "hours": 1,
-            "source": "free",
-            "zoneRu": "Платных зон рядом нет",
-            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
-            "sundayRu": null,
-            "freeRu": "Бесплатно: вне платных зон"
-           }
-          },
-          "dayPatch": [
-           {
-            "stopId": "d1s01",
-            "seq": 1,
-            "arriveAt": null,
-            "departAt": "2026-10-24T08:00",
-            "kmFromPrev": 0
-           },
-           {
-            "stopId": "d1s02",
-            "seq": 2,
-            "arriveAt": "2026-10-24T09:34",
-            "departAt": "2026-10-24T09:54",
-            "kmFromPrev": 113
-           },
-           {
-            "stopId": "d1s03",
-            "seq": 3,
-            "arriveAt": "2026-10-24T10:59",
-            "departAt": "2026-10-24T11:19",
-            "kmFromPrev": 77
-           },
-           {
-            "stopId": "d1s04",
-            "seq": 4,
-            "arriveAt": "2026-10-24T12:21",
-            "departAt": "2026-10-24T12:41",
-            "kmFromPrev": 76
-           },
-           {
-            "stopId": "d1s05",
-            "seq": 5,
-            "arriveAt": "2026-10-24T14:18",
-            "departAt": "2026-10-24T15:18",
-            "kmFromPrev": 120
-           },
-           {
-            "stopId": "d1s06",
-            "seq": 6,
-            "arriveAt": "2026-10-24T15:19",
-            "departAt": null,
-            "kmFromPrev": 1
+            "kmFromPrev": 3
            }
           ]
          }
@@ -409,15 +430,15 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 108,
-        "kmLeft": 273,
+        "kmDriven": 109,
+        "kmLeft": 284,
         "amenities": [
          "wc"
         ]
        },
        {
-        "id": "d1s03",
-        "seq": 3,
+        "id": "d1s05",
+        "seq": 5,
         "day": 1,
         "kind": "rest",
         "sign": "rest",
@@ -427,8 +448,8 @@
         "note": null,
         "lat": 56.99227,
         "lon": 62.98364,
-        "arriveAt": "2026-10-24T10:48",
-        "departAt": "2026-10-24T11:08",
+        "arriveAt": "2026-10-24T12:02",
+        "departAt": "2026-10-24T12:22",
         "tz": "Asia/Yekaterinburg",
         "kmFromPrev": 76,
         "kmAt": 183,
@@ -442,7 +463,7 @@
         "replaceable": true,
         "alternatives": [
          {
-          "id": "alt_d1s03_syn_f_5697136_6265560",
+          "id": "alt_d1s05_syn_f_5697136_6265560",
           "placeId": "syn_f_5697136_6265560",
           "name": "АЗС у трассы",
           "deltaMin": -5,
@@ -461,8 +482,8 @@
            "tripKmDelta": 0
           },
           "stop": {
-           "id": "d1s03",
-           "seq": 3,
+           "id": "d1s05",
+           "seq": 5,
            "day": 1,
            "kind": "fuel",
            "sign": "fuel",
@@ -472,8 +493,8 @@
            "note": null,
            "lat": 56.97136,
            "lon": 62.6556,
-           "arriveAt": "2026-10-24T10:28",
-           "departAt": "2026-10-24T10:43",
+           "arriveAt": "2026-10-24T11:42",
+           "departAt": "2026-10-24T11:57",
            "tz": "Asia/Yekaterinburg",
            "kmFromPrev": 51,
            "kmAt": 158,
@@ -503,42 +524,63 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-24T09:27",
-            "departAt": "2026-10-24T09:47",
-            "kmFromPrev": 108
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-24T10:28",
-            "departAt": "2026-10-24T10:43",
-            "kmFromPrev": 51
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-24T12:05",
-            "departAt": "2026-10-24T12:25",
+            "arriveAt": "2026-10-24T10:41",
+            "departAt": "2026-10-24T11:01",
             "kmFromPrev": 102
            },
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:02",
-            "departAt": "2026-10-24T15:02",
-            "kmFromPrev": 120
+            "arriveAt": "2026-10-24T11:42",
+            "departAt": "2026-10-24T11:57",
+            "kmFromPrev": 51
            },
            {
             "stopId": "d1s06",
             "seq": 6,
-            "arriveAt": "2026-10-24T15:03",
+            "arriveAt": "2026-10-24T13:09",
+            "departAt": "2026-10-24T14:09",
+            "kmFromPrev": 85
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:32",
+            "departAt": "2026-10-24T15:52",
+            "kmFromPrev": 99
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:31",
+            "departAt": "2026-10-24T17:46",
+            "kmFromPrev": 46
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T17:51",
             "departAt": null,
-            "kmFromPrev": 1
+            "kmFromPrev": 3
            }
           ]
          },
          {
-          "id": "alt_d1s03_syn_f_5702363_6347571",
+          "id": "alt_d1s05_syn_f_5702363_6347571",
           "placeId": "syn_f_5702363_6347571",
           "name": "АЗС у трассы",
           "deltaMin": -5,
@@ -557,8 +599,8 @@
            "tripKmDelta": 0
           },
           "stop": {
-           "id": "d1s03",
-           "seq": 3,
+           "id": "d1s05",
+           "seq": 5,
            "day": 1,
            "kind": "fuel",
            "sign": "fuel",
@@ -568,8 +610,8 @@
            "note": null,
            "lat": 57.02363,
            "lon": 63.47571,
-           "arriveAt": "2026-10-24T11:19",
-           "departAt": "2026-10-24T11:34",
+           "arriveAt": "2026-10-24T12:33",
+           "departAt": "2026-10-24T12:48",
            "tz": "Asia/Yekaterinburg",
            "kmFromPrev": 114,
            "kmAt": 221,
@@ -599,37 +641,58 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-24T09:27",
-            "departAt": "2026-10-24T09:47",
-            "kmFromPrev": 108
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-24T11:19",
-            "departAt": "2026-10-24T11:34",
-            "kmFromPrev": 114
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-24T12:05",
-            "departAt": "2026-10-24T12:25",
-            "kmFromPrev": 38
+            "arriveAt": "2026-10-24T10:41",
+            "departAt": "2026-10-24T11:01",
+            "kmFromPrev": 102
            },
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:02",
-            "departAt": "2026-10-24T15:02",
-            "kmFromPrev": 120
+            "arriveAt": "2026-10-24T12:33",
+            "departAt": "2026-10-24T12:48",
+            "kmFromPrev": 114
            },
            {
             "stopId": "d1s06",
             "seq": 6,
-            "arriveAt": "2026-10-24T15:03",
+            "arriveAt": "2026-10-24T13:09",
+            "departAt": "2026-10-24T14:09",
+            "kmFromPrev": 22
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:32",
+            "departAt": "2026-10-24T15:52",
+            "kmFromPrev": 99
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:31",
+            "departAt": "2026-10-24T17:46",
+            "kmFromPrev": 46
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T17:51",
             "departAt": null,
-            "kmFromPrev": 1
+            "kmFromPrev": 3
            }
           ]
          }
@@ -637,82 +700,81 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 184,
-        "kmLeft": 197,
+        "kmDriven": 185,
+        "kmLeft": 208,
         "amenities": [
          "wc"
         ]
        },
        {
-        "id": "d1s04",
-        "seq": 4,
+        "id": "d1s06",
+        "seq": 6,
         "day": 1,
-        "kind": "rest",
-        "sign": "rest",
-        "placeId": "syn_r_5705499_6396778",
-        "townId": null,
-        "name": "Площадка отдыха",
+        "kind": "food",
+        "sign": "food",
+        "placeId": "syn_c_Q196603_1",
+        "townId": "Q196603",
+        "name": "Кафе «Огонёк»",
         "note": null,
-        "lat": 57.05499,
-        "lon": 63.96778,
-        "arriveAt": "2026-10-24T12:10",
-        "departAt": "2026-10-24T12:30",
+        "lat": 57.015213115198875,
+        "lon": 63.72257030350783,
+        "arriveAt": "2026-10-24T13:14",
+        "departAt": "2026-10-24T14:14",
         "tz": "Asia/Yekaterinburg",
-        "kmFromPrev": 76,
-        "kmAt": 259,
-        "dwellMin": 20,
+        "kmFromPrev": 60,
+        "kmAt": 240,
+        "dwellMin": 60,
         "tags": [
-         "wc"
+         "kids_menu",
+         "parking"
         ],
-        "costRub": 0,
-        "reason": "Разминка 20 минут после часа за рулём.",
+        "costRub": 1100,
+        "reason": "Обед, парковка у входа.",
         "verified": true,
         "replaceable": true,
         "alternatives": [
          {
-          "id": "alt_d1s04_syn_f_5702363_6347571",
-          "placeId": "syn_f_5702363_6347571",
-          "name": "АЗС у трассы",
-          "deltaMin": -5,
-          "deltaRub": 0,
-          "shiftMin": -5,
+          "id": "alt_d1s06_syn_c_Q196603_0",
+          "placeId": "syn_c_Q196603_0",
+          "name": "Столовая «Обед по-домашнему»",
+          "deltaMin": 2,
+          "deltaRub": -290,
+          "shiftMin": 2,
           "units": {
-           "deltaKm": -0.0,
+           "deltaKm": 1.502,
            "regionCode": "RU-SVE",
-           "checkRub": null,
+           "checkRub": 400,
            "adultRub": null,
            "childRub": null,
-           "name": "АЗС у трассы",
-           "placeId": "syn_f_5702363_6347571",
+           "name": "Столовая «Обед по-домашнему»",
+           "placeId": "syn_c_Q196603_0",
            "priceRub": "61.50",
            "regionName": "Свердловская область",
-           "tripKmDelta": 0
+           "tripKmDelta": 1
           },
           "stop": {
-           "id": "d1s04",
-           "seq": 4,
+           "id": "d1s06",
+           "seq": 6,
            "day": 1,
-           "kind": "fuel",
-           "sign": "fuel",
-           "placeId": "syn_f_5702363_6347571",
-           "townId": null,
-           "name": "АЗС у трассы",
+           "kind": "food",
+           "sign": "food",
+           "placeId": "syn_c_Q196603_0",
+           "townId": "Q196603",
+           "name": "Столовая «Обед по-домашнему»",
            "note": null,
-           "lat": 57.02363,
-           "lon": 63.47571,
-           "arriveAt": "2026-10-24T11:39",
-           "departAt": "2026-10-24T11:54",
+           "lat": 57.01069125653409,
+           "lon": 63.734119772369134,
+           "arriveAt": "2026-10-24T13:16",
+           "departAt": "2026-10-24T14:16",
            "tz": "Asia/Yekaterinburg",
-           "kmFromPrev": 38,
-           "kmAt": 221,
-           "dwellMin": 15,
+           "kmFromPrev": 62,
+           "kmAt": 241,
+           "dwellMin": 60,
            "tags": [
-            "wc",
-            "cafe_at_fuel",
-            "24h"
+            "parking"
            ],
-           "costRub": 0,
-           "reason": "Разминка 15 минут после получаса за рулём.",
+           "costRub": 800,
+           "reason": "Обед, парковка у входа.",
            "verified": true,
            "replaceable": true,
            "alternatives": [],
@@ -731,42 +793,96 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-24T09:27",
-            "departAt": "2026-10-24T09:47",
-            "kmFromPrev": 108
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-24T10:48",
-            "departAt": "2026-10-24T11:08",
-            "kmFromPrev": 76
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-24T11:39",
-            "departAt": "2026-10-24T11:54",
-            "kmFromPrev": 38
+            "arriveAt": "2026-10-24T10:41",
+            "departAt": "2026-10-24T11:01",
+            "kmFromPrev": 102
            },
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:02",
-            "departAt": "2026-10-24T15:02",
-            "kmFromPrev": 158
+            "arriveAt": "2026-10-24T12:02",
+            "departAt": "2026-10-24T12:22",
+            "kmFromPrev": 76
            },
            {
             "stopId": "d1s06",
             "seq": 6,
-            "arriveAt": "2026-10-24T15:03",
+            "arriveAt": "2026-10-24T13:16",
+            "departAt": "2026-10-24T14:16",
+            "kmFromPrev": 62
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:39",
+            "departAt": "2026-10-24T15:59",
+            "kmFromPrev": 98
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:38",
+            "departAt": "2026-10-24T17:53",
+            "kmFromPrev": 46
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T17:58",
             "departAt": null,
-            "kmFromPrev": 1
+            "kmFromPrev": 3
            }
           ]
-         },
+         }
+        ],
+        "alternativesNote": "Нашли только один вариант в это время.",
+        "hotelOptions": [],
+        "selectedHotelId": null,
+        "kmDriven": 245,
+        "kmLeft": 148
+       },
+       {
+        "id": "d1s07",
+        "seq": 7,
+        "day": 1,
+        "kind": "rest",
+        "sign": "rest",
+        "placeId": "syn_r_5711771_6495191",
+        "townId": null,
+        "name": "Площадка отдыха",
+        "note": null,
+        "lat": 57.11771,
+        "lon": 64.95191,
+        "arriveAt": "2026-10-24T15:37",
+        "departAt": "2026-10-24T15:57",
+        "tz": "Asia/Yekaterinburg",
+        "kmFromPrev": 99,
+        "kmAt": 335,
+        "dwellMin": 20,
+        "tags": [
+         "wc"
+        ],
+        "costRub": 0,
+        "reason": "Разминка 20 минут после полутора часов за рулём.",
+        "verified": true,
+        "replaceable": true,
+        "alternatives": [
          {
-          "id": "alt_d1s04_syn_f_5707589_6429582",
+          "id": "alt_d1s07_syn_f_5707589_6429582",
           "placeId": "syn_f_5707589_6429582",
           "name": "АЗС у трассы",
           "deltaMin": -5,
@@ -785,8 +901,8 @@
            "tripKmDelta": 0
           },
           "stop": {
-           "id": "d1s04",
-           "seq": 4,
+           "id": "d1s07",
+           "seq": 7,
            "day": 1,
            "kind": "fuel",
            "sign": "fuel",
@@ -796,10 +912,10 @@
            "note": null,
            "lat": 57.07589,
            "lon": 64.29582,
-           "arriveAt": "2026-10-24T12:30",
-           "departAt": "2026-10-24T12:45",
+           "arriveAt": "2026-10-24T14:56",
+           "departAt": "2026-10-24T15:11",
            "tz": "Asia/Yekaterinburg",
-           "kmFromPrev": 102,
+           "kmFromPrev": 48,
            "kmAt": 284,
            "dwellMin": 15,
            "tags": [
@@ -808,7 +924,7 @@
             "24h"
            ],
            "costRub": 0,
-           "reason": "Разминка 15 минут после 1 ч 15 мин за рулём.",
+           "reason": "Разминка 15 минут после 45 мин за рулём.",
            "verified": true,
            "replaceable": true,
            "alternatives": [],
@@ -827,84 +943,256 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-24T09:27",
-            "departAt": "2026-10-24T09:47",
-            "kmFromPrev": 108
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-24T10:48",
-            "departAt": "2026-10-24T11:08",
-            "kmFromPrev": 76
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-24T12:30",
-            "departAt": "2026-10-24T12:45",
+            "arriveAt": "2026-10-24T10:41",
+            "departAt": "2026-10-24T11:01",
             "kmFromPrev": 102
            },
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:02",
-            "departAt": "2026-10-24T15:02",
-            "kmFromPrev": 95
+            "arriveAt": "2026-10-24T12:02",
+            "departAt": "2026-10-24T12:22",
+            "kmFromPrev": 76
            },
            {
             "stopId": "d1s06",
             "seq": 6,
-            "arriveAt": "2026-10-24T15:03",
+            "arriveAt": "2026-10-24T13:14",
+            "departAt": "2026-10-24T14:14",
+            "kmFromPrev": 60
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T14:56",
+            "departAt": "2026-10-24T15:11",
+            "kmFromPrev": 48
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:31",
+            "departAt": "2026-10-24T17:46",
+            "kmFromPrev": 96
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T17:51",
             "departAt": null,
-            "kmFromPrev": 1
+            "kmFromPrev": 3
            }
           ]
          },
          {
-          "id": "alt_d1s04_osm_w616890534",
-          "placeId": "osm_w616890534",
-          "name": "Детская площадка",
-          "deltaMin": 12,
-          "deltaRub": 30,
-          "shiftMin": 12,
+          "id": "alt_d1s07_syn_f_5712816_6511594",
+          "placeId": "syn_f_5712816_6511594",
+          "name": "АЗС у трассы",
+          "deltaMin": -5,
+          "deltaRub": 0,
+          "shiftMin": -5,
           "units": {
-           "deltaKm": 6.412,
-           "regionCode": "RU-SVE",
+           "deltaKm": -0.001,
+           "regionCode": "RU-TYU",
+           "checkRub": null,
+           "adultRub": null,
+           "childRub": null,
+           "name": "АЗС у трассы",
+           "placeId": "syn_f_5712816_6511594",
+           "priceRub": "61.50",
+           "regionName": "Тюменская область",
+           "tripKmDelta": 0
+          },
+          "stop": {
+           "id": "d1s07",
+           "seq": 7,
+           "day": 1,
+           "kind": "fuel",
+           "sign": "fuel",
+           "placeId": "syn_f_5712816_6511594",
+           "townId": null,
+           "name": "АЗС у трассы",
+           "note": null,
+           "lat": 57.12816,
+           "lon": 65.11594,
+           "arriveAt": "2026-10-24T15:48",
+           "departAt": "2026-10-24T16:03",
+           "tz": "Asia/Yekaterinburg",
+           "kmFromPrev": 111,
+           "kmAt": 348,
+           "dwellMin": 15,
+           "tags": [
+            "wc",
+            "cafe_at_fuel",
+            "24h"
+           ],
+           "costRub": 0,
+           "reason": "Разминка 15 минут после полутора часов за рулём.",
+           "verified": true,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null
+          },
+          "dayPatch": [
+           {
+            "stopId": "d1s01",
+            "seq": 1,
+            "arriveAt": null,
+            "departAt": "2026-10-24T08:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d1s02",
+            "seq": 2,
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s03",
+            "seq": 3,
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
+           },
+           {
+            "stopId": "d1s04",
+            "seq": 4,
+            "arriveAt": "2026-10-24T10:41",
+            "departAt": "2026-10-24T11:01",
+            "kmFromPrev": 102
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-24T12:02",
+            "departAt": "2026-10-24T12:22",
+            "kmFromPrev": 76
+           },
+           {
+            "stopId": "d1s06",
+            "seq": 6,
+            "arriveAt": "2026-10-24T13:14",
+            "departAt": "2026-10-24T14:14",
+            "kmFromPrev": 60
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:48",
+            "departAt": "2026-10-24T16:03",
+            "kmFromPrev": 111
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:31",
+            "departAt": "2026-10-24T17:46",
+            "kmFromPrev": 33
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T17:51",
+            "departAt": null,
+            "kmFromPrev": 3
+           }
+          ]
+         }
+        ],
+        "alternativesNote": null,
+        "hotelOptions": [],
+        "selectedHotelId": null,
+        "kmDriven": 344,
+        "kmLeft": 49,
+        "amenities": [
+         "wc"
+        ]
+       },
+       {
+        "id": "d1s08",
+        "seq": 8,
+        "day": 1,
+        "kind": "sight",
+        "sign": "tourist",
+        "placeId": "Q47004154",
+        "townId": "Q5815",
+        "name": "Краеведческий музей «Городская Дума»",
+        "note": "не проверено",
+        "lat": 57.16308,
+        "lon": 65.51941,
+        "arriveAt": "2026-10-24T16:36",
+        "departAt": "2026-10-24T17:51",
+        "tz": "Asia/Yekaterinburg",
+        "kmFromPrev": 46,
+        "kmAt": 379,
+        "dwellMin": 75,
+        "tags": [
+         "museum"
+        ],
+        "costRub": 800,
+        "reason": "По открытым данным.",
+        "verified": false,
+        "replaceable": true,
+        "alternatives": [
+         {
+          "id": "alt_d1s08_Q4430902",
+          "placeId": "Q4430902",
+          "name": "Спасская церковь",
+          "deltaMin": -59,
+          "deltaRub": -860,
+          "shiftMin": -59,
+          "units": {
+           "deltaKm": -2.294,
+           "regionCode": "RU-TYU",
            "checkRub": null,
            "adultRub": 0,
            "childRub": 0,
-           "name": "Детская площадка",
-           "placeId": "osm_w616890534",
+           "name": "Спасская церковь",
+           "placeId": "Q4430902",
            "priceRub": "61.50",
-           "regionName": "Свердловская область",
-           "tripKmDelta": 7,
-           "parkingRub": 0,
-           "parkingRubPerHour": 0,
+           "regionName": "Тюменская область",
+           "tripKmDelta": -3,
+           "parkingRub": 30,
+           "parkingRubPerHour": 30,
            "parkingHours": 1,
-           "parkingSource": "free"
+           "parkingSource": "osm"
           },
           "stop": {
-           "id": "d1s04",
-           "seq": 4,
+           "id": "d1s08",
+           "seq": 8,
            "day": 1,
            "kind": "sight",
            "sign": "tourist",
-           "placeId": "osm_w616890534",
-           "townId": "Q196603",
-           "name": "Детская площадка",
+           "placeId": "Q4430902",
+           "townId": "Q5815",
+           "name": "Спасская церковь",
            "note": "не проверено",
-           "lat": 57.01335,
-           "lon": 63.72398,
-           "arriveAt": "2026-10-24T12:00",
-           "departAt": "2026-10-24T12:20",
+           "lat": 57.15583,
+           "lon": 65.53167,
+           "arriveAt": "2026-10-24T16:35",
+           "departAt": "2026-10-24T16:55",
            "tz": "Asia/Yekaterinburg",
-           "kmFromPrev": 60,
-           "kmAt": 240,
+           "kmFromPrev": 45,
+           "kmAt": 380,
            "dwellMin": 20,
            "tags": [
-            "playground",
-            "walk",
             "free_entry"
            ],
            "costRub": 0,
@@ -915,18 +1203,18 @@
            "alternativesNote": null,
            "hotelOptions": [],
            "selectedHotelId": null,
-           "poiKind": "playground",
-           "whyRu": null,
-           "photoSource": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
            "parking": {
-            "rub": 0,
-            "rubPerHour": 0,
+            "rub": 30,
+            "rubPerHour": 30,
             "hours": 1,
-            "source": "free",
-            "zoneRu": "Платных зон рядом нет",
-            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "source": "osm",
+            "zoneRu": "Платная парковка по данным OpenStreetMap",
+            "whereRu": "Парковка в 84 м от объекта",
             "sundayRu": null,
-            "freeRu": "Бесплатно: вне платных зон"
+            "freeRu": null
            }
           },
           "dayPatch": [
@@ -940,35 +1228,321 @@
            {
             "stopId": "d1s02",
             "seq": 2,
-            "arriveAt": "2026-10-24T09:27",
-            "departAt": "2026-10-24T09:47",
-            "kmFromPrev": 108
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
            },
            {
             "stopId": "d1s03",
             "seq": 3,
-            "arriveAt": "2026-10-24T10:48",
-            "departAt": "2026-10-24T11:08",
-            "kmFromPrev": 76
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
            },
            {
             "stopId": "d1s04",
             "seq": 4,
-            "arriveAt": "2026-10-24T12:00",
-            "departAt": "2026-10-24T12:20",
-            "kmFromPrev": 60
+            "arriveAt": "2026-10-24T10:41",
+            "departAt": "2026-10-24T11:01",
+            "kmFromPrev": 102
            },
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:19",
-            "departAt": "2026-10-24T15:19",
-            "kmFromPrev": 143
+            "arriveAt": "2026-10-24T12:02",
+            "departAt": "2026-10-24T12:22",
+            "kmFromPrev": 76
            },
            {
             "stopId": "d1s06",
             "seq": 6,
-            "arriveAt": "2026-10-24T15:20",
+            "arriveAt": "2026-10-24T13:14",
+            "departAt": "2026-10-24T14:14",
+            "kmFromPrev": 60
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:37",
+            "departAt": "2026-10-24T15:57",
+            "kmFromPrev": 99
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:35",
+            "departAt": "2026-10-24T16:55",
+            "kmFromPrev": 45
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T16:57",
+            "departAt": null,
+            "kmFromPrev": 1
+           }
+          ]
+         },
+         {
+          "id": "alt_d1s08_Q547238",
+          "placeId": "Q547238",
+          "name": "Церковь Святого Иосифа Обручника",
+          "deltaMin": -57,
+          "deltaRub": -840,
+          "shiftMin": -57,
+          "units": {
+           "deltaKm": -0.936,
+           "regionCode": "RU-TYU",
+           "checkRub": null,
+           "adultRub": 0,
+           "childRub": 0,
+           "name": "Церковь Святого Иосифа Обручника",
+           "placeId": "Q547238",
+           "priceRub": "61.50",
+           "regionName": "Тюменская область",
+           "tripKmDelta": -1,
+           "parkingRub": 40,
+           "parkingRubPerHour": 40,
+           "parkingHours": 1,
+           "parkingSource": "osm"
+          },
+          "stop": {
+           "id": "d1s08",
+           "seq": 8,
+           "day": 1,
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "Q547238",
+           "townId": "Q5815",
+           "name": "Церковь Святого Иосифа Обручника",
+           "note": "не проверено",
+           "lat": 57.16007,
+           "lon": 65.52359,
+           "arriveAt": "2026-10-24T16:36",
+           "departAt": "2026-10-24T16:56",
+           "tz": "Asia/Yekaterinburg",
+           "kmFromPrev": 46,
+           "kmAt": 379,
+           "dwellMin": 20,
+           "tags": [
+            "free_entry"
+           ],
+           "costRub": 0,
+           "reason": "По открытым данным.",
+           "verified": false,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 40,
+            "rubPerHour": 40,
+            "hours": 1,
+            "source": "osm",
+            "zoneRu": "Платная парковка по данным OpenStreetMap",
+            "whereRu": "Парковка в 29 м от объекта",
+            "sundayRu": null,
+            "freeRu": null
+           }
+          },
+          "dayPatch": [
+           {
+            "stopId": "d1s01",
+            "seq": 1,
+            "arriveAt": null,
+            "departAt": "2026-10-24T08:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d1s02",
+            "seq": 2,
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s03",
+            "seq": 3,
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
+           },
+           {
+            "stopId": "d1s04",
+            "seq": 4,
+            "arriveAt": "2026-10-24T10:41",
+            "departAt": "2026-10-24T11:01",
+            "kmFromPrev": 102
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-24T12:02",
+            "departAt": "2026-10-24T12:22",
+            "kmFromPrev": 76
+           },
+           {
+            "stopId": "d1s06",
+            "seq": 6,
+            "arriveAt": "2026-10-24T13:14",
+            "departAt": "2026-10-24T14:14",
+            "kmFromPrev": 60
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:37",
+            "departAt": "2026-10-24T15:57",
+            "kmFromPrev": 99
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:36",
+            "departAt": "2026-10-24T16:56",
+            "kmFromPrev": 46
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T16:59",
+            "departAt": null,
+            "kmFromPrev": 2
+           }
+          ]
+         },
+         {
+          "id": "alt_d1s08_Q4467487",
+          "placeId": "Q4467487",
+          "name": "Тюменская синагога",
+          "deltaMin": -48,
+          "deltaRub": -840,
+          "shiftMin": -48,
+          "units": {
+           "deltaKm": -2.1,
+           "regionCode": "RU-TYU",
+           "checkRub": null,
+           "adultRub": 0,
+           "childRub": 0,
+           "name": "Тюменская синагога",
+           "placeId": "Q4467487",
+           "priceRub": "61.50",
+           "regionName": "Тюменская область",
+           "tripKmDelta": -3,
+           "parkingRub": 50,
+           "parkingRubPerHour": 50,
+           "parkingHours": 1,
+           "parkingSource": "osm"
+          },
+          "stop": {
+           "id": "d1s08",
+           "seq": 8,
+           "day": 1,
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "Q4467487",
+           "townId": "Q5815",
+           "name": "Тюменская синагога",
+           "note": "не проверено",
+           "lat": 57.15634,
+           "lon": 65.52906,
+           "arriveAt": "2026-10-24T16:35",
+           "departAt": "2026-10-24T17:05",
+           "tz": "Asia/Yekaterinburg",
+           "kmFromPrev": 45,
+           "kmAt": 379,
+           "dwellMin": 30,
+           "tags": [
+            "walk",
+            "free_entry"
+           ],
+           "costRub": 0,
+           "reason": "По открытым данным.",
+           "verified": false,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "poiKind": "attraction",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 50,
+            "rubPerHour": 50,
+            "hours": 1,
+            "source": "osm",
+            "zoneRu": "Платная парковка по данным OpenStreetMap",
+            "whereRu": "Парковка в 121 м от объекта",
+            "sundayRu": null,
+            "freeRu": null
+           }
+          },
+          "dayPatch": [
+           {
+            "stopId": "d1s01",
+            "seq": 1,
+            "arriveAt": null,
+            "departAt": "2026-10-24T08:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d1s02",
+            "seq": 2,
+            "arriveAt": "2026-10-24T08:02",
+            "departAt": "2026-10-24T08:32",
+            "kmFromPrev": 1
+           },
+           {
+            "stopId": "d1s03",
+            "seq": 3,
+            "arriveAt": "2026-10-24T08:39",
+            "departAt": "2026-10-24T09:19",
+            "kmFromPrev": 6
+           },
+           {
+            "stopId": "d1s04",
+            "seq": 4,
+            "arriveAt": "2026-10-24T10:41",
+            "departAt": "2026-10-24T11:01",
+            "kmFromPrev": 102
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-24T12:02",
+            "departAt": "2026-10-24T12:22",
+            "kmFromPrev": 76
+           },
+           {
+            "stopId": "d1s06",
+            "seq": 6,
+            "arriveAt": "2026-10-24T13:14",
+            "departAt": "2026-10-24T14:14",
+            "kmFromPrev": 60
+           },
+           {
+            "stopId": "d1s07",
+            "seq": 7,
+            "arriveAt": "2026-10-24T15:37",
+            "departAt": "2026-10-24T15:57",
+            "kmFromPrev": 99
+           },
+           {
+            "stopId": "d1s08",
+            "seq": 8,
+            "arriveAt": "2026-10-24T16:35",
+            "departAt": "2026-10-24T17:05",
+            "kmFromPrev": 45
+           },
+           {
+            "stopId": "d1s09",
+            "seq": 9,
+            "arriveAt": "2026-10-24T17:08",
             "departAt": null,
             "kmFromPrev": 1
            }
@@ -978,48 +1552,25 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 260,
-        "kmLeft": 121,
-        "amenities": [
-         "wc"
-        ]
+        "kmDriven": 390,
+        "kmLeft": 3,
+        "poiKind": "museum",
+        "whyRu": "Объект культурного наследия",
+        "photoSource": "p18",
+        "parking": {
+         "rub": 80,
+         "rubPerHour": 40,
+         "hours": 2,
+         "source": "osm",
+         "zoneRu": "Платная парковка по данным OpenStreetMap",
+         "whereRu": "Парковка в 212 м от объекта",
+         "sundayRu": null,
+         "freeRu": null
+        }
        },
        {
-        "id": "d1s05",
-        "seq": 5,
-        "day": 1,
-        "kind": "food",
-        "sign": "food",
-        "placeId": "syn_c_Q5815_1",
-        "townId": "Q5815",
-        "name": "Кафе «Печка»",
-        "note": null,
-        "lat": 57.15271311519887,
-        "lon": 65.52670579359784,
-        "arriveAt": "2026-10-24T14:07",
-        "departAt": "2026-10-24T15:07",
-        "tz": "Asia/Yekaterinburg",
-        "kmFromPrev": 120,
-        "kmAt": 379,
-        "dwellMin": 60,
-        "tags": [
-         "kids_menu",
-         "parking"
-        ],
-        "costRub": 1400,
-        "reason": "Обед, парковка у входа.",
-        "verified": true,
-        "replaceable": true,
-        "alternatives": [],
-        "alternativesNote": "Других вариантов в это время поблизости нет.",
-        "hotelOptions": [],
-        "selectedHotelId": null,
-        "kmDriven": 380,
-        "kmLeft": 1
-       },
-       {
-        "id": "d1s06",
-        "seq": 6,
+        "id": "d1s09",
+        "seq": 9,
         "day": 1,
         "kind": "finish",
         "sign": "city",
@@ -1029,10 +1580,10 @@
         "note": null,
         "lat": 57.153,
         "lon": 65.5343,
-        "arriveAt": "2026-10-24T15:08",
+        "arriveAt": "2026-10-24T17:56",
         "departAt": null,
         "tz": "Asia/Yekaterinburg",
-        "kmFromPrev": 1,
+        "kmFromPrev": 3,
         "kmAt": 380,
         "dwellMin": 0,
         "tags": [],
@@ -1044,7 +1595,7 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 381,
+        "kmDriven": 393,
         "kmLeft": 0
        }
       ]
@@ -1055,20 +1606,20 @@
       {
        "key": "fuel",
        "title": "Бензин АИ-95",
-       "rub": 1880,
-       "formula": "381 км × 8 л/100 × ≈ 61,50 ₽ (средняя по 2 регионам)",
+       "rub": 1930,
+       "formula": "393 км × 8 л/100 × ≈ 61,50 ₽ (средняя по 2 регионам)",
        "asOf": "2026-10",
        "enabled": true,
        "breakdown": [
         {
          "label": "Свердловская область",
-         "formula": "312 км × 8 л/100 × 61,50 ₽ = 1 530 ₽",
-         "rub": 1530
+         "formula": "319 км × 8 л/100 × 61,50 ₽ = 1 570 ₽",
+         "rub": 1570
         },
         {
          "label": "Тюменская область",
-         "formula": "70 км × 8 л/100 × 61,50 ₽ = 340 ₽",
-         "rub": 340
+         "formula": "73 км × 8 л/100 × 61,50 ₽ = 360 ₽",
+         "rub": 360
         }
        ]
       },
@@ -1093,31 +1644,62 @@
       {
        "key": "food",
        "title": "Питание",
-       "rub": 1400,
-       "formula": "2 чел. × 1 приём × 700",
+       "rub": 1100,
+       "formula": "2 чел. × 1 приём × 550",
        "asOf": "2026-10",
        "enabled": true,
        "breakdown": [
         {
          "label": "День 1",
-         "formula": "обед 700",
-         "rub": 1400
+         "formula": "обед 550",
+         "rub": 1100
         }
        ]
       },
       {
        "key": "tickets",
        "title": "Билеты",
-       "rub": 0,
-       "formula": "вход свободный",
+       "rub": 800,
+       "formula": "1 место × 2 взр.",
        "asOf": "2026-10",
        "enabled": true,
-       "breakdown": []
+       "breakdown": [
+        {
+         "label": "Краеведческий музей «Городская Дума»",
+         "formula": "2 × 400",
+         "rub": 800
+        }
+       ]
+      },
+      {
+       "key": "parking",
+       "title": "Парковки",
+       "rub": 80,
+       "formula": "1 стоянка · 2 ч по тарифам зон + ещё 2 без данных",
+       "asOf": "2026-06",
+       "enabled": true,
+       "breakdown": [
+        {
+         "label": "дом Ипатьева",
+         "formula": "цена неизвестна",
+         "rub": 0
+        },
+        {
+         "label": "Шарташские каменные палатки",
+         "formula": "цена неизвестна",
+         "rub": 0
+        },
+        {
+         "label": "Краеведческий музей «Городская Дума»",
+         "formula": "2 ч × 40 ₽/ч",
+         "rub": 80
+        }
+       ]
       },
       {
        "key": "reserve",
        "title": "Резерв 10%",
-       "rub": 330,
+       "rub": 390,
        "formula": "на пробки и «давай заедем»",
        "asOf": "2026-10",
        "enabled": true,
@@ -1125,9 +1707,9 @@
       }
      ],
      "reserveOn": true,
-     "subtotalRub": 3280,
-     "totalRub": 3600,
-     "perPersonRub": 1800,
+     "subtotalRub": 3910,
+     "totalRub": 4300,
+     "perPersonRub": 2200,
      "budgetRub": null,
      "remainingRub": null,
      "overBudget": false,
@@ -1142,18 +1724,18 @@
         {
          "regionCode": "RU-SVE",
          "regionName": "Свердловская область",
-         "km": 311.562,
+         "km": 319.139,
          "priceRub": "61.50"
         },
         {
          "regionCode": "RU-TYU",
          "regionName": "Тюменская область",
-         "km": 69.763,
+         "km": 73.377,
          "priceRub": "61.50"
         }
        ],
        "asOf": "2026-10",
-       "tripKm": 381
+       "tripKm": 393
       },
       "tolls": [],
       "nights": [],
@@ -1161,11 +1743,33 @@
        {
         "day": 1,
         "meal": "lunch",
-        "stopId": "d1s05",
-        "checkRub": 700
+        "stopId": "d1s06",
+        "checkRub": 550
        }
       ],
-      "tickets": [],
+      "tickets": [
+       {
+        "stopId": "d1s02",
+        "placeId": "Q1381934",
+        "name": "дом Ипатьева",
+        "adultRub": 0,
+        "childRub": 0
+       },
+       {
+        "stopId": "d1s03",
+        "placeId": "Q2036269",
+        "name": "Шарташские каменные палатки",
+        "adultRub": 0,
+        "childRub": 0
+       },
+       {
+        "stopId": "d1s08",
+        "placeId": "Q47004154",
+        "name": "Краеведческий музей «Городская Дума»",
+        "adultRub": 400,
+        "childRub": 200
+       }
+      ],
       "reserveFrac": "0.10",
       "lineStep": 10,
       "totalStep": 100,
@@ -1178,15 +1782,50 @@
        "lodging": "2026-10",
        "food": "2026-10",
        "tickets": "2026-10",
-       "reserve": "2026-10"
+       "reserve": "2026-10",
+       "parking": "2026-06"
       },
-      "moodJustDrive": false
+      "moodJustDrive": false,
+      "parking": [
+       {
+        "stopId": "d1s02",
+        "name": "дом Ипатьева",
+        "rubPerHour": null,
+        "hours": 1,
+        "rub": null,
+        "source": "unknown"
+       },
+       {
+        "stopId": "d1s03",
+        "name": "Шарташские каменные палатки",
+        "rubPerHour": null,
+        "hours": 1,
+        "rub": null,
+        "source": "unknown"
+       },
+       {
+        "stopId": "d1s08",
+        "name": "Краеведческий музей «Городская Дума»",
+        "rubPerHour": 40,
+        "hours": 2,
+        "rub": 80,
+        "source": "osm"
+       }
+      ]
      }
     },
     "reasons": {
      "overnights": []
     },
-    "warnings": [],
+    "warnings": [
+     {
+      "code": "UNVERIFIED_PLACES",
+      "day": null,
+      "message": "Места — из открытых данных: часы и цены уточняйте",
+      "detail": "osm_places",
+      "level": "info"
+     }
+    ],
     "input": {
      "origin": {
       "lat": 56.8389,
@@ -1997,11 +2636,11 @@
      "regionKm": [
       [
        "RU-SVE",
-       311.562
+       319.139
       ],
       [
        "RU-TYU",
-       69.763
+       73.377
       ]
      ],
      "tollHits": [],
@@ -2036,6 +2675,44 @@
         },
         {
          "stopId": "d1s02",
+         "kind": "sight",
+         "kmAt": 0.33701084251798474,
+         "detourKm": 1.5082692277873166,
+         "detourMin": 4,
+         "dwellMin": 30,
+         "fixed": false,
+         "auto": false,
+         "score": 4.223333333333334,
+         "placeId": "Q1381934",
+         "regionCode": "RU-SVE",
+         "reasonKey": "sight.osm",
+         "reasonParams": [],
+         "meal": null,
+         "litres": 0.0,
+         "coffee": false,
+         "pool": "sight"
+        },
+        {
+         "stopId": "d1s03",
+         "kind": "sight",
+         "kmAt": 5.583455211070584,
+         "detourKm": 0.21381071744979585,
+         "detourMin": 0,
+         "dwellMin": 40,
+         "fixed": false,
+         "auto": false,
+         "score": 4.14,
+         "placeId": "Q2036269",
+         "regionCode": "RU-SVE",
+         "reasonKey": "sight.osm",
+         "reasonParams": [],
+         "meal": null,
+         "litres": 0.0,
+         "coffee": false,
+         "pool": "sight"
+        },
+        {
+         "stopId": "d1s04",
          "kind": "rest",
          "kmAt": 107.41043136709342,
          "detourKm": 0.5204227659340631,
@@ -2067,7 +2744,7 @@
          "pool": "rest"
         },
         {
-         "stopId": "d1s03",
+         "stopId": "d1s05",
          "kind": "rest",
          "kmAt": 183.22920522668582,
          "detourKm": 0.5208028040887736,
@@ -2099,17 +2776,36 @@
          "pool": "rest"
         },
         {
-         "stopId": "d1s04",
+         "stopId": "d1s06",
+         "kind": "food",
+         "kmAt": 239.768395394338,
+         "detourKm": 6.37542498986098,
+         "detourMin": 12,
+         "dwellMin": 60,
+         "fixed": false,
+         "auto": true,
+         "score": 2.9,
+         "placeId": "syn_c_Q196603_1",
+         "regionCode": "RU-SVE",
+         "reasonKey": "lunch.parking",
+         "reasonParams": [],
+         "meal": "lunch",
+         "litres": 0.0,
+         "coffee": false,
+         "pool": "food"
+        },
+        {
+         "stopId": "d1s07",
          "kind": "rest",
-         "kmAt": 259.0487392334977,
-         "detourKm": 0.5210008480608513,
+         "kmAt": 334.8675130930902,
+         "detourKm": 0.5213808862175968,
          "detourMin": 0,
          "dwellMin": 20,
          "fixed": false,
          "auto": true,
          "score": 2.0,
-         "placeId": "syn_r_5705499_6396778",
-         "regionCode": "RU-SVE",
+         "placeId": "syn_r_5711771_6495191",
+         "regionCode": "RU-TYU",
          "reasonKey": "rest.generic",
          "reasonParams": [
           [
@@ -2122,7 +2818,7 @@
           ],
           [
            "drive",
-           "часа"
+           "полутора часов"
           ]
          ],
          "meal": null,
@@ -2131,26 +2827,26 @@
          "pool": "rest"
         },
         {
-         "stopId": "d1s05",
-         "kind": "food",
-         "kmAt": 379.124348088721,
-         "detourKm": 0.05628434024000642,
-         "detourMin": 0,
-         "dwellMin": 60,
+         "stopId": "d1s08",
+         "kind": "sight",
+         "kmAt": 378.73676861790796,
+         "detourKm": 3.149538657056601,
+         "detourMin": 7,
+         "dwellMin": 75,
          "fixed": false,
-         "auto": true,
-         "score": 5.8,
-         "placeId": "syn_c_Q5815_1",
+         "auto": false,
+         "score": 3.993333333333333,
+         "placeId": "Q47004154",
          "regionCode": "RU-TYU",
-         "reasonKey": "lunch.parking",
+         "reasonKey": "sight.osm",
          "reasonParams": [],
-         "meal": "lunch",
+         "meal": null,
          "litres": 0.0,
          "coffee": false,
-         "pool": "food"
+         "pool": "sight"
         },
         {
-         "stopId": "d1s06",
+         "stopId": "d1s09",
          "kind": "finish",
          "kmAt": 379.7062412286271,
          "detourKm": 0.0,
@@ -2172,6 +2868,15 @@
       }
      ],
      "candidates": [
+      {
+       "placeId": "Q106150540",
+       "kmAt": 0.0,
+       "lateralKm": 5.311067126827603,
+       "detourKm": 13.80877452975177,
+       "detourMin": 23,
+       "roadClass": "primary",
+       "regionCode": "RU-SVE"
+      },
       {
        "placeId": "Q16630837",
        "kmAt": 0.0,
@@ -2214,15 +2919,6 @@
        "lateralKm": 1.504398891940874,
        "detourKm": 3.9114371190462722,
        "detourMin": 8,
-       "roadClass": "primary",
-       "regionCode": "RU-SVE"
-      },
-      {
-       "placeId": "Q4306371",
-       "kmAt": 0.12314702768203702,
-       "lateralKm": 0.49293159818518445,
-       "detourKm": 1.2816221552814797,
-       "detourMin": 4,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -2317,11 +3013,38 @@
        "regionCode": "RU-SVE"
       },
       {
+       "placeId": "osm_n2896437783",
+       "kmAt": 16.015504624836165,
+       "lateralKm": 6.209517162502648,
+       "detourKm": 16.144744622506884,
+       "detourMin": 26,
+       "roadClass": "primary",
+       "regionCode": "RU-SVE"
+      },
+      {
+       "placeId": "osm_n2896437780",
+       "kmAt": 16.086046823614492,
+       "lateralKm": 6.128438114523714,
+       "detourKm": 15.933939097761657,
+       "detourMin": 26,
+       "roadClass": "primary",
+       "regionCode": "RU-SVE"
+      },
+      {
        "placeId": "osm_n1831398575",
        "kmAt": 16.09923495046195,
        "lateralKm": 6.738360710531751,
        "detourKm": 17.519737847382554,
        "detourMin": 28,
+       "roadClass": "primary",
+       "regionCode": "RU-SVE"
+      },
+      {
+       "placeId": "osm_w256186718",
+       "kmAt": 16.1468372722052,
+       "lateralKm": 5.93359928667465,
+       "detourKm": 15.427358145354091,
+       "detourMin": 25,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -2340,6 +3063,15 @@
        "lateralKm": 11.994370869421969,
        "detourKm": 31.18536426049712,
        "detourMin": 49,
+       "roadClass": "primary",
+       "regionCode": "RU-SVE"
+      },
+      {
+       "placeId": "osm_w1212881933",
+       "kmAt": 16.546151936473635,
+       "lateralKm": 6.019278642877633,
+       "detourKm": 15.650124471481845,
+       "detourMin": 25,
        "roadClass": "primary",
        "regionCode": "RU-SVE"
       },
@@ -3270,13 +4002,17 @@
      ]
     }
    },
-   "shareText": "Екатеринбург → Тюмень · 381 км · 1 день\nДень 1 · 381 км\n08:00 Екатеринбург\n09:27 Площадка отдыха\n10:48 Площадка отдыха\n12:10 Площадка отдыха\n14:07 Кафе «Печка»\n15:08 Тюмень\nИтого ≈ 3 600 ₽ на 2 чел.",
+   "shareText": "Екатеринбург → Тюмень · 393 км · 1 день\nДень 1 · 393 км\n08:00 Екатеринбург\n08:02 дом Ипатьева\n08:39 Шарташские каменные палатки\n10:41 Площадка отдыха\n12:02 Площадка отдыха\n13:14 Кафе «Огонёк»\n15:37 Площадка отдыха\n16:36 Краеведческий музей «Городская Дума»\n17:56 Тюмень\nИтого ≈ 4 300 ₽ на 2 чел.",
    "pricesMonthRu": "октябрь",
    "pricesYear": "2026",
    "townPrepRu": {
+    "Q887": "Екатеринбурге",
+    "Q196603": "Талице",
     "Q5815": "Тюмени"
    },
    "townGenRu": {
+    "Q887": "Екатеринбурга",
+    "Q196603": "Талицы",
     "Q5815": "Тюмени"
    }
   },

@@ -30,6 +30,7 @@
   "sight.default": "{dwell} на осмотр.",
   "sight.dog_waits": "{dwell} на осмотр. Собака ждёт с одним из взрослых.",
   "sight.osm": "По открытым данным.",
+  "sight.detour": "Крюк ≈ {minutes} мин.",
   "start.default": "Выезд в {time}.",
   "finish.home": "Дома к {part_of_day}.",
   "finish.default": "Финиш.",

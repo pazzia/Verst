@@ -33,6 +33,7 @@ MAX_REST_SIGHT_DWELL = 30
 # ADR-0015 §5 «Весело и познавательно»: interesting stops in the rest slots, within a 15-min detour,
 # 30-45 min, chosen for the crew; a dog never gets an indoor-only place as its walk.
 FUN_DETOUR_MIN = 15
+FUN_DETOUR_FALLBACK_MIN = 30  # M8: when nothing interesting is within 15 min of the rest window
 FUN_DWELL = (30, 45)
 FUN_BONUS = 5.0  # above a rest area with a playground, WC and a walk (5.5) for a fitting stop
 FUN_PREFER: dict[str, frozenset[str]] = {
@@ -169,7 +170,10 @@ def rest_pool(corridor: Corridor, fun: bool = False, secular: bool = False) -> l
     pool += [
         c
         for c in corridor.sights
-        if ((c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL or (fun and c.detour_min <= FUN_DETOUR_MIN))
+        if (
+            (c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL
+            or (fun and c.detour_min <= FUN_DETOUR_FALLBACK_MIN)
+        )
         and not (secular and category_of(c.place) in RELIGIOUS)
     ]
     return sorted(pool, key=lambda c: (c.km_at, c.place.id))
@@ -335,6 +339,7 @@ def plan_rests_day(
     accepted: set[tuple[int, int]] = set()
     # ADR-0015 §5: «подходящей площадки рядом нет» once a day; later breaks say only «Перерыв 15 минут»
     roadside_done = any(s.reason_key == "rest.roadside" for s in day.stops)
+    last_roadside: float | None = None
     for _guard in range(200):
         clock = DriveClock.of(day, profile)
         gap = _first_long_gap(day, clock, r, rc.break_min_dwell, accepted)
@@ -362,8 +367,9 @@ def plan_rests_day(
             gap: _Gap = gap,
             clock: DriveClock = clock,
             need_after: float = need_after,
+            fun_limit: int = FUN_DETOUR_MIN,
         ) -> bool:
-            limit = FUN_DETOUR_MIN if is_fun(c, inp) else rc.max_detour_min
+            limit = fun_limit if is_fun(c, inp) else rc.max_detour_min
             if c.detour_min > limit or d0 < g - EPS:
                 return False
             return gap.t1 - clock.at(c.km_at) >= need_after - EPS
@@ -390,7 +396,17 @@ def plan_rests_day(
         if inp.mood is Mood.FUN:
             # ADR-0015 §5: an interesting stop in the widened window beats a plain rest area in the narrow one
             # (`rest_score` carries the fun bonus); the extended window stays the last resort
-            windows = [_union(windows[0], windows[1]), windows[2]]
+            near = _union(windows[0], windows[1])
+            if not any(is_fun(c, inp) for c, _d in near):  # M8: nothing within 15 min → up to 30 min
+                wide = [
+                    (c, d0)
+                    for c, d0 in span
+                    if is_fun(c, inp)
+                    and admissible(c, d0, fun_limit=FUN_DETOUR_FALLBACK_MIN)
+                    and max(g, r - rc.widen_before_min) - EPS <= d0 <= r + rc.widen_after_min + EPS
+                ]
+                near = _union(near, wide)
+            windows = [near, windows[2]]
         chosen = None
         for cands in windows:
             for c, d0 in rank_rests(cands, inp, r):
@@ -403,8 +419,11 @@ def plan_rests_day(
             if chosen is not None:
                 break
         if chosen is None:  # step 4: a roadside break at x, never a gap left unfilled
+            if last_roadside is not None and abs(last_roadside - x) < 0.01:
+                break  # the break did not shorten the gap (x inside a long detour): one is enough
             chosen = roadside_break(x, pool, ctx, again=roadside_done)
             roadside_done = True
+            last_roadside = x
         insert_stop(day, chosen)
         accepted.add((id(b0), id(chosen)))
         if chosen.place is not None:
