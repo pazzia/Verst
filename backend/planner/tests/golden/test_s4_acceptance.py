@@ -15,7 +15,7 @@ from tests.unit import test_mobile_v2
 from verst_planner import mobile
 from verst_planner.domain.model import LatLon
 from verst_planner.geo.distance import haversine_km
-from verst_planner.pipeline.sights import MIN_QUALITY, RELIGIOUS, category_of, effective_quality
+from verst_planner.pipeline.sights import MIN_QUALITY, RELIGIOUS, category_of, effective_quality, signature
 
 CASES = Path(__file__).resolve().parent / "cases_s4"
 MOSCOW = LatLon(55.7558, 37.6173)
@@ -86,7 +86,14 @@ class S4AcceptanceTest(unittest.TestCase):
             with self.subTest(stop=s["name"]):
                 self.assertFalse(any(s["name"].casefold().startswith(b) for b in BAD_NAMES))
                 self.assertFalse(s["name"].casefold() in self.town_names, "a town filed as a sight")
-        free = [s for s in ss if s.get("replaceable")]  # ready-route template sights are not replaceable
+        # the cap counts the added open-data sights: not the ready-route template stops (not replaceable)
+        # and not the ring's signature sites (hand-curated kremlins and monasteries, M9 follow-up)
+        free = [
+            s
+            for s in ss
+            if s.get("replaceable")
+            and not (s["placeId"] in self.world.places and signature(self.world.places[s["placeId"]]))
+        ]
         religious = [s for s in free if self.category(s) in RELIGIOUS]
         if free:
             self.assertLessEqual(
@@ -133,8 +140,14 @@ class S4AcceptanceTest(unittest.TestCase):
             self.assertLessEqual(len(long), 1, [s["name"] for s in long])
 
     def test_g15_fryazino_golden_ring(self) -> None:
+        """The ring keeps its signature sites (Лавра, Ипатьевский, the Суздаль kremlin); the religious cap
+        applies to the added open-data sights only."""
         trip = plan("G15_fryazino_golden_ring")
         self.check_quality_rules(trip)
+        names = {s["name"] for s in sights(trip)}
+        self.assertTrue(
+            {"Троице-Сергиева лавра", "Ипатьевский монастырь", "Суздальский кремль"} <= names, names
+        )
         for s in sights(trip):
             self.assertGreater(haversine_km(LatLon(s["lat"], s["lon"]), MOSCOW), 12.0, s["name"])
 

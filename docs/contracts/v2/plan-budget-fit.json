@@ -29,7 +29,7 @@
    "trip": {
     "id": null,
     "title": "Золотое кольцо · коротко",
-    "km": 554,
+    "km": 548,
     "days": 2,
     "nights": 1,
     "roundTrip": true,
@@ -71,7 +71,7 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 0,
-        "kmLeft": 554
+        "kmLeft": 548
        },
        {
         "id": "d1s02",
@@ -105,7 +105,7 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 73,
-        "kmLeft": 481,
+        "kmLeft": 475,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -262,114 +262,6 @@
           ]
          },
          {
-          "id": "alt_d1s03_pl_prs_nikitsky",
-          "placeId": "pl_prs_nikitsky",
-          "name": "Никитский монастырь",
-          "deltaMin": 7,
-          "deltaRub": -20,
-          "shiftMin": 7,
-          "units": {
-           "deltaKm": -3.678,
-           "regionCode": "RU-YAR",
-           "checkRub": null,
-           "adultRub": 0,
-           "childRub": 0,
-           "name": "Никитский монастырь",
-           "placeId": "pl_prs_nikitsky",
-           "priceRub": "61.90",
-           "regionName": "Ярославская область",
-           "tripKmDelta": -4,
-           "parkingRub": 0,
-           "parkingRubPerHour": 0,
-           "parkingHours": 1,
-           "parkingSource": "free"
-          },
-          "stop": {
-           "id": "d1s03",
-           "seq": 3,
-           "day": 1,
-           "kind": "sight",
-           "sign": "tourist",
-           "placeId": "pl_prs_nikitsky",
-           "townId": "t_pereslavl",
-           "name": "Никитский монастырь",
-           "note": null,
-           "lat": 56.7487612042614,
-           "lon": 38.867402170532564,
-           "arriveAt": "2026-10-24T11:32",
-           "departAt": "2026-10-24T12:17",
-           "tz": "Europe/Moscow",
-           "kmFromPrev": 70,
-           "kmAt": 142,
-           "dwellMin": 45,
-           "tags": [
-            "monastery",
-            "free_entry"
-           ],
-           "costRub": 0,
-           "reason": "45 мин на осмотр. Собака ждёт с одним из взрослых.",
-           "verified": true,
-           "replaceable": true,
-           "alternatives": [],
-           "alternativesNote": null,
-           "hotelOptions": [],
-           "selectedHotelId": null,
-           "parking": {
-            "rub": 0,
-            "rubPerHour": 0,
-            "hours": 1,
-            "source": "free",
-            "zoneRu": "Платных зон рядом нет",
-            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
-            "sundayRu": null,
-            "freeRu": "Бесплатно: вне платных зон"
-           },
-           "poiKind": "monastery",
-           "poiKindRu": "Монастырь",
-           "whyRu": null,
-           "photoSource": "p18",
-           "placeSource": "curated",
-           "placeAttributionRu": null
-          },
-          "dayPatch": [
-           {
-            "stopId": "d1s01",
-            "seq": 1,
-            "arriveAt": null,
-            "departAt": "2026-10-24T08:00",
-            "kmFromPrev": 0
-           },
-           {
-            "stopId": "d1s02",
-            "seq": 2,
-            "arriveAt": "2026-10-24T09:05",
-            "departAt": "2026-10-24T10:35",
-            "kmFromPrev": 73
-           },
-           {
-            "stopId": "d1s03",
-            "seq": 3,
-            "arriveAt": "2026-10-24T11:32",
-            "departAt": "2026-10-24T12:17",
-            "kmFromPrev": 70
-           },
-           {
-            "stopId": "d1s04",
-            "seq": 4,
-            "arriveAt": "2026-10-24T13:09",
-            "departAt": "2026-10-24T14:09",
-            "kmFromPrev": 63
-           },
-           {
-            "stopId": "d1s05",
-            "seq": 5,
-            "arriveAt": "2026-10-24T15:01",
-            "departAt": null,
-            "kmFromPrev": 61
-           }
-          ]
-         },
-         {
           "id": "alt_d1s03_Q4144213",
           "placeId": "Q4144213",
           "name": "Горицкий Успенский монастырь",
@@ -476,13 +368,121 @@
             "kmFromPrev": 61
            }
           ]
+         },
+         {
+          "id": "alt_d1s03_pl_prs_goritsky",
+          "placeId": "pl_prs_goritsky",
+          "name": "Горицкий монастырь",
+          "deltaMin": 29,
+          "deltaRub": 1350,
+          "shiftMin": 29,
+          "units": {
+           "deltaKm": -0.541,
+           "regionCode": "RU-YAR",
+           "checkRub": null,
+           "adultRub": 300,
+           "childRub": 150,
+           "name": "Горицкий монастырь",
+           "placeId": "pl_prs_goritsky",
+           "priceRub": "61.90",
+           "regionName": "Ярославская область",
+           "tripKmDelta": -1,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
+          },
+          "stop": {
+           "id": "d1s03",
+           "seq": 3,
+           "day": 1,
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "pl_prs_goritsky",
+           "townId": "t_pereslavl",
+           "name": "Горицкий монастырь",
+           "note": null,
+           "lat": 56.72796065440339,
+           "lon": 38.870677713165705,
+           "arriveAt": "2026-10-24T11:35",
+           "departAt": "2026-10-24T12:35",
+           "tz": "Europe/Moscow",
+           "kmFromPrev": 70,
+           "kmAt": 140,
+           "dwellMin": 60,
+           "tags": [
+            "museum",
+            "monastery"
+           ],
+           "costRub": 1350,
+           "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+           "verified": true,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           },
+           "poiKind": "monastery",
+           "poiKindRu": "Монастырь",
+           "whyRu": null,
+           "photoSource": null,
+           "placeSource": "curated",
+           "placeAttributionRu": null
+          },
+          "dayPatch": [
+           {
+            "stopId": "d1s01",
+            "seq": 1,
+            "arriveAt": null,
+            "departAt": "2026-10-24T08:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d1s02",
+            "seq": 2,
+            "arriveAt": "2026-10-24T09:05",
+            "departAt": "2026-10-24T10:35",
+            "kmFromPrev": 73
+           },
+           {
+            "stopId": "d1s03",
+            "seq": 3,
+            "arriveAt": "2026-10-24T11:35",
+            "departAt": "2026-10-24T12:35",
+            "kmFromPrev": 70
+           },
+           {
+            "stopId": "d1s04",
+            "seq": 4,
+            "arriveAt": "2026-10-24T13:31",
+            "departAt": "2026-10-24T14:31",
+            "kmFromPrev": 66
+           },
+           {
+            "stopId": "d1s05",
+            "seq": 5,
+            "arriveAt": "2026-10-24T15:23",
+            "departAt": null,
+            "kmFromPrev": 61
+           }
+          ]
          }
         ],
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 143,
-        "kmLeft": 411,
+        "kmLeft": 405,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -838,7 +838,7 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 209,
-        "kmLeft": 345,
+        "kmLeft": 339,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -910,17 +910,17 @@
         ],
         "selectedHotelId": "pl_yar_hotel_strelka",
         "kmDriven": 272,
-        "kmLeft": 282
+        "kmLeft": 276
        }
       ]
      },
      {
       "day": 2,
-      "km": 282,
-      "driveMin": 258,
+      "km": 276,
+      "driveMin": 245,
       "tz": "Europe/Moscow",
       "startAt": "2026-10-25T09:00",
-      "endAt": "2026-10-25T15:33",
+      "endAt": "2026-10-25T15:30",
       "overBudget": false,
       "stops": [
        {
@@ -951,54 +951,53 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 272,
-        "kmLeft": 282
+        "kmLeft": 276
        },
        {
         "id": "d2s02",
         "seq": 7,
         "day": 2,
-        "kind": "rest",
-        "sign": "rest",
-        "placeId": "pl_m8_rest_130",
-        "townId": null,
-        "name": "Площадка отдыха, М-8, 130 км",
+        "kind": "sight",
+        "sign": "tourist",
+        "placeId": "pl_prs_nikitsky",
+        "townId": "t_pereslavl",
+        "name": "Никитский монастырь",
         "note": null,
-        "lat": 56.67235093023244,
-        "lon": 38.752183894318144,
-        "arriveAt": "2026-10-25T10:51",
-        "departAt": "2026-10-25T11:11",
+        "lat": 56.7487612042614,
+        "lon": 38.867402170532564,
+        "arriveAt": "2026-10-25T10:40",
+        "departAt": "2026-10-25T11:25",
         "tz": "Europe/Moscow",
-        "kmFromPrev": 133,
-        "kmAt": 396,
-        "dwellMin": 20,
+        "kmFromPrev": 121,
+        "kmAt": 384,
+        "dwellMin": 45,
         "tags": [
-         "playground",
-         "wc",
-         "view"
+         "monastery",
+         "free_entry"
         ],
         "costRub": 0,
-        "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+        "reason": "45 мин на осмотр. Собака ждёт с одним из взрослых.",
         "verified": true,
         "replaceable": true,
         "alternatives": [
          {
-          "id": "alt_d2s02_pl_m8_rest_085",
-          "placeId": "pl_m8_rest_085",
-          "name": "Площадка отдыха, М-8, 85 км",
-          "deltaMin": -3,
-          "deltaRub": 0,
-          "shiftMin": -3,
+          "id": "alt_d2s02_Q4144213",
+          "placeId": "Q4144213",
+          "name": "Горицкий Успенский монастырь",
+          "deltaMin": 15,
+          "deltaRub": 1350,
+          "shiftMin": 15,
           "units": {
-           "deltaKm": -0.0,
-           "regionCode": "RU-MOS",
+           "deltaKm": 0.173,
+           "regionCode": "RU-YAR",
            "checkRub": null,
-           "adultRub": null,
-           "childRub": null,
-           "name": "Площадка отдыха, М-8, 85 км",
-           "placeId": "pl_m8_rest_085",
-           "priceRub": "61.80",
-           "regionName": "Московская область",
-           "tripKmDelta": 0,
+           "adultRub": 300,
+           "childRub": 150,
+           "name": "Горицкий Успенский монастырь",
+           "placeId": "Q4144213",
+           "priceRub": "61.90",
+           "regionName": "Ярославская область",
+           "tripKmDelta": 1,
            "parkingRub": 0,
            "parkingRubPerHour": 0,
            "parkingHours": 1,
@@ -1008,27 +1007,27 @@
            "id": "d2s02",
            "seq": 7,
            "day": 2,
-           "kind": "rest",
-           "sign": "rest",
-           "placeId": "pl_m8_rest_085",
-           "townId": null,
-           "name": "Площадка отдыха, М-8, 85 км",
-           "note": null,
-           "lat": 56.39761377564991,
-           "lon": 38.269614635093625,
-           "arriveAt": "2026-10-25T11:27",
-           "departAt": "2026-10-25T11:47",
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "Q4144213",
+           "townId": "t_pereslavl",
+           "name": "Горицкий Успенский монастырь",
+           "note": "не проверено",
+           "lat": 56.721,
+           "lon": 38.824,
+           "arriveAt": "2026-10-25T10:44",
+           "departAt": "2026-10-25T11:44",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 178,
-           "kmAt": 441,
-           "dwellMin": 20,
+           "kmFromPrev": 126,
+           "kmAt": 389,
+           "dwellMin": 60,
            "tags": [
-            "wc",
-            "walk"
+            "walk",
+            "monastery"
            ],
-           "costRub": 0,
-           "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
-           "verified": true,
+           "costRub": 1350,
+           "reason": "По открытым данным.",
+           "verified": false,
            "replaceable": true,
            "alternatives": [],
            "alternativesNote": null,
@@ -1043,118 +1042,9 @@
             "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
             "sundayRu": null,
             "freeRu": "Бесплатно: вне платных зон"
-           }
-          },
-          "dayPatch": [
-           {
-            "stopId": "d2s01",
-            "seq": 6,
-            "arriveAt": null,
-            "departAt": "2026-10-25T09:00",
-            "kmFromPrev": 0
            },
-           {
-            "stopId": "d2s02",
-            "seq": 7,
-            "arriveAt": "2026-10-25T11:27",
-            "departAt": "2026-10-25T11:47",
-            "kmFromPrev": 178
-           },
-           {
-            "stopId": "d2s03",
-            "seq": 8,
-            "arriveAt": "2026-10-25T12:45",
-            "departAt": "2026-10-25T13:45",
-            "kmFromPrev": 68
-           },
-           {
-            "stopId": "d2s04",
-            "seq": 9,
-            "arriveAt": "2026-10-25T14:08",
-            "departAt": "2026-10-25T14:23",
-            "kmFromPrev": 17
-           },
-           {
-            "stopId": "d2s05",
-            "seq": 10,
-            "arriveAt": "2026-10-25T14:35",
-            "departAt": "2026-10-25T15:15",
-            "kmFromPrev": 7
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:30",
-            "departAt": null,
-            "kmFromPrev": 12
-           }
-          ]
-         },
-         {
-          "id": "alt_d2s02_Q4419634",
-          "placeId": "Q4419634",
-          "name": "Симеоновская церковь (Переславль)",
-          "deltaMin": 7,
-          "deltaRub": 0,
-          "shiftMin": 7,
-          "units": {
-           "deltaKm": -0.364,
-           "regionCode": "RU-YAR",
-           "checkRub": null,
-           "adultRub": 0,
-           "childRub": 0,
-           "name": "Симеоновская церковь (Переславль)",
-           "placeId": "Q4419634",
-           "priceRub": "61.90",
-           "regionName": "Ярославская область",
-           "tripKmDelta": 0,
-           "parkingRub": null,
-           "parkingRubPerHour": null,
-           "parkingHours": 1,
-           "parkingSource": "unknown"
-          },
-          "stop": {
-           "id": "d2s02",
-           "seq": 7,
-           "day": 2,
-           "kind": "sight",
-           "sign": "tourist",
-           "placeId": "Q4419634",
-           "townId": "t_pereslavl",
-           "name": "Симеоновская церковь (Переславль)",
-           "note": "не проверено",
-           "lat": 56.74056,
-           "lon": 38.85667,
-           "arriveAt": "2026-10-25T10:41",
-           "departAt": "2026-10-25T11:11",
-           "tz": "Europe/Moscow",
-           "kmFromPrev": 123,
-           "kmAt": 385,
-           "dwellMin": 30,
-           "tags": [
-            "walk",
-            "free_entry"
-           ],
-           "costRub": 0,
-           "reason": "По открытым данным.",
-           "verified": false,
-           "replaceable": true,
-           "alternatives": [],
-           "alternativesNote": null,
-           "hotelOptions": [],
-           "selectedHotelId": null,
-           "parking": {
-            "rub": null,
-            "rubPerHour": null,
-            "hours": 1,
-            "source": "unknown",
-            "zoneRu": "Платная парковка, тариф неизвестен",
-            "whereRu": "Парковка в 286 м от объекта",
-            "sundayRu": null,
-            "freeRu": null
-           },
-           "poiKind": "temple",
-           "poiKindRu": "Храм",
+           "poiKind": "monastery",
+           "poiKindRu": "Монастырь",
            "whyRu": "Объект культурного наследия",
            "photoSource": "p18",
            "placeSource": "wikidata",
@@ -1171,58 +1061,51 @@
            {
             "stopId": "d2s02",
             "seq": 7,
-            "arriveAt": "2026-10-25T10:41",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 123
+            "arriveAt": "2026-10-25T10:44",
+            "departAt": "2026-10-25T11:44",
+            "kmFromPrev": 126
            },
            {
             "stopId": "d2s03",
             "seq": 8,
-            "arriveAt": "2026-10-25T12:55",
-            "departAt": "2026-10-25T13:55",
-            "kmFromPrev": 123
+            "arriveAt": "2026-10-25T13:25",
+            "departAt": "2026-10-25T14:25",
+            "kmFromPrev": 120
            },
            {
             "stopId": "d2s04",
             "seq": 9,
-            "arriveAt": "2026-10-25T14:18",
-            "departAt": "2026-10-25T14:33",
-            "kmFromPrev": 17
+            "arriveAt": "2026-10-25T14:50",
+            "departAt": "2026-10-25T15:30",
+            "kmFromPrev": 19
            },
            {
             "stopId": "d2s05",
             "seq": 10,
-            "arriveAt": "2026-10-25T14:45",
-            "departAt": "2026-10-25T15:25",
-            "kmFromPrev": 7
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:40",
+            "arriveAt": "2026-10-25T15:45",
             "departAt": null,
             "kmFromPrev": 12
            }
           ]
          },
          {
-          "id": "alt_d2s02_pl_m8_rest_175",
-          "placeId": "pl_m8_rest_175",
-          "name": "Площадка отдыха, М-8, 175 км",
-          "deltaMin": 0,
-          "deltaRub": 0,
-          "shiftMin": 0,
+          "id": "alt_d2s02_pl_prs_goritsky",
+          "placeId": "pl_prs_goritsky",
+          "name": "Горицкий монастырь",
+          "deltaMin": 22,
+          "deltaRub": 1370,
+          "shiftMin": 22,
           "units": {
-           "deltaKm": 0.0,
+           "deltaKm": 3.136,
            "regionCode": "RU-YAR",
            "checkRub": null,
-           "adultRub": null,
-           "childRub": null,
-           "name": "Площадка отдыха, М-8, 175 км",
-           "placeId": "pl_m8_rest_175",
+           "adultRub": 300,
+           "childRub": 150,
+           "name": "Горицкий монастырь",
+           "placeId": "pl_prs_goritsky",
            "priceRub": "61.90",
            "regionName": "Ярославская область",
-           "tripKmDelta": 0,
+           "tripKmDelta": 3,
            "parkingRub": 0,
            "parkingRubPerHour": 0,
            "parkingHours": 1,
@@ -1232,26 +1115,26 @@
            "id": "d2s02",
            "seq": 7,
            "day": 2,
-           "kind": "rest",
-           "sign": "rest",
-           "placeId": "pl_m8_rest_175",
-           "townId": null,
-           "name": "Площадка отдыха, М-8, 175 км",
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "pl_prs_goritsky",
+           "townId": "t_pereslavl",
+           "name": "Горицкий монастырь",
            "note": null,
-           "lat": 56.98328897153895,
-           "lon": 39.156635493883755,
-           "arriveAt": "2026-10-25T10:14",
-           "departAt": "2026-10-25T10:34",
+           "lat": 56.72796065440339,
+           "lon": 38.870677713165705,
+           "arriveAt": "2026-10-25T10:45",
+           "departAt": "2026-10-25T11:45",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 88,
-           "kmAt": 351,
-           "dwellMin": 20,
+           "kmFromPrev": 125,
+           "kmAt": 386,
+           "dwellMin": 60,
            "tags": [
-            "wc",
-            "walk"
+            "museum",
+            "monastery"
            ],
-           "costRub": 0,
-           "reason": "Разминка 20 минут: ребёнку побегать, собаке погулять.",
+           "costRub": 1350,
+           "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
            "verified": true,
            "replaceable": true,
            "alternatives": [],
@@ -1267,7 +1150,13 @@
             "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
             "sundayRu": null,
             "freeRu": "Бесплатно: вне платных зон"
-           }
+           },
+           "poiKind": "monastery",
+           "poiKindRu": "Монастырь",
+           "whyRu": null,
+           "photoSource": null,
+           "placeSource": "curated",
+           "placeAttributionRu": null
           },
           "dayPatch": [
            {
@@ -1280,35 +1169,136 @@
            {
             "stopId": "d2s02",
             "seq": 7,
-            "arriveAt": "2026-10-25T10:14",
-            "departAt": "2026-10-25T10:34",
-            "kmFromPrev": 88
+            "arriveAt": "2026-10-25T10:45",
+            "departAt": "2026-10-25T11:45",
+            "kmFromPrev": 125
            },
            {
             "stopId": "d2s03",
             "seq": 8,
-            "arriveAt": "2026-10-25T12:48",
-            "departAt": "2026-10-25T13:48",
-            "kmFromPrev": 158
+            "arriveAt": "2026-10-25T13:32",
+            "departAt": "2026-10-25T14:32",
+            "kmFromPrev": 124
            },
            {
             "stopId": "d2s04",
             "seq": 9,
-            "arriveAt": "2026-10-25T14:11",
-            "departAt": "2026-10-25T14:26",
-            "kmFromPrev": 17
+            "arriveAt": "2026-10-25T14:57",
+            "departAt": "2026-10-25T15:37",
+            "kmFromPrev": 19
            },
            {
             "stopId": "d2s05",
             "seq": 10,
-            "arriveAt": "2026-10-25T14:38",
-            "departAt": "2026-10-25T15:18",
-            "kmFromPrev": 7
+            "arriveAt": "2026-10-25T15:52",
+            "departAt": null,
+            "kmFromPrev": 12
+           }
+          ]
+         },
+         {
+          "id": "alt_d2s02_Q16701537",
+          "placeId": "Q16701537",
+          "name": "Сретенский Новодевичий монастырь",
+          "deltaMin": 15,
+          "deltaRub": 1350,
+          "shiftMin": 15,
+          "units": {
+           "deltaKm": -0.292,
+           "regionCode": "RU-YAR",
+           "checkRub": null,
+           "adultRub": 300,
+           "childRub": 150,
+           "name": "Сретенский Новодевичий монастырь",
+           "placeId": "Q16701537",
+           "priceRub": "61.90",
+           "regionName": "Ярославская область",
+           "tripKmDelta": 0,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
+          },
+          "stop": {
+           "id": "d2s02",
+           "seq": 7,
+           "day": 2,
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "Q16701537",
+           "townId": "t_pereslavl",
+           "name": "Сретенский Новодевичий монастырь",
+           "note": "не проверено",
+           "lat": 56.73537,
+           "lon": 38.85255,
+           "arriveAt": "2026-10-25T10:42",
+           "departAt": "2026-10-25T11:42",
+           "tz": "Europe/Moscow",
+           "kmFromPrev": 123,
+           "kmAt": 386,
+           "dwellMin": 60,
+           "tags": [
+            "walk",
+            "monastery"
+           ],
+           "costRub": 1350,
+           "reason": "По открытым данным.",
+           "verified": false,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           },
+           "poiKind": "monastery",
+           "poiKindRu": "Монастырь",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "placeSource": "wikidata",
+           "placeAttributionRu": null
+          },
+          "dayPatch": [
+           {
+            "stopId": "d2s01",
+            "seq": 6,
+            "arriveAt": null,
+            "departAt": "2026-10-25T09:00",
+            "kmFromPrev": 0
            },
            {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:33",
+            "stopId": "d2s02",
+            "seq": 7,
+            "arriveAt": "2026-10-25T10:42",
+            "departAt": "2026-10-25T11:42",
+            "kmFromPrev": 123
+           },
+           {
+            "stopId": "d2s03",
+            "seq": 8,
+            "arriveAt": "2026-10-25T13:25",
+            "departAt": "2026-10-25T14:25",
+            "kmFromPrev": 123
+           },
+           {
+            "stopId": "d2s04",
+            "seq": 9,
+            "arriveAt": "2026-10-25T14:50",
+            "departAt": "2026-10-25T15:30",
+            "kmFromPrev": 19
+           },
+           {
+            "stopId": "d2s05",
+            "seq": 10,
+            "arriveAt": "2026-10-25T15:45",
             "departAt": null,
             "kmFromPrev": 12
            }
@@ -1318,13 +1308,8 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 405,
-        "kmLeft": 149,
-        "amenities": [
-         "wc",
-         "playground",
-         "view"
-        ],
+        "kmDriven": 393,
+        "kmLeft": 155,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -1334,7 +1319,13 @@
          "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
          "sundayRu": null,
          "freeRu": "Бесплатно: вне платных зон"
-        }
+        },
+        "poiKind": "monastery",
+        "poiKindRu": "Монастырь",
+        "whyRu": null,
+        "photoSource": "p18",
+        "placeSource": "curated",
+        "placeAttributionRu": null
        },
        {
         "id": "d2s03",
@@ -1348,10 +1339,10 @@
         "note": null,
         "lat": 55.919383115198876,
         "lon": 37.72691804924099,
-        "arriveAt": "2026-10-25T12:48",
-        "departAt": "2026-10-25T13:48",
+        "arriveAt": "2026-10-25T13:10",
+        "departAt": "2026-10-25T14:10",
         "tz": "Europe/Moscow",
-        "kmFromPrev": 113,
+        "kmFromPrev": 125,
         "kmAt": 506,
         "dwellMin": 60,
         "tags": [
@@ -1398,10 +1389,10 @@
            "note": null,
            "lat": 55.919383115198876,
            "lon": 37.81025804924099,
-           "arriveAt": "2026-10-25T12:47",
-           "departAt": "2026-10-25T13:47",
+           "arriveAt": "2026-10-25T13:09",
+           "departAt": "2026-10-25T14:09",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 111,
+           "kmFromPrev": 123,
            "kmAt": 503,
            "dwellMin": 60,
            "tags": [
@@ -1438,35 +1429,28 @@
            {
             "stopId": "d2s02",
             "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
+            "arriveAt": "2026-10-25T10:40",
+            "departAt": "2026-10-25T11:25",
+            "kmFromPrev": 121
            },
            {
             "stopId": "d2s03",
             "seq": 8,
-            "arriveAt": "2026-10-25T12:47",
-            "departAt": "2026-10-25T13:47",
-            "kmFromPrev": 111
+            "arriveAt": "2026-10-25T13:09",
+            "departAt": "2026-10-25T14:09",
+            "kmFromPrev": 123
            },
            {
             "stopId": "d2s04",
             "seq": 9,
-            "arriveAt": "2026-10-25T14:13",
-            "departAt": "2026-10-25T14:28",
-            "kmFromPrev": 20
+            "arriveAt": "2026-10-25T14:37",
+            "departAt": "2026-10-25T15:17",
+            "kmFromPrev": 22
            },
            {
             "stopId": "d2s05",
             "seq": 10,
-            "arriveAt": "2026-10-25T14:40",
-            "departAt": "2026-10-25T15:20",
-            "kmFromPrev": 7
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:35",
+            "arriveAt": "2026-10-25T15:32",
             "departAt": null,
             "kmFromPrev": 12
            }
@@ -1507,10 +1491,10 @@
            "note": null,
            "lat": 55.91486125653409,
            "lon": 37.73813896306926,
-           "arriveAt": "2026-10-25T12:47",
-           "departAt": "2026-10-25T13:47",
+           "arriveAt": "2026-10-25T13:09",
+           "departAt": "2026-10-25T14:09",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 112,
+           "kmFromPrev": 124,
            "kmAt": 506,
            "dwellMin": 60,
            "tags": [
@@ -1546,35 +1530,28 @@
            {
             "stopId": "d2s02",
             "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
+            "arriveAt": "2026-10-25T10:40",
+            "departAt": "2026-10-25T11:25",
+            "kmFromPrev": 121
            },
            {
             "stopId": "d2s03",
             "seq": 8,
-            "arriveAt": "2026-10-25T12:47",
-            "departAt": "2026-10-25T13:47",
-            "kmFromPrev": 112
+            "arriveAt": "2026-10-25T13:09",
+            "departAt": "2026-10-25T14:09",
+            "kmFromPrev": 124
            },
            {
             "stopId": "d2s04",
             "seq": 9,
-            "arriveAt": "2026-10-25T14:08",
-            "departAt": "2026-10-25T14:23",
-            "kmFromPrev": 16
+            "arriveAt": "2026-10-25T14:32",
+            "departAt": "2026-10-25T15:12",
+            "kmFromPrev": 17
            },
            {
             "stopId": "d2s05",
             "seq": 10,
-            "arriveAt": "2026-10-25T14:35",
-            "departAt": "2026-10-25T15:15",
-            "kmFromPrev": 7
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:30",
+            "arriveAt": "2026-10-25T15:27",
             "departAt": null,
             "kmFromPrev": 12
            }
@@ -1615,10 +1592,10 @@
            "note": null,
            "lat": 55.97271311519887,
            "lon": 37.91357921387146,
-           "arriveAt": "2026-10-25T12:43",
-           "departAt": "2026-10-25T13:43",
+           "arriveAt": "2026-10-25T13:05",
+           "departAt": "2026-10-25T14:05",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 107,
+           "kmFromPrev": 118,
            "kmAt": 495,
            "dwellMin": 60,
            "tags": [
@@ -1655,35 +1632,28 @@
            {
             "stopId": "d2s02",
             "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
+            "arriveAt": "2026-10-25T10:40",
+            "departAt": "2026-10-25T11:25",
+            "kmFromPrev": 121
            },
            {
             "stopId": "d2s03",
             "seq": 8,
-            "arriveAt": "2026-10-25T12:43",
-            "departAt": "2026-10-25T13:43",
-            "kmFromPrev": 107
+            "arriveAt": "2026-10-25T13:05",
+            "departAt": "2026-10-25T14:05",
+            "kmFromPrev": 118
            },
            {
             "stopId": "d2s04",
             "seq": 9,
-            "arriveAt": "2026-10-25T14:25",
-            "departAt": "2026-10-25T14:40",
-            "kmFromPrev": 33
+            "arriveAt": "2026-10-25T14:49",
+            "departAt": "2026-10-25T15:29",
+            "kmFromPrev": 34
            },
            {
             "stopId": "d2s05",
             "seq": 10,
-            "arriveAt": "2026-10-25T14:52",
-            "departAt": "2026-10-25T15:32",
-            "kmFromPrev": 7
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:47",
+            "arriveAt": "2026-10-25T15:44",
             "departAt": null,
             "kmFromPrev": 12
            }
@@ -1694,7 +1664,7 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 518,
-        "kmLeft": 36,
+        "kmLeft": 30,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -1712,410 +1682,16 @@
         "day": 2,
         "kind": "sight",
         "sign": "tourist",
-        "placeId": "Q627114",
-        "townId": "t_moscow",
-        "name": "Рабочий и колхозница",
-        "note": "не проверено",
-        "lat": 55.82823,
-        "lon": 37.64669,
-        "arriveAt": "2026-10-25T14:11",
-        "departAt": "2026-10-25T14:26",
-        "tz": "Europe/Moscow",
-        "kmFromPrev": 17,
-        "kmAt": 518,
-        "dwellMin": 15,
-        "tags": [
-         "walk",
-         "free_entry"
-        ],
-        "costRub": 0,
-        "reason": "По открытым данным. Крюк ≈ 10 мин.",
-        "verified": false,
-        "replaceable": true,
-        "alternatives": [
-         {
-          "id": "alt_d2s04_Q181324",
-          "placeId": "Q181324",
-          "name": "Останкинская телебашня",
-          "deltaMin": 11,
-          "deltaRub": 20,
-          "shiftMin": 11,
-          "units": {
-           "deltaKm": 3.954,
-           "regionCode": "RU-MOW",
-           "checkRub": null,
-           "adultRub": 0,
-           "childRub": 0,
-           "name": "Останкинская телебашня",
-           "placeId": "Q181324",
-           "priceRub": "62.50",
-           "regionName": "Москва",
-           "tripKmDelta": 4,
-           "parkingRub": 0,
-           "parkingRubPerHour": 0,
-           "parkingHours": 1,
-           "parkingSource": "free"
-          },
-          "stop": {
-           "id": "d2s04",
-           "seq": 9,
-           "day": 2,
-           "kind": "sight",
-           "sign": "tourist",
-           "placeId": "Q181324",
-           "townId": "t_moscow",
-           "name": "Останкинская телебашня",
-           "note": "не проверено",
-           "lat": 55.81972,
-           "lon": 37.61167,
-           "arriveAt": "2026-10-25T14:15",
-           "departAt": "2026-10-25T14:35",
-           "tz": "Europe/Moscow",
-           "kmFromPrev": 19,
-           "kmAt": 518,
-           "dwellMin": 20,
-           "tags": [
-            "view",
-            "walk",
-            "free_entry"
-           ],
-           "costRub": 0,
-           "reason": "По открытым данным. Крюк ≈ 15 мин.",
-           "verified": false,
-           "replaceable": true,
-           "alternatives": [],
-           "alternativesNote": null,
-           "hotelOptions": [],
-           "selectedHotelId": null,
-           "parking": {
-            "rub": 0,
-            "rubPerHour": 0,
-            "hours": 1,
-            "source": "free",
-            "zoneRu": "Москва: платная зона до 17 км от центра, 80 ₽/ч с 08:00 до 21:00, ночью 60 ₽/ч",
-            "whereRu": "Уличные места в платной зоне у объекта",
-            "sundayRu": "По воскресеньям бесплатно; в праздники бесплатно",
-            "freeRu": "Бесплатно: воскресенье"
-           },
-           "poiKind": "viewpoint",
-           "poiKindRu": "Вид",
-           "whyRu": "Объект культурного наследия · Статьи в 60 языковых разделах Википедии",
-           "photoSource": "p18",
-           "placeSource": "wikidata",
-           "placeAttributionRu": null
-          },
-          "dayPatch": [
-           {
-            "stopId": "d2s01",
-            "seq": 6,
-            "arriveAt": null,
-            "departAt": "2026-10-25T09:00",
-            "kmFromPrev": 0
-           },
-           {
-            "stopId": "d2s02",
-            "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
-           },
-           {
-            "stopId": "d2s03",
-            "seq": 8,
-            "arriveAt": "2026-10-25T12:48",
-            "departAt": "2026-10-25T13:48",
-            "kmFromPrev": 113
-           },
-           {
-            "stopId": "d2s04",
-            "seq": 9,
-            "arriveAt": "2026-10-25T14:15",
-            "departAt": "2026-10-25T14:35",
-            "kmFromPrev": 19
-           },
-           {
-            "stopId": "d2s05",
-            "seq": 10,
-            "arriveAt": "2026-10-25T14:49",
-            "departAt": "2026-10-25T15:29",
-            "kmFromPrev": 8
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:44",
-            "departAt": null,
-            "kmFromPrev": 12
-           }
-          ]
-         },
-         {
-          "id": "alt_d2s04_Q2299609",
-          "placeId": "Q2299609",
-          "name": "Монумент «Покорителям космоса»",
-          "deltaMin": 60,
-          "deltaRub": 1800,
-          "shiftMin": 60,
-          "units": {
-           "deltaKm": 0.297,
-           "regionCode": "RU-MOW",
-           "checkRub": null,
-           "adultRub": 400,
-           "childRub": 200,
-           "name": "Монумент «Покорителям космоса»",
-           "placeId": "Q2299609",
-           "priceRub": "62.50",
-           "regionName": "Москва",
-           "tripKmDelta": 0,
-           "parkingRub": 0,
-           "parkingRubPerHour": 0,
-           "parkingHours": 2,
-           "parkingSource": "free"
-          },
-          "stop": {
-           "id": "d2s04",
-           "seq": 9,
-           "day": 2,
-           "kind": "sight",
-           "sign": "tourist",
-           "placeId": "Q2299609",
-           "townId": "t_moscow",
-           "name": "Монумент «Покорителям космоса»",
-           "note": "не проверено",
-           "lat": 55.82278,
-           "lon": 37.63972,
-           "arriveAt": "2026-10-25T14:12",
-           "departAt": "2026-10-25T15:27",
-           "tz": "Europe/Moscow",
-           "kmFromPrev": 18,
-           "kmAt": 518,
-           "dwellMin": 75,
-           "tags": [
-            "museum"
-           ],
-           "costRub": 1800,
-           "reason": "По открытым данным. Крюк ≈ 10 мин.",
-           "verified": false,
-           "replaceable": true,
-           "alternatives": [],
-           "alternativesNote": null,
-           "hotelOptions": [],
-           "selectedHotelId": null,
-           "parking": {
-            "rub": 0,
-            "rubPerHour": 0,
-            "hours": 2,
-            "source": "free",
-            "zoneRu": "Москва: платная зона до 17 км от центра, 80 ₽/ч с 08:00 до 21:00, ночью 60 ₽/ч",
-            "whereRu": "Уличные места в платной зоне у объекта",
-            "sundayRu": "По воскресеньям бесплатно; в праздники бесплатно",
-            "freeRu": "Бесплатно: воскресенье"
-           },
-           "poiKind": "monument",
-           "poiKindRu": "Памятник",
-           "whyRu": "Объект культурного наследия · Статьи в 20 языковых разделах Википедии",
-           "photoSource": "p18",
-           "placeSource": "wikidata",
-           "placeAttributionRu": null
-          },
-          "dayPatch": [
-           {
-            "stopId": "d2s01",
-            "seq": 6,
-            "arriveAt": null,
-            "departAt": "2026-10-25T09:00",
-            "kmFromPrev": 0
-           },
-           {
-            "stopId": "d2s02",
-            "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
-           },
-           {
-            "stopId": "d2s03",
-            "seq": 8,
-            "arriveAt": "2026-10-25T12:48",
-            "departAt": "2026-10-25T13:48",
-            "kmFromPrev": 113
-           },
-           {
-            "stopId": "d2s04",
-            "seq": 9,
-            "arriveAt": "2026-10-25T14:12",
-            "departAt": "2026-10-25T15:27",
-            "kmFromPrev": 18
-           },
-           {
-            "stopId": "d2s05",
-            "seq": 10,
-            "arriveAt": "2026-10-25T15:38",
-            "departAt": "2026-10-25T16:18",
-            "kmFromPrev": 6
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T16:33",
-            "departAt": null,
-            "kmFromPrev": 12
-           }
-          ]
-         },
-         {
-          "id": "alt_d2s04_Q4309603",
-          "placeId": "Q4309603",
-          "name": "Мытищинский историко-художественный музей",
-          "deltaMin": 57,
-          "deltaRub": 1790,
-          "shiftMin": 57,
-          "units": {
-           "deltaKm": -2.005,
-           "regionCode": "RU-MOS",
-           "checkRub": null,
-           "adultRub": 400,
-           "childRub": 200,
-           "name": "Мытищинский историко-художественный музей",
-           "placeId": "Q4309603",
-           "priceRub": "61.80",
-           "regionName": "Московская область",
-           "tripKmDelta": -2,
-           "parkingRub": 0,
-           "parkingRubPerHour": 0,
-           "parkingHours": 2,
-           "parkingSource": "free"
-          },
-          "stop": {
-           "id": "d2s04",
-           "seq": 9,
-           "day": 2,
-           "kind": "sight",
-           "sign": "tourist",
-           "placeId": "Q4309603",
-           "townId": "Q23185",
-           "name": "Мытищинский историко-художественный музей",
-           "note": "не проверено",
-           "lat": 55.91132,
-           "lon": 37.73555,
-           "arriveAt": "2026-10-25T13:58",
-           "departAt": "2026-10-25T15:13",
-           "tz": "Europe/Moscow",
-           "kmFromPrev": 5,
-           "kmAt": 506,
-           "dwellMin": 75,
-           "tags": [
-            "museum"
-           ],
-           "costRub": 1800,
-           "reason": "По открытым данным.",
-           "verified": false,
-           "replaceable": true,
-           "alternatives": [],
-           "alternativesNote": null,
-           "hotelOptions": [],
-           "selectedHotelId": null,
-           "parking": {
-            "rub": 0,
-            "rubPerHour": 0,
-            "hours": 2,
-            "source": "free",
-            "zoneRu": "Платных зон рядом нет",
-            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
-            "sundayRu": null,
-            "freeRu": "Бесплатно: вне платных зон"
-           },
-           "poiKind": "museum",
-           "poiKindRu": "Музей",
-           "whyRu": null,
-           "photoSource": "p18",
-           "placeSource": "wikidata",
-           "placeAttributionRu": null
-          },
-          "dayPatch": [
-           {
-            "stopId": "d2s01",
-            "seq": 6,
-            "arriveAt": null,
-            "departAt": "2026-10-25T09:00",
-            "kmFromPrev": 0
-           },
-           {
-            "stopId": "d2s02",
-            "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
-           },
-           {
-            "stopId": "d2s03",
-            "seq": 8,
-            "arriveAt": "2026-10-25T12:48",
-            "departAt": "2026-10-25T13:48",
-            "kmFromPrev": 113
-           },
-           {
-            "stopId": "d2s04",
-            "seq": 9,
-            "arriveAt": "2026-10-25T13:58",
-            "departAt": "2026-10-25T15:13",
-            "kmFromPrev": 5
-           },
-           {
-            "stopId": "d2s05",
-            "seq": 10,
-            "arriveAt": "2026-10-25T15:35",
-            "departAt": "2026-10-25T16:15",
-            "kmFromPrev": 17
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T16:30",
-            "departAt": null,
-            "kmFromPrev": 12
-           }
-          ]
-         }
-        ],
-        "alternativesNote": null,
-        "hotelOptions": [],
-        "selectedHotelId": null,
-        "kmDriven": 535,
-        "kmLeft": 19,
-        "parking": {
-         "rub": 0,
-         "rubPerHour": 0,
-         "hours": 1,
-         "source": "free",
-         "zoneRu": "Москва: платная зона до 17 км от центра, 80 ₽/ч с 08:00 до 21:00, ночью 60 ₽/ч",
-         "whereRu": "Уличные места в платной зоне у объекта",
-         "sundayRu": "По воскресеньям бесплатно; в праздники бесплатно",
-         "freeRu": "Бесплатно: воскресенье"
-        },
-        "poiKind": "monument",
-        "poiKindRu": "Памятник",
-        "whyRu": "Объект культурного наследия · Статьи в 39 языковых разделах Википедии",
-        "photoSource": "p18",
-        "placeSource": "wikidata",
-        "placeAttributionRu": null
-       },
-       {
-        "id": "d2s05",
-        "seq": 10,
-        "day": 2,
-        "kind": "sight",
-        "sign": "tourist",
         "placeId": "Q855493",
         "townId": "t_moscow",
         "name": "Выставка достижений народного хозяйства",
         "note": "не проверено",
         "lat": 55.82972,
         "lon": 37.63222,
-        "arriveAt": "2026-10-25T14:38",
-        "departAt": "2026-10-25T15:18",
+        "arriveAt": "2026-10-25T14:35",
+        "departAt": "2026-10-25T15:15",
         "tz": "Europe/Moscow",
-        "kmFromPrev": 7,
+        "kmFromPrev": 19,
         "kmAt": 518,
         "dwellMin": 40,
         "tags": [
@@ -2128,7 +1704,7 @@
         "replaceable": true,
         "alternatives": [
          {
-          "id": "alt_d2s05_Q181324",
+          "id": "alt_d2s04_Q181324",
           "placeId": "Q181324",
           "name": "Останкинская телебашня",
           "deltaMin": -17,
@@ -2151,8 +1727,8 @@
            "parkingSource": "free"
           },
           "stop": {
-           "id": "d2s05",
-           "seq": 10,
+           "id": "d2s04",
+           "seq": 9,
            "day": 2,
            "kind": "sight",
            "sign": "tourist",
@@ -2162,10 +1738,10 @@
            "note": "не проверено",
            "lat": 55.81972,
            "lon": 37.61167,
-           "arriveAt": "2026-10-25T14:41",
-           "departAt": "2026-10-25T15:01",
+           "arriveAt": "2026-10-25T14:38",
+           "departAt": "2026-10-25T14:58",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 9,
+           "kmFromPrev": 21,
            "kmAt": 520,
            "dwellMin": 20,
            "tags": [
@@ -2209,42 +1785,143 @@
            {
             "stopId": "d2s02",
             "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
+            "arriveAt": "2026-10-25T10:40",
+            "departAt": "2026-10-25T11:25",
+            "kmFromPrev": 121
            },
            {
             "stopId": "d2s03",
             "seq": 8,
-            "arriveAt": "2026-10-25T12:48",
-            "departAt": "2026-10-25T13:48",
-            "kmFromPrev": 113
+            "arriveAt": "2026-10-25T13:10",
+            "departAt": "2026-10-25T14:10",
+            "kmFromPrev": 125
            },
            {
             "stopId": "d2s04",
             "seq": 9,
-            "arriveAt": "2026-10-25T14:11",
-            "departAt": "2026-10-25T14:26",
-            "kmFromPrev": 17
+            "arriveAt": "2026-10-25T14:38",
+            "departAt": "2026-10-25T14:58",
+            "kmFromPrev": 21
            },
            {
             "stopId": "d2s05",
             "seq": 10,
-            "arriveAt": "2026-10-25T14:41",
-            "departAt": "2026-10-25T15:01",
-            "kmFromPrev": 9
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:16",
+            "arriveAt": "2026-10-25T15:13",
             "departAt": null,
             "kmFromPrev": 11
            }
           ]
          },
          {
-          "id": "alt_d2s05_Q2375145",
+          "id": "alt_d2s04_Q627114",
+          "placeId": "Q627114",
+          "name": "Рабочий и колхозница",
+          "deltaMin": -28,
+          "deltaRub": -10,
+          "shiftMin": -28,
+          "units": {
+           "deltaKm": -2.287,
+           "regionCode": "RU-MOW",
+           "checkRub": null,
+           "adultRub": 0,
+           "childRub": 0,
+           "name": "Рабочий и колхозница",
+           "placeId": "Q627114",
+           "priceRub": "62.50",
+           "regionName": "Москва",
+           "tripKmDelta": -2,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
+          },
+          "stop": {
+           "id": "d2s04",
+           "seq": 9,
+           "day": 2,
+           "kind": "sight",
+           "sign": "tourist",
+           "placeId": "Q627114",
+           "townId": "t_moscow",
+           "name": "Рабочий и колхозница",
+           "note": "не проверено",
+           "lat": 55.82823,
+           "lon": 37.64669,
+           "arriveAt": "2026-10-25T14:33",
+           "departAt": "2026-10-25T14:48",
+           "tz": "Europe/Moscow",
+           "kmFromPrev": 17,
+           "kmAt": 518,
+           "dwellMin": 15,
+           "tags": [
+            "walk",
+            "free_entry"
+           ],
+           "costRub": 0,
+           "reason": "По открытым данным. Крюк ≈ 10 мин.",
+           "verified": false,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Москва: платная зона до 17 км от центра, 80 ₽/ч с 08:00 до 21:00, ночью 60 ₽/ч",
+            "whereRu": "Уличные места в платной зоне у объекта",
+            "sundayRu": "По воскресеньям бесплатно; в праздники бесплатно",
+            "freeRu": "Бесплатно: воскресенье"
+           },
+           "poiKind": "monument",
+           "poiKindRu": "Памятник",
+           "whyRu": "Объект культурного наследия · Статьи в 39 языковых разделах Википедии",
+           "photoSource": "p18",
+           "placeSource": "wikidata",
+           "placeAttributionRu": null
+          },
+          "dayPatch": [
+           {
+            "stopId": "d2s01",
+            "seq": 6,
+            "arriveAt": null,
+            "departAt": "2026-10-25T09:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d2s02",
+            "seq": 7,
+            "arriveAt": "2026-10-25T10:40",
+            "departAt": "2026-10-25T11:25",
+            "kmFromPrev": 121
+           },
+           {
+            "stopId": "d2s03",
+            "seq": 8,
+            "arriveAt": "2026-10-25T13:10",
+            "departAt": "2026-10-25T14:10",
+            "kmFromPrev": 125
+           },
+           {
+            "stopId": "d2s04",
+            "seq": 9,
+            "arriveAt": "2026-10-25T14:33",
+            "departAt": "2026-10-25T14:48",
+            "kmFromPrev": 17
+           },
+           {
+            "stopId": "d2s05",
+            "seq": 10,
+            "arriveAt": "2026-10-25T15:02",
+            "departAt": null,
+            "kmFromPrev": 11
+           }
+          ]
+         },
+         {
+          "id": "alt_d2s04_Q2375145",
           "placeId": "Q2375145",
           "name": "Сокольники",
           "deltaMin": -7,
@@ -2267,8 +1944,8 @@
            "parkingSource": "free"
           },
           "stop": {
-           "id": "d2s05",
-           "seq": 10,
+           "id": "d2s04",
+           "seq": 9,
            "day": 2,
            "kind": "sight",
            "sign": "tourist",
@@ -2278,10 +1955,10 @@
            "note": "не проверено",
            "lat": 55.80028,
            "lon": 37.67417,
-           "arriveAt": "2026-10-25T14:37",
-           "departAt": "2026-10-25T15:17",
+           "arriveAt": "2026-10-25T14:34",
+           "departAt": "2026-10-25T15:14",
            "tz": "Europe/Moscow",
-           "kmFromPrev": 6,
+           "kmFromPrev": 18,
            "kmAt": 520,
            "dwellMin": 40,
            "tags": [
@@ -2324,151 +2001,30 @@
            {
             "stopId": "d2s02",
             "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
+            "arriveAt": "2026-10-25T10:40",
+            "departAt": "2026-10-25T11:25",
+            "kmFromPrev": 121
            },
            {
             "stopId": "d2s03",
             "seq": 8,
-            "arriveAt": "2026-10-25T12:48",
-            "departAt": "2026-10-25T13:48",
-            "kmFromPrev": 113
+            "arriveAt": "2026-10-25T13:10",
+            "departAt": "2026-10-25T14:10",
+            "kmFromPrev": 125
            },
            {
             "stopId": "d2s04",
             "seq": 9,
-            "arriveAt": "2026-10-25T14:11",
-            "departAt": "2026-10-25T14:26",
-            "kmFromPrev": 17
+            "arriveAt": "2026-10-25T14:34",
+            "departAt": "2026-10-25T15:14",
+            "kmFromPrev": 18
            },
            {
             "stopId": "d2s05",
             "seq": 10,
-            "arriveAt": "2026-10-25T14:37",
-            "departAt": "2026-10-25T15:17",
-            "kmFromPrev": 6
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T15:26",
+            "arriveAt": "2026-10-25T15:23",
             "departAt": null,
             "kmFromPrev": 7
-           }
-          ]
-         },
-         {
-          "id": "alt_d2s05_Q2299609",
-          "placeId": "Q2299609",
-          "name": "Монумент «Покорителям космоса»",
-          "deltaMin": 32,
-          "deltaRub": 1790,
-          "shiftMin": 32,
-          "units": {
-           "deltaKm": -1.991,
-           "regionCode": "RU-MOW",
-           "checkRub": null,
-           "adultRub": 400,
-           "childRub": 200,
-           "name": "Монумент «Покорителям космоса»",
-           "placeId": "Q2299609",
-           "priceRub": "62.50",
-           "regionName": "Москва",
-           "tripKmDelta": -2,
-           "parkingRub": 0,
-           "parkingRubPerHour": 0,
-           "parkingHours": 2,
-           "parkingSource": "free"
-          },
-          "stop": {
-           "id": "d2s05",
-           "seq": 10,
-           "day": 2,
-           "kind": "sight",
-           "sign": "tourist",
-           "placeId": "Q2299609",
-           "townId": "t_moscow",
-           "name": "Монумент «Покорителям космоса»",
-           "note": "не проверено",
-           "lat": 55.82278,
-           "lon": 37.63972,
-           "arriveAt": "2026-10-25T14:37",
-           "departAt": "2026-10-25T15:52",
-           "tz": "Europe/Moscow",
-           "kmFromPrev": 6,
-           "kmAt": 518,
-           "dwellMin": 75,
-           "tags": [
-            "museum"
-           ],
-           "costRub": 1800,
-           "reason": "По открытым данным. Крюк ≈ 10 мин.",
-           "verified": false,
-           "replaceable": true,
-           "alternatives": [],
-           "alternativesNote": null,
-           "hotelOptions": [],
-           "selectedHotelId": null,
-           "parking": {
-            "rub": 0,
-            "rubPerHour": 0,
-            "hours": 2,
-            "source": "free",
-            "zoneRu": "Москва: платная зона до 17 км от центра, 80 ₽/ч с 08:00 до 21:00, ночью 60 ₽/ч",
-            "whereRu": "Уличные места в платной зоне у объекта",
-            "sundayRu": "По воскресеньям бесплатно; в праздники бесплатно",
-            "freeRu": "Бесплатно: воскресенье"
-           },
-           "poiKind": "monument",
-           "poiKindRu": "Памятник",
-           "whyRu": "Объект культурного наследия · Статьи в 20 языковых разделах Википедии",
-           "photoSource": "p18",
-           "placeSource": "wikidata",
-           "placeAttributionRu": null
-          },
-          "dayPatch": [
-           {
-            "stopId": "d2s01",
-            "seq": 6,
-            "arriveAt": null,
-            "departAt": "2026-10-25T09:00",
-            "kmFromPrev": 0
-           },
-           {
-            "stopId": "d2s02",
-            "seq": 7,
-            "arriveAt": "2026-10-25T10:51",
-            "departAt": "2026-10-25T11:11",
-            "kmFromPrev": 133
-           },
-           {
-            "stopId": "d2s03",
-            "seq": 8,
-            "arriveAt": "2026-10-25T12:48",
-            "departAt": "2026-10-25T13:48",
-            "kmFromPrev": 113
-           },
-           {
-            "stopId": "d2s04",
-            "seq": 9,
-            "arriveAt": "2026-10-25T14:11",
-            "departAt": "2026-10-25T14:26",
-            "kmFromPrev": 17
-           },
-           {
-            "stopId": "d2s05",
-            "seq": 10,
-            "arriveAt": "2026-10-25T14:37",
-            "departAt": "2026-10-25T15:52",
-            "kmFromPrev": 6
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T16:05",
-            "departAt": null,
-            "kmFromPrev": 10
            }
           ]
          }
@@ -2476,8 +2032,8 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 542,
-        "kmLeft": 12,
+        "kmDriven": 537,
+        "kmLeft": 11,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -2496,8 +2052,8 @@
         "placeAttributionRu": null
        },
        {
-        "id": "d2s06",
-        "seq": 11,
+        "id": "d2s05",
+        "seq": 10,
         "day": 2,
         "kind": "finish",
         "sign": "city",
@@ -2507,7 +2063,7 @@
         "note": null,
         "lat": 55.7558,
         "lon": 37.6173,
-        "arriveAt": "2026-10-25T15:33",
+        "arriveAt": "2026-10-25T15:30",
         "departAt": null,
         "tz": "Europe/Moscow",
         "kmFromPrev": 12,
@@ -2522,7 +2078,7 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 554,
+        "kmDriven": 548,
         "kmLeft": 0
        }
       ]
@@ -2533,15 +2089,15 @@
       {
        "key": "fuel",
        "title": "Бензин АИ-95",
-       "rub": 2740,
-       "formula": "554 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 4 регионам)",
+       "rub": 2710,
+       "formula": "548 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 4 регионам)",
        "asOf": "2026-10",
        "enabled": true,
        "breakdown": [
         {
          "label": "Москва",
-         "formula": "49 км × 8 л/100 × 62,50 ₽ = 240 ₽",
-         "rub": 240
+         "formula": "43 км × 8 л/100 × 62,50 ₽ = 220 ₽",
+         "rub": 220
         },
         {
          "label": "Московская область",
@@ -2637,17 +2193,12 @@
          "rub": 0
         },
         {
-         "label": "Площадка отдыха, М-8, 130 км",
+         "label": "Никитский монастырь",
          "formula": "бесплатно",
          "rub": 0
         },
         {
          "label": "Кафе «Огонёк»",
-         "formula": "бесплатно",
-         "rub": 0
-        },
-        {
-         "label": "Рабочий и колхозница",
          "formula": "бесплатно",
          "rub": 0
         },
@@ -2669,7 +2220,7 @@
       }
      ],
      "reserveOn": true,
-     "subtotalRub": 23990,
+     "subtotalRub": 23960,
      "totalRub": 26400,
      "perPersonRub": 5300,
      "budgetRub": 30000,
@@ -2686,7 +2237,7 @@
         {
          "regionCode": "RU-MOW",
          "regionName": "Москва",
-         "km": 48.697,
+         "km": 43.492,
          "priceRub": "62.50"
         },
         {
@@ -2704,12 +2255,12 @@
         {
          "regionCode": "RU-YAR",
          "regionName": "Ярославская область",
-         "km": 299.028,
+         "km": 298.598,
          "priceRub": "61.90"
         }
        ],
        "asOf": "2026-10",
-       "tripKm": 554
+       "tripKm": 548
       },
       "tolls": [],
       "nights": [
@@ -2772,14 +2323,14 @@
         "childRub": 0
        },
        {
-        "stopId": "d2s04",
-        "placeId": "Q627114",
-        "name": "Рабочий и колхозница",
+        "stopId": "d2s02",
+        "placeId": "pl_prs_nikitsky",
+        "name": "Никитский монастырь",
         "adultRub": 0,
         "childRub": 0
        },
        {
-        "stopId": "d2s05",
+        "stopId": "d2s04",
         "placeId": "Q855493",
         "name": "Выставка достижений народного хозяйства",
         "adultRub": 0,
@@ -2829,7 +2380,7 @@
        },
        {
         "stopId": "d2s02",
-        "name": "Площадка отдыха, М-8, 130 км",
+        "name": "Никитский монастырь",
         "rubPerHour": 0,
         "hours": 1,
         "rub": 0,
@@ -2845,14 +2396,6 @@
        },
        {
         "stopId": "d2s04",
-        "name": "Рабочий и колхозница",
-        "rubPerHour": 0,
-        "hours": 1,
-        "rub": 0,
-        "source": "free"
-       },
-       {
-        "stopId": "d2s05",
         "name": "Выставка достижений народного хозяйства",
         "rubPerHour": 0,
         "hours": 1,
@@ -2922,7 +2465,7 @@
      "status": "fits",
      "budgetRub": 30000,
      "allowedRub": 31500,
-     "initialTotalRub": 58200,
+     "initialTotalRub": 56300,
      "totalRub": 26400,
      "levers": [
       {
@@ -2931,11 +2474,11 @@
       },
       {
        "code": "sights_free",
-       "savedRub": 3800
+       "savedRub": 2000
       },
       {
        "code": "variant",
-       "savedRub": 24400
+       "savedRub": 24300
       }
      ],
      "textRu": "Подогнали под бюджет 30 000 ₽: кафе попроще, бесплатные места, короткий вариант маршрута.",
@@ -4003,7 +3546,7 @@
      "regionKm": [
       [
        "RU-MOW",
-       48.697
+       43.492
       ],
       [
        "RU-MOS",
@@ -4015,7 +3558,7 @@
       ],
       [
        "RU-YAR",
-       299.028
+       298.598
       ]
      ],
      "tollHits": [],
@@ -4160,35 +3703,27 @@
         },
         {
          "stopId": "d2s02",
-         "kind": "rest",
-         "kmAt": 396.0000000000003,
-         "detourKm": 0.7800000000003923,
-         "detourMin": 3,
-         "dwellMin": 20,
+         "kind": "sight",
+         "kmAt": 384.2941692963628,
+         "detourKm": 0.35032841540159704,
+         "detourMin": 0,
+         "dwellMin": 45,
          "fixed": false,
-         "auto": true,
-         "score": 3.9,
-         "placeId": "pl_m8_rest_130",
+         "auto": false,
+         "score": 5.4,
+         "placeId": "pl_prs_nikitsky",
          "regionCode": "RU-YAR",
-         "reasonKey": "rest.who",
+         "reasonKey": "sight.dog_waits",
          "reasonParams": [
           [
-           "min",
-           20
-          ],
-          [
-           "min_word",
-           "минут"
-          ],
-          [
-           "who",
-           "ребёнку побегать, собаке погулять"
+           "dwell",
+           "45 мин"
           ]
          ],
          "meal": null,
          "litres": 0.0,
          "coffee": false,
-         "pool": "rest"
+         "pool": "sight"
         },
         {
          "stopId": "d2s03",
@@ -4212,25 +3747,6 @@
         {
          "stopId": "d2s04",
          "kind": "sight",
-         "kmAt": 517.6775054220406,
-         "detourKm": 5.204680656919823,
-         "detourMin": 10,
-         "dwellMin": 15,
-         "fixed": false,
-         "auto": false,
-         "score": 4.393333333333333,
-         "placeId": "Q627114",
-         "regionCode": "RU-MOW",
-         "reasonKey": "sight.osm",
-         "reasonParams": [],
-         "meal": null,
-         "litres": 0.0,
-         "coffee": false,
-         "pool": "sight"
-        },
-        {
-         "stopId": "d2s05",
-         "kind": "sight",
          "kmAt": 517.9526645397224,
          "detourKm": 7.492074213653011,
          "detourMin": 13,
@@ -4248,7 +3764,7 @@
          "pool": "sight"
         },
         {
-         "stopId": "d2s06",
+         "stopId": "d2s05",
          "kind": "finish",
          "kmAt": 526.0,
          "detourKm": 0.0,
@@ -7778,7 +7294,7 @@
      ]
     }
    },
-   "shareText": "Золотое кольцо · коротко · 554 км · 2 дня\nДень 1 · 272 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Кафе «Пряник»\n14:54 Ярославль\nДень 2 · 282 км\n09:00 Ярославль\n10:51 Площадка отдыха, М-8, 130 км\n12:48 Кафе «Огонёк»\n14:11 Рабочий и колхозница\n14:38 Выставка достижений народного хозяйства\n15:33 Москва\nИтого ≈ 26 400 ₽ на 5 чел.",
+   "shareText": "Золотое кольцо · коротко · 548 км · 2 дня\nДень 1 · 272 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Кафе «Пряник»\n14:54 Ярославль\nДень 2 · 276 км\n09:00 Ярославль\n10:40 Никитский монастырь\n13:10 Кафе «Огонёк»\n14:35 Выставка достижений народного хозяйства\n15:30 Москва\nИтого ≈ 26 400 ₽ на 5 чел.",
    "pricesMonthRu": "сентябрь",
    "pricesYear": "2026",
    "townPrepRu": {
