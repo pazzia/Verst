@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -83,7 +85,7 @@ fun BoxScope.ReportSheet(ui: ReportUi, windowH: Dp, a: ReportActions) {
         val bring = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
         var commentFocused by remember { mutableStateOf(false) }
         // follow the IME while it animates in: every inset change brings the comment + button back into view
-        val imeBottom = androidx.compose.foundation.layout.WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current)
+        val imeBottom = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current)
         androidx.compose.runtime.LaunchedEffect(commentFocused, imeBottom) {
             if (commentFocused) {
                 kotlinx.coroutines.delay(50)
