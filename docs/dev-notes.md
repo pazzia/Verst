@@ -1908,3 +1908,29 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   - Day 2: Ивановская филармония, Спасо-Евфимиев монастырь, Суздальский кремль, Золотые ворота.
   - The Ростовский кремль is tried first on day 1 but does not fit the pace: the two template visits
     already take 3 h of a 404 km day.
+
+### S4-RELEASE (Developer): M9 wired, G15 merged, catalogue measured
+- **Labels:** `poiKindRu` is shown as given, upper-cased, on Road, Walk and the card. The app's own
+  kind → word table remains only for trips saved before M9 (no `poiKindRu`). `church` → `temple` needs no
+  app change.
+- **«Разминка»:** a stop is a stretch only when `funFor` is non-empty. The reason text is no longer
+  parsed, and `ParkingCostTest` asserts that a reason alone is not a stretch.
+- **P part:** shown on leave-the-car stops when the engine sends a `parking` object (`rub: null` →
+  «P ?»), and on sights without one (old data → «P ?»). Fuel, overnight and roadside breaks: no P. The
+  engine sends null there, and hotel parking is a hotel fact.
+- **ODbL line:** `placeSource == "osm"` or a `placeAttributionRu` → the card's bottom line shows
+  `placeAttributionRu` (falls back to `card_osm`).
+- **Tag row wraps** (FlowRow) instead of clipping. Run 117 showed «РАЗМИНКА 30 МИН» + «ДЕТСКАЯ ПЛОЩ…» on
+  «Разминка · Детская площадка, Любань».
+- **e2e Москва → Казань now uses the app's default mood (FUN):**
+  - Run 117 used CALM (2 sights/day), so Покрова на Нерли was dropped and the shot showed Золотые ворота.
+  - The engine's default for G18 (no children → more_stops, 4/day) and FUN both keep Палаты Андрея
+    Боголюбского and Церковь Покрова на Нерли. Verified in the sandbox: calm 20 900 ₽ vs fun/default
+    21 600 ₽.
+- **Catalogue load on the CI emulator (run 117, logcat «VerstEngine: catalogue»):**
+  - 618, 945, 1 033, 454 and 633 ms over five cold starts. EngineStartupTest: 945 ms.
+  - Before M9: 1.8–3.3 s. The target is ≤ 1.5 s: met.
+  - The EngineStartupTest budget is tightened from 4 000 to 2 000 ms (the target plus emulator jitter).
+- **Left for the Architect (data, not app):** day 2 of the Golden Ring has «Ивановская государственная
+  филармония» (theatre) as a sight stop. That is a concert hall with no visit, an odd pick between Кострома
+  and Суздаль.

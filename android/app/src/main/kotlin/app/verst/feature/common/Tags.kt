@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -102,15 +104,17 @@ fun OpenDataRing(modifier: Modifier = Modifier) {
 }
 
 /** One tag row: `StretchTag` and/or `KindTag`, then the open-data ring. Hidden when empty. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TagRow(kind: String?, stretchMin: Int?, openData: Boolean, modifier: Modifier = Modifier, label: String? = null) {
     // M9: the engine's `poiKindRu` as given; the kind word only for trips saved before it
     val word = label?.uppercase() ?: kindWord(kind)
     if (word == null && stretchMin == null && !openData) return
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+    // S4-RELEASE: wraps instead of clipping «РАЗМИНКА 30 МИН» + a long label («ДЕТСКАЯ ПЛОЩАДКА») on a phone
+    FlowRow(modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         if (stretchMin != null) StretchTag(stretchMin)
         if (word != null) KindTag(word)
-        if (openData) OpenDataRing()
+        if (openData) OpenDataRing(Modifier.align(Alignment.CenterVertically))
     }
 }
 

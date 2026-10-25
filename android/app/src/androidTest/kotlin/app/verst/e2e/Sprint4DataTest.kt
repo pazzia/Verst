@@ -214,7 +214,8 @@ class Sprint4DataTest {
     @Test
     fun s4dMoscowKazanM12() {
         compose.runOnUiThread { flow.debugResetOrigin() }
-        planTo("Казань", Mood.CALM, dailyKm = 500)
+        // the app's default mood (FUN; the engine default for G18 is the same 4 sights/day): CALM keeps 2/day and drops Покрова
+        planTo("Казань", Mood.FUN, dailyKm = 500)
         logTrip("msk-kazan")
         val detours = stops().filter { (it.note ?: it.reason)?.contains("Крюк") == true }
         Log.i("VerstE2e", "S4D Крюк rows: ${detours.map { "${it.name}: ${it.note ?: it.reason}" }}")
