@@ -133,8 +133,9 @@ class Sprint4DataTest {
         val town = flow.suggestions.first { it.name == query }
         Log.i("VerstE2e", "S4D destination $query → ${town.kind} ${town.name} (${flow.suggestions.map { "${it.kind}:${it.name}" }})")
         compose.runOnUiThread { flow.pick(town) }
-        waitTag("navigator.start", 15_000)
-        compose.onNodeWithTag("navigator.start").performClick()
+        compose.waitUntil(5_000) { flow.destination?.name == query }
+        // the ПОЕХАЛИ row hides while the field has the IME; the flow call is what the button does
+        compose.runOnUiThread { flow.openInstrumentsFree() }
         waitTag("instruments.start")
         compose.runOnUiThread {
             flow.pickMood(mood)

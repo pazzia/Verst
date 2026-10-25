@@ -285,7 +285,9 @@ class Sprint4Test {
         waitTag("city.picker")
         compose.onNodeWithTag("city.duration.120").performClick()
         compose.onNodeWithTag("city.picker.done").performClick()
-        compose.waitUntil(30_000) { flow.walk !== first && !flow.walkBuilding }
+        // rebuilt in place — a new walk, or (an evening with few open places) the «мало мест» plate on 5.11
+        compose.waitUntil(30_000) { !flow.walkBuilding && (flow.walk !== first || flow.walkFew != null) }
+        Log.i("VerstE2e", "S4 walk 2 h: new=${flow.walk !== first} few=${flow.walkFew} stops=${flow.walk?.stops?.size}")
         assertEquals(Route.Walk, flow.top)
         assertEquals(120, flow.cityDurationMin)
         shot("111-walk-rebuilt-2h")
