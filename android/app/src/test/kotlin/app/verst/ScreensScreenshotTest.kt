@@ -389,24 +389,25 @@ class ScreensScreenshotTest {
         assertEquals(known, trip.cost.lines.first { it.key == "parking" }.rub)
     }
 
-    /** M6 contract (Москва → Кремль 380 ₽): the engine's P part, the sheet from `zoneRu` / `whereRu` / `sundayRu`. */
+    /** M6+ contract (a Moscow zone stop): the engine's P part, the sheet from `zoneRu` / `whereRu` / `sundayRu`. */
     @Test
     fun roadM6MoscowParkingContract() {
         val trip = v2PlanTrip("plan-moscow-parking.json").trip
-        val kremlin = trip.daysList.flatMap { it.stops }.first { it.parking != null }
+        val kremlin = trip.daysList.flatMap { it.stops }.first { (it.parking?.rub ?: 0) > 0 }
         shot("road", "m6-moscow-parking") { RoadScreen(RoadUi(trip, "N"), noRoad) }
         compose.onNodeWithTag("road.stop.${kremlin.id}.parking", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
-        assertEquals(380, trip.cost.lines.first { it.key == "parking" }.rub)
+        // the line is Σ of the stops' stays (data-independent)
+        assertEquals(trip.daysList.flatMap { it.stops }.sumOf { it.parking?.rub ?: 0 }, trip.cost.lines.first { it.key == "parking" }.rub)
         assertTrue("no «не проверено» on rows", compose.onAllNodesWithText("не проверено", substring = true, useUnmergedTree = true).fetchSemanticsNodes().isEmpty())
     }
 
     @Test
     fun roadM6ParkingSheetContract() {
         val trip = v2PlanTrip("plan-moscow-parking.json").trip
-        val kremlin = trip.daysList.flatMap { it.stops }.first { it.parking != null }
+        val kremlin = trip.daysList.flatMap { it.stops }.first { (it.parking?.rub ?: 0) > 0 }
         shot("road", "m6-parking-sheet") { RoadScreen(RoadUi(trip, "N", parking = kremlin), noRoad) }
-        compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("380", substring = true)
+        compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("${kremlin.parking!!.rubPerHour}", substring = true)
         assertTrue(compose.onAllNodesWithText("воскресенье", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty())
     }
 
