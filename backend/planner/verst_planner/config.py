@@ -25,6 +25,7 @@ class MoodInts:
     calm: int
     more_stops: int
     just_drive: int
+    fun: int  # «Весело и познавательно» (ADR-0015 §5); `more_stops` is the v2 legacy value
 
     def of(self, mood: Mood) -> int:
         return int(getattr(self, mood.value))

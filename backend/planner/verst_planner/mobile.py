@@ -83,7 +83,7 @@ from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.grid import GridIndex
 from verst_planner.hours import parse as parse_hours
 
-API_VERSION = 2
+API_VERSION = 3
 REQUIRED_ZONES = ("Europe/Moscow", "Europe/Volgograd")
 TOMBSTONES = 32
 
@@ -472,6 +472,26 @@ class _ListenerSink:
                 )
 
 
+def with_driven_km(trip: dict[str, Any]) -> dict[str, Any]:
+    """API v3 (ADR-0015 §7): every stop gets `kmDriven` (Σ `kmFromPrev` from the trip start, detours included)
+    and `kmLeft` (the rest of the trip's driven km), so «пройдено N км» needs no arithmetic in the app.
+    Added in the bridge, so the golden snapshots (the codec output) keep their bytes."""
+    total = int(trip.get("km") or 0)
+    before = 0  # the driven km of the previous days (their `km`, which counts each detour in full)
+    for d in trip.get("daysList", []):
+        driven = before
+        for s in d.get("stops", []):
+            driven += int(s.get("kmFromPrev") or 0)
+            s["kmDriven"] = min(driven, before + int(d.get("km") or 0))
+            s["kmLeft"] = max(0, total - s["kmDriven"])
+        stops = d.get("stops", [])
+        before += int(d.get("km") or 0)
+        if stops and stops[-1].get("kind") in ("overnight", "finish"):
+            stops[-1]["kmDriven"] = before  # the day ends where its km end
+            stops[-1]["kmLeft"] = max(0, total - before)
+    return trip
+
+
 def _trip_result(plan: TripPlan, world: FakeWorld | None = None) -> dict[str, Any]:
     """The private trip, its share text, the Waybill footnote month/year («октябрь», "2026") and the
     prepositional names of the overnight towns (5.7 «Отметим ночёвку в Ярославле…»)."""
@@ -486,7 +506,7 @@ def _trip_result(plan: TripPlan, world: FakeWorld | None = None) -> dict[str, An
                     prep[town.id] = ru.prepositional(town)
                     gen[town.id] = ru.genitive(town)
     return {
-        "trip": codec.plan_to_json(plan, public=False),
+        "trip": with_driven_km(codec.plan_to_json(plan, public=False)),
         "shareText": render_share_text(plan),
         "pricesMonthRu": month,
         "pricesYear": year,

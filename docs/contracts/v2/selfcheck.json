@@ -7,7 +7,7 @@
   "ok": true,
   "result": {
    "engineVersion": "0.1.0",
-   "apiVersion": 2,
+   "apiVersion": 3,
    "python": "3.13.16",
    "tz": {
     "Asia/Anadyr": true,

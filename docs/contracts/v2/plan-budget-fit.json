@@ -69,7 +69,9 @@
         "alternatives": [],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 0,
+        "kmLeft": 541
        },
        {
         "id": "d1s02",
@@ -101,7 +103,9 @@
         "alternatives": [],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 73,
+        "kmLeft": 468
        },
        {
         "id": "d1s03",
@@ -399,7 +403,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 143,
+        "kmLeft": 398
        },
        {
         "id": "d1s04",
@@ -695,7 +701,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 209,
+        "kmLeft": 332
        },
        {
         "id": "d1s05",
@@ -755,7 +763,9 @@
           "exitDistanceM": 899
          }
         ],
-        "selectedHotelId": "pl_yar_hotel_strelka"
+        "selectedHotelId": "pl_yar_hotel_strelka",
+        "kmDriven": 272,
+        "kmLeft": 269
        }
       ]
      },
@@ -794,7 +804,9 @@
         "alternatives": [],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 272,
+        "kmLeft": 269
        },
        {
         "id": "d2s02",
@@ -1090,7 +1102,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 393,
+        "kmLeft": 148
        },
        {
         "id": "d2s03",
@@ -1387,7 +1401,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 395,
+        "kmLeft": 146
        },
        {
         "id": "d2s04",
@@ -1682,7 +1698,9 @@
         ],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 518,
+        "kmLeft": 23
        },
        {
         "id": "d2s05",
@@ -1710,7 +1728,9 @@
         "alternatives": [],
         "alternativesNote": null,
         "hotelOptions": [],
-        "selectedHotelId": null
+        "selectedHotelId": null,
+        "kmDriven": 541,
+        "kmLeft": 0
        }
       ]
      }

@@ -58,6 +58,33 @@ class CarTest(unittest.TestCase):
         lats = [p["lat"] for p in vias]
         self.assertEqual(lats, sorted(lats))  # route order kept
 
+    def test_v3_next_point_order_and_signing(self) -> None:
+        """ADR-0015 §1: Карты takes the day, the Навигатор the next point; signing adds `client`."""
+        r = h.handoff(trip(2), {"mode": "car", "day": 1, "fromHere": False})
+        part = r["parts"][0]
+        self.assertEqual(r["order"], ["maps", "navigatorNext", "web"])
+        self.assertEqual(
+            part["links"]["navigatorNext"],
+            "yandexnavi://build_route_on_map?lat_to=55.100000&lon_to=37.100000",
+        )
+        self.assertEqual(part["next"]["nameRu"], "sight2")
+        self.assertNotIn("toSign", part)
+        signed = h.handoff(trip(2), {"mode": "car", "day": 1, "signing": {"client": "verst"}})["parts"][0]
+        for k in ("navigator", "navigatorNext", "maps"):
+            self.assertTrue(signed["links"][k].endswith("&client=verst"), k)
+            self.assertEqual(signed["toSign"][k], signed["links"][k])
+        self.assertNotIn("client", signed["links"]["web"])
+        w = h.handoff(
+            {
+                "stops": [{"id": "w1", "lat": 55.0, "lon": 37.0, "nameRu": "a"}],
+                "start": {"lat": 55.1, "lon": 37.1},
+            },
+            {"mode": "walk", "fromHere": False, "signing": {"client": "verst"}},
+        )
+        self.assertTrue(w["parts"][0]["links"]["maps"].endswith("&client=verst"))
+        with self.assertRaises(h.HandoffError):
+            h.handoff(trip(1), {"mode": "car", "signing": {}})
+
     def test_from_stop(self) -> None:
         r = h.handoff(trip(3), {"mode": "car", "fromStopId": "d1s04", "fromHere": False})
         pts = r["parts"][0]["points"]
