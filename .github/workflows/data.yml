@@ -64,7 +64,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, datetime
-          json.dump({"wikidata": "query.wikidata.org", "overpass": "overpass-api.de", "commons": "commons.wikimedia.org",
+          json.dump({"wikidata": "query.wikidata.org", "osm": "download.geofabrik.de/russia-latest.osm.pbf (Overpass fallback)", "commons": "commons.wikimedia.org",
                      "fetchedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
                      "run": os.environ["GITHUB_RUN_ID"]}, open(os.environ["RAW"] + "/sources.json", "w"))
           PY
