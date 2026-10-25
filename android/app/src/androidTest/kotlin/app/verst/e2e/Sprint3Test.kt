@@ -488,6 +488,9 @@ class Sprint3Test {
     private fun walkIn(town: String, lat: Double, lon: Double, preset: String, shotName: String): Boolean {
         compose.runOnUiThread {
             while (flow.back()) Unit
+            // adults only (an 18+ preset with a child in the crew shows the «не с детьми» toast instead of the gate)
+            flow.frontAdult = true
+            for (i in flow.seats.indices) flow.seats[i] = Seat.EMPTY
             flow.debugMockLocation = GeoPoint(town, lat, lon)
             flow.locate()
         }
@@ -499,11 +502,17 @@ class Sprint3Test {
         Log.i("VerstE2e", "R4 presets $town: ${flow.cityPresets?.presets?.map { "${it.preset}:${it.available}:${it.count}" }} tz=${flow.cityPresets?.town?.tz}")
         if (p == null || !p.available) return false
         waitTag("city.preset.$preset")
-        compose.onNodeWithTag("city.preset.$preset").performScrollTo().performClick()
+        // the plate tap itself is covered by S3-4; here the preset is chosen through the flow (a plate half under
+        // the caption row must not decide a data journey)
+        compose.runOnUiThread { flow.selectCityPreset(preset) }
         if (p.adultOnly) {
+            compose.waitUntil(5_000) { flow.ageGate != null || flow.toast != null }
+            Log.i("VerstE2e", "R4 age gate $town/$preset gate=${flow.ageGate} toast=${flow.toast} children=${flow.children}")
             waitTag("agegate")
+            shot("$shotName-agegate")
             compose.onNodeWithTag("agegate.yes", useUnmergedTree = true).performClick()
         }
+        compose.waitUntil(5_000) { flow.cityPreset == preset }
         compose.onNodeWithTag("city.go").performClick()
         compose.waitUntil(30_000) { flow.top == Route.Walk }
         waitTag("walk.total")
