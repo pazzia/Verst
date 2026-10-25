@@ -202,11 +202,11 @@ class Sprint4Test {
             addressSearch(server, "Советская 1")
             // the screen answers at once (the field and the towns stay usable)
             compose.onNodeWithTag("navigator.to").assertExists()
-            compose.waitUntil(16_000) { flow.addressState == AddressState.Later }
+            compose.waitUntil(16_000) { flow.addressState == AddressState.Failed }
             val ms = (System.nanoTime() - t0) / 1_000_000
             Log.i("VerstE2e", "S4 slow address search ended after $ms ms, requests=${server.requestCount}")
             assertTrue("ended within the OR-1 call limit: $ms", ms < 16_000)
-            waitTag("address.later")
+            waitTag("address.failed")
             shot("105-slow-address")
             noErrorShown()
             // a slow but steady body (2 s latency, 20 KB/s) still arrives and is used
@@ -230,9 +230,9 @@ class Sprint4Test {
             server.enqueue(MockResponse().setResponseCode(500))
             server.enqueue(MockResponse().setResponseCode(503))
             addressSearch(server, "Советская 1")
-            compose.waitUntil(15_000) { flow.addressState == AddressState.Later }
+            compose.waitUntil(15_000) { flow.addressState == AddressState.Failed }
             assertEquals("one retry", 2, server.requestCount)
-            waitTag("address.later")
+            waitTag("address.failed")
             shot("107-http-500")
             noErrorShown()
             val garbage = listOf(
@@ -243,7 +243,7 @@ class Sprint4Test {
             garbage.forEachIndexed { i, r ->
                 server.enqueue(r)
                 addressSearch(server, "Тверская ${i + 2}")
-                compose.waitUntil(15_000) { flow.addressState == AddressState.Later }
+                compose.waitUntil(15_000) { flow.addressState == AddressState.Failed }
                 noErrorShown()
             }
             shot("108-garbage")

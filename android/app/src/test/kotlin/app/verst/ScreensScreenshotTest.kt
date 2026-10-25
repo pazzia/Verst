@@ -433,6 +433,14 @@ class ScreensScreenshotTest {
         assertTrue(compose.onAllNodesWithText("Разминка", substring = true).fetchSemanticsNodes().isNotEmpty())
         assertTrue(compose.onAllNodesWithTag("tag.opendata", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
         assertTrue(compose.onAllNodesWithText("туалет", substring = true).fetchSemanticsNodes().isNotEmpty())
+        // S4-QA P1-01: food and night rows have a P part too (fuel is the only row without one)
+        val trip = s4Trip()
+        trip.daysList.flatMap { it.stops }.filter { it.kind == "food" || it.kind == "overnight" }.take(2).forEach { st ->
+            compose.onNodeWithTag("road.stop.${st.id}.parking", useUnmergedTree = true).assertExists()
+        }
+        trip.daysList.flatMap { it.stops }.filter { it.kind == "fuel" }.take(1).forEach { st ->
+            compose.onNodeWithTag("road.stop.${st.id}.parking", useUnmergedTree = true).assertDoesNotExist()
+        }
     }
 
     @Test
@@ -450,6 +458,7 @@ class ScreensScreenshotTest {
         val trip = s4Trip()
         val stop = trip.daysList.flatMap { it.stops }.first { it.kind == "sight" && it.parking == null }
         shot("road", "s4-parking-unknown") { RoadScreen(RoadUi(trip, "NE", parking = stop), noRoad) }
+        compose.onNodeWithTag("parking.note", useUnmergedTree = true).assertTextContains("Тариф неизвестен", substring = true) // S4-QA P1-04
         compose.onAllNodesWithText("уточните", substring = true).fetchSemanticsNodes().isNotEmpty().let(::assertTrue)
     }
 
@@ -674,9 +683,10 @@ class ScreensScreenshotTest {
     @Test
     fun cardS4OsmOnly() {
         val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
-        val d = real.copy(poiKind = "park", image = null, descriptionRu = null, extractRu = null, extractSource = null, ticket = null, descSource = "osm", whyRu = null)
+        val d = real.copy(poiKind = "park", image = null, descriptionRu = null, extractRu = null, extractSource = null, ticket = null, descSource = "osm", whyRu = null, wikidataId = null, attributionRu = emptyList())
         shot("card", "s4-osm-only") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
         compose.onNodeWithTag("photo.illustration.none", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.osm", useUnmergedTree = true).assertExists() // S4-QA P1-05 (ODbL)
     }
 
     @Test

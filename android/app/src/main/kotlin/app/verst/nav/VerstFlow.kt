@@ -1760,9 +1760,10 @@ class VerstFlow(
                 }
                 app.verst.data.net.AddressResult.Offline -> addressState = AddressState.Offline
                 is app.verst.data.net.AddressResult.Failed -> {
-                    // CEO S4: nothing online ever shows an error — a failure is «уточним при интернете»
+                    // S4-QA P1-02: online and failed → the quiet «попробуйте ещё раз» (never an error screen);
+                    // gone offline meanwhile → the offline hint
                     addressResults = emptyList()
-                    addressState = AddressState.Later
+                    addressState = if (connectivity.online) AddressState.Failed else AddressState.Offline
                 }
             }
         }
@@ -2690,8 +2691,11 @@ data class CardState(val source: CardSource, val rowId: String, val poiId: Strin
 data class AgeGate(val preset: String? = null, val interest: String? = null)
 
 /** 5.12 §2 address search state under the ОТКУДА / КУДА field. */
-/** [Later]: the service failed (timeout, 5xx, garbage, breaker) → the quiet «уточним при интернете» (ADR-0016 OR-4). */
-enum class AddressState { Idle, Searching, Done, None, Offline, Later }
+/**
+ * [Failed]: online, but the service failed (timeout, 5xx, garbage, breaker) → `addr_failed` «Не получилось найти
+ * адрес — попробуйте ещё раз» (5.5 §10.9, S4-QA P1-02); «уточним при интернете» is for [Offline] only.
+ */
+enum class AddressState { Idle, Searching, Done, None, Offline, Failed }
 
 /** 5.10 «СКОЛЬКО ГУЛЯЕМ» chips, minutes. */
 val WalkDurations = listOf(120, 240, 360, 480)

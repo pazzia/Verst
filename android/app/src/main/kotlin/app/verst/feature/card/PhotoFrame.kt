@@ -190,8 +190,13 @@ fun PhotoFrameContent(
                 ),
         ) {
             if (loaded == null || fade < 1f) {
-                if (state == PhotoState.None && illustration != null) CategoryIllustration(placeholder, illustration)
-                else PlaceholderVignette(placeholder, state)
+                // S4-QA P2-06: offline / failed uncached photos also get the category illustration, with the state caption
+                when {
+                    illustration == null || state == PhotoState.Loading || state is PhotoState.Loaded -> PlaceholderVignette(placeholder, state)
+                    state == PhotoState.Offline -> CategoryIllustration(placeholder, illustration, androidx.compose.ui.res.stringResource(app.verst.core.ui.R.string.card_photo_offline))
+                    state == PhotoState.Error -> CategoryIllustration(placeholder, illustration, androidx.compose.ui.res.stringResource(app.verst.core.ui.R.string.card_photo_error))
+                    else -> CategoryIllustration(placeholder, illustration)
+                }
             }
             if (loaded != null) {
                 if (loaded.contain) {
@@ -249,7 +254,7 @@ private fun AreaPlate(modifier: Modifier, label: String? = null) {
  * kind pictogram, the kind word (`type.tag.kind` 15, `kind.text`); «фото пока нет» only for OSM-only places.
  */
 @Composable
-private fun androidx.compose.foundation.layout.BoxScope.CategoryIllustration(kind: Placeholder, ill: Illustration) {
+private fun androidx.compose.foundation.layout.BoxScope.CategoryIllustration(kind: Placeholder, ill: Illustration, stateText: String? = null) {
     val mat = when (kind) {
         Placeholder.MUSEUM -> C.photo.phMuseum
         Placeholder.CHURCH -> C.photo.phChurch
@@ -278,7 +283,9 @@ private fun androidx.compose.foundation.layout.BoxScope.CategoryIllustration(kin
                 contentAlignment = Alignment.Center,
             ) { Canvas(Modifier.size(72.dp, 48.dp)) { vignette(kind, C.sign.white, C.sign.white.copy(alpha = 0.35f)) } }
             Txt(ill.word, T.tag.kind.copy(fontSize = 15.sp), C.kind.text, Modifier.padding(top = 10.dp), maxLines = 1)
-            if (ill.caption) {
+            if (stateText != null) {
+                Txt(stateText, T.body.sm, C.text.muted, Modifier.padding(top = 4.dp, start = 16.dp, end = 16.dp).testTag("photo.illustration.state"), maxLines = 2, align = TextAlign.Center)
+            } else if (ill.caption) {
                 Txt(androidx.compose.ui.res.stringResource(app.verst.core.ui.R.string.card_illustration_none), T.body.sm, C.text.muted, Modifier.padding(top = 4.dp).testTag("photo.illustration.none"), maxLines = 1)
             }
         }

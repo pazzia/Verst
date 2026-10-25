@@ -560,9 +560,13 @@ private fun WalkStopRow(
             }
             if (untimed) UntimedHours(hours)
             // M4 notes join parts with « · » («С собакой внутрь обычно нельзя · Часы работы уточняйте»)
-            val note = s.noteRu?.split(" · ")?.filterNot { hideHoursNote && it == HOURS_NOTE }?.joinToString(" · ")?.takeIf { it.isNotBlank() }
-            val dogNo = if (dog && s.indoor && note?.contains("собак", ignoreCase = true) != true) stringResource(R.string.walk_stop_dog_no) else null
-            listOfNotNull(note, dogNo).joinToString(" ").takeIf { it.isNotBlank() }?.let { Txt(it, T.body.md, C.text.note, Modifier.testTag("walk.stop.note")) }
+            // S4-QA P2-02: no «уточняйте» next to known hours; parts read as sentences («…нельзя. Часы…»)
+            val knownHours = hours != null && hours.source != "default" && (hours.todayRu != null || hours.allDay)
+            val parts = s.noteRu?.split(" · ").orEmpty().map { it.trim().trimEnd('.') }
+                .filterNot { it.isBlank() || ((hideHoursNote || knownHours) && it == HOURS_NOTE) }
+            val dogNo = if (dog && s.indoor && parts.none { it.contains("собак", ignoreCase = true) }) stringResource(R.string.walk_stop_dog_no).trimEnd('.') else null
+            (parts + listOfNotNull(dogNo)).takeIf { it.isNotEmpty() }?.joinToString(". ", postfix = ".")
+                ?.let { Txt(it, T.body.md, C.text.note, Modifier.testTag("walk.stop.note")) }
             if (cost != null) Txt(cost, T.body.mdStrong, C.accent.yellow)
         }
     }

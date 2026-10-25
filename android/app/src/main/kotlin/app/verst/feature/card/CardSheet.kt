@@ -169,7 +169,10 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
                 contentAlignment = Alignment.CenterStart,
             ) { Txt(stringResource(R.string.card_report), T.body.smStrong, C.text.muted, maxLines = 1) }
         }
-        if ((d?.attributionRu?.isNotEmpty() == true || ui.kind == "bar") && d?.textSource != "osm") {
+        // S4-QA P1-05 (ODbL): any place whose data comes from OSM says so, at every card level — unless the source
+        // line under the text already did
+        val osmShown = !desc.isNullOrBlank() && d?.textSource == "osm"
+        if (osmData(ui) && !osmShown) {
             Txt(stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
         }
     }
@@ -245,6 +248,16 @@ private fun SecondaryButton(text: String, tag: String, onClick: () -> Unit) {
             .background(C.dash.control).clickable(role = Role.Button, onClick = onClick).testTag(tag),
         contentAlignment = Alignment.Center,
     ) { Txt(text, T.button.md, C.text.primary, maxLines = 1) }
+}
+
+/**
+ * The place's data comes (partly) from OpenStreetMap: the engine's OSM attribution, an OSM text or photo, a bar, or a
+ * sight known only from the OSM layer (no Wikidata item, not a curated place).
+ */
+internal fun osmData(ui: CardUi): Boolean {
+    val d = ui.details
+    return ui.kind == "bar" || d?.osmSource == true || d?.attributionRu?.any { it.contains("OpenStreetMap") } == true || d?.textSource == "osm" ||
+        d?.image?.source == "osm" || (ui.kind == "sight" && d != null && d.wikidataId == null && !d.id.startsWith("pl_"))
 }
 
 /**

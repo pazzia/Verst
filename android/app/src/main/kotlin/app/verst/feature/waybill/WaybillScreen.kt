@@ -306,10 +306,11 @@ private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onC
     val paid = stops.filter { it.parking?.known == true && (it.parking?.rub ?: 0) > 0 }
     val free = stops.count { it.parking?.free == true }
     val unknownStops = stops.filter { it.parking?.known != true }
-    val unknown = if (line.unknownCount > 0) line.unknownCount else unknownStops.size
+    // S4-QA P1-01: the same count as the Road ahead rows and day headers (every left-the-car stop without a tariff)
+    val unknown = unknownStops.size
     val sum = RuFormat.thousands(line.rub)
     val hoursOf = { s: app.verst.core.model.dto.StopDto -> kotlin.math.ceil(s.parking?.hours ?: (s.dwellMin / 60.0)).toInt().coerceAtLeast(1) }
-    val formula = line.formula.ifBlank {
+    val formula = line.formula.replace(Regex("""\s*[+·]?\s*(\+\s*)?ещё \d+ без данных"""), "").trim().ifBlank {
         val h = paid.sumOf(hoursOf)
         val towns = paid.mapNotNull { it.townId }.distinct().size.coerceAtLeast(if (paid.isEmpty()) 0 else 1)
         stringResource(R.string.waybill_parking_formula, paid.size, stringResource(R.string.common_hours_short, h), "$towns ${pluralStringResource(R.plurals.plural_town, towns)}")
@@ -339,6 +340,9 @@ private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onC
             val rows = buildList<Pair<String, String>> {
                 if (line.breakdown.isNotEmpty()) {
                     line.breakdown.forEach { b -> add((if (b.formula.isBlank()) b.label else b.label + ", " + b.formula.substringBefore(" = ")) to RuFormat.thousands(b.rub)) }
+                    // every unknown stop is listed (S4-QA P1-01), also when the engine's breakdown has only the known ones
+                    val listed = line.breakdown.map { it.label }.toSet()
+                    unknownStops.filter { it.name !in listed }.forEach { st -> add(st.name to "?") }
                 } else {
                     paid.forEach { s ->
                         add(stringResource(R.string.waybill_parking_row, s.name, hoursOf(s), RuFormat.thousands(s.parking?.rubPerHour ?: 0)) to RuFormat.thousands(s.parking?.rub ?: 0))

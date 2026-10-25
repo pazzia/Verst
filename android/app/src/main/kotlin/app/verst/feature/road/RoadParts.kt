@@ -85,10 +85,10 @@ internal fun parkingAware(trip: TripDto): Boolean =
     trip.cost.lines.any { it.key == "parking" } || trip.daysList.any { d -> d.stops.any { it.parking != null } }
 
 /**
- * Where the P part shows in a parking-aware trip (M6): every sight (the engine prices sights; null = «P ?»), and any
- * other stop the engine gave a parking object.
+ * 5.5 §10.10 (S4-QA P1-01): in a parking-aware trip every left-the-car stop (sight, food, rest area, night) has a
+ * P part, «P ?» when the engine has no tariff; fuel is the only row without it.
  */
-internal fun showsParking(s: StopDto): Boolean = s.kind == "sight" || (parkingStop(s) && s.parking != null)
+internal fun showsParking(s: StopDto): Boolean = parkingStop(s)
 
 /** Σ known stays of a day and the count of stops without data. */
 internal data class ParkingSum(val rub: Int, val unknown: Int)
@@ -186,32 +186,54 @@ private fun parkingCd(p: ParkingDto?): String {
  * components §26.2 `CostsLine`: price (yellow) · P part (a button → ParkingSheet), and the quiet action on the right.
  * Fuel has the price only. The P part keeps a 36 × 44 touch box.
  */
+/**
+ * components §26.2 `CostsLine` with 5.5 §10.10 (S4-QA P1-03): the quiet action is pinned right on the **first**
+ * line and never wraps; price · P part share the rest, and when they don't fit the P part moves under the price
+ * (left-aligned, no separator), still a button.
+ */
 @Composable
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 internal fun CostsLine(price: String?, parking: ParkingDto?, showParking: Boolean, tag: String, onParking: () -> Unit, action: @Composable () -> Unit) {
-    // «A costs line may wrap instead of truncating» (components §31): the action drops to the next line when needed
-    androidx.compose.foundation.layout.FlowRow(
-        Modifier.fillMaxWidth().defaultMinSize(minHeight = 36.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Row(Modifier.height(36.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            if (price != null) Txt(price, T.body.mdStrong, C.accent.yellow, maxLines = 1)
-            if (price != null && showParking) Txt("·", T.body.mdStrong, C.interior.pole, maxLines = 1)
-            if (showParking) {
-                val unknown = parking?.known != true
-                val cd = parkingCd(parking)
-                Row(
-                    Modifier.touch36().defaultMinSize(minWidth = 36.dp)
-                        .clickable(role = Role.Button, onClick = onParking)
-                        .semantics(mergeDescendants = true) { contentDescription = cd }
-                        .testTag("$tag.parking")
-                        .padding(horizontal = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    PGlyph(15.dp)
-                    Txt(parkingInline(parking), T.body.mdStrong, if (unknown) C.text.muted else C.navi.text, maxLines = 1)
+    val pPart: @Composable () -> Unit = {
+        val unknown = parking?.known != true
+        val cd = parkingCd(parking)
+        Row(
+            Modifier.touch36().defaultMinSize(minWidth = 36.dp)
+                .clickable(role = Role.Button, onClick = onParking)
+                .semantics(mergeDescendants = true) { contentDescription = cd }
+                .testTag("$tag.parking")
+                .padding(horizontal = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            PGlyph(15.dp)
+            Txt(parkingInline(parking), T.body.mdStrong, if (unknown) C.text.muted else C.navi.text, maxLines = 1)
+        }
+    }
+    Row(Modifier.fillMaxWidth().defaultMinSize(minHeight = 36.dp), verticalAlignment = Alignment.Top) {
+        androidx.compose.ui.layout.Layout(
+            content = {
+                Box(Modifier.height(36.dp), contentAlignment = Alignment.CenterStart) { if (price != null) Txt(price, T.body.mdStrong, C.accent.yellow, maxLines = 1) }
+                Box(Modifier.height(36.dp).padding(horizontal = 5.dp), contentAlignment = Alignment.Center) { Txt("·", T.body.mdStrong, C.interior.pole, maxLines = 1) }
+                Box(Modifier.height(36.dp), contentAlignment = Alignment.CenterStart) { if (showParking) pPart() }
+            },
+            modifier = Modifier.weight(1f),
+        ) { ms, c ->
+            val loose = c.copy(minWidth = 0)
+            val pr = ms[0].measure(loose)
+            val dot = ms[1].measure(loose)
+            val pp = ms[2].measure(loose)
+            val hasPrice = price != null
+            val oneLine = !showParking || !hasPrice || pr.width + dot.width + pp.width <= c.maxWidth
+            val h = if (oneLine) maxOf(pr.height, pp.height) else pr.height + pp.height
+            layout(c.maxWidth, h) {
+                if (hasPrice) pr.place(0, 0)
+                if (showParking) {
+                    if (oneLine) {
+                        if (hasPrice) dot.place(pr.width, 0)
+                        pp.place(if (hasPrice) pr.width + dot.width else 0, 0)
+                    } else {
+                        pp.place(0, pr.height) // under the price, no separator
+                    }
                 }
             }
         }
@@ -429,7 +451,11 @@ internal fun BoxScope.ParkingSheet(s: StopDto, windowH: Dp, onClose: () -> Unit)
                 }
             }
         }
-        Txt(p?.noteRu ?: stringResource(R.string.road_parking_note), T.body.smRelaxed, C.text.muted, Modifier.padding(top = 10.dp))
+        // S4-QA P1-04: an unknown tariff is not «уже в сумме»
+        Txt(
+            p?.noteRu ?: stringResource(if (known) R.string.road_parking_note else R.string.road_parking_note_unknown),
+            T.body.smRelaxed, C.text.muted, Modifier.padding(top = 10.dp).testTag("parking.note"),
+        )
         SecondaryButton(stringResource(R.string.road_parking_ok), onClose, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("parking.ok"))
     }
 }

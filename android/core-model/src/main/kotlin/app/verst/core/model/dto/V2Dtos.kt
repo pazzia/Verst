@@ -142,6 +142,8 @@ data class PoiDetailsDto(
     val quality: Int? = null,
     val fee: String? = null,
     val website: String? = null,
+    /** M9: the place's data comes from OpenStreetMap (ODbL attribution on the card). */
+    val osmSource: Boolean? = null,
 ) {
     /** The card text: the v3 extract, else the Sprint 3 description. */
     val textRu: String? get() = extractRu?.takeIf { it.isNotBlank() } ?: descriptionRu

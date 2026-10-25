@@ -202,7 +202,8 @@ private fun AppCard(
         ) {
             GlyphIcon(if (app == HandoffApp.MAPS) Glyph.PIN else Glyph.NAVIGATOR, if (dimGlyph) C.text.muted else C.text.onLight, 22.dp, filled = app == HandoffApp.NAVI)
         }
-        Column(Modifier.weight(1f).alpha(if (install) 0.55f else 1f)) {
+        Column(Modifier.weight(1f)) {
+          Column(Modifier.alpha(if (install) 0.55f else 1f)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Txt(title, T.title.md, C.text.primary, maxLines = 1)
                 if (badge) {
@@ -213,11 +214,10 @@ private fun AppCard(
             }
             Txt(sub, T.body.md, C.text.note, Modifier.padding(top = 2.dp))
             if (note != null) Txt(note, T.body.sm, C.navi.labelSecondary, Modifier.padding(top = 2.dp).testTag("$tag.note"))
+          }
+            // S4-QA P2-05 / components §30: «Установить…» is the yellow note line, not a right column
+            if (install) Txt(stringResource(R.string.handoff_install), T.body.sm, C.accent.yellow, Modifier.padding(top = 2.dp).testTag("$tag.install"))
         }
-        if (install) {
-            Txt(stringResource(R.string.handoff_install), T.body.smStrong, C.accent.yellow, Modifier.width(96.dp).testTag("$tag.install"))
-        } else {
-            GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 16.dp)
-        }
+        if (!install) GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 16.dp)
     }
 }
