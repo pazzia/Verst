@@ -1,6 +1,6 @@
 # Verst — Investor-readiness backlog: from a demo to a product with proof
 
-Horizon: 90 days (13 weeks) · Owner: CEO · Engineering acceptance: Manager · Base: `main` @ `11f3a2b` (Sprint 4 CEO build)
+Horizon: 90 days (13 weeks) · Owner: CEO · Engineering acceptance: Manager · Team: role skills in `.claude/skills/` (see `.claude/skills/TEAM.md`) · Base: `main` @ `11f3a2b` (Sprint 4 CEO build)
 
 **Goal.** In 90 days, go back to an investor with proof, not promises. That means real roads, real hotels and real prices; 10 Moscow ready routes with verified places; at least 100 families who actually drove a Verst trip; and a first money signal: confirmed affiliate bookings or one signed pilot.
 
@@ -74,36 +74,36 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 | --- | --- | --- | --- | --- | --- |
 | HYG-01 | Fix the 2 failing planner tests on `main`; make CI block red releases | P0 | Architect | — | 0.5 d |
 | HYG-02 | Split god files (`VerstFlow.kt` 2 739 lines, `gen_worlds.py` 3 437 lines) | P2 | Developer / Architect | — | 2 d |
-| VAL-01 | 30–50 customer interviews with car-travelling families | P0 | CEO | — | W1–W4 |
-| VAL-02 | Landing page + waitlist + paid ad test (30–50 k ₽) | P0 | CEO + Designer | — | 3 d + 2 wk run |
-| VAL-03 | Competitor teardown (Яндекс Путешествия + Алиса AI, Яндекс Карты, 2ГИС, Roadtrippers, TripforTeam, Trippi) | P1 | CEO | — | 2 d |
-| VAL-04 | Closed beta with ≥ 100 families | P0 | CEO + Developer | ENG-01, ENG-03, ENG-05 | W8–W12 |
-| VAL-05 | 3 field trips with receipts (day trip, 2-day trip, Golden Ring) | P0 | CEO | ENG-01, ENG-02, ENG-03 | 3 trips |
+| VAL-01 | 30–50 customer interviews with car-travelling families | P0 | UX Specialist (CEO talks) | — | W1–W4 |
+| VAL-02 | Landing page + waitlist + paid ad test (30–50 k ₽) | P0 | Growth Marketer + Web Designer (CEO approves spend) | — | 3 d + 2 wk run |
+| VAL-03 | Competitor teardown (Яндекс Путешествия + Алиса AI, Яндекс Карты, 2ГИС, Roadtrippers, TripforTeam, Trippi) | P1 | Business Analyst | — | 2 d |
+| VAL-04 | Closed beta with ≥ 100 families | P0 | Growth Marketer + UX Specialist + Developer | ENG-01, ENG-03, ENG-05 | W8–W12 |
+| VAL-05 | 3 field trips with receipts (day trip, 2-day trip, Golden Ring) | P0 | UX Specialist (CEO drives) | ENG-01, ENG-02, ENG-03 | 3 trips |
 | ENG-01 | Real road routing (self-hosted GraphHopper or OSRM, Russia extract) behind the existing routing port | P0 | Architect | — | 5 d |
 | ENG-02 | Real toll segments and tariffs for the Moscow corridors | P1 | Architect | ENG-01 | 2 d |
 | ENG-03 | Real hotels with prices and working affiliate links; remove synthetic hotels from production builds | P0 | Architect + Developer | LEG-02 | 5 d |
 | ENG-04 | Minimal backend: plan API, ready routes, feedback, links; Docker Compose on one VM in Russia | P0 | Architect | ENG-01 | 5 d |
-| ENG-05 | Analytics funnel and crash reporting (SPEC §15) + weekly dashboard | P0 | Developer | ENG-04 | 2 d |
-| ENG-06 | Web planner MVP (plan + cost page, shareable link, iOS users, SEO) | P1 | Developer + Designer | ENG-04 | 5 d |
+| ENG-05 | Analytics funnel and crash reporting (SPEC §15) + weekly dashboard | P0 | Developer (tracking plan: Growth Marketer) | ENG-04 | 2 d |
+| ENG-06 | Web planner MVP (plan + cost page, shareable link, iOS users, SEO) | P1 | Developer + Web Designer | ENG-04 | 5 d |
 | ENG-07 | Startup time and APK size: measure and cut the on-device Python cold start | P2 | Developer | — | 2 d |
 | DATA-01 | Keep Verst's own data (tags, checks, prices) in tables separate from OSM-derived records | P0 | Architect | LEG-01 | 2 d |
-| DATA-02 | Curate the 10 Moscow ready routes: ≥ 300 verified places with family/dog/parking tags | P0 | Curator (TEAM-01) + CEO | DATA-01, ENG-04 | W3–W8 |
-| DATA-03 | User verification loop: "here they let us in with the dog: yes/no", "closed", "price wrong" | P1 | Developer + Designer | ENG-04, DATA-01 | 3 d |
-| DATA-04 | "Verified places per route" as a tracked KPI in the admin | P1 | Architect | DATA-02 | 1 d |
-| LEG-01 | Lawyer's opinion on ODbL share-alike for the Place DB (OSM import in SPEC §9 step 1) | P0 | CEO | — | W1 |
-| LEG-02 | Legal entity (self-employed / ИП / ООО), Travelpayouts and partner accounts, privacy policy | P0 | CEO | — | W1–W2 |
-| BIZ-01 | Unit-economics model in a spreadsheet: revenue per planned trip by stream versus CAC | P0 | CEO | — | 1 d, then weekly |
-| BIZ-02 | Hotel chains that left Яндекс Путешествия in Feb 2026: offer a direct channel | P1 | CEO | ENG-03 | W4–W12 |
-| BIZ-03 | Regional tourism body pilot (B2G): paid placement of a ready route | P1 | CEO | DATA-02 | W6–W12 |
-| BIZ-04 | Roadside service (cafes, fuel, motels) on Moscow corridors: sponsored stops | P2 | CEO | DATA-02 | W8–W12 |
-| BIZ-05 | B2B engine licensing exploration (car rental, carsharing, in-car platforms) | P2 | CEO | ENG-04 | 3 calls |
-| BIZ-06 | Trip Pro waitlist with a price test (3 price points) | P1 | Developer + CEO | ENG-05 | 2 d |
-| DES-01 | Usability test of the «За рулём» UI on 10 people | P1 | Designer | — | 3 d |
-| DES-02 | Seasonality plan: winter ready routes (New Year, Карелия, Казань) | P2 | Designer + CEO | DATA-02 | 2 d |
-| TEAM-01 | Hire a part-time paid curator | P0 | CEO | LEG-02 | W2 |
+| DATA-02 | Curate the 10 Moscow ready routes: ≥ 300 verified places with family/dog/parking tags | P0 | Data Curator + paid curator (TEAM-01) | DATA-01, ENG-04 | W3–W8 |
+| DATA-03 | User verification loop: "here they let us in with the dog: yes/no", "closed", "price wrong" | P1 | Developer + Designer + Data Curator | ENG-04, DATA-01 | 3 d |
+| DATA-04 | "Verified places per route" as a tracked KPI in the admin | P1 | Architect + Data Curator | DATA-02 | 1 d |
+| LEG-01 | Lawyer's opinion on ODbL share-alike for the Place DB (OSM import in SPEC §9 step 1) | P0 | Legal & Compliance (CEO hires lawyer) | — | W1 |
+| LEG-02 | Legal entity (self-employed / ИП / ООО), Travelpayouts and partner accounts, privacy policy | P0 | Legal & Compliance + CEO | — | W1–W2 |
+| BIZ-01 | Unit-economics model in a spreadsheet: revenue per planned trip by stream versus CAC | P0 | Business Analyst | — | 1 d, then weekly |
+| BIZ-02 | Hotel chains that left Яндекс Путешествия in Feb 2026: offer a direct channel | P1 | Partnerships (CEO sends) | ENG-03 | W4–W12 |
+| BIZ-03 | Regional tourism body pilot (B2G): paid placement of a ready route | P1 | Partnerships (CEO sends) | DATA-02 | W6–W12 |
+| BIZ-04 | Roadside service (cafes, fuel, motels) on Moscow corridors: sponsored stops | P2 | Partnerships (CEO sends) | DATA-02 | W8–W12 |
+| BIZ-05 | B2B engine licensing exploration (car rental, carsharing, in-car platforms) | P2 | Partnerships + Business Analyst | ENG-04 | 3 calls |
+| BIZ-06 | Trip Pro waitlist with a price test (3 price points) | P1 | Growth Marketer + Developer | ENG-05 | 2 d |
+| DES-01 | Usability test of the «За рулём» UI on 10 people | P1 | UX Specialist + Designer | — | 3 d |
+| DES-02 | Seasonality plan: winter ready routes (New Year, Карелия, Казань) | P2 | Designer + Growth Marketer | DATA-02 | 2 d |
+| TEAM-01 | Hire a part-time paid curator | P0 | CEO (Data Curator writes the brief) | LEG-02 | W2 |
 | TEAM-02 | Find a co-founder or advisor for partnerships and sales (tour operator, OTA or regional tourism background) | P1 | CEO | — | W1–W12 |
-| INV-01 | Data room: metrics, unit economics, legal, cap table, 12-month plan | P0 | CEO | M1–M5 | 2 d |
-| INV-02 | Pitch deck built on real numbers (the targets table above) | P0 | CEO | INV-01 | 2 d |
+| INV-01 | Data room: metrics, unit economics, legal, cap table, 12-month plan | P0 | Business Analyst + CEO | M1–M5 | 2 d |
+| INV-02 | Pitch deck built on real numbers (the targets table above) | P0 | Business Analyst + CEO | INV-01 | 2 d |
 
 ---
 
