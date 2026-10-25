@@ -508,7 +508,7 @@ private fun OptionRow(kind: StopDto, name: String, sub: String?, delta: String, 
         Box(Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellow else C.text.secondary, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) {
             if (selected) Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(C.accent.yellow))
         }
-        RoadSign(kind.sign, kind.name, kind.tags, Modifier.scaled(0.7f))
+        RoadSign(kind.sign, kind.name, app.verst.feature.common.signTags(kind.poiKind, kind.tags), Modifier.scaled(0.7f))
         Column(Modifier.weight(1f)) {
             Txt(name, T.title.sm, C.text.primary, maxLines = 1)
             if (!sub.isNullOrBlank()) Txt(sub, T.body.sm, C.text.secondary, maxLines = 2)
@@ -779,7 +779,7 @@ private fun StopRow(
         }
         // the sign column 66–132 (city signs with their 2 dp outline may overflow it by a dp each side)
         Box(Modifier.widthIn(min = 66.dp), contentAlignment = Alignment.TopCenter) {
-            RoadSign(s.sign, s.name, s.tags)
+            RoadSign(s.sign, s.name, app.verst.feature.common.signTags(s.poiKind, s.tags))
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(Modifier.fillMaxWidth()) {

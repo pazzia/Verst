@@ -237,7 +237,7 @@ private fun FactChips(ui: CardUi) {
 @Composable
 private fun CardMiniSign(ui: CardUi) {
     if (ui.kind == "bar") BarSign(ui.tags.firstOrNull() ?: "bar")
-    else Box(Modifier.scaled(0.7f)) { RoadSign(ui.sign, ui.name, ui.tags) }
+    else Box(Modifier.scaled(0.7f)) { RoadSign(ui.sign, ui.name, app.verst.feature.common.signTags(ui.details?.poiKind, ui.tags)) }
 }
 
 @Composable

@@ -48,6 +48,20 @@ fun kindWord(kind: String?): String? = when (kind) {
     else -> null
 }
 
+/**
+ * S4-QA P2-01: one pictogram table from the place kind for the row sign, the card mini sign and the illustration —
+ * the kind's tag for `touristPictogram` (kremlin / monastery / museum / view / walk), else the engine's tags.
+ */
+fun signTags(poiKind: String?, tags: List<String>): List<String> = when (poiKind) {
+    "kremlin" -> listOf("kremlin")
+    "monastery", "temple", "church", "cathedral" -> listOf("monastery")
+    "museum", "gallery", "theatre", "theater", "interactive" -> listOf("museum")
+    "viewpoint", "view", "nature", "embankment", "park", "garden" -> listOf("view")
+    "playground", "zoo" -> listOf("walk")
+    "monument", "memorial", "square", "attraction" -> listOf("monument")
+    else -> tags
+}
+
 /** components §26 `KindTag`: h 20, radius 4, `kind.*` colours, the uppercase category word. */
 @Composable
 fun KindTag(word: String, modifier: Modifier = Modifier) {

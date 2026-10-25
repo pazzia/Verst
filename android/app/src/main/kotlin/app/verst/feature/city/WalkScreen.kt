@@ -544,7 +544,7 @@ private fun WalkStopRow(
             .testTag("walk.stop.${s.id}"),
     ) {
         Box(Modifier.padding(start = 72.dp).widthIn(min = 68.dp), contentAlignment = Alignment.TopCenter) {
-            if (s.isBar) BarSign(s.kind) else RoadSign("tourist", s.nameRu, listOf(s.kind))
+            if (s.isBar) BarSign(s.kind) else RoadSign("tourist", s.nameRu, app.verst.feature.common.signTags(s.poiKind ?: s.kind, listOf(s.kind)))
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(Modifier.fillMaxWidth()) {
