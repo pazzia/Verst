@@ -25,6 +25,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -566,23 +567,30 @@ class ScreensScreenshotTest {
         override fun changeStart() = Unit
         override fun preset(p: String) = Unit
         override fun go() = Unit
-        override fun duration(min: Int) = Unit
         override fun interest(i: String) = Unit
-        override fun pace(p: String) = Unit
-        override fun budget(rub: Int?) = Unit
         override fun toggleReturn() = Unit
         override fun closeCustom() = Unit
         override fun buildCustom() = Unit
         override fun age(yes: Boolean) = Unit
-        override fun longer() = Unit
-        override fun otherPreset() = Unit
+        override fun suggestion(s: app.verst.core.model.dto.WalkSuggestion) = Unit
+        override fun openPicker(p: app.verst.nav.CityPicker) = Unit
     }
 
-    private fun cityUi(error: String? = null, custom: Boolean = false, age: Boolean = false, building: Boolean = false, children: Boolean = false): app.verst.feature.city.CityUi {
+    private val dogPreset = app.verst.core.model.dto.CityPresetDto(preset = "dog_walk", count = 9, defaultDurationMin = 120, titleRu = "Прогулка с собакой")
+
+    private fun cityUi(
+        error: String? = null, custom: Boolean = false, age: Boolean = false, building: Boolean = false, children: Int = 0, dog: Boolean = false,
+        selected: String = "overview", duration: Int? = 240, few: app.verst.nav.WalkFew? = null, picker: app.verst.nav.CityPicker? = null,
+    ): app.verst.feature.city.CityUi {
         val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets)
+        val shown = presets.presets.filter { it.available }.let { if (dog) listOf(dogPreset) + it else it }
         return app.verst.feature.city.CityUi(
-            if (error == "NO_CITY") null else presets.town?.name, if (error == "NO_CITY") "Толбухино" else "Советская пл., 1", true, if (error == "NO_CITY") emptyList() else presets.presets, false, error, "overview",
-            240, listOf("parks", "views"), "normal", null, true, custom, age, building, children, "11:00",
+            town = if (error == "NO_CITY") null else presets.town?.name,
+            startLabel = if (error == "NO_CITY") "Толбухино" else "Советская пл., 1",
+            fromGps = true, presets = if (error == "NO_CITY") emptyList() else shown, loading = false, error = error, selected = selected,
+            durationMin = duration, interests = listOf("parks", "views"), pace = "normal", budget = null, returnToStart = true,
+            customSheet = custom, ageGate = age, building = building, adults = 2, children = children, dog = dog, startTime = "11:00",
+            few = few, picker = picker,
         )
     }
 
@@ -590,22 +598,43 @@ class ScreensScreenshotTest {
     fun cityPresets() {
         shot("city", "presets") { app.verst.feature.city.CityScreen(cityUi(), noCity) }
         compose.onNodeWithTag("city.preset.overview", useUnmergedTree = true).assertExists()
-        // `available: false` is hidden (read from the contract: the real catalogue decides which)
-        val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets).presets
-        presets.filter { !it.available }.forEach { compose.onNodeWithTag("city.preset.${it.preset}", useUnmergedTree = true).assertDoesNotExist() }
-        presets.filter { it.available }.forEach { compose.onNodeWithTag("city.preset.${it.preset}", useUnmergedTree = true).assertExists() }
+        compose.onNodeWithTag("city.start", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.crew.dog", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.duration.unlimited", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.pref.pace", useUnmergedTree = true).assertExists()
     }
 
     @Test
-    fun cityKidsBlocked() = shot("city", "kids-blocked") { app.verst.feature.city.CityScreen(cityUi(children = true), noCity) }
+    fun cityChildAndBeerWarns() {
+        // S4: children never block a preset — the walk is allowed and the plate says what to expect
+        shot("city", "child-beer") { app.verst.feature.city.CityScreen(cityUi(children = 1, selected = "beer"), noCity) }
+        compose.onNodeWithTag("city.warn.childbars", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.go").assertIsEnabled()
+    }
 
     @Test
-    fun cityCustomSheet() = shot("city", "custom-sheet") { app.verst.feature.city.CityScreen(cityUi(custom = true), noCity) }
+    fun cityDogWalkFirst() {
+        shot("city", "dog") { app.verst.feature.city.CityScreen(cityUi(dog = true, selected = "museums"), noCity) }
+        compose.onNodeWithTag("city.preset.dog_walk", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("city.warn.dogindoor", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun cityUnlimited() {
+        shot("city", "unlimited") { app.verst.feature.city.CityScreen(cityUi(duration = null), noCity) }
+        compose.onNodeWithText("без расписания", substring = true).assertExists()
+    }
+
+    @Test
+    fun cityCustomSheet() = shot("city", "custom-sheet") { app.verst.feature.city.CityScreen(cityUi(custom = true, selected = "custom"), noCity) }
+
+    @Test
+    fun cityPacePicker() = shot("city", "pace-picker") { app.verst.feature.city.CityScreen(cityUi(picker = app.verst.nav.CityPicker.PACE), noCity) }
 
     @Test
     fun cityAgeGate() {
         shot("city", "age-gate") { app.verst.feature.city.CityScreen(cityUi(age = true), noCity) }
-        compose.onNodeWithText("Маршрут для взрослых").assertExists()
+        compose.onNodeWithText("Вам есть 18?").assertExists()
     }
 
     @Test
@@ -615,7 +644,28 @@ class ScreensScreenshotTest {
     fun cityNoCity() = shot("city", "no-city") { app.verst.feature.city.CityScreen(cityUi(error = "NO_CITY"), noCity) }
 
     @Test
-    fun cityNotEnough() = shot("city", "not-enough") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS"), noCity) }
+    fun cityNotEnoughWithEngineSuggestions() {
+        // 5.11 §10.5: only the engine's verified suggestions — never «Гулять 4 ч» while 4 ч is selected
+        val few = app.verst.nav.WalkFew(
+            480, false,
+            listOf(
+                app.verst.core.model.dto.WalkSuggestion(durationMin = 360, count = 7),
+                app.verst.core.model.dto.WalkSuggestion(unlimited = true, count = 9),
+                app.verst.core.model.dto.WalkSuggestion(preset = "overview", count = 12),
+            ),
+            5,
+        )
+        shot("city", "not-enough") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS", duration = 480, few = few), noCity) }
+        compose.onNodeWithTag("walk.few.0", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Гулять 8 ч").assertDoesNotExist()
+    }
+
+    @Test
+    fun cityNotEnoughWithoutSuggestions() {
+        val few = app.verst.nav.WalkFew(240, false, emptyList(), null)
+        shot("city", "not-enough-none") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS", few = few), noCity) }
+        compose.onNodeWithText("Гулять", substring = true).assertDoesNotExist()
+    }
 
     private val noWalk = object : app.verst.feature.city.WalkActions {
         override fun back() = Unit
@@ -638,6 +688,65 @@ class ScreensScreenshotTest {
 
     @Test
     fun walkOverview() = walkShot("city_route-overview.json", "overview")
+
+    private fun walkFilters(dog: Boolean = false, children: Int = 0, duration: Int? = 240) = app.verst.feature.city.PickerUi(
+        duration, v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets).presets.filter { it.available },
+        "overview", 2, children, dog, "normal", null,
+    )
+
+    private fun walkS4(state: String, ui: (app.verst.core.model.dto.WalkRouteDto) -> app.verst.feature.city.WalkUi) {
+        val w = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        shot("walk", state) { app.verst.feature.city.WalkScreen(ui(w), noWalk) }
+    }
+
+    @Test
+    fun walkFilterBarAndRebuilding() {
+        walkS4("rebuilding") { w -> app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = true, filters = walkFilters()) }
+        compose.onNodeWithTag("walk.filter.duration", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("walk.rebuilding", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun walkOtherNone() {
+        walkS4("other-none") { w -> app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(), otherNone = true) }
+        compose.onNodeWithTag("walk.other.none", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("walk.other", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun walkFewOnTheWalkScreen() {
+        val few = app.verst.nav.WalkFew(480, false, listOf(app.verst.core.model.dto.WalkSuggestion(durationMin = 240, count = 6), app.verst.core.model.dto.WalkSuggestion(clearExclude = true, count = 3)), 4)
+        walkS4("few") { w -> app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(duration = 480), few = few) }
+        compose.onNodeWithTag("walk.few", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("walk.total", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun walkUntimedWithHoursPills() {
+        val w0 = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        val hours = listOf(
+            app.verst.core.model.dto.WalkHoursDto(todayRu = "10:00–18:00", openNow = true),
+            app.verst.core.model.dto.WalkHoursDto(openNow = false, closedDayRu = "вторник"),
+            app.verst.core.model.dto.WalkHoursDto(allDay = true),
+            null,
+        )
+        val w = w0.copy(
+            startAt = null, endAt = null,
+            stops = w0.stops.mapIndexed { i, st -> st.copy(arriveAt = null, departAt = null, hours = hours[i % hours.size], poiKind = listOf("museum", "park", "square", "monument")[i % 4]) },
+        )
+        shot("walk", "untimed") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(duration = null)), noWalk) }
+        compose.onNodeWithText("Порядок по пути", substring = true).assertExists()
+        compose.onAllNodes(androidx.compose.ui.test.hasTestTag("hours.pill"), useUnmergedTree = true).fetchSemanticsNodes().let { assertTrue("pills ${it.size}", it.size >= 3) }
+    }
+
+    @Test
+    fun walkDogWarning() {
+        val w0 = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        val w = w0.copy(stops = w0.stops.mapIndexed { i, st -> if (i == 0) st.copy(poiKind = "museum") else st })
+        shot("walk", "dog-warning") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(dog = true)), noWalk) }
+        compose.onNodeWithTag("walk.warn.dog", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("С собакой внутрь нельзя.", substring = true).assertExists()
+    }
 
     @Test
     fun walkFreeFooter() {

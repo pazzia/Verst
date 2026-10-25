@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -701,7 +702,6 @@ class VerstFlowTest {
      * NOT_ENOUGH_POIS. Expected behaviour; this test FAILS on main (bugs a and c), the fix makes it pass.
      */
     @Test
-    @org.junit.Ignore("S4 bug (a)/(b), docs/bugs/s4-walk-filters.md — fails on main (CI run 40181105711); remove with the fix")
     fun customWalkRecoversAfterOtherVariantRunsOutOfPlaces() = runTest {
         val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
         fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
@@ -730,23 +730,125 @@ class VerstFlowTest {
         flow.buildCustomWalk()
         settle()
         assertEquals(Route.Walk, flow.top)
-        // «Другой вариант» → the engine runs out of places
+        // (a) «Другой вариант» with nothing new: the walk stays, the button is disabled, the stops come back
         flow.otherWalk()
         settle()
-        // (a) the screen drops out of the walk to the City plate…
-        assertEquals("NOT_ENOUGH_POIS", flow.cityError)
-        // …and every later build still excludes the first walk's stops, whatever the filters
-        flow.selectCityPreset("custom") // «Другой маршрут»
+        assertEquals(Route.Walk, flow.top)
+        assertTrue(flow.walkOtherNone)
+        assertNull(flow.walkFew)
+        assertNull(flow.cityError)
+        flow.otherWalk() // disabled: no request
+        settle()
+        val before = requests.size
+        // (b) a filter change on 5.11 clears the exclusions and rebuilds there after 400 ms
         flow.setCityDuration(120)
         flow.toggleCityInterest("parks")
-        flow.buildCustomWalk()
-        settle()
+        settle(300)
+        assertEquals("debounced: nothing yet", before, requests.size)
+        settle(1_000)
+        assertEquals("one rebuild for two quick changes", before + 1, requests.size)
         val last = requests.last()
         assertEquals("filters reach the request", 120, last.durationMin)
         assertTrue("filters reach the request", "parks" in last.interests)
-        // EXPECTED (fails on main): a filter change starts a fresh walk — the exclusions of «Другой вариант» are dropped
         assertTrue("exclusions survive a filter change: ${last.exclude}", last.exclude.isEmpty())
         assertEquals(Route.Walk, flow.top)
+        assertFalse(flow.walkOtherNone)
         assertNull(flow.cityError)
+        // the user's custom values persist when the sheet reopens
+        flow.back()
+        flow.selectCityPreset("custom")
+        assertEquals(120, flow.cityDurationMin)
+        assertTrue("parks" in flow.cityInterests)
+    }
+
+    @Test
+    fun walkCrewIsTheWalksOwnAndChildrenNeverBlock() = runTest {
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val p0 = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        // v3 shape: a beer preset (18+) and the dog walk
+        val presets = p0.copy(presets = p0.presets.map { if (it.preset == "beer") it.copy(available = true, adultOnly = true) else it } +
+            app.verst.core.model.dto.CityPresetDto(preset = "dog_walk", count = 9, defaultDurationMin = 120))
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                return EngineResult.Ok(oneWalk)
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        // the dog walk shows only with the dog, first
+        assertFalse(flow.visibleCityPresets().any { it.preset == "dog_walk" })
+        flow.setCityDog(true)
+        assertEquals("dog_walk", flow.visibleCityPresets().first().preset)
+        flow.setCityChildren(1)
+        flow.setCityAdults(3)
+        // 18+: the age question only; a child does not block the drink preset
+        flow.selectCityPreset("beer")
+        assertNotNull(flow.ageGate)
+        flow.answerAge(false)
+        assertEquals("«Нет» keeps the previous preset", "overview", flow.cityPreset)
+        flow.selectCityPreset("beer")
+        flow.answerAge(true)
+        assertEquals("beer", flow.cityPreset)
+        flow.setCityDuration(null)
+        flow.buildWalk()
+        settle()
+        val r = requests.single()
+        assertEquals(3, r.adults)
+        assertEquals(1, r.children)
+        assertTrue(r.dog)
+        assertTrue(r.unlimited)
+        assertTrue(r.adultConfirmed)
+        assertTrue(r.toInputJson().contains("\"durationMin\":null"))
+        assertTrue(r.toInputJson().contains("\"dog\":true"))
+        // the car crew is untouched
+        assertEquals(flow.adults, flow.adults)
+    }
+
+    @Test
+    fun notEnoughShowsOnlyTheEnginesSuggestions() = runTest {
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val presets = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
+        // the v3 error as JSON: «6 ч» checked, unlimited checked
+        val err = app.verst.core.model.EngineJson.walkRoute(
+            """{"ok": false, "error": {"code": "NOT_ENOUGH_POIS", "count": 4, "suggestions": [{"durationMin": 360, "count": 7}, {"durationMin": null, "count": 9}, {"weird": 1}]}}""",
+        ) as EngineResult.Err
+        assertEquals(2, err.error.walkSuggestions.size)
+        assertTrue(err.error.walkSuggestions[1].unlimited)
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                return if (request.durationMin == 480) err else EngineResult.Ok(oneWalk)
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        flow.setCityDuration(480)
+        flow.buildWalk()
+        settle()
+        assertEquals(Route.City, flow.top)
+        assertEquals("NOT_ENOUGH_POIS", flow.cityError)
+        assertEquals(listOf(360, null), flow.walkFew!!.suggestions.map { it.durationMin })
+        flow.applyWalkSuggestion(flow.walkFew!!.suggestions[0])
+        settle()
+        assertEquals(Route.Walk, flow.top)
+        assertEquals(360, requests.last().durationMin)
+        assertNull(flow.walkFew)
     }
 }

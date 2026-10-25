@@ -219,8 +219,35 @@ fun BoxScope.NaviDialog(
     tag: String,
     onPrimary: () -> Unit,
     onSecondary: () -> Unit,
+    /** S4 `AgeGateDialog`: «Нет» / «Да» side by side, equal width («Да» yellow, right). */
+    sideBySide: Boolean = false,
 ) {
     Box(Modifier.matchParentSize().background(C.overlay.scrim).clickable(remember { MutableInteractionSource() }, indication = null, onClick = onSecondary))
+    if (sideBySide) {
+        Column(
+            Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp).naviPanel().padding(6.dp).padding(18.dp)
+                .pointerInput(Unit) { detectTapGestures { } }
+                .semantics { paneTitle = title }.testTag(tag),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Txt(title, T.title.lg, C.text.primary)
+            if (body.isNotEmpty()) Txt(body, T.body.md, C.navi.text)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Box(
+                    Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.dash.control)
+                        .border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r12))
+                        .clickable(role = Role.Button, onClick = onSecondary).testTag("$tag.no"),
+                    contentAlignment = Alignment.Center,
+                ) { Txt(secondary, T.button.md, C.text.primary, maxLines = 1) }
+                Box(
+                    Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.accent.yellow)
+                        .clickable(role = Role.Button, onClick = onPrimary).testTag("$tag.yes"),
+                    contentAlignment = Alignment.Center,
+                ) { Txt(primary, T.cta.sm, C.text.onLight, maxLines = 1) }
+            }
+        }
+        return
+    }
     Column(
         Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp).naviPanel().padding(6.dp).padding(18.dp)
             .pointerInput(Unit) { detectTapGestures { } }

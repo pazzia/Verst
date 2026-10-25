@@ -177,9 +177,23 @@ data class WalkStopDto(
     val noteRu: String? = null,
     val hasPhoto: Boolean = false,
     val tappable: Boolean = true,
+    /** API v3: today's hours (untimed walks show them as a pill; timed ones as «открыто до …»). */
+    val hours: WalkHoursDto? = null,
+    /** API v3: the whitelist kind (ADR-0015 §2) for the `KindTag`; the old `kind` stays the pictogram key. */
+    val poiKind: String? = null,
+    /** API v3: `osm | wikidata | default` — replaces `hoursVerified`. */
+    val hoursSource: String? = null,
 ) {
     val isBar: Boolean get() = kind in BarKinds
+    /** Indoor places a dog usually may not enter (5.11 §10.4 `walk_stop_dog_no`). */
+    val indoor: Boolean get() = isBar || (poiKind ?: kind) in IndoorKinds
 }
+
+/** `stops[].hours` (v3): «10:00–18:00» today, open now (null = unknown), where the hours come from. */
+@Serializable
+data class WalkHoursDto(val todayRu: String? = null, val openNow: Boolean? = null, val source: String? = null, val closedDayRu: String? = null, val allDay: Boolean = false)
+
+val IndoorKinds = setOf("museum", "theatre", "interactive", "gallery", "cafe")
 
 val BarKinds = setOf("bar", "ryumochnaya", "pub", "craft", "beer")
 
@@ -223,12 +237,18 @@ data class WalkRouteDto(
     val input: JsonObject? = null,
     /** Architect (S3-QA P0-01), when it lands: the walk was moved to the next day's window. */
     @kotlinx.serialization.SerialName("startsTomorrow") val startsTomorrowFlag: Boolean? = null,
+    /** API v3: a hash of the input; a result whose key is not the current request's is stale (5.11 §10.2). */
+    val requestKey: String? = null,
     /** Architect S3-QA P1-02: why the walk is shorter than asked (null = it is not). */
     val shorter: WalkShorterDto? = null,
     val requestedDurationMin: Int? = null,
     @Transient val json: String = "",
 ) {
     val adultOnly: Boolean get() = responsibleNoteRu != null
+
+    /** «без ограничения» (v3 `durationMin: null`): no times, the hours of each place instead. */
+    val untimed: Boolean get() = input?.get("durationMin") is kotlinx.serialization.json.JsonNull ||
+        (startAt == null && stops.isNotEmpty() && stops.all { it.arriveAt == null })
 
     /**
      * S3-QA P0-01: the walk starts on a later day than «now» in the town's time zone. The engine's flag

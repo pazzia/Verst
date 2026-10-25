@@ -134,6 +134,10 @@ data class WalkRequest(
     val children: Int = 0,
     val adultConfirmed: Boolean = false,
     val exclude: List<String> = emptyList(),
+    /** API v3: the dog in the walk's own crew (ADR-0015 §6). */
+    val dog: Boolean = false,
+    /** API v3: «без ограничения» — sent as `"durationMin": null`. */
+    val unlimited: Boolean = false,
 ) {
     fun toInputJson(): String = buildJsonObject {
         put("start", buildJsonObject {
@@ -142,7 +146,7 @@ data class WalkRequest(
             put("label", start.label)
         })
         put("preset", preset)
-        durationMin?.let { put("durationMin", it) }
+        if (unlimited) put("durationMin", kotlinx.serialization.json.JsonNull) else durationMin?.let { put("durationMin", it) }
         if (interests.isNotEmpty()) put("interests", kotlinx.serialization.json.JsonArray(interests.map { JsonPrimitive(it) }))
         pace?.let { put("pace", it) }
         budgetRub?.let { put("budgetRub", it) }
@@ -150,6 +154,7 @@ data class WalkRequest(
         put("crew", buildJsonObject {
             put("adults", adults)
             put("children", children)
+            if (dog) put("dog", true)
         })
         if (adultConfirmed) put("adultConfirmed", true)
         if (exclude.isNotEmpty()) put("exclude", kotlinx.serialization.json.JsonArray(exclude.map { JsonPrimitive(it) }))

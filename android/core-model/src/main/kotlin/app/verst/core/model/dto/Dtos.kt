@@ -206,7 +206,45 @@ data class EngineErrorDto(
     val pointIndex: Int? = null,
     val roadKm: Double? = null,
     val detail: String? = null,
-)
+    /**
+     * API v3 (ADR-0015 §6): `NOT_ENOUGH_POIS` options the engine has checked — each differs from the request and
+     * succeeds. Kept raw: `{"durationMin": null}` (explicit null) means «без ограничения».
+     */
+    val suggestions: kotlinx.serialization.json.JsonArray? = null,
+    /** v3: how many places were found for the failed request (the «Нашли N» line). */
+    val count: Int? = null,
+) {
+    /** The engine's verified suggestions, decoded defensively (unknown shapes are skipped). */
+    val walkSuggestions: List<WalkSuggestion>
+        get() = suggestions.orEmpty().mapNotNull { WalkSuggestion.from(it) }
+}
+
+/** One `NOT_ENOUGH_POIS` suggestion: a duration (null = unlimited), a preset, or «return the removed places». */
+data class WalkSuggestion(
+    val durationMin: Int? = null,
+    val unlimited: Boolean = false,
+    val preset: String? = null,
+    val clearExclude: Boolean = false,
+    val count: Int? = null,
+) {
+    companion object {
+        fun from(e: kotlinx.serialization.json.JsonElement): WalkSuggestion? {
+            val o = e as? kotlinx.serialization.json.JsonObject ?: return null
+            fun prim(k: String) = o[k] as? kotlinx.serialization.json.JsonPrimitive
+            val count = prim("count")?.content?.toIntOrNull()
+            return when {
+                prim("clearExclude")?.content == "true" -> WalkSuggestion(clearExclude = true, count = count)
+                o.containsKey("preset") -> prim("preset")?.takeIf { it.isString }?.content?.let { WalkSuggestion(preset = it, count = count) }
+                o.containsKey("durationMin") -> {
+                    val d = o["durationMin"]
+                    if (d is kotlinx.serialization.json.JsonNull) WalkSuggestion(unlimited = true, count = count)
+                    else prim("durationMin")?.content?.toIntOrNull()?.let { WalkSuggestion(durationMin = it, count = count) }
+                }
+                else -> null
+            }
+        }
+    }
+}
 
 /**
  * `plan` / `replace_stop` / `patch_cost` result. [tripJson] is the engine's private trip verbatim (with
