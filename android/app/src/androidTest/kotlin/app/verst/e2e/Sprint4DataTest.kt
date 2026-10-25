@@ -119,7 +119,7 @@ class Sprint4DataTest {
     }
 
     /** Navigator → [query] → Instruments with [mood] → Road ahead. */
-    private fun planTo(query: String, mood: Mood, child: Boolean = false, dog: Boolean = false) {
+    private fun planTo(query: String, mood: Mood, child: Boolean = false, dog: Boolean = false, dailyKm: Int? = null) {
         compose.runOnUiThread {
             if (child) flow.seats[0] = Seat.CHILD
             flow.dog = dog
@@ -133,7 +133,10 @@ class Sprint4DataTest {
         waitTag("navigator.start", 10_000)
         compose.onNodeWithTag("navigator.start").performClick()
         waitTag("instruments.start")
-        compose.runOnUiThread { flow.pickMood(mood) }
+        compose.runOnUiThread {
+            flow.pickMood(mood)
+            if (dailyKm != null) flow.stepKm(dailyKm - flow.dailyKm)
+        }
         compose.onNodeWithTag("instruments.start").performClick()
         compose.waitUntil(120_000) { flow.top == Route.Road || flow.top == Route.NoFit }
         if (flow.top == Route.NoFit) Log.i("VerstE2e", "S4D no-fit for $query")
@@ -198,6 +201,35 @@ class Sprint4DataTest {
         funStops.take(2).forEachIndexed { i, s -> scrollShot(s, "13${1 + i}-fun-stop-$i") }
         assertTrue("«Разминка» stops on M-11", funStops.isNotEmpty())
         cardsAtEveryLevel("msk-spb")
+    }
+
+    /** M8 / G18: Москва → Казань по М-12, 2 взр., 500 км/день — Покрова на Нерли with «Крюк ≈ 30 мин». */
+    @Test
+    fun s4dMoscowKazanM12() {
+        compose.runOnUiThread { flow.debugResetOrigin() }
+        planTo("Казань", Mood.CALM, dailyKm = 500)
+        logTrip("msk-kazan")
+        val detours = stops().filter { (it.note ?: it.reason)?.contains("Крюк") == true }
+        Log.i("VerstE2e", "S4D Крюк rows: ${detours.map { "${it.name}: ${it.note ?: it.reason}" }}")
+        val pokrov = stops().firstOrNull { it.name.contains("Покрова") } ?: detours.firstOrNull()
+        assertTrue("a quality detour on М-12", pokrov != null)
+        scrollShot(pokrov!!, "150-msk-kazan-pokrov")
+        compose.onNodeWithTag("road.total").performClick()
+        waitTag("waybill.sheet")
+        shot("151-msk-kazan-waybill")
+    }
+
+    /** M8 / G14: Фрязино → Екатеринбург, 2 взр. + ребёнок, 600 км/день — day 1 through Владимир. */
+    @Test
+    fun s4dFryazinoEkaterinburgDay1() {
+        from("Фрязино", 55.9606, 38.0456)
+        planTo("Екатеринбург", Mood.CALM, child = true, dailyKm = 600)
+        logTrip("fryazino-ekb")
+        val day1 = flow.result!!.trip.daysList.first().stops
+        val vladimir = day1.firstOrNull { it.name.contains("Владимир") || it.townId?.contains("vladimir") == true }
+        Log.i("VerstE2e", "S4D day 1 Владимир: ${vladimir?.name}")
+        shot("152-fryazino-ekb-top")
+        (vladimir ?: day1.getOrNull(2))?.let { scrollShot(it, "153-fryazino-ekb-day1-vladimir") }
     }
 
     @Test
