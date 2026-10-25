@@ -50,7 +50,7 @@ class V2ContractsTest {
         assertTrue(plan.tripJson.contains("engineState"))
         val e = ok(EngineJson.estimate(envelope("estimate-synthetic.json")))
         assertEquals("plan", e.outcome)
-        assertTrue("an estimate total (data-dependent: ${e.totalRub})", e.totalRub > 0)
+        assertTrue("an estimate total (data-dependent: ${e.totalRub})", (e.totalRub ?: 0) > 0)
         // The v1 decoder still reads a v2 plan (additive fields only).
         assertEquals(plan.trip.km, ok(EngineJson.planResult(envelope("plan-synthetic.json"))).trip.km)
     }
