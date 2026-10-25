@@ -298,10 +298,13 @@ def delta_rub(
     return _round10(_exact_cost(new, inp, ctx) - _exact_cost(old, inp, ctx) + fuel + park_delta)
 
 
+PARKED = frozenset({StopKind.SIGHT, StopKind.FOOD, StopKind.REST})  # = engine.PARKED_KINDS
+
+
 def _parking_at(s: PlannedStop, slot: Slot, sid: str, day: DayPlan, ctx: PlanContext) -> ParkingUnit | None:
-    """The stop's parking unit as `engine._parking` prices it (sights only); None without a parking port."""
+    """The stop's parking unit as `engine._parking` prices it; None without a parking port."""
     model = ctx.ports.parking
-    if model is None or s.kind is not StopKind.SIGHT or s.place is None or slot.arrive is None:
+    if model is None or s.kind not in PARKED or s.place is None or slot.arrive is None:
         return None
     return model.unit(sid, s.name_ru, s.point, local(slot.arrive, day.tz), s.dwell_min)
 

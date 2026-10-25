@@ -72,29 +72,51 @@ POI_TICKETS = {
 BIG_MUSEUM_SITELINKS = 40
 
 
+_RATING: dict[int, float] = {}
+
+
 def poi_rating(sitelinks: int) -> float:
-    return round(3.6 + 1.3 * min(1.0, math.log10(1 + sitelinks) / math.log10(1 + 150)), 2)
+    r = _RATING.get(sitelinks)
+    if r is None:
+        r = _RATING[sitelinks] = round(
+            3.6 + 1.3 * min(1.0, math.log10(1 + sitelinks) / math.log10(1 + 150)), 2
+        )
+    return r
 
 
 # catalogue kind → ADR-0015 §2 category (the diversity rules count «temple» and «monastery» as religious)
 POI_CATEGORY = {"church": "temple"}
+_HOURS_OK: dict[str, bool] = {}
 
 
 def _hours_ok(text: str) -> bool:
-    from verst_planner.hours import parse
+    ok = _HOURS_OK.get(text)
+    if ok is None:
+        from verst_planner.hours import parse
 
-    try:
-        parse(text)
-    except Exception:
-        return False
-    return True
+        try:
+            parse(text)
+            ok = True
+        except Exception:
+            ok = False
+        _HOURS_OK[text] = ok
+    return ok
+
+
+_NO_PARTNERS = PartnerIds(None, None)
+_TAGS: dict[tuple[str, bool], frozenset[Tag]] = {}
+
+
+def _tags(kind: str, free: bool) -> frozenset[Tag]:
+    """The kind's tags (+ FREE_ENTRY), one shared frozenset per (kind, free): 20 k POIs, a few dozen sets."""
+    t = _TAGS.get((kind, free))
+    if t is None:
+        t = _TAGS[(kind, free)] = POI_TAGS[kind] | ({Tag.FREE_ENTRY} if free else frozenset())
+    return t
 
 
 def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
     ticket = None if p.fee is False else POI_TICKETS.get(p.kind)  # OSM fee=no: free entry
-    tags = set(POI_TAGS[p.kind])
-    if ticket is None:
-        tags.add(Tag.FREE_ENTRY)
     dwell = POI_DWELL[p.kind]
     if p.kind == "museum" and p.sitelinks >= BIG_MUSEUM_SITELINKS:
         dwell = 90
@@ -113,9 +135,9 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
         ticket_adult_rub=ticket[0] if ticket else None,
         ticket_child_rub=ticket[1] if ticket else None,
         rating_internal=poi_rating(p.sitelinks),
-        tags=frozenset(tags),
+        tags=_tags(p.kind, ticket is None),
         description_ru=p.desc,
-        partner_ids=PartnerIds(None, None),
+        partner_ids=_NO_PARTNERS,
         source=Source.OSM,
         verified_at=None,
         status=PlaceStatus.LIVE,

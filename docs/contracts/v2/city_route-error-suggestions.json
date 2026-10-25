@@ -29,12 +29,12 @@
    "suggestions": [
     {
      "preset": "overview",
-     "stops": 4,
+     "stops": 2,
      "titleRu": "Обзорная прогулка"
     },
     {
      "preset": "custom",
-     "stops": 4,
+     "stops": 5,
      "titleRu": "История, архитектура, парки и виды"
     }
    ],

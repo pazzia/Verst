@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import gc
 import json
 import sys
 import threading
@@ -536,6 +537,21 @@ def why_ru(w: _World, p: Place) -> str | None:
     return " · ".join(parts) or None
 
 
+OSM_PLACE_ATTRIBUTION = "poi.osm_place"
+
+
+def place_source(w: _World, place_id: str) -> dict[str, Any]:
+    """M9 (ODbL): `placeSource` = curated | wikidata | osm and, for an OSM-only place (or a bar),
+    `placeAttributionRu` (the `poi.osm_place` line) for the card and the stop sheet."""
+    p = w.world.places.get(place_id)
+    if p is not None and p.source is Source.CURATED:
+        return {"placeSource": "curated", "placeAttributionRu": None}
+    osm = place_id.startswith("osm_") or (bool(_CATALOGUE) and place_id in _CATALOGUE[0].bar_by_id)
+    if osm:
+        return {"placeSource": "osm", "placeAttributionRu": ru.text(OSM_PLACE_ATTRIBUTION)}
+    return {"placeSource": "wikidata", "placeAttributionRu": None}
+
+
 def _photo_source(w: _World, place_id: str) -> str | None:
     """Where the stop's photo comes from: p18 (the item's own image) | wikipedia | osm | geosearch (a
     Commons photo taken near the place, labelled «Фото поблизости»); None = no photo."""
@@ -605,14 +621,20 @@ def _stop_parking(w: _World, s: dict[str, Any], unit: dict[str, Any] | None) -> 
     return parking_sheet(info, {k: unit[k] for k in ("rub", "rubPerHour", "hours", "source")})
 
 
+PARKED_STOPS = ("sight", "food", "rest")
+
+
 def _decorate_sight(w: _World, s: dict[str, Any], unit: dict[str, Any] | None) -> None:
+    if s.get("kind") in PARKED_STOPS:  # M9: every stop where the car is left (rub null = unknown tariff)
+        s["parking"] = _stop_parking(w, s, unit)
     p = w.world.places.get(s.get("placeId") or "")
     if s.get("kind") != "sight" or p is None:
         return
     s["poiKind"] = card_kind(w, p)
+    s["poiKindRu"] = ru.kind_label(s["poiKind"])
     s["whyRu"] = why_ru(w, p)
     s["photoSource"] = _photo_source(w, p.id)
-    s["parking"] = _stop_parking(w, s, unit)
+    s.update(place_source(w, p.id))
 
 
 def with_stop_details(trip: dict[str, Any], w: _World | None) -> dict[str, Any]:
@@ -871,9 +893,7 @@ def replace_stop(world: str, trip_json: str, stop_id: str, alt_id: str) -> str:
     def run() -> dict[str, Any]:
         w = _world(world)
         trip = _trip(trip_json)
-        return _trip_result(
-            w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")), w
-        )
+        return _trip_result(w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")), w)
 
     return _envelope(run)
 
@@ -961,15 +981,24 @@ def _load_catalogue() -> dict[str, Any]:
     if base is None:
         raise EngineFailure("NO_WORLD", "central_russia_v1 must be loaded before the catalogue")
     t0 = time.perf_counter()
+    # M9: ~100 k long-lived objects; the cyclic GC would rescan them several times while they are created
+    # (≈ 30 % of the load). Pause it, then freeze the result so later collections skip it too.
+    was_enabled = gc.isenabled()
+    gc.disable()
     try:
-        cat = load_packaged()
-    except CatalogueError as e:
-        raise EngineFailure("NO_CATALOGUE", str(e)) from e
-    cw = compose(base.world, cat)
-    ports = build_catalogue_ports(cw, _CLOCK.now())
-    bars: GridIndex[str] = GridIndex(0.05)
-    for b in cat.bars:
-        bars.add(b.point, b.id)
+        try:
+            cat = load_packaged()
+        except CatalogueError as e:
+            raise EngineFailure("NO_CATALOGUE", str(e)) from e
+        cw = compose(base.world, cat)
+        ports = build_catalogue_ports(cw, _CLOCK.now())
+        bars: GridIndex[str] = GridIndex(0.05)
+        for b in cat.bars:
+            bars.add(b.point, b.id)
+    finally:
+        if was_enabled:
+            gc.enable()
+    gc.freeze()
     _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, _planner(ports, _CLOCK, OPEN_DATA_CONFIG), cw, bars)
     _CATALOGUE[:] = [cat]
     return {
@@ -1040,10 +1069,9 @@ def _poi_kind(w: _World, p: Place) -> str:
 
 
 def card_kind(w: _World, p: Place) -> str:
-    """API v3 `poiKind` of a sight on cards, geo search and trip stops: the catalogue kind, with the generic
-    «attraction» narrowed to the ADR-0015 category (a temple by its name, a park by its tag)."""
-    kind = _poi_kind(w, p)
-    return category_of(p) if kind == "attraction" else kind
+    """API v3 `poiKind` of a sight on cards, geo search, trip and walk stops (M9: the same rule as the
+    diversity category — name first: «Церковь…» is a temple, «Золотые ворота» a monument)."""
+    return category_of(p)
 
 
 def _sitelinks(place_id: str) -> int:
@@ -1248,7 +1276,10 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
         wt = WalkTown(town.id, town.name_ru, ru.prepositional(town), tz)
         key = request_key(str(world), inp)
         try:
-            return {**_solve_walk(w, inp, wt, now_local, f"wlk_{rid}", token), "requestKey": key}
+            return {
+                **_walk_details(w, _solve_walk(w, inp, wt, now_local, f"wlk_{rid}", token)),
+                "requestKey": key,
+            }
         except NotEnoughPois as e:
             e.suggestions = _walk_suggestions(w, inp, wt, now_local, token)
             e.request_key = key
@@ -1257,6 +1288,19 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
         with _LOCK:
             if _CANCELS.get(rid) is token:
                 del _CANCELS[rid]
+
+
+def _walk_details(w: _World, result: dict[str, Any]) -> dict[str, Any]:
+    """M9: walk stops carry the same `poiKind` / `poiKindRu` and place source as trip stops (`kind` stays
+    the walk solver's kind)."""
+    for s in result.get("stops", []):
+        pid = s.get("poiId") or ""
+        p = w.world.places.get(pid)
+        if p is not None:
+            s["poiKind"] = card_kind(w, p)
+            s["poiKindRu"] = ru.kind_label(s["poiKind"])
+        s.update(place_source(w, pid))
+    return result
 
 
 def _walk_candidates(w: _World, inp: WalkInput) -> tuple[WalkInput, list[Candidate]]:
@@ -1504,6 +1548,7 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
             "id": p.id,
             "kind": "sight",
             "poiKind": card_kind(w, p),
+            "poiKindRu": ru.kind_label(card_kind(w, p)),
             "nameRu": p.name_ru,
             "descriptionRu": p.description_ru,
             # API v3 (ADR-0015 §3): the extra sources and the card level the 5.9 card is laid out for
@@ -1529,6 +1574,7 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
             "isFictional": False,
             "attributionRu": attribution,
             "wikidataId": w.catalogue.qid_of_place.get(p.id) if w.catalogue else None,
+            **place_source(w, p.id),
         }
     if p is not None and p.type is PlaceType.LODGING:
         town = w.world.towns.get(p.town_id or "")
@@ -1568,6 +1614,8 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
             "isFictional": False,
             "attributionRu": [ru.text("poi.osm")],
             "wikidataId": None,
+            "placeSource": "osm",
+            "placeAttributionRu": ru.text(OSM_PLACE_ATTRIBUTION),
         }
     raise NotFound("place", pid)
 

@@ -151,16 +151,25 @@ class CatalogueGeocoding:
     def __init__(self, world: FakeWorld, popularity: dict[str, int], towns: GridIndex[Town]) -> None:
         self.world = world
         self.towns = towns
-        self._town_keys = [
-            (t.name_ru.casefold().replace("\u0451", "\u0435"), t)
-            for t in sorted(world.towns.values(), key=lambda t: t.id)
-        ]
-        self._place_keys = [
-            (p.name_ru.casefold().replace("\u0451", "\u0435"), p)
-            for p in sorted(world.places.values(), key=lambda p: p.id)
-            if p.status is PlaceStatus.LIVE and p.type is PlaceType.SIGHT
-        ]
+        self._keys: tuple[list[tuple[str, Town]], list[tuple[str, Place]]] | None = None
         self.popularity = popularity
+
+    def _search_keys(self) -> tuple[list[tuple[str, Town]], list[tuple[str, Place]]]:
+        """Built on the first query, not at catalogue load (M9: the load is on the app's start path)."""
+        if self._keys is None:
+            world = self.world
+            self._keys = (
+                [
+                    (t.name_ru.casefold().replace("\u0451", "\u0435"), t)
+                    for t in sorted(world.towns.values(), key=lambda t: t.id)
+                ],
+                [
+                    (p.name_ru.casefold().replace("\u0451", "\u0435"), p)
+                    for p in sorted(world.places.values(), key=lambda p: p.id)
+                    if p.status is PlaceStatus.LIVE and p.type is PlaceType.SIGHT
+                ],
+            )
+        return self._keys
 
     def _region_name(self, code: str) -> str:
         r = self.world.regions.get(code)
@@ -171,13 +180,14 @@ class CatalogueGeocoding:
         if not needle:
             return []
         found: list[tuple[int, int, float, str, GeoSuggestion]] = []
-        for name, t in self._town_keys:
+        town_keys, place_keys = self._search_keys()
+        for name, t in town_keys:
             if needle in name:
                 rank = 0 if name.startswith(needle) else 2
                 dist = haversine_km(near, t.point) if near else 0.0
                 s = GeoSuggestion("city", t.name_ru, self._region_name(t.region_code), t.point, t.id)
                 found.append((rank, -t.population, round(dist, 3), t.id, s))
-        for name, p in self._place_keys:
+        for name, p in place_keys:
             if needle in name:
                 rank = 1 if name.startswith(needle) else 3
                 dist = haversine_km(near, p.point) if near else 0.0

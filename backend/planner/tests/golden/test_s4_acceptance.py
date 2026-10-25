@@ -22,13 +22,34 @@ MOSCOW = LatLon(55.7558, 37.6173)
 BAD_NAMES = ("школа", "гимназия", "стадион", "администрация", "больница", "детский сад")
 
 
+BARE_NAMES = ("Остановка у дороги", "Площадка отдыха", "АЗС у трассы", "Детская площадка")
+
+
 def plan(case: str) -> dict[str, Any]:
     doc = json.loads((CASES / f"{case}.json").read_text("utf-8"))
     mobile.set_clock(doc["clock"])
     r = json.loads(mobile.plan("russia_v1", case, json.dumps(doc["input"], ensure_ascii=False), None))
     assert r["ok"], r
     trip: dict[str, Any] = r["result"]["trip"]
+    check_m9(trip)
     return trip
+
+
+def check_m9(trip: dict[str, Any]) -> None:
+    """M9 on every S4 case: no bare roadside / rest / playground name, a parking object wherever the car is
+    left, the Russian category label, the OSM attribution, `funFor` on the fun stops."""
+    for d in trip["daysList"]:
+        for s in d["stops"]:
+            assert s["name"] not in BARE_NAMES, s["name"]
+            if s["kind"] in ("sight", "food") or (s["kind"] == "rest" and s["placeId"]):
+                assert s.get("parking") is not None, s["name"]
+                assert "rub" in s["parking"] and "zoneRu" in s["parking"], s["name"]
+            if s["kind"] == "sight" and s["placeId"]:
+                assert s.get("poiKindRu"), s["name"]
+                if s.get("placeSource") == "osm":
+                    assert s["placeAttributionRu"] == "Данные о месте: © участники OpenStreetMap"
+            if (s.get("reason") or "").startswith("Весело и познавательно"):
+                assert s.get("funFor") and set(s["funFor"]) <= {"child", "dog", "adults"}, s["name"]
 
 
 def _detour(s: dict[str, Any]) -> int:
@@ -123,7 +144,7 @@ class S4AcceptanceTest(unittest.TestCase):
         self.assertIn("parking", lines)
         units = trip["cost"]["units"]["parking"]
         self.assertEqual(lines["parking"]["rub"], sum(u["rub"] or 0 for u in units))
-        stops = {s["id"]: s for s in sights(trip)}
+        stops = {s["id"]: s for d in trip["daysList"] for s in d["stops"]}  # sights, cafés, rest areas
         for u in units:  # a weekday sight in Moscow's paid zones (≤ 17 km) pays; outside the zones it is free
             s = stops[u["stopId"]]
             in_centre = haversine_km(LatLon(s["lat"], s["lon"]), MOSCOW) <= 17.0

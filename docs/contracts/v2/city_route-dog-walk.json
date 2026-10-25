@@ -77,7 +77,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w02",
@@ -100,7 +104,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     },
     {
      "id": "w03",
@@ -123,7 +131,11 @@
      },
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
-     "tappable": true
+     "tappable": true,
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
     }
    ],
    "cost": {

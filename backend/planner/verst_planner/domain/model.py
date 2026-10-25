@@ -563,6 +563,8 @@ class ScheduledStop:
     selected_hotel_id: str | None
     alternatives_note_ru: str | None = None
     """A§16.6: «Других вариантов…» / «Нашли только один…» when fewer than two alternatives were found."""
+    fun_for: tuple[str, ...] = ()
+    """ADR-0015 §5 (API v3 `funFor`): who a «Весело и познавательно» stop is for — child, dog, adults."""
 
 
 @dataclass(frozen=True, slots=True)

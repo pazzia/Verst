@@ -21,9 +21,10 @@ import dataclasses
 from dataclasses import dataclass
 
 from verst_planner.domain.enums import Mood, PlaceType, StopKind, Tag
-from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop, Route
+from verst_planner.domain.model import Candidate, DayPlan, LatLon, NormalizedInput, Place, PlannedStop, Route
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import sight_reason
+from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.polyline import interpolate
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.checks import day_valid, lunch_out_of_window, over_budget, sights_still_open
@@ -117,8 +118,37 @@ def fun_affinity(c: Candidate, inp: NormalizedInput) -> float:
     return score
 
 
+FUN_MIN_QUALITY = 0.30  # M9: a bare «Паровоз» is not a fun stop; a playground (named by its town) is
+
+
 def is_fun(c: Candidate, inp: NormalizedInput) -> bool:
-    return inp.mood is Mood.FUN and c.place.type is PlaceType.SIGHT and fun_affinity(c, inp) > 0
+    return (
+        inp.mood is Mood.FUN
+        and c.place.type is PlaceType.SIGHT
+        and fun_affinity(c, inp) > 0
+        and _fun_quality_ok(c.place)
+    )
+
+
+def _fun_quality_ok(p: Place) -> bool:
+    from verst_planner.pipeline.sights import category_of
+
+    return p.quality is None or p.quality >= FUN_MIN_QUALITY or category_of(p) == "playground"
+
+
+def fun_for(p: Place, inp: NormalizedInput) -> tuple[str, ...]:
+    """ADR-0015 §5 `funFor`: the crew groups the stop suits (the stop's own group first when none does)."""
+    from verst_planner.pipeline.sights import category_of
+
+    cat = category_of(p)
+    groups = []
+    if inp.crew.children > 0 and cat in FUN_PREFER["child"]:
+        groups.append("child")
+    if inp.crew.dog and cat in FUN_PREFER["dog"] and cat not in INDOOR:
+        groups.append("dog")
+    if cat in FUN_PREFER["adults"] and not (inp.crew.dog and cat in INDOOR):
+        groups.append("adults")
+    return tuple(groups) or (fun_group(inp),)
 
 
 def rest_score(c: Candidate, inp: NormalizedInput) -> float:
@@ -174,7 +204,7 @@ def rest_pool(corridor: Corridor, fun: bool = False, secular: bool = False) -> l
             (c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL
             or (fun and c.detour_min <= FUN_DETOUR_FALLBACK_MIN)
         )
-        and not (secular and category_of(c.place) in RELIGIOUS)
+        and not (secular and (category_of(c.place) in RELIGIOUS or not _fun_quality_ok(c.place)))
     ]
     return sorted(pool, key=lambda c: (c.km_at, c.place.id))
 
@@ -372,6 +402,13 @@ def plan_rests_day(
             limit = fun_limit if is_fun(c, inp) else rc.max_detour_min
             if c.detour_min > limit or d0 < g - EPS:
                 return False
+            if inp.crew.children == 0 and c.place.quality is not None and Tag.PLAYGROUND in c.place.tags:
+                return False  # M9: an open-data playground is a break only for a child
+            if c.place.type is PlaceType.SIGHT and ctx.cfg.sights.diversity:
+                from verst_planner.pipeline.sights import diversity_ok
+
+                if not diversity_ok(day, c):  # a sight as a break follows the same kind rules
+                    return False
             return gap.t1 - clock.at(c.km_at) >= need_after - EPS
 
         span = [(c, d0) for c in pool.between(gap.km0, gap.km1) if (d0 := drive_since(c)) is not None]
@@ -451,10 +488,11 @@ def roadside_break(km: float, pool: RestPool, ctx: PlanContext, again: bool = Fa
     (a second one that day) drops the «площадки рядом нет» sentence (ADR-0015 §5)."""
     assert pool.route is not None
     point = interpolate(pool.route, km)
+    name = roadside_name(km, point, pool.route, ctx) if ctx.cfg.sights.diversity else None
     return PlannedStop(
         kind=StopKind.REST,
         km_at=km,
-        name_ru=ru.text("label.roadside_break"),
+        name_ru=name or ru.text("label.roadside_break"),
         point=point,
         dwell_min=ctx.cfg.rest.break_min_dwell,
         auto=True,
@@ -462,6 +500,38 @@ def roadside_break(km: float, pool: RestPool, ctx: PlanContext, again: bool = Fa
         region_code=ctx.region_at(point).code,
         pool="rest",
     )
+
+
+ROADSIDE_TOWN_KM = 15.0
+
+
+def roadside_name(
+    km: float, point: LatLon, route: Route | None, ctx: PlanContext, base: str | None = None
+) -> str:
+    """M9 (spec 5.5 §10.4): never a bare roadside label (`base`: a synthetic rest area or fuel station name,
+    else the break label) — the nearest corridor town within ROADSIDE_TOWN_KM (`label.place_near`), else
+    the road and its km (`label.place_road`), else the km (`label.place_km`)."""
+    base = base or ru.text("label.roadside_break")
+    near = [
+        (haversine_km(t.town.point, point), t.town.id, t.town)
+        for t in ctx.corridor_towns
+        if haversine_km(t.town.point, point) <= ROADSIDE_TOWN_KM
+    ]
+    if near:
+        town = min(near)[2]
+        return ru.text("label.place_near", base=base, town=ru.genitive(town))
+    ref = _road_ref_at(route, km) if route is not None else None
+    if ref:
+        return ru.text("label.place_road", base=base, road=ref, km=round(km))
+    return ru.text("label.place_km", base=base, km=round(km))
+
+
+def _road_ref_at(route: Route, km: float) -> str | None:
+    i = bisect.bisect_left(route.cum_km, km)
+    for d in route.details:
+        if d.from_idx <= i <= d.to_idx and d.road_ref:
+            return d.road_ref
+    return None
 
 
 def plan_rests(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:

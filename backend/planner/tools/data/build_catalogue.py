@@ -52,6 +52,7 @@ from enrich import (  # noqa: E402
     osm_name_ok,
     quality,
     refine_kind,
+    tidy,
 )
 
 from verst_planner.catalogue import (  # noqa: E402
@@ -170,6 +171,20 @@ def denylist() -> list[str]:
 def denied(name: str, deny: Iterable[str]) -> bool:
     low = name.casefold()
     return any(b in low for b in deny)
+
+
+GENERIC_PLAYGROUND = "Детская площадка"
+VO = re.compile(r"^[ВвФф][бвгджзйклмнпрстфхцчшщ]")  # «во Владимире», «во Пскове» — not «в Вологде»
+
+
+def playground_name(name: str, town: dict[str, Any]) -> str:
+    """M9: never a bare «Детская площадка» — «Детская площадка в Клину» (the town's prepositional form)."""
+    if name != GENERIC_PLAYGROUND:
+        return name
+    prep = town.get("prep")
+    if not prep or prep == town["name"]:  # no prepositional form known: «Детская площадка, Благовещенск»
+        return f"{name}, {town['name']}"
+    return f"{name} {'во' if VO.match(prep) else 'в'} {prep}"
 
 
 def website(tags: dict[str, str], deny: Iterable[str]) -> str | None:
@@ -549,8 +564,8 @@ def build(
         desc = r.get("desc")
         return {
             "id": r["qid"],
-            "name": poi_name(r["name"], town["name"]),
-            "desc": desc[:DESC_MAX] if desc else None,
+            "name": tidy(poi_name(r["name"], town["name"])),
+            "desc": tidy(desc[:DESC_MAX]) if desc else None,
             "kind": POI_KINDS.index(r["_kind"]),
             "lat": to_coord(r["lat"]),
             "lon": to_coord(r["lon"]),
@@ -664,6 +679,9 @@ def build(
 
 
 MIN_SHIP_QUALITY = 0.25  # ADR-0015 §2: below the walk threshold a POI is not shipped
+# M9: an OSM-only POI needs a photo or a text on top of its tourism tag (a bare «Паровоз», «Свиное рыло»
+# at 0.25 is not worth a stop) — and the catalogue loads faster with ~40 % fewer rows
+MIN_SHIP_QUALITY_OSM = 0.30
 PARKING_NEAR_KM = 1.5
 
 
@@ -715,7 +733,11 @@ def osm_rows(
     out = []
     for qid in sorted(per_town, key=lambda q: town_pos[q]):
         lst = per_town[qid]
-        play = sorted([x for x in lst if x["_kind"] == "playground"], key=lambda x: (x["_d"], x["osm"]))
+        # named playgrounds first («Сказка» before a bare «Детская площадка»), then the nearest to the town
+        play = sorted(
+            [x for x in lst if x["_kind"] == "playground"],
+            key=lambda x: (x["_name"] == "Детская площадка", x["_d"], x["osm"]),
+        )
         named = [x for x in lst if x["_kind"] != "playground"]
         rows = []
         for x in named + play[:PLAYGROUNDS_PER_TOWN]:
@@ -740,7 +762,7 @@ def osm_rows(
             rows.append(
                 {
                     "id": f"osm_{x['osm']}",
-                    "name": x["_name"],
+                    "name": playground_name(tidy(x["_name"]) or "", towns[town_pos[qid]]),
                     "desc": None,
                     "kind": POI_KINDS.index(x["_kind"]),
                     "lat": to_coord(x["lat"]),
@@ -763,7 +785,7 @@ def osm_rows(
         rows = [
             r
             for r in rows
-            if r["kind"] == POI_KINDS.index("playground") or r["quality"] >= MIN_SHIP_QUALITY * 100
+            if r["kind"] == POI_KINDS.index("playground") or r["quality"] >= MIN_SHIP_QUALITY_OSM * 100
         ]
         rows.sort(key=lambda r: (-r["quality"], r["id"]))
         out.extend(rows[: OSM_PER_TOWN + PLAYGROUNDS_PER_TOWN])

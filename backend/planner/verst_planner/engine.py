@@ -1011,15 +1011,19 @@ def _cost_input(
     )
 
 
+PARKED_KINDS = frozenset({StopKind.SIGHT, StopKind.FOOD, StopKind.REST})
+
+
 def _parking(days: Sequence[Sched], ctx: PlanContext) -> tuple[ParkingUnit, ...]:
-    """ADR-0015 §4: the car is parked at sights (hotels and cafés have their own parking)."""
+    """ADR-0015 §4: the car is parked at every stop where the crew leaves it — sights, cafés and rest areas
+    (M9: in a paid zone a lunch costs its parking too); not at a fuel pump, a roadside break or a hotel."""
     model = ctx.ports.parking
     if model is None:
         return ()
     out = []
     for d in days:
         for j, (s, slot) in enumerate(zip(d.stops, d.slots, strict=True)):
-            if s.kind is StopKind.SIGHT and s.place is not None and slot.arrive is not None:
+            if s.kind in PARKED_KINDS and s.place is not None and slot.arrive is not None:
                 out.append(model.unit(d.ids[j], s.name_ru, s.point, local(slot.arrive, d.tz), s.dwell_min))
     return tuple(out)
 

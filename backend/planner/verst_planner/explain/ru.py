@@ -43,6 +43,12 @@ def words(key: str) -> list[str]:
     return [str(x) for x in raw]
 
 
+def kind_label(kind: str) -> str:
+    """API v3 `poiKindRu`: the card's Russian category label («Храм», «Памятник», «Музей»…)."""
+    table = _strings()["poi.kind_ru"]
+    return str(table.get(kind, table["attraction"]))
+
+
 def plural(n: int, one: str, few: str, many: str) -> str:
     n = abs(n)
     if n % 10 == 1 and n % 100 != 11:
