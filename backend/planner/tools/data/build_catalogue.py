@@ -159,6 +159,18 @@ def fixture_points(
 # ------------------------------------------------------------------------------------------- build
 
 
+EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+URL = re.compile(r"(https?://|www\.)\S+", re.I)
+
+
+def clean_author(author: str) -> str | None:
+    """Commons «Artist» without markup, e-mail addresses (run 3: «…@yandex.ru») and URLs."""
+    text = re.sub(r"<[^>]+>", "", author)
+    text = URL.sub("", EMAIL.sub("", text))
+    text = re.sub(r"\s+", " ", re.sub(r"\(\s*\)|\[\s*\]", "", text)).strip(" ,;:-–—")
+    return text[:AUTHOR_MAX] or None
+
+
 def poi_kind(roots: Iterable[str]) -> str | None:
     have = set(roots)
     for q, kind in CLASS_KIND:
@@ -261,7 +273,7 @@ def build(
             return None, None
         author = c.get("author")
         if author:
-            author = re.sub(r"<[^>]+>", "", author).strip()[:AUTHOR_MAX] or None
+            author = clean_author(author)
         key = (author, c.get("licence"), c.get("url"))
         if key not in credit_idx:
             credit_idx[key] = len(credit_list)

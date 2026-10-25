@@ -6,9 +6,9 @@
    "request_id": "c-walk-6",
    "input_json": {
     "start": {
-     "lat": 56.8587,
-     "lon": 35.9176,
-     "label": "Тверь"
+     "lat": 56.4197,
+     "lon": 40.4434,
+     "label": "Суздаль"
     },
     "preset": "beer",
     "adultConfirmed": true

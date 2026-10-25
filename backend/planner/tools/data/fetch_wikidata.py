@@ -73,6 +73,34 @@ RU_LABEL: dict[str, str] = {
 }
 RADIUS_KM = ((1_000_000, 10.0), (100_000, 6.0), (20_000, 4.0), (0, 2.0))
 CAPITALS = {"Москва": 15.0, "Санкт-Петербург": 15.0}
+# Run 3 had 1 058 towns but no Екатеринбург, Челябинск or Владивосток (their P31 is a subclass of «город
+# России», hence `wdt:P31/wdt:P279*`); the towns step now fails when one of these is missing.
+MUST_HAVE = (
+    "Москва",
+    "Санкт-Петербург",
+    "Новосибирск",
+    "Екатеринбург",
+    "Казань",
+    "Нижний Новгород",
+    "Челябинск",
+    "Красноярск",
+    "Самара",
+    "Уфа",
+    "Ростов-на-Дону",
+    "Омск",
+    "Краснодар",
+    "Воронеж",
+    "Пермь",
+    "Волгоград",
+    "Владивосток",
+    "Ярославль",
+    "Калининград",
+    "Иркутск",
+    "Хабаровск",
+    "Мурманск",
+    "Суздаль",
+    "Сочи",
+)
 POINT = re.compile(r"Point\(([-0-9.eE]+) ([-0-9.eE]+)\)")
 
 
@@ -217,6 +245,11 @@ def pois_from_bindings(bindings: list[dict[str, Any]], town_qid: str) -> list[di
     return sorted(acc.values(), key=lambda p: p["qid"])
 
 
+def missing_towns(towns: list[dict[str, Any]]) -> list[str]:
+    names = {t["name"] for t in towns}
+    return [n for n in MUST_HAVE if n not in names]
+
+
 def radius_for(t: dict[str, Any]) -> float:
     if t["name"] in CAPITALS:
         return CAPITALS[t["name"]]
@@ -234,7 +267,8 @@ Q_RESOLVE = """SELECT ?c (COUNT(DISTINCT ?i) AS ?n) WHERE {{
 
 Q_TOWNS = """SELECT ?town ?townLabel ?coord ?pop ?popDate ?iso ?regionLabel ?image WHERE {{
   VALUES ?cls {{ {classes} }}
-  ?town wdt:P31 ?cls; wdt:P17 wd:{country}; wdt:P625 ?coord .
+  ?town wdt:P31/wdt:P279* ?cls .
+  ?town wdt:P17 wd:{country}; wdt:P625 ?coord .
   FILTER NOT EXISTS {{ ?town wdt:P576 [] }}
   OPTIONAL {{ ?town p:P1082 ?ps . ?ps ps:P1082 ?pop . OPTIONAL {{ ?ps pq:P585 ?popDate }} }}
   OPTIONAL {{ ?town wdt:P131* ?region . ?region wdt:P300 ?iso . FILTER(STRSTARTS(?iso, "RU-")) }}
@@ -284,8 +318,9 @@ def main(argv: list[str]) -> int:
         q = Q_TOWNS.format(classes=" ".join(f"wd:{c}" for c in TOWN_CLASSES), country=COUNTRY)
         towns = towns_from_bindings(sparql(q, pacer))
         (out / "towns.json").write_text(json.dumps(towns, ensure_ascii=False), "utf-8")
-        print(f"towns: {len(towns)}")
-        return 0
+        missing = missing_towns(towns)
+        print(f"towns: {len(towns)}; missing must-have: {missing}")
+        return 0 if not missing else 4
     if cmd == "pois":
         towns = json.loads((out / "towns.json").read_text("utf-8"))
         resolved_path = out / "classes_resolved.json"
