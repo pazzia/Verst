@@ -95,7 +95,7 @@ def build_walk(
                 "walkMinFromPrev": round(leg.walk_min),
                 "costRub": c.cost_rub,
                 "hoursVerified": c.hours_verified,
-                "noteRu": None if c.hours_verified else ru.text("walk.note.hours"),
+                "noteRu": _stop_note(c),
                 "hasPhoto": c.has_photo,
                 "tappable": True,
             }
@@ -174,6 +174,15 @@ def build_walk(
         "approxDistances": True,
         "input": _input_echo(inp, start_dt),
     }
+
+
+def _stop_note(c: Candidate) -> str | None:
+    notes = []
+    if c.long_visit:
+        notes.append(ru.text("walk.note.long_visit", time=ru.fmt_duration(c.dwell_min)))
+    if not c.hours_verified:
+        notes.append(ru.text("walk.note.hours"))
+    return " · ".join(notes) or None
 
 
 def _quarter(minutes: int) -> int:

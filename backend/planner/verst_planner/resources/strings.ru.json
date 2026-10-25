@@ -126,6 +126,7 @@
   "walk.preset.ryumochnye": "По рюмочным",
   "walk.preset.beer": "Пивной",
   "walk.preset.custom": "Свой маршрут",
+  "walk.note.long_visit": "Большой музей: за {time} — только главное",
   "walk.note.hours": "Часы работы уточняйте",
   "walk.warning.hours": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом.",
   "walk.shorter.places": "Получилось {actual} вместо {requested} — больше открытых мест рядом нет",

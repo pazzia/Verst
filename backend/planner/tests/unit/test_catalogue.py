@@ -63,6 +63,27 @@ class FormatTest(unittest.TestCase):
         self.assertTrue(all(p.town in c.town_by_id for p in c.pois))
         self.assertTrue(all(b.kind in cat.BAR_KINDS for b in c.bars))
 
+    def test_credits_are_short_names(self) -> None:
+        """Release S3: every shipped photo credit is a short name: no sentence, URL, e-mail or licence."""
+        import re
+
+        c = cat.load_packaged()
+        bad = re.compile(
+            r"https?://|www\.|\S@\S+\.\w|\[at\]|<|>|\b(?:was|is|please|uploader|uploaded|own work|"
+            r"taken by|created by|photo by|licen[cs]e|cc[ -]by|public domain|camera location|derivative)\b"
+            r"|[^\W\d_]{3}\.\s+[A-ZА-ЯЁ]|\n",
+            re.I,
+        )
+        for credit in c.credits:
+            a = credit.author
+            if a is None:
+                continue
+            with self.subTest(author=a):
+                self.assertLessEqual(len(a), 40)
+                self.assertLessEqual(len(a.split()), 4)
+                self.assertIsNone(bad.search(a))
+                self.assertEqual(a, a.strip())
+
     def test_real_catalogue_coverage(self) -> None:
         """ARCH-302 acceptance on the CI-built data (skipped for the sandbox sample)."""
         c = cat.load_packaged()
@@ -106,8 +127,46 @@ class BuilderRulesTest(unittest.TestCase):
         ):
             self.assertFalse(self.b.is_town({"name": name, "population": pop}), name)
 
+    def test_area_ok(self) -> None:
+        jpeg = {"w": 3600, "h": 2400, "mime": "image/jpeg", "cats": ["Flag tower (Peter & Paul Fortress)"]}
+        self.assertTrue(self.b.area_ok("Peter & Paul fortress in SPB 03.jpg", jpeg))
+        self.assertTrue(self.b.area_ok("x.jpg", None))  # no metadata: the file-name rule only
+        for name, meta in (
+            ("KAZ Collage 2015.png", None),
+            ("Новокузнецк Коллаж.jpg", None),
+            ("Montage-of-Makhachkala-(2016).png", None),
+            ("Coat of Arms of Tver.jpg", None),
+            ("Ufa.jpg", {**jpeg, "cats": ["Montages of Ufa"]}),
+            ("Dolgoprudny.jpg", {**jpeg, "cats": ["Flags of cities and villages of Moscow Oblast"]}),
+            ("small.jpg", {**jpeg, "w": 640, "h": 480}),
+            ("wide.jpg", {**jpeg, "w": 5992, "h": 2056}),  # 2.9 : 1
+            ("map.jpg", {**jpeg, "mime": "image/png"}),
+        ):
+            self.assertFalse(self.b.area_ok(name, meta), name)
+        self.assertTrue(self.b.area_ok("Belogorsk.jpg", {**jpeg, "cats": ["Belogorsk"]}))  # not «logo»
+
     def test_author_and_poi_name(self) -> None:
         self.assertEqual(self.b.clean_author("Иван (tibr1984@yandex.ru)"), "Иван")
+        cases = {
+            "This photo was taken by Anton Zelenov. Please credit this with: Anton Zelenov in the line": (
+                "Anton Zelenov"
+            ),
+            "This photography was created by Artem Topchiy (user Art-top)": "Artem Topchiy",
+            "Анатолий Горлов. Original uploader was Szn-lordi at ru.wikipedia": "Анатолий Горлов",
+            "The original uploader was Digr at Russian Wikipedia.": "Digr",
+            "No machine-readable author provided. Muad'Dib~commonswiki assumed": "Muad'Dib",
+            "Photo: user:NVO. Architects: ???.": "NVO",
+            "ru:User:Al Silonov": "Al Silonov",
+            "Чурилов Д. А.. Original uploader was Skydrinker at ru.wikipedia": "Чурилов Д. А.",
+            "Zac allan (talk) 21:00, 14 July 2009 (UTC)": "Zac allan",
+            "<a href='x'>Bob</a>, CC BY-SA 4.0": "Bob",
+            "Own work": None,
+            "Unknown authorUnknown author": None,
+            "The Krasnoyarsk National and Cultural Autonomy of the Chuvash People": None,
+            "Иерей Максим Массалитин Camera location 55° 47′ N": "Иерей Максим Массалитин",
+        }
+        for raw, want in cases.items():
+            self.assertEqual(self.b.clean_author(raw), want, raw)
         self.assertIsNone(self.b.clean_author("https://flickr.com/x"))
         self.assertEqual(self.b.poi_name("Площадь Свободы (Казань)", "Казань"), "Площадь Свободы")
         self.assertEqual(self.b.poi_name("Собор (Москва)", "Казань"), "Собор (Москва)")
