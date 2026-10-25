@@ -159,3 +159,11 @@ High-refresh displays (90/120 Hz): loops are time-based, so speed is unchanged; 
 | `limitSignIn` | 5.8 no-fit screen | the round limit sign: scale 0.8 → 1, alpha 0 → 1 (pivot centre), with `screen.arrive` | | 400 ms | `decelerate` | `Animatable` on first composition | final frame |
 
 Card sheet, day / stop hand-off menus and the custom-walk sheet: `bottomSheetIn` / `bottomSheetOut`; the 18+ dialog: `dialogIn` / `dialogOut`; hand-off and location toasts: `toastIn` / `toastOut`; walk building: `shimmer` on the caption + the start-button loading arc (`spinner`). Scene loops (lamps, footsteps) pause under sheets and dialogs (§4.3).
+
+## 2.5 Sprint 4 tokens
+
+| Token | Where | Property | Values | Duration | Easing | Repeat | Compose | Reduced motion |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `rebuildPulse` | 5.11 rebuild pill dot | alpha | 0.35 → 0.6 → 0.35 | 1200 ms | easeInOut | ∞ while rebuilding | `infiniteRepeatable(tween(600), RepeatMode.Reverse)` | static 0.6 |
+| `walkRebuild` | 5.11 filters | logic (debounce) | rebuild 400 ms after the last filter change | — | — | — | `debounce` in the flow | same |
+| `cityEntryPress` | 5.1 `CityEntryPlate` | translateY, shadow | 0 → 1 dp | 90 ms | standard | — | `animateDpAsState` | none |

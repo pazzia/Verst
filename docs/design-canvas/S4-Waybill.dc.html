@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Путевой лист · Спринт 4</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;family=Marck+Script&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE27A}
+@keyframes stamp{0%{transform:rotate(-14deg) scale(2.4);opacity:0}60%{transform:rotate(-14deg) scale(.92);opacity:.9}100%{transform:rotate(-14deg) scale(1);opacity:.85}}
+.stamp{animation:stamp .5s cubic-bezier(.3,1.4,.5,1) 1s both}
+@keyframes slide{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet{animation:slide .6s cubic-bezier(.2,.8,.3,1) both}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+</style>
+</helmet>
+<!-- Sprint 4 · 5.6 Waybill (design/screens/5.6-waybill.md §9): a «Парковки» line with its formula, counted in ИТОГО and the budget fit.
+     Tap the «Парковки» line to open the per-stop breakdown; tap «Резерв» as before. -->
+<div style="width: 390px; min-height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif; box-sizing: border-box; padding: 14px 14px 20px; display: flex; flex-direction: column">
+  <a href="S4-Road.dc.html" style="align-self: flex-start; min-height: 32px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #8C8C93; text-decoration: none">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8C93" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>
+    Дорога впереди
+  </a>
+
+  <div class="sheet" style="position: relative; margin-top: 18px; background: #EEF2F4; color: #22313D; border-radius: 4px; padding: 26px 16px 14px; box-shadow: 0 10px 26px rgba(0,0,0,.5)">
+    <div aria-hidden="true" style="position: absolute; left: 50%; top: -14px; width: 120px; margin-left: -60px; height: 30px; border-radius: 8px; background: #8C8C93; box-shadow: inset 0 -4px 0 #5D5D63"></div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #22313D; padding-bottom: 6px">
+      <div>
+        <div style="font-size: 10px; letter-spacing: 0.08em; color: #5B7186">ФОРМА ПОЕЗДКИ · ВЕРСТА</div>
+        <div style="font-weight: 700; font-size: 20px; line-height: 1.05">ПУТЕВОЙ ЛИСТ</div>
+        <div style="font-size: 12px">легкового автомобиля</div>
+      </div>
+      <div style="text-align: right; font-size: 11px; color: #5B7186">№ <span style="font-family: 'Marck Script', cursive; font-size: 20px; color: #1B3FA0">001</span></div>
+    </div>
+
+    <div style="margin-top: 8px; display: grid; grid-template-columns: 92px minmax(0, 1fr); row-gap: 4px; align-items: baseline">
+      <span style="font-size: 11px; color: #5B7186">Маршрут</span>
+      <span style="border-bottom: 1px solid #9FB0BE; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; line-height: 1.2">Москва — Золотое кольцо — Москва</span>
+      <span style="font-size: 11px; color: #5B7186">Экипаж</span>
+      <span style="border-bottom: 1px solid #9FB0BE; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; line-height: 1.2">2 взр., 1 реб., собака</span>
+      <span style="font-size: 11px; color: #5B7186">Пробег, км</span>
+      <span style="border-bottom: 1px solid #9FB0BE; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; line-height: 1.2">825 за 3 дня</span>
+    </div>
+
+    <div style="margin-top: 10px; border: 1.5px solid #22313D">
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 70px; font-size: 10px; letter-spacing: 0.06em; color: #5B7186; border-bottom: 1.5px solid #22313D">
+        <span style="padding: 3px 6px; border-right: 1px solid #22313D">СТАТЬЯ И РАСЧЁТ</span><span style="padding: 3px 6px; text-align: right">₽</span>
+      </div>
+      <sc-for list="{{lines}}" as="l" hint-placeholder-count="5">
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 70px; border-bottom: 1px solid #9FB0BE">
+          <span style="padding: 3px 6px; border-right: 1px solid #22313D; display: flex; flex-direction: column">
+            <span style="font-weight: 600; font-size: 13px">{{l.name}}</span>
+            <span style="font-family: 'Marck Script', cursive; font-size: 15px; color: #1B3FA0; line-height: 1.15">{{l.calc}}</span>
+          </span>
+          <span style="padding: 3px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; align-self: center">{{l.sum}}</span>
+        </div>
+      </sc-for>
+      <button type="button" aria-expanded="{{parkOpen}}" onClick="{{togglePark}}" style="width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 70px; border: none; border-bottom: 1px solid #9FB0BE; background: transparent; padding: 0; cursor: pointer; font-family: inherit; color: #22313D; text-align: left; min-height: 44px">
+        <span style="padding: 3px 6px; border-right: 1px solid #22313D; display: flex; flex-direction: column">
+          <span style="font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 15px; height: 15px; border-radius: 2px; background: #1E4FA3; color: #F4F4F0; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; justify-content: center">P</span>Парковки<span aria-hidden="true" style="font-size: 10px; color: #5B7186">{{parkChevron}}</span></span>
+          <span style="font-family: 'Marck Script', cursive; font-size: 15px; color: #1B3FA0; line-height: 1.15">стоянок: 6 · ≈ 8 ч · Сергиев Посад, Ростов, Кострома, Владимир</span>
+          <span style="{{parkListStyle}}">
+            <sc-for list="{{parks}}" as="p" hint-placeholder-count="6"><span style="display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: #22313D"><span>{{p.n}}</span><span style="font-family: 'Marck Script', cursive; font-size: 14px; color: #1B3FA0">{{p.v}}</span></span></sc-for>
+            <span style="font-size: 10px; color: #5B7186">Ночёвки и бесплатные стоянки — 0 ₽. Тарифы средние по городу.</span>
+          </span>
+        </span>
+        <span style="padding: 3px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; align-self: center">1 060</span>
+      </button>
+      <button type="button" role="switch" aria-checked="{{reserveOn}}" onClick="{{toggle}}" style="width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 70px; border: none; border-bottom: 1.5px solid #22313D; background: transparent; padding: 0; cursor: pointer; font-family: inherit; color: #22313D; text-align: left; min-height: 44px">
+        <span style="padding: 3px 6px; border-right: 1px solid #22313D; display: flex; align-items: center; gap: 8px">
+          <span aria-hidden="true" style="width: 18px; height: 18px; border: 1.5px solid #22313D; display: flex; align-items: center; justify-content: center; font-family: 'Marck Script', cursive; font-size: 20px; color: #1B3FA0; line-height: 1">{{check}}</span>
+          <span style="display: flex; flex-direction: column"><span style="font-weight: 600; font-size: 13px">Резерв 10%</span><span style="font-size: 11px; color: #5B7186">на пробки и «давай заедем»</span></span>
+        </span>
+        <span style="padding: 3px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0; align-self: center">{{reserve}}</span>
+      </button>
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 100px; align-items: center">
+        <span style="padding: 6px; font-weight: 700; font-size: 14px">ИТОГО</span>
+        <span style="padding: 4px 6px; text-align: right; font-family: 'Marck Script', cursive; font-size: 26px; color: #1B3FA0">{{total}}</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; font-size: 11px; color: #5B7186">
+      <span>Выдано<span style="display: block; border-bottom: 1px solid #9FB0BE; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0">40 000</span></span>
+      <span>Остаток<span style="display: block; border-bottom: 1px solid #9FB0BE; font-family: 'Marck Script', cursive; font-size: 19px; color: #1B3FA0">{{left}}</span></span>
+    </div>
+    <div style="margin-top: 6px; font-size: 10px; color: #5B7186">Пример расчёта: цены средние по трассе, точные — при бронировании.</div>
+
+    <div class="stamp" aria-hidden="true" style="position: absolute; right: 12px; bottom: -30px; width: 88px; height: 88px; background: rgba(238,242,244,.0); border-radius: 50%; border: 3px solid #5B3FA0; color: #5B3FA0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-weight: 700; font-size: 10px; letter-spacing: 0.06em; line-height: 1.2; box-shadow: inset 0 0 0 3px #EEF2F4, inset 0 0 0 4px #5B3FA0">ВЕРСТА<br><span style="font-size: 15px">В ПУТЬ</span>ГОТОВЫ</div>
+  </div>
+
+  <div style="margin-top: auto; padding-top: 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <button type="button" style="height: 56px; border-radius: 12px; border: 1px solid #3A3A42; background: #232327; color: #F4F4F0; font-family: inherit; font-weight: 600; font-size: 15px; cursor: pointer">Сохранить офлайн</button>
+    <button type="button" style="height: 56px; border-radius: 12px; border: none; background: #FFD23F; color: #141416; font-family: inherit; font-weight: 700; font-size: 15px; cursor: pointer">Отправить экипажу</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { reserve: true, park: true }; }
+  renderVals() {
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const items = [
+      ['Бензин АИ-95', '825 км × 8 л/100 × 62,40 ₽', 4120],
+      ['Платные дороги', 'нет платных участков', 0],
+      ['Ночёвки', 'Ярославль + Суздаль, 2 × 6 000', 12000],
+      ['Питание', '3 чел. × 5 приёмов × 600', 9000],
+      ['Билеты', 'кремли и музеи на троих', 3000]
+    ];
+    const base = items.reduce((s, i) => s + i[2], 0) + 1060;
+    const on = this.state.reserve;
+    const res = Math.round(base * 0.1 / 10) * 10;
+    const total = Math.round((on ? base + res : base) / 100) * 100;
+    return {
+      lines: items.map((i) => ({ name: i[0], calc: i[1], sum: fmt(i[2]) })),
+      reserveOn: on ? 'true' : 'false',
+      check: on ? '✓' : '',
+      reserve: on ? fmt(res) : '—',
+      toggle: () => this.setState({ reserve: !on }),
+      parkOpen: this.state.park ? 'true' : 'false', parkChevron: this.state.park ? '▲' : '▼',
+      togglePark: () => this.setState({ park: !this.state.park }),
+      parkListStyle: this.state.park ? 'display:flex;flex-direction:column;gap:1px;margin:4px 0 2px' : 'display:none',
+      parks: [
+        { n: 'Сергиев Посад · лавра, 2 ч × 150', v: '300' },
+        { n: 'Ростов · кремль, 2 ч × 100', v: '200' },
+        { n: 'Кострома · монастырь, 2 ч × 100', v: '200' },
+        { n: 'Владимир · ворота, 2 ч × 80', v: '160' },
+        { n: 'Переславль, Кострома (сыр), Плёс', v: '0' },
+        { n: 'Прочие короткие стоянки', v: '200' }
+      ],
+      total: '≈ ' + fmt(total),
+      left: '≈ ' + fmt(40000 - total)
+    };
+  }
+}
+</script>
+</body>
+</html>

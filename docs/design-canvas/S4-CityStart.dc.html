@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>По городу · Спринт 4</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,a{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+@keyframes lamp{0%,100%{opacity:.7}50%{opacity:1}}
+.lamp{animation:lamp 3.2s ease-in-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(216,64,43,.55)}100%{box-shadow:0 0 0 16px rgba(216,64,43,0)}}
+.start{animation:ring 1.8s ease-out infinite}
+.stepper button{width:44px;height:44px;border-radius:10px;border:none;background:#2A2A2E;color:#F4F4F0;font-size:20px;cursor:pointer;box-shadow:inset 0 -3px 0 #0E0E10}
+.stepper button:disabled{color:#55555E;cursor:default}
+</style>
+</helmet>
+<!-- Sprint 4 · 5.10 «По городу» start (design/screens/5.10-city.md §10). Everything starts from scratch (not the car crew).
+     Tap: the start field (→ address search), the steppers and the dog, a preset (18+ asks only «Вам есть 18?»), a duration
+     (incl. «без ограничения»). With a child + a bar preset, or a dog + a non-nature preset, a warning appears under the presets. -->
+<div style="width: 390px; min-height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <!-- CityScene 0–200 -->
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 203px; overflow: hidden; background: #2B2850">
+    <svg width="390" height="200" viewBox="0 0 390 200" style="position: absolute; left: 0; top: 0">
+      <path d="M0 112 L34 112 L34 96 L80 96 L80 106 L128 106 L128 88 L150 80 L172 88 L172 104 L230 104 L230 92 L270 92 L270 108 L318 108 L318 94 L390 94 V200 H0 Z" fill="#2E2939"></path>
+      <rect x="0" y="124" width="70" height="76" fill="#4A3B55"></rect><rect x="70" y="132" width="80" height="68" fill="#4A3B55"></rect>
+      <rect x="150" y="124" width="86" height="76" fill="#4A3B55"></rect><rect x="236" y="132" width="82" height="68" fill="#4A3B55"></rect><rect x="318" y="124" width="72" height="76" fill="#4A3B55"></rect>
+      <rect x="0" y="140" width="390" height="46" fill="#3B3046"></rect>
+      <g fill="#FFD99A">
+        <rect x="8" y="150" width="10" height="14"></rect><rect x="52" y="150" width="10" height="14"></rect><rect x="74" y="150" width="10" height="14"></rect><rect x="118" y="150" width="10" height="14"></rect>
+        <rect x="162" y="150" width="10" height="14"></rect><rect x="184" y="150" width="10" height="14"></rect><rect x="250" y="150" width="10" height="14"></rect><rect x="294" y="150" width="10" height="14"></rect>
+        <rect x="338" y="150" width="10" height="14"></rect><rect x="30" y="172" width="10" height="14"></rect><rect x="96" y="172" width="10" height="14"></rect><rect x="140" y="172" width="10" height="14"></rect>
+        <rect x="206" y="172" width="10" height="14"></rect><rect x="228" y="172" width="10" height="14"></rect><rect x="316" y="172" width="10" height="14"></rect><rect x="360" y="172" width="10" height="14"></rect>
+      </g>
+      <g fill="#231F2D">
+        <rect x="30" y="150" width="10" height="14"></rect><rect x="96" y="150" width="10" height="14"></rect><rect x="140" y="150" width="10" height="14"></rect><rect x="206" y="150" width="10" height="14"></rect>
+        <rect x="228" y="150" width="10" height="14"></rect><rect x="272" y="150" width="10" height="14"></rect><rect x="316" y="150" width="10" height="14"></rect><rect x="360" y="150" width="10" height="14"></rect>
+        <rect x="8" y="172" width="10" height="14"></rect><rect x="52" y="172" width="10" height="14"></rect><rect x="74" y="172" width="10" height="14"></rect><rect x="118" y="172" width="10" height="14"></rect>
+        <rect x="162" y="172" width="10" height="14"></rect><rect x="184" y="172" width="10" height="14"></rect><rect x="250" y="172" width="10" height="14"></rect><rect x="272" y="172" width="10" height="14"></rect><rect x="294" y="172" width="10" height="14"></rect><rect x="338" y="172" width="10" height="14"></rect>
+      </g>
+      <rect x="0" y="186" width="390" height="14" fill="#4A4A50"></rect>
+      <path d="M24 186v14M48 186v14M72 186v14M96 186v14M120 186v14M144 186v14M168 186v14M192 186v14M216 186v14M240 186v14M264 186v14M288 186v14M312 186v14M336 186v14M360 186v14M384 186v14" stroke="#3B3B41" stroke-width="1"></path>
+      <g fill="#55565C"><rect x="55" y="134" width="3" height="52"></rect><rect x="195" y="134" width="3" height="52"></rect><rect x="335" y="134" width="3" height="52"></rect></g>
+      <g fill="#FFE7A8"><rect x="50" y="130" width="14" height="6" rx="2"></rect><rect x="190" y="130" width="14" height="6" rx="2"></rect><rect x="330" y="130" width="14" height="6" rx="2"></rect></g>
+      <g fill="#FFE7A8" fill-opacity=".18"><circle class="lamp" cx="57" cy="134" r="18"></circle><circle class="lamp" cx="197" cy="134" r="18" style="animation-delay:1.1s"></circle><circle class="lamp" cx="337" cy="134" r="18" style="animation-delay:2.2s"></circle></g>
+    </svg>
+    <div style="position: absolute; left: 0; right: 0; top: 200px; height: 3px; background: #8C8C93"></div>
+  </div>
+  <a href="S4-Windshield.dc.html" style="position: absolute; left: 16px; top: 8px; height: 32px; display: flex; align-items: center; gap: 6px; color: #E9E2F2; text-decoration: none; font-size: 13px">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>К лобовому</a>
+  <!-- StreetPlate -->
+  <div role="heading" aria-level="2" aria-label="По городу, старт: Тверская улица, 7, Москва" style="position: absolute; left: 20px; top: 44px; display: flex; gap: 6px">
+    <div style="height: 64px; background: #1E4FA3; border-radius: 6px; padding: 4px; box-sizing: border-box; box-shadow: 0 6px 14px rgba(0,0,0,.4)">
+      <div style="height: 100%; border: 2px solid #F4F4F0; border-radius: 4px; box-sizing: border-box; padding: 4px 12px; display: flex; flex-direction: column; justify-content: center">
+        <span style="font-size: 12px; font-weight: 600; color: #D6E0F5">пешком · Москва</span>
+        <span style="font-size: 22px; font-weight: 700; line-height: 24px">Тверская ул.</span>
+      </div>
+    </div>
+    <div style="width: 44px; height: 44px; background: #1E4FA3; border-radius: 6px; padding: 3px; box-sizing: border-box"><div style="height: 100%; border: 2px solid #F4F4F0; border-radius: 4px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700">7</div></div>
+  </div>
+
+
+  <div style="position: relative; padding: 218px 20px 0">
+    <h1 style="margin: 0; font-size: 28px; line-height: 29.4px; font-weight: 700">По городу</h1>
+
+    <div style="margin-top: 16px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">СТАРТ ПРОГУЛКИ</div>
+    <a href="Navi.dc.html" aria-label="Старт прогулки: Тверская улица, 7, Москва, вы здесь. Изменить" style="margin-top: 6px; min-height: 60px; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 14px; box-sizing: border-box; border-radius: 12px; background: #16222C; border: 2px solid #FFD23F; color: #F4F4F0; text-decoration: none">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="1.5" fill="#FFD23F"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>
+      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+        <span style="font-weight: 700; font-size: 17px; line-height: 22px">Тверская ул., 7</span>
+        <span style="font-size: 12px; color: #8FA4B8">Москва · вы здесь</span>
+      </span>
+      <span style="height: 40px; padding: 0 12px; border-radius: 8px; background: #232327; display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; color: #F4F4F0">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"></path></svg>изменить</span>
+    </a>
+
+    <div style="margin-top: 20px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">КТО ИДЁТ</div>
+    <div style="margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px">
+      <sc-for list="{{people}}" as="g" hint-placeholder-count="2">
+        <div class="stepper" style="background: #0F0F11; border: 3px solid #232327; border-radius: 14px; padding: 8px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px">
+          <span style="font-size: 12px; font-weight: 600; color: #B9B9C0">{{g.label}}</span>
+          <span aria-live="polite" style="font-weight: 700; font-size: 24px; line-height: 26px">{{g.n}}</span>
+          <span style="display: flex; gap: 6px"><button type="button" aria-label="{{g.less}}" onClick="{{g.dec}}">−</button><button type="button" aria-label="{{g.more}}" onClick="{{g.inc}}">+</button></span>
+        </div>
+      </sc-for>
+      <button type="button" onClick="{{toggleDog}}" aria-pressed="{{dogOn}}" style="{{dogStyle}}">
+        <span style="font-size: 12px; font-weight: 600; color: #B9B9C0">Собака</span>
+        <svg aria-hidden="true" width="34" height="34" viewBox="0 0 24 24" fill="{{dogFill}}" stroke="{{dogStroke}}" stroke-width="1.6"><ellipse cx="12" cy="15.5" rx="4.2" ry="3.6"></ellipse><ellipse cx="6.2" cy="10.5" rx="1.8" ry="2.3"></ellipse><ellipse cx="17.8" cy="10.5" rx="1.8" ry="2.3"></ellipse><ellipse cx="9.3" cy="6.8" rx="1.7" ry="2.2"></ellipse><ellipse cx="14.7" cy="6.8" rx="1.7" ry="2.2"></ellipse></svg>
+        <span style="font-weight: 600; font-size: 13px">{{dogText}}</span>
+      </button>
+    </div>
+
+    <div style="margin-top: 20px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">КАКАЯ ПРОГУЛКА</div>
+    <div style="margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+      <sc-for list="{{presets}}" as="p" hint-placeholder-count="6">
+        <button type="button" onClick="{{p.pick}}" aria-label="{{p.cd}}" aria-pressed="{{p.on}}" style="{{p.style}}">
+          <span aria-hidden="true" style="position: absolute; inset: 3px; border: 2px {{p.border}} #F4F4F0; border-radius: 3px"></span>
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 10px"><path d="{{p.icon}}"></path></svg>
+          <span style="{{p.badge}}">18+</span>
+          <span style="{{p.check}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span>
+          <span style="position: absolute; left: 12px; bottom: 10px; display: flex; flex-direction: column; text-align: left">
+            <span style="font-weight: 700; font-size: 15px; line-height: 19.5px">{{p.name}}</span>
+            <span style="font-size: 12px; color: #E9E2F2">{{p.sub}}</span>
+          </span>
+        </button>
+      </sc-for>
+    </div>
+    <sc-for list="{{warns}}" as="w" hint-placeholder-count="1">
+      <div role="note" style="margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid #FFD23F; display: flex; flex-direction: column; gap: 8px">
+        <span style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 18.2px">
+          <span aria-hidden="true" style="width: 18px; height: 18px; border-radius: 50%; background: #FFD23F; color: #141416; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px">!</span>
+          <span>{{w.text}}</span></span>
+        <span style="{{w.actions}}">
+          <sc-for list="{{w.btns}}" as="b" hint-placeholder-count="2"><button type="button" onClick="{{b.go}}" style="height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #3A3A42; background: #232327; color: #F4F4F0; font-weight: 600; font-size: 12px; cursor: pointer">{{b.t}}</button></sc-for>
+        </span>
+      </div>
+    </sc-for>
+
+    <div style="margin-top: 20px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">СКОЛЬКО ГУЛЯЕМ</div>
+    <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px">
+      <sc-for list="{{durs}}" as="d" hint-placeholder-count="5"><button type="button" onClick="{{d.go}}" aria-pressed="{{d.on}}" style="{{d.style}}">{{d.t}}</button></sc-for>
+    </div>
+    <div style="margin-top: 6px; font-size: 12px; color: #8C8C93">{{durHint}}</div>
+
+    <div style="margin-top: 20px; font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">ПОЖЕЛАНИЯ И ОГРАНИЧЕНИЯ</div>
+    <div style="margin-top: 6px; border-radius: 12px; background: #1C1C1F; border: 1px solid #2A2A2E">
+      <sc-for list="{{prefs}}" as="r" hint-placeholder-count="3">
+        <div style="min-height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid #2A2A2E">
+          <span style="font-size: 15px; font-weight: 600">{{r.k}}</span>
+          <span style="display: flex; align-items: center; gap: 6px; font-size: 14px; color: #FFD23F; font-weight: 600">{{r.v}}<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8C93" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg></span>
+        </div>
+      </sc-for>
+      <div style="min-height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px">
+        <span style="font-size: 15px; font-weight: 600">Вернуться к старту</span>
+        <span aria-hidden="true" style="width: 40px; height: 24px; border-radius: 12px; background: #FFD23F; position: relative"><span style="position: absolute; right: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #141416"></span></span>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: relative; margin-top: 16px; padding: 12px 20px 24px; display: flex; align-items: center; gap: 14px; border-top: 1px solid #232327">
+    <div style="flex: 1; min-width: 0">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">ПРОГУЛКА</div>
+      <div style="font-weight: 700; font-size: 20px; line-height: 23px">{{capTitle}}</div>
+      <div style="font-size: 13px; color: #B9B9C0">{{capMeta}}</div>
+    </div>
+    <a href="S4-WalkResult.dc.html" class="start" aria-label="Пошли" style="width: 92px; height: 92px; border-radius: 50%; background: #232327; display: flex; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0">
+      <span style="width: 76px; height: 76px; border-radius: 50%; background: #1C1C1F; box-shadow: inset 0 0 0 3px #D8402B; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #F4F4F0">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="2" fill="#F4F4F0"></circle><path d="M9.5 21l2.5-6.5 2.5 2V21M12 14.5l1-5-3.5 1.5L8 14M13 9.5l2.5 3 3 1"></path></svg>
+        <span style="font-size: 12px; font-weight: 700; letter-spacing: .06em">ПОШЛИ</span>
+      </span>
+    </a>
+  </div>
+  <div style="padding: 0 20px 20px; font-size: 12px; color: #55565C">В приложении строка «Прогулка» и «Пошли» закреплены внизу экрана; форма прокручивается над ними.</div>
+
+  <!-- «Вам есть 18?» — only the question -->
+  <div aria-hidden="true" style="{{scrim}}"></div>
+  <div role="dialog" aria-label="Вам есть 18?" style="{{gate}}">
+    <h2 style="margin: 0 0 16px; font-size: 22px; font-weight: 700; text-align: center">Вам есть 18?</h2>
+    <div style="display: flex; gap: 10px">
+      <button type="button" onClick="{{no}}" style="flex: 1; height: 52px; border-radius: 12px; border: 1px solid #3A5266; background: transparent; color: #F4F4F0; font-weight: 700; font-size: 16px; cursor: pointer">Нет</button>
+      <button type="button" onClick="{{yes}}" style="flex: 1; height: 52px; border: none; border-radius: 12px; background: #FFD23F; color: #141416; font-weight: 700; font-size: 16px; cursor: pointer">Да</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { adults: 2, kids: 0, dog: false, pick: 'overview', gate: null, dur: 4 }; }
+  renderVals() {
+    const st = this.state, hide = 'display:none', n = '\u00a0';
+    const icons = {
+      overview: 'M5 15a3.5 3.5 0 1 0 0.01 0M19 15a3.5 3.5 0 1 0 0.01 0M9 7l-2 4.5M15 7l2 4.5M10.5 14h3',
+      museums: 'M3 9l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18',
+      dog_walk: 'M12 3l-5 8h3l-4 6h12l-4-6h3zM12 17v4',
+      ryumochnye: 'M7 4h10l-1.2 9.5a3.8 3.8 0 0 1-7.6 0zM12 17v3M8.5 20h7',
+      beer: 'M6 7h9v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zM15 10h2.5a2 2 0 0 1 0 4H15M8 4c.5 1 1.5 1 2 0s1.5-1 2 0',
+      custom: 'M12 9a3 3 0 1 0 0.01 0M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1'
+    };
+    const list = [
+      { id: 'overview', name: 'Обзорный', sub: 'главное в центре' },
+      { id: 'museums', name: 'Музейный', sub: 'до 4 музеев' },
+      { id: 'ryumochnye', name: 'По рюмочным', sub: '18+ · только пешком', adult: true },
+      { id: 'beer', name: 'Пивной', sub: '18+ · только пешком', adult: true },
+      { id: 'custom', name: 'Свой маршрут', sub: 'интересы и темп' }
+    ];
+    if (st.dog) list.unshift({ id: 'dog_walk', name: 'Прогулка с собакой', sub: 'парки, набережные, виды', nature: true });
+    const cur = list.find(p => p.id === st.pick) || list[0];
+    const presets = list.map(p => {
+      const on = cur.id === p.id, custom = p.id === 'custom';
+      return Object.assign({}, p, {
+        on: on ? 'true' : 'false', icon: icons[p.id], border: custom ? 'dashed' : 'solid',
+        cd: p.name + (p.adult ? ', только для взрослых' : '') + ', ' + p.sub + '. Выбрать',
+        badge: p.adult ? 'position:absolute;right:' + (on ? 34 : 10) + 'px;top:10px;width:22px;height:22px;border-radius:50%;background:#F4F4F0;color:#141416;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center' : hide,
+        check: on ? 'position:absolute;right:10px;top:12px' : hide,
+        style: 'position:relative;height:76px;border:none;border-radius:5px;cursor:pointer;color:#F4F4F0;background:' + (custom ? 'transparent' : '#6B3E26') + ';box-shadow:' + (on ? '0 0 0 2px #161618,0 0 0 4px #FFD23F' : 'none') + ';' + (custom ? 'outline:2px dashed #55555E;outline-offset:-2px' : ''),
+        pick: () => p.adult ? this.setState({ gate: p.id }) : this.setState({ pick: p.id })
+      });
+    });
+    const step = (key, label, min, sing) => ({
+      label, n: st[key],
+      dec: () => this.setState({ [key]: Math.max(min, st[key] - 1) }), inc: () => this.setState({ [key]: Math.min(9, st[key] + 1) }),
+      less: label + ': ' + st[key] + '. Меньше', more: label + ': ' + st[key] + '. Больше'
+    });
+    const warns = [];
+    if (st.kids > 0 && cur.adult) warns.push({ text: 'Ребёнку может быть некомфортно: в бары с детьми обычно не пускают.', actions: hide, btns: [] });
+    if (st.dog && !cur.nature) warns.push({
+      text: 'С собакой в ' + (cur.adult ? 'бары' : 'музеи и кафе') + ' обычно нельзя. Оставьте собаку дома или выберите прогулку с собакой.',
+      actions: 'display:flex;flex-wrap:wrap;gap:8px;padding-left:28px',
+      btns: [{ t: 'Прогулка с собакой', go: () => this.setState({ pick: 'dog_walk' }) }, { t: 'Собака останется дома', go: () => this.setState({ dog: false }) }]
+    });
+    const durList = [2, 4, 6, 8, 0];
+    const durs = durList.map(d => ({ t: d ? d + n + 'ч' : 'без ограничения', on: st.dur === d ? 'true' : 'false', go: () => this.setState({ dur: d }),
+      style: 'height:44px;padding:0 16px;border-radius:22px;font-size:14px;font-weight:600;cursor:pointer;' + (st.dur === d ? 'border:none;background:#F4F4F0;color:#141416' : 'background:transparent;border:1px solid #55555E;color:#B9B9C0') }));
+    const pl = (k, a, b, c) => { const m10 = k % 10, m100 = k % 100; if (m10 === 1 && m100 !== 11) return a; if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return b; return c; };
+    let crew = st.adults + n + pl(st.adults, 'взрослый', 'взрослых', 'взрослых');
+    if (st.kids) crew += ' · ' + st.kids + n + pl(st.kids, 'ребёнок', 'ребёнка', 'детей');
+    if (st.dog) crew += ' · собака';
+    return {
+      people: [step('adults', 'Взрослые', 1), step('kids', 'Дети', 0)],
+      dogOn: st.dog ? 'true' : 'false', toggleDog: () => this.setState({ dog: !st.dog }),
+      dogText: st.dog ? 'с нами' : 'нет',
+      dogFill: st.dog ? '#C99A5B' : 'none', dogStroke: st.dog ? '#C99A5B' : '#8C8C93',
+      dogStyle: 'background:#0F0F11;border:3px solid ' + (st.dog ? '#C99A5B' : '#232327') + ';border-radius:14px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:4px;color:#F4F4F0;cursor:pointer',
+      presets, warns, durs,
+      durHint: st.dur ? 'Соберём расписание: когда куда прийти и когда финиш' : 'Без расписания: порядок мест по пути и часы работы каждого',
+      prefs: [{ k: 'Бюджет на всех', v: 'не важно' }, { k: 'Темп', v: 'обычный' }],
+      capTitle: cur.name + ' · ' + (st.dur ? st.dur + n + 'ч' : 'без ограничения'),
+      capMeta: crew + ' · ' + (st.dur ? 'старт 11:00' : 'без расписания'),
+      scrim: st.gate ? 'position:absolute;inset:0;background:rgba(0,0,0,.6)' : hide,
+      gate: st.gate ? 'position:absolute;left:40px;right:40px;top:560px;background:#0B1218;border:6px solid #232327;border-radius:16px;padding:22px 18px 18px' : hide,
+      yes: () => this.setState({ pick: st.gate, gate: null }),
+      no: () => this.setState({ gate: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

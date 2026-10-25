@@ -144,6 +144,32 @@ color['budget'] = O(
   overBorder=c('#D8402B','«Не помещается» plate border (= accent.red)'),
   tight=c('#FFD23F','«Впритык» text and dot (= accent.yellow)'),
 )
+color['kind'] = O(
+  fill=c('#2A1E17','Category tag fill (МУЗЕЙ, ПАРК…) on rows and cards (Sprint 4)'),
+  border=c('#6B3E26','Category tag border (= tourist brown)'),
+  text=c('#E0B48F','Category tag text (AA on fill)'),
+)
+color['stretch'] = O(
+  fill=c('#2B2A12','«РАЗМИНКА N МИН» tag fill (fun preset stops)'),
+  border=c('#8A7A1E','«РАЗМИНКА» tag border'),
+  text=c('#FFD23F','«РАЗМИНКА» tag text (= accent.yellow)'),
+)
+color['hours'] = O(
+  open=c('#7FD38A','Opening hours «открыто» text / dot (Sprint 4 walks, cards)'),
+  openFill=c('#7FD38A','«открыто» pill fill', alpha=0.12),
+  closed=c('#E6604A','«сегодня закрыто» text (= accent.redText)'),
+  closedFill=c('#E6604A','«закрыто» pill fill', alpha=0.14),
+  unknown=c('#B9B9C0','«часы не указаны» (= text.secondary)'),
+)
+color['info'] = O(
+  fill=c('#1C2A1E','Green info plate fill: how the walk was adapted to the crew'),
+  border=c('#2F4A33','Green info plate border'),
+  mark=c('#7FD38A','Green info plate check disc'),
+)
+color['odometer'] = O(
+  fill=c('#000000','Odometer tag under a Road-ahead sign («193 км»)'),
+  border=c('#3A3A42','Odometer tag border (= dash.outline)'),
+)
 color['overlay'] = O(
   scrim=c('#000000','Scrim behind bottom sheets and dialogs (new)', alpha=0.60),
   focus=c('#FFD23F','Keyboard focus ring, 2dp, offset 2dp'),
@@ -225,6 +251,12 @@ typ['street'] = O(
   kind=t(S,600,12,14.4,use='Street plate small line «улица», house number'),
 )
 typ['badge'] = t(S,700,12,15.6,use='Suggestion type badge Г/У/М')
+typ['tag'] = O(
+  kind=t(S,700,11,14.3,ls=0.06,use='Category / «РАЗМИНКА» tag (uppercase copy)'),
+  odometer=t(M,600,11,14.3,tnum=True,use='Odometer tag «193 км» under a Road-ahead sign'),
+  hours=t(S,600,12,15.6,use='Opening-hours line on a timed walk / card'),
+  hoursLg=t(S,700,14,18.2,use='Opening-hours pill on an untimed walk («без ограничения»)'),
+)
 typ['odometer'] = t(M,600,22,28.6,tnum=True,use='Odometer digits')
 typ['paper'] = O(
   title=t(S,700,20,21,use='"ПУТЕВОЙ ЛИСТ"'),
@@ -296,6 +328,9 @@ size = O(
   photoH=dp(233,'Card photo frame height = width / 1.5 (3:2 fixed aspect, ADR-0012 §6)'),
   presetH=dp(76,'City-walk preset plate height'),
   streetPlateH=dp(64,'Street-name plate height'),
+  kindTagH=dp(20,'Category tag height'), odometerTagW=dp(50,'Odometer tag min width'), odometerTagH=dp(20,'Odometer tag height'),
+  handoffCtaH=dp(60,'Road-ahead «Вести в навигаторе» button min height'), cityEntryH=dp(64,'Windshield «По городу пешком» plate height'),
+  crewCellH=dp(118,'City-start crew stepper cell height'), hoursPillH=dp(24,'Untimed walk hours pill height'),
   sheetHandleW=dp(36,'Bottom-sheet handle width (new)'), sheetHandleH=dp(4,'Bottom-sheet handle height (new)'),
 )
 E = O(
@@ -366,6 +401,9 @@ motion['photoFadeIn'] = m(durationMs=250, easing='standard', infinite=False)
 motion['returnToItem'] = m(durationMs=0, highlightMs=1200, holdMs=400, easing='easeOut', infinite=False)
 motion['footsteps'] = m(durationMs=1800, easing='linear', periodDp=48, infinite=True)
 motion['lamps'] = m(durationMs=3200, easing='easeInOut', fromAlpha=0.7, toAlpha=1.0, infinite=True)
+motion['rebuildPulse'] = m(durationMs=1200, easing='easeInOut', fromAlpha=0.35, toAlpha=0.6, infinite=True)
+motion['walkRebuild'] = m(durationMs=400, easing='linear', infinite=False)
+motion['cityEntryPress'] = m(durationMs=90, easing='standard', infinite=False)
 motion['limitSignIn'] = m(durationMs=400, easing='decelerate', fromScale=0.8, infinite=False)
 motion['frameBudgetMs'] = O(value=16, unit='ms', use='Per-frame budget at 60 fps (scene draw <= 4 ms)')
 

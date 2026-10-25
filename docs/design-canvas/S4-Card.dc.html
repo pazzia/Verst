@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Карточка места · Спринт 4</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,a{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+</style>
+</helmet>
+<!-- Sprint 4 · 5.9 card with little data (design/screens/5.9-place-card.md §9). One place, four data levels — tap the dashed chips
+     at the bottom (or the photo) to step down: everything → a photo taken nearby → text only → open-map data only.
+     «Фото» are drawn stand-ins; the app loads Commons / Wikipedia images. -->
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; inset: 0">
+    <div style="height: 132px; background: linear-gradient(#2B2850 0 38%, #8E4A6B 38% 64%, #D9655A 64% 84%, #F29A5E 84%)"></div>
+    <div style="position: absolute; left: 20px; right: 20px; top: 56px; height: 49px; background: #1E4FA3; border-radius: 7px; padding: 3px; box-sizing: border-box">
+      <div style="height: 100%; border: 2px solid #F4F4F0; border-radius: 5px; box-sizing: border-box; display: flex; align-items: center; padding: 0 10px; font-weight: 700; font-size: 20px; justify-content: space-between"><span>Золотое кольцо</span><span>825</span></div>
+    </div>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(0,0,0,.6)"></div>
+
+  <div role="dialog" aria-label="{{title}}" style="position: absolute; left: 0; right: 0; bottom: 0; background: #161618; border-radius: 16px 16px 0 0; border-top: 2px solid #232327; padding: 8px 20px 16px; box-sizing: border-box">
+    <div aria-hidden="true" style="width: 36px; height: 4px; border-radius: 2px; background: #3A3A42; margin: 0 auto 14px"></div>
+    <div style="display: flex; align-items: flex-start; gap: 12px">
+      <span aria-hidden="true" style="width: 39px; height: 39px; border-radius: 4px; background: #6B3E26; box-shadow: inset 0 0 0 2px #6B3E26, inset 0 0 0 3.5px #F4F4F0; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-6 9 6M5 10v10h14V10M9 20v-5h6v5M3 20h18"></path></svg></span>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+        <h2 style="margin: 0; font-size: 20px; line-height: 23px; font-weight: 700">{{title}}</h2>
+        <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8C8C93"><span style="height: 20px; padding: 0 6px; border-radius: 4px; background: #2A1E17; border: 1px solid #6B3E26; color: #E0B48F; font-size: 11px; font-weight: 700; letter-spacing: .06em; display: flex; align-items: center">МУЗЕЙ</span>усадьба · Мураново, 12&nbsp;км от трассы</span>
+        <span style="{{whyStyle}}">{{why}}</span>
+      </span>
+      <button type="button" aria-label="Закрыть" style="width: 44px; height: 44px; margin: -8px -10px 0 0; border: none; background: transparent; color: #B9B9C0; font-size: 22px">×</button>
+    </div>
+
+    <button type="button" onClick="{{next}}" aria-label="{{photoCd}}" style="position: relative; display: block; width: 350px; height: 233px; margin-top: 12px; padding: 0; border: none; border-radius: 12px; overflow: hidden; background: {{mat}}; cursor: pointer">
+      <span style="{{photoStyle}}">
+        <span style="position: absolute; left: 0; right: 0; top: 0; height: 130px; background: linear-gradient(#8FB3D6,#D8E3EA)"></span>
+        <span style="position: absolute; left: 0; right: 0; top: 130px; bottom: 0; background: {{ground}}"></span>
+        <span style="{{house}}"></span><span style="{{roof}}"></span>
+        <span style="position: absolute; left: {{treeX}}px; top: 70px; width: 70px; height: 90px; border-radius: 50%; background: #4D6B3C"></span>
+        <span style="position: absolute; left: {{tree2X}}px; top: 90px; width: 50px; height: 70px; border-radius: 50%; background: #5E7E47"></span>
+      </span>
+      <span style="{{labelStyle}}">ФОТО РЯДОМ</span>
+      <span style="{{scrimStyle}}"></span>
+      <span style="{{creditStyle}}">{{credit}}</span>
+      <span style="{{illoStyle}}">
+        <span aria-hidden="true" style="position: absolute; inset: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.025) 0 12px, transparent 12px 24px)"></span>
+        <span aria-hidden="true" style="width: 92px; height: 92px; border-radius: 8px; background: #6B3E26; box-shadow: inset 0 0 0 5px #6B3E26, inset 0 0 0 8px #F4F4F0; display: flex; align-items: center; justify-content: center; position: relative"><svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-6 9 6M5 10v10h14V10M9 20v-5h6v5M3 20h18"></path></svg></span>
+        <span style="position: relative; margin-top: 10px; font-weight: 700; font-size: 15px; color: #E0B48F; letter-spacing: .06em">МУЗЕЙ</span>
+        <span style="{{noPhotoStyle}}">фото пока нет</span>
+      </span>
+      <span aria-hidden="true" style="position: absolute; inset: 0; border: 1px solid #3A3A42; border-radius: 12px; pointer-events: none"></span>
+    </button>
+
+    <div style="{{descStyle}}">{{desc}}</div>
+    <div style="{{srcStyle}}">{{src}}</div>
+    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px">
+      <sc-for list="{{facts}}" as="f" hint-placeholder-count="3"><span style="{{f.s}}">{{f.t}}</span></sc-for>
+    </div>
+    <div style="{{openDataStyle}}"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 50%; border: 1.5px dotted #8C8C93; flex-shrink: 0"></span>{{openData}}</div>
+    <div style="margin-top: 12px; height: 52px; border-radius: 12px; background: #232327; border: 1px solid #3A3A42; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px">Заменить</div>
+    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px">
+      <sc-for list="{{levels}}" as="l" hint-placeholder-count="4"><button type="button" onClick="{{l.go}}" style="{{l.style}}">{{l.t}}</button></sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { lv: 0 }; }
+  renderVals() {
+    const lv = this.state.lv, hide = 'display:none', n = ' ', abs = 'position:absolute;';
+    const photo = lv <= 1, nearby = lv === 1;
+    const chip = (t, kind) => ({ t, s: 'min-height:28px;padding:4px 9px;border-radius:14px;box-sizing:border-box;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;' + (kind === 'park' ? 'background:#16253F;color:#B9C6D3' : kind === 'open' ? 'background:rgba(127,211,138,.12);color:#7FD38A' : 'background:#232327;color:#C4C4CA') });
+    const factsByLevel = [
+      [chip('сегодня 10:00–18:00 · открыто', 'open'), chip('билет ≈' + n + '400' + n + '₽'), chip('P бесплатно у входа', 'park')],
+      [chip('сегодня 10:00–18:00 · открыто', 'open'), chip('билет ≈' + n + '400' + n + '₽'), chip('P бесплатно у входа', 'park')],
+      [chip('сегодня 10:00–18:00 · открыто', 'open'), chip('вход платный')],
+      [chip('часы не указаны'), chip('с собакой — нельзя')]
+    ];
+    const descs = [
+      'Усадьба, где жили Боратынский и Тютчевы: дом-музей с подлинной мебелью, парк и пруд. Летом — экскурсии по аллеям.',
+      'Усадьба, где жили Боратынский и Тютчевы: дом-музей с подлинной мебелью, парк и пруд.',
+      'Литературный музей в старой усадьбе: дом, парк и пруд. Удобно размяться по пути на Ярославское шоссе.',
+      ''
+    ];
+    const srcs = ['Описание: Википедия · CC BY-SA', 'Описание: Википедия · CC BY-SA', 'Описание: Викигид · CC BY-SA', 'Данные о месте: © участники OpenStreetMap'];
+    const levelNames = ['есть всё', 'фото рядом', 'только текст', 'минимум'];
+    return {
+      title: 'Музей-усадьба «Мураново»',
+      why: lv < 3 ? 'Почему здесь: объект наследия федерального значения · есть в Викигиде' : '', whyStyle: lv < 3 ? 'font-size:12px;color:#B9B9C0' : hide,
+      next: () => this.setState({ lv: (lv + 1) % 4 }),
+      photoCd: photo ? (nearby ? 'Фото рядом с местом' : 'Фото: музей-усадьба «Мураново»') : 'Иллюстрация: музей',
+      mat: photo ? '#232327' : '#2A2620',
+      photoStyle: photo ? abs + 'inset:0' : hide,
+      ground: nearby ? '#6E8A57' : '#7A9461',
+      house: nearby ? abs + 'left:250px;top:118px;width:60px;height:34px;background:#F1ECE2' : abs + 'left:120px;top:98px;width:130px;height:62px;background:#F1ECE2',
+      roof: nearby ? abs + 'left:244px;top:104px;width:72px;height:16px;background:#7A5A44;clip-path:polygon(10% 100%,50% 0,90% 100%)' : abs + 'left:110px;top:70px;width:150px;height:30px;background:#7A5A44;clip-path:polygon(8% 100%,50% 0,92% 100%)',
+      treeX: nearby ? 40 : 20, tree2X: nearby ? 110 : 280,
+      labelStyle: nearby ? abs + 'left:10px;top:10px;height:24px;padding:0 8px;border-radius:4px;background:rgba(0,0,0,.62);color:#F4F4F0;font-size:11px;font-weight:600;letter-spacing:.08em;display:flex;align-items:center' : hide,
+      scrimStyle: photo ? abs + 'left:0;right:0;bottom:0;height:56px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.62))' : hide,
+      creditStyle: photo ? abs + 'left:12px;right:12px;bottom:8px;text-align:left;font-size:11px;font-weight:500;color:#F4F4F0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis' : hide,
+      credit: nearby ? 'Фото рядом с местом · Wikimedia Commons · А. Савин · CC BY-SA' : 'Фото: Wikimedia Commons · А. Савин · CC BY-SA 4.0',
+      illoStyle: photo ? hide : abs + 'inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center',
+      noPhotoStyle: lv === 3 ? 'position:relative;margin-top:6px;font-size:12px;color:#8C8C93' : hide,
+      desc: descs[lv], descStyle: descs[lv] ? 'margin-top:12px;font-size:14px;line-height:1.4;color:#C4C4CA' : hide,
+      src: srcs[lv], srcStyle: 'margin-top:' + (descs[lv] ? 4 : 12) + 'px;font-size:11px;color:#8C8C93',
+      facts: factsByLevel[lv],
+      openData: 'часы и цены — из открытых данных, уточняйте',
+      openDataStyle: lv >= 2 ? 'margin-top:8px;display:flex;align-items:center;gap:6px;font-size:12px;color:#8C8C93' : hide,
+      levels: levelNames.map((t, i) => ({ t: 'пример: ' + t, go: () => this.setState({ lv: i }),
+        style: 'height:30px;padding:0 10px;border-radius:15px;font-size:11px;cursor:pointer;background:none;' + (i === lv ? 'border:1px solid #8C8C93;color:#F4F4F0' : 'border:1px dashed #3A3A42;color:#8C8C93') }))
+    };
+  }
+}
+</script>
+</body>
+</html>

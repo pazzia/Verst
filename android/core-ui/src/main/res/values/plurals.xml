@@ -73,6 +73,12 @@
         <item quantity="many">мест</item>
         <item quantity="other">места</item>
     </plurals>
+    <plurals name="plural_point">
+        <item quantity="one">точка</item>
+        <item quantity="few">точки</item>
+        <item quantity="many">точек</item>
+        <item quantity="other">точки</item>
+    </plurals>
     <plurals name="plural_person">
         <item quantity="one">человек</item>
         <item quantity="few">человека</item>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Дорога впереди · Спринт 4</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE27A}
+@keyframes roll{from{background-position:0 0}to{background-position:0 64px}}
+.lane{background:repeating-linear-gradient(to bottom,#F4F4F0 0 32px,transparent 32px 64px);animation:roll 2.2s linear infinite}
+@keyframes car{from{top:0}to{top:100%}}
+.car{animation:car 14s linear infinite}
+.row{transition:background .2s}
+.row:hover{background:#1C1C20}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+</style>
+</helmet>
+<!-- Sprint 4 · 5.5 Road ahead (design/screens/5.5-road-ahead.md §10). Preset «Весело и познавательно», crew 2 взр · 1 реб · пёс.
+     New: «Вести в навигаторе» (whole trip) and «Вести: день N» (→ S4-Handoff), the odometer tag under each sign (km from the start),
+     the category tag, parking lines «P …», stretch stops at interesting places instead of bare roadside stops, a rest row with
+     what is actually there, and the subtle «open data» mark (dotted ring after the tag) instead of «не проверено» text. -->
+<div style="width: 390px; height: 2760px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 132px; overflow: hidden">
+    <div style="position: absolute; inset: 0 0 auto 0; height: 50px; background: #2B2850"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 50px; height: 34px; background: #8E4A6B"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 84px; height: 26px; background: #D9655A"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 110px; height: 22px; background: #F29A5E"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 14px; background: #0E0E10; border-radius: 0 0 50% 50% / 0 0 12px 12px"></div>
+  </div>
+  <div style="position: absolute; left: 0; right: 0; top: 110px; height: 40px; background: #161618; border-radius: 50% 50% 0 0 / 30px 30px 0 0"></div>
+
+  <a href="Panel.dc.html" style="position: absolute; left: 16px; top: 18px; min-height: 32px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #E9E2F2; text-decoration: none">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>
+    Приборы
+  </a>
+  <div style="position: absolute; left: 20px; right: 20px; top: 56px; background: #1E4FA3; border-radius: 7px; padding: 3px; box-shadow: 0 6px 14px rgba(0,0,0,.35)">
+    <div style="border: 2px solid #F4F4F0; border-radius: 5px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center">
+      <span style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 20px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"></path></svg>Золотое кольцо</span>
+      <span style="font-weight: 700; font-size: 20px">825</span>
+    </div>
+  </div>
+
+  <div style="position: relative; padding-top: 150px">
+    <div style="padding: 0 20px 4px">
+      <h1 style="margin: 0; font-weight: 700; font-size: 28px; line-height: 1.05">Дорога впереди</h1>
+      <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 600">
+        <span style="padding: 4px 9px; border-radius: 12px; background: #2A2A2E">3 дня · 2 ночи</span>
+        <span style="padding: 4px 9px; border-radius: 12px; background: #2A2A2E">2 взр · 1 реб · пёс</span>
+        <span style="padding: 4px 9px; border-radius: 12px; background: #2A2A2E">весело и познавательно</span>
+      </div>
+      <a href="S4-Handoff.dc.html" aria-label="Вести в навигаторе: по дням, начиная с первого" style="margin-top: 12px; min-height: 60px; border-radius: 12px; background: #FFD23F; color: #141416; display: flex; align-items: center; gap: 12px; padding: 8px 16px; box-sizing: border-box; text-decoration: none">
+        <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="#141416"><path d="M3 11l18-8-8 18-2-8z"></path></svg>
+        <span style="flex: 1; display: flex; flex-direction: column"><span style="font-weight: 700; font-size: 18px; line-height: 22px">Вести в навигаторе</span><span style="font-size: 12px; font-weight: 600; color: #4A3D0A">по дням · начнём с дня 1</span></span>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+      </a>
+      <p style="margin: 10px 0 0; font-size: 13px; color: #B9B9C0">Знаки по пути — как увидите их на трассе. Любой можно заменить.</p>
+      <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8C8C93"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 50%; border: 1.5px dotted #8C8C93; flex-shrink: 0"></span><span>— из открытых данных, часы уточняйте</span><span style="color: #7FA6D9; font-weight: 600; white-space: nowrap">· О данных</span></div>
+    </div>
+
+    <div style="position: relative; margin-top: 14px">
+      <div aria-hidden="true" style="position: absolute; left: 14px; top: 0; bottom: 0; width: 46px; background: #3A3A3F; border-left: 3px solid #F4F4F0; border-right: 3px solid #F4F4F0; box-sizing: border-box">
+        <div class="lane" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px"></div>
+        <div class="car" style="position: absolute; left: 50%; margin-left: 2px; width: 14px; height: 22px; border-radius: 5px 5px 3px 3px; background: #FFD23F; border: 2px solid #141416; box-sizing: border-box"></div>
+      </div>
+
+      <sc-for list="{{days}}" as="d" hint-placeholder-count="3">
+        <div>
+          <div style="margin: 6px 16px 10px 72px; display: flex; align-items: center; gap: 8px">
+            <span style="font-weight: 700; font-size: 15px; color: #FFD23F">{{d.name}}</span>
+            <span style="flex: 1; font-size: 12px; color: #8C8C93">{{d.meta}}</span>
+            <a href="S4-Handoff.dc.html" aria-label="Вести в навигаторе: {{d.name}}" style="min-height: 36px; padding: 0 10px; border-radius: 18px; border: 1px solid #FFD23F; color: #FFD23F; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 5px; text-decoration: none"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="#FFD23F"><path d="M3 11l18-8-8 18-2-8z"></path></svg>вести</a>
+          </div>
+          <sc-for list="{{d.rows}}" as="r" hint-placeholder-count="4">
+            <div class="row" style="display: grid; grid-template-columns: 72px 68px minmax(0, 1fr); align-items: start; padding: 8px 16px 12px 0">
+              <div aria-hidden="true" style="position: relative; height: 100%">
+                <span style="position: absolute; left: 60px; top: 30px; width: 14px; height: 3px; background: #55565C"></span>
+              </div>
+              <div aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+                <sc-if value="{{r.isCity}}" hint-placeholder-val="{{false}}">
+                  <span style="width: 64px; min-height: 40px; background: #F4F4F0; color: #141416; border: 3px solid #141416; outline: 2px solid #F4F4F0; border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 700; font-size: 11px; line-height: 1.05; padding: 3px 2px; box-sizing: border-box">{{r.signText}}</span>
+                </sc-if>
+                <sc-if value="{{r.isBrown}}" hint-placeholder-val="{{false}}">
+                  <span style="width: 56px; height: 56px; background: #6B3E26; border-radius: 5px; padding: 3px; box-sizing: border-box; display: block">
+                    <span style="width: 100%; height: 100%; border: 2px solid #F4F4F0; border-radius: 3px; box-sizing: border-box; display: flex; align-items: center; justify-content: center">
+                      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{r.icon}}"></path></svg>
+                    </span>
+                  </span>
+                </sc-if>
+                <sc-if value="{{r.isService}}" hint-placeholder-val="{{true}}">
+                  <span style="width: 50px; height: 62px; background: #1E4FA3; border-radius: 4px; padding: 5px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 4px">
+                    <span style="width: 40px; height: 40px; background: #F4F4F0; border-radius: 2px; display: flex; align-items: center; justify-content: center">
+                      <sc-if value="{{r.isFuel}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v15M3 20h11M5 9h7M13 8l3 2v7a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg></sc-if>
+                      <sc-if value="{{r.isFood}}" hint-placeholder-val="{{true}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v5M9 3v5M16 21V3c2.5 1 4 3.5 4 7h-4"></path></svg></sc-if>
+                      <sc-if value="{{r.isRest}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l-5 8h3l-4 6h12l-4-6h3zM12 17v4"></path></svg></sc-if>
+                      <sc-if value="{{r.isHotel}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"></path><circle cx="7" cy="11" r="2"></circle></svg></sc-if>
+                    </span>
+                    <span style="width: 22px; height: 3px; background: #F4F4F0; border-radius: 2px"></span>
+                  </span>
+                </sc-if>
+                <span style="{{r.odoStyle}}">{{r.odo}}</span>
+              </div>
+              <div style="min-width: 0; padding-left: 4px; display: flex; flex-direction: column; gap: 3px">
+                <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #8C8C93">
+                  <span>{{r.ahead}}</span><span style="font-variant-numeric: tabular-nums">{{r.time}}</span>
+                </div>
+                <div style="font-weight: 700; font-size: 17px; line-height: 1.15">{{r.name}}</div>
+                <div style="{{r.tagRow}}">
+                  <sc-for list="{{r.tags}}" as="t" hint-placeholder-count="1"><span style="{{t.s}}">{{t.t}}</span></sc-for>
+                  <span title="данные из открытых источников" style="{{r.unv}}"></span>
+                </div>
+                <div style="font-size: 13px; line-height: 1.4; color: #C4C4CA">{{r.note}}</div>
+                <div style="{{r.amenStyle}}">{{r.amen}}</div>
+                <div style="{{r.parkStyle}}"><span aria-hidden="true" style="width: 18px; height: 18px; border-radius: 3px; background: #1E4FA3; color: #F4F4F0; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">P</span><span>{{r.park}}</span></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px">
+                  <span style="font-weight: 600; font-size: 13px; color: #FFD23F">{{r.cost}}</span>
+                  <sc-if value="{{r.isHotel}}" hint-placeholder-val="{{false}}">
+                    <a href="Exit.dc.html" style="min-height: 36px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px; background: #1E4FA3; color: #F4F4F0; font-weight: 600; font-size: 13px; text-decoration: none">Выбрать отель →</a>
+                  </sc-if>
+                  <sc-if value="{{r.canSwap}}" hint-placeholder-val="{{true}}">
+                    <button type="button" aria-label="Заменить: {{r.name}}" style="min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #3A3A42; background: transparent; color: #B9B9C0; font-family: inherit; font-weight: 600; font-size: 12px; cursor: pointer">заменить</button>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <a href="S4-Waybill.dc.html" style="position: absolute; left: 16px; right: 16px; bottom: 24px; height: 64px; border-radius: 12px; background: #F4F4F0; color: #141416; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; text-decoration: none">
+    <span style="display: flex; flex-direction: column">
+      <span style="display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #55565C">ПУТЕВОЙ ЛИСТ · <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#55565C" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>В БЮДЖЕТЕ</span>
+      <span style="font-weight: 700; font-size: 22px">≈ 32 100 ₽</span>
+    </span>
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M13 5l7 7-7 7"></path></svg>
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const n = '\u00a0', t = '\u202f', hide = 'display:none';
+    const I = {
+      monastery: 'M12 2v3M10.5 3.5h3M8 21V12l4-4 4 4v9M5 21h14M10 21v-4a2 2 0 0 1 4 0v4',
+      kremlin: 'M4 21V9l2-2 2 2v3h2V7l2-3 2 3v5h2V9l2-2 2 2v12zM10 21v-4h4v4',
+      estate: 'M3 11l9-6 9 6M5 10v10h14V10M9 20v-5h6v5M3 20h18',
+      museum: 'M3 9l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18',
+      nature: 'M12 3l-5 8h3l-4 6h12l-4-6h3zM12 17v4',
+      play: 'M5 21V8l7-5 7 5v13M9 21v-6h6v6M2 21h20'
+    };
+    const tag = (x, kind) => ({ t: x, s: 'height:20px;padding:0 6px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.06em;display:flex;align-items:center;' + (kind === 'stretch' ? 'background:#2B2A12;border:1px solid #8A7A1E;color:#FFD23F' : 'background:#2A1E17;border:1px solid #6B3E26;color:#E0B48F') });
+    const r = (type, ahead, time, name, note, cost, o) => {
+      o = o || {};
+      return {
+        ahead, time, name, note, cost, signText: o.sign || '', icon: I[o.icon || 'monastery'],
+        isCity: type === 'city', isBrown: type === 'brown',
+        isService: ['fuel', 'food', 'rest', 'hotel'].indexOf(type) >= 0,
+        isFuel: type === 'fuel', isFood: type === 'food', isRest: type === 'rest', isHotel: type === 'hotel',
+        canSwap: type !== 'city' && type !== 'hotel',
+        odo: o.odo + n + 'км', odoStyle: 'min-width:50px;height:20px;padding:0 4px;box-sizing:border-box;border-radius:3px;background:#000;border:1px solid #3A3A42;color:#F4F4F0;font-family:IBM Plex Mono,monospace;font-weight:600;font-size:11px;display:flex;align-items:center;justify-content:center;letter-spacing:.02em',
+        tags: o.tags || [], tagRow: (o.tags || []).length ? 'display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:1px 0' : hide,
+        unv: o.unv ? 'width:12px;height:12px;border-radius:50%;border:1.5px dotted #8C8C93;box-sizing:border-box;display:inline-block' : hide,
+        park: o.park || '', parkStyle: o.park ? 'display:flex;align-items:center;gap:6px;font-size:13px;color:#B9C6D3' : hide,
+        amen: o.amen || '', amenStyle: o.amen ? 'font-size:12px;color:#8FA4B8' : hide
+      };
+    };
+    const days = [
+      { name: 'День 1', meta: '265' + n + 'км · ≈' + n + '4' + n + 'ч за рулём', rows: [
+        r('city', 'старт', '08:00', 'Москва', 'Выезд по Ярославскому шоссе, до пробок.', '', { sign: 'МОСКВА', odo: 0 }),
+        r('brown', 'через 73' + n + 'км', '09:05', 'Троице-Сергиева лавра', 'Полтора часа на осмотр. Собака ждёт с одним из взрослых.', 'вход свободный', { odo: 73, tags: [tag('МОНАСТЫРЬ')], park: '≈' + n + '150' + n + '₽/ч · ≈' + n + '300' + n + '₽ за стоянку' }),
+        r('brown', 'через 62' + n + 'км', '11:00', 'Разминка · Музей «Ботик Петра I»', 'Ребёнку — первый корабль флота, собаке — берег Плещеева озера. 8 мин от трассы.', '≈' + n + '400' + n + '₽', { icon: 'estate', odo: 135, tags: [tag('РАЗМИНКА 30' + n + 'МИН', 'stretch'), tag('МУЗЕЙ')], park: 'бесплатно у входа' }),
+        r('food', 'через 5' + n + 'км', '11:50', 'Обед · Переславль-Залесский', 'Кафе у Плещеева озера, есть детское меню.', '≈' + n + '1' + t + '800' + n + '₽', { odo: 140 }),
+        r('brown', 'через 66' + n + 'км', '13:40', 'Ростовский кремль', 'Прогулка по стенам и у озера Неро.', '≈' + n + '900' + n + '₽', { icon: 'kremlin', odo: 206, tags: [tag('КРЕМЛЬ')], park: '≈' + n + '100' + n + '₽/ч · ≈' + n + '200' + n + '₽ за стоянку' }),
+        r('rest', 'через 34' + n + 'км', '15:00', 'Отдых · площадка у М-8', '15 минут размяться перед Ярославлем.', '0' + n + '₽', { odo: 240, amen: 'есть: туалет · столы · навес' }),
+        r('hotel', 'через 25' + n + 'км', '16:00', 'Ночёвка · Ярославль', 'Отель, где можно с собакой. Вечером — Стрелка.', '≈' + n + '6' + t + '000' + n + '₽', { odo: 265, park: 'у гостиницы · бесплатно' })
+      ] },
+      { name: 'День 2', meta: '340' + n + 'км · ≈' + n + '5' + n + 'ч', rows: [
+        r('brown', 'через 80' + n + 'км', '10:30', 'Ипатьевский монастырь', 'Кострома, а после — торговые ряды.', '≈' + n + '500' + n + '₽', { odo: 345, tags: [tag('МОНАСТЫРЬ')], park: '≈' + n + '100' + n + '₽/ч · ≈' + n + '200' + n + '₽ за стоянку' }),
+        r('brown', 'через 48' + n + 'км', '12:20', 'Разминка · Музей сыра, Кострома', 'Ребёнку — мастер-класс и дегустация, 5 мин от трассы. Собака ждёт с одним из взрослых.', '≈' + n + '1' + t + '200' + n + '₽', { icon: 'museum', odo: 393, tags: [tag('РАЗМИНКА 40' + n + 'МИН', 'stretch'), tag('ИНТЕРАКТИВНЫЙ')], park: 'бесплатно рядом', unv: true }),
+        r('brown', 'через 70' + n + 'км', '14:30', 'Разминка · парк «Плёсские высоты»', 'Собаке — простор, всем — левитановские виды над Волгой. 12 мин от трассы.', 'вход свободный', { icon: 'nature', odo: 463, tags: [tag('РАЗМИНКА 30' + n + 'МИН', 'stretch'), tag('ПРИРОДА')] }),
+        r('hotel', 'через 142' + n + 'км', '17:30', 'Ночёвка · Суздаль', 'Гостевой дом в центре, ужин рядом.', '≈' + n + '6' + t + '000' + n + '₽', { odo: 605, park: 'у гостиницы · бесплатно' })
+      ] },
+      { name: 'День 3', meta: '220' + n + 'км · домой', rows: [
+        r('brown', 'через 35' + n + 'км', '10:00', 'Золотые ворота', 'Владимир: ворота и Успенский собор рядом.', '≈' + n + '600' + n + '₽', { icon: 'kremlin', odo: 640, tags: [tag('ПАМЯТНИК')], park: '≈' + n + '80' + n + '₽/ч · ≈' + n + '160' + n + '₽ за стоянку' }),
+        r('fuel', 'через 60' + n + 'км', '11:30', 'АЗС на М-7', 'Последняя заправка до дома.', '≈' + n + '1' + t + '700' + n + '₽', { odo: 700 }),
+        r('city', 'через 125' + n + 'км', '15:30', 'Москва', 'Дома к вечеру, без ночной трассы.', '', { sign: 'МОСКВА', odo: 825 })
+      ] }
+    ];
+    return { days };
+  }
+}
+</script>
+</body>
+</html>
