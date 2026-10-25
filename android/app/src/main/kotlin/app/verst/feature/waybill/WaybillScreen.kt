@@ -302,7 +302,7 @@ private fun CostLine(line: CostLineDto, expanded: Boolean, onClick: () -> Unit) 
  */
 @Composable
 private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onClick: () -> Unit) {
-    val stops = trip.daysList.flatMap { it.stops }.filter { app.verst.feature.road.parkingStop(it) }
+    val stops = trip.daysList.flatMap { it.stops }.filter { app.verst.feature.road.showsParking(it) }
     val paid = stops.filter { it.parking?.known == true && (it.parking?.rub ?: 0) > 0 }
     val free = stops.count { it.parking?.free == true }
     val unknownStops = stops.filter { it.parking?.known != true }

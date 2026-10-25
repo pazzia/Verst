@@ -848,4 +848,10 @@
     <string name="common_hours_approx">≈ %1$d ч</string>
     <string name="common_hours_short">%1$d ч</string>
     <string name="card_hours_daily">ежедневно</string>
+    <string name="card_desc_source">Описание: %1$s</string>
+    <!-- S4 dev: the M6 amenity tags of rest / fuel rows the deck has no word for -->
+    <string name="road_amenity_walk">где погулять</string>
+    <string name="road_amenity_view">вид</string>
+    <string name="road_amenity_ev">зарядка для электромобиля</string>
+    <string name="road_amenity_24h">круглосуточно</string>
 </resources>

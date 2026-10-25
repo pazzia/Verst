@@ -304,7 +304,7 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                                 d.stops.forEachIndexed { si, st ->
                                     StopRow(
                                         st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name,
-                                        showParking = parkingOn && parkingStop(st),
+                                        showParking = parkingOn && showsParking(st),
                                         onParking = { a.parking(st) },
                                         highlighted = st.id == highlight,
                                         focusRequester = requesters.getOrPut(st.id) { FocusRequester() },
@@ -813,12 +813,16 @@ private fun noteWithAmenities(s: StopDto): String? {
     if (s.amenities.isEmpty()) return note
     val words = s.amenities.mapNotNull {
         when (it) {
-            "toilets", "toilet" -> stringResource(R.string.road_amenity_toilet)
+            "wc", "toilets", "toilet" -> stringResource(R.string.road_amenity_toilet)
             "tables", "picnic_table" -> stringResource(R.string.road_amenity_tables)
             "shelter" -> stringResource(R.string.road_amenity_shelter)
-            "cafe" -> stringResource(R.string.road_amenity_cafe)
+            "cafe", "cafe_at_fuel" -> stringResource(R.string.road_amenity_cafe)
             "playground" -> stringResource(R.string.road_amenity_playground)
-            else -> null
+            "walk" -> stringResource(R.string.road_amenity_walk)
+            "view" -> stringResource(R.string.road_amenity_view)
+            "ev_charger" -> stringResource(R.string.road_amenity_ev)
+            "24h" -> stringResource(R.string.road_amenity_24h)
+            else -> null // `parking` is the P part
         }
     }
     if (words.isEmpty()) return note

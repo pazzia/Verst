@@ -82,8 +82,11 @@ data class StopDto(
     val funFor: List<String> = emptyList(),
     /** API v3 (ADR-0015 §4): the zone tariff of the stop; null with a parking-aware engine = unknown. */
     val parking: ParkingDto? = null,
-    /** Rest areas: what OSM says is there (`toilets`, `tables`, `shelter`, `cafe`, `playground`). */
+    /** Rest and fuel rows (M3): `wc`, `cafe_at_fuel`, `playground`, `walk`, `view`, `parking`, `ev_charger`, `24h`. */
     val amenities: List<String> = emptyList(),
+    /** M6: why this sight («Объект культурного наследия · …»), and where its photo comes from (p18 … geosearch). */
+    val whyRu: String? = null,
+    val photoSource: String? = null,
 ) {
     /** A «Разминка» stop of the fun mood (5.5 §10.4). */
     val stretch: Boolean get() = funFor.isNotEmpty()
@@ -250,6 +253,8 @@ data class EngineErrorDto(
     val suggestions: kotlinx.serialization.json.JsonArray? = null,
     /** v3: how many places were found for the failed request (the «Нашли N» line). */
     val count: Int? = null,
+    /** M6: the key of the request this error answers (NOT_ENOUGH_POIS). */
+    val requestKey: String? = null,
 ) {
     /** The engine's verified suggestions, decoded defensively (unknown shapes are skipped). */
     val walkSuggestions: List<WalkSuggestion>
@@ -263,19 +268,22 @@ data class WalkSuggestion(
     val preset: String? = null,
     val clearExclude: Boolean = false,
     val count: Int? = null,
+    /** M6: the engine's chip text («Вернуть убранные места», «На 6 ч», «История, архитектура, парки и виды»). */
+    val titleRu: String? = null,
 ) {
     companion object {
         fun from(e: kotlinx.serialization.json.JsonElement): WalkSuggestion? {
             val o = e as? kotlinx.serialization.json.JsonObject ?: return null
             fun prim(k: String) = o[k] as? kotlinx.serialization.json.JsonPrimitive
-            val count = prim("count")?.content?.toIntOrNull()
+            val count = (prim("stops") ?: prim("count"))?.content?.toIntOrNull()
+            val title = prim("titleRu")?.takeIf { it.isString }?.content?.takeIf { it.isNotBlank() }
             return when {
-                prim("clearExclude")?.content == "true" -> WalkSuggestion(clearExclude = true, count = count)
-                o.containsKey("preset") -> prim("preset")?.takeIf { it.isString }?.content?.let { WalkSuggestion(preset = it, count = count) }
+                prim("clearExclude")?.content == "true" -> WalkSuggestion(clearExclude = true, count = count, titleRu = title)
+                o.containsKey("preset") -> prim("preset")?.takeIf { it.isString }?.content?.let { WalkSuggestion(preset = it, count = count, titleRu = title) }
                 o.containsKey("durationMin") -> {
                     val d = o["durationMin"]
-                    if (d is kotlinx.serialization.json.JsonNull) WalkSuggestion(unlimited = true, count = count)
-                    else prim("durationMin")?.content?.toIntOrNull()?.let { WalkSuggestion(durationMin = it, count = count) }
+                    if (d is kotlinx.serialization.json.JsonNull) WalkSuggestion(unlimited = true, count = count, titleRu = title)
+                    else prim("durationMin")?.content?.toIntOrNull()?.let { WalkSuggestion(durationMin = it, count = count, titleRu = title) }
                 }
                 else -> null
             }

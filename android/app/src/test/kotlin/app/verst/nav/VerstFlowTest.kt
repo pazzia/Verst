@@ -759,7 +759,8 @@ class VerstFlowTest {
     fun cardHoursAreNeverRawOsm() {
         assertEquals("{daily} 05:00–21:00", app.verst.feature.card.hoursRu("Mo-Su 05:00-21:00"))
         assertEquals("{24}", app.verst.feature.card.hoursRu("24/7"))
-        assertNull(app.verst.feature.card.hoursRu("Tu-Su 10:00-18:00; Mo off"))
+        assertEquals("вт–вс 10:00–18:00; пн выходной", app.verst.feature.card.hoursRu("Tu-Su 10:00-18:00; Mo off"))
+        assertNull(app.verst.feature.card.hoursRu("sunrise-sunset"))
         assertEquals("10:00–18:00", app.verst.feature.card.hoursRu("10:00–18:00"))
     }
 
@@ -878,6 +879,56 @@ class VerstFlowTest {
         assertTrue(r.toInputJson().contains("\"dog\":true"))
         // the car crew is untouched
         assertEquals(flow.adults, flow.adults)
+    }
+
+    /**
+     * M6 `requestKey`: a filter change that leads back to a request the engine already answered with the walk on
+     * screen sends nothing; an answer whose key is not the key of the request sent is dropped as stale.
+     */
+    @Test
+    fun walkRequestKeyDropsStaleAnswersAndSkipsSameRequests() = runTest {
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        val resp = { f: String -> app.verst.core.model.EngineJson.json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() } }
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        var lie = false
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                val key = Integer.toHexString(request.toInputJson().hashCode()) + if (lie) "x" else ""
+                return EngineResult.Ok(oneWalk.copy(id = "w${requests.size}", requestKey = key))
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        flow.buildWalk()
+        settle()
+        assertEquals(Route.Walk, flow.top)
+        val first = flow.walk!!
+        flow.pickCityPace("slow")
+        settle(300); settle(1_000)
+        assertEquals(2, requests.size)
+        assertEquals("w2", flow.walk!!.id)
+        flow.pickCityPace("normal") // back to the first request: its key is known, but the screen shows w2 → sent
+        settle(300); settle(1_000)
+        assertEquals(3, requests.size)
+        assertEquals(first.requestKey, flow.walk!!.requestKey)
+        // the same request again through another filter round trip: the shown walk answers it, nothing is sent
+        flow.pickCityBudget(1_000)
+        flow.pickCityBudget(null)
+        settle(300); settle(1_000)
+        assertEquals(3, requests.size)
+        // an answer under another key than the request sent is stale: the walk on screen stays
+        lie = true
+        flow.pickCityPace("slow")
+        settle(300); settle(1_000)
+        assertEquals(4, requests.size)
+        assertEquals(first.requestKey, flow.walk!!.requestKey)
+        assertFalse(flow.walkBuilding)
     }
 
     @Test

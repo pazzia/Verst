@@ -301,12 +301,35 @@ class Sprint4Test {
         back()
         compose.waitUntil(5_000) { flow.top == Route.City }
         assertEquals(120, flow.cityDurationMin)
-        // «без ограничения» (API v3; an engine without it answers an error → the toast, the screen stays)
+        // «без ограничения» (M4): no times, the hours of each place
+        compose.runOnUiThread { flow.selectCityPreset("overview") }
         compose.onNodeWithTag("city.duration.unlimited").performScrollTo().performClick()
         compose.onNodeWithTag("city.go").performClick()
         compose.waitUntil(30_000) { flow.top == Route.Walk || flow.cityError != null || flow.walkFew != null || flow.toast != null }
-        Log.i("VerstE2e", "S4 unlimited walk: top=${flow.top} untimed=${flow.walk?.untimed} error=${flow.cityError} toast=${flow.toast}")
+        Log.i("VerstE2e", "S4 unlimited walk: top=${flow.top} untimed=${flow.walk?.untimed} stops=${flow.walk?.stops?.size} key=${flow.walk?.requestKey} error=${flow.cityError} toast=${flow.toast}")
         shot("113-walk-unlimited")
         noErrorShown()
+        assertEquals(Route.Walk, flow.top)
+        assertTrue("an untimed walk", flow.walk!!.untimed)
+        assertTrue("every stop has today's hours", flow.walk!!.stops.all { it.hours != null })
+        waitTag("walk.header")
+        // the dog: «Прогулка с собакой» first, outdoor kinds only
+        back()
+        compose.waitUntil(5_000) { flow.top == Route.City }
+        compose.onNodeWithTag("city.crew.dog").performScrollTo().performClick()
+        compose.waitUntil(5_000) { flow.cityDog }
+        if (flow.visibleCityPresets().any { it.preset == "dog_walk" && it.available }) {
+            compose.runOnUiThread { flow.selectCityPreset("dog_walk") }
+            compose.runOnUiThread { flow.setCityDuration(120) }
+            compose.onNodeWithTag("city.go").performClick()
+            compose.waitUntil(30_000) { flow.top == Route.Walk && flow.walk?.preset == "dog_walk" || flow.walkFew != null || flow.toast != null }
+            Log.i("VerstE2e", "S4 dog walk: ${flow.walk?.titleRu} kinds=${flow.walk?.stops?.map { it.kind }} warnings=${flow.walk?.warnings?.map { it.code }}")
+            shot("114-walk-dog")
+            noErrorShown()
+            if (flow.top == Route.Walk) assertTrue("no indoor stop on a dog walk", flow.walk!!.stops.none { it.indoor })
+        } else {
+            Log.i("VerstE2e", "S4 dog walk preset not offered in ${flow.cityPresets?.town?.name}: ${flow.cityPresets?.presets?.map { it.preset }}")
+        }
+        compose.runOnUiThread { flow.pickCityDog(false) }
     }
 }

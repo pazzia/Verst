@@ -344,6 +344,8 @@ internal fun FewPlate(few: WalkFew, preset: String, excludedCount: Int, onSugges
                     stringResource(R.string.walk_few_clear_sub, (sg.count ?: excludedCount).let { "$it ${pluralStringResource(R.plurals.plural_place, it)}" })
                 sg.unlimited -> stringResource(R.string.walk_few_unlimited) to places?.let { stringResource(R.string.walk_few_unlimited_sub, it) }
                 sg.durationMin != null -> stringResource(R.string.walk_few_duration, durationLabel(sg.durationMin)) to places?.let { stringResource(R.string.walk_few_duration_sub, it) }
+                // «custom» with widened interests: the engine names it («История, архитектура, парки и виды»)
+                sg.preset == "custom" && sg.titleRu != null -> sg.titleRu!! to places?.let { stringResource(R.string.walk_few_preset_sub, it) }
                 else -> stringResource(R.string.walk_few_preset, presetName(sg.preset ?: "", sg.preset ?: "")) to places?.let { stringResource(R.string.walk_few_preset_sub, it) }
             }
             Column(

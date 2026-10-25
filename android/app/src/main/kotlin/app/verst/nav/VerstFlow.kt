@@ -273,6 +273,8 @@ class VerstFlow(
         private set
     /** S4 5.11 §10.5 / 5.10: `NOT_ENOUGH_POIS` with the engine's verified suggestions (never guessed here). */
     var walkFew: WalkFew? by mutableStateOf(null)
+    /** M6: request input → the engine's `requestKey` (stale answers and same-request rebuilds). */
+    private val walkKeyByInput = HashMap<String, String>()
         private set
     /** S4: which picker sheet is open (5.10 prefs, 5.11 filter bar). */
     var cityPicker: CityPicker? by mutableStateOf(null)
@@ -2005,11 +2007,31 @@ class VerstFlow(
             walkFew = null
         }
         val req = walkRequest()
+        // M6 `requestKey`: the engine's key of a request we sent before (learned from its answer). A filter change
+        // that leads back to the walk on screen sends nothing; an answer whose key is not the sent one is stale.
+        val input = req.toInputJson()
+        val sentKey = walkKeyByInput[input]
+        if (mode == WalkBuild.FILTER && sentKey != null && sentKey == walk?.requestKey && walkFew == null) {
+            walkBuilding = false
+            return
+        }
         val id = UUID.randomUUID().toString()
         val seq = ++walkSeq
         walkJob = scope.launch {
             val r = gateway.cityRoute(id, req)
             if (seq != walkSeq) return@launch // superseded by a newer request
+            val key = when (r) {
+                is EngineResult.Ok -> r.value.requestKey
+                is EngineResult.Err -> r.error.requestKey
+            }
+            if (key != null) {
+                if (sentKey != null && key != sentKey) {
+                    walkBuilding = false
+                    return@launch // an answer to another request: stale
+                }
+                if (walkKeyByInput.size > 64) walkKeyByInput.clear()
+                walkKeyByInput[input] = key
+            }
             val onWalk = top == Route.Walk
             when (r) {
                 is EngineResult.Ok -> {

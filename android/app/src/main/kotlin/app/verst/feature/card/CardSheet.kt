@@ -90,7 +90,8 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             img == null -> if (area) d?.townName?.let { stringResource(R.string.card_photo_area, it) } else null
             area -> img.labelRu ?: stringResource(R.string.card_photo_area, d?.townName ?: "")
             // 5.9 §9 level 3: a Commons photo ≤ 300 m from the place
-            img.source == "nearby" -> stringResource(R.string.card_photo_nearby_credit, img.credit?.author ?: "Wikimedia Commons", img.credit?.licence ?: "")
+            img.source == "geosearch" || img.source == "nearby" -> img.labelRu
+                ?: stringResource(R.string.card_photo_nearby_credit, img.credit?.author ?: "Wikimedia Commons", img.credit?.licence ?: "")
             img.credit?.author != null -> stringResource(R.string.card_photo_credit, img.credit!!.author!!, img.credit!!.licence ?: "")
             // release-s3: no usable author → «Фото: Wikimedia Commons · CC BY-SA 4.0» (the licence stays)
             img.credit?.licence != null -> stringResource(R.string.card_photo_credit_short) + stringResource(R.string.common_join_dot) + img.credit!!.licence!!
@@ -98,7 +99,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
         }
         val town = d?.townName ?: ""
         var photoShown by remember(img?.card) { mutableStateOf(false) }
-        val descText = d?.descriptionRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kindLine(ui), d?.townName) }
+        val descText = d?.textRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kindLine(ui), d?.townName) }
         val illWord = if (!area && ui.kind != "bar") (tagWord ?: kindLine(ui).substringBefore(" · ").uppercase()) else null
         PhotoFrame(
             url = if (ui.loading) null else img?.card,
@@ -109,7 +110,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             contentDescription = if (area) stringResource(R.string.cd_card_photo_area, town) else stringResource(R.string.cd_card_photo, name),
             onCredit = img?.page?.let { p -> { a.openPage(p) } },
             onShown = { photoShown = it },
-            plate = if (img?.source == "nearby") stringResource(R.string.card_photo_nearby_label) else null,
+            plate = if (img?.source == "geosearch" || img?.source == "nearby") stringResource(R.string.card_photo_nearby_label) else null,
             // levels 4–5: the category illustration; «фото пока нет» only without a description (OSM-only)
             illustration = illWord?.let { Illustration(it, caption = descText.isNullOrBlank()) },
         )
@@ -122,7 +123,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
         }
         // the fictional status is said once (S3-QA P1-05): no engine «Демо: вымышленная гостиница» line
         val desc = descText
-        if (desc.isNullOrBlank() && ui.offline && ui.kind == "sight" && d?.wikidataId != null && d.descSource != "osm") {
+        if (desc.isNullOrBlank() && ui.offline && ui.kind == "sight" && d?.wikidataId != null && d.textSource != "osm") {
             // ADR-0016 OR-4 / CEO S4: an online-only value is missing offline → the quiet line in its place
             Txt(stringResource(R.string.online_later), T.body.md, C.text.muted, Modifier.padding(top = 12.dp).testTag("card.later"))
         }
@@ -130,11 +131,11 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             var more by remember(desc) { mutableStateOf(false) }
             Txt(desc, T.body.md, C.text.note, Modifier.padding(top = 12.dp).clickable { more = !more }, maxLines = if (more) Int.MAX_VALUE else 6)
             // the source line under the text (a link to the page when the engine has it)
-            val src = when (d?.descSource) {
+            val src = when (d?.textSource) {
                 "wikipedia" -> stringResource(R.string.card_desc_wikipedia)
                 "wikivoyage" -> stringResource(R.string.card_desc_wikivoyage)
                 "osm" -> stringResource(R.string.card_osm)
-                else -> null
+                else -> d?.extractSource?.nameRu?.let { n -> stringResource(R.string.card_desc_source, listOfNotNull(n, d?.extractSource?.licence).joinToString(" · ")) }
             }
             if (src != null) Txt(src, T.caption.md, C.text.muted, Modifier.padding(top = 4.dp).testTag("card.desc.source"))
         }
@@ -166,7 +167,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
                 contentAlignment = Alignment.CenterStart,
             ) { Txt(stringResource(R.string.card_report), T.body.smStrong, C.text.muted, maxLines = 1) }
         }
-        if ((d?.attributionRu?.isNotEmpty() == true || ui.kind == "bar") && d?.descSource != "osm") {
+        if ((d?.attributionRu?.isNotEmpty() == true || ui.kind == "bar") && d?.textSource != "osm") {
             Txt(stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
         }
     }
@@ -252,7 +253,13 @@ internal fun hoursRu(text: String): String? {
     val t = text.trim()
     if (t == "24/7") return "{24}"
     Regex("""^Mo-Su (\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$""").matchEntire(t)?.let { m -> return "{daily} ${m.groupValues[1]}–${m.groupValues[2]}" }
-    return if (t.any { it in 'A'..'Z' || it in 'a'..'z' }) null else t
+    // OSM day abbreviations → Russian («Tu-Su 10:00-18:00; Mo off» → «вт–вс 10:00–18:00; пн выходной»)
+    val days = mapOf("Mo" to "пн", "Tu" to "вт", "We" to "ср", "Th" to "чт", "Fr" to "пт", "Sa" to "сб", "Su" to "вс", "PH" to "праздники")
+    var r = Regex("""\b(Mo|Tu|We|Th|Fr|Sa|Su|PH)\b""").replace(t) { days.getValue(it.value) }
+    r = r.replace(Regex("""\boff\b|\bclosed\b"""), "выходной")
+    r = Regex("""(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})""").replace(r) { "${it.groupValues[1]}–${it.groupValues[2]}" }
+    r = Regex("""([а-я]{2})-([а-я]{2})""").replace(r) { "${it.groupValues[1]}–${it.groupValues[2]}" }
+    return if (r.any { it in 'A'..'Z' || it in 'a'..'z' }) null else r
 }
 
 /**

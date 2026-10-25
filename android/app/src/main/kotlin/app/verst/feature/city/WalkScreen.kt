@@ -388,7 +388,8 @@ private fun CrewPlates(ui: WalkUi, a: WalkActions) {
     val codes = w.warnings.map { it.code }.toSet()
     val indoor = w.stops.count { it.indoor }
     if (f.children > 0 && ("CHILD_BARS" in codes || w.adultOnly)) WalkWarningPlate(stringResource(R.string.walk_warn_child_bars), "walk.warn.childbars")
-    if (f.dog && ("DOG_INDOOR" in codes || indoor > 0) && indoor > 0) {
+    val dogPlate = f.dog && ("DOG_INDOOR" in codes || indoor > 0) && indoor > 0
+    if (dogPlate) {
         val actions = buildList {
             if (f.presets.any { it.preset == DOG_WALK }) add(stringResource(R.string.walk_action_dog_walk) to { a.preset(DOG_WALK) })
             add(stringResource(R.string.walk_action_dog_home) to { a.dog(false) })
@@ -398,6 +399,8 @@ private fun CrewPlates(ui: WalkUi, a: WalkActions) {
     if ("CHILD_ADAPTED" in codes) WalkInfoPlate(stringResource(R.string.walk_info_child), "walk.info.child")
     if ("CHILD_MUSEUMS" in codes) WalkInfoPlate(stringResource(R.string.walk_info_child_museums), "walk.info.childmuseums")
     if ("DOG_ADAPTED" in codes || w.preset == DOG_WALK) WalkInfoPlate(stringResource(R.string.walk_info_dog), "walk.info.dog")
+    // M4 crew notes; the dog one only when the dog plate above does not already say it
+    w.crewNotesRu.filterNot { dogPlate && it.contains("собак", ignoreCase = true) }.forEachIndexed { i, n -> WalkInfoPlate(n, "walk.crew.note.$i") }
 }
 
 /** components §29 `WalkFilterChip`: h 36, radius 18, dashed-outline look, chevron-down. */
@@ -551,12 +554,13 @@ private fun WalkStopRow(
             // S4 5.11 §10.3: the category tag; timed rows «открыто до 20:00», untimed rows the hours pill
             val hours = s.hours
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                kindWord(s.poiKind)?.let { KindTag(it) }
-                if (!untimed && hours != null) TimedHours(hours)
+                kindWord(s.poiKind ?: s.kind)?.let { KindTag(it) }
+                if (!untimed && hours != null && hours.source != "default") TimedHours(hours)
             }
             if (untimed) UntimedHours(hours)
-            val note = s.noteRu?.takeIf { it.isNotBlank() && !(hideHoursNote && it == HOURS_NOTE) }
-            val dogNo = if (dog && s.indoor) stringResource(R.string.walk_stop_dog_no) else null
+            // M4 notes join parts with « · » («С собакой внутрь обычно нельзя · Часы работы уточняйте»)
+            val note = s.noteRu?.split(" · ")?.filterNot { hideHoursNote && it == HOURS_NOTE }?.joinToString(" · ")?.takeIf { it.isNotBlank() }
+            val dogNo = if (dog && s.indoor && note?.contains("собак", ignoreCase = true) != true) stringResource(R.string.walk_stop_dog_no) else null
             listOfNotNull(note, dogNo).joinToString(" ").takeIf { it.isNotBlank() }?.let { Txt(it, T.body.md, C.text.note, Modifier.testTag("walk.stop.note")) }
             if (cost != null) Txt(cost, T.body.mdStrong, C.accent.yellow)
         }
@@ -579,6 +583,8 @@ private fun TimedHours(h: app.verst.core.model.dto.WalkHoursDto) {
 private fun UntimedHours(h: app.verst.core.model.dto.WalkHoursDto?) {
     when {
         h == null || (h.todayRu == null && !h.allDay && h.openNow == null) -> HoursPill(HoursState.UNKNOWN, stringResource(R.string.hours_unknown))
+        // M6: default hours are a guess — no «открыто» claim, just the hours (the note says «уточняйте»)
+        h.source == "default" && h.openNow != false -> HoursPill(HoursState.UNKNOWN, h.todayRu ?: stringResource(R.string.hours_unknown))
         h.allDay -> HoursPill(HoursState.ALLDAY, stringResource(R.string.hours_24))
         h.openNow == false -> HoursPill(HoursState.CLOSED, h.closedDayRu?.let { stringResource(R.string.hours_closed_day, it) } ?: stringResource(R.string.hours_closed))
         h.todayRu != null -> HoursPill(if (h.openNow == true) HoursState.OPEN else HoursState.UNKNOWN, if (h.openNow == true) stringResource(R.string.hours_today_open, h.todayRu!!) else h.todayRu!!)

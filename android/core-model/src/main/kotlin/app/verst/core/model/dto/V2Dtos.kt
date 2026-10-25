@@ -135,7 +135,22 @@ data class PoiDetailsDto(
     val descSource: String? = null,
     val dogsAllowed: Boolean? = null,
     val parking: ParkingDto? = null,
-)
+    /** M6 `poi_details` v3: the text (Wikipedia / Wikivoyage / OSM …) and where it comes from; the data level 1–4. */
+    val extractRu: String? = null,
+    val extractSource: ExtractSourceDto? = null,
+    val cardLevel: Int? = null,
+    val quality: Int? = null,
+    val fee: String? = null,
+    val website: String? = null,
+) {
+    /** The card text: the v3 extract, else the Sprint 3 description. */
+    val textRu: String? get() = extractRu?.takeIf { it.isNotBlank() } ?: descriptionRu
+    /** `wikipedia` | `wikivoyage` | `osm` | `wikidata` … */
+    val textSource: String? get() = extractSource?.key ?: descSource
+}
+
+@Serializable
+data class ExtractSourceDto(val key: String? = null, val nameRu: String? = null, val licence: String? = null)
 
 // ------------------------------------------------------------------------------------------ hand-off (ADR-0014)
 
@@ -278,12 +293,17 @@ data class WalkRouteDto(
     /** Architect S3-QA P1-02: why the walk is shorter than asked (null = it is not). */
     val shorter: WalkShorterDto? = null,
     val requestedDurationMin: Int? = null,
+    /** M4: «без ограничения» answered (no times; `durationMin`, `endAt`, the stop times are null). */
+    val unlimited: Boolean = false,
+    /** M4: crew notes («С собакой: в закрытые места кто-то зайдёт один…»). */
+    val crewNotesRu: List<String> = emptyList(),
+    val interestsWidened: Boolean = false,
     @Transient val json: String = "",
 ) {
     val adultOnly: Boolean get() = responsibleNoteRu != null
 
     /** «без ограничения» (v3 `durationMin: null`): no times, the hours of each place instead. */
-    val untimed: Boolean get() = input?.get("durationMin") is kotlinx.serialization.json.JsonNull ||
+    val untimed: Boolean get() = unlimited || input?.get("durationMin") is kotlinx.serialization.json.JsonNull ||
         (startAt == null && stops.isNotEmpty() && stops.all { it.arriveAt == null })
 
     /**

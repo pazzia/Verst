@@ -77,15 +77,24 @@ import app.verst.core.ui.theme.DesignTokens.type as T
 /** Stops where the car is left (5.5 §10.6): not fuel, not the start, not the finish. */
 internal fun parkingStop(s: StopDto): Boolean = s.kind in setOf("sight", "food", "rest", "overnight")
 
-/** A trip planned by a parking-aware engine (API v3 §4): only then the P parts and totals show. */
+/**
+ * A trip with parking data (M6: the «Парковки» line exists only in `russia_v1`; fixture worlds have none, and then
+ * no P part is drawn at all).
+ */
 internal fun parkingAware(trip: TripDto): Boolean =
     trip.cost.lines.any { it.key == "parking" } || trip.daysList.any { d -> d.stops.any { it.parking != null } }
+
+/**
+ * Where the P part shows in a parking-aware trip (M6): every sight (the engine prices sights; null = «P ?»), and any
+ * other stop the engine gave a parking object.
+ */
+internal fun showsParking(s: StopDto): Boolean = s.kind == "sight" || (parkingStop(s) && s.parking != null)
 
 /** Σ known stays of a day and the count of stops without data. */
 internal data class ParkingSum(val rub: Int, val unknown: Int)
 
 internal fun parkingOf(day: DayDto): ParkingSum {
-    val stops = day.stops.filter(::parkingStop)
+    val stops = day.stops.filter(::showsParking)
     return ParkingSum(stops.sumOf { it.parking?.takeIf(ParkingDto::known)?.rub ?: 0 }, stops.count { it.parking?.known != true })
 }
 
@@ -364,7 +373,9 @@ internal fun BoxScope.ParkingSheet(s: StopDto, windowH: Dp, onClose: () -> Unit)
     val detail = when {
         !known -> stringResource(R.string.road_parking_unknown)
         p!!.free -> p.freeRu ?: stringResource(R.string.road_parking_free)
-        else -> stringResource(R.string.road_parking_zone, p.zoneRu ?: stringResource(R.string.road_parking_zone_default), RuFormat.thousands(p.rubPerHour ?: 0), h)
+        // M6: `zoneRu` is the engine's whole sentence («Москва: платная зона …, 380 ₽/ч с 08:00 до 21:00»)
+        p.zoneRu != null -> p.zoneRu!!
+        else -> stringResource(R.string.road_parking_zone, stringResource(R.string.road_parking_zone_default), RuFormat.thousands(p.rubPerHour ?: 0), h)
     }
     BottomSheet(s.name, onClose, "parking", windowH) {
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {

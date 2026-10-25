@@ -57,6 +57,7 @@ data class MealUnitDto(val day: Int, val meal: String, val stopId: String? = nul
 @Serializable
 data class ParkingUnitDto(
     val stopId: String,
+    val name: String = "",
     val rubPerHour: Int? = null,
     val hours: Double? = null,
     val rub: Int? = null,
@@ -98,8 +99,14 @@ data class AltUnitsDto(
     val priceRub: String? = null,
     val regionName: String = "",
     val tripKmDelta: Int = 0,
-    /** API v3: the alternative's own parking stay (rounded), when the engine knows it. */
+    /**
+     * API v3 (M6, rule 5): the alternative's own parking, present only when the trip has parking data;
+     * [parkingRub] null = an unknown price. Without [parkingSource] the replaced stop simply loses its parking.
+     */
     val parkingRub: Int? = null,
+    val parkingRubPerHour: Int? = null,
+    val parkingHours: Double? = null,
+    val parkingSource: String? = null,
 )
 
 @Serializable
@@ -161,6 +168,18 @@ object CostCalculator {
         }
         val ticketed = u.tickets.map { it.stopId }.toSet()
         ov.replaced.forEach { (sid, a) -> if (sid !in ticketed && a.adultRub != null) out += altTicket(a) }
+        return out
+    }
+
+    /** M6 rule 5: the parking units after the replacements of [ov]. */
+    fun parkingAfter(units: List<ParkingUnitDto>, ov: CostOverridesDto): List<ParkingUnitDto> {
+        val out = units.filter { it.stopId !in ov.replaced }.toMutableList()
+        for ((sid, a) in ov.replaced) {
+            val src = a.parkingSource ?: continue
+            val unit = ParkingUnitDto(sid, a.name, a.parkingRubPerHour, a.parkingHours, a.parkingRub, src)
+            val i = units.indexOfFirst { it.stopId == sid }
+            if (i >= 0) out.add(i.coerceAtMost(out.size), unit) else out += unit
+        }
         return out
     }
 
@@ -230,11 +249,12 @@ object CostCalculator {
         val ticketsRub = roundTo(ticketExact, step)
         lines["tickets"] = ticketsRub
 
-        // ---- parking (ADR-0015 §4): Σ of the per-stop stays (integers, already rounded); unknown stays add 0.
-        // A replaced stop takes the alternative's stay when known; the engine's answer then overwrites it.
-        if (u.parking.isNotEmpty()) {
-            val parking = u.parking.sumOf { p -> ov.replaced[p.stopId]?.parkingRub ?: p.rub ?: 0 }
-            lines["parking"] = roundTo(BigDecimal(parking), step)
+        // ---- parking (ADR-0015 §4, M6 rule 5): Σ known per-stop stays (integers, already rounded); unknown = 0.
+        // A replaced stop loses its unit; the alternative's own parking (when it has `parkingSource`) takes its
+        // place, or is appended when the replaced stop had none (a rest stop replaced by a sight).
+        val parkingUnits = parkingAfter(u.parking, ov)
+        if (u.parking.isNotEmpty() || parkingUnits.isNotEmpty()) {
+            lines["parking"] = roundTo(BigDecimal(parkingUnits.sumOf { it.rub ?: 0 }), step)
         }
 
         // ---- totals (A§7.2)
