@@ -1547,3 +1547,32 @@ Inputs merged:
 - **Report sheet:**
   - 84: the sheet as opened, with the IME down and all four reasons + the button visible.
   - 84b: after a tap in the comment, with the button above the IME.
+
+## Sprint 4 engine (arch/s4-engine from main cf8f335) — contract changes for the Developer
+API v3 is additive (`mobile.API_VERSION = 3`; the contracts stay in `docs/contracts/v2/`, 37 files).
+- **Trip stops:** `kmDriven` (driven km from the trip start, detours included) and `kmLeft`; the last stop has
+  `kmDriven == trip.km`. Rest and fuel rows have `amenities` (wc, cafe_at_fuel, playground, walk, view, parking,
+  ev_charger, 24h). A second roadside break of a day reads only «Перерыв 15 минут.».
+- **Hand-off (car):** `order = ["maps", "navigatorNext", "web"]`; `parts[0].links.navigatorNext` (the next point
+  only) and `parts[0].next`; `links.navigator` (the whole day) stays for a signed build. `options.signing =
+  {"client": id}` adds `&client=` to the app links and returns `toSign` (sign each string with SHA256withRSA,
+  Base64, URL-encode, append `&signature=`).
+- **Moods:** `mood: "fun"` «Весело и познавательно» (interesting stops in the rest slots, ≤ 15 min detour, for the
+  crew; reason «Весело и познавательно: …»). The UI shows «Спокойно» (`calm`), «Весело и познавательно»
+  (`fun`), «Только доехать» (`just_drive`); `more_stops` stays accepted for saved trips.
+- **Parking:** a «Парковки» cost line (`key: "parking"`) with per-stop `breakdown` and
+  `cost.units.parking[] = {stopId, name, rubPerHour, hours, rub, source}` (`rub` null = unknown). Present only
+  in `russia_v1`. CostCalculator: the line = Σ known `rub` of the units whose `stopId` is not replaced; part of
+  the subtotal and the reserve. `tests/contract/cost_recompute_cases.json` has 4 `parking_*` cases (49).
+- **Walks:** `crew.dog`; children never block a drink walk (`CHILD_BARS` warning); `DOG_INDOOR` warning and
+  stop `noteRu`; `crewNotesRu`; preset `dog_walk` «Прогулка с собакой»; `durationMin: null` = «без ограничения»
+  (`unlimited: true`, no `arriveAt/departAt/endAt/durationMin`, ≤ 12 stops); every stop has `hours: {todayRu,
+  openNow, source}`; `interestsWidened`; `shorter.reason` gains `reach`; `NOT_ENOUGH_POIS.suggestions[]` with
+  `clearExclude` / `durationMin` (null = unlimited) / `preset` and `stops` — each solved, never the current
+  value. The app still resets `exclude` on any parameter change (docs/bugs/s4-walk-filters.md a).
+- **POI card:** `poi_details` gains `extractRu`, `extractSource {key, nameRu, licence}`, `cardLevel` 1–4,
+  `quality`, `fee`, `website`; OSM hours replace the default hours text.
+- **Rules (russia_v1 only):** open-data quality threshold, no sights within 12 km of a million-city centre
+  unless the trip starts/ends/stays there, ≤ 1 religious per 3 sights a day, no same kind twice in a row,
+  ≤ 30 % religious per trip; МКАД/ЦКАД in the routing graph (ЦКАД tolls not priced yet).
+- G01–G13 are byte-identical; G14–G17 (tests/golden/cases_s4) are rule checks on the real catalogue.
