@@ -77,9 +77,11 @@ class ProcessDeathTest {
         compose.onNodeWithTag("navigator.start").performClick()
         waitTag("instruments.start")
         android.util.Log.i("VerstE2e", "ProcessDeath instruments: mood=${flow.mood} budget=${flow.budgetIndex} seats=${flow.seats.toList()} dog=${flow.dog}")
+        val t0 = System.nanoTime()
         compose.onNodeWithTag("instruments.start").performClick()
-        compose.waitUntil(45_000) { flow.top == Route.Road || flow.top == Route.NoFit || has("drive.error.cta") }
-        android.util.Log.i("VerstE2e", "ProcessDeath after start: top=${flow.top}")
+        // diagnostics (runs 94 / 101): how long the first plan of a fresh process takes
+        compose.waitUntil(150_000) { flow.top == Route.Road || flow.top == Route.NoFit || has("drive.error.cta") }
+        android.util.Log.i("VerstE2e", "ProcessDeath after start: top=${flow.top} after ${(System.nanoTime() - t0) / 1_000_000} ms")
         waitTag("road.total", 45_000)
         assertEquals(Route.Road, flow.top)
         val trip = flow.result!!.trip

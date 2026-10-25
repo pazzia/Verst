@@ -144,7 +144,12 @@ class EngineHost(private val context: Context) {
         check(Looper.myLooper() != Looper.getMainLooper()) { "Python call on the main thread" }
         return try {
             val m = module ?: return errorEnvelope("NO_ENGINE", "engine not started: ${_status.value}")
-            m.callAttr(function, *args).toString()
+            val t0 = System.nanoTime()
+            m.callAttr(function, *args).toString().also {
+                // OR-8 / S4 diagnostics: slow engine calls (they hold the one engine thread) go to the log
+                val ms = (System.nanoTime() - t0) / 1_000_000
+                if (ms >= 1_000) Log.i(TAG, "slow call $function: $ms ms")
+            }
         } catch (e: Throwable) {
             Log.e(TAG, "call $function failed", e)
             errorEnvelope("INTERNAL", e.toString())
