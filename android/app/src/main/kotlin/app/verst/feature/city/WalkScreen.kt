@@ -69,6 +69,8 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.disabled
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Glyph
+import app.verst.core.ui.components.GlyphIcon
+import androidx.compose.animation.core.animateFloat
 import app.verst.core.ui.components.InfoChip
 import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.RoadSign
