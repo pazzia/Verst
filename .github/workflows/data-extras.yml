@@ -22,7 +22,7 @@ concurrency:
 jobs:
   extras:
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 300
     env:
       RAW: ${{ github.workspace }}/data-raw
       X: ${{ github.workspace }}/data-extra
@@ -66,8 +66,11 @@ jobs:
             -o "$RUNNER_TEMP/x.geojsonseq" --overwrite
           python3 $T/fetch_extras.py osm "$RAW" "$RUNNER_TEMP/x.geojsonseq" 2>&1 | tee -a "$X/log.txt"
       - name: Commons geosearch near POIs without a photo
+        timeout-minutes: 70
+        continue-on-error: true  # geosearch.json is written every 500 POIs; a timeout keeps the part found
         run: python3 $T/fetch_extras.py geosearch "$RAW" 2>&1 | tee -a "$X/log.txt"
       - name: Candidate photos — credits, size and categories
+        timeout-minutes: 60
         run: |
           python3 $T/fetch_extras.py candidates "$RAW" 2>&1 | tee -a "$X/log.txt"
           mkdir -p "$RUNNER_TEMP/c"

@@ -399,6 +399,8 @@ def cmd_geosearch(raw: Path) -> int:
             out[t["id"]] = files
         if i % 500 == 0:
             print(f"geosearch: {i}/{len(targets)}", flush=True)
+            # written as it goes: a step timeout keeps what was found so far
+            (raw / "geosearch.json").write_text(json.dumps(out, ensure_ascii=False), "utf-8")
     (raw / "geosearch.json").write_text(json.dumps(out, ensure_ascii=False), "utf-8")
     print(f"geosearch: {len(out)} of {len(targets)} POIs have nearby files")
     return 0
