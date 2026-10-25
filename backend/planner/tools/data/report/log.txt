@@ -1,0 +1,51 @@
+{"mismatches": {}, "resolved": {}}
+town classes: 547
+retry 1/4 in 5s: Invalid control character at: line 1382417 column 256 (char 41076822)
+towns: 1276; missing must-have: []
+pois: 0/1276 towns, 9252 rows, 0 failed
+pois: 50/1276 towns, 28279 rows, 0 failed
+pois: 100/1276 towns, 33726 rows, 0 failed
+pois: 150/1276 towns, 36422 rows, 0 failed
+pois: 200/1276 towns, 39643 rows, 0 failed
+pois: 250/1276 towns, 41564 rows, 0 failed
+pois: 300/1276 towns, 43331 rows, 0 failed
+pois: 350/1276 towns, 44442 rows, 0 failed
+pois: 400/1276 towns, 45797 rows, 0 failed
+pois: 450/1276 towns, 47110 rows, 0 failed
+pois: 500/1276 towns, 48040 rows, 0 failed
+pois: 550/1276 towns, 49558 rows, 0 failed
+pois: 600/1276 towns, 49982 rows, 0 failed
+pois: 650/1276 towns, 50887 rows, 0 failed
+pois: 700/1276 towns, 51570 rows, 0 failed
+pois: 750/1276 towns, 52337 rows, 0 failed
+pois: 800/1276 towns, 53035 rows, 0 failed
+pois: 850/1276 towns, 54076 rows, 0 failed
+pois: 900/1276 towns, 54698 rows, 0 failed
+pois: 950/1276 towns, 55419 rows, 0 failed
+pois: 1000/1276 towns, 56627 rows, 0 failed
+pois: 1050/1276 towns, 57605 rows, 0 failed
+pois: 1100/1276 towns, 58488 rows, 0 failed
+pois: 1150/1276 towns, 59296 rows, 0 failed
+pois: 1200/1276 towns, 59667 rows, 0 failed
+pois: 1250/1276 towns, 62009 rows, 0 failed
+pois: 62886 rows, 0 towns failed
+forms: 1276 towns; fixture oracle 47/48
+-rw-r--r-- 1 runner runner 4187472293 Oct 25 02:45 /home/runner/work/_temp/ru.osm.pbf
+bars: 5382 rows from 9019 named features, 179 towns (extract)
+credits: 50/10960
+credits: 1050/10960
+credits: 2050/10960
+credits: 3050/10960
+credits: 4050/10960
+credits: 5050/10960
+credits: 6050/10960
+credits: 7050/10960
+credits: 8050/10960
+credits: 9050/10960
+credits: 10050/10960
+credits: 10960 of 10960 files
+photos width=800: 50/50
+photos width=400: 50/50
+photos width=500: 50/50
+photos width=960: 50/50
+{"800": 1.0, "400": 1.0, "500": 1.0, "960": 1.0}

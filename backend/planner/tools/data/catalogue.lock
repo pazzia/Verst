@@ -1,0 +1,87 @@
+{
+ "version": "wd-20261025-r7",
+ "builtAt": "2026-10-25",
+ "counts": {
+  "towns": 1241,
+  "pois": 12439,
+  "bars": 3528,
+  "links": 79,
+  "credits": 3640
+ },
+ "totalBytes": 721247,
+ "files": {
+  "catalogue_meta.json.gz": {
+   "bytes": 48172,
+   "sha256": "5a3e28c54e6d39fbdd10b560da9c9decdbe34a19c3755df4f299477be241a3a2"
+  },
+  "catalogue_towns.json.gz": {
+   "bytes": 58907,
+   "sha256": "6a5cd81a2cefa88dc5f1e01ddba9c0715c3fc9e93f62338667ee17ac07674b88"
+  },
+  "catalogue_pois.json.gz": {
+   "bytes": 536026,
+   "sha256": "e55a5bd122c997caa31a185132556767804492c1a461f611fb14074fe85ec340"
+  },
+  "catalogue_bars.json.gz": {
+   "bytes": 78142,
+   "sha256": "5d9e01da40eefe6a8f8ad5d4e4a8c868d2f49394b78ec65c4a9a52e23d31626b"
+  }
+ },
+ "sources": {
+  "wikidata": "query.wikidata.org",
+  "osm": "download.geofabrik.de/russia-latest.osm.pbf (Overpass fallback)",
+  "commons": "commons.wikimedia.org",
+  "fetchedAt": "2026-10-25T02:46:58+00:00",
+  "run": "40151703225"
+ },
+ "classCheck": {
+  "labels": {
+   "Q159": "Russia",
+   "Q2977": "cathedral",
+   "Q16970": "church building",
+   "Q22698": "park",
+   "Q44613": "monastery",
+   "Q23413": "castle",
+   "Q179700": "statue",
+   "Q33506": "museum",
+   "Q174782": "square",
+   "Q183342": "federal city of Russia",
+   "Q57821": "fortification",
+   "Q570116": "tourist attraction",
+   "Q1107656": "garden",
+   "Q263274": "kremlin",
+   "Q2319498": "architectural landmark",
+   "Q4989906": "monument",
+   "Q1851368": "waterfront",
+   "Q5003624": "memorial",
+   "Q6017969": "scenic viewpoint",
+   "Q7930989": "city or town"
+  },
+  "mismatches": {},
+  "ok": true,
+  "resolved": {},
+  "unresolved": []
+ },
+ "forms": {
+  "total": 48,
+  "match": 47,
+  "misses": [
+   {
+    "name": "Пушкино",
+    "got": {
+     "gen": "Пушкина",
+     "prep": "Пушкине"
+    },
+    "want": [
+     "Пушкино",
+     "Пушкино"
+    ]
+   }
+  ],
+  "pymorphy3": "2.0.2"
+ },
+ "failedTowns": {
+  "pois": [],
+  "bars": []
+ }
+}
