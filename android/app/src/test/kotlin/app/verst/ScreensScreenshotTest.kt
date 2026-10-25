@@ -460,7 +460,9 @@ class ScreensScreenshotTest {
 
     @Test
     fun cardHotelArea() {
-        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-hotel.json", EngineJson::poiDetails)
+        // the placeholder state, deterministically: no URL (the runner has internet, Coil could load the real file)
+        val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-hotel.json", EngineJson::poiDetails)
+        val d = real.copy(image = real.image?.copy(card = null, thumb = null))
         val night = snapshot("G02_golden_ring").daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
         shot("card", "hotel-area") { CardOverRoad(card(d.nameRu, "hotel", "hotel", d, night.hotelOptions.first())) }
         compose.onNodeWithTag("card.fictional", useUnmergedTree = true).assertExists()
