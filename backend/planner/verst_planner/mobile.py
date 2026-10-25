@@ -1294,6 +1294,21 @@ def _area_photo(w: _World, town: Town) -> tuple[str | None, int | None]:
     return (best[1], best[2]) if best else (None, None)
 
 
+EXTRACT_LICENCE = {
+    "wikipedia": "CC BY-SA 4.0",
+    "wikivoyage": "CC BY-SA 3.0",
+    "osm": "ODbL",
+    "wikidata": "CC0",
+}
+
+
+def _cat_poi(w: _World, place_id: str) -> Any:
+    if not _CATALOGUE or w.catalogue is None:
+        return None
+    qid = w.catalogue.qid_of_place.get(place_id, place_id)
+    return _CATALOGUE[0].poi_by_id.get(qid)
+
+
 def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
     w = _world(world)
     pid = _str(place_id, "place_id")
@@ -1315,12 +1330,33 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
                 "childRub": p.ticket_child_rub,
                 "estimate": p.source is not Source.CURATED,
             }
+        poi = _cat_poi(w, p.id)
+        if poi is not None and poi.hours and hours is not None:
+            hours = {"textRu": poi.hours, "verified": True, "source": "osm"}
+        attribution = []
+        if poi is not None and poi.extract_src:
+            attribution.append(ru.text(f"poi.source.{poi.extract_src}"))
+        if poi is not None and (poi.hours or poi.fee is not None):
+            attribution.append(ru.text("poi.osm"))
         return {
             "id": p.id,
             "kind": "sight",
             "poiKind": _poi_kind(w, p),
             "nameRu": p.name_ru,
             "descriptionRu": p.description_ru,
+            # API v3 (ADR-0015 §3): the extra sources and the card level the 5.9 card is laid out for
+            "extractRu": poi.extract if poi else None,
+            "extractSource": None
+            if poi is None or not poi.extract_src
+            else {
+                "key": poi.extract_src,
+                "nameRu": ru.text(f"poi.source.{poi.extract_src}"),
+                "licence": EXTRACT_LICENCE[poi.extract_src],
+            },
+            "cardLevel": poi.level if poi else (4 if p.source is Source.CURATED else 2),
+            "quality": None if poi is None or poi.quality is None else round(poi.quality * 100),
+            "fee": poi.fee if poi else None,
+            "website": poi.website if poi else None,
             "townName": town.name_ru if town else None,
             "lat": p.point.lat,
             "lon": p.point.lon,
@@ -1328,7 +1364,7 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
             "hours": hours,
             "ticket": ticket,
             "isFictional": False,
-            "attributionRu": [],
+            "attributionRu": attribution,
             "wikidataId": w.catalogue.qid_of_place.get(p.id) if w.catalogue else None,
         }
     if p is not None and p.type is PlaceType.LODGING:
