@@ -733,3 +733,14 @@ Radio card, min-h 56, padding 10 12, radius 12, gap 12. Off: fill `dash.face` `#
 ## 30. `HandoffAppCard` and the sheet (5.13 §5)
 
 Tabs: segmented control, fill `dash.well`, radius 12, padding 4, gap 4; tab min-h 40, radius 9, 13/600; selected fill `text.primary` with `text.onLight`. Card: min-h 72, padding 12, radius 12, gap 12; app glyph in a 40 white square (radius 10; pin for Карты, arrow for Навигатор — glyphs, no logos); title 17/700 + badge (h 20, yellow, 11/700); sub 13/17 `#C4C4CA`; note 12 (`#8FA4B8`, or yellow for «Установить…»); out-arrow 16. Recommended: fill `#1F2A14`, 2 dp yellow. Not installed: α 0.55, glyph square `dash.controlAlt`. Remember switch 44 × 26.
+
+### 26.2 After the second CEO review (5.5 §10.7)
+
+`OdometerTag` and `ParkingSign` (§26, §26.1) are **retired** on Road ahead (tokens kept for the Instruments odometer).
+
+| Control | Spec |
+| --- | --- |
+| `CostsLine` | flex row, min-h 36, space-between. Left (nowrap, gap 5, 13/600): price `accent.yellow` · separator `#55565C` · P part. Right: quiet action |
+| P part | button, min touch 36 × 44, padding 0 2: glyph 15 × 15 (radius 3, `sign.blue`, «P» 11/700 white) + text 13/600 `#B9C6D3` (unknown «?» `text.muted`). TalkBack «Парковка: примерно 300 рублей. Подробнее» → `ParkingSheet` |
+| Quiet action | «заменить»: text 12/600 `text.muted`, no border/fill, padding-left 6, min-h 36; hotels «выбрать отель →» 12/600 `#7FA6D9` |
+| `KmPost` (variant B) | absolute in the road column at row top + 4, x 34: plate 30 × 30 `sign.white`, 1.5 dp `sign.black`, radius 2; number Plex Mono 12/600 + «км» 8/700 `text.onLight`; post 4 × 10 white with 1 dp black sides; first post only: label «пройдено» 9/600 `text.secondary` on `dash.raised` |

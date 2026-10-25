@@ -684,6 +684,12 @@
     <string name="road_handoff_day">вести</string>
     <string name="cd_road_handoff_day">Вести в навигаторе: день %1$d</string>
     <string name="road_odometer">%1$s км</string>
+    <string name="road_meta_driven">%1$s · пройдено %2$s км</string>
+    <string name="road_km_post_label">пройдено</string>
+    <string name="road_parking_inline_paid">≈ %1$s ₽</string>
+    <string name="road_parking_inline_free">бесплатно</string>
+    <string name="road_parking_inline_unknown">\?</string>
+    <string name="cd_road_parking_inline">Парковка: %1$s. Подробнее</string>
     <string name="cd_road_odometer">пройдено %1$s километров от старта</string>
     <string name="kind_museum">МУЗЕЙ</string>
     <string name="kind_kremlin">КРЕМЛЬ</string>

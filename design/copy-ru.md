@@ -985,7 +985,13 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `road_handoff_cta_sub` | по дням · начнём с дня {n} | `{n}` = today's day (1 before the trip) |
 | `road_handoff_day` | вести | day-header outline button |
 | `cd_road_handoff_day` | Вести в навигаторе: день {n} | |
-| `road_odometer` | {km} км | odometer tag under a sign = engine `kmDriven` (ADR-0015 §7) |
+| `road_odometer` | {km} км | km post number (variant B) = engine `kmDriven`; the odometer tag is retired (5.5 §10.7) |
+| `road_meta_driven` | {ahead} · пройдено {km} км | variant A meta line: «через 62 км · пройдено 135 км» |
+| `road_km_post_label` | пройдено | variant B, under the first km post only |
+| `road_parking_inline_paid` | ≈ {amount} ₽ | P part of the costs line |
+| `road_parking_inline_free` | бесплатно | |
+| `road_parking_inline_unknown` | ? | |
+| `cd_road_parking_inline` | Парковка: {value}. Подробнее | `{value}` «примерно 300 рублей» / «бесплатно» / «нет данных» |
 | `cd_road_odometer` | пройдено {km} километров от старта | TalkBack, read after «через …» |
 | `kind_museum` | МУЗЕЙ | category tags (ADR-0015 §2 whitelist); rows, cards, walks |
 | `kind_kremlin` | КРЕМЛЬ | |
