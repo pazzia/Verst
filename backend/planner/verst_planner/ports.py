@@ -12,6 +12,7 @@ from verst_planner.domain.model import (
     GeoLabel,
     GeoSuggestion,
     LatLon,
+    ParkingUnit,
     Place,
     ReadyRoute,
     RegionInfo,
@@ -84,6 +85,16 @@ class RegionLocator(Protocol):
     def locate(self, point: LatLon) -> RegionInfo:
         """Never raises; unknown → RU / Europe/Moscow."""
         ...
+
+
+class ParkingPort(Protocol):
+    """ADR-0015 §4: the static parking price of a car stop (tariff zones + OSM fee tags)."""
+
+    as_of: str
+
+    def unit(
+        self, stop_id: str, name: str, point: LatLon, arrive_local: datetime, dwell_min: int
+    ) -> ParkingUnit: ...
 
 
 class Clock(Protocol):

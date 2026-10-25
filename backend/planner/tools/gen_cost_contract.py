@@ -185,6 +185,12 @@ def expected(units, crew, reserve_on, budget, overrides):
         "food": r(food, 10),
         "tickets": r(tickets, 10),
     }
+    # ADR-0015 §4 (API v3): Σ known per-stop parking (rub already rounded to 10 by the engine); a replaced
+    # stop's parking is dropped; no `parking` units = no line
+    if units.get("parking"):
+        lines["parking"] = sum(
+            x["rub"] for x in units["parking"] if x["stopId"] not in replaced and x["rub"] is not None
+        )
     subtotal = sum(lines.values())
     lines["reserve"] = r(D(units["reserveFrac"]) * subtotal, 10)
     total = r(subtotal + (lines["reserve"] if reserve_on else 0), 100)
@@ -585,6 +591,32 @@ case(
     crew=FAMILY,
     reserve_on=False,
     budget=30000,
+)
+
+def park(stop, name, rate, hours, source):
+    rub = None if rate is None else int(r(D(rate * hours), 10))
+    return {"stopId": stop, "name": name, "rubPerHour": rate, "hours": hours, "rub": rub, "source": source}
+
+
+PARKING = [
+    park("d1s02", "Московский Кремль", 380, 2, "zone"),
+    park("d1s04", "Троице-Сергиева лавра", 0, 2, "free"),
+    park("d2s02", "Набережная", None, 1, "unknown"),
+    park("d2s03", "Музей", 55, 1, "osm"),
+]
+case("parking_known_free_unknown", "ADR-0015 §4: 760 + 0 + unknown + 60 = 820", units=mod(parking=PARKING))
+case(
+    "parking_replaced_stop",
+    "a replaced stop loses its parking unit (the engine prices the new stop)",
+    units=mod(parking=PARKING),
+    overrides={"replaced": {"d1s02": alt("RU-MOS", 0.0)}},
+)
+case("parking_all_free", "every stop free: a 0 ₽ line", units=mod(parking=[PARKING[1]]))
+case(
+    "parking_reserve_budget",
+    "parking counts in the subtotal, the reserve and the budget check",
+    units=mod(parking=PARKING),
+    budget=20000,
 )
 
 TEXT = (

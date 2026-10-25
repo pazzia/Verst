@@ -1057,6 +1057,21 @@
        "breakdown": []
       },
       {
+       "key": "parking",
+       "title": "Парковки",
+       "rub": 0,
+       "formula": "парковки бесплатные",
+       "asOf": "2026-06",
+       "enabled": true,
+       "breakdown": [
+        {
+         "label": "Площадь Кирова",
+         "formula": "бесплатно",
+         "rub": 0
+        }
+       ]
+      },
+      {
        "key": "reserve",
        "title": "Резерв 10%",
        "rub": 330,
@@ -1128,9 +1143,20 @@
        "lodging": "2026-10",
        "food": "2026-10",
        "tickets": "2026-10",
-       "reserve": "2026-10"
+       "reserve": "2026-10",
+       "parking": "2026-06"
       },
-      "moodJustDrive": false
+      "moodJustDrive": false,
+      "parking": [
+       {
+        "stopId": "d1s02",
+        "name": "Площадь Кирова",
+        "rubPerHour": 0,
+        "hours": 1,
+        "rub": 0,
+        "source": "free"
+       }
+      ]
      }
     },
     "reasons": {

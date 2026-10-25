@@ -462,6 +462,18 @@ class TicketUnit:
 
 
 @dataclass(frozen=True, slots=True)
+class ParkingUnit:
+    """ADR-0015 §4: paid parking at one car stop. `rub_per_hour` None = unknown (no zone, no OSM charge)."""
+
+    stop_id: str
+    name_ru: str
+    rub_per_hour: int | None
+    hours: int
+    rub: int | None  # round10(rub_per_hour x hours); 0 = free; None = unknown
+    source: str  # "zone" | "osm" | "free" | "unknown"
+
+
+@dataclass(frozen=True, slots=True)
 class CostUnits:
     fuel: FuelUnits
     tolls: tuple[TollUnit, ...]
@@ -478,6 +490,8 @@ class CostUnits:
     """`(line key, "YYYY-MM")` freshness per line, so offline recompute keeps `CostLine.as_of`."""
     mood_just_drive: bool = False
     """Mood is already «Только доехать» (then the `just_drive` overspend hint is not offered)."""
+    parking: tuple[ParkingUnit, ...] = ()
+    """ADR-0015 §4 per-stop parking; empty = no parking data (no «Парковки» line, fixture worlds)."""
 
 
 @dataclass(frozen=True, slots=True)

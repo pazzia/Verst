@@ -49,6 +49,7 @@ from verst_planner.domain.model import (
     NightUnit,
     NormalizedInput,
     OvernightReason,
+    ParkingUnit,
     PlanWarning,
     PointInput,
     ScheduledStop,
@@ -583,7 +584,23 @@ def units_to_json(u: CostUnits) -> Json:
         "childFoodWeightUnder7": dec_to_str(u.child_food_weight_under7),
         "asOf": {k: v for k, v in u.as_of},
         "moodJustDrive": u.mood_just_drive,
-    }
+    } | (
+        {}
+        if not u.parking
+        else {
+            "parking": [
+                {
+                    "stopId": x.stop_id,
+                    "name": x.name_ru,
+                    "rubPerHour": x.rub_per_hour,
+                    "hours": x.hours,
+                    "rub": x.rub,
+                    "source": x.source,
+                }
+                for x in u.parking
+            ]
+        }
+    )
 
 
 def units_from_json(d: Mapping[str, Any]) -> CostUnits:
@@ -636,6 +653,10 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
         child_food_weight_under7=_dec(d["childFoodWeightUnder7"]),
         as_of=tuple((str(k), str(v)) for k, v in d.get("asOf", {}).items()),
         mood_just_drive=bool(d.get("moodJustDrive", False)),
+        parking=tuple(
+            ParkingUnit(x["stopId"], x["name"], x["rubPerHour"], x["hours"], x["rub"], x["source"])
+            for x in d.get("parking", [])
+        ),
     )
 
 

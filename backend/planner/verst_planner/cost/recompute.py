@@ -259,6 +259,23 @@ def recompute(
         )
     )
 
+    # ---- parking (ADR-0015 §4, API v3): Σ known per-stop amounts (already rounded to 10 ₽); a replaced
+    # stop's parking goes away (the engine prices the new stop on replace). No units = no line (no data).
+    if units.parking:
+        parks = [x for x in units.parking if x.stop_id not in ov.replaced]
+        known = [x for x in parks if x.rub is not None]
+        unknown = len(parks) - len(known)
+        lines.append(
+            CostLine(
+                CostKey.PARKING,
+                fm.title(CostKey.PARKING, fuel_t, units.reserve_frac),
+                sum(x.rub or 0 for x in known),
+                fm.parking_formula(known, unknown),
+                _as_of(units, CostKey.PARKING, units.fuel.as_of),
+                tuple(fm.parking_row(x) for x in parks),
+            )
+        )
+
     # ---- totals (A§7.2)
     subtotal = sum(line.rub for line in lines)
     reserve = round_to(units.reserve_frac * subtotal, step)

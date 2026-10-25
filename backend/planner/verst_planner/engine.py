@@ -61,6 +61,7 @@ from verst_planner.domain.model import (
     NormalizedInput,
     OvernightChoice,
     OvernightReason,
+    ParkingUnit,
     Place,
     PlannedStop,
     PlanWarning,
@@ -121,6 +122,7 @@ from verst_planner.pipeline.timeline import (
 from verst_planner.ports import (
     Clock,
     GeocodingPort,
+    ParkingPort,
     PlaceRepository,
     PriceRepository,
     RegionLocator,
@@ -164,8 +166,9 @@ class Planner:
         clock: Clock,
         config: PlannerConfig,
         templates: ReasonTemplates,
+        parking: ParkingPort | None = None,
     ) -> None:
-        self.ports = Ports(routing, places, prices, tolls, regions, geocoding)
+        self.ports = Ports(routing, places, prices, tolls, regions, geocoding, parking)
         self.clock = clock
         self.cfg = config
         self.templates = templates
@@ -999,7 +1002,22 @@ def _cost_input(
         sights,
         prices.defaults_as_of(),
         trip_km,
+        _parking(days, ctx),
+        ctx.ports.parking.as_of if ctx.ports.parking is not None else None,
     )
+
+
+def _parking(days: Sequence[Sched], ctx: PlanContext) -> tuple[ParkingUnit, ...]:
+    """ADR-0015 §4: the car is parked at sights (hotels and cafés have their own parking)."""
+    model = ctx.ports.parking
+    if model is None:
+        return ()
+    out = []
+    for d in days:
+        for j, (s, slot) in enumerate(zip(d.stops, d.slots, strict=True)):
+            if s.kind is StopKind.SIGHT and s.place is not None and slot.arrive is not None:
+                out.append(model.unit(d.ids[j], s.name_ru, s.point, local(slot.arrive, d.tz), s.dwell_min))
+    return tuple(out)
 
 
 __all__ = ["Planner"]

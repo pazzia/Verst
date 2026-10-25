@@ -255,6 +255,9 @@ def _num(v: Any, what: str) -> float:
 # ---------------------------------------------------------------------------------------------- planners
 
 
+OPEN_DATA_CONFIG: dict[str, Any] = {"sights": {"diversity": 1}}  # ADR-0015 §2 rules for russia_v1
+
+
 def _planner(fakes: FakePorts | CataloguePorts, clock: Any, config: dict[str, Any] | None = None) -> Planner:
     return Planner(
         routing=fakes.routing,
@@ -266,6 +269,7 @@ def _planner(fakes: FakePorts | CataloguePorts, clock: Any, config: dict[str, An
         clock=clock,
         config=PlannerConfig.from_dict(config or {}),
         templates=ReasonTemplates.default(),
+        parking=getattr(fakes, "parking", None),
     )
 
 
@@ -821,7 +825,7 @@ def _load_catalogue() -> dict[str, Any]:
     bars: GridIndex[str] = GridIndex(0.05)
     for b in cat.bars:
         bars.add(b.point, b.id)
-    _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, _planner(ports, _CLOCK), cw, bars)
+    _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, _planner(ports, _CLOCK, OPEN_DATA_CONFIG), cw, bars)
     _CATALOGUE[:] = [cat]
     return {
         **cat.info(),

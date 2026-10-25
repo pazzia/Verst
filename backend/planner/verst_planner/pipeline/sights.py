@@ -88,12 +88,12 @@ def _day_sights(day: DayPlan) -> list[PlannedStop]:
     return [s for s in day.stops if s.kind is StopKind.SIGHT and s.place is not None]
 
 
-def diversity_ok(day: DayPlan, c: Candidate) -> bool:
+def diversity_ok(day: DayPlan, c: Candidate, on: bool = True) -> bool:
     """≤ 1 religious place per 3 sights of the day, and never two sights of the same kind in a row.
 
-    The rules guard against open-data noise: a curated place (the fixture worlds, every sight picked by a
-    person) passes, so G01-G13 keep their bytes."""
-    if c.place.source is Source.CURATED:
+    `on` is the `sights.diversity` config: on for the open-data world, off for the curated fixture worlds
+    (G01-G13 keep their bytes)."""
+    if not on:
         return True
     cat = category_of(c.place)
     sights = sorted([*_day_sights(day)], key=lambda s: s.km_at)
@@ -114,10 +114,6 @@ def _religious(s: PlannedStop) -> bool:
     return s.place is not None and category_of(s.place) in RELIGIOUS
 
 
-def _open_data(s: PlannedStop) -> bool:
-    return s.place is not None and s.place.source is not Source.CURATED
-
-
 def trip_religious_repair(days: list[DayPlan]) -> None:
     """Drop the lowest-scored droppable religious sights until they are ≤ 30 % of non-template sights."""
     while True:
@@ -126,9 +122,6 @@ def trip_religious_repair(days: list[DayPlan]) -> None:
             return
         rel = [(d, i) for d, i in rows if _religious(d.stops[i])]
         if len(rel) <= RELIGIOUS_SHARE * len(rows):
-            return
-        rel = [(d, i) for d, i in rel if _open_data(d.stops[i])]
-        if not rel:
             return
         d, i = min(rel, key=lambda r: (r[0].stops[r[1]].score, -r[0].stops[r[1]].km_at))
         d.stops.pop(i)
@@ -207,7 +200,7 @@ def plan_sights(
         for c in pool:
             if n >= max_n:
                 break
-            if c.place.id in used or not diversity_ok(day, c):
+            if c.place.id in used or not diversity_ok(day, c, bool(ctx.cfg.sights.diversity)):
                 continue
             stop = make_sight_stop(c, inp, ctx)
             i = insert_stop(day, stop)
@@ -216,7 +209,8 @@ def plan_sights(
                 used.add(c.place.id)
             else:
                 day.stops.pop(i)
-    trip_religious_repair(days)
+    if ctx.cfg.sights.diversity:
+        trip_religious_repair(days)
 
 
 def droppable_sights(day: DayPlan) -> list[int]:

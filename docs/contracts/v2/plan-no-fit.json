@@ -37,11 +37,11 @@
      },
      {
       "code": "sights_free",
-      "savedRub": 4800
+      "savedRub": 2900
      },
      {
       "code": "variant",
-      "savedRub": 24200
+      "savedRub": 24600
      }
     ],
     "trip": {
@@ -154,6 +154,94 @@
          "verified": true,
          "replaceable": true,
          "alternatives": [
+          {
+           "id": "alt_d1s03_pl_prs_nikitsky",
+           "placeId": "pl_prs_nikitsky",
+           "name": "Никитский монастырь",
+           "deltaMin": 7,
+           "deltaRub": -20,
+           "shiftMin": 7,
+           "units": {
+            "deltaKm": -3.678,
+            "regionCode": "RU-YAR",
+            "checkRub": null,
+            "adultRub": 0,
+            "childRub": 0,
+            "name": "Никитский монастырь",
+            "placeId": "pl_prs_nikitsky",
+            "priceRub": "61.90",
+            "regionName": "Ярославская область",
+            "tripKmDelta": -4
+           },
+           "stop": {
+            "id": "d1s03",
+            "seq": 3,
+            "day": 1,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_prs_nikitsky",
+            "townId": "t_pereslavl",
+            "name": "Никитский монастырь",
+            "note": null,
+            "lat": 56.7487612042614,
+            "lon": 38.867402170532564,
+            "arriveAt": "2026-10-24T11:32",
+            "departAt": "2026-10-24T12:17",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 70,
+            "kmAt": 142,
+            "dwellMin": 45,
+            "tags": [
+             "monastery",
+             "free_entry"
+            ],
+            "costRub": 0,
+            "reason": "45 мин на осмотр. Собака ждёт с одним из взрослых.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+           },
+           "dayPatch": [
+            {
+             "stopId": "d1s01",
+             "seq": 1,
+             "arriveAt": null,
+             "departAt": "2026-10-24T08:00",
+             "kmFromPrev": 0
+            },
+            {
+             "stopId": "d1s02",
+             "seq": 2,
+             "arriveAt": "2026-10-24T09:05",
+             "departAt": "2026-10-24T10:35",
+             "kmFromPrev": 73
+            },
+            {
+             "stopId": "d1s03",
+             "seq": 3,
+             "arriveAt": "2026-10-24T11:32",
+             "departAt": "2026-10-24T12:17",
+             "kmFromPrev": 70
+            },
+            {
+             "stopId": "d1s04",
+             "seq": 4,
+             "arriveAt": "2026-10-24T13:09",
+             "departAt": "2026-10-24T14:09",
+             "kmFromPrev": 63
+            },
+            {
+             "stopId": "d1s05",
+             "seq": 5,
+             "arriveAt": "2026-10-24T15:01",
+             "departAt": null,
+             "kmFromPrev": 61
+            }
+           ]
+          },
           {
            "id": "alt_d1s03_Q4144213",
            "placeId": "Q4144213",
@@ -325,94 +413,6 @@
              "stopId": "d1s05",
              "seq": 5,
              "arriveAt": "2026-10-24T15:23",
-             "departAt": null,
-             "kmFromPrev": 61
-            }
-           ]
-          },
-          {
-           "id": "alt_d1s03_Q16701537",
-           "placeId": "Q16701537",
-           "name": "Сретенский Новодевичий монастырь",
-           "deltaMin": 22,
-           "deltaRub": 1330,
-           "shiftMin": 22,
-           "units": {
-            "deltaKm": -3.97,
-            "regionCode": "RU-YAR",
-            "checkRub": null,
-            "adultRub": 300,
-            "childRub": 150,
-            "name": "Сретенский Новодевичий монастырь",
-            "placeId": "Q16701537",
-            "priceRub": "61.90",
-            "regionName": "Ярославская область",
-            "tripKmDelta": -4
-           },
-           "stop": {
-            "id": "d1s03",
-            "seq": 3,
-            "day": 1,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "Q16701537",
-            "townId": "t_pereslavl",
-            "name": "Сретенский Новодевичий монастырь",
-            "note": "не проверено",
-            "lat": 56.73537,
-            "lon": 38.85255,
-            "arriveAt": "2026-10-24T11:31",
-            "departAt": "2026-10-24T12:31",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 68,
-            "kmAt": 140,
-            "dwellMin": 60,
-            "tags": [
-             "walk",
-             "monastery"
-            ],
-            "costRub": 1350,
-            "reason": "По открытым данным.",
-            "verified": false,
-            "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null
-           },
-           "dayPatch": [
-            {
-             "stopId": "d1s01",
-             "seq": 1,
-             "arriveAt": null,
-             "departAt": "2026-10-24T08:00",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d1s02",
-             "seq": 2,
-             "arriveAt": "2026-10-24T09:05",
-             "departAt": "2026-10-24T10:35",
-             "kmFromPrev": 73
-            },
-            {
-             "stopId": "d1s03",
-             "seq": 3,
-             "arriveAt": "2026-10-24T11:31",
-             "departAt": "2026-10-24T12:31",
-             "kmFromPrev": 68
-            },
-            {
-             "stopId": "d1s04",
-             "seq": 4,
-             "arriveAt": "2026-10-24T13:24",
-             "departAt": "2026-10-24T14:24",
-             "kmFromPrev": 64
-            },
-            {
-             "stopId": "d1s05",
-             "seq": 5,
-             "arriveAt": "2026-10-24T15:16",
              "departAt": null,
              "kmFromPrev": 61
             }
@@ -793,7 +793,7 @@
        "driveMin": 232,
        "tz": "Europe/Moscow",
        "startAt": "2026-10-25T09:00",
-       "endAt": "2026-10-25T15:07",
+       "endAt": "2026-10-25T14:22",
        "overBudget": false,
        "stops": [
         {
@@ -832,36 +832,118 @@
          "day": 2,
          "kind": "sight",
          "sign": "tourist",
-         "placeId": "pl_prs_nikitsky",
+         "placeId": "pl_prs_rampart",
          "townId": "t_pereslavl",
-         "name": "Никитский монастырь",
+         "name": "Земляной вал Переславля",
          "note": null,
-         "lat": 56.7487612042614,
-         "lon": 38.867402170532564,
-         "arriveAt": "2026-10-25T10:40",
-         "departAt": "2026-10-25T11:25",
+         "lat": 56.73881311519887,
+         "lon": 38.85757554263314,
+         "arriveAt": "2026-10-25T10:41",
+         "departAt": "2026-10-25T11:11",
          "tz": "Europe/Moscow",
-         "kmFromPrev": 121,
-         "kmAt": 384,
-         "dwellMin": 45,
+         "kmFromPrev": 123,
+         "kmAt": 386,
+         "dwellMin": 30,
          "tags": [
-          "monastery",
+          "view",
+          "walk",
           "free_entry"
          ],
          "costRub": 0,
-         "reason": "45 мин на осмотр. Собака ждёт с одним из взрослых.",
+         "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
          "verified": true,
          "replaceable": true,
          "alternatives": [
           {
+           "id": "alt_d2s02_pl_prs_nikitsky",
+           "placeId": "pl_prs_nikitsky",
+           "name": "Никитский монастырь",
+           "deltaMin": 15,
+           "deltaRub": 0,
+           "shiftMin": 15,
+           "units": {
+            "deltaKm": 0.336,
+            "regionCode": "RU-YAR",
+            "checkRub": null,
+            "adultRub": 0,
+            "childRub": 0,
+            "name": "Никитский монастырь",
+            "placeId": "pl_prs_nikitsky",
+            "priceRub": "61.90",
+            "regionName": "Ярославская область",
+            "tripKmDelta": 0
+           },
+           "stop": {
+            "id": "d2s02",
+            "seq": 7,
+            "day": 2,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_prs_nikitsky",
+            "townId": "t_pereslavl",
+            "name": "Никитский монастырь",
+            "note": null,
+            "lat": 56.7487612042614,
+            "lon": 38.867402170532564,
+            "arriveAt": "2026-10-25T10:40",
+            "departAt": "2026-10-25T11:25",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 121,
+            "kmAt": 384,
+            "dwellMin": 45,
+            "tags": [
+             "monastery",
+             "free_entry"
+            ],
+            "costRub": 0,
+            "reason": "45 мин на осмотр. Собака ждёт с одним из взрослых.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+           },
+           "dayPatch": [
+            {
+             "stopId": "d2s01",
+             "seq": 6,
+             "arriveAt": null,
+             "departAt": "2026-10-25T09:00",
+             "kmFromPrev": 0
+            },
+            {
+             "stopId": "d2s02",
+             "seq": 7,
+             "arriveAt": "2026-10-25T10:40",
+             "departAt": "2026-10-25T11:25",
+             "kmFromPrev": 121
+            },
+            {
+             "stopId": "d2s03",
+             "seq": 8,
+             "arriveAt": "2026-10-25T13:10",
+             "departAt": "2026-10-25T14:10",
+             "kmFromPrev": 125
+            },
+            {
+             "stopId": "d2s04",
+             "seq": 9,
+             "arriveAt": "2026-10-25T14:37",
+             "departAt": null,
+             "kmFromPrev": 23
+            }
+           ]
+          },
+          {
            "id": "alt_d2s02_Q4144213",
            "placeId": "Q4144213",
            "name": "Горицкий Успенский монастырь",
-           "deltaMin": 15,
+           "deltaMin": 30,
            "deltaRub": 1350,
-           "shiftMin": 15,
+           "shiftMin": 30,
            "units": {
-            "deltaKm": 0.173,
+            "deltaKm": 0.509,
             "regionCode": "RU-YAR",
             "checkRub": null,
             "adultRub": 300,
@@ -874,7 +956,7 @@
            },
            "stop": {
             "id": "d2s02",
-            "seq": 8,
+            "seq": 7,
             "day": 2,
             "kind": "sight",
             "sign": "tourist",
@@ -884,10 +966,10 @@
             "note": "не проверено",
             "lat": 56.721,
             "lon": 38.824,
-            "arriveAt": "2026-10-25T11:14",
-            "departAt": "2026-10-25T12:14",
+            "arriveAt": "2026-10-25T10:44",
+            "departAt": "2026-10-25T11:44",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 3,
+            "kmFromPrev": 126,
             "kmAt": 389,
             "dwellMin": 60,
             "tags": [
@@ -912,30 +994,23 @@
              "kmFromPrev": 0
             },
             {
-             "stopId": "d2s03",
+             "stopId": "d2s02",
              "seq": 7,
-             "arriveAt": "2026-10-25T10:41",
-             "departAt": "2026-10-25T11:11",
-             "kmFromPrev": 123
+             "arriveAt": "2026-10-25T10:44",
+             "departAt": "2026-10-25T11:44",
+             "kmFromPrev": 126
             },
             {
-             "stopId": "d2s02",
+             "stopId": "d2s03",
              "seq": 8,
-             "arriveAt": "2026-10-25T11:14",
-             "departAt": "2026-10-25T12:14",
-             "kmFromPrev": 3
+             "arriveAt": "2026-10-25T13:25",
+             "departAt": "2026-10-25T14:25",
+             "kmFromPrev": 120
             },
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T13:55",
-             "departAt": "2026-10-25T14:55",
-             "kmFromPrev": 120
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:22",
+             "arriveAt": "2026-10-25T14:52",
              "departAt": null,
              "kmFromPrev": 23
             }
@@ -945,11 +1020,11 @@
            "id": "alt_d2s02_pl_prs_goritsky",
            "placeId": "pl_prs_goritsky",
            "name": "Горицкий монастырь",
-           "deltaMin": 22,
+           "deltaMin": 37,
            "deltaRub": 1370,
-           "shiftMin": 22,
+           "shiftMin": 37,
            "units": {
-            "deltaKm": 3.136,
+            "deltaKm": 3.472,
             "regionCode": "RU-YAR",
             "checkRub": null,
             "adultRub": 300,
@@ -975,7 +1050,7 @@
             "arriveAt": "2026-10-25T10:45",
             "departAt": "2026-10-25T11:45",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 124,
+            "kmFromPrev": 125,
             "kmAt": 386,
             "dwellMin": 60,
             "tags": [
@@ -1004,413 +1079,19 @@
              "seq": 7,
              "arriveAt": "2026-10-25T10:45",
              "departAt": "2026-10-25T11:45",
+             "kmFromPrev": 125
+            },
+            {
+             "stopId": "d2s03",
+             "seq": 8,
+             "arriveAt": "2026-10-25T13:32",
+             "departAt": "2026-10-25T14:32",
              "kmFromPrev": 124
             },
             {
-             "stopId": "d2s03",
-             "seq": 8,
-             "arriveAt": "2026-10-25T11:48",
-             "departAt": "2026-10-25T12:18",
-             "kmFromPrev": 2
-            },
-            {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T14:02",
-             "departAt": "2026-10-25T15:02",
-             "kmFromPrev": 123
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:29",
-             "departAt": null,
-             "kmFromPrev": 23
-            }
-           ]
-          },
-          {
-           "id": "alt_d2s02_pl_prs_botik",
-           "placeId": "pl_prs_botik",
-           "name": "Музей-усадьба «Ботик Петра Первого»",
-           "deltaMin": 18,
-           "deltaRub": 1550,
-           "shiftMin": 18,
-           "units": {
-            "deltaKm": 0.539,
-            "regionCode": "RU-YAR",
-            "checkRub": null,
-            "adultRub": 350,
-            "childRub": 150,
-            "name": "Музей-усадьба «Ботик Петра Первого»",
-            "placeId": "pl_prs_botik",
-            "priceRub": "61.90",
-            "regionName": "Ярославская область",
-            "tripKmDelta": 0
-           },
-           "stop": {
-            "id": "d2s02",
-            "seq": 8,
-            "day": 2,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "pl_prs_botik",
-            "townId": "t_pereslavl",
-            "name": "Музей-усадьба «Ботик Петра Первого»",
-            "note": null,
-            "lat": 56.72524753920452,
-            "lon": 38.82809565893488,
-            "arriveAt": "2026-10-25T11:15",
-            "departAt": "2026-10-25T12:15",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 3,
-            "kmAt": 388,
-            "dwellMin": 60,
-            "tags": [
-             "view",
-             "museum"
-            ],
-            "costRub": 1550,
-            "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
-            "verified": true,
-            "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null
-           },
-           "dayPatch": [
-            {
-             "stopId": "d2s01",
-             "seq": 6,
-             "arriveAt": null,
-             "departAt": "2026-10-25T09:00",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d2s03",
-             "seq": 7,
-             "arriveAt": "2026-10-25T10:41",
-             "departAt": "2026-10-25T11:11",
-             "kmFromPrev": 123
-            },
-            {
-             "stopId": "d2s02",
-             "seq": 8,
-             "arriveAt": "2026-10-25T11:15",
-             "departAt": "2026-10-25T12:15",
-             "kmFromPrev": 3
-            },
-            {
-             "stopId": "d2s04",
-             "seq": 9,
-             "arriveAt": "2026-10-25T13:58",
-             "departAt": "2026-10-25T14:58",
-             "kmFromPrev": 121
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:25",
-             "departAt": null,
-             "kmFromPrev": 23
-            }
-           ]
-          }
-         ],
-         "alternativesNote": null,
-         "hotelOptions": [],
-         "selectedHotelId": null,
-         "kmDriven": 393,
-         "kmLeft": 148
-        },
-        {
-         "id": "d2s03",
-         "seq": 8,
-         "day": 2,
-         "kind": "sight",
-         "sign": "tourist",
-         "placeId": "pl_prs_rampart",
-         "townId": "t_pereslavl",
-         "name": "Земляной вал Переславля",
-         "note": null,
-         "lat": 56.73881311519887,
-         "lon": 38.85757554263314,
-         "arriveAt": "2026-10-25T11:26",
-         "departAt": "2026-10-25T11:56",
-         "tz": "Europe/Moscow",
-         "kmFromPrev": 2,
-         "kmAt": 386,
-         "dwellMin": 30,
-         "tags": [
-          "view",
-          "walk",
-          "free_entry"
-         ],
-         "costRub": 0,
-         "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
-         "verified": true,
-         "replaceable": true,
-         "alternatives": [
-          {
-           "id": "alt_d2s03_Q4144213",
-           "placeId": "Q4144213",
-           "name": "Горицкий Успенский монастырь",
-           "deltaMin": 30,
-           "deltaRub": 1350,
-           "shiftMin": 30,
-           "units": {
-            "deltaKm": 0.509,
-            "regionCode": "RU-YAR",
-            "checkRub": null,
-            "adultRub": 300,
-            "childRub": 150,
-            "name": "Горицкий Успенский монастырь",
-            "placeId": "Q4144213",
-            "priceRub": "61.90",
-            "regionName": "Ярославская область",
-            "tripKmDelta": 0
-           },
-           "stop": {
-            "id": "d2s03",
-            "seq": 8,
-            "day": 2,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "Q4144213",
-            "townId": "t_pereslavl",
-            "name": "Горицкий Успенский монастырь",
-            "note": "не проверено",
-            "lat": 56.721,
-            "lon": 38.824,
-            "arriveAt": "2026-10-25T11:29",
-            "departAt": "2026-10-25T12:29",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 5,
-            "kmAt": 389,
-            "dwellMin": 60,
-            "tags": [
-             "walk",
-             "monastery"
-            ],
-            "costRub": 1350,
-            "reason": "По открытым данным.",
-            "verified": false,
-            "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null
-           },
-           "dayPatch": [
-            {
-             "stopId": "d2s01",
-             "seq": 6,
-             "arriveAt": null,
-             "departAt": "2026-10-25T09:00",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d2s02",
-             "seq": 7,
-             "arriveAt": "2026-10-25T10:40",
-             "departAt": "2026-10-25T11:25",
-             "kmFromPrev": 121
-            },
-            {
-             "stopId": "d2s03",
-             "seq": 8,
-             "arriveAt": "2026-10-25T11:29",
-             "departAt": "2026-10-25T12:29",
-             "kmFromPrev": 5
-            },
-            {
-             "stopId": "d2s04",
-             "seq": 9,
-             "arriveAt": "2026-10-25T14:10",
-             "departAt": "2026-10-25T15:10",
-             "kmFromPrev": 120
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:37",
-             "departAt": null,
-             "kmFromPrev": 23
-            }
-           ]
-          },
-          {
-           "id": "alt_d2s03_pl_prs_goritsky",
-           "placeId": "pl_prs_goritsky",
-           "name": "Горицкий монастырь",
-           "deltaMin": 37,
-           "deltaRub": 1370,
-           "shiftMin": 37,
-           "units": {
-            "deltaKm": 3.472,
-            "regionCode": "RU-YAR",
-            "checkRub": null,
-            "adultRub": 300,
-            "childRub": 150,
-            "name": "Горицкий монастырь",
-            "placeId": "pl_prs_goritsky",
-            "priceRub": "61.90",
-            "regionName": "Ярославская область",
-            "tripKmDelta": 3
-           },
-           "stop": {
-            "id": "d2s03",
-            "seq": 8,
-            "day": 2,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "pl_prs_goritsky",
-            "townId": "t_pereslavl",
-            "name": "Горицкий монастырь",
-            "note": null,
-            "lat": 56.72796065440339,
-            "lon": 38.870677713165705,
-            "arriveAt": "2026-10-25T11:30",
-            "departAt": "2026-10-25T12:30",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 4,
-            "kmAt": 386,
-            "dwellMin": 60,
-            "tags": [
-             "museum",
-             "monastery"
-            ],
-            "costRub": 1350,
-            "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
-            "verified": true,
-            "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null
-           },
-           "dayPatch": [
-            {
-             "stopId": "d2s01",
-             "seq": 6,
-             "arriveAt": null,
-             "departAt": "2026-10-25T09:00",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d2s02",
-             "seq": 7,
-             "arriveAt": "2026-10-25T10:40",
-             "departAt": "2026-10-25T11:25",
-             "kmFromPrev": 121
-            },
-            {
-             "stopId": "d2s03",
-             "seq": 8,
-             "arriveAt": "2026-10-25T11:30",
-             "departAt": "2026-10-25T12:30",
-             "kmFromPrev": 4
-            },
-            {
-             "stopId": "d2s04",
-             "seq": 9,
-             "arriveAt": "2026-10-25T14:17",
-             "departAt": "2026-10-25T15:17",
-             "kmFromPrev": 124
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:44",
-             "departAt": null,
-             "kmFromPrev": 23
-            }
-           ]
-          },
-          {
-           "id": "alt_d2s03_pl_prs_botik",
-           "placeId": "pl_prs_botik",
-           "name": "Музей-усадьба «Ботик Петра Первого»",
-           "deltaMin": 33,
-           "deltaRub": 1550,
-           "shiftMin": 33,
-           "units": {
-            "deltaKm": 0.875,
-            "regionCode": "RU-YAR",
-            "checkRub": null,
-            "adultRub": 350,
-            "childRub": 150,
-            "name": "Музей-усадьба «Ботик Петра Первого»",
-            "placeId": "pl_prs_botik",
-            "priceRub": "61.90",
-            "regionName": "Ярославская область",
-            "tripKmDelta": 1
-           },
-           "stop": {
-            "id": "d2s03",
-            "seq": 8,
-            "day": 2,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "pl_prs_botik",
-            "townId": "t_pereslavl",
-            "name": "Музей-усадьба «Ботик Петра Первого»",
-            "note": null,
-            "lat": 56.72524753920452,
-            "lon": 38.82809565893488,
-            "arriveAt": "2026-10-25T11:30",
-            "departAt": "2026-10-25T12:30",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 4,
-            "kmAt": 388,
-            "dwellMin": 60,
-            "tags": [
-             "view",
-             "museum"
-            ],
-            "costRub": 1550,
-            "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
-            "verified": true,
-            "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null
-           },
-           "dayPatch": [
-            {
-             "stopId": "d2s01",
-             "seq": 6,
-             "arriveAt": null,
-             "departAt": "2026-10-25T09:00",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d2s02",
-             "seq": 7,
-             "arriveAt": "2026-10-25T10:40",
-             "departAt": "2026-10-25T11:25",
-             "kmFromPrev": 121
-            },
-            {
-             "stopId": "d2s03",
-             "seq": 8,
-             "arriveAt": "2026-10-25T11:30",
-             "departAt": "2026-10-25T12:30",
-             "kmFromPrev": 4
-            },
-            {
-             "stopId": "d2s04",
-             "seq": 9,
-             "arriveAt": "2026-10-25T14:13",
-             "departAt": "2026-10-25T15:13",
-             "kmFromPrev": 121
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:40",
+             "arriveAt": "2026-10-25T14:59",
              "departAt": null,
              "kmFromPrev": 23
             }
@@ -1424,8 +1105,8 @@
          "kmLeft": 146
         },
         {
-         "id": "d2s04",
-         "seq": 9,
+         "id": "d2s03",
+         "seq": 8,
          "day": 2,
          "kind": "food",
          "sign": "food",
@@ -1435,8 +1116,8 @@
          "note": null,
          "lat": 55.919383115198876,
          "lon": 37.72691804924099,
-         "arriveAt": "2026-10-25T13:40",
-         "departAt": "2026-10-25T14:40",
+         "arriveAt": "2026-10-25T12:55",
+         "departAt": "2026-10-25T13:55",
          "tz": "Europe/Moscow",
          "kmFromPrev": 123,
          "kmAt": 506,
@@ -1451,7 +1132,7 @@
          "replaceable": true,
          "alternatives": [
           {
-           "id": "alt_d2s04_syn_c_Q155309_1",
+           "id": "alt_d2s03_syn_c_Q155309_1",
            "placeId": "syn_c_Q155309_1",
            "name": "Кафе «Пряник»",
            "deltaMin": 2,
@@ -1470,8 +1151,8 @@
             "tripKmDelta": 1
            },
            "stop": {
-            "id": "d2s04",
-            "seq": 9,
+            "id": "d2s03",
+            "seq": 8,
             "day": 2,
             "kind": "food",
             "sign": "food",
@@ -1481,8 +1162,8 @@
             "note": null,
             "lat": 55.919383115198876,
             "lon": 37.81025804924099,
-            "arriveAt": "2026-10-25T13:39",
-            "departAt": "2026-10-25T14:39",
+            "arriveAt": "2026-10-25T12:54",
+            "departAt": "2026-10-25T13:54",
             "tz": "Europe/Moscow",
             "kmFromPrev": 121,
             "kmAt": 503,
@@ -1511,35 +1192,28 @@
             {
              "stopId": "d2s02",
              "seq": 7,
-             "arriveAt": "2026-10-25T10:40",
-             "departAt": "2026-10-25T11:25",
-             "kmFromPrev": 121
+             "arriveAt": "2026-10-25T10:41",
+             "departAt": "2026-10-25T11:11",
+             "kmFromPrev": 123
             },
             {
              "stopId": "d2s03",
              "seq": 8,
-             "arriveAt": "2026-10-25T11:26",
-             "departAt": "2026-10-25T11:56",
-             "kmFromPrev": 2
+             "arriveAt": "2026-10-25T12:54",
+             "departAt": "2026-10-25T13:54",
+             "kmFromPrev": 121
             },
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T13:39",
-             "departAt": "2026-10-25T14:39",
-             "kmFromPrev": 121
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:09",
+             "arriveAt": "2026-10-25T14:24",
              "departAt": null,
              "kmFromPrev": 26
             }
            ]
           },
           {
-           "id": "alt_d2s04_syn_c_Q23185_0",
+           "id": "alt_d2s03_syn_c_Q23185_0",
            "placeId": "syn_c_Q23185_0",
            "name": "Столовая «Щи да каша»",
            "deltaMin": -3,
@@ -1555,11 +1229,11 @@
             "placeId": "syn_c_Q23185_0",
             "priceRub": "61.80",
             "regionName": "Московская область",
-            "tripKmDelta": -2
+            "tripKmDelta": -3
            },
            "stop": {
-            "id": "d2s04",
-            "seq": 9,
+            "id": "d2s03",
+            "seq": 8,
             "day": 2,
             "kind": "food",
             "sign": "food",
@@ -1569,8 +1243,8 @@
             "note": null,
             "lat": 55.91486125653409,
             "lon": 37.73813896306926,
-            "arriveAt": "2026-10-25T13:39",
-            "departAt": "2026-10-25T14:39",
+            "arriveAt": "2026-10-25T12:54",
+            "departAt": "2026-10-25T13:54",
             "tz": "Europe/Moscow",
             "kmFromPrev": 122,
             "kmAt": 506,
@@ -1598,69 +1272,62 @@
             {
              "stopId": "d2s02",
              "seq": 7,
-             "arriveAt": "2026-10-25T10:40",
-             "departAt": "2026-10-25T11:25",
-             "kmFromPrev": 121
+             "arriveAt": "2026-10-25T10:41",
+             "departAt": "2026-10-25T11:11",
+             "kmFromPrev": 123
             },
             {
              "stopId": "d2s03",
              "seq": 8,
-             "arriveAt": "2026-10-25T11:26",
-             "departAt": "2026-10-25T11:56",
-             "kmFromPrev": 2
+             "arriveAt": "2026-10-25T12:54",
+             "departAt": "2026-10-25T13:54",
+             "kmFromPrev": 122
             },
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T13:39",
-             "departAt": "2026-10-25T14:39",
-             "kmFromPrev": 122
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:04",
+             "arriveAt": "2026-10-25T14:19",
              "departAt": null,
              "kmFromPrev": 22
             }
            ]
           },
           {
-           "id": "alt_d2s04_syn_c_Q197620_1",
-           "placeId": "syn_c_Q197620_1",
-           "name": "Кафе «Печка»",
-           "deltaMin": 15,
-           "deltaRub": -700,
-           "shiftMin": 15,
+           "id": "alt_d2s03_syn_c_Q141538_1",
+           "placeId": "syn_c_Q141538_1",
+           "name": "Кафе «Калитка»",
+           "deltaMin": 14,
+           "deltaRub": -710,
+           "shiftMin": 14,
            "units": {
-            "deltaKm": 10.087,
+            "deltaKm": 9.035,
             "regionCode": "RU-MOS",
             "checkRub": 550,
             "adultRub": null,
             "childRub": null,
-            "name": "Кафе «Печка»",
-            "placeId": "syn_c_Q197620_1",
+            "name": "Кафе «Калитка»",
+            "placeId": "syn_c_Q141538_1",
             "priceRub": "61.80",
             "regionName": "Московская область",
-            "tripKmDelta": 10
+            "tripKmDelta": 9
            },
            "stop": {
-            "id": "d2s04",
-            "seq": 9,
+            "id": "d2s03",
+            "seq": 8,
             "day": 2,
             "kind": "food",
             "sign": "food",
-            "placeId": "syn_c_Q197620_1",
-            "townId": "Q197620",
-            "name": "Кафе «Печка»",
+            "placeId": "syn_c_Q141538_1",
+            "townId": "Q141538",
+            "name": "Кафе «Калитка»",
             "note": null,
-            "lat": 56.256213115198875,
-            "lon": 37.97035173905595,
-            "arriveAt": "2026-10-25T13:13",
-            "departAt": "2026-10-25T14:13",
+            "lat": 55.97271311519887,
+            "lon": 37.91357921387146,
+            "arriveAt": "2026-10-25T12:50",
+            "departAt": "2026-10-25T13:50",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 87,
-            "kmAt": 465,
+            "kmFromPrev": 117,
+            "kmAt": 495,
             "dwellMin": 60,
             "tags": [
              "kids_menu",
@@ -1686,30 +1353,23 @@
             {
              "stopId": "d2s02",
              "seq": 7,
-             "arriveAt": "2026-10-25T10:40",
-             "departAt": "2026-10-25T11:25",
-             "kmFromPrev": 121
+             "arriveAt": "2026-10-25T10:41",
+             "departAt": "2026-10-25T11:11",
+             "kmFromPrev": 123
             },
             {
              "stopId": "d2s03",
              "seq": 8,
-             "arriveAt": "2026-10-25T11:26",
-             "departAt": "2026-10-25T11:56",
-             "kmFromPrev": 2
+             "arriveAt": "2026-10-25T12:50",
+             "departAt": "2026-10-25T13:50",
+             "kmFromPrev": 117
             },
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T13:13",
-             "departAt": "2026-10-25T14:13",
-             "kmFromPrev": 87
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:22",
+             "arriveAt": "2026-10-25T14:36",
              "departAt": null,
-             "kmFromPrev": 69
+             "kmFromPrev": 38
             }
            ]
           }
@@ -1721,8 +1381,8 @@
          "kmLeft": 23
         },
         {
-         "id": "d2s05",
-         "seq": 10,
+         "id": "d2s04",
+         "seq": 9,
          "day": 2,
          "kind": "finish",
          "sign": "city",
@@ -1732,7 +1392,7 @@
          "note": null,
          "lat": 55.7558,
          "lon": 37.6173,
-         "arriveAt": "2026-10-25T15:07",
+         "arriveAt": "2026-10-25T14:22",
          "departAt": null,
          "tz": "Europe/Moscow",
          "kmFromPrev": 23,
@@ -1758,7 +1418,7 @@
        {
         "key": "fuel",
         "title": "Бензин АИ-95",
-        "rub": 2680,
+        "rub": 2670,
         "formula": "541 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 4 регионам)",
         "asOf": "2026-10",
         "enabled": true,
@@ -1780,7 +1440,7 @@
          },
          {
           "label": "Ярославская область",
-          "formula": "299 км × 8 л/100 × 61,90 ₽ = 1 480 ₽",
+          "formula": "298 км × 8 л/100 × 61,90 ₽ = 1 480 ₽",
           "rub": 1480
          }
         ]
@@ -1839,6 +1499,31 @@
         "breakdown": []
        },
        {
+        "key": "parking",
+        "title": "Парковки",
+        "rub": 0,
+        "formula": "парковки бесплатные",
+        "asOf": "2026-06",
+        "enabled": true,
+        "breakdown": [
+         {
+          "label": "Троице-Сергиева лавра",
+          "formula": "бесплатно",
+          "rub": 0
+         },
+         {
+          "label": "Плещеево озеро",
+          "formula": "бесплатно",
+          "rub": 0
+         },
+         {
+          "label": "Земляной вал Переславля",
+          "formula": "бесплатно",
+          "rub": 0
+         }
+        ]
+       },
+       {
         "key": "reserve",
         "title": "Резерв 10%",
         "rub": 2390,
@@ -1849,7 +1534,7 @@
        }
       ],
       "reserveOn": true,
-      "subtotalRub": 23930,
+      "subtotalRub": 23920,
       "totalRub": 26300,
       "perPersonRub": 5300,
       "budgetRub": 20000,
@@ -1890,7 +1575,7 @@
          {
           "regionCode": "RU-YAR",
           "regionName": "Ярославская область",
-          "km": 298.612,
+          "km": 298.262,
           "priceRub": "61.90"
          }
         ],
@@ -1938,7 +1623,7 @@
         {
          "day": 2,
          "meal": "lunch",
-         "stopId": "d2s04",
+         "stopId": "d2s03",
          "checkRub": 700
         }
        ],
@@ -1959,13 +1644,6 @@
         },
         {
          "stopId": "d2s02",
-         "placeId": "pl_prs_nikitsky",
-         "name": "Никитский монастырь",
-         "adultRub": 0,
-         "childRub": 0
-        },
-        {
-         "stopId": "d2s03",
          "placeId": "pl_prs_rampart",
          "name": "Земляной вал Переславля",
          "adultRub": 0,
@@ -1984,9 +1662,36 @@
         "lodging": "2026-09",
         "food": "2026-10",
         "tickets": "2026-10",
-        "reserve": "2026-09"
+        "reserve": "2026-09",
+        "parking": "2026-06"
        },
-       "moodJustDrive": false
+       "moodJustDrive": false,
+       "parking": [
+        {
+         "stopId": "d1s02",
+         "name": "Троице-Сергиева лавра",
+         "rubPerHour": 0,
+         "hours": 2,
+         "rub": 0,
+         "source": "free"
+        },
+        {
+         "stopId": "d1s03",
+         "name": "Плещеево озеро",
+         "rubPerHour": 0,
+         "hours": 1,
+         "rub": 0,
+         "source": "free"
+        },
+        {
+         "stopId": "d2s02",
+         "name": "Земляной вал Переславля",
+         "rubPerHour": 0,
+         "hours": 1,
+         "rub": 0,
+         "source": "free"
+        }
+       ]
       }
      },
      "reasons": {
@@ -3111,7 +2816,7 @@
        ],
        [
         "RU-YAR",
-        298.612
+        298.262
        ]
       ],
       "tollHits": [],
@@ -3257,30 +2962,6 @@
          {
           "stopId": "d2s02",
           "kind": "sight",
-          "kmAt": 384.2941692963628,
-          "detourKm": 0.35032841540159704,
-          "detourMin": 0,
-          "dwellMin": 45,
-          "fixed": false,
-          "auto": false,
-          "score": 5.4,
-          "placeId": "pl_prs_nikitsky",
-          "regionCode": "RU-YAR",
-          "reasonKey": "sight.dog_waits",
-          "reasonParams": [
-           [
-            "dwell",
-            "45 мин"
-           ]
-          ],
-          "meal": null,
-          "litres": 0.0,
-          "coffee": false,
-          "pool": "sight"
-         },
-         {
-          "stopId": "d2s03",
-          "kind": "sight",
           "kmAt": 385.61740659351454,
           "detourKm": 0.014141138223426976,
           "detourMin": 0,
@@ -3303,7 +2984,7 @@
           "pool": "sight"
          },
          {
-          "stopId": "d2s04",
+          "stopId": "d2s03",
           "kind": "food",
           "kmAt": 505.9232714132162,
           "detourKm": 5.500612627766976,
@@ -3322,7 +3003,7 @@
           "pool": "food"
          },
          {
-          "stopId": "d2s05",
+          "stopId": "d2s04",
           "kind": "finish",
           "kmAt": 526.0,
           "detourKm": 0.0,
@@ -6303,7 +5984,7 @@
       ]
      }
     },
-    "shareText": "Золотое кольцо · коротко · 541 км · 2 дня\nДень 1 · 272 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Кафе «Пряник»\n14:54 Ярославль\nДень 2 · 269 км\n09:00 Ярославль\n10:40 Никитский монастырь\n11:26 Земляной вал Переславля\n13:40 Кафе «Огонёк»\n15:07 Москва\nИтого ≈ 26 300 ₽ на 5 чел.",
+    "shareText": "Золотое кольцо · коротко · 541 км · 2 дня\nДень 1 · 272 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Кафе «Пряник»\n14:54 Ярославль\nДень 2 · 269 км\n09:00 Ярославль\n10:41 Земляной вал Переславля\n12:55 Кафе «Огонёк»\n14:22 Москва\nИтого ≈ 26 300 ₽ на 5 чел.",
     "pricesMonthRu": "сентябрь",
     "pricesYear": "2026",
     "townPrepRu": {
@@ -6324,7 +6005,7 @@
    "options": [
     {
      "kind": "cheaper_route",
-     "totalRub": 23200,
+     "totalRub": 23600,
      "budgetRub": null,
      "days": 2,
      "dailyKm": null,

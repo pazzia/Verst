@@ -125,6 +125,7 @@ class CostKey(StrEnum):
     LODGING = "lodging"
     FOOD = "food"
     TICKETS = "tickets"
+    PARKING = "parking"  # API v3 (ADR-0015 §4); present only when the world has parking data
     RESERVE = "reserve"
 
 

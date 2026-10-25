@@ -105,6 +105,12 @@ class FixtureLink:
     credit: int | None
 
 
+@dataclass(frozen=True, slots=True)
+class CatParking:
+    point: LatLon
+    rub_per_hour: int | None
+
+
 @dataclass(slots=True)
 class Catalogue:
     version: str
@@ -116,6 +122,8 @@ class Catalogue:
     credits: list[Credit]
     links: dict[str, FixtureLink]
     sources: dict[str, Any] = field(default_factory=dict)
+    parking: list[CatParking] = field(default_factory=list)
+    """ADR-0015 §4: paid OSM parking places (fee=yes), with ₽/h when their `charge` parses."""
     area_blocked: frozenset[str] = frozenset()
     """Files that must not be shown as an area photo (5.9 §3: collages, maps, flags, small or very wide)."""
     town_by_id: dict[str, CatTown] = field(default_factory=dict)
