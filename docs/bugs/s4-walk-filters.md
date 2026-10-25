@@ -11,8 +11,7 @@ How it was reproduced:
 - **Engine.** `docs/bugs/s4-walk-filters-repro.py` runs the real engine and the real catalogue (r7.2) on the
   sandbox: `python3 -I docs/bugs/s4-walk-filters-repro.py`.
 - **App flow.** `VerstFlowTest.customWalkRecoversAfterOtherVariantRunsOutOfPlaces` uses a fake engine that
-  answers like the real one in Фрязино. It fails on main (CI run listed at the end), and the fix should make it
-  pass. It is committed with `@Ignore` so the branch stays green.
+  answers like the real one in Фрязино. It fails on main and the fix should make it pass. It is committed with `@Ignore` so the branch stays green.
 
 ## What the engine does in Фрязино (repro script)
 
@@ -132,3 +131,17 @@ plate → «Гулять …» → the plate again with a different number. Eith
 | b | Developer + Designer | keep custom values when the sheet reopens; make «changed, rebuild» visible (mockup) | flow test: reopen the sheet keeps 2 ч / slow |
 | b | Architect | solver reaches clusters behind the leg cap; interests filter with fallback; honest `shorter` reason | engine test: Фрязино 4 ч normal + return ≥ 4 stops |
 | c | Developer | «Гулять N ч» only when a longer walk can help (no exclusions, below 8 ч) | Robolectric plate test at 480; flow test after «Другой вариант» |
+
+## Reproduction on CI
+
+Run 84 (40181105711) on 143912e had the new test enabled. It fails at the expected assertion and nowhere
+earlier:
+
+```
+VerstFlowTest > customWalkRecoversAfterOtherVariantRunsOutOfPlaces
+AssertionError: exclusions survive a filter change: [Q4204534, Q4426361, pl_yar_embankment, pl_yar_strelka, pl_yar_tower, Q4343231]
+```
+
+The earlier assertions pass: the custom walk is built, «Другой вариант» ends in `NOT_ENOUGH_POIS` on the City
+plate, and the new duration and interest do reach the request. The test is now `@Ignore`d, with a pointer here.
+Remove the annotation with the fix.
