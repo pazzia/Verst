@@ -396,11 +396,13 @@
     "startAt": "2026-10-24T09:00",
     "crew": {
      "adults": 2,
-     "children": 0
+     "children": 0,
+     "dog": false
     },
     "adultConfirmed": false,
     "exclude": []
-   }
+   },
+   "requestKey": "997509fbdd1e4970"
   },
   "ms": 0
  }

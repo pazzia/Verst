@@ -508,6 +508,9 @@ class AltUnits:
     region_name_ru: str = ""
     trip_km_delta: int = 0
     """`round(day km of the trial day) - round(day km of the current day)` (A§16.11.4 rule 2)."""
+    parking: ParkingUnit | None = None
+    """API v3 (ADR-0015 §4): the alternative's own parking at its arrival and dwell, when the trip is priced
+    with a parking model; None = no parking data (no line) or not a car-parked stop (rest, food, fuel)."""
 
 
 @dataclass(frozen=True, slots=True)

@@ -123,7 +123,20 @@
          "hotelOptions": [],
          "selectedHotelId": null,
          "kmDriven": 73,
-         "kmLeft": 468
+         "kmLeft": 468,
+         "poiKind": "monastery",
+         "whyRu": null,
+         "photoSource": "p18",
+         "parking": {
+          "rub": 0,
+          "rubPerHour": 0,
+          "hours": 2,
+          "source": "free",
+          "zoneRu": "Платных зон рядом нет",
+          "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+          "sundayRu": null,
+          "freeRu": "Бесплатно: вне платных зон"
+         }
         },
         {
          "id": "d1s03",
@@ -171,7 +184,11 @@
             "placeId": "pl_prs_nikitsky",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": -4
+            "tripKmDelta": -4,
+            "parkingRub": 0,
+            "parkingRubPerHour": 0,
+            "parkingHours": 1,
+            "parkingSource": "free"
            },
            "stop": {
             "id": "d1s03",
@@ -202,7 +219,20 @@
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "poiKind": "monastery",
+            "whyRu": null,
+            "photoSource": "p18",
+            "parking": {
+             "rub": 0,
+             "rubPerHour": 0,
+             "hours": 1,
+             "source": "free",
+             "zoneRu": "Платных зон рядом нет",
+             "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+             "sundayRu": null,
+             "freeRu": "Бесплатно: вне платных зон"
+            }
            },
            "dayPatch": [
             {
@@ -259,7 +289,11 @@
             "placeId": "Q4144213",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": -4
+            "tripKmDelta": -4,
+            "parkingRub": 0,
+            "parkingRubPerHour": 0,
+            "parkingHours": 1,
+            "parkingSource": "free"
            },
            "stop": {
             "id": "d1s03",
@@ -290,7 +324,20 @@
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "poiKind": "monastery",
+            "whyRu": "Объект культурного наследия",
+            "photoSource": "p18",
+            "parking": {
+             "rub": 0,
+             "rubPerHour": 0,
+             "hours": 1,
+             "source": "free",
+             "zoneRu": "Платных зон рядом нет",
+             "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+             "sundayRu": null,
+             "freeRu": "Бесплатно: вне платных зон"
+            }
            },
            "dayPatch": [
             {
@@ -347,7 +394,11 @@
             "placeId": "pl_prs_goritsky",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": -1
+            "tripKmDelta": -1,
+            "parkingRub": 0,
+            "parkingRubPerHour": 0,
+            "parkingHours": 1,
+            "parkingSource": "free"
            },
            "stop": {
             "id": "d1s03",
@@ -378,7 +429,20 @@
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "poiKind": "monastery",
+            "whyRu": null,
+            "photoSource": null,
+            "parking": {
+             "rub": 0,
+             "rubPerHour": 0,
+             "hours": 1,
+             "source": "free",
+             "zoneRu": "Платных зон рядом нет",
+             "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+             "sundayRu": null,
+             "freeRu": "Бесплатно: вне платных зон"
+            }
            },
            "dayPatch": [
             {
@@ -423,7 +487,20 @@
          "hotelOptions": [],
          "selectedHotelId": null,
          "kmDriven": 143,
-         "kmLeft": 398
+         "kmLeft": 398,
+         "poiKind": "viewpoint",
+         "whyRu": null,
+         "photoSource": null,
+         "parking": {
+          "rub": 0,
+          "rubPerHour": 0,
+          "hours": 1,
+          "source": "free",
+          "zoneRu": "Платных зон рядом нет",
+          "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+          "sundayRu": null,
+          "freeRu": "Бесплатно: вне платных зон"
+         }
         },
         {
          "id": "d1s04",
@@ -871,7 +948,11 @@
             "placeId": "pl_prs_nikitsky",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": 0
+            "tripKmDelta": 0,
+            "parkingRub": 0,
+            "parkingRubPerHour": 0,
+            "parkingHours": 1,
+            "parkingSource": "free"
            },
            "stop": {
             "id": "d2s02",
@@ -902,7 +983,20 @@
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "poiKind": "monastery",
+            "whyRu": null,
+            "photoSource": "p18",
+            "parking": {
+             "rub": 0,
+             "rubPerHour": 0,
+             "hours": 1,
+             "source": "free",
+             "zoneRu": "Платных зон рядом нет",
+             "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+             "sundayRu": null,
+             "freeRu": "Бесплатно: вне платных зон"
+            }
            },
            "dayPatch": [
             {
@@ -952,7 +1046,11 @@
             "placeId": "Q4144213",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": 0
+            "tripKmDelta": 0,
+            "parkingRub": 0,
+            "parkingRubPerHour": 0,
+            "parkingHours": 1,
+            "parkingSource": "free"
            },
            "stop": {
             "id": "d2s02",
@@ -983,7 +1081,20 @@
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "poiKind": "monastery",
+            "whyRu": "Объект культурного наследия",
+            "photoSource": "p18",
+            "parking": {
+             "rub": 0,
+             "rubPerHour": 0,
+             "hours": 1,
+             "source": "free",
+             "zoneRu": "Платных зон рядом нет",
+             "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+             "sundayRu": null,
+             "freeRu": "Бесплатно: вне платных зон"
+            }
            },
            "dayPatch": [
             {
@@ -1033,7 +1144,11 @@
             "placeId": "pl_prs_goritsky",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": 3
+            "tripKmDelta": 3,
+            "parkingRub": 0,
+            "parkingRubPerHour": 0,
+            "parkingHours": 1,
+            "parkingSource": "free"
            },
            "stop": {
             "id": "d2s02",
@@ -1064,7 +1179,20 @@
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "poiKind": "monastery",
+            "whyRu": null,
+            "photoSource": null,
+            "parking": {
+             "rub": 0,
+             "rubPerHour": 0,
+             "hours": 1,
+             "source": "free",
+             "zoneRu": "Платных зон рядом нет",
+             "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+             "sundayRu": null,
+             "freeRu": "Бесплатно: вне платных зон"
+            }
            },
            "dayPatch": [
             {
@@ -1102,7 +1230,20 @@
          "hotelOptions": [],
          "selectedHotelId": null,
          "kmDriven": 395,
-         "kmLeft": 146
+         "kmLeft": 146,
+         "poiKind": "viewpoint",
+         "whyRu": null,
+         "photoSource": null,
+         "parking": {
+          "rub": 0,
+          "rubPerHour": 0,
+          "hours": 1,
+          "source": "free",
+          "zoneRu": "Платных зон рядом нет",
+          "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+          "sundayRu": null,
+          "freeRu": "Бесплатно: вне платных зон"
+         }
         },
         {
          "id": "d2s03",

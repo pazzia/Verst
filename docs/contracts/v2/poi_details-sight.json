@@ -33,8 +33,10 @@
      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0"
     },
     "isArea": false,
-    "labelRu": "Фото: Wikimedia Commons · И Ольга · CC BY-SA 3.0"
+    "labelRu": "Фото: Wikimedia Commons · И Ольга · CC BY-SA 3.0",
+    "source": "p18"
    },
+   "whyRu": "Объект культурного наследия",
    "hours": {
     "textRu": "Часы работы уточняйте",
     "verified": false

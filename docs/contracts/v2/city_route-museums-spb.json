@@ -237,11 +237,13 @@
     "startAt": "2026-10-23T10:00",
     "crew": {
      "adults": 2,
-     "children": 1
+     "children": 1,
+     "dog": false
     },
     "adultConfirmed": false,
     "exclude": []
-   }
+   },
+   "requestKey": "007b8f9ee17efa50"
   },
   "ms": 0
  }

@@ -27,7 +27,8 @@
      "licenceUrl": null
     },
     "isArea": true,
-    "labelRu": "Фото района: Ярославль · Wikimedia Commons"
+    "labelRu": "Фото района: Ярославль · Wikimedia Commons",
+    "source": "area"
    },
    "hours": null,
    "ticket": null,

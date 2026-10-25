@@ -6,9 +6,9 @@
    "request_id": "c-walk-14",
    "input_json": {
     "start": {
-     "lat": 55.55,
-     "lon": 98.66667,
-     "label": "Алзамай"
+     "lat": 55.05,
+     "lon": 60.1,
+     "label": "Миасс"
     },
     "preset": "beer",
     "adultConfirmed": true,
@@ -26,7 +26,19 @@
    "pointIndex": null,
    "roadKm": null,
    "detail": null,
-   "suggestions": []
+   "suggestions": [
+    {
+     "preset": "overview",
+     "stops": 7,
+     "titleRu": "Обзорная прогулка"
+    },
+    {
+     "preset": "custom",
+     "stops": 6,
+     "titleRu": "История, архитектура, парки и виды"
+    }
+   ],
+   "requestKey": "a4431880440691f2"
   },
   "ms": 0
  }

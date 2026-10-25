@@ -346,7 +346,7 @@ def _hotel_option_from_json(d: Mapping[str, Any]) -> HotelOption:
 
 
 def alt_units_to_json(u: AltUnits) -> Json:
-    return {
+    out: Json = {
         "deltaKm": u.delta_km,
         "regionCode": u.region_code,
         "checkRub": u.check_rub,
@@ -357,6 +357,18 @@ def alt_units_to_json(u: AltUnits) -> Json:
         "priceRub": None if u.price_rub is None else dec_to_str(u.price_rub),
         "regionName": u.region_name_ru,
         "tripKmDelta": u.trip_km_delta,
+    }
+    if u.parking is not None:
+        out.update(_alt_parking_to_json(u.parking))
+    return out
+
+
+def _alt_parking_to_json(p: ParkingUnit) -> Json:
+    return {
+        "parkingRub": p.rub,
+        "parkingRubPerHour": p.rub_per_hour,
+        "parkingHours": p.hours,
+        "parkingSource": p.source,
     }
 
 
@@ -372,6 +384,16 @@ def alt_units_from_json(d: Mapping[str, Any]) -> AltUnits:
         price_rub=None if d.get("priceRub") is None else _dec(d["priceRub"]),
         region_name_ru=d.get("regionName", ""),
         trip_km_delta=int(d.get("tripKmDelta", 0)),
+        parking=None
+        if "parkingSource" not in d
+        else ParkingUnit(
+            "",
+            d["name"],
+            d["parkingRubPerHour"],
+            int(d["parkingHours"]),
+            d["parkingRub"],
+            d["parkingSource"],
+        ),
     )
 
 

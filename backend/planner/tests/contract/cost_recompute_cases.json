@@ -7120,7 +7120,7 @@
   },
   {
    "name": "parking_replaced_stop",
-   "note": "a replaced stop loses its parking unit (the engine prices the new stop)",
+   "note": "rule 5: a replaced stop loses its parking; an alternative without parkingSource adds none: 0 + 60 = 60",
    "units": {
     "fuel": {
      "consumption": 8.0,
@@ -7317,6 +7317,621 @@
     "overBudget": false,
     "hintKeys": [],
     "fuelFormulaKm": 750
+   }
+  },
+  {
+   "name": "parking_replaced_by_alt",
+   "note": "rule 5: the alternative's own parking (200 ₽/h x 2 h) replaces the Kremlin's 760: 400 + 0 + 60 = 460",
+   "units": {
+    "fuel": {
+     "consumption": 8.0,
+     "fuelType": "ai95",
+     "regions": [
+      {
+       "regionCode": "RU-YAR",
+       "regionName": "Ярославская область",
+       "km": 750.0,
+       "priceRub": "62.00"
+      }
+     ],
+     "asOf": "2026-10"
+    },
+    "tolls": [],
+    "nights": [
+     {
+      "stopId": "d1s05",
+      "day": 1,
+      "townName": "Ярославль",
+      "selectedPlaceId": "h_yar",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_yar",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     },
+     {
+      "stopId": "d2s05",
+      "day": 2,
+      "townName": "Суздаль",
+      "selectedPlaceId": "h_suz",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_suz",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       },
+       {
+        "placeId": "h_suz2",
+        "priceNightRub": 4500,
+        "breakfastIncluded": false
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     }
+    ],
+    "meals": [
+     {
+      "day": 1,
+      "meal": "lunch",
+      "stopId": "d1s03",
+      "checkRub": 600
+     },
+     {
+      "day": 1,
+      "meal": "dinner",
+      "stopId": "d1s05",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "lunch",
+      "stopId": "d2s03",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "dinner",
+      "stopId": "d2s05",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": "d3s02",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "dinner",
+      "stopId": null,
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": null,
+      "checkRub": 600
+     }
+    ],
+    "tickets": [
+     {
+      "stopId": "d1s02",
+      "placeId": "pl_k",
+      "name": "Кремль",
+      "adultRub": 1000,
+      "childRub": 1000
+     }
+    ],
+    "reserveFrac": "0.10",
+    "lineStep": 10,
+    "totalStep": 100,
+    "childAges": null,
+    "assumedChildAge": 8,
+    "childFoodWeightUnder7": "0.50",
+    "asOf": {
+     "fuel": "2026-10",
+     "lodging": "2026-09"
+    },
+    "moodJustDrive": false,
+    "parking": [
+     {
+      "stopId": "d1s02",
+      "name": "Московский Кремль",
+      "rubPerHour": 380,
+      "hours": 2,
+      "rub": 760,
+      "source": "zone"
+     },
+     {
+      "stopId": "d1s04",
+      "name": "Троице-Сергиева лавра",
+      "rubPerHour": 0,
+      "hours": 2,
+      "rub": 0,
+      "source": "free"
+     },
+     {
+      "stopId": "d2s02",
+      "name": "Набережная",
+      "rubPerHour": null,
+      "hours": 1,
+      "rub": null,
+      "source": "unknown"
+     },
+     {
+      "stopId": "d2s03",
+      "name": "Музей",
+      "rubPerHour": 55,
+      "hours": 1,
+      "rub": 60,
+      "source": "osm"
+     }
+    ]
+   },
+   "crew": {
+    "adults": 2,
+    "children": 1,
+    "dog": true,
+    "childAges": null
+   },
+   "reserveOn": true,
+   "budget": null,
+   "overrides": {
+    "replaced": {
+     "d1s02": {
+      "tripKmDelta": 0,
+      "deltaKm": 0.4,
+      "regionCode": "RU-MOS",
+      "checkRub": null,
+      "adultRub": 500,
+      "childRub": 0,
+      "name": "Замена",
+      "placeId": "pl_alt",
+      "priceRub": null,
+      "regionName": "",
+      "parkingRub": 400,
+      "parkingRubPerHour": 200,
+      "parkingHours": 2,
+      "parkingSource": "zone"
+     }
+    }
+   },
+   "expected": {
+    "lines": {
+     "fuel": 3720,
+     "tolls": 0,
+     "lodging": 12000,
+     "food": 12600,
+     "tickets": 1000,
+     "parking": 460,
+     "reserve": 2980
+    },
+    "subtotalRub": 29780,
+    "totalRub": 32800,
+    "perPersonRub": 10900,
+    "remainingRub": null,
+    "overBudget": false,
+    "hintKeys": [],
+    "fuelFormulaKm": 750
+   }
+  },
+  {
+   "name": "parking_alt_unknown",
+   "note": "rule 5: an alternative at paid parking with an unknown price counts 0: 0 + 0 + 60 = 60",
+   "units": {
+    "fuel": {
+     "consumption": 8.0,
+     "fuelType": "ai95",
+     "regions": [
+      {
+       "regionCode": "RU-YAR",
+       "regionName": "Ярославская область",
+       "km": 750.0,
+       "priceRub": "62.00"
+      }
+     ],
+     "asOf": "2026-10"
+    },
+    "tolls": [],
+    "nights": [
+     {
+      "stopId": "d1s05",
+      "day": 1,
+      "townName": "Ярославль",
+      "selectedPlaceId": "h_yar",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_yar",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     },
+     {
+      "stopId": "d2s05",
+      "day": 2,
+      "townName": "Суздаль",
+      "selectedPlaceId": "h_suz",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_suz",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       },
+       {
+        "placeId": "h_suz2",
+        "priceNightRub": 4500,
+        "breakfastIncluded": false
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     }
+    ],
+    "meals": [
+     {
+      "day": 1,
+      "meal": "lunch",
+      "stopId": "d1s03",
+      "checkRub": 600
+     },
+     {
+      "day": 1,
+      "meal": "dinner",
+      "stopId": "d1s05",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "lunch",
+      "stopId": "d2s03",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "dinner",
+      "stopId": "d2s05",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": "d3s02",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "dinner",
+      "stopId": null,
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": null,
+      "checkRub": 600
+     }
+    ],
+    "tickets": [
+     {
+      "stopId": "d1s02",
+      "placeId": "pl_k",
+      "name": "Кремль",
+      "adultRub": 1000,
+      "childRub": 1000
+     }
+    ],
+    "reserveFrac": "0.10",
+    "lineStep": 10,
+    "totalStep": 100,
+    "childAges": null,
+    "assumedChildAge": 8,
+    "childFoodWeightUnder7": "0.50",
+    "asOf": {
+     "fuel": "2026-10",
+     "lodging": "2026-09"
+    },
+    "moodJustDrive": false,
+    "parking": [
+     {
+      "stopId": "d1s02",
+      "name": "Московский Кремль",
+      "rubPerHour": 380,
+      "hours": 2,
+      "rub": 760,
+      "source": "zone"
+     },
+     {
+      "stopId": "d1s04",
+      "name": "Троице-Сергиева лавра",
+      "rubPerHour": 0,
+      "hours": 2,
+      "rub": 0,
+      "source": "free"
+     },
+     {
+      "stopId": "d2s02",
+      "name": "Набережная",
+      "rubPerHour": null,
+      "hours": 1,
+      "rub": null,
+      "source": "unknown"
+     },
+     {
+      "stopId": "d2s03",
+      "name": "Музей",
+      "rubPerHour": 55,
+      "hours": 1,
+      "rub": 60,
+      "source": "osm"
+     }
+    ]
+   },
+   "crew": {
+    "adults": 2,
+    "children": 1,
+    "dog": true,
+    "childAges": null
+   },
+   "reserveOn": true,
+   "budget": null,
+   "overrides": {
+    "replaced": {
+     "d1s02": {
+      "tripKmDelta": 0,
+      "deltaKm": 0.4,
+      "regionCode": "RU-MOS",
+      "checkRub": null,
+      "adultRub": 0,
+      "childRub": 0,
+      "name": "Замена",
+      "placeId": "pl_alt",
+      "priceRub": null,
+      "regionName": "",
+      "parkingRub": null,
+      "parkingRubPerHour": null,
+      "parkingHours": 1,
+      "parkingSource": "unknown"
+     }
+    }
+   },
+   "expected": {
+    "lines": {
+     "fuel": 3720,
+     "tolls": 0,
+     "lodging": 12000,
+     "food": 12600,
+     "tickets": 0,
+     "parking": 60,
+     "reserve": 2840
+    },
+    "subtotalRub": 28380,
+    "totalRub": 31200,
+    "perPersonRub": 10400,
+    "remainingRub": null,
+    "overBudget": false,
+    "hintKeys": [],
+    "fuelFormulaKm": 750
+   }
+  },
+  {
+   "name": "parking_rest_replaced_by_sight",
+   "note": "rule 5: a rest stop (no parking unit) replaced by a sight appends its parking: 820 + 80 = 900",
+   "units": {
+    "fuel": {
+     "consumption": 8.0,
+     "fuelType": "ai95",
+     "regions": [
+      {
+       "regionCode": "RU-YAR",
+       "regionName": "Ярославская область",
+       "km": 750.0,
+       "priceRub": "62.00"
+      }
+     ],
+     "asOf": "2026-10"
+    },
+    "tolls": [],
+    "nights": [
+     {
+      "stopId": "d1s05",
+      "day": 1,
+      "townName": "Ярославль",
+      "selectedPlaceId": "h_yar",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_yar",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     },
+     {
+      "stopId": "d2s05",
+      "day": 2,
+      "townName": "Суздаль",
+      "selectedPlaceId": "h_suz",
+      "priceNightRub": 6000,
+      "options": [
+       {
+        "placeId": "h_suz",
+        "priceNightRub": 6000,
+        "breakfastIncluded": true
+       },
+       {
+        "placeId": "h_suz2",
+        "priceNightRub": 4500,
+        "breakfastIncluded": false
+       }
+      ],
+      "defaultPrice": false,
+      "breakfastIncluded": true,
+      "breakfastCheckRub": 360
+     }
+    ],
+    "meals": [
+     {
+      "day": 1,
+      "meal": "lunch",
+      "stopId": "d1s03",
+      "checkRub": 600
+     },
+     {
+      "day": 1,
+      "meal": "dinner",
+      "stopId": "d1s05",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "lunch",
+      "stopId": "d2s03",
+      "checkRub": 600
+     },
+     {
+      "day": 2,
+      "meal": "dinner",
+      "stopId": "d2s05",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": "d3s02",
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "dinner",
+      "stopId": null,
+      "checkRub": 600
+     },
+     {
+      "day": 3,
+      "meal": "lunch",
+      "stopId": null,
+      "checkRub": 600
+     }
+    ],
+    "tickets": [
+     {
+      "stopId": "d1s02",
+      "placeId": "pl_k",
+      "name": "Кремль",
+      "adultRub": 1000,
+      "childRub": 1000
+     }
+    ],
+    "reserveFrac": "0.10",
+    "lineStep": 10,
+    "totalStep": 100,
+    "childAges": null,
+    "assumedChildAge": 8,
+    "childFoodWeightUnder7": "0.50",
+    "asOf": {
+     "fuel": "2026-10",
+     "lodging": "2026-09"
+    },
+    "moodJustDrive": false,
+    "parking": [
+     {
+      "stopId": "d1s02",
+      "name": "Московский Кремль",
+      "rubPerHour": 380,
+      "hours": 2,
+      "rub": 760,
+      "source": "zone"
+     },
+     {
+      "stopId": "d1s04",
+      "name": "Троице-Сергиева лавра",
+      "rubPerHour": 0,
+      "hours": 2,
+      "rub": 0,
+      "source": "free"
+     },
+     {
+      "stopId": "d2s02",
+      "name": "Набережная",
+      "rubPerHour": null,
+      "hours": 1,
+      "rub": null,
+      "source": "unknown"
+     },
+     {
+      "stopId": "d2s03",
+      "name": "Музей",
+      "rubPerHour": 55,
+      "hours": 1,
+      "rub": 60,
+      "source": "osm"
+     }
+    ]
+   },
+   "crew": {
+    "adults": 2,
+    "children": 1,
+    "dog": true,
+    "childAges": null
+   },
+   "reserveOn": true,
+   "budget": null,
+   "overrides": {
+    "replaced": {
+     "d2s01": {
+      "tripKmDelta": 0,
+      "deltaKm": 0.8,
+      "regionCode": "RU-YAR",
+      "checkRub": null,
+      "adultRub": 250,
+      "childRub": 100,
+      "name": "Замена",
+      "placeId": "pl_alt",
+      "priceRub": null,
+      "regionName": "",
+      "parkingRub": 80,
+      "parkingRubPerHour": 80,
+      "parkingHours": 1,
+      "parkingSource": "zone"
+     }
+    }
+   },
+   "expected": {
+    "lines": {
+     "fuel": 3720,
+     "tolls": 0,
+     "lodging": 12000,
+     "food": 12600,
+     "tickets": 3600,
+     "parking": 900,
+     "reserve": 3280
+    },
+    "subtotalRub": 32820,
+    "totalRub": 36100,
+    "perPersonRub": 12000,
+    "remainingRub": null,
+    "overBudget": false,
+    "hintKeys": [],
+    "fuelFormulaKm": 751
    }
   },
   {

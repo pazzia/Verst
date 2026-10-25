@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -34,6 +36,7 @@ class NotEnoughPois(PlannerError):
         super().__init__(f"not enough places for preset {preset!r}")
         self.field = "preset"
         self.suggestions: list[dict[str, Any]] = []  # set by the bridge: checked, never the current values
+        self.request_key: str | None = None  # set by the bridge: `request_key` of the failed request
 
 
 @dataclass(frozen=True, slots=True)
@@ -282,10 +285,33 @@ def _input_echo(inp: WalkInput, start_dt: datetime) -> dict[str, Any]:
         "budgetRub": inp.budget_rub,
         "returnToStart": inp.return_to_start,
         "startAt": hm(start_dt),
-        "crew": {"adults": inp.adults, "children": inp.children},
+        "crew": {"adults": inp.adults, "children": inp.children, "dog": inp.dog},
         "adultConfirmed": inp.adult_confirmed,
         "exclude": sorted(inp.exclude),
     }
 
 
-__all__ = ["NotEnoughPois", "WalkTown", "build_walk"]
+def request_key(world: str, inp: WalkInput) -> str:
+    """API v3 stale-result key: 16 hex of SHA-256 over the normalised request — what the user asked, not the
+    clock (`startAt` counts only when the user gave it). Equal keys = the same request; the app drops a
+    result or a NOT_ENOUGH_POIS error whose key is not that of its latest request."""
+    doc = {
+        "world": world,
+        "start": [round(inp.start.lat, 6), round(inp.start.lon, 6)],
+        "townId": inp.town_id,
+        "preset": inp.preset,
+        "durationMin": inp.duration_min,
+        "interests": sorted(inp.interests),
+        "pace": inp.pace,
+        "budgetRub": inp.budget_rub,
+        "returnToStart": inp.return_to_start,
+        "startAt": None if inp.start_at is None else inp.start_at.isoformat(),
+        "crew": [inp.adults, inp.children, inp.dog],
+        "adultConfirmed": inp.adult_confirmed,
+        "exclude": sorted(inp.exclude),
+    }
+    blob = json.dumps(doc, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
+
+
+__all__ = ["NotEnoughPois", "WalkTown", "build_walk", "request_key"]

@@ -1549,7 +1549,7 @@ Inputs merged:
   - 84b: after a tap in the comment, with the button above the IME.
 
 ## Sprint 4 engine (arch/s4-engine from main cf8f335) — contract changes for the Developer
-API v3 is additive (`mobile.API_VERSION = 3`; the contracts stay in `docs/contracts/v2/`, 37 files).
+API v3 is additive (`mobile.API_VERSION = 3`; the contracts stay in `docs/contracts/v2/`, 38 files).
 - **Trip stops:** `kmDriven` (driven km from the trip start, detours included) and `kmLeft`; the last stop has
   `kmDriven == trip.km`. Rest and fuel rows have `amenities` (wc, cafe_at_fuel, playground, walk, view, parking,
   ev_charger, 24h). A second roadside break of a day reads only «Перерыв 15 минут.».
@@ -1562,8 +1562,7 @@ API v3 is additive (`mobile.API_VERSION = 3`; the contracts stay in `docs/contra
   (`fun`), «Только доехать» (`just_drive`); `more_stops` stays accepted for saved trips.
 - **Parking:** a «Парковки» cost line (`key: "parking"`) with per-stop `breakdown` and
   `cost.units.parking[] = {stopId, name, rubPerHour, hours, rub, source}` (`rub` null = unknown). Present only
-  in `russia_v1`. CostCalculator: the line = Σ known `rub` of the units whose `stopId` is not replaced; part of
-  the subtotal and the reserve. `tests/contract/cost_recompute_cases.json` has 4 `parking_*` cases (49).
+  in `russia_v1`. CostCalculator: see «M6 answers» §3 below (superseded).
 - **Walks:** `crew.dog`; children never block a drink walk (`CHILD_BARS` warning); `DOG_INDOOR` warning and
   stop `noteRu`; `crewNotesRu`; preset `dog_walk` «Прогулка с собакой»; `durationMin: null` = «без ограничения»
   (`unlimited: true`, no `arriveAt/departAt/endAt/durationMin`, ≤ 12 stops); every stop has `hours: {todayRu,
@@ -1576,3 +1575,69 @@ API v3 is additive (`mobile.API_VERSION = 3`; the contracts stay in `docs/contra
   unless the trip starts/ends/stays there, ≤ 1 religious per 3 sights a day, no same kind twice in a row,
   ≤ 30 % religious per trip; МКАД/ЦКАД in the routing graph (ЦКАД tolls not priced yet).
 - G01–G13 are byte-identical; G14–G17 (tests/golden/cases_s4) are rule checks on the real catalogue.
+
+### M6 answers to the Developer's S4 questions (dev/S4 @ feb8b70)
+Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost cases:
+`tests/contract/cost_recompute_cases.json` (52, 7 `parking_*`).
+
+**1. Walks** (`city_route`)
+- Unlimited: send `durationMin: null`. Accepted since M4 (dac11bb); M0 rejected it. Result: `unlimited: true`,
+  `durationMin: null`, `endAt: null`, stops `arriveAt/departAt: null`, ≤ 12 stops; `requestedDurationMin` echoes
+  the request. See `city_route-unlimited.json`.
+- Dog walk: `preset: "dog_walk"` (title «Прогулка с собакой», outdoor kinds only) and `crew.dog: true` on any
+  preset. A dog with an indoor stop gives the `DOG_INDOOR` warning and the stop `noteRu`. The input echo now has
+  `crew.dog`. See `city_route-dog-walk.json` and `city_route-museums-with-dog.json`.
+- Today's hours per stop: `stops[].hours = {todayRu, openNow, source}`. `todayRu` is «10:00–18:00», «24 часа»
+  or «Сегодня закрыто». `source` is `curated` | `osm` | `default`; with `default`, show «часы уточняйте».
+- NOT_ENOUGH suggestions: `error.suggestions[]`, at most 3. Each one was solved before it is offered, and none
+  repeats the current value. Fields: `clearExclude: true` | `durationMin` (int or null = unlimited) |
+  `preset`, plus `stops` (the stop count it gives) and `titleRu` (the chip text: «Вернуть убранные места»,
+  «На 6 ч», «Без ограничения по времени», «Обзорная прогулка»…). Apply the fields; leave the rest of the form
+  as it is. See `city_route-error-suggestions.json` (a beer walk in Миасс).
+- Stale-result key: `result.requestKey`, also `error.requestKey` on NOT_ENOUGH_POIS. It is 16 hex digits over
+  the normalised request (world, start, town, preset, duration, sorted interests, pace, budget, return,
+  explicit `startAt`, crew incl. dog, adultConfirmed, exclude). The clock is not in it. Keep the key of the
+  last request you sent and drop any answer whose key differs; equal keys mean the same request.
+
+**2. Stop categories, parking, rest amenities, why, photo** (trip stops of `plan` / `replace_stop` /
+`patch_cost`, added in the bridge, also on `alternatives[].stop`)
+- `kind` stays the stop type (sight/rest/food/fuel/overnight/…). **`poiKind` is confirmed**: on sight stops
+  only. It is the same vocabulary as `poi_details.poiKind` and `geo_search` rows (museum, kremlin, monastery,
+  temple, park, viewpoint, embankment, square, monument, theatre, zoo, nature, interactive, playground,
+  attraction…). The generic catalogue «attraction» is narrowed to the ADR-0015 category where the name or tags
+  allow it.
+- `parking` on sight stops: `{rub, rubPerHour, hours, source, zoneRu, whereRu, sundayRu, freeRu}` or null
+  (no parking data: fixture worlds). The names are yours:
+  - `zoneRu`: the zone or the evidence, e.g. «Москва: платная зона до 2 км от центра, 380 ₽/ч с 08:00 до
+    21:00, ночью 200 ₽/ч», «Платная парковка по данным OpenStreetMap», «Платных зон рядом нет».
+  - `whereRu`: where the car stands.
+  - `sundayRu`: the Sunday and holiday rule; zones only, else null.
+  - `freeRu`: why it is free at this arrival («Бесплатно: воскресенье» / праздничный день / ночью / вне
+    платных зон), or null when paid.
+  The sheet texts are on the stop, not in `cost.units.parking[]`. Those units stay numeric
+  (`{stopId, name, rubPerHour, hours, rub, source}`, `source` zone | osm | unknown | free) because they are
+  the CostCalculator input. See `plan-moscow-parking.json` (the Kremlin, 380 ₽).
+- `amenities` on rest/fuel rows: unchanged since M3.
+- `whyRu` on sight stops and in `poi_details`: one line, or null for curated sights and when the data is
+  silent. Parts are joined with « · »: «Объект культурного наследия», «Советует Викигид», «Статьи в N языковых
+  разделах Википедии».
+- Photo source: `photoSource` on sight stops, and `poi_details.image.source`. Values: `p18` (the item's own
+  image), `wikipedia` (the article image), `osm` (the `wikimedia_commons` tag), `geosearch` (a Commons photo
+  taken near the place), `area` (the hotel card's area photo). For `geosearch`, `image.labelRu` already says
+  «Фото поблизости: Wikimedia Commons · автор…».
+
+**3. Cost parity** (`cost/recompute.py`, rule 5 of `tools/gen_cost_contract.py`)
+- Parking is inside the subtotal, so it is inside the reserve base and the budget check. **Confirmed.**
+- A replaced stop takes the alternative's own parking. **Your assumption is now the rule.** The alternative's
+  `units` carry `parkingRub` (null = unknown price), `parkingRubPerHour`, `parkingHours` and `parkingSource`,
+  only when the trip has parking data. CostCalculator:
+  1. Remove the replaced stop's `ParkingUnit`.
+  2. If `parkingSource` is present, put `{stopId: <replaced stop>, name: alt.name, rubPerHour, hours, rub,
+     source}` in its place. If the replaced stop had no unit (a rest stop replaced by a sight), append it.
+  3. The line is Σ known `rub`.
+  The engine's `replace_stop` bakes the same thing into the units. `alternatives[].deltaRub` includes Δ
+  parking, and it stays in after a crew change. Cases: `parking_replaced_stop` (no `parkingSource` → none),
+  `parking_replaced_by_alt` (460), `parking_alt_unknown` (60), `parking_rest_replaced_by_sight` (900),
+  `parking_reserve_budget`.
+- The other stops' parking is not re-priced after a replace, even when their arrival moves. That matches
+  tickets and keeps the offline recompute exact.

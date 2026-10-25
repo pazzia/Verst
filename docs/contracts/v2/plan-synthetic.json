@@ -105,7 +105,20 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 4,
-        "kmLeft": 382
+        "kmLeft": 382,
+        "poiKind": "square",
+        "whyRu": null,
+        "photoSource": "p18",
+        "parking": {
+         "rub": 0,
+         "rubPerHour": 0,
+         "hours": 1,
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
+        }
        },
        {
         "id": "d1s03",
@@ -966,7 +979,11 @@
            "placeId": "Q125939698",
            "priceRub": "61.50",
            "regionName": "Свердловская область",
-           "tripKmDelta": 6
+           "tripKmDelta": 6,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s05",
@@ -997,7 +1014,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "monument",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -1159,7 +1189,11 @@
            "placeId": "Q1074347",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": -1
+           "tripKmDelta": -1,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s07",
@@ -1190,7 +1224,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "kremlin",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -1282,7 +1329,11 @@
            "placeId": "Q547238",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": 1
+           "tripKmDelta": 1,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s07",
@@ -1312,7 +1363,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -1404,7 +1468,11 @@
            "placeId": "Q13668678",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": 0
+           "tripKmDelta": 0,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s07",
@@ -1434,7 +1502,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -1514,7 +1595,20 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 381,
-        "kmLeft": 5
+        "kmLeft": 5,
+        "poiKind": "attraction",
+        "whyRu": "Объект культурного наследия",
+        "photoSource": "p18",
+        "parking": {
+         "rub": 0,
+         "rubPerHour": 0,
+         "hours": 1,
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
+        }
        },
        {
         "id": "d1s08",
@@ -1559,7 +1653,11 @@
            "placeId": "Q1074347",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": -1
+           "tripKmDelta": -1,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s08",
@@ -1590,7 +1688,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "kremlin",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -1682,7 +1793,11 @@
            "placeId": "Q547238",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": 1
+           "tripKmDelta": 1,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s08",
@@ -1712,7 +1827,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -1804,7 +1932,11 @@
            "placeId": "Q13668678",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": 0
+           "tripKmDelta": 0,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s08",
@@ -1834,7 +1966,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -1914,7 +2059,20 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 382,
-        "kmLeft": 4
+        "kmLeft": 4,
+        "poiKind": "church",
+        "whyRu": "Объект культурного наследия",
+        "photoSource": "p18",
+        "parking": {
+         "rub": 0,
+         "rubPerHour": 0,
+         "hours": 1,
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
+        }
        },
        {
         "id": "d1s09",
@@ -1960,7 +2118,11 @@
            "placeId": "Q1074347",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": -2
+           "tripKmDelta": -2,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s09",
@@ -1991,7 +2153,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "kremlin",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -2083,7 +2258,11 @@
            "placeId": "Q547238",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": 0
+           "tripKmDelta": 0,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s09",
@@ -2113,7 +2292,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -2205,7 +2397,11 @@
            "placeId": "Q13668678",
            "priceRub": "61.50",
            "regionName": "Тюменская область",
-           "tripKmDelta": -1
+           "tripKmDelta": -1,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
           },
           "stop": {
            "id": "d1s09",
@@ -2235,7 +2431,20 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "poiKind": "church",
+           "whyRu": "Объект культурного наследия",
+           "photoSource": "p18",
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
           },
           "dayPatch": [
            {
@@ -2315,7 +2524,20 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 383,
-        "kmLeft": 3
+        "kmLeft": 3,
+        "poiKind": "attraction",
+        "whyRu": "Объект культурного наследия",
+        "photoSource": "p18",
+        "parking": {
+         "rub": 0,
+         "rubPerHour": 0,
+         "hours": 1,
+         "source": "free",
+         "zoneRu": "Платных зон рядом нет",
+         "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+         "sundayRu": null,
+         "freeRu": "Бесплатно: вне платных зон"
+        }
        },
        {
         "id": "d1s10",

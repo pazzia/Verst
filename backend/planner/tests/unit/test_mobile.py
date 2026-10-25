@@ -261,7 +261,10 @@ class MobileTest(unittest.TestCase):
         self.assertEqual(
             json.dumps(got["trip"], sort_keys=True, ensure_ascii=False),
             json.dumps(
-                mobile.with_amenities(mobile.with_driven_km(codec.plan_to_json(want, public=False))),
+                mobile.with_stop_details(
+                    mobile.with_amenities(mobile.with_driven_km(codec.plan_to_json(want, public=False))),
+                    mobile._WORLDS["central_russia_v1"],
+                ),
                 sort_keys=True,
                 ensure_ascii=False,
             ),

@@ -68,6 +68,21 @@ def town_without_bars():
     raise AssertionError("no town without bars")
 
 
+def dry_town_with_sights():
+    """A catalogue town with no bar within 6 km where an overview walk works: a beer walk there fails with
+    checked suggestions (the NOT_ENOUGH_POIS suggestions example), deterministic."""
+    from verst_planner.geo.distance import haversine_km
+
+    cat = mobile._CATALOGUE[0]
+    for t in sorted(cat.towns, key=lambda t: (-t.population, t.id)):
+        if all(haversine_km(t.point, b.point) > 6 for b in cat.bars):
+            start = {"lat": t.point.lat, "lon": t.point.lon, "label": t.name}
+            probe = json.loads(mobile.city_route(R, "probe", json.dumps({"start": start, "preset": "overview"})))
+            if probe["ok"]:
+                return start
+    raise AssertionError("no dry town with sights")
+
+
 def bar_in(near):
     from verst_planner.geo.distance import haversine_km
 
@@ -135,6 +150,17 @@ call(
     world=R,
     request_id="c-fit-4",
     input_json=json.dumps({**CEO, "budget": 20000}),
+)
+# API v3 (ADR-0015 §4): paid street parking at the Moscow Kremlin — `parking` sheet on the stop and its line
+call(
+    "plan-moscow-parking",
+    "plan",
+    world=R,
+    request_id="c-park-1",
+    input_json=trip_input(
+        msk, {"lat": 54.1961, "lon": 37.6182, "label": "Тула"}, startAt="2026-10-26T09:00", mood="calm"
+    ),
+    listener=None,
 )
 call("city_presets", "city_presets", world=R, lat=YAR["lat"], lon=YAR["lon"])
 walk = call(
@@ -264,7 +290,7 @@ call(
     world=R,
     request_id="c-walk-14",
     input_json=json.dumps(
-        {"start": town_without_bars(), "preset": "beer", "adultConfirmed": True, "durationMin": 240}
+        {"start": dry_town_with_sights(), "preset": "beer", "adultConfirmed": True, "durationMin": 240}
     ),
 )
 

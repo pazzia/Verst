@@ -13,6 +13,7 @@ Order of evidence, per stop:
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import math
 import re
@@ -69,6 +70,27 @@ class OsmParking:
     rub_per_hour: int | None
 
 
+@dataclass(frozen=True, slots=True)
+class ParkingInfo:
+    """Why a stop's parking costs what it does: `source` zone | osm | unknown | free, the zone it falls in
+    (city, band radius, day/night rate, paid hours, Sunday rule: free | paid_here | None = paid on Sunday,
+    holidays free), the distance to the paid OSM parking, and why it is free now (holiday | sunday | night |
+    no_zone)."""
+
+    source: str
+    rub_per_hour: int | None
+    city: str | None = None
+    band_km: float | None = None
+    day_rub: int | None = None
+    night_rub: int | None = None
+    day_from: time | None = None
+    day_to: time | None = None
+    sunday: str | None = None
+    holidays_free: bool = False
+    osm_m: int | None = None
+    free_reason: str | None = None
+
+
 class ParkingModel:
     def __init__(
         self,
@@ -107,6 +129,11 @@ class ParkingModel:
 
     def rate(self, point: LatLon, arrive_local: datetime) -> tuple[int | None, str]:
         """(₽ per hour, source); 0 = free here and now; None = paid parking with an unknown price."""
+        info = self.explain(point, arrive_local)
+        return info.rub_per_hour, info.source
+
+    def explain(self, point: LatLon, arrive_local: datetime) -> ParkingInfo:
+        """The evidence behind `rate`, for the stop's parking sheet (the bridge words it)."""
         for c in self.cities:
             d = haversine_km(c.centre, point)
             band = next((b for b in c.bands if d <= b.radius_km), None)
@@ -114,17 +141,26 @@ class ParkingModel:
                 continue
             day = c.day_from <= arrive_local.time() < c.day_to
             rub = band.day_rub if day else band.night_rub
+            sunday = "free" if c.sunday_free and c.sunday_free_below_rub == 0 else None
+            if c.sunday_free and c.sunday_free_below_rub:
+                sunday = "free" if band.day_rub < c.sunday_free_below_rub else "paid_here"
+            zone = ParkingInfo(
+                "zone", rub, c.city, band.radius_km, band.day_rub, band.night_rub, c.day_from, c.day_to,
+                sunday, c.holidays_free,
+            )
             if c.holidays_free and arrive_local.strftime("%m-%d") in self.holidays:
-                return 0, "free"
-            if c.sunday_free and arrive_local.weekday() == 6 and band.day_rub < c.sunday_free_below_rub:
-                return 0, "free"
-            return (rub, "zone") if rub > 0 else (0, "free")
+                return dataclasses.replace(zone, source="free", rub_per_hour=0, free_reason="holiday")
+            if sunday == "free" and arrive_local.weekday() == 6:
+                return dataclasses.replace(zone, source="free", rub_per_hour=0, free_reason="sunday")
+            if rub <= 0:
+                return dataclasses.replace(zone, source="free", rub_per_hour=0, free_reason="night")
+            return zone
         near = self.osm.within(point, self.osm_radius_km)
         if near:
-            _d, i = min(near)
+            d_km, i = min(near)
             r = self._osm[i].rub_per_hour
-            return (r, "osm") if r is not None else (None, "unknown")
-        return 0, "free"
+            return ParkingInfo("osm" if r is not None else "unknown", r, osm_m=round(d_km * 1000))
+        return ParkingInfo("free", 0, free_reason="no_zone")
 
     def unit(
         self, stop_id: str, name: str, point: LatLon, arrive_local: datetime, dwell_min: int
@@ -135,4 +171,4 @@ class ParkingModel:
         return ParkingUnit(stop_id, name, rate, hours, rub, source)
 
 
-__all__ = ["OsmParking", "ParkingModel", "charge_per_hour"]
+__all__ = ["OsmParking", "ParkingInfo", "ParkingModel", "charge_per_hour"]
