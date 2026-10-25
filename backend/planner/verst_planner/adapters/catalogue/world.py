@@ -54,6 +54,10 @@ def poi_rating(sitelinks: int) -> float:
     return round(3.6 + 1.3 * min(1.0, math.log10(1 + sitelinks) / math.log10(1 + 150)), 2)
 
 
+# catalogue kind → ADR-0015 §2 category (the diversity rules count «temple» and «monastery» as religious)
+POI_CATEGORY = {"church": "temple"}
+
+
 def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
     ticket = POI_TICKETS.get(p.kind)
     tags = set(POI_TAGS[p.kind])
@@ -83,6 +87,8 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
         source=Source.OSM,
         verified_at=None,
         status=PlaceStatus.LIVE,
+        category=POI_CATEGORY.get(p.kind, p.kind),
+        quality=p.quality,
     )
 
 

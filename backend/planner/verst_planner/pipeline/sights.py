@@ -181,7 +181,7 @@ def plan_sights(
     profile = ctx.profile_for(corridor.route)
     max_n = ctx.cfg.sights.max_per_day.of(inp.mood)
     used = _used(days)
-    rests = RestPool.of(corridor)
+    rests = RestPool.of(corridor, inp.mood is Mood.FUN)
     centres = big_city_centres(corridor)
     own = own_big_cities(inp, corridor, days)
     for day in days:
@@ -228,7 +228,7 @@ def lowest_sight(day: DayPlan) -> int:
 def plan_lunches(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
     """Stage 8 with the lunch probes checked by `day_ok` (rests reserved)."""
     profile = ctx.profile_for(corridor.route)
-    rests = RestPool.of(corridor)
+    rests = RestPool.of(corridor, inp.mood is Mood.FUN)
     used = _used(days)
     plan_meals(days, corridor, inp, ctx, ok=lambda d: day_ok(d, inp, ctx, profile, rests, used))
 
@@ -280,6 +280,6 @@ def plan_lunch_after_sights(
     """Stage 8b over every day still without a lunch that now overlaps the lunch window."""
     profile = ctx.profile_for(corridor.route)
     used = _used(days)
-    rests = RestPool.of(corridor)
+    rests = RestPool.of(corridor, inp.mood is Mood.FUN)
     for day in days:
         lunch_after_sights_day(day, corridor, inp, ctx, profile, used, rests)

@@ -120,7 +120,12 @@ def stop_reason(
         return t.render("finish.default")
     if s.kind is StopKind.VIA:
         return t.render("via.user")
-    if s.place is not None and s.place.source is Source.OSM and s.kind is StopKind.SIGHT:
+    if (
+        s.place is not None
+        and s.place.source is Source.OSM
+        and s.kind is StopKind.SIGHT
+        and not s.reason_key.startswith("rest.fun.")  # ADR-0015 §5: the fun stop says why it was chosen
+    ):
         return t.render("sight.osm")
     if s.kind is StopKind.SIGHT and s.fixed:
         dwell = ru.duration_phrase(s.dwell_min)

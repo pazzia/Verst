@@ -20,7 +20,7 @@ import bisect
 import dataclasses
 from dataclasses import dataclass
 
-from verst_planner.domain.enums import PlaceType, StopKind, Tag
+from verst_planner.domain.enums import Mood, PlaceType, StopKind, Tag
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop, Route
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import sight_reason
@@ -30,6 +30,17 @@ from verst_planner.pipeline.checks import day_valid, lunch_out_of_window, over_b
 from verst_planner.pipeline.timeline import Profile, eta_if_inserted, insert_stop, local, schedule_day
 
 MAX_REST_SIGHT_DWELL = 30
+# ADR-0015 §5 «Весело и познавательно»: interesting stops in the rest slots, within a 15-min detour,
+# 30-45 min, chosen for the crew; a dog never gets an indoor-only place as its walk.
+FUN_DETOUR_MIN = 15
+FUN_DWELL = (30, 45)
+FUN_BONUS = 5.0  # above a rest area with a playground, WC and a walk (5.5) for a fitting stop
+FUN_PREFER: dict[str, frozenset[str]] = {
+    "child": frozenset({"playground", "interactive", "zoo", "park", "nature", "museum"}),
+    "dog": frozenset({"park", "nature", "embankment", "viewpoint"}),
+    "adults": frozenset({"museum", "viewpoint", "kremlin", "nature", "square", "park", "embankment"}),
+}
+INDOOR = frozenset({"museum", "theatre", "interactive"})
 EXTENDED_MIN_DRIVE = 45  # A§16.11.1 step 3: driving since b0 in [max(45, R - 60), R + 30]
 EXTENDED_AFTER = 30
 ROUND_DRIVE_MIN = 15
@@ -82,10 +93,36 @@ def is_break(s: PlannedStop, min_dwell: int) -> bool:
     )
 
 
+def fun_group(inp: NormalizedInput) -> str:
+    if inp.crew.children > 0:
+        return "child"
+    return "dog" if inp.crew.dog else "adults"
+
+
+def fun_affinity(c: Candidate, inp: NormalizedInput) -> float:
+    """How well an interesting stop suits the crew (0..1.5; negative = unsuitable)."""
+    if c.place.type is not PlaceType.SIGHT:
+        return 0.0
+    from verst_planner.pipeline.sights import category_of
+
+    cat = category_of(c.place)
+    if inp.crew.dog and cat in INDOOR:
+        return -1.0
+    score = 0.5 + (1.0 if cat in FUN_PREFER[fun_group(inp)] else 0.0)
+    if inp.crew.children > 0 and cat in ("temple", "monastery", "church"):
+        score -= 0.5
+    return score
+
+
+def is_fun(c: Candidate, inp: NormalizedInput) -> bool:
+    return inp.mood is Mood.FUN and c.place.type is PlaceType.SIGHT and fun_affinity(c, inp) > 0
+
+
 def rest_score(c: Candidate, inp: NormalizedInput) -> float:
     t = c.place.tags
     sight = c.place.type is PlaceType.SIGHT
-    return (
+    fun = FUN_BONUS * fun_affinity(c, inp) if inp.mood is Mood.FUN and sight else 0.0
+    return fun + (
         1.0 * (c.place.type is PlaceType.REST)
         + 2.0 * (Tag.PLAYGROUND in t and inp.crew.children > 0)
         + 1.5 * (Tag.WALK in t and inp.crew.dog)
@@ -120,11 +157,15 @@ def _reason(inp: NormalizedInput, dwell: int, drove_min: float) -> tuple[str, di
     return "rest.generic", {**base, "drive": ru.duration_genitive(rounded_drive(drove_min))}
 
 
-def rest_pool(corridor: Corridor) -> list[Candidate]:
+def rest_pool(corridor: Corridor, fun: bool = False) -> list[Candidate]:
     """Rest areas, short sights and fuel stations with a cafe (A§6.8), sorted by km; also the REST
-    alternatives pool."""
+    alternatives pool. `fun` («Весело и познавательно») adds every sight within the fun detour."""
     pool = [*corridor.rest, *[c for c in corridor.fuel if Tag.CAFE_AT_FUEL in c.place.tags]]
-    pool += [c for c in corridor.sights if (c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL]
+    pool += [
+        c
+        for c in corridor.sights
+        if (c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL or (fun and c.detour_min <= FUN_DETOUR_MIN)
+    ]
     return sorted(pool, key=lambda c: (c.km_at, c.place.id))
 
 
@@ -135,6 +176,13 @@ def make_rest_stop(c: Candidate, inp: NormalizedInput, ctx: PlanContext, drove_m
     if c.place.type is PlaceType.FUEL:
         kind, dwell, coffee = StopKind.FUEL, dm.coffee, True
         key, params = _reason(inp, dwell, drove_min)
+    elif is_fun(c, inp):
+        kind, dwell, coffee = (
+            StopKind.SIGHT,
+            min(FUN_DWELL[1], max(FUN_DWELL[0], c.place.dwell_min or 30)),
+            False,
+        )
+        key, params = f"rest.fun.{fun_group(inp)}", {"min": dwell, "min_word": ru.minutes_word(dwell)}
     elif c.place.type is PlaceType.SIGHT:
         kind, dwell, coffee = (
             StopKind.SIGHT,
@@ -196,8 +244,8 @@ class RestPool:
         self.kms = [c.km_at for c in self.cands]
 
     @classmethod
-    def of(cls, corridor: Corridor) -> RestPool:
-        return cls(rest_pool(corridor), corridor.route)
+    def of(cls, corridor: Corridor, fun: bool = False) -> RestPool:
+        return cls(rest_pool(corridor, fun), corridor.route)
 
     def between(self, lo: float, hi: float) -> list[Candidate]:
         return self.cands[bisect.bisect_left(self.kms, lo) : bisect.bisect_right(self.kms, hi)]
@@ -279,6 +327,8 @@ def plan_rests_day(
     added: list[PlannedStop] = []
     taken = set(used)
     accepted: set[tuple[int, int]] = set()
+    # ADR-0015 §5: «подходящей площадки рядом нет» once a day; later breaks say only «Перерыв 15 минут»
+    roadside_done = any(s.reason_key == "rest.roadside" for s in day.stops)
     for _guard in range(200):
         clock = DriveClock.of(day, profile)
         gap = _first_long_gap(day, clock, r, rc.break_min_dwell, accepted)
@@ -307,7 +357,8 @@ def plan_rests_day(
             clock: DriveClock = clock,
             need_after: float = need_after,
         ) -> bool:
-            if c.detour_min > rc.max_detour_min or d0 < g - EPS:
+            limit = FUN_DETOUR_MIN if is_fun(c, inp) else rc.max_detour_min
+            if c.detour_min > limit or d0 < g - EPS:
                 return False
             return gap.t1 - clock.at(c.km_at) >= need_after - EPS
 
@@ -342,7 +393,8 @@ def plan_rests_day(
             if chosen is not None:
                 break
         if chosen is None:  # step 4: a roadside break at x, never a gap left unfilled
-            chosen = roadside_break(x, pool, ctx)
+            chosen = roadside_break(x, pool, ctx, again=roadside_done)
+            roadside_done = True
         insert_stop(day, chosen)
         accepted.add((id(b0), id(chosen)))
         if chosen.place is not None:
@@ -358,8 +410,9 @@ def rank_rests(
     return sorted(cands, key=lambda cd: (-round(rest_score(cd[0], inp), 9), abs(cd[1] - r), cd[0].place.id))
 
 
-def roadside_break(km: float, pool: RestPool, ctx: PlanContext) -> PlannedStop:
-    """A§16.11.1 step 4: a 15-min stop on the road where no place fits (`label.roadside_break`)."""
+def roadside_break(km: float, pool: RestPool, ctx: PlanContext, again: bool = False) -> PlannedStop:
+    """A§16.11.1 step 4: a 15-min stop on the road where no place fits (`label.roadside_break`); `again`
+    (a second one that day) drops the «площадки рядом нет» sentence (ADR-0015 §5)."""
     assert pool.route is not None
     point = interpolate(pool.route, km)
     return PlannedStop(
@@ -369,7 +422,7 @@ def roadside_break(km: float, pool: RestPool, ctx: PlanContext) -> PlannedStop:
         point=point,
         dwell_min=ctx.cfg.rest.break_min_dwell,
         auto=True,
-        reason_key="rest.roadside",
+        reason_key="rest.roadside_again" if again else "rest.roadside",
         region_code=ctx.region_at(point).code,
         pool="rest",
     )
@@ -379,7 +432,7 @@ def plan_rests(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ct
     """Stage 7 over every day (runs after lunch and sights, A§16.2)."""
     profile = ctx.profile_for(corridor.route)
     used = {s.place.id for d in days for s in d.stops if s.place is not None}
-    pool = RestPool.of(corridor)
+    pool = RestPool.of(corridor, inp.mood is Mood.FUN)
     for day in days:
         for s in plan_rests_day(day, pool, used, inp, ctx, profile):
             if s.place is not None:

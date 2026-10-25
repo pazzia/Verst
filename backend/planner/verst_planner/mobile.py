@@ -496,6 +496,19 @@ def with_driven_km(trip: dict[str, Any]) -> dict[str, Any]:
     return trip
 
 
+AMENITY_TAGS = ("wc", "cafe_at_fuel", "playground", "walk", "view", "parking", "ev_charger", "24h")
+
+
+def with_amenities(trip: dict[str, Any]) -> dict[str, Any]:
+    """API v3 (ADR-0015 §5): rest and fuel rows list their amenities in a fixed order, for the row icons."""
+    for d in trip.get("daysList", []):
+        for s in d.get("stops", []):
+            if s.get("kind") in ("rest", "fuel"):
+                tags = set(s.get("tags") or [])
+                s["amenities"] = [t for t in AMENITY_TAGS if t in tags]
+    return trip
+
+
 def _trip_result(plan: TripPlan, world: FakeWorld | None = None) -> dict[str, Any]:
     """The private trip, its share text, the Waybill footnote month/year («октябрь», "2026") and the
     prepositional names of the overnight towns (5.7 «Отметим ночёвку в Ярославле…»)."""
@@ -510,7 +523,7 @@ def _trip_result(plan: TripPlan, world: FakeWorld | None = None) -> dict[str, An
                     prep[town.id] = ru.prepositional(town)
                     gen[town.id] = ru.genitive(town)
     return {
-        "trip": with_driven_km(codec.plan_to_json(plan, public=False)),
+        "trip": with_amenities(with_driven_km(codec.plan_to_json(plan, public=False))),
         "shareText": render_share_text(plan),
         "pricesMonthRu": month,
         "pricesYear": year,
