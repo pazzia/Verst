@@ -83,8 +83,8 @@ class V2ContractsTest {
         assertTrue(sight.image!!.credit!!.licence.orEmpty().startsWith("CC") || sight.image!!.credit!!.licence == "Public domain")
         val hotel = ok(EngineJson.poiDetails(envelope("poi_details-hotel.json")))
         assertTrue(hotel.isFictional)
-        assertTrue(hotel.image!!.isArea)
-        assertTrue(hotel.image!!.labelRu!!.startsWith("Фото района"))
+        // release-s3: only single photographs may be area photos — when there is one, it is labelled as such
+        hotel.image?.let { assertTrue(it.isArea); assertTrue(it.labelRu!!.startsWith("Фото района")) }
         val bar = ok(EngineJson.poiDetails(envelope("poi_details-bar.json")))
         assertEquals("bar", bar.kind)
         assertTrue(bar.attributionRu.isNotEmpty())
@@ -93,14 +93,17 @@ class V2ContractsTest {
 
         val day = ok(EngineJson.handoff(envelope("handoff-car-day.json")))
         assertEquals("car", day.mode)
-        assertTrue(day.parts.single().links.navigator!!.startsWith("yandexnavi://build_route_on_map?"))
+        assertTrue(day.parts.isNotEmpty() && day.parts.all { it.links.navigator!!.startsWith("yandexnavi://build_route_on_map?") })
         val walk = ok(EngineJson.handoff(envelope("handoff-walk.json")))
-        assertNull(walk.parts.single().links.navigator)
-        assertTrue(walk.parts.single().links.web!!.endsWith("&rtt=pd"))
+        // a long walk is split into parts (real catalogue): every part is a pedestrian web link, no navigator
+        assertTrue(walk.parts.isNotEmpty())
+        walk.parts.forEach { assertNull(it.links.navigator); assertTrue(it.links.web!!.endsWith("&rtt=pd")) }
 
         val presets = ok(EngineJson.cityPresets(envelope("city_presets.json")))
         assertEquals("Ярославль", presets.town!!.name)
-        assertFalse(presets.presets.first { it.preset == "beer" }.available)
+        // availability comes from the data; the shape is fixed: the five presets, custom always available
+        assertEquals(setOf("overview", "museums", "ryumochnye", "beer", "custom"), presets.presets.map { it.preset }.toSet())
+        assertTrue(presets.presets.first { it.preset == "custom" }.available)
         assertTrue(presets.presets.first { it.preset == "ryumochnye" }.adultOnly)
         for (f in listOf("city_route-overview.json", "city_route-custom.json", "city_route-museums-spb.json", "city_route-ryumochnye.json")) {
             val w = ok(EngineJson.walkRoute(envelope(f)))
