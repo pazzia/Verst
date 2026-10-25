@@ -214,7 +214,8 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         val label = if (ui.target == HandoffTarget.Maps || ui.target == HandoffTarget.MapsDryRun) stringResource(R.string.handoff_maps_walk) else stringResource(R.string.handoff_web)
         if (parts.size > 1) {
             parts.forEach { p ->
-                WideButton("$label · " + stringResource(R.string.handoff_part, p.index, parts.size), "walk.handoff.${p.index}", walker = true, onClick = { a.handoff(p.index) })
+                // the part on its own line: «Открыть Яндекс Карты в браузере» / «Часть 1 из 2» (never clipped)
+                WideButton(label, "walk.handoff.${p.index}", walker = true, height = 60.dp, sub = stringResource(R.string.handoff_part, p.index, parts.size), onClick = { a.handoff(p.index) })
             }
         } else {
             WideButton(label, "walk.handoff", walker = true, enabled = true, onClick = { a.handoff(1) })
@@ -268,7 +269,7 @@ private fun distance(km: Double): String =
 
 /** components §22 walk button / §2 `SecondaryButton`. */
 @Composable
-private fun WideButton(text: String, tag: String, walker: Boolean = false, enabled: Boolean = true, height: Dp = 48.dp, onClick: () -> Unit) {
+private fun WideButton(text: String, tag: String, walker: Boolean = false, enabled: Boolean = true, height: Dp = 48.dp, sub: String? = null, onClick: () -> Unit) {
     val shape = RoundedCornerShape(DesignTokens.radius.r12)
     Row(
         Modifier.fillMaxWidth().height(height).clip(shape).background(C.dash.control).border(DesignTokens.stroke.w1, C.dash.outline, shape)
@@ -280,7 +281,14 @@ private fun WideButton(text: String, tag: String, walker: Boolean = false, enabl
             WalkerIcon(C.accent.yellow, 18.dp)
             Spacer(Modifier.width(8.dp))
         }
-        Txt(text, T.button.md, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
+        if (sub == null) {
+            Txt(text, T.button.md, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
+        } else {
+            androidx.compose.foundation.layout.Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Txt(text, T.button.md, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
+                Txt(sub, T.body.sm, C.text.secondary, maxLines = 1)
+            }
+        }
     }
 }
 
