@@ -32,14 +32,36 @@ from typing import Any
 
 PLANNER = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PLANNER))
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # enrich, fetch_extras
+
+from enrich import (  # noqa: E402
+    OSM_PER_TOWN,
+    OSM_RADIUS_KM,
+    PLAYGROUND_KM,
+    PLAYGROUNDS_PER_TOWN,
+    Extras,
+    OsmIndex,
+    card_level,
+    excluded,
+    extract_for,
+    geosearch_pick,
+    heritage_level,
+    in_voyage,
+    osm_is_tourism,
+    osm_kind,
+    quality,
+    refine_kind,
+)
 
 from verst_planner.catalogue import (  # noqa: E402
     BAR_COLS,
     BAR_KINDS,
+    COORD_SCALE,
     FILES,
     FORMAT_VERSION,
     POI_COLS,
     POI_KINDS,
+    POI_OPT_COLS,
     TOWN_COLS,
     dump_gz,
     encode_table,
@@ -332,6 +354,8 @@ def build(
     credits_in = load_json(raw_dir / "credits.json", {})
     forms = load_json(raw_dir / "forms.json", {})
     sources = load_json(raw_dir / "sources.json", {})
+    ex = Extras.load(raw_dir)  # Sprint 4 extras (data-extras.yml); empty when absent
+    credits_in = {**credits_in, **ex.credits}
 
     # ---- towns: dedupe by qid (largest population wins), ISO 3166-2:RU regions only, real towns only
     region_fix = {name: code for name, code in read_tsv(HERE / "region_overrides.tsv")}
@@ -431,11 +455,20 @@ def build(
         )
     town_pos = {t["qid"]: i for i, t in enumerate(towns)}
 
-    # ---- POIs: kind, nearest town among the towns that found it, deny-list, caps
+    # ---- POIs: kind, nearest town among the towns that found it, deny-list, ADR-0015 §2 excludes, caps
+    town_names = {str(t["name"]).strip().casefold() for t in towns}
+    osm_ix = OsmIndex(ex.osm)
+    all_meta = {**load_json(raw_dir / "photo_meta.json", {}), **ex.photo_meta}
+    stats: dict[str, int] = {}
     pois_by_qid: dict[str, dict[str, Any]] = {}
     for r in raw_pois:
         kind = poi_kind(r.get("roots", []))
         if kind is None or not r.get("name") or denied(r["name"], deny) or r.get("townQid") not in town_pos:
+            continue
+        kind = refine_kind(kind, r, ex)
+        why = excluded(r, kind, ex, town_names)
+        if why is not None:
+            stats[why] = stats.get(why, 0) + 1
             continue
         town = towns[town_pos[r["townQid"]]]
         d = haversine_km((r["lat"], r["lon"]), (town["lat"], town["lon"]))
@@ -452,31 +485,79 @@ def build(
     grouped: dict[str, list[dict[str, Any]]] = {}
     for r in pois_by_qid.values():
         grouped.setdefault(r["townQid"], []).append(r)
+
+    def enriched(r: dict[str, Any], town: dict[str, Any]) -> dict[str, Any]:
+        osm = osm_ix.match(r["qid"], r["name"], r["lat"], r["lon"])
+        tags = osm["tags"] if osm else {}
+        image, credit = image_and_credit(r.get("image"))
+        src = "p18" if image else None
+        for cand, s_ in (
+            ((ex.wiki.get(r["qid"]) or {}).get("image"), "wikipedia"),
+            (commons_tag(tags), "osm"),
+            (geosearch_pick(r["name"], ex.geosearch.get(r["qid"], []), all_meta), "geosearch"),
+        ):
+            if image is None and cand and cand in credits_in:
+                image, credit = image_and_credit(cand)
+                src = s_ if image else None
+        extract, extract_src = extract_for(r["qid"], osm, r.get("desc"), ex)
+        hours = tags.get("opening_hours")
+        if hours and hours_ok is not None and not hours_ok(hours):
+            hours = None
+        fee = {"yes": 1, "no": 0}.get(str(tags.get("fee", "")).lower())
+        q = quality(
+            int(r.get("sitelinks") or 0),
+            heritage_level(r, ex.wd.get(r["qid"]) or {}),
+            in_voyage(r["qid"], ex),
+            osm is not None and osm_is_tourism(tags),
+            image is not None,
+            extract is not None,
+            r["_kind"],
+        )
+        desc = r.get("desc")
+        return {
+            "id": r["qid"],
+            "name": poi_name(r["name"], town["name"]),
+            "desc": desc[:DESC_MAX] if desc else None,
+            "kind": POI_KINDS.index(r["_kind"]),
+            "lat": to_coord(r["lat"]),
+            "lon": to_coord(r["lon"]),
+            "town": town_pos[r["townQid"]],
+            "sitelinks": int(r.get("sitelinks") or 0),
+            "heritage": 1 if r.get("heritage") else 0,
+            "image": image,
+            "credit": credit,
+            "quality": round(q * 100),
+            "extract": extract,
+            "extractSrc": extract_src,
+            "hours": hours,
+            "fee": fee,
+            "website": (tags.get("website") or None) and str(tags["website"])[:100],
+            "level": card_level(image is not None, extract_src, hours is not None),
+            "imageSrc": src,
+        }
+
     poi_rows = []
     for qid in sorted(grouped, key=lambda q: town_pos[q]):
         town = towns[town_pos[qid]]
-        lst = sorted(
-            grouped[qid],
-            key=lambda r: (-int(r.get("sitelinks") or 0), -int(bool(r.get("heritage"))), r["qid"]),
+        rows = [enriched(r, town) for r in grouped[qid]]
+        rows = [x for x in rows if x["quality"] >= MIN_SHIP_QUALITY * 100]
+        rows.sort(key=lambda x: (-x["quality"], -x["sitelinks"], x["id"]))
+        poi_rows.extend(rows[: poi_cap(int(town.get("population") or 0), qid in tourist)])
+    shipped = {x["id"] for x in poi_rows}
+    poi_rows.extend(
+        osm_rows(
+            ex,
+            towns,
+            town_pos,
+            shipped,
+            {r["qid"] for r in raw_pois},
+            image_and_credit,
+            all_meta,
+            hours_ok,
+            deny,
         )
-        for r in lst[: poi_cap(int(town.get("population") or 0), qid in tourist)]:
-            image, credit = image_and_credit(r.get("image"))
-            desc = r.get("desc")
-            poi_rows.append(
-                {
-                    "id": r["qid"],
-                    "name": poi_name(r["name"], town["name"]),
-                    "desc": desc[:DESC_MAX] if desc else None,
-                    "kind": POI_KINDS.index(r["_kind"]),
-                    "lat": to_coord(r["lat"]),
-                    "lon": to_coord(r["lon"]),
-                    "town": town_pos[qid],
-                    "sitelinks": int(r.get("sitelinks") or 0),
-                    "heritage": 1 if r.get("heritage") else 0,
-                    "image": image,
-                    "credit": credit,
-                }
-            )
+    )
+    stats["shipped"] = len(poi_rows)
 
     # ---- bars: no chains, named, deny-list, caps (known hours and рюмочные first)
     bars_by_id: dict[str, dict[str, Any]] = {}
@@ -538,13 +619,136 @@ def build(
         "areaBlock": area_block,
         "areaChecked": bool(photo_meta),
         "sources": sources,
+        "parking": parking_meta(ex.parking, poi_rows),
+        "buildStats": stats,
     }
     return {
         "meta": meta,
         "towns": encode_table(town_rows, TOWN_COLS),
-        "pois": encode_table(poi_rows, POI_COLS),
+        "pois": encode_table(poi_rows, POI_COLS + POI_OPT_COLS),
         "bars": encode_table(bar_rows, BAR_COLS),
     }
+
+
+MIN_SHIP_QUALITY = 0.25  # ADR-0015 §2: below the walk threshold a POI is not shipped
+PARKING_NEAR_KM = 1.5
+
+
+def commons_tag(tags: dict[str, str]) -> str | None:
+    from fetch_extras import commons_name
+
+    return commons_name(tags.get("wikimedia_commons")) or commons_name(tags.get("image"))
+
+
+def osm_rows(
+    ex: Extras,
+    towns: list[dict[str, Any]],
+    town_pos: dict[str, int],
+    shipped: set[str],
+    wikidata_ids: set[str],
+    image_and_credit: Any,
+    meta: dict[str, dict[str, Any]],
+    hours_ok: Any,
+    deny: list[str],
+) -> list[dict[str, Any]]:
+    """OSM-only POIs (ADR-0015 §2 kinds: nature, parks, zoos, theatres, interactive, playgrounds, viewpoints,
+    attractions): the nearest town within OSM_RADIUS_KM (playgrounds within PLAYGROUND_KM), capped per town."""
+    grid: dict[tuple[int, int], list[dict[str, Any]]] = {}
+    for t in towns:
+        grid.setdefault((int(t["lat"] // 0.5), int(t["lon"] // 0.5)), []).append(t)
+    per_town: dict[str, list[dict[str, Any]]] = {}
+    for o in ex.osm:
+        tags = o["tags"]
+        if tags.get("wikidata") in wikidata_ids or tags.get("wikidata") in shipped:
+            continue
+        kind = osm_kind(tags)
+        if kind is None:
+            continue
+        name = tags.get("name") or ("Детская площадка" if kind == "playground" else None)
+        if not name or denied(name, deny):
+            continue
+        reach = PLAYGROUND_KM if kind == "playground" else OSM_RADIUS_KM
+        ci, cj = int(o["lat"] // 0.5), int(o["lon"] // 0.5)
+        best = None
+        for di in (-1, 0, 1):
+            for dj in (-1, 0, 1):
+                for t in grid.get((ci + di, cj + dj), ()):
+                    d = haversine_km((o["lat"], o["lon"]), (t["lat"], t["lon"]))
+                    if d <= reach and (best is None or d < best[0]):
+                        best = (d, t)
+        if best is None:
+            continue
+        per_town.setdefault(best[1]["qid"], []).append({**o, "_kind": kind, "_name": name, "_d": best[0]})
+    out = []
+    for qid in sorted(per_town, key=lambda q: town_pos[q]):
+        lst = per_town[qid]
+        play = sorted([x for x in lst if x["_kind"] == "playground"], key=lambda x: (x["_d"], x["osm"]))
+        named = [x for x in lst if x["_kind"] != "playground"]
+        rows = []
+        for x in named + play[:PLAYGROUNDS_PER_TOWN]:
+            tags = x["tags"]
+            cand = commons_tag(tags) or geosearch_pick(x["_name"], ex.geosearch.get(x["osm"], []), meta)
+            image, credit = image_and_credit(cand) if cand else (None, None)
+            extract, src = extract_for(x["osm"], x, None, ex)
+            hours = tags.get("opening_hours")
+            if hours and hours_ok is not None and not hours_ok(hours):
+                hours = None
+            q = quality(
+                0,
+                0.0,
+                False,
+                osm_is_tourism(tags) or x["_kind"] == "playground",
+                image is not None,
+                extract is not None,
+                x["_kind"],
+            )
+            rows.append(
+                {
+                    "id": f"osm_{x['osm']}",
+                    "name": x["_name"],
+                    "desc": None,
+                    "kind": POI_KINDS.index(x["_kind"]),
+                    "lat": to_coord(x["lat"]),
+                    "lon": to_coord(x["lon"]),
+                    "town": town_pos[qid],
+                    "sitelinks": 0,
+                    "heritage": 0,
+                    "image": image,
+                    "credit": credit,
+                    "quality": round(q * 100),
+                    "extract": extract,
+                    "extractSrc": src,
+                    "hours": hours,
+                    "fee": {"yes": 1, "no": 0}.get(str(tags.get("fee", "")).lower()),
+                    "website": (tags.get("website") or None) and str(tags["website"])[:100],
+                    "level": card_level(image is not None, src, hours is not None),
+                    "imageSrc": ("osm" if commons_tag(tags) else "geosearch") if image else None,
+                }
+            )
+        rows = [
+            r
+            for r in rows
+            if r["kind"] == POI_KINDS.index("playground") or r["quality"] >= MIN_SHIP_QUALITY * 100
+        ]
+        rows.sort(key=lambda r: (-r["quality"], r["id"]))
+        out.extend(rows[: OSM_PER_TOWN + PLAYGROUNDS_PER_TOWN])
+    return out
+
+
+def parking_meta(parking: list[dict[str, Any]], pois: list[dict[str, Any]]) -> dict[str, list[Any]]:
+    """Paid OSM parking within PARKING_NEAR_KM of a shipped POI (ADR-0015 §4), with ₽/h from `charge`."""
+    from verst_planner.parking import charge_per_hour
+
+    cells = {(int(p["lat"] / COORD_SCALE // 0.02), int(p["lon"] / COORD_SCALE // 0.02)) for p in pois}
+    lat, lon, rph = [], [], []
+    for x in sorted(parking, key=lambda x: x["osm"]):
+        c = (int(x["lat"] // 0.02), int(x["lon"] // 0.02))
+        if not any((c[0] + a, c[1] + b) in cells for a in (-1, 0, 1) for b in (-1, 0, 1)):
+            continue
+        lat.append(to_coord(x["lat"]))
+        lon.append(to_coord(x["lon"]))
+        rph.append(charge_per_hour(x.get("charge")))
+    return {"lat": lat, "lon": lon, "rph": rph}
 
 
 def write(docs: dict[str, dict[str, Any]], out: Path) -> dict[str, int]:
