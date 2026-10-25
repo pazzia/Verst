@@ -650,7 +650,12 @@
     <string name="route_approx_open_data">Расстояния приблизительные · места из открытых данных</string>
     <string name="route_approx_more">О данных</string>
     <string name="about_data_title">О данных</string>
-    <string name="about_data_body">Города и места — Wikidata (CC0). Бары и адреса — © участники OpenStreetMap (ODbL). Фото — Wikimedia Commons, у каждого своя лицензия и автор. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные.</string>
+    <string name="about_data_body">Города и достопримечательности — Wikidata (CC0). Бары, детские площадки, парковки, часы работы, часть описаний и адреса — © участники OpenStreetMap, данные доступны по лицензии ODbL 1.0. Каталог мест в приложении — производная база данных OpenStreetMap; он тоже распространяется по ODbL 1.0, копию можно скачать бесплатно. Описания из Википедии и Викигида — CC BY-SA 4.0, тексты сокращены, ссылка на статью — в карточке. Фото — Wikimedia Commons: автор и лицензия — в подписи под фото. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные.</string>
+    <string name="about_data_copy">Скачать копию каталога (ODbL)</string>
+    <string name="about_data_odbl">Лицензия ODbL 1.0</string>
+    <string name="about_data_osm">Авторские права OpenStreetMap</string>
+    <string name="about_data_notice">Полный текст уведомления о лицензиях</string>
+    <string name="about_data_notice_hide">Скрыть уведомление</string>
     <string name="cd_loc_searching">Ищем, где вы</string>
     <string name="cd_addr_row">%1$s, %2$s, примерно %3$s километров</string>
     <string name="handoff_navigator">Открыть в Яндекс Навигаторе</string>
@@ -776,8 +781,8 @@
     <string name="handoff_open_maps">Открываем Яндекс Карты</string>
     <string name="handoff_open_navi">Открываем Яндекс Навигатор</string>
     <string name="card_why">Почему здесь: %1$s</string>
-    <string name="card_desc_wikipedia">Описание: Википедия · CC BY-SA</string>
-    <string name="card_desc_wikivoyage">Описание: Викигид · CC BY-SA</string>
+    <string name="card_desc_wikipedia">Из статьи Википедии, текст сокращён · CC BY-SA 4.0</string>
+    <string name="card_desc_wikivoyage">Из Викигида, текст сокращён · CC BY-SA 4.0</string>
     <string name="card_photo_nearby_label">ФОТО РЯДОМ</string>
     <string name="card_photo_nearby_credit">Фото рядом с местом · Wikimedia Commons · %1$s · %2$s</string>
     <string name="card_illustration_none">фото пока нет</string>

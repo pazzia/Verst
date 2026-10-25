@@ -467,11 +467,58 @@ internal fun HandoffItem(title: String, target: HandoffTarget, truncated: Boolea
     }
 }
 
-/** 5.12 §3 «О данных». */
+/**
+ * The ODbL package (CEO D-IR-07, docs/legal/risk-register.md R-01): where the catalogue's free copy, the ODbL text
+ * and the OpenStreetMap copyright page live, and the notice file the APK ships. The URIs are the ones in
+ * `backend/planner/tools/data/build_catalogue.py` (`meta.licence`) and in the notice; `test_data_licence.py` keeps
+ * the three in step.
+ */
+internal object DataLicence {
+    /** core-ui `src/main/assets/licenses/` (the folder of the font NOTICE; ADR-0012 spelled it `licences`). */
+    const val NOTICE_ASSET = "licenses/data.txt"
+    const val CATALOGUE_COPY = "https://github.com/pazzia/Verst/tree/main/data/catalogue"
+    const val ODBL = "https://opendatacommons.org/licenses/odbl/1-0/"
+    const val OSM_COPYRIGHT = "https://www.openstreetmap.org/copyright"
+}
+
+/**
+ * 5.12 §3 «О данных»: the sources and licences, then the links (the free catalogue copy, ODbL 1.0, OpenStreetMap
+ * copyright; each leaves the app, ↗) and the full notice `assets/licenses/data.txt`, shown in place. The body
+ * scrolls inside the sheet once the notice is open.
+ */
 @Composable
 internal fun androidx.compose.foundation.layout.BoxScope.AboutDataSheet(windowH: androidx.compose.ui.unit.Dp, onClose: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val uri = androidx.compose.ui.platform.LocalUriHandler.current
+    val notice = remember {
+        runCatching { context.assets.open(DataLicence.NOTICE_ASSET).bufferedReader(Charsets.UTF_8).use { it.readText() } }.getOrNull()
+    }
+    var full by remember { mutableStateOf(false) }
+    val open: (String) -> Unit = { url -> runCatching { uri.openUri(url) } }
     BottomSheet(stringResource(R.string.about_data_title), onClose, "aboutdata", windowH) {
-        Txt(stringResource(R.string.about_data_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 8.dp))
+        Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
+            Txt(stringResource(R.string.about_data_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 8.dp))
+            DataLink(stringResource(R.string.about_data_copy), "aboutdata.copy") { open(DataLicence.CATALOGUE_COPY) }
+            DataLink(stringResource(R.string.about_data_odbl), "aboutdata.odbl") { open(DataLicence.ODBL) }
+            DataLink(stringResource(R.string.about_data_osm), "aboutdata.osm") { open(DataLicence.OSM_COPYRIGHT) }
+            if (notice != null) {
+                DataLink(stringResource(if (full) R.string.about_data_notice_hide else R.string.about_data_notice), "aboutdata.notice", external = false) { full = !full }
+                if (full) Txt(notice, T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("aboutdata.notice.text"))
+            }
+        }
+    }
+}
+
+/** A link row of «О данных»: `type.body.mdStrong` `color.navi.label` like `route_approx_more`, touch 44; ↗ when it leaves the app. */
+@Composable
+private fun DataLink(title: String, tag: String, external: Boolean = true, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.touchMin)
+            .clickable(role = Role.Button, onClick = onClick).testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Txt(title, T.body.mdStrong, C.navi.label, Modifier.weight(1f))
+        if (external) GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 16.dp)
     }
 }
 

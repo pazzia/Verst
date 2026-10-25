@@ -1501,12 +1501,39 @@ def _area_photo(w: _World, town: Town) -> tuple[str | None, int | None]:
     return (best[1], best[2]) if best else (None, None)
 
 
+# Wikimedia's Terms of Use (June 2023) put the text of every project, Wikivoyage included, under CC BY-SA 4.0.
 EXTRACT_LICENCE = {
     "wikipedia": "CC BY-SA 4.0",
-    "wikivoyage": "CC BY-SA 3.0",
+    "wikivoyage": "CC BY-SA 4.0",
     "osm": "ODbL",
     "wikidata": "CC0",
 }
+EXTRACT_LICENCE_URL = {
+    "wikipedia": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "wikivoyage": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "osm": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "wikidata": "https://creativecommons.org/publicdomain/zero/1.0/",
+}
+# R-09 (CC BY-SA 4.0 §3(a)): an encyclopaedic extract is the first sentence of a longer text, so it says so.
+ABRIDGED_SOURCES = frozenset({"wikipedia", "wikivoyage"})
+LINKED_PAGE = "https://www.wikidata.org/wiki/Special:GoToLinkedPage/{site}/{qid}"
+
+
+def _is_qid(s: str) -> bool:
+    return len(s) > 1 and s[0] == "Q" and s[1:].isdigit()
+
+
+def extract_page(poi: Any) -> str | None:
+    """R-09: the page an extract comes from, for the credit line's link (CC BY-SA 4.0 §3(a)(1)(A)(v)).
+
+    The catalogue keeps no article titles, so the link is Wikidata's `Special:GoToLinkedPage`, which redirects
+    to the item's ru sitelink. A Wikipedia extract is the intro of the item's own ruwiki article; a Wikivoyage
+    listing sits in its town's guide. OSM and Wikidata texts get no page (their line names the source)."""
+    if poi.extract_src == "wikipedia" and _is_qid(poi.id):
+        return LINKED_PAGE.format(site="ruwiki", qid=poi.id)
+    if poi.extract_src == "wikivoyage" and _is_qid(poi.town):
+        return LINKED_PAGE.format(site="ruwikivoyage", qid=poi.town)
+    return None
 
 
 def _cat_poi(w: _World, place_id: str) -> Any:
@@ -1542,7 +1569,9 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
             hours = {"textRu": poi.hours, "verified": True, "source": "osm"}
         attribution = []
         if poi is not None and poi.extract_src:
-            attribution.append(ru.text(f"poi.source.{poi.extract_src}"))
+            attribution.append(
+                ru.text(f"poi.source.{poi.extract_src}") + " · " + EXTRACT_LICENCE[poi.extract_src]
+            )
         if poi is not None and (poi.hours or poi.fee is not None):
             attribution.append(ru.text("poi.osm"))
         return {
@@ -1560,6 +1589,10 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
                 "key": poi.extract_src,
                 "nameRu": ru.text(f"poi.source.{poi.extract_src}"),
                 "licence": EXTRACT_LICENCE[poi.extract_src],
+                # R-09: the credit line links the article and the licence and says the text is abridged
+                "url": extract_page(poi),
+                "licenceUrl": EXTRACT_LICENCE_URL[poi.extract_src],
+                "abridged": poi.extract_src in ABRIDGED_SOURCES,
             },
             "cardLevel": poi.level if poi else (4 if p.source is Source.CURATED else 2),
             "quality": None if poi is None or poi.quality is None else round(poi.quality * 100),

@@ -353,6 +353,7 @@ jobs:
             echo "- Постоянная ссылка на последнюю сборку: https://github.com/${{ github.repository }}/releases/download/mvp-mock-latest/verst-mock-latest.apk"
             echo "- Проверка на эмуляторе: ${E2E_RESULT}"
             echo "- Коммит: ${{ github.sha }}"
+            echo "- Данные: каталог мест — производная база данных OpenStreetMap (© участники OpenStreetMap), лицензия ODbL 1.0. Бесплатная копия каталога этой сборки, лицензии и описание сборки: https://github.com/${{ github.repository }}/tree/${{ github.sha }}/data/catalogue"
             echo
             echo "Изменения: $(echo "${HEAD_MSG:-ручной запуск}" | head -1)"
           } > dist/notes.md

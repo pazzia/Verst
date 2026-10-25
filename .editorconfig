@@ -16,3 +16,7 @@ indent_size = 2
 
 [Makefile]
 indent_style = tab
+
+# Licence texts stay byte-for-byte as published (Open Data Commons' plain-text ODbL 1.0 has trailing spaces).
+[data/catalogue/LICENSE-ODbL.txt]
+trim_trailing_whitespace = false

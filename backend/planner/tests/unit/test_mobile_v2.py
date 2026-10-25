@@ -191,7 +191,48 @@ class MobileV2Test(unittest.TestCase):
         )
         self.assertTrue(card["image"]["card"].endswith("?width=800"))
         self.assertIn("Wikimedia Commons", card["image"]["labelRu"])
+        # R-09 (ODbL package): a Wikipedia extract links its article, names CC BY-SA 4.0, says it is abridged
+        wiki = next(p for p in cat.pois if p.extract_src == "wikipedia")
+        src = call(mobile.poi_details(R, wiki.id))["extractSource"]
+        self.assertEqual(
+            src,
+            {
+                "key": "wikipedia",
+                "nameRu": "Из статьи Википедии, текст сокращён",
+                "licence": "CC BY-SA 4.0",
+                "url": f"https://www.wikidata.org/wiki/Special:GoToLinkedPage/ruwiki/{wiki.id}",
+                "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+                "abridged": True,
+            },
+        )
+        self.assertIn(
+            "Из статьи Википедии, текст сокращён · CC BY-SA 4.0",
+            call(mobile.poi_details(R, wiki.id))["attributionRu"],
+        )
+        osm_text = next(p for p in cat.pois if p.extract_src == "osm")
+        src = call(mobile.poi_details(R, osm_text.id))["extractSource"]
+        self.assertEqual((src["url"], src["licence"], src["abridged"]), (None, "ODbL", False))
         self.assertEqual(fail(mobile.poi_details(R, "pl_m8_fuel_022"))["code"], "NOT_FOUND")
+
+    def test_extract_page(self) -> None:
+        """R-09: the page behind an extract: the item's ruwiki article, its town's ruwikivoyage guide."""
+        from types import SimpleNamespace as Poi
+
+        page = mobile.extract_page
+        self.assertEqual(
+            page(Poi(id="Q42", town="Q649", extract_src="wikipedia")),
+            "https://www.wikidata.org/wiki/Special:GoToLinkedPage/ruwiki/Q42",
+        )
+        self.assertEqual(
+            page(Poi(id="Q42", town="Q649", extract_src="wikivoyage")),
+            "https://www.wikidata.org/wiki/Special:GoToLinkedPage/ruwikivoyage/Q649",
+        )
+        # an OSM-only place has no Wikidata item, so no sitelink
+        self.assertIsNone(page(Poi(id="osm_n1", town="Q649", extract_src="wikipedia")))
+        self.assertIsNone(page(Poi(id="Q42", town="t_moscow", extract_src="wikivoyage")))
+        self.assertIsNone(page(Poi(id="Q42", town="Q649", extract_src="osm")))
+        self.assertIsNone(page(Poi(id="Q42", town="Q649", extract_src="wikidata")))
+        self.assertEqual(mobile.EXTRACT_LICENCE["wikivoyage"], "CC BY-SA 4.0")  # Wikimedia ToU 2023
         plain = call(mobile.poi_details("central_russia_v1", "pl_yar_ilya"))
         self.assertIsNone(plain["wikidataId"])
 

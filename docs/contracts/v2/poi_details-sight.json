@@ -18,8 +18,11 @@
    "extractRu": "Эрмитаж-Выборг — филиал Государственного Эрмитажа и выставочный центр в Выборге, открывшийся в июне 2010 года.",
    "extractSource": {
     "key": "wikipedia",
-    "nameRu": "Описание: Википедия",
-    "licence": "CC BY-SA 4.0"
+    "nameRu": "Из статьи Википедии, текст сокращён",
+    "licence": "CC BY-SA 4.0",
+    "url": "https://www.wikidata.org/wiki/Special:GoToLinkedPage/ruwiki/Q4357088",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "abridged": true
    },
    "cardLevel": 3,
    "quality": 54,
@@ -53,7 +56,7 @@
    },
    "isFictional": false,
    "attributionRu": [
-    "Описание: Википедия"
+    "Из статьи Википедии, текст сокращён · CC BY-SA 4.0"
    ],
    "wikidataId": "Q4357088",
    "placeSource": "wikidata",

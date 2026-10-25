@@ -139,7 +139,15 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
                 "osm" -> stringResource(R.string.card_osm)
                 else -> d?.extractSource?.nameRu?.let { n -> stringResource(R.string.card_desc_source, listOfNotNull(n, d?.extractSource?.licence).joinToString(" · ")) }
             }
-            if (src != null) Txt(src, T.caption.md, C.text.muted, Modifier.padding(top = 4.dp).testTag("card.desc.source"))
+            // R-09 (CC BY-SA 4.0): the line names the licence and the abridgement and opens the article, like the photo credit
+            val page = d?.extractSource?.url
+            if (src != null) {
+                Txt(
+                    src, T.caption.md, C.text.muted,
+                    Modifier.padding(top = 4.dp).then(if (page != null) Modifier.clickable(role = Role.Button) { a.openPage(page) } else Modifier)
+                        .testTag("card.desc.source"),
+                )
+            }
         }
         if (ui.kind == "hotel") {
             val facts = facts(ui)

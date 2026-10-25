@@ -34,6 +34,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import app.verst.core.model.DefaultOrigin
 import app.verst.core.model.EngineJson
 import app.verst.core.model.EngineResult
@@ -722,6 +723,32 @@ class ScreensScreenshotTest {
         val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
         shot("card", "sight-placeholder") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
         compose.onNodeWithText("цена примерная", substring = true).assertExists() // the deck uses NBSPs in the ticket line
+        // R-09 (ODbL package): the extract credit names CC BY-SA 4.0 and the abridgement, and opens the article
+        assertTrue(d.extractSource!!.url!!.startsWith("https://www.wikidata.org/wiki/Special:GoToLinkedPage/ruwiki/"))
+        val source = compose.onNodeWithTag("card.desc.source", useUnmergedTree = true)
+        source.assertTextEquals("Из статьи Википедии, текст сокращён · CC BY-SA 4.0")
+        assertTrue(source.fetchSemanticsNode().config.contains(SemanticsActions.OnClick))
+    }
+
+    /** «О данных» (ODbL package, CEO D-IR-07): sources and licences, the three links, the APK's full notice in place. */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1000dp-port-xxhdpi")
+    fun aboutData() {
+        shot("road", "about-data", 390, 1000) { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", aboutData = true), noRoad) }
+        compose.onNodeWithText("данные доступны по лицензии ODbL 1.0", substring = true).assertExists()
+        compose.onNodeWithText("в демо-сборке вымышленные", substring = true).assertExists()
+        for (tag in listOf("aboutdata.copy", "aboutdata.odbl", "aboutdata.osm")) {
+            assertTrue(tag, compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().config.contains(SemanticsActions.OnClick))
+        }
+        // assets/licenses/data.txt (core-ui) ships in the APK and opens under the links
+        compose.onNodeWithTag("aboutdata.notice.text", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("aboutdata.notice", useUnmergedTree = true).performClick()
+        compose.waitForIdle()
+        val notice = compose.onNodeWithTag("aboutdata.notice.text", useUnmergedTree = true)
+        notice.assertTextContains("© участники OpenStreetMap, данные доступны по лицензии", substring = true)
+        notice.assertTextContains("https://opendatacommons.org/licenses/odbl/1-0/", substring = true)
+        notice.assertTextContains("https://github.com/pazzia/Verst/tree/main/data/catalogue", substring = true)
+        compose.onNodeWithText("Скрыть уведомление").assertExists()
     }
 
     @Test

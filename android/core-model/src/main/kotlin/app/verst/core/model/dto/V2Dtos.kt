@@ -155,8 +155,16 @@ data class PoiDetailsDto(
     val textSource: String? get() = extractSource?.key ?: descSource
 }
 
+/** R-09 (ODbL package): [url] = the article the extract comes from (Wikipedia / Wikivoyage), [abridged] = the text is cut. */
 @Serializable
-data class ExtractSourceDto(val key: String? = null, val nameRu: String? = null, val licence: String? = null)
+data class ExtractSourceDto(
+    val key: String? = null,
+    val nameRu: String? = null,
+    val licence: String? = null,
+    val url: String? = null,
+    val licenceUrl: String? = null,
+    val abridged: Boolean = false,
+)
 
 // ------------------------------------------------------------------------------------------ hand-off (ADR-0014)
 
