@@ -187,6 +187,8 @@ class Place:
     """ADR-0015 §2 kind of an open-data sight (museum, temple, park, …); None = derived from the tags."""
     quality: float | None = None
     """ADR-0015 §2 quality score 0..1 of an open-data sight; None = curated (no threshold)."""
+    heritage: bool = False
+    """An open-data sight with a heritage designation (Wikidata P1435)."""
 
 
 @dataclass(frozen=True, slots=True)

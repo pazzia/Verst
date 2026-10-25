@@ -7,9 +7,11 @@ rests out of the budget (A§16.2); the budget rule is A§16.5 (`max(day_budget_m
 
 from __future__ import annotations
 
+import dataclasses
 import itertools
 import math
 import re
+from datetime import timedelta
 
 from verst_planner.domain.enums import Meal, Mood, Source, StopKind, Tag
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, Place, PlannedStop, Town
@@ -19,7 +21,7 @@ from verst_planner.geo.distance import haversine_km
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.meals import best_lunch, lunch_candidates, needs_lunch, plan_meals
 from verst_planner.pipeline.rest import RestPool, day_ok
-from verst_planner.pipeline.timeline import Profile, insert_stop
+from verst_planner.pipeline.timeline import Profile, insert_stop, local, schedule_day
 
 NOTABLE = frozenset({Tag.KREMLIN, Tag.MONASTERY, Tag.MUSEUM, Tag.VIEW})
 
@@ -37,6 +39,8 @@ SAME_SPOT_KM = 0.4  # two sights closer than this are one stop
 TOP_QUALITY, TOP_DETOUR_MIN = 0.70, 45  # at most TOP_PER_DAY such long detours a day
 MID_QUALITY, MID_DETOUR_MIN = 0.55, 25
 TOP_PER_DAY = 1
+SAME_TOWN_KM = 2.0  # a café this close to a sight is «in its town» for the moved lunch
+AFTER_SIGHT_KM = 0.01
 RELIGIOUS = frozenset({"temple", "monastery", "church"})
 RELIGIOUS_SHARE = 0.30  # of the trip's non-template sights
 RELIGIOUS_NAME = re.compile(r"(?i)\b(" + "|".join(ru.words("sight.religious_name")) + ")")
@@ -97,6 +101,18 @@ def kind_of(name: str, base: str, desc: str | None = None) -> str:
 
 
 POI_CATEGORY_OF = {"church": "temple"}
+
+
+NOT_A_SIGHT = _words("sight.not_a_sight")
+NOT_A_SIGHT_UNLESS_Q = 0.60
+
+
+def not_a_sight(p: Place) -> bool:
+    """M9: a philharmonic, concert hall or house of culture is not a road-trip sight unless it is heritage
+    AND of quality ≥ 0.60 (open-data places; curated ones were picked by hand)."""
+    if p.quality is None or not NOT_A_SIGHT.search(p.name_ru):
+        return False
+    return not (p.heritage and p.quality >= NOT_A_SIGHT_UNLESS_Q)
 
 
 def category_of(p: Place) -> str:
@@ -310,7 +326,7 @@ def plan_sights(
                 and c.place.id not in used
                 and sight_score(c, inp) >= ctx.cfg.sights.min_score
                 and not (ctx.knobs.sights_free and is_paid(c, inp))
-                and (detour_ok(c) if open_data else quality_ok(c))
+                and (detour_ok(c) and not not_a_sight(c.place) if open_data else quality_ok(c))
                 and not in_foreign_centre(c, centres, own, open_data)
                 and (
                     religious is None
@@ -332,8 +348,10 @@ def plan_sights(
                     break
                 stop = make_sight_stop(c, inp, ctx)
                 i = insert_stop(day, stop)
-                if day_ok(day, inp, ctx, profile, rests, used | {c.place.id}) or (
-                    open_data and _with_moved_lunch(day, stop, corridor, inp, ctx, profile, rests, used)
+                if (
+                    day_ok(day, inp, ctx, profile, rests, used | {c.place.id})
+                    or (open_data and _with_moved_lunch(day, stop, corridor, inp, ctx, profile, rests, used))
+                    or (open_data and _with_later_start(day, stop, inp, ctx, profile, rests, used))
                 ):
                     n += 1
                     used.add(c.place.id)
@@ -394,6 +412,24 @@ def _with_moved_lunch(
     found = lunch_candidates(
         trial, corridor, inp, ctx, profile, free, ok=lambda x: day_ok(x, inp, ctx, profile, rests, free)
     )
+    if not found and stop.place is not None:
+        # a café in the sight's own town, taken after the visit (in Rostov the café before the kremlin is
+        # 3 min before the lunch window, after the kremlin it is in it)
+        after = [
+            dataclasses.replace(c, km_at=stop.km_at + AFTER_SIGHT_KM)
+            for c in corridor.food
+            if haversine_km(c.place.point, stop.place.point) <= SAME_TOWN_KM and c.km_at <= stop.km_at
+        ]
+        if after:
+            found = lunch_candidates(
+                trial,
+                dataclasses.replace(corridor, food=after),
+                inp,
+                ctx,
+                profile,
+                free,
+                ok=lambda x: day_ok(x, inp, ctx, profile, rests, free),
+            )
     if not found:
         return False
     best = best_lunch(found)
@@ -404,6 +440,46 @@ def _with_moved_lunch(
     if best.place is not None:
         used.add(best.place.id)
     return True
+
+
+LATER_START_MAX_MIN = 90  # the morning in the overnight town: wait at most this long for an opening
+NEAR_START_KM = 5.0
+
+
+def _with_later_start(
+    day: DayPlan,
+    stop: PlannedStop,
+    inp: NormalizedInput,
+    ctx: PlanContext,
+    profile: Profile,
+    rests: RestPool,
+    used: set[str],
+) -> bool:
+    """Open-data world: a sight in the overnight town that is still closed when the day starts (the
+    Суздаль kremlin opens at 10:00, the day at 09:00) moves the departure to its opening (≤ 90 min).
+    The day's duration does not grow, so the pace stays. True = kept; False = `day` is unchanged."""
+    if day.day == 1 or stop.place is None or stop.km_at - day.km_start > NEAR_START_KM:
+        return False
+    hours = ctx.hours(stop.place)
+    if hours is None:
+        return False
+    slots = schedule_day(day, profile)
+    k = day.stops.index(stop)
+    arrive = slots[k].arrive
+    if arrive is None:
+        return False
+    tz = ctx.tz_of(stop.region_code, stop.point)
+    at = local(arrive, tz)
+    minute = at.hour * 60 + at.minute
+    opens = [lo for lo, _hi in hours.day_intervals(at.weekday()) if lo > minute]
+    if not opens or opens[0] - minute > LATER_START_MAX_MIN:
+        return False
+    old = day.start_at
+    day.start_at = old + timedelta(minutes=opens[0] - minute)
+    if day_ok(day, inp, ctx, profile, rests, used | {stop.place.id}):
+        return True
+    day.start_at = old
+    return False
 
 
 def _religious_room(days: list[DayPlan]) -> bool:

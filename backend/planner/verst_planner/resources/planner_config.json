@@ -30,7 +30,8 @@
     "widened_lo": 0.40,
     "widened_hi": 1.30,
     "template_hi": 1.05,
-    "template_lo": 0.90
+    "template_lo": 0.90,
+    "honour_template": 0
   },
   "overnight_score": {
     "w_h": 3.0,

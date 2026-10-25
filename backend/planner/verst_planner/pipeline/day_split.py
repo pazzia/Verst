@@ -69,9 +69,11 @@ def template_fits(template: ReadyRoute, corridor: Corridor, inp: NormalizedInput
     bounds = [0.0, *[t.km_at for t in nights], total]
     kms = [b - a for a, b in itertools.pairwise(bounds)]
     s = ctx.cfg.split
-    return max(kms) <= s.template_hi * inp.daily_km + EPS and len(kms) <= math.ceil(
-        total / (s.template_lo * inp.daily_km) - EPS
-    )
+    if max(kms) > s.template_hi * inp.daily_km + EPS:
+        return False
+    if s.honour_template:  # the template's days are a minimum, not too many (M9)
+        return True
+    return len(kms) <= math.ceil(total / (s.template_lo * inp.daily_km) - EPS)
 
 
 def split_days(

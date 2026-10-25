@@ -140,14 +140,23 @@ class S4AcceptanceTest(unittest.TestCase):
             self.assertLessEqual(len(long), 1, [s["name"] for s in long])
 
     def test_g15_fryazino_golden_ring(self) -> None:
-        """The ring keeps its signature sites (Лавра, Ипатьевский, the Суздаль kremlin); the religious cap
-        applies to the added open-data sights only."""
+        """The ring keeps its signature sites (Лавра, Ипатьевский, the Суздаль and Ростов kremlins) and its
+        template days; the religious cap applies to the added open-data sights only."""
         trip = plan("G15_fryazino_golden_ring")
         self.check_quality_rules(trip)
         names = {s["name"] for s in sights(trip)}
-        self.assertTrue(
-            {"Троице-Сергиева лавра", "Ипатьевский монастырь", "Суздальский кремль"} <= names, names
-        )
+        signature = {
+            "Троице-Сергиева лавра",
+            "Ипатьевский монастырь",
+            "Суздальский кремль",
+            "Ростовский кремль",
+        }
+        self.assertTrue(signature <= names, names)
+        # M9: a ready route keeps its template days and night towns (3 days; Ярославль, Суздаль)
+        self.assertEqual(len(trip["daysList"]), 3)
+        nights = [d["stops"][-1]["name"] for d in trip["daysList"][:-1]]
+        self.assertEqual(nights, ["Ярославль", "Суздаль"])
+        self.assertFalse(any("филармони" in n.casefold() for n in names))
         for s in sights(trip):
             self.assertGreater(haversine_km(LatLon(s["lat"], s["lon"]), MOSCOW), 12.0, s["name"])
 
