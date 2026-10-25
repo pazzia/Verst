@@ -754,6 +754,15 @@ class VerstFlowTest {
         assertEquals("Музей под открытым небом.", clean("Музей под открытым небом.", "музей · Суздаль", "Суздаль"))
     }
 
+    /** S4 card chips: raw OSM hours never show in English. */
+    @Test
+    fun cardHoursAreNeverRawOsm() {
+        assertEquals("{daily} 05:00–21:00", app.verst.feature.card.hoursRu("Mo-Su 05:00-21:00"))
+        assertEquals("{24}", app.verst.feature.card.hoursRu("24/7"))
+        assertNull(app.verst.feature.card.hoursRu("Tu-Su 10:00-18:00; Mo off"))
+        assertEquals("10:00–18:00", app.verst.feature.card.hoursRu("10:00–18:00"))
+    }
+
     /**
      * S4 investigation (docs/bugs/s4-walk-filters.md): «Свой маршрут» in a town with few places (Фрязино). The fake
      * engine behaves like the real one there: the first walk succeeds, a walk that excludes its stops is

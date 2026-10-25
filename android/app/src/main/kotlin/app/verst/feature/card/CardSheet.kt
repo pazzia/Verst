@@ -187,7 +187,7 @@ private fun FactChips(ui: CardUi) {
             h.allDay -> chips += Triple(stringResource(R.string.hours_24), C.hours.open, C.hours.openFill)
             h.openNow == true && h.todayRu != null -> chips += Triple(stringResource(R.string.hours_today_open, h.todayRu ?: ""), C.hours.open, C.hours.openFill)
             h.openNow == false -> chips += Triple(stringResource(R.string.hours_closed), C.hours.closed, C.hours.closedFill)
-            !h.textRu.isNullOrBlank() -> chips += Triple(h.textRu!!, C.text.secondary, C.dash.control)
+            !h.textRu.isNullOrBlank() -> hoursRu(h.textRu!!)?.let { chips += Triple(it.replace("{24}", stringResource(R.string.hours_24)).replace("{daily}", stringResource(R.string.card_hours_daily)), C.text.secondary, C.dash.control) }
         }
     }
     val t = d.ticket
@@ -242,6 +242,17 @@ private fun SecondaryButton(text: String, tag: String, onClick: () -> Unit) {
             .background(C.dash.control).clickable(role = Role.Button, onClick = onClick).testTag(tag),
         contentAlignment = Alignment.Center,
     ) { Txt(text, T.button.md, C.text.primary, maxLines = 1) }
+}
+
+/**
+ * Raw OSM `opening_hours` must never reach the card in English («Mo-Su 05:00-21:00»): the daily form becomes
+ * «{daily} 05:00–21:00», `24/7` → «{24}»; anything else with Latin letters is dropped (the open-data line stays).
+ */
+internal fun hoursRu(text: String): String? {
+    val t = text.trim()
+    if (t == "24/7") return "{24}"
+    Regex("""^Mo-Su (\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$""").matchEntire(t)?.let { m -> return "{daily} ${m.groupValues[1]}–${m.groupValues[2]}" }
+    return if (t.any { it in 'A'..'Z' || it in 'a'..'z' }) null else t
 }
 
 /**

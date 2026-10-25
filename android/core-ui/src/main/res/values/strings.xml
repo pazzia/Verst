@@ -847,4 +847,5 @@
     <string name="common_km_unit">км</string>
     <string name="common_hours_approx">≈ %1$d ч</string>
     <string name="common_hours_short">%1$d ч</string>
+    <string name="card_hours_daily">ежедневно</string>
 </resources>

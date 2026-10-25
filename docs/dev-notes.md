@@ -1622,6 +1622,14 @@ field is optional, so the M0 engine and saved trips render as before.
 - Not done: cached parking with age (no live parking — CEO), the online Wikipedia summary fetch (nothing to
   fetch yet, so the card shows the offline text only).
 
+### Found on the emulator
+- Card hours chip showed raw OSM «Mo-Su 05:00-21:00»: `hoursRu` turns the daily form into «ежедневно 05:00–21:00»,
+  `24/7` into «круглосуточно», and drops anything else with Latin letters.
+- «без ограничения» on the M0 engine: `city_route` rejects `durationMin: null` → the Sprint 3 engine toast on 5.10
+  (the walk milestone of `arch/s4-engine` fixes it; `Sprint4Test` logs the answer and only checks no error screen).
+- The first ProcessDeath failure (run 94) followed the Sprint4Test crashes in the same instrumentation; with those
+  fixed it passes (run 95). It now logs the crew/route and takes a failure screenshot.
+
 ### Tokens missing in the deck (used the nearest)
 - MoodCard on fill #1F1F17, HandoffAppCard recommended #1F2A14 → `dash.face` + the 2 dp yellow border;
   CityEntryPlate pressed #173E82 → `sign.blueSelected`; HandoffCta pressed #E6BD38 → yellow at 90 %; car roof
