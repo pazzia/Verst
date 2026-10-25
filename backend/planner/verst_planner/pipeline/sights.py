@@ -195,21 +195,42 @@ def diversity_ok(day: DayPlan, c: Candidate, on: bool = True) -> bool:
         assert nb.place is not None
         if category_of(nb.place) == cat:
             return False
-    if cat in RELIGIOUS:
-        religious = sum(1 for s in sights if s.place is not None and category_of(s.place) in RELIGIOUS)
-        if religious + 1 > math.ceil((len(sights) + 1) / 3):
+    if cat in RELIGIOUS and not signature(c.place):
+        counted = [s.place for s in sights if s.place is not None and not signature(s.place)]
+        religious = sum(1 for p in counted if category_of(p) in RELIGIOUS)
+        if religious + 1 > math.ceil((len(counted) + 1) / 3):
             return False
     return True
+
+
+def signature(p: Place) -> bool:
+    """A hand-curated kremlin or monastery (Троице-Сергиева лавра, Ипатьевский монастырь, the Суздаль and
+    Ростов kremlins): the ring's signature sites count first and are exempt from the religious cap, which
+    applies only to the added open-data sights."""
+    return p.source is Source.CURATED and category_of(p) in SIGNATURE_KINDS
+
+
+SIGNATURE_KINDS = frozenset({"kremlin", "monastery"})
 
 
 def _religious(s: PlannedStop) -> bool:
     return s.place is not None and category_of(s.place) in RELIGIOUS
 
 
+def _capped(d: DayPlan) -> list[int]:
+    """The stage-9 sights the religious cap counts (signature sites are not)."""
+    out = []
+    for i in droppable_sights(d):
+        p = d.stops[i].place
+        if p is None or not signature(p):
+            out.append(i)
+    return out
+
+
 def trip_religious_repair(days: list[DayPlan]) -> None:
     """Drop the lowest-scored droppable religious sights until they are ≤ 30 % of non-template sights."""
     while True:
-        rows = [(d, i) for d in days for i in droppable_sights(d)]
+        rows = [(d, i) for d in days for i in _capped(d)]
         if not rows:
             return
         rel = [(d, i) for d, i in rows if _religious(d.stops[i])]
@@ -291,10 +312,13 @@ def plan_sights(
                 and not (ctx.knobs.sights_free and is_paid(c, inp))
                 and (detour_ok(c) if open_data else quality_ok(c))
                 and not in_foreign_centre(c, centres, own, open_data)
-                and (religious is None or (category_of(c.place) in RELIGIOUS) == religious)
+                and (
+                    religious is None
+                    or (category_of(c.place) in RELIGIOUS and not signature(c.place)) == religious
+                )
             ]
             if open_data:  # quality first, so a 45-minute Владимир is tried before a nearby bust
-                pool.sort(key=lambda c: (-_open_score(c, inp), c.km_at, c.place.id))
+                pool.sort(key=lambda c: (not signature(c.place), -_open_score(c, inp), c.km_at, c.place.id))
             else:
                 pool.sort(key=lambda c: (-round(sight_score(c, inp), 9), c.km_at, c.place.id))
             for c in pool:
@@ -384,7 +408,7 @@ def _with_moved_lunch(
 
 def _religious_room(days: list[DayPlan]) -> bool:
     """One more religious stage-9 sight keeps the trip within RELIGIOUS_SHARE."""
-    rows = [d.stops[i] for d in days for i in droppable_sights(d)]
+    rows = [d.stops[i] for d in days for i in _capped(d)]
     rel = sum(1 for s in rows if _religious(s))
     return rel + 1 <= RELIGIOUS_SHARE * (len(rows) + 1)
 

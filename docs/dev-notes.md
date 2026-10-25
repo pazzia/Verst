@@ -1897,3 +1897,14 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
 - There are ≈ 45 % fewer POI rows.
 - On the emulator's 3–5× factor that is ≈ 0.8–1.3 s, against the 1.5 s target. Please measure it on the
   device.
+
+### M9 follow-up: the ring's signature sites
+- **Signature sites:** hand-curated kremlins and monasteries (Троице-Сергиева лавра, Ипатьевский
+  монастырь, Спасо-Евфимиев монастырь, the Суздаль / Ростов / Казань kremlins, Свияжск). They are tried
+  first and are exempt from the daily and the trip religious caps. The ≤ 30 % cap counts only the added
+  open-data sights.
+- **G15 Golden Ring (400 km/day, 2 days):**
+  - Day 1: Лавра and Ипатьевский (both template stops), plus Стрелка.
+  - Day 2: Ивановская филармония, Спасо-Евфимиев монастырь, Суздальский кремль, Золотые ворота.
+  - The Ростовский кремль is tried first on day 1 but does not fit the pace: the two template visits
+    already take 3 h of a 404 km day.
