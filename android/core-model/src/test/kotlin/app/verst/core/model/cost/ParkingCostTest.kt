@@ -29,10 +29,10 @@ class ParkingCostTest {
         val n = CostCalculator.recompute(
             units(
                 listOf(
-                    ParkingUnitDto("d1s2", 150, 2.0, 300, "zone"),
-                    ParkingUnitDto("d1s4", 100, 2.0, 200, "zone"),
-                    ParkingUnitDto("d1s5", null, null, 0, "free"),
-                    ParkingUnitDto("d1s6", null, 1.0, null, "unknown"),
+                    ParkingUnitDto("d1s2", rubPerHour = 150, hours = 2.0, rub = 300, source = "zone"),
+                    ParkingUnitDto("d1s4", rubPerHour = 100, hours = 2.0, rub = 200, source = "zone"),
+                    ParkingUnitDto("d1s5", rubPerHour = null, hours = null, rub = 0, source = "free"),
+                    ParkingUnitDto("d1s6", rubPerHour = null, hours = 1.0, rub = null, source = "unknown"),
                 ),
             ),
             crew, reserveOn = true, budgetRub = null,
@@ -48,7 +48,7 @@ class ParkingCostTest {
 
     @Test
     fun replacedStopTakesTheAlternativesStay() {
-        val u = units(listOf(ParkingUnitDto("d1s2", 150, 2.0, 300, "zone")))
+        val u = units(listOf(ParkingUnitDto("d1s2", rubPerHour = 150, hours = 2.0, rub = 300, source = "zone")))
         val ov = CostOverridesDto(replaced = mapOf("d1s2" to AltUnitsDto(parkingRub = 80, parkingSource = "zone")))
         assertEquals(80, CostCalculator.recompute(u, crew, reserveOn = false, budgetRub = null, ov = ov).lines["parking"])
         // M6 rule 5: without `parkingSource` the replaced stop loses its parking
