@@ -38,7 +38,8 @@ def pages_meta(pages: list[dict[str, Any]], into: dict[str, dict[str, Any]]) -> 
 
 def main(argv: list[str]) -> int:
     raw, cat_dir = Path(argv[0]), Path(argv[1])
-    files = files_of(cat_dir)
+    # a catalogue directory, or a JSON list of file names (data-extras.yml: the Sprint 4 candidate photos)
+    files = json.loads(cat_dir.read_text("utf-8")) if cat_dir.suffix == ".json" else files_of(cat_dir)
     pacer = Pacer(1.0)
     meta: dict[str, dict[str, Any]] = {}
     for i in range(0, len(files), BATCH):

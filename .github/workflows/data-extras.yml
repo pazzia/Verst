@@ -1,0 +1,91 @@
+# Sprint 4 (ADR-0015 §2–§4): extra sources on top of the run-7 raw responses (bot/raw-7): class trees, Wikidata
+# P31/heritage/sitelinks, ru Wikipedia extracts and page images, ru Wikivoyage listings, OSM tags, POIs and paid
+# parking (Geofabrik extract), Commons geosearch, and credits/size/categories of the candidate photos.
+# Trigger: git push origin HEAD:data-extras-request --force → branch bot/extras-<run_number>.
+name: data-extras
+on:
+  push:
+    branches: [data-extras-request]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: data-extras
+  cancel-in-progress: false
+
+jobs:
+  extras:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      RAW: ${{ github.workspace }}/data-raw
+      X: ${{ github.workspace }}/data-extra
+      T: backend/planner/tools/data
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore the run-7 raw responses
+        run: |
+          mkdir -p "$RAW" "$X"
+          git fetch -q origin bot/raw-7
+          git show origin/bot/raw-7:data-raw.tar.gz | tar -xz -C "$RAW"
+          ls "$RAW" | tee "$X/log.txt"
+      - name: Class trees (kinds, excludes; label check + ru re-resolution)
+        run: python3 $T/fetch_extras.py classes "$RAW" 2>&1 | tee -a "$X/log.txt"
+      - name: Wikidata P31, heritage labels, ru wiki/voyage titles
+        run: python3 $T/fetch_extras.py wikidata "$RAW" 2>&1 | tee -a "$X/log.txt"
+      - name: ru Wikipedia extracts and page images
+        run: python3 $T/fetch_extras.py wikipedia "$RAW" 2>&1 | tee -a "$X/log.txt"
+      - name: ru Wikivoyage listings (dump)
+        continue-on-error: true
+        run: |
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/voy.xml.bz2" \
+            https://dumps.wikimedia.org/ruwikivoyage/latest/ruwikivoyage-latest-pages-articles.xml.bz2
+          python3 $T/fetch_extras.py voyage "$RAW" "$RUNNER_TEMP/voy.xml.bz2" 2>&1 | tee -a "$X/log.txt"
+      - name: OSM POIs, tags and paid parking (Geofabrik extract)
+        timeout-minutes: 60
+        run: |
+          sudo apt-get install -y -qq osmium-tool >/dev/null
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/ru.osm.pbf" https://download.geofabrik.de/russia-latest.osm.pbf
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" \
+            nwr/tourism=attraction,museum,viewpoint,zoo,theme_park,gallery,aquarium \
+            nwr/leisure=park,water_park,nature_reserve,playground \
+            nwr/amenity=theatre,parking \
+            nwr/natural=waterfall,peak,cave_entrance,rock,spring,beach \
+            nwr/historic=castle,fort,monument,memorial,manor,ruins,archaeological_site \
+            -o "$RUNNER_TEMP/x.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/x.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/x.geojsonseq" --overwrite
+          python3 $T/fetch_extras.py osm "$RAW" "$RUNNER_TEMP/x.geojsonseq" 2>&1 | tee -a "$X/log.txt"
+      - name: Commons geosearch near POIs without a photo
+        run: python3 $T/fetch_extras.py geosearch "$RAW" 2>&1 | tee -a "$X/log.txt"
+      - name: Candidate photos — credits, size and categories
+        run: |
+          python3 $T/fetch_extras.py candidates "$RAW" 2>&1 | tee -a "$X/log.txt"
+          mkdir -p "$RUNNER_TEMP/c"
+          python3 $T/fetch_commons_meta.py "$RUNNER_TEMP/c" "$RAW/candidates.json" 2>&1 | tee -a "$X/log.txt"
+          python3 $T/fetch_photo_meta.py "$RUNNER_TEMP/c" "$RAW/candidates.json" 2>&1 | tee -a "$X/log.txt"
+          mv "$RUNNER_TEMP/c/credits.json" "$RAW/credits_extra.json"
+          mv "$RUNNER_TEMP/c/photo_meta.json" "$RAW/photo_meta_extra.json"
+      - name: Push to bot/extras-${{ github.run_number }}
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "verst-ci"
+          git config user.email "verst-ci@users.noreply.github.com"
+          cd "$RAW"
+          tar -czf "$X/extras.tar.gz" --ignore-failed-read class_tree.json wd_extra.json wiki.json voyage.json \
+            osm_pois.json parking.json geosearch.json candidates.json credits_extra.json photo_meta_extra.json || true
+          cd "$GITHUB_WORKSPACE"
+          git checkout -q --orphan "bot/extras-${{ github.run_number }}"
+          git rm -rq --cached .
+          git add -f data-extra/extras.tar.gz data-extra/log.txt
+          git commit -qm "data: Sprint 4 extras, run ${{ github.run_id }}"
+          git push origin "bot/extras-${{ github.run_number }}"

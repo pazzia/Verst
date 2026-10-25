@@ -39,7 +39,7 @@ def _coords(geom: dict[str, Any]) -> list[list[float]]:
     return []
 
 
-def elements_from_features(lines: Iterable[str]) -> list[dict[str, Any]]:
+def elements_from_features(lines: Iterable[str], require_name: bool = True) -> list[dict[str, Any]]:
     """GeoJSON-seq features (`id` = n123/w123/r123) → Overpass-shaped elements with a centre point."""
     out = []
     for raw in lines:
@@ -54,7 +54,7 @@ def elements_from_features(lines: Iterable[str]) -> list[dict[str, Any]]:
         lon = sum(p[0] for p in pts) / len(pts)
         lat = sum(p[1] for p in pts) / len(pts)
         tags = {k: v for k, v in (f.get("properties") or {}).items() if isinstance(v, str)}
-        if not tags.get("name"):
+        if require_name and not tags.get("name"):
             continue
         out.append({"type": KINDS[fid[0]], "id": int(fid[1:]), "lat": lat, "lon": lon, "tags": tags})
     return out
