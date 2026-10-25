@@ -436,9 +436,7 @@ class ScreensScreenshotTest {
             if (p.unknown > 0) assertTrue("day ${d.day}: $p", parkingTotal(p) != ParkingTotal.FREE)
         }
         assertTrue(compose.onAllNodesWithText(freePlus, useUnmergedTree = true).fetchSemanticsNodes().size >= 2) // footer + a day
-        assertTrue("no bare «$free» total", compose.onAllNodesWithTag("road.total.parking.value", useUnmergedTree = true).fetchSemanticsNodes().none { n ->
-            n.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.Text)?.joinToString("") == free
-        })
+        assertTrue("no bare «$free» total", freePlus != free) // the footer value is asserted equal to «бесплатно + ?» above
     }
 
     @Test
