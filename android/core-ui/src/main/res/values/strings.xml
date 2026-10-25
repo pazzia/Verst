@@ -846,4 +846,5 @@
     <!-- S4 dev: units the deck spells inline (5.5 §10.8 km post «км», ParkingSheet «Стоим ≈ 2 ч») -->
     <string name="common_km_unit">км</string>
     <string name="common_hours_approx">≈ %1$d ч</string>
+    <string name="common_hours_short">%1$d ч</string>
 </resources>

@@ -210,8 +210,8 @@ interface RoadActions {
     /** 5.13 §5 the hand-off sheet's actions. */
     fun handoffSheet(): HandoffSheetActions = object : HandoffSheetActions {
         override fun scope(day: Int?) = Unit
-        override fun pick(app: app.verst.nav.HandoffApp) = Unit
-        override fun install(app: app.verst.nav.HandoffApp) = Unit
+        override fun pick(which: app.verst.nav.HandoffApp) = Unit
+        override fun install(which: app.verst.nav.HandoffApp) = Unit
         override fun remember() = Unit
         override fun close() = Unit
     }

@@ -375,6 +375,20 @@ class ScreensScreenshotTest {
         return t.copy(daysList = days, cost = t.cost.copy(lines = lines))
     }
 
+    /** 5.6 §9 (S4) «Парковки» expanded: paid rows, the free ones in one 0 row, the unknown ones with «?». */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1200dp-port-xxhdpi")
+    fun waybillS4Parking() {
+        val trip = s4Trip()
+        shot("waybill", "s4-parking", 390, 1200) { WaybillScreen(WaybillUi(trip, 1, false, "parking"), noWaybill) }
+        compose.onNodeWithTag("waybill.line.parking").assertExists()
+        compose.onNodeWithTag("waybill.parking.unknown", useUnmergedTree = true).assertExists()
+        assertTrue(compose.onAllNodesWithTag("waybill.breakdown.parking.0", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+        // parity: the line = Σ known stays = the Road-ahead footer
+        val known = trip.daysList.flatMap { it.stops }.sumOf { it.parking?.rub ?: 0 }
+        assertEquals(known, trip.cost.lines.first { it.key == "parking" }.rub)
+    }
+
     @Test
     fun roadS4Top() {
         shot("road", "s4-top") { RoadScreen(RoadUi(s4Trip(), "NE"), noRoad) }
@@ -608,6 +622,37 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("Гостиница в демо-сборке вымышленная").assertExists()
         compose.onNodeWithText("Демо: вымышленная гостиница").assertDoesNotExist()
         compose.onNodeWithTag("card.sign", useUnmergedTree = true).assertExists()
+    }
+
+    /** 5.9 §9 (S4) level 4: no photo → the category illustration; «Почему здесь», the source line, fact chips. */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1000dp-port-xxhdpi")
+    fun cardS4IllustrationAndChips() {
+        val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
+        val d = real.copy(
+            poiKind = "museum", image = null, verified = false,
+            whyRu = "объект наследия федерального значения · есть в Викигиде", descSource = "wikipedia",
+            hours = app.verst.core.model.dto.PoiHoursDto(textRu = "11:00–20:00", verified = false, todayRu = "11:00–20:00", openNow = true),
+            dogsAllowed = false,
+            parking = app.verst.core.model.dto.ParkingDto(rubPerHour = 80, rub = 160, source = "zone"),
+        )
+        shot("card", "s4-illustration-chips", 390, 1000) { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
+        compose.onNodeWithTag("photo.illustration", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("photo.illustration.none", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("card.why", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.desc.source", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.facts", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("card.opendata", useUnmergedTree = true).assertExists()
+        assertTrue(compose.onAllNodesWithText("не проверено", substring = true).fetchSemanticsNodes().isEmpty())
+    }
+
+    /** Level 5 (OSM-only): no photo and no description → the illustration with «фото пока нет». */
+    @Test
+    fun cardS4OsmOnly() {
+        val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
+        val d = real.copy(poiKind = "park", image = null, descriptionRu = null, ticket = null, descSource = "osm", whyRu = null)
+        shot("card", "s4-osm-only") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
+        compose.onNodeWithTag("photo.illustration.none", useUnmergedTree = true).assertExists()
     }
 
     @Test

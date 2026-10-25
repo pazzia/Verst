@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -42,6 +43,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
@@ -112,10 +114,14 @@ fun PhotoFrame(
     onCredit: (() -> Unit)? = null,
     /** true once an image is on screen (S3-QA P1-05: the hotel note depends on it). */
     onShown: (Boolean) -> Unit = {},
+    /** 5.9 §9 (S4): the plate over the photo («ФОТО РЯДОМ»); [area] shows «ФОТО РАЙОНА». */
+    plate: String? = null,
+    /** 5.9 §9 level 4: no photo → the category illustration instead of «нет фото». */
+    illustration: Illustration? = null,
 ) {
     if (url == null) {
         androidx.compose.runtime.LaunchedEffect(Unit) { onShown(false) }
-        PhotoFrameContent(PhotoState.None, placeholder, credit, area, contentDescription, modifier, onCredit)
+        PhotoFrameContent(PhotoState.None, placeholder, credit, area, contentDescription, modifier, onCredit, plate, illustration)
         return
     }
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -141,8 +147,11 @@ fun PhotoFrame(
     }
     val shown = state is PhotoState.Loaded
     androidx.compose.runtime.LaunchedEffect(shown) { onShown(shown) }
-    PhotoFrameContent(state, placeholder, credit, area, contentDescription, modifier, onCredit)
+    PhotoFrameContent(state, placeholder, credit, area, contentDescription, modifier, onCredit, plate, illustration)
 }
+
+/** 5.9 §9 level 4/5: the kind word under the big tourist sign, and «фото пока нет» only without a description. */
+data class Illustration(val word: String, val caption: Boolean)
 
 /** The stateless frame (Robolectric screenshots pass a fake painter). */
 @Composable
@@ -154,6 +163,8 @@ fun PhotoFrameContent(
     contentDescription: String,
     modifier: Modifier = Modifier,
     onCredit: (() -> Unit)? = null,
+    plate: String? = null,
+    illustration: Illustration? = null,
 ) {
     val shape = RoundedCornerShape(DesignTokens.radius.r12)
     val loaded = state as? PhotoState.Loaded
@@ -178,7 +189,10 @@ fun PhotoFrameContent(
                     },
                 ),
         ) {
-            if (loaded == null || fade < 1f) PlaceholderVignette(placeholder, state)
+            if (loaded == null || fade < 1f) {
+                if (state == PhotoState.None && illustration != null) CategoryIllustration(placeholder, illustration)
+                else PlaceholderVignette(placeholder, state)
+            }
             if (loaded != null) {
                 if (loaded.contain) {
                     // contain on the mat: 12 dp inset, never upscaled above 2 × (the painter's intrinsic size)
@@ -200,7 +214,7 @@ fun PhotoFrameContent(
                     )
                     if (credit != null) CreditLine(credit, C.photo.credit, Modifier.align(Alignment.BottomStart).padding(start = 12.dp, end = 12.dp, bottom = 8.dp), onCredit)
                 }
-                if (area) AreaPlate(Modifier.align(Alignment.TopStart).padding(10.dp))
+                if (area || plate != null) AreaPlate(Modifier.align(Alignment.TopStart).padding(10.dp), plate)
             }
             // hairline over the image
             Box(Modifier.matchParentSize().border(DesignTokens.stroke.w1, C.photo.border, shape))
@@ -223,11 +237,52 @@ private fun CreditLine(text: String, color: Color, modifier: Modifier, onClick: 
 }
 
 @Composable
-private fun AreaPlate(modifier: Modifier) {
+private fun AreaPlate(modifier: Modifier, label: String? = null) {
     Box(
-        modifier.height(22.dp).clip(RoundedCornerShape(DesignTokens.radius.r4)).background(C.photo.scrim).padding(horizontal = 8.dp),
+        modifier.height(22.dp).clip(RoundedCornerShape(DesignTokens.radius.r4)).background(C.photo.scrim).padding(horizontal = 8.dp).testTag("photo.plate"),
         contentAlignment = Alignment.Center,
-    ) { Txt(androidx.compose.ui.res.stringResource(app.verst.core.ui.R.string.card_area_plate), T.photo.label, C.photo.credit, maxLines = 1) }
+    ) { Txt(label ?: androidx.compose.ui.res.stringResource(app.verst.core.ui.R.string.card_area_plate), T.photo.label, C.photo.credit, maxLines = 1) }
+}
+
+/**
+ * 5.9 §9 level 4: the mat tinted by kind with a 135° 12 dp stripe at 2.5 % white, a big tourist sign 92 with the
+ * kind pictogram, the kind word (`type.tag.kind` 15, `kind.text`); «фото пока нет» only for OSM-only places.
+ */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.CategoryIllustration(kind: Placeholder, ill: Illustration) {
+    val mat = when (kind) {
+        Placeholder.MUSEUM -> C.photo.phMuseum
+        Placeholder.CHURCH -> C.photo.phChurch
+        Placeholder.PARK -> C.photo.phPark
+        Placeholder.MONUMENT -> C.photo.phMonument
+        Placeholder.VIEW -> C.photo.phView
+        Placeholder.BAR -> C.photo.phBar
+        Placeholder.CITY -> C.photo.phCity
+    }
+    Box(
+        Modifier.matchParentSize().background(mat).testTag("photo.illustration").drawBehind {
+            val step = 24.dp.toPx()
+            val w = 12.dp.toPx()
+            val white = Color.White.copy(alpha = 0.025f)
+            var x = -size.height
+            while (x < size.width + size.height) {
+                drawLine(white, Offset(x, 0f), Offset(x + size.height, size.height), w)
+                x += step
+            }
+        },
+    ) {
+        Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                Modifier.size(92.dp).clip(RoundedCornerShape(8.dp)).background(C.sign.brown).padding(5.dp)
+                    .border(DesignTokens.stroke.w2, C.sign.white, RoundedCornerShape(5.dp)),
+                contentAlignment = Alignment.Center,
+            ) { Canvas(Modifier.size(72.dp, 48.dp)) { vignette(kind, C.sign.white, C.sign.white.copy(alpha = 0.35f)) } }
+            Txt(ill.word, T.tag.kind.copy(fontSize = 15.sp), C.kind.text, Modifier.padding(top = 10.dp), maxLines = 1)
+            if (ill.caption) {
+                Txt(androidx.compose.ui.res.stringResource(app.verst.core.ui.R.string.card_illustration_none), T.body.sm, C.text.muted, Modifier.padding(top = 4.dp).testTag("photo.illustration.none"), maxLines = 1)
+            }
+        }
+    }
 }
 
 /** §18.1: the illustration at 42 % of the frame height, the state text at 78 %. */
@@ -266,10 +321,8 @@ private fun androidx.compose.foundation.layout.BoxScope.PlaceholderVignette(kind
 }
 
 /** The vignettes in a 96 × 64 box, `photo.ink` strokes 3 dp, `photo.accent` fills. */
-private fun DrawScope.vignette(kind: Placeholder) {
+private fun DrawScope.vignette(kind: Placeholder, ink: Color = C.photo.ink, acc: Color = C.photo.accent) {
     val u = size.width / 96f
-    val ink = C.photo.ink
-    val acc = C.photo.accent
     val st = Stroke(width = 3f * u)
     fun line(x1: Float, y1: Float, x2: Float, y2: Float) = drawLine(ink, Offset(x1 * u, y1 * u), Offset(x2 * u, y2 * u), 3f * u)
     fun rect(x: Float, y: Float, w: Float, h: Float, fill: Boolean = false) =

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,13 +74,23 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
     val d = ui.details
     val name = d?.nameRu ?: ui.name
     BottomSheet(name, a::close, "card", windowH, pane = stringResource(R.string.cd_card, name), leading = { CardMiniSign(ui) }) {
-        Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.padding(top = 0.dp).testTag("card.kind"))
+        // 5.9 §9: the KindTag + the kind/place line; «Почему здесь: …» when the engine says why
+        val tagWord = if (ui.kind == "sight") app.verst.feature.common.kindWord(d?.poiKind) else null
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (tagWord != null) app.verst.feature.common.KindTag(tagWord)
+            Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("card.kind"), maxLines = 1)
+        }
+        d?.whyRu?.takeIf { it.isNotBlank() }?.let {
+            Txt(stringResource(R.string.card_why, it), T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("card.why"))
+        }
         Spacer(Modifier.height(12.dp))
         val img = d?.image
         val area = ui.kind == "hotel" || img?.isArea == true
         val credit = when {
             img == null -> if (area) d?.townName?.let { stringResource(R.string.card_photo_area, it) } else null
             area -> img.labelRu ?: stringResource(R.string.card_photo_area, d?.townName ?: "")
+            // 5.9 §9 level 3: a Commons photo ≤ 300 m from the place
+            img.source == "nearby" -> stringResource(R.string.card_photo_nearby_credit, img.credit?.author ?: "Wikimedia Commons", img.credit?.licence ?: "")
             img.credit?.author != null -> stringResource(R.string.card_photo_credit, img.credit!!.author!!, img.credit!!.licence ?: "")
             // release-s3: no usable author → «Фото: Wikimedia Commons · CC BY-SA 4.0» (the licence stays)
             img.credit?.licence != null -> stringResource(R.string.card_photo_credit_short) + stringResource(R.string.common_join_dot) + img.credit!!.licence!!
@@ -86,6 +98,8 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
         }
         val town = d?.townName ?: ""
         var photoShown by remember(img?.card) { mutableStateOf(false) }
+        val descText = d?.descriptionRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kindLine(ui), d?.townName) }
+        val illWord = if (!area && ui.kind != "bar") (tagWord ?: kindLine(ui).substringBefore(" · ").uppercase()) else null
         PhotoFrame(
             url = if (ui.loading) null else img?.card,
             placeholder = if (area) Placeholder.CITY else placeholderFor(d?.poiKind, ui.kind),
@@ -95,6 +109,9 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             contentDescription = if (area) stringResource(R.string.cd_card_photo_area, town) else stringResource(R.string.cd_card_photo, name),
             onCredit = img?.page?.let { p -> { a.openPage(p) } },
             onShown = { photoShown = it },
+            plate = if (img?.source == "nearby") stringResource(R.string.card_photo_nearby_label) else null,
+            // levels 4–5: the category illustration; «фото пока нет» only without a description (OSM-only)
+            illustration = illWord?.let { Illustration(it, caption = descText.isNullOrBlank()) },
         )
         if (ui.kind == "hotel") {
             // 5.9 §3: «на фото район, а не она» only while the area photo is on screen
@@ -104,16 +121,28 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             )
         }
         // the fictional status is said once (S3-QA P1-05): no engine «Демо: вымышленная гостиница» line
-        val desc = d?.descriptionRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kindLine(ui), d?.townName) }
+        val desc = descText
         if (!desc.isNullOrBlank()) {
             var more by remember(desc) { mutableStateOf(false) }
             Txt(desc, T.body.md, C.text.note, Modifier.padding(top = 12.dp).clickable { more = !more }, maxLines = if (more) Int.MAX_VALUE else 6)
-        }
-        val facts = facts(ui)
-        if (facts.isNotEmpty()) {
-            Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                facts.forEach { Txt(it, T.body.sm, C.text.secondary) }
+            // the source line under the text (a link to the page when the engine has it)
+            val src = when (d?.descSource) {
+                "wikipedia" -> stringResource(R.string.card_desc_wikipedia)
+                "wikivoyage" -> stringResource(R.string.card_desc_wikivoyage)
+                "osm" -> stringResource(R.string.card_osm)
+                else -> null
             }
+            if (src != null) Txt(src, T.caption.md, C.text.muted, Modifier.padding(top = 4.dp).testTag("card.desc.source"))
+        }
+        if (ui.kind == "hotel") {
+            val facts = facts(ui)
+            if (facts.isNotEmpty()) {
+                Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    facts.forEach { Txt(it, T.body.sm, C.text.secondary) }
+                }
+            }
+        } else {
+            FactChips(ui)
         }
         val action: Pair<String, () -> Unit>? = when {
             ui.kind == "hotel" && !ui.walkStop -> stringResource(R.string.card_pick_hotel) to a::pickHotel
@@ -133,8 +162,63 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
                 contentAlignment = Alignment.CenterStart,
             ) { Txt(stringResource(R.string.card_report), T.body.smStrong, C.text.muted, maxLines = 1) }
         }
-        if (d?.attributionRu?.isNotEmpty() == true || ui.kind == "bar") {
+        if ((d?.attributionRu?.isNotEmpty() == true || ui.kind == "bar") && d?.descSource != "osm") {
             Txt(stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
+        }
+    }
+}
+
+/**
+ * 5.9 §9 facts as chips (min-h 28, radius 14): hours (green open / red closed), ticket, dogs, parking (blue tint);
+ * one open-data line with the dotted ring when any fact is open data. «не проверено» is never shown.
+ */
+@Composable
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+private fun FactChips(ui: CardUi) {
+    val d = ui.details ?: return
+    val chips = mutableListOf<Triple<String, androidx.compose.ui.graphics.Color, androidx.compose.ui.graphics.Color>>()
+    val h = d.hours
+    if (h != null) {
+        when {
+            h.allDay -> chips += Triple(stringResource(R.string.hours_24), C.hours.open, C.hours.openFill)
+            h.openNow == true && h.todayRu != null -> chips += Triple(stringResource(R.string.hours_today_open, h.todayRu), C.hours.open, C.hours.openFill)
+            h.openNow == false -> chips += Triple(stringResource(R.string.hours_closed), C.hours.closed, C.hours.closedFill)
+            !h.textRu.isNullOrBlank() -> chips += Triple(h.textRu!!, C.text.secondary, C.dash.control)
+        }
+    }
+    val t = d.ticket
+    if (t != null && (t.adultRub ?: 0) > 0) {
+        var line = stringResource(R.string.card_ticket, RuFormat.thousands(t.adultRub ?: 0), RuFormat.thousands(t.childRub ?: 0))
+        if (t.estimate) line += stringResource(R.string.common_join_dot) + stringResource(R.string.card_price_estimate)
+        chips += Triple(line, C.text.secondary, C.dash.control)
+    } else if (t != null && ui.kind == "sight") {
+        chips += Triple(stringResource(R.string.card_ticket_free), C.text.secondary, C.dash.control)
+    }
+    d.dogsAllowed?.let { chips += Triple(stringResource(if (it) R.string.card_dogs_yes else R.string.card_dogs_no), C.text.secondary, C.dash.control) }
+    val p = d.parking
+    if (p != null && p.known) {
+        val text = if (p.free) stringResource(R.string.card_parking_free) else stringResource(R.string.card_parking_paid, RuFormat.thousands(p.rubPerHour ?: 0))
+        chips += Triple(text, C.navi.text, C.sign.blue.copy(alpha = 0.25f))
+    }
+    if (d.heritage) chips += Triple(stringResource(R.string.card_heritage), C.text.secondary, C.dash.control)
+    if (chips.isNotEmpty()) {
+        androidx.compose.foundation.layout.FlowRow(
+            Modifier.padding(top = 10.dp).fillMaxWidth().testTag("card.facts"),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            chips.forEach { (text, fg, bg) ->
+                Box(
+                    Modifier.defaultMinSize(minHeight = 28.dp).clip(RoundedCornerShape(14.dp)).background(bg).padding(horizontal = 10.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.Center,
+                ) { Txt(text, T.body.smStrong, fg) }
+            }
+        }
+    }
+    if (!d.verified || h?.verified == false) {
+        Row(Modifier.padding(top = 8.dp).testTag("card.opendata"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            app.verst.feature.common.OpenDataRing()
+            Txt(stringResource(R.string.card_open_data), T.body.sm, C.text.muted)
         }
     }
 }

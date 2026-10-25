@@ -93,10 +93,19 @@ data class PoiImageDto(
     val credit: PhotoCreditDto? = null,
     val isArea: Boolean = false,
     val labelRu: String? = null,
+    /** API v3 (ADR-0015 §3): `p18` | `wikipedia` | `nearby` (Commons geosearch ≤ 300 m → «ФОТО РЯДОМ»). */
+    val source: String? = null,
 )
 
 @Serializable
-data class PoiHoursDto(val textRu: String? = null, val verified: Boolean = false)
+data class PoiHoursDto(
+    val textRu: String? = null,
+    val verified: Boolean = false,
+    /** API v3: today's hours («11:00–20:00»), open now, round the clock. */
+    val todayRu: String? = null,
+    val openNow: Boolean? = null,
+    val allDay: Boolean = false,
+)
 
 @Serializable
 data class PoiTicketDto(val adultRub: Int? = null, val childRub: Int? = null, val estimate: Boolean = false)
@@ -120,6 +129,12 @@ data class PoiDetailsDto(
     val verified: Boolean = true,
     val attributionRu: List<String> = emptyList(),
     val wikidataId: String? = null,
+    /** API v3 (ADR-0015 §2): «объект наследия федерального значения · есть в Викигиде». */
+    val whyRu: String? = null,
+    /** API v3 (ADR-0015 §3): where [descriptionRu] comes from: `wikipedia` | `wikivoyage` | `osm` | `wikidata`. */
+    val descSource: String? = null,
+    val dogsAllowed: Boolean? = null,
+    val parking: ParkingDto? = null,
 )
 
 // ------------------------------------------------------------------------------------------ hand-off (ADR-0014)

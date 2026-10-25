@@ -352,8 +352,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun handoffSheet(day: Int) = flow.openHandoffSheet(day)
                         override fun handoffSheet(): app.verst.feature.road.HandoffSheetActions = object : app.verst.feature.road.HandoffSheetActions {
                             override fun scope(day: Int?) = flow.handoffScope(day)
-                            override fun pick(app: app.verst.nav.HandoffApp) = flow.handoffPick(app)
-                            override fun install(app: app.verst.nav.HandoffApp) = flow.handoffInstall(app)
+                            override fun pick(which: app.verst.nav.HandoffApp) = flow.handoffPick(which)
+                            override fun install(which: app.verst.nav.HandoffApp) = flow.handoffInstall(which)
                             override fun remember() = flow.toggleHandoffRemember()
                             override fun close() = flow.closeHandoffSheet()
                         }

@@ -150,7 +150,8 @@ private fun Sheet(ui: WaybillUi, a: WaybillActions) {
             Column(Modifier.fillMaxWidth().border(1.5.dp, C.paper.text)) {
                 TableHeader()
                 cost.lines.filter { it.key != "reserve" }.forEach { line ->
-                    CostLine(line, ui.expanded == line.key) { a.toggleLine(line.key) }
+                    if (line.key == "parking") ParkingLine(line, trip, ui.expanded == line.key) { a.toggleLine(line.key) }
+                    else CostLine(line, ui.expanded == line.key) { a.toggleLine(line.key) }
                 }
                 cost.lines.firstOrNull { it.key == "reserve" }?.let { ReserveRow(it, cost.reserveOn, ui.busy, a::toggleReserve) }
                 TotalRow(cost.totalRub)
@@ -294,6 +295,70 @@ private fun CostLine(line: CostLineDto, expanded: Boolean, onClick: () -> Unit) 
     }
 }
 
+/**
+ * 5.6 §9 (S4) «Парковки»: P 15 + title + chevron; the formula (engine, else from the stops) with «+ ещё N без
+ * данных»; expanded: one row per paid stop, the free ones collapsed into one 0 row, the unknown ones with «?»,
+ * then the note. Amount = Σ known stays (= the Road-ahead footer).
+ */
+@Composable
+private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onClick: () -> Unit) {
+    val stops = trip.daysList.flatMap { it.stops }.filter { app.verst.feature.road.parkingStop(it) }
+    val paid = stops.filter { it.parking?.known == true && (it.parking?.rub ?: 0) > 0 }
+    val free = stops.count { it.parking?.free == true }
+    val unknownStops = stops.filter { it.parking?.known != true }
+    val unknown = if (line.unknownCount > 0) line.unknownCount else unknownStops.size
+    val sum = RuFormat.thousands(line.rub)
+    val hoursOf = { s: app.verst.core.model.dto.StopDto -> kotlin.math.ceil(s.parking?.hours ?: (s.dwellMin / 60.0)).toInt().coerceAtLeast(1) }
+    val formula = line.formula.ifBlank {
+        val h = paid.sumOf(hoursOf)
+        val towns = paid.mapNotNull { it.townId }.distinct().size.coerceAtLeast(if (paid.isEmpty()) 0 else 1)
+        stringResource(R.string.waybill_parking_formula, paid.size, stringResource(R.string.common_hours_short, h), "$towns ${pluralStringResource(R.plurals.plural_town, towns)}")
+    }
+    val unknownLine = if (unknown > 0) stringResource(R.string.waybill_parking_unknown, unknown) else null
+    val state = stringResource(if (expanded) R.string.cd_waybill_collapse else R.string.cd_waybill_expand)
+    val cd = stringResource(R.string.cd_waybill_line, line.title, sum, listOfNotNull(formula, unknownLine).joinToString(" "), state)
+    Column(
+        Modifier.fillMaxWidth().animateContentSize()
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = cd }
+            .testTag("waybill.line.parking"),
+    ) {
+        TableRow(1.dp, SumCol, Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin), left = {
+            Column(Modifier.padding(horizontal = 6.dp, vertical = 3.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    app.verst.feature.road.PGlyph(15.dp, Modifier.padding(end = 6.dp))
+                    Txt(line.title.ifBlank { stringResource(R.string.waybill_parking) }, T.paper.body, C.paper.text, maxLines = 1)
+                    Spacer(Modifier.width(6.dp))
+                    GlyphIcon(Glyph.CHEVRON_DOWN, C.paper.label, 12.dp, Modifier.rotate(if (expanded) 180f else 0f), strokeWidth = 2.5f)
+                }
+                Txt(formula, T.hand.sm, C.paper.ink, Modifier.testTag("waybill.formula.parking"))
+                if (unknownLine != null) Txt(unknownLine, T.hand.sm, C.paper.ink, Modifier.testTag("waybill.parking.unknown"))
+            }
+        }, right = { Txt(sum, T.hand.md, C.paper.ink, align = TextAlign.End, maxLines = 1) })
+        if (expanded) {
+            val rows = buildList<Pair<String, String>> {
+                if (line.breakdown.isNotEmpty()) {
+                    line.breakdown.forEach { b -> add((if (b.formula.isBlank()) b.label else b.label + ", " + b.formula.substringBefore(" = ")) to RuFormat.thousands(b.rub)) }
+                } else {
+                    paid.forEach { s ->
+                        add(stringResource(R.string.waybill_parking_row, s.name, hoursOf(s), RuFormat.thousands(s.parking?.rubPerHour ?: 0)) to RuFormat.thousands(s.parking?.rub ?: 0))
+                    }
+                    if (free > 0) add("${stringResource(R.string.road_parking_inline_free).replaceFirstChar { it.uppercase() }} · $free" to "0")
+                    unknownStops.forEach { s -> add(s.name to "?") }
+                }
+            }
+            rows.forEachIndexed { i, (text, rub) ->
+                TableRow(0.dp, SumCol, Modifier.defaultMinSize(minHeight = 22.dp).testTag("waybill.breakdown.parking.$i"), left = {
+                    Txt(text, T.paper.label, C.paper.text, Modifier.padding(start = 18.dp, end = 6.dp, top = 2.dp, bottom = 2.dp))
+                }, right = { Txt(rub, T.hand.sm, C.paper.ink, align = TextAlign.End, maxLines = 1) })
+            }
+            TableRow(1.dp, SumCol, Modifier.defaultMinSize(minHeight = 22.dp), left = {
+                Txt(stringResource(R.string.waybill_parking_note), T.paper.label, C.paper.label, Modifier.padding(start = 18.dp, end = 6.dp, top = 2.dp, bottom = 4.dp))
+            }, right = {})
+        }
+    }
+}
+
 /** components §11 `ReserveSwitch`: checkbox (hand check), «Резерв 10%», sub, sum or «—»; a Switch for TalkBack. */
 @Composable
 private fun ReserveRow(line: CostLineDto, on: Boolean, busy: Boolean, onToggle: () -> Unit) {
@@ -349,6 +414,7 @@ internal fun leverName(code: String): String = when (code) {
     "family_rooms" -> stringResource(R.string.budget_lever_family_rooms)
     "food_economy" -> stringResource(R.string.budget_lever_food_economy)
     "sights_free" -> stringResource(R.string.budget_lever_sights_free)
+    "parking_free" -> stringResource(R.string.budget_lever_parking_free)
     "fewer_nights" -> stringResource(R.string.budget_lever_fewer_nights)
     "variant" -> stringResource(R.string.budget_lever_variant)
     else -> code

@@ -21,6 +21,7 @@ import app.verst.core.model.dto.HandoffLinksDto
 import app.verst.core.model.NaviLinks
 import app.verst.nav.HandoffLauncher
 import app.verst.nav.HandoffTarget
+import app.verst.nav.HandoffApp
 import app.verst.nav.Locator
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -118,8 +119,8 @@ class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
         }
     }
 
-    override fun openIn(app: app.verst.nav.HandoffApp, uri: String?, web: String?): HandoffTarget {
-        if (app == app.verst.nav.HandoffApp.NAVI) {
+    override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
+        if (app == HandoffApp.NAVI) {
             return if (uri != null && navigatorInstalled() && start(uri, NaviLinks.NAVI_PACKAGE)) HandoffTarget.Navigator else HandoffTarget.None
         }
         if (uri != null && mapsInstalled() && start(uri, NaviLinks.MAPS_PACKAGE)) return HandoffTarget.Maps
@@ -133,8 +134,8 @@ class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
         }
     }
 
-    override fun openStore(app: app.verst.nav.HandoffApp) {
-        val pkg = if (app == app.verst.nav.HandoffApp.NAVI) NaviLinks.NAVI_PACKAGE else NaviLinks.MAPS_PACKAGE
+    override fun openStore(app: HandoffApp) {
+        val pkg = if (app == HandoffApp.NAVI) NaviLinks.NAVI_PACKAGE else NaviLinks.MAPS_PACKAGE
         val market = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg"))
         if (runCatching { activity.startActivity(market) }.isFailure) {
             runCatching { activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$pkg"))) }
