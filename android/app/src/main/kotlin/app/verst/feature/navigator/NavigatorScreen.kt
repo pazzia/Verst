@@ -589,6 +589,9 @@ private fun AddressBlock(ui: NavigatorUi, q: String, onFind: () -> Unit, onPick:
             if (ui.addressState == AddressState.None) {
                 Txt(stringResource(R.string.addr_none), T.body.sm, C.navi.labelSecondary, Modifier.testTag("address.none"))
             }
+            if (ui.addressState == AddressState.Later) {
+                Txt(stringResource(R.string.online_later), T.body.sm, C.text.muted, Modifier.testTag("address.later"))
+            }
         }
     }
 }

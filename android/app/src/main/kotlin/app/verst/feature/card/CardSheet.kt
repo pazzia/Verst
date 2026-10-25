@@ -122,6 +122,10 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
         }
         // the fictional status is said once (S3-QA P1-05): no engine «Демо: вымышленная гостиница» line
         val desc = descText
+        if (desc.isNullOrBlank() && ui.offline && ui.kind == "sight" && d?.wikidataId != null && d.descSource != "osm") {
+            // ADR-0016 OR-4 / CEO S4: an online-only value is missing offline → the quiet line in its place
+            Txt(stringResource(R.string.online_later), T.body.md, C.text.muted, Modifier.padding(top = 12.dp).testTag("card.later"))
+        }
         if (!desc.isNullOrBlank()) {
             var more by remember(desc) { mutableStateOf(false) }
             Txt(desc, T.body.md, C.text.note, Modifier.padding(top = 12.dp).clickable { more = !more }, maxLines = if (more) Int.MAX_VALUE else 6)
@@ -181,7 +185,7 @@ private fun FactChips(ui: CardUi) {
     if (h != null) {
         when {
             h.allDay -> chips += Triple(stringResource(R.string.hours_24), C.hours.open, C.hours.openFill)
-            h.openNow == true && h.todayRu != null -> chips += Triple(stringResource(R.string.hours_today_open, h.todayRu), C.hours.open, C.hours.openFill)
+            h.openNow == true && h.todayRu != null -> chips += Triple(stringResource(R.string.hours_today_open, h.todayRu ?: ""), C.hours.open, C.hours.openFill)
             h.openNow == false -> chips += Triple(stringResource(R.string.hours_closed), C.hours.closed, C.hours.closedFill)
             !h.textRu.isNullOrBlank() -> chips += Triple(h.textRu!!, C.text.secondary, C.dash.control)
         }

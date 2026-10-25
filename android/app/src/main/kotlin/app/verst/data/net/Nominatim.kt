@@ -85,15 +85,28 @@ class NominatimClient(
             lastCall = now()
             requests++
             try {
+                val host = url.toHttpUrl().host
                 val body = withContext(Dispatchers.IO) {
                     http().newCall(Request.Builder().url(url).build()).execute().use { r ->
                         if (!r.isSuccessful) throw IOException("HTTP ${r.code}")
-                        r.body?.string() ?: ""
+                        // OR-5: HTML, a wrong content type or a body over 1 MB is no data
+                        r.jsonBodyOrNull() ?: run {
+                            OnlineStats.dropped(host)
+                            throw IOException("not json")
+                        }
                     }
                 }
-                val v = parse(body)
+                // OR-5: truncated or garbage JSON is no data, never an exception out of the data layer
+                val v = try {
+                    parse(body)
+                } catch (e: Exception) {
+                    OnlineStats.dropped(host)
+                    throw IOException("garbage", e)
+                }
                 cache[url] = now() to v
                 AddressResult.Ok(v)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 AddressResult.Failed(e.toString())
             }

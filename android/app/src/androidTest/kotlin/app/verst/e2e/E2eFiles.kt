@@ -19,6 +19,8 @@ object E2e {
     fun noRealNominatim() {
         val flow = (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as VerstApp).flow
         (flow.address as? app.verst.data.net.NominatimClient)?.baseUrl = "http://127.0.0.1:9"
+        // ADR-0016 OR-6: the app-wide breaker must not carry one journey's failures into the next
+        app.verst.data.net.Net.breaker.reset()
     }
 
     fun dir(): File =
