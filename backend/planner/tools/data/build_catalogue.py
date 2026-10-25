@@ -109,6 +109,21 @@ RYUMKA = re.compile(r"рюмочн", re.IGNORECASE)
 
 # ------------------------------------------------------------------------------------------- helpers
 
+MISPLACED_KM = 40.0
+PAREN_TOWN = re.compile(r"\(([^()]+)\)\s*$")
+
+
+def misplaced(r: dict[str, Any], by_name: dict[str, list[tuple[float, float]]]) -> bool:
+    """«Памятник Чернышевскому (Москва)» at Сергиев Посад: the name's own town disagrees with the
+    coordinates by more than `MISPLACED_KM` (a Wikidata coordinate error) — do not ship it."""
+    m = PAREN_TOWN.search(str(r.get("name") or ""))
+    if m is None:
+        return False
+    pts = by_name.get(m.group(1).strip().casefold())
+    if not pts:
+        return False
+    return min(haversine_km((r["lat"], r["lon"]), p) for p in pts) > MISPLACED_KM
+
 
 def haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
     p1, p2 = math.radians(a[0]), math.radians(b[0])
@@ -457,6 +472,9 @@ def build(
 
     # ---- POIs: kind, nearest town among the towns that found it, deny-list, ADR-0015 §2 excludes, caps
     town_names = {str(t["name"]).strip().casefold() for t in towns}
+    by_name: dict[str, list[tuple[float, float]]] = {}
+    for t in towns:
+        by_name.setdefault(str(t["name"]).strip().casefold(), []).append((t["lat"], t["lon"]))
     osm_ix = OsmIndex(ex.osm)
     all_meta = {**load_json(raw_dir / "photo_meta.json", {}), **ex.photo_meta}
     stats: dict[str, int] = {}
@@ -472,6 +490,9 @@ def build(
             continue
         town = towns[town_pos[r["townQid"]]]
         d = haversine_km((r["lat"], r["lon"]), (town["lat"], town["lon"]))
+        if misplaced(r, by_name):
+            stats["misplaced"] = stats.get("misplaced", 0) + 1
+            continue
         old = pois_by_qid.get(r["qid"])
         if old is None or d < old["_d"] or (d == old["_d"] and r["townQid"] < old["townQid"]):
             pois_by_qid[r["qid"]] = {**r, "_kind": kind, "_d": d}
