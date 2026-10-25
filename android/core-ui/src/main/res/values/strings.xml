@@ -686,6 +686,7 @@
     <string name="road_odometer">%1$s км</string>
     <string name="road_meta_driven">%1$s · пройдено %2$s км</string>
     <string name="road_km_post_label">пройдено</string>
+    <string name="cd_road_km_post">пройдено %1$s километров</string>
     <string name="road_parking_inline_paid">≈ %1$s ₽</string>
     <string name="road_parking_inline_free">бесплатно</string>
     <string name="road_parking_inline_unknown">\?</string>
@@ -839,4 +840,25 @@
     <string name="walk_few_preset_sub">%1$s рядом</string>
     <string name="walk_few_clear">Вернуть убранные места</string>
     <string name="walk_few_clear_sub">вы убрали %1$s — вернём их в подбор</string>
+    <string name="online_loading">Загружаем данные о парковке…</string>
+    <string name="online_updated_now">обновлено только что</string>
+    <string name="online_updated_min">обновлено %1$d мин назад</string>
+    <string name="online_updated_hours">обновлено %1$d ч назад</string>
+    <string name="online_later">уточним при интернете</string>
+    <string name="online_need_check">требуется уточнить при наличии интернета</string>
+    <string name="online_banner">Нет сети — показываем сохранённое, остальное уточним при интернете</string>
+    <string name="online_cached_note">Показываем сохранённое. Обновим, когда появится интернет.</string>
+    <string name="parking_live_status">сейчас ≈ %1$d мест · %2$s ₽/ч · обновлено только что</string>
+    <string name="parking_row_free_now">Свободно сейчас</string>
+    <string name="parking_row_free_cached">Свободно</string>
+    <string name="parking_free_now">≈ %1$d мест</string>
+    <string name="parking_free_cached">было ≈ %1$d · %2$d мин назад</string>
+    <string name="parking_live_note">Свободные места меняются каждую минуту — к приезду их может не быть. Сумма уже в путевом листе и в бюджете.</string>
+    <string name="parking_offline_status">нет сети — уточним при интернете</string>
+    <string name="parking_offline_note">В путевом листе это место пока без суммы — добавим, когда появится интернет. Маршрут и остальное работают без сети.</string>
+    <string name="parking_none_status">нет данных о парковке</string>
+    <string name="parking_none_note">Открытые источники ничего не знают об этой парковке. В путевом листе — «без данных», в сумму не входит.</string>
+    <string name="parking_loading_note">Пока грузим, в путевом листе — сумма по справочнику тарифов.</string>
+    <string name="cd_parking_loading">Парковка: загружаем</string>
+    <string name="cd_parking_live">Парковка сейчас: примерно %1$d свободных мест, %2$s рублей в час</string>
 </resources>

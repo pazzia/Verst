@@ -331,6 +331,7 @@ size = O(
   kindTagH=dp(20,'Category tag height'), odometerTagW=dp(50,'Odometer tag min width'), odometerTagH=dp(20,'Odometer tag height'),
   handoffCtaH=dp(60,'Road-ahead «Вести в навигаторе» button min height'), cityEntryH=dp(64,'Windshield «По городу пешком» plate height'),
   crewCellH=dp(118,'City-start crew stepper cell height'), hoursPillH=dp(24,'Untimed walk hours pill height'),
+  carMarkerW=dp(18,'Road-ahead car marker width'), carMarkerH=dp(32,'Road-ahead car marker height'), kmPostW=dp(26,'Km post plate width'), kmPostH=dp(28,'Km post plate height'), roadW=dp(52,'Road-ahead road column width (incl. edges)'),
   sheetHandleW=dp(36,'Bottom-sheet handle width (new)'), sheetHandleH=dp(4,'Bottom-sheet handle height (new)'),
 )
 E = O(
@@ -401,6 +402,7 @@ motion['photoFadeIn'] = m(durationMs=250, easing='standard', infinite=False)
 motion['returnToItem'] = m(durationMs=0, highlightMs=1200, holdMs=400, easing='easeOut', infinite=False)
 motion['footsteps'] = m(durationMs=1800, easing='linear', periodDp=48, infinite=True)
 motion['lamps'] = m(durationMs=3200, easing='easeInOut', fromAlpha=0.7, toAlpha=1.0, infinite=True)
+motion['livePulse'] = m(durationMs=1600, easing='easeInOut', fromAlpha=1.0, toAlpha=0.35, infinite=True)
 motion['rebuildPulse'] = m(durationMs=1200, easing='easeInOut', fromAlpha=0.35, toAlpha=0.6, infinite=True)
 motion['walkRebuild'] = m(durationMs=400, easing='linear', infinite=False)
 motion['cityEntryPress'] = m(durationMs=90, easing='standard', infinite=False)

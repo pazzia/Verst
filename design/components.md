@@ -743,4 +743,18 @@ Tabs: segmented control, fill `dash.well`, radius 12, padding 4, gap 4; tab min-
 | `CostsLine` | flex row, min-h 36, space-between. Left (nowrap, gap 5, 13/600): price `accent.yellow` · separator `#55565C` · P part. Right: quiet action |
 | P part | button, min touch 36 × 44, padding 0 2: glyph 15 × 15 (radius 3, `sign.blue`, «P» 11/700 white) + text 13/600 `#B9C6D3` (unknown «?» `text.muted`). TalkBack «Парковка: примерно 300 рублей. Подробнее» → `ParkingSheet` |
 | Quiet action | «заменить»: text 12/600 `text.muted`, no border/fill, padding-left 6, min-h 36; hotels «выбрать отель →» 12/600 `#7FA6D9` |
-| `KmPost` (variant B) | absolute in the road column at row top + 4, x 34: plate 30 × 30 `sign.white`, 1.5 dp `sign.black`, radius 2; number Plex Mono 12/600 + «км» 8/700 `text.onLight`; post 4 × 10 white with 1 dp black sides; first post only: label «пройдено» 9/600 `text.secondary` on `dash.raised` |
+| `KmPost` (decision B) | absolute at row top + 4, x 40 (post zone, 5.5 §10.8), z 2: plate 26 × 28 `sign.white`, 1.5 dp `sign.black`, radius 2; number Plex Mono 12/600 + «км» 8/700 `text.onLight`; post 4 × 10 white with 1 dp black sides; first post only: label «пройдено» 9/600 `text.secondary` on `dash.raised` |
+
+### 26.3 `CarMarker`
+
+18 × 32 dp vector, drawn in the road's car lane (road-column x 3, i.e. screen x 13–34), z 3. Body: rounded rect 14.5 × 30, radius 5, fill `accent.yellow`, stroke 1.5 `text.onLight`; rear window 9 × 3.5 (top) and windscreen trapezoid (bottom) in `text.onLight` α 0.85; roof 8 × 8 radius 2 `#FFE27A`; wheels 3 × 6 radius 1 `text.onLight` at y 6 and 20 on both sides; headlights 3 × 1.6 `text.primary` at the bottom. Halo: 1 dp `text.primary` drop shadow + 0 3 4 black α 0.6. Motion `motion.carMarker`; reduced motion: parked at the top of the visible road.
+
+## 31. Online values (5.5 §10.9)
+
+| Control | Spec |
+| --- | --- |
+| Shimmer pill | inline 44 × 12 (row) / 90 × 12 (sheet cell), radius 6, fill `dash.controlAlt`, band 30–40 dp `dash.outline` moving with `motion.shimmer` |
+| Live dot | 6 dp (row) / 8 dp (sheet status) `hours.open`, `motion.livePulse` |
+| Freshness | `online_updated_now` / `online_updated_min` / `online_updated_hours`, 13 `text.secondary` (live: `hours.open`) |
+| Deferred value | `online_later` «уточним при интернете», `text.muted`; a row may wrap instead of truncating |
+| Offline banner | full width under the chips, min-h 32, padding 6 10, radius 8, fill `budget.overFill`, no-wifi glyph 14 `accent.redText`, 12 `text.primary` |

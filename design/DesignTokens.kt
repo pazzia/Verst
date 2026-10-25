@@ -1213,6 +1213,16 @@ object DesignTokens {
         val crewCellH: Dp = 118.dp
         /** Untimed walk hours pill height */
         val hoursPillH: Dp = 24.dp
+        /** Road-ahead car marker width */
+        val carMarkerW: Dp = 18.dp
+        /** Road-ahead car marker height */
+        val carMarkerH: Dp = 32.dp
+        /** Km post plate width */
+        val kmPostW: Dp = 26.dp
+        /** Km post plate height */
+        val kmPostH: Dp = 28.dp
+        /** Road-ahead road column width (incl. edges) */
+        val roadW: Dp = 52.dp
         /** Bottom-sheet handle width (new) */
         val sheetHandleW: Dp = 36.dp
         /** Bottom-sheet handle height (new) */
@@ -1567,6 +1577,13 @@ object DesignTokens {
             val easing: Easing = DesignTokens.motion.easing.easeInOut
             const val fromAlpha: Float = 0.7f
             const val toAlpha: Float = 1.0f
+            const val infinite: Boolean = true
+        }
+        object livePulse {
+            const val durationMs: Int = 1600
+            val easing: Easing = DesignTokens.motion.easing.easeInOut
+            const val fromAlpha: Float = 1.0f
+            const val toAlpha: Float = 0.35f
             const val infinite: Boolean = true
         }
         object rebuildPulse {

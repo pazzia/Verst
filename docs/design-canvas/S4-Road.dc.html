@@ -14,15 +14,16 @@ body{margin:0}
 a{color:#FFD23F}a:hover{color:#FFE27A}
 @keyframes roll{from{background-position:0 0}to{background-position:0 64px}}
 .lane{background:repeating-linear-gradient(to bottom,#F4F4F0 0 32px,transparent 32px 64px);animation:roll 2.2s linear infinite}
-@keyframes car{from{top:0}to{top:100%}}
+@keyframes car{from{top:0}to{top:calc(100% - 32px)}}
 .car{animation:car 14s linear infinite}
 .row{transition:background .2s}
 .row:hover{background:#1C1C20}
 button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
 </style>
 </helmet>
-<!-- Sprint 4 · 5.5 Road ahead (design/screens/5.5-road-ahead.md §10, decluttered per §10.7). Distance so far: variant A
-     (text in the meta line) — switch to B in S4-Road-Km. Costs are one line: price · «P» part; tap the P part → the parking sheet. -->
+<!-- Sprint 4 · 5.5 Road ahead (design/screens/5.5-road-ahead.md §10, §10.7–§10.8). Distance so far = roadside km posts (variant B,
+     chosen by the CEO) on the right edge of the road; the car drives in the left lane and never passes under a post.
+     Costs are one line: price · «P» part; tap the P part → the parking sheet. -->
 <div style="width: 390px; height: 2780px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
   <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 132px; overflow: hidden">
     <div style="position: absolute; inset: 0 0 auto 0; height: 50px; background: #2B2850"></div>
@@ -62,9 +63,11 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
     </div>
 
     <div style="position: relative; margin-top: 14px">
-      <div aria-hidden="true" style="position: absolute; left: 14px; top: 0; bottom: 0; width: 46px; background: #3A3A3F; border-left: 3px solid #F4F4F0; border-right: 3px solid #F4F4F0; box-sizing: border-box">
-        <div class="lane" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px"></div>
-        <div class="car" style="position: absolute; left: 50%; margin-left: 2px; width: 14px; height: 22px; border-radius: 5px 5px 3px 3px; background: #FFD23F; border: 2px solid #141416; box-sizing: border-box"></div>
+      <div aria-hidden="true" style="position: absolute; left: 10px; top: 0; bottom: 0; width: 52px; background: #3A3A3F; border-left: 3px solid #F4F4F0; border-right: 3px solid #F4F4F0; box-sizing: border-box; z-index: 0">
+        <div class="lane" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px; z-index: 1"></div>
+        <div class="car" style="position: absolute; left: 3px; width: 18px; height: 32px; z-index: 3; filter: drop-shadow(0 0 1px #F4F4F0) drop-shadow(0 3px 4px rgba(0,0,0,.6))">
+          <svg width="18" height="32" viewBox="0 0 18 32"><g fill="#141416"><rect x="0" y="6" width="3" height="6" rx="1"></rect><rect x="15" y="6" width="3" height="6" rx="1"></rect><rect x="0" y="20" width="3" height="6" rx="1"></rect><rect x="15" y="20" width="3" height="6" rx="1"></rect></g><rect x="1.75" y="1" width="14.5" height="30" rx="5" fill="#FFD23F" stroke="#141416" stroke-width="1.5"></rect><rect x="4.5" y="4.5" width="9" height="3.5" rx="1.5" fill="#141416" opacity=".85"></rect><rect x="5" y="10" width="8" height="8" rx="2" fill="#FFE27A"></rect><path d="M3.8 19.5h10.4l-1.3 4.5H5.1z" fill="#141416"></path><rect x="3.5" y="28" width="3" height="1.6" rx=".8" fill="#F4F4F0"></rect><rect x="11.5" y="28" width="3" height="1.6" rx=".8" fill="#F4F4F0"></rect></svg>
+        </div>
       </div>
 
       <sc-for list="{{days}}" as="d" hint-placeholder-count="3">
@@ -79,8 +82,8 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
               <div aria-hidden="true" style="position: relative; height: 100%">
                 <span style="position: absolute; left: 60px; top: 30px; width: 8px; height: 3px; background: #55565C"></span>
                 <span style="{{r.postStyle}}">
-                  <span style="width: 30px; height: 30px; box-sizing: border-box; background: #F4F4F0; border: 1.5px solid #141416; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1">
-                    <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 12px; color: #141416">{{r.km}}</span>
+                  <span style="width: 26px; height: 28px; box-sizing: border-box; background: #F4F4F0; border: 1.5px solid #141416; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 11px; color: #141416">{{r.km}}</span>
                     <span style="font-size: 8px; font-weight: 700; color: #141416; margin-top: 1px">км</span>
                   </span>
                   <span style="width: 4px; height: 10px; background: #F4F4F0; border-left: 1px solid #141416; border-right: 1px solid #141416; box-sizing: border-box"></span>
@@ -172,11 +175,11 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2780}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { km: 'A', sheet: null }; }
+  constructor(p) { super(p); this.state = { sheet: null }; }
   renderVals() {
     const n = ' ', t = ' ', hide = 'display:none';
     const st = this.state || {};
-    const km = st.km || 'A';
+    const km = 'B';
     const I = {
       monastery: 'M12 2v3M10.5 3.5h3M8 21V12l4-4 4 4v9M5 21h14M10 21v-4a2 2 0 0 1 4 0v4',
       kremlin: 'M4 21V9l2-2 2 2v3h2V7l2-3 2 3v5h2V9l2-2 2 2v12zM10 21v-4h4v4',
@@ -196,7 +199,7 @@ class Component extends DCLogic {
       return {
         time, name, note, signText: o.sign || '', icon: I[o.icon || 'monastery'],
         meta: (km === 'A' && !start) ? ahead + ' · пройдено ' + o.odo + n + 'км' : ahead,
-        km: o.odo, postStyle: showPost ? 'position:absolute;left:34px;top:4px;display:flex;flex-direction:column;align-items:center;z-index:1' : hide,
+        km: o.odo, postStyle: showPost ? 'position:absolute;left:40px;top:4px;display:flex;flex-direction:column;align-items:center;z-index:2' : hide,
         postLabel: label ? 'margin-top:2px;font-size:9px;font-weight:600;color:#B9B9C0;background:#161618;padding:0 2px;border-radius:2px' : hide,
         isCity: type === 'city', isBrown: type === 'brown',
         isService: ['fuel', 'food', 'rest', 'hotel'].indexOf(type) >= 0,
@@ -257,12 +260,7 @@ class Component extends DCLogic {
       sheetStyle: cur ? 'position:absolute;left:0;right:0;bottom:0;background:#161618;border-radius:16px 16px 0 0;border-top:2px solid #232327;padding:8px 20px 20px;box-sizing:border-box;z-index:4' : hide,
       close: () => this.setState({ sheet: null })
     };
-    const kmDefs = [['A', 'Вариант A · текстом'], ['B', 'Вариант B · км-столбик']];
-    return Object.assign({ days: [D1, D2, D3],
-      kmBar: 'margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:#0F0F11',
-      kmOpts: kmDefs.map(([id, tt]) => ({ t: tt, on: km === id ? 'true' : 'false', go: () => this.setState({ km: id }), style: 'min-height:40px;border:none;border-radius:9px;font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;' + (km === id ? 'background:#F4F4F0;color:#141416' : 'background:transparent;color:#B9B9C0') })),
-      kmNote: 'margin-top:8px;font-size:12px;line-height:16px;color:#8C8C93',
-      kmText: km === 'A' ? 'A: «пройдено 135 км» в верхней строке, рядом с «через 62 км». Слово снимает путаницу с суммой.' : 'B: белый километровый столбик у дороги на каждой остановке; подпись «пройдено» — только у первого. Текст карточки не меняется.'
+    return Object.assign({ days: [D1, D2, D3]
     }, sheetVals);
   }
 }

@@ -167,3 +167,6 @@ Card sheet, day / stop hand-off menus and the custom-walk sheet: `bottomSheetIn`
 | `rebuildPulse` | 5.11 rebuild pill dot | alpha | 0.35 → 0.6 → 0.35 | 1200 ms | easeInOut | ∞ while rebuilding | `infiniteRepeatable(tween(600), RepeatMode.Reverse)` | static 0.6 |
 | `walkRebuild` | 5.11 filters | logic (debounce) | rebuild 400 ms after the last filter change | — | — | — | `debounce` in the flow | same |
 | `cityEntryPress` | 5.1 `CityEntryPlate` | translateY, shadow | 0 → 1 dp | 90 ms | standard | — | `animateDpAsState` | none |
+| `livePulse` | live parking dot (5.5 §10.9) | alpha | 1 → 0.35 → 1 | 1600 ms | easeInOut | ∞ while live | `infiniteRepeatable(tween(800), RepeatMode.Reverse)` | static 1 |
+
+`carMarker` (Sprint 4): the marker is now the 18 × 32 `CarMarker` (components §26.3) at a fixed x in the car lane; the loop is unchanged. It never shares x with the km posts, so no z-fighting is possible; z-order road < dashes < posts < car.

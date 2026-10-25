@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Без сети и загрузка · Спринт 4</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,a{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+@keyframes shimmer{from{transform:translateX(-90px)}to{transform:translateX(260px)}}
+.shimmer{animation:shimmer 1.2s linear infinite}
+@keyframes live{0%,100%{opacity:1}50%{opacity:.35}}
+.live{animation:live 1.6s ease-in-out infinite}
+</style>
+</helmet>
+<!-- Sprint 4 · online data states (design/screens/5.5-road-ahead.md §10.8, components §31). One Road-ahead row and its parking sheet
+     in five states — tap the tabs: загрузка / сейчас (live) / сохранено (cache) / нет сети (no cache) / нет данных.
+     Rule: nothing online ever produces an error screen; we show what we have and say what will be checked when the internet is back. -->
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 100px; background: linear-gradient(#2B2850 0 40%, #8E4A6B 40% 70%, #D9655A 70%)"></div>
+  <div style="position: absolute; left: 20px; right: 20px; top: 28px; height: 49px; background: #1E4FA3; border-radius: 7px; padding: 3px; box-sizing: border-box; box-shadow: 0 6px 14px rgba(0,0,0,.35)">
+    <div style="height: 100%; border: 2px solid #F4F4F0; border-radius: 5px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-weight: 700; font-size: 20px"><span>↗ Золотое кольцо</span><span>825</span></div>
+  </div>
+  <div style="position: absolute; left: 0; right: 0; top: 86px; height: 30px; background: #161618; border-radius: 50% 50% 0 0 / 24px 24px 0 0"></div>
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 112px">
+    <div role="tablist" aria-label="Состояние данных" style="display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: #0F0F11">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5"><button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.go}}" style="{{t.style}}">{{t.t}}</button></sc-for>
+    </div>
+    <div style="{{bannerStyle}}"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E6604A" stroke-width="2.4" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M3 3l18 18"></path></svg><span>Нет сети — показываем сохранённое, остальное уточним при интернете</span></div>
+  </div>
+
+  <!-- the row -->
+  <div style="position: absolute; left: 0; right: 0; top: {{rowTop}}px">
+    <div aria-hidden="true" style="position: absolute; left: 10px; top: 0; height: 168px; width: 52px; background: #3A3A3F; border-left: 3px solid #F4F4F0; border-right: 3px solid #F4F4F0; box-sizing: border-box">
+      <div style="position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px; background: repeating-linear-gradient(to bottom,#F4F4F0 0 32px,transparent 32px 64px)"></div>
+    </div>
+    <div style="position: relative; display: grid; grid-template-columns: 66px 66px minmax(0, 1fr); padding: 8px 12px 10px 0">
+      <div aria-hidden="true" style="position: relative">
+        <span style="position: absolute; left: 60px; top: 30px; width: 8px; height: 3px; background: #55565C"></span>
+        <span style="position: absolute; left: 40px; top: 4px; display: flex; flex-direction: column; align-items: center; z-index: 2"><span style="width: 26px; height: 28px; box-sizing: border-box; background: #F4F4F0; border: 1.5px solid #141416; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1"><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 11px; color: #141416">800</span><span style="font-size: 8px; font-weight: 700; color: #141416; margin-top: 1px">км</span></span><span style="width: 4px; height: 10px; background: #F4F4F0; border-left: 1px solid #141416; border-right: 1px solid #141416; box-sizing: border-box"></span></span>
+      </div>
+      <div aria-hidden="true" style="display: flex; justify-content: center"><span style="width: 56px; height: 56px; background: #6B3E26; border-radius: 5px; padding: 3px; box-sizing: border-box; display: block"><span style="width: 100%; height: 100%; border: 2px solid #F4F4F0; border-radius: 3px; box-sizing: border-box; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l-5 8h3l-4 6h12l-4-6h3zM12 17v4"></path></svg></span></span></div>
+      <div style="min-width: 0; padding-left: 4px; display: flex; flex-direction: column; gap: 3px">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #8C8C93"><span>через 100&nbsp;км</span><span>13:30</span></div>
+        <div style="font-weight: 700; font-size: 17px; line-height: 1.15">Парк «Зарядье», Москва</div>
+        <div style="display: flex; gap: 6px"><span style="height: 20px; padding: 0 6px; border-radius: 4px; background: #2A1E17; border: 1px solid #6B3E26; color: #E0B48F; font-size: 11px; font-weight: 700; letter-spacing: .06em; display: flex; align-items: center">ПАРК</span></div>
+        <div style="font-size: 13px; line-height: 18.2px; color: #C4C4CA">По пути домой: парящий мост и вид на Кремль. С собакой можно.</div>
+        <div style="min-height: 36px; display: flex; justify-content: space-between; align-items: center; gap: 8px">
+          <span style="{{costLeft}}">
+            <span style="color: #FFD23F">вход свободный</span><span style="color: #55565C">·</span>
+            <span aria-label="{{pCd}}" style="display: inline-flex; align-items: center; gap: 4px; min-height: 36px">
+              <span aria-hidden="true" style="width: 15px; height: 15px; border-radius: 3px; background: #1E4FA3; color: #F4F4F0; font-weight: 700; font-size: 11px; display: inline-flex; align-items: center; justify-content: center">P</span>
+              <span style="{{pSkel}}"><span class="shimmer" style="position: absolute; top: 0; bottom: 0; width: 30px; background: linear-gradient(90deg,transparent,#3A3A42,transparent)"></span></span>
+              <span style="{{pTextStyle}}">{{pText}}</span>
+              <span class="live" style="{{pLive}}"></span>
+            </span>
+          </span>
+          <span style="flex-shrink: 0; font-size: 12px; font-weight: 600; color: #8C8C93">заменить</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- the parking sheet -->
+  <div role="dialog" aria-label="Парковка" style="position: absolute; left: 0; right: 0; bottom: 0; background: #161618; border-radius: 16px 16px 0 0; border-top: 2px solid #232327; box-shadow: 0 -8px 20px rgba(0,0,0,.5); padding: 8px 20px 18px; box-sizing: border-box">
+    <div aria-hidden="true" style="width: 36px; height: 4px; border-radius: 2px; background: #3A3A42; margin: 0 auto 12px"></div>
+    <div style="display: flex; gap: 14px; align-items: flex-start">
+      <span aria-hidden="true" style="display: flex; flex-direction: column; align-items: center">
+        <span style="width: 52px; height: 52px; box-sizing: border-box; border-radius: 6px; background: #1E4FA3; padding: 3px; display: block"><span style="width: 100%; height: 100%; box-sizing: border-box; border: 2px solid #F4F4F0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #F4F4F0; font-weight: 700; font-size: 32px">P</span></span>
+        <span style="{{plateStyle}}">{{plate}}</span>
+        <span style="{{plateSkel}}"><span class="shimmer" style="position: absolute; top: 0; bottom: 0; width: 30px; background: linear-gradient(90deg,transparent,#3A3A42,transparent)"></span></span>
+      </span>
+      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8C8C93">ПАРКОВКА</span>
+        <span style="font-size: 20px; line-height: 23px; font-weight: 700">Парк «Зарядье», Москва</span>
+        <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: {{statusColor}}"><span class="live" style="{{statusDot}}"></span><span>{{status}}</span></span>
+      </span>
+    </div>
+    <div style="margin-top: 12px; border-radius: 12px; background: #1C1C1F; border: 1px solid #2A2A2E">
+      <sc-for list="{{rows}}" as="x" hint-placeholder-count="4">
+        <div style="min-height: 42px; display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 6px 14px; box-sizing: border-box; border-bottom: 1px solid #2A2A2E; font-size: 14px">
+          <span style="color: #B9B9C0">{{x.k}}</span>
+          <span style="{{x.vs}}">{{x.v}}</span>
+          <span style="{{x.skel}}"><span class="shimmer" style="position: absolute; top: 0; bottom: 0; width: 40px; background: linear-gradient(90deg,transparent,#3A3A42,transparent)"></span></span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top: 10px; font-size: 12px; line-height: 16px; color: #8C8C93">{{note}}</div>
+    <div style="margin-top: 12px; height: 48px; border-radius: 12px; border: 1px solid #3A3A42; background: #232327; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px">Понятно</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { s: 'live' }; }
+  renderVals() {
+    const st = this.state.s, hide = 'display:none', n = ' ';
+    const defs = [['loading', 'Загрузка'], ['live', 'Сейчас'], ['cached', 'Сохранено'], ['offline', 'Без сети'], ['none', 'Нет данных']];
+    const tabs = defs.map(([id, t]) => ({ t, on: id === st ? 'true' : 'false', go: () => this.setState({ s: id }),
+      style: 'flex:1;min-height:36px;padding:0 2px;border:none;border-radius:9px;font-weight:600;font-size:11px;white-space:nowrap;cursor:pointer;' + (id === st ? 'background:#F4F4F0;color:#141416' : 'background:transparent;color:#B9B9C0') }));
+    const skel = (w) => 'position:relative;overflow:hidden;display:inline-block;width:' + w + 'px;height:12px;border-radius:6px;background:#2A2A2E';
+    const val = (v, c) => ({ v, vs: 'font-weight:600;text-align:right;color:' + (c || '#F4F4F0'), skel: hide });
+    const loadingRow = (k) => ({ k, v: '', vs: hide, skel: skel(90) });
+    const later = 'уточним при интернете';
+    const S = {
+      loading: { p: '', pc: '', live: false, plate: '', status: 'Загружаем данные о парковке…', sc: '#8C8C93', dot: false,
+        rows: [loadingRow('Тариф'), loadingRow('Свободно сейчас'), loadingRow('Стоим'), loadingRow('Где')],
+        note: 'Пока грузим, в путевом листе — сумма по справочнику тарифов.' },
+      live: { p: '≈' + n + '760' + n + '₽', pc: '#B9C6D3', live: true, plate: '≈' + n + '760' + n + '₽', status: 'сейчас ≈ 12 мест · 380' + n + '₽/ч · обновлено только что', sc: '#7FD38A', dot: true,
+        rows: [{ k: 'Тариф', ...val('380' + n + '₽/ч, днём') }, { k: 'Свободно сейчас', ...val('≈' + n + '12 мест', '#7FD38A') }, { k: 'Стоим', ...val('≈' + n + '2' + n + 'ч → ≈' + n + '760' + n + '₽') }, { k: 'Где', ...val('ул. Варварка, у входа в парк') }],
+        note: 'Свободные места меняются каждую минуту — к приезду их может не быть. Сумма уже в путевом листе и в бюджете.' },
+      cached: { p: '≈' + n + '760' + n + '₽', pc: '#B9C6D3', live: false, plate: '≈' + n + '760' + n + '₽', status: 'обновлено 25 мин назад', sc: '#B9B9C0', dot: false,
+        rows: [{ k: 'Тариф', ...val('380' + n + '₽/ч, днём') }, { k: 'Свободно', ...val('было ≈' + n + '12 · 25 мин назад', '#B9B9C0') }, { k: 'Стоим', ...val('≈' + n + '2' + n + 'ч → ≈' + n + '760' + n + '₽') }, { k: 'Где', ...val('ул. Варварка, у входа в парк') }],
+        note: 'Показываем сохранённое. Обновим, когда появится интернет.' },
+      offline: { p: later, pc: '#8C8C93', live: false, plate: '?', status: 'нет сети — ' + later, sc: '#E6604A', dot: false,
+        rows: [{ k: 'Тариф', ...val(later, '#8C8C93') }, { k: 'Свободно', ...val(later, '#8C8C93') }, { k: 'Стоим', ...val('≈' + n + '2' + n + 'ч') }, { k: 'Где', ...val(later, '#8C8C93') }],
+        note: 'В путевом листе это место пока без суммы — добавим, когда появится интернет. Маршрут и остальное работают без сети.' },
+      none: { p: '?', pc: '#8C8C93', live: false, plate: '?', status: 'нет данных о парковке', sc: '#B9B9C0', dot: false,
+        rows: [{ k: 'Тариф', ...val('неизвестен', '#8C8C93') }, { k: 'Стоим', ...val('≈' + n + '2' + n + 'ч') }, { k: 'Где', ...val('уточните на месте', '#8C8C93') }],
+        note: 'Открытые источники ничего не знают об этой парковке. В путевом листе — «без данных», в сумму не входит.' }
+    };
+    const c = S[st];
+    return {
+      costLeft: 'display:flex;align-items:center;column-gap:5px;font-size:13px;font-weight:600;min-width:0;' + (st === 'offline' ? 'flex-wrap:wrap' : 'white-space:nowrap'),
+      tabs, rows: c.rows, note: c.note, status: c.status, statusColor: c.sc,
+      statusDot: c.dot ? 'width:8px;height:8px;border-radius:50%;background:#7FD38A;flex-shrink:0' : hide,
+      bannerStyle: st === 'offline' || st === 'cached' ? 'margin-top:8px;min-height:32px;padding:6px 10px;box-sizing:border-box;border-radius:8px;background:#2A1816;display:flex;align-items:center;gap:8px;font-size:12px;color:#F4F4F0' : hide,
+      rowTop: st === 'offline' || st === 'cached' ? 196 : 158,
+      pText: c.p, pTextStyle: c.p ? 'color:' + c.pc : hide,
+      pSkel: st === 'loading' ? skel(44) : hide,
+      pLive: c.live ? 'width:6px;height:6px;border-radius:50%;background:#7FD38A' : hide,
+      pCd: 'Парковка: ' + (st === 'loading' ? 'загружаем' : st === 'offline' ? later : st === 'none' ? 'нет данных' : 'примерно 760 рублей'),
+      plate: c.plate, plateStyle: c.plate ? 'margin-top:-1px;min-width:64px;height:24px;padding:0 6px;box-sizing:border-box;border-radius:3px;background:#F4F4F0;border:2px solid #141416;color:' + (c.plate === '?' ? '#55565C' : '#141416') + ';font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;white-space:nowrap' : hide,
+      plateSkel: st === 'loading' ? 'margin-top:4px;position:relative;overflow:hidden;width:64px;height:20px;border-radius:3px;background:#2A2A2E' : hide
+    };
+  }
+}
+</script>
+</body>
+</html>
