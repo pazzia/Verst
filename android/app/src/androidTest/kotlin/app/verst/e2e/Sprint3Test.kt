@@ -531,7 +531,7 @@ class Sprint3Test {
         val beer = listOf(
             Triple("Санкт-Петербург", 59.9386, 30.3141), Triple("Москва", 55.7558, 37.6173),
             Triple("Екатеринбург", 56.8389, 60.6057), Triple("Новосибирск", 55.0302, 82.9204), Triple("Казань", 55.7963, 49.1088),
-        ).firstOrNull { (t, la, lo) -> walkIn(t, la, lo, "beer", "94-walk-beer-${t.take(3)}") }
+        ).withIndex().firstOrNull { (i, c) -> walkIn(c.first, c.second, c.third, "beer", "94-walk-beer-$i") }?.value // ASCII file names
         Log.i("VerstE2e", "R4 beer walk in ${beer?.first}")
         assertTrue("a «Пивной» walk in a town ≥ 100 k", beer != null)
     }
