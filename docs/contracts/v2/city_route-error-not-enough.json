@@ -24,7 +24,9 @@
    "reason": null,
    "pointIndex": null,
    "roadKm": null,
-   "detail": null
+   "detail": null,
+   "suggestions": [],
+   "requestKey": "d4f3961dbc470576"
   },
   "ms": 0
  }

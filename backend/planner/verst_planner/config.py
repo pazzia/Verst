@@ -115,6 +115,9 @@ class DwellCfg:
 class SightsCfg:
     max_per_day: MoodInts
     min_score: float
+    diversity: int = 0
+    """ADR-0015 §2 diversity rules (1 = on): on for the open-data world `russia_v1`, off for the curated
+    fixture worlds (their sights were picked by hand; G01-G13 keep their bytes)."""
 
 
 @dataclass(frozen=True, slots=True)

@@ -33,11 +33,20 @@ POI_KINDS = (
     "embankment",
     "square",
     "attraction",
+    # Sprint 4 (ADR-0015 §2): OSM kinds
+    "theatre",
+    "zoo",
+    "nature",
+    "interactive",
+    "playground",
 )
 BAR_KINDS = ("ryumochnaya", "pub", "craft", "bar")
 
 TOWN_COLS = ("id", "name", "gen", "prep", "lat", "lon", "pop", "region", "image", "credit")
 POI_COLS = ("id", "name", "desc", "kind", "lat", "lon", "town", "sitelinks", "heritage", "image", "credit")
+# Sprint 4 optional columns (absent in older catalogues → defaults): quality 0..100, the description and its
+# source, OSM opening_hours/fee/website, the card level 1-4 and the photo source (ADR-0015 §2-§3)
+POI_OPT_COLS = ("quality", "extract", "extractSrc", "hours", "fee", "website", "level", "imageSrc")
 BAR_COLS = ("id", "name", "kind", "lat", "lon", "town", "hours")
 
 FILES = {
@@ -84,6 +93,14 @@ class CatPoi:
     heritage: bool
     image: str | None
     credit: int | None
+    quality: float | None = None
+    extract: str | None = None
+    extract_src: str | None = None  # "wikipedia" | "wikivoyage" | "osm" | "wikidata"
+    hours: str | None = None  # OSM opening_hours
+    fee: bool | None = None
+    website: str | None = None
+    level: int = 1  # card level 1-4 (ADR-0015 §3)
+    image_src: str | None = None  # "p18" | "wikipedia" | "osm" | "geosearch"
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,6 +122,12 @@ class FixtureLink:
     credit: int | None
 
 
+@dataclass(frozen=True, slots=True)
+class CatParking:
+    point: LatLon
+    rub_per_hour: int | None
+
+
 @dataclass(slots=True)
 class Catalogue:
     version: str
@@ -116,6 +139,8 @@ class Catalogue:
     credits: list[Credit]
     links: dict[str, FixtureLink]
     sources: dict[str, Any] = field(default_factory=dict)
+    parking: list[CatParking] = field(default_factory=list)
+    """ADR-0015 §4: paid OSM parking places (fee=yes), with ₽/h when their `charge` parses."""
     area_blocked: frozenset[str] = frozenset()
     """Files that must not be shown as an area photo (5.9 §3: collages, maps, flags, small or very wide)."""
     town_by_id: dict[str, CatTown] = field(default_factory=dict)
@@ -159,6 +184,16 @@ def columns(doc: Any, cols: Sequence[str], name: str) -> list[list[Any]]:
         if not isinstance(col, list) or len(col) != doc["n"]:
             raise CatalogueError(f"{name}: column {c!r} missing or of the wrong length")
         out.append(col)
+    return out
+
+
+def optional_columns(doc: Any, cols: Sequence[str]) -> list[list[Any]]:
+    """Optional columns of a validated table: a missing column reads as all-None."""
+    n = int(doc["n"])
+    out = []
+    for c in cols:
+        col = doc["cols"].get(c)
+        out.append(col if isinstance(col, list) and len(col) == n else [None] * n)
     return out
 
 
@@ -231,6 +266,7 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any) -> Catalogue:
     ]
     town_ids = [t.id for t in out_towns]
     p_cols = columns(pois, POI_COLS, "pois")
+    opt = optional_columns(pois, POI_OPT_COLS)
     out_pois = [
         CatPoi(
             str(a),
@@ -243,8 +279,18 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any) -> Catalogue:
             bool(i),
             j,
             k,
+            None if q is None else float(q) / 100,
+            ex,
+            exs,
+            hrs,
+            None if fee is None else bool(fee),
+            web,
+            int(lvl or 1),
+            isrc,
         )
-        for a, b, c, d, e, f, g, h, i, j, k in zip(*p_cols, strict=True)
+        for (a, b, c, d, e, f, g, h, i, j, k), (q, ex, exs, hrs, fee, web, lvl, isrc) in zip(
+            zip(*p_cols, strict=True), zip(*opt, strict=True), strict=True
+        )
     ]
     b_cols = columns(bars, BAR_COLS, "bars")
     out_bars = [
@@ -268,7 +314,21 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any) -> Catalogue:
         links=links,
         sources=dict(meta.get("sources", {})),
         area_blocked=frozenset(str(f) for f in meta.get("areaBlock", [])),
+        parking=parking_points(meta.get("parking")),
     )
+
+
+def parking_points(doc: Any) -> list[CatParking]:
+    """`meta.parking = {"lat": [int], "lon": [int], "rph": [int|null]}` (coordinates x 1e5)."""
+    if not isinstance(doc, dict):
+        return []
+    lat, lon, rph = doc.get("lat") or [], doc.get("lon") or [], doc.get("rph") or []
+    if not (len(lat) == len(lon) == len(rph)):
+        raise CatalogueError("meta.parking: columns of different lengths")
+    return [
+        CatParking(LatLon(a / COORD_SCALE, b / COORD_SCALE), None if r is None else int(r))
+        for a, b, r in zip(lat, lon, rph, strict=True)
+    ]
 
 
 def load_packaged() -> Catalogue:

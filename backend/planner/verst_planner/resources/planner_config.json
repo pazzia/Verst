@@ -78,7 +78,8 @@
   "lunch_sweet_spot": ["12:30", "13:30"],
   "sights": {
     "max_per_day": {"calm": 2, "more_stops": 4, "just_drive": 0, "fun": 4},
-    "min_score": 2.0
+    "min_score": 2.0,
+    "diversity": 0
   },
   "alternatives": {"window_min": 45, "max": 3, "cluster_km": 2.0},
   "cost": {

@@ -25,6 +25,7 @@ from verst_planner.domain.model import (
     MealUnit,
     NightUnit,
     NormalizedInput,
+    ParkingUnit,
     Place,
     RegionPrice,
     TicketUnit,
@@ -87,6 +88,8 @@ class CostInput:
     sights: tuple[SightInput, ...]
     defaults_as_of: date
     trip_km: int | None = None  # `TripPlan.km`, shown in the fuel formula (A§16.7)
+    parking: tuple[ParkingUnit, ...] = ()  # ADR-0015 §4 (empty without parking data)
+    parking_as_of: str | None = None
 
 
 def ym(d: date) -> str:
@@ -210,7 +213,7 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
         (CostKey.FOOD.value, ym(min(food_dates, default=ci.defaults_as_of))),
         (CostKey.TICKETS.value, ym(min(ticket_dates, default=ci.defaults_as_of))),
         (CostKey.RESERVE.value, min(fuel.as_of, lodging_as_of)),
-    )
+    ) + (((CostKey.PARKING.value, ci.parking_as_of),) if ci.parking and ci.parking_as_of else ())
     return CostUnits(
         fuel=fuel,
         tolls=tolls,
@@ -225,6 +228,7 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
         child_food_weight_under7=c.child_food_weight_under7,
         as_of=as_of,
         mood_just_drive=inp.mood is Mood.JUST_DRIVE,
+        parking=ci.parking,
     )
 
 

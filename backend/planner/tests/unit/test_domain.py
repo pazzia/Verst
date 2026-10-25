@@ -45,7 +45,7 @@ class EnumTest(unittest.TestCase):
                 "STOP_CLOSED",
             ],
             StageKey: ["split", "lodging", "hours", "fuel", "cost", "budget"],
-            CostKey: ["fuel", "tolls", "lodging", "food", "tickets", "reserve"],
+            CostKey: ["fuel", "tolls", "lodging", "food", "tickets", "parking", "reserve"],
         }
         for enum_cls, values in expected.items():
             with self.subTest(enum=enum_cls.__name__):

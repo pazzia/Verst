@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from verst_planner.cost.money import quantize, round_to
 from verst_planner.domain.enums import CostKey, FuelType, Meal
-from verst_planner.domain.model import CostBreakdownRow
+from verst_planner.domain.model import CostBreakdownRow, ParkingUnit
 from verst_planner.explain import ru
 
 
@@ -170,3 +170,34 @@ def ticket_row(name: str, adults: int, adult: int, children: int, child: int, ru
 
 def reserve_formula() -> str:
     return ru.text("cost.reserve")
+
+
+def parking_formula(known: list[ParkingUnit], unknown: int) -> str:
+    paid = [x for x in known if (x.rub or 0) > 0]
+    if not paid and not unknown:
+        return ru.text("cost.parking.free")
+    hours = sum(x.hours for x in paid)
+    out = (
+        ru.text(
+            "cost.parking.formula",
+            n=len(paid),
+            stops_word=ru.plural_word(len(paid), "plural.parking"),
+            hours=hours,
+        )
+        if paid
+        else ru.text("cost.parking.no_paid")
+    )
+    if unknown:
+        out += " " + ru.text("cost.parking.unknown", n=unknown)
+    return out
+
+
+def parking_row(x: ParkingUnit) -> CostBreakdownRow:
+    if x.rub is None:
+        return CostBreakdownRow(x.name_ru, ru.text("cost.parking.row_unknown"), 0)
+    if x.rub == 0:
+        return CostBreakdownRow(x.name_ru, ru.text("cost.parking.row_free"), 0)
+    assert x.rub_per_hour is not None
+    return CostBreakdownRow(
+        x.name_ru, ru.text("cost.parking.row", hours=x.hours, rate=ru.fmt_int(x.rub_per_hour)), x.rub
+    )

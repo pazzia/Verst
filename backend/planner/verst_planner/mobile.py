@@ -29,6 +29,7 @@ CLI: ``python3 -m verst_planner.mobile selftest [--world PATH …]`` runs the wh
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import sys
 import threading
@@ -49,7 +50,7 @@ from verst_planner.adapters.fake import GOLDEN_CLOCK, FakePorts, FakeWorld, buil
 from verst_planner.catalogue import Catalogue, CatalogueError, load_packaged
 from verst_planner.catalogue.photos import image_urls
 from verst_planner.city import presets as city_presets_mod
-from verst_planner.city.route import NotEnoughPois, WalkTown, build_walk
+from verst_planner.city.route import NotEnoughPois, WalkTown, build_walk, request_key
 from verst_planner.city.walk import (
     Candidate,
     WalkInput,
@@ -82,6 +83,8 @@ from verst_planner.geo.bearing import bearing8
 from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.grid import GridIndex
 from verst_planner.hours import parse as parse_hours
+from verst_planner.parking import ParkingInfo
+from verst_planner.pipeline.sights import category_of
 
 API_VERSION = 3
 REQUIRED_ZONES = ("Europe/Moscow", "Europe/Volgograd")
@@ -178,7 +181,12 @@ def _envelope(fn: Callable[[], Any]) -> str:
         except TooShort as e:
             body = {"ok": False, "error": _error(e.code, str(e), roadKm=e.road_km)}
         except NotEnoughPois as e:
-            body = {"ok": False, "error": _error(e.code, str(e), field=e.field)}
+            body = {
+                "ok": False,
+                "error": _error(
+                    e.code, str(e), field=e.field, suggestions=e.suggestions, requestKey=e.request_key
+                ),
+            }
         except PlannerError as e:
             body = {"ok": False, "error": _error(e.code, str(e))}
         except EngineFailure as e:
@@ -255,6 +263,9 @@ def _num(v: Any, what: str) -> float:
 # ---------------------------------------------------------------------------------------------- planners
 
 
+OPEN_DATA_CONFIG: dict[str, Any] = {"sights": {"diversity": 1}}  # ADR-0015 §2 rules for russia_v1
+
+
 def _planner(fakes: FakePorts | CataloguePorts, clock: Any, config: dict[str, Any] | None = None) -> Planner:
     return Planner(
         routing=fakes.routing,
@@ -266,6 +277,7 @@ def _planner(fakes: FakePorts | CataloguePorts, clock: Any, config: dict[str, An
         clock=clock,
         config=PlannerConfig.from_dict(config or {}),
         templates=ReasonTemplates.default(),
+        parking=getattr(fakes, "parking", None),
     )
 
 
@@ -492,12 +504,149 @@ def with_driven_km(trip: dict[str, Any]) -> dict[str, Any]:
     return trip
 
 
-def _trip_result(plan: TripPlan, world: FakeWorld | None = None) -> dict[str, Any]:
+AMENITY_TAGS = ("wc", "cafe_at_fuel", "playground", "walk", "view", "parking", "ev_charger", "24h")
+
+
+def with_amenities(trip: dict[str, Any]) -> dict[str, Any]:
+    """API v3 (ADR-0015 §5): rest and fuel rows list their amenities in a fixed order, for the row icons."""
+    for d in trip.get("daysList", []):
+        for s in d.get("stops", []):
+            if s.get("kind") in ("rest", "fuel"):
+                tags = set(s.get("tags") or [])
+                s["amenities"] = [t for t in AMENITY_TAGS if t in tags]
+    return trip
+
+
+WHY_SITELINKS = 15  # «статьи в N разделах Википедии» from this many language editions
+
+
+def why_ru(w: _World, p: Place) -> str | None:
+    """API v3: one line why a catalogue sight is worth the stop — heritage, Wikivoyage, wide fame; None for
+    a curated sight (its description says it) or when the open data says nothing."""
+    poi = _cat_poi(w, p.id)
+    if poi is None or p.source is Source.CURATED:
+        return None
+    parts = []
+    if poi.heritage:
+        parts.append(ru.text("poi.why.heritage"))
+    if poi.extract_src == "wikivoyage":
+        parts.append(ru.text("poi.why.voyage"))
+    if poi.sitelinks >= WHY_SITELINKS:
+        parts.append(ru.text("poi.why.famous", n=poi.sitelinks))
+    return " · ".join(parts) or None
+
+
+def _photo_source(w: _World, place_id: str) -> str | None:
+    """Where the stop's photo comes from: p18 (the item's own image) | wikipedia | osm | geosearch (a
+    Commons photo taken near the place, labelled «Фото поблизости»); None = no photo."""
+    if not _CATALOGUE:
+        return None
+    cat = _CATALOGUE[0]
+    link = cat.links.get(place_id)
+    if link is not None:
+        return "p18" if link.image else None
+    poi = _cat_poi(w, place_id)
+    if poi is None or not poi.image:
+        return None
+    return poi.image_src or "p18"
+
+
+def _hm(t: Any) -> str:
+    return str(t.strftime("%H:%M"))
+
+
+def parking_sheet(info: ParkingInfo, unit: dict[str, Any]) -> dict[str, Any]:
+    """API v3 stop `parking`: the cost unit's numbers plus the sheet texts (ADR-0015 §4).
+    zoneRu — the tariff zone or the evidence; whereRu — where the car stands; sundayRu — the Sunday and
+    holiday rule (zones only, else null); freeRu — why it is free at this arrival (null when paid)."""
+    if info.source in ("zone", "free") and info.city is not None:
+        night = (
+            ru.text("parking.night_free")
+            if not info.night_rub
+            else ru.text("parking.night_rub", rub=info.night_rub)
+        )
+        zone = ru.text(
+            "parking.zone",
+            city=info.city,
+            km=f"{info.band_km or 0:g}".replace(".", ","),
+            rub=info.day_rub or 0,
+            start=_hm(info.day_from),
+            end=_hm(info.day_to),
+            night=night,
+        )
+        where = ru.text("parking.where.zone")
+        sunday = ru.text(f"parking.sunday.{info.sunday or 'paid'}")
+        if info.holidays_free:
+            sunday = ru.text("parking.sunday_holidays", sunday=sunday)
+    elif info.source in ("osm", "unknown"):
+        zone = ru.text(f"parking.zone_{info.source}")
+        where = ru.text("parking.where.osm", m=info.osm_m or 0)
+        sunday = None
+    else:
+        zone = ru.text("parking.zone_none")
+        where = ru.text("parking.where.free")
+        sunday = None
+    free = None
+    if info.free_reason is not None:
+        free = ru.text(
+            f"parking.free.{info.free_reason}",
+            start=_hm(info.day_from) if info.day_from else "",
+            end=_hm(info.day_to) if info.day_to else "",
+        )
+    return {**unit, "zoneRu": zone, "whereRu": where, "sundayRu": sunday, "freeRu": free}
+
+
+def _stop_parking(w: _World, s: dict[str, Any], unit: dict[str, Any] | None) -> dict[str, Any] | None:
+    model = getattr(w.fakes, "parking", None)
+    if model is None or unit is None or not s.get("arriveAt"):
+        return None
+    arrive = datetime.fromisoformat(s["arriveAt"])
+    info = model.explain(LatLon(s["lat"], s["lon"]), arrive)
+    return parking_sheet(info, {k: unit[k] for k in ("rub", "rubPerHour", "hours", "source")})
+
+
+def _decorate_sight(w: _World, s: dict[str, Any], unit: dict[str, Any] | None) -> None:
+    p = w.world.places.get(s.get("placeId") or "")
+    if s.get("kind") != "sight" or p is None:
+        return
+    s["poiKind"] = card_kind(w, p)
+    s["whyRu"] = why_ru(w, p)
+    s["photoSource"] = _photo_source(w, p.id)
+    s["parking"] = _stop_parking(w, s, unit)
+
+
+def with_stop_details(trip: dict[str, Any], w: _World | None) -> dict[str, Any]:
+    """API v3 (ADR-0015 §3-4): sight stops — and the stops of their alternatives — get `poiKind` (the card
+    kind; `kind` stays the stop type), `whyRu`, `photoSource` and `parking` (null without parking data)."""
+    if w is None:
+        return trip
+    units = {u["stopId"]: u for u in trip.get("cost", {}).get("units", {}).get("parking", [])}
+    for d in trip.get("daysList", []):
+        for s in d.get("stops", []):
+            _decorate_sight(w, s, units.get(s.get("id")))
+            for a in s.get("alternatives", []):
+                u = a.get("units", {})
+                alt_unit = (
+                    None
+                    if "parkingSource" not in u
+                    else {
+                        "rub": u["parkingRub"],
+                        "rubPerHour": u["parkingRubPerHour"],
+                        "hours": u["parkingHours"],
+                        "source": u["parkingSource"],
+                    }
+                )
+                _decorate_sight(w, a.get("stop", {}), alt_unit)
+    return trip
+
+
+def _trip_result(plan: TripPlan, w: _World | None = None) -> dict[str, Any]:
     """The private trip, its share text, the Waybill footnote month/year («октябрь», "2026") and the
     prepositional names of the overnight towns (5.7 «Отметим ночёвку в Ярославле…»)."""
     month, year = ru.month_year_ru(plan.cost.prices_as_of).split(" ")
     prep: dict[str, str] = {}
     gen: dict[str, str] = {}
+    world = w.world if w is not None else None
     if world is not None:
         for d in plan.days_list:
             for s in d.stops:
@@ -506,7 +655,7 @@ def _trip_result(plan: TripPlan, world: FakeWorld | None = None) -> dict[str, An
                     prep[town.id] = ru.prepositional(town)
                     gen[town.id] = ru.genitive(town)
     return {
-        "trip": with_driven_km(codec.plan_to_json(plan, public=False)),
+        "trip": with_stop_details(with_amenities(with_driven_km(codec.plan_to_json(plan, public=False))), w),
         "shareText": render_share_text(plan),
         "pricesMonthRu": month,
         "pricesYear": year,
@@ -589,7 +738,7 @@ def _no_fit_result(nf: NoFit, w: _World) -> dict[str, Any]:
         "minimum": {
             "totalRub": nf.minimum.cost.total_rub,
             "levers": [{"code": x.code, "savedRub": x.saved_rub} for x in nf.levers],
-            **_trip_result(nf.minimum, w.world),
+            **_trip_result(nf.minimum, w),
         },
         "options": options,
         "textRu": nf.text_ru,
@@ -605,7 +754,7 @@ def plan(world: str, request_id: str, input_json: str, listener: Any = None) -> 
             trip = _run_plan(w, request_id, input_json, _ListenerSink(listener), hint=True)
         except NoFit as nf:
             return _no_fit_result(nf, w)
-        return {"outcome": "plan", **_trip_result(trip, w.world)}
+        return {"outcome": "plan", **_trip_result(trip, w)}
 
     return _envelope(run)
 
@@ -723,7 +872,7 @@ def replace_stop(world: str, trip_json: str, stop_id: str, alt_id: str) -> str:
         w = _world(world)
         trip = _trip(trip_json)
         return _trip_result(
-            w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")), w.world
+            w.planner.replace_stop(trip, _str(stop_id, "stop_id"), _str(alt_id, "alt_id")), w
         )
 
     return _envelope(run)
@@ -767,7 +916,7 @@ def patch_cost(world: str, trip_json: str, patch_json: str) -> str:
 
     def run() -> dict[str, Any]:
         w = _world(world)
-        return _trip_result(w.planner.recompute_cost(_trip(trip_json), _cost_patch(patch_json)), w.world)
+        return _trip_result(w.planner.recompute_cost(_trip(trip_json), _cost_patch(patch_json)), w)
 
     return _envelope(run)
 
@@ -821,7 +970,7 @@ def _load_catalogue() -> dict[str, Any]:
     bars: GridIndex[str] = GridIndex(0.05)
     for b in cat.bars:
         bars.add(b.point, b.id)
-    _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, _planner(ports, _CLOCK), cw, bars)
+    _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, _planner(ports, _CLOCK, OPEN_DATA_CONFIG), cw, bars)
     _CATALOGUE[:] = [cat]
     return {
         **cat.info(),
@@ -890,6 +1039,13 @@ def _poi_kind(w: _World, p: Place) -> str:
     return "park" if Tag.WALK in p.tags else "attraction"
 
 
+def card_kind(w: _World, p: Place) -> str:
+    """API v3 `poiKind` of a sight on cards, geo search and trip stops: the catalogue kind, with the generic
+    «attraction» narrowed to the ADR-0015 category (a temple by its name, a park by its tag)."""
+    kind = _poi_kind(w, p)
+    return category_of(p) if kind == "attraction" else kind
+
+
 def _sitelinks(place_id: str) -> int:
     if not _CATALOGUE:
         return 0
@@ -922,7 +1078,7 @@ def _geo_search(world: Any, q: Any, lat: Any, lon: Any, limit: Any, kinds: Any) 
                     "kind": "poi" if p.source is Source.OSM else "place",
                     "population": None,
                     "regionRu": s.subtitle_ru,
-                    "poiKind": _poi_kind(w, p),
+                    "poiKind": card_kind(w, p),
                     "hasPhoto": _photo_file(w, p.id)[0] is not None,
                 }
             )
@@ -975,6 +1131,23 @@ def _walk_town(w: _World, start: LatLon, town_id: str | None) -> Town:
     return hit[1]
 
 
+def _safe_hours(text: str | None) -> Any:
+    if not text:
+        return None
+    try:
+        return parse_hours(text)
+    except Exception:  # an OSM value outside the supported subset: the kind's default applies
+        return None
+
+
+def _osm_hours(place_id: str) -> str | None:
+    """The OSM `opening_hours` of a catalogue POI (ADR-0015 §3), if the data build found one."""
+    if not _CATALOGUE:
+        return None
+    poi = _CATALOGUE[0].poi_by_id.get(place_id)
+    return poi.hours if poi is not None else None
+
+
 def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
     weights = weights_for(inp)
     crew_tickets = inp.adults, inp.children
@@ -986,7 +1159,8 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
         weight = weights.get(kind, 0.0)
         if weight <= 0:
             continue
-        hours = parse_hours(p.opening_hours) if p.opening_hours else None
+        hours = _safe_hours(p.opening_hours)
+        osm_hours = _osm_hours(p.id) is not None and hours is not None
         adult = p.ticket_adult_rub or 0
         child = p.ticket_child_rub if p.ticket_child_rub is not None else adult
         cost = 0 if Tag.FREE_ENTRY in p.tags else crew_tickets[0] * adult + crew_tickets[1] * child
@@ -999,7 +1173,10 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                 popularity=max(0.0, min(1.0, (p.rating_internal - 3.5) / 1.5)),
                 heritage=False,
                 hours=hours,
-                hours_verified=p.source is Source.CURATED and p.opening_hours is not None,
+                hours_verified=(p.source is Source.CURATED and p.opening_hours is not None) or osm_hours,
+                hours_source="curated"
+                if p.source is Source.CURATED and p.opening_hours is not None
+                else ("osm" if osm_hours else "default"),
                 cost_rub=cost,
                 dwell_min=dwell_for(kind, _sitelinks(p.id), inp),
                 long_visit=inp.preset == "museums" and long_visit(kind, _sitelinks(p.id)),
@@ -1068,26 +1245,96 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
             raise PlanCancelled()
         _CANCELS[rid] = token
     try:
-        speed = city_presets_mod.PACES[inp.pace][0]
-        cands = _candidates(w, inp, city_presets_mod.radius_km(inp.duration_min, speed))
-        if inp.start_at is not None:
-            start_dt, tomorrow = inp.start_at, inp.start_at.date() > now_local.date()
-        else:
-            start_dt, tomorrow = planned_start(now_local, inp.preset, inp.interests, inp.duration_min)
-        return build_walk(
-            inp,
-            cands,
-            WalkTown(town.id, town.name_ru, ru.prepositional(town), tz),
-            start_dt,
-            ENGINE_VERSION,
-            f"wlk_{rid}",
-            token,
-            tomorrow,
-        )
+        wt = WalkTown(town.id, town.name_ru, ru.prepositional(town), tz)
+        key = request_key(str(world), inp)
+        try:
+            return {**_solve_walk(w, inp, wt, now_local, f"wlk_{rid}", token), "requestKey": key}
+        except NotEnoughPois as e:
+            e.suggestions = _walk_suggestions(w, inp, wt, now_local, token)
+            e.request_key = key
+            raise
     finally:
         with _LOCK:
             if _CANCELS.get(rid) is token:
                 del _CANCELS[rid]
+
+
+def _walk_candidates(w: _World, inp: WalkInput) -> tuple[WalkInput, list[Candidate]]:
+    """The candidates; a custom walk whose interests give < 2 places widens to other sights (flagged)."""
+    radius = city_presets_mod.radius_km(inp.duration_min, city_presets_mod.PACES[inp.pace][0])
+    cands = _candidates(w, inp, radius)
+    if inp.preset == "custom" and not inp.widened:
+        sights = [c for c in cands if c.kind not in city_presets_mod.DRINK_KINDS]
+        if len(sights) < 2:
+            inp = dataclasses.replace(inp, widened=True)
+            cands = _candidates(w, inp, radius)
+    return inp, cands
+
+
+def _solve_walk(
+    w: _World, inp: WalkInput, wt: WalkTown, now_local: datetime, route_id: str, token: CancelToken
+) -> dict[str, Any]:
+    inp, cands = _walk_candidates(w, inp)
+    if inp.start_at is not None:
+        start_dt, tomorrow = inp.start_at, inp.start_at.date() > now_local.date()
+    else:
+        start_dt, tomorrow = planned_start(now_local, inp.preset, inp.interests, inp.duration_min or 120)
+    return build_walk(inp, cands, wt, start_dt, ENGINE_VERSION, route_id, token, tomorrow)
+
+
+MAX_SUGGESTIONS = 3
+
+
+def _walk_suggestions(
+    w: _World, inp: WalkInput, wt: WalkTown, now_local: datetime, token: CancelToken
+) -> list[dict[str, Any]]:
+    """ADR-0015 §6 / S4 bug c: what would work instead, each one solved and never the current value."""
+    trials: list[tuple[dict[str, Any], WalkInput]] = []
+    if inp.exclude:
+        trials.append(({"clearExclude": True}, dataclasses.replace(inp, exclude=frozenset())))
+    if inp.duration_min is not None:
+        for d in city_presets_mod.DURATIONS:
+            if d > inp.duration_min:
+                trials.append(({"durationMin": d}, dataclasses.replace(inp, duration_min=d)))
+        trials.append(({"durationMin": None}, dataclasses.replace(inp, duration_min=None)))
+    for p in ("dog_walk", "overview", "custom") if inp.dog else ("overview", "custom"):
+        if p == inp.preset:
+            continue
+        table = city_presets_mod.PRESET_TABLE.get(p)
+        trials.append(
+            (
+                {"preset": p},
+                dataclasses.replace(
+                    inp,
+                    preset=p,
+                    interests=("history", "architecture", "parks", "views") if p == "custom" else (),
+                    duration_min=table.default_duration if table else inp.duration_min,
+                    widened=False,
+                ),
+            )
+        )
+    out: list[dict[str, Any]] = []
+    for label, trial in trials:
+        if len(out) >= MAX_SUGGESTIONS:
+            break
+        try:
+            r = _solve_walk(w, trial, wt, now_local, "probe", token)
+        except NotEnoughPois:
+            continue
+        out.append({**label, "stops": len(r["stops"]), "titleRu": _suggestion_title(label)})
+    return out
+
+
+def _suggestion_title(label: dict[str, Any]) -> str:
+    """The chip text of a checked NOT_ENOUGH_POIS suggestion."""
+    if label.get("clearExclude"):
+        return ru.text("walk.suggest.clear_exclude")
+    if "durationMin" in label:
+        d = label["durationMin"]
+        if d is None:
+            return ru.text("walk.suggest.unlimited")
+        return ru.text("walk.suggest.duration", duration=ru.fmt_duration(d))
+    return ru.text(f"walk.suggest.preset.{label['preset']}")
 
 
 def city_route(world: str, request_id: str, input_json: str) -> str:
@@ -1157,21 +1404,31 @@ def city_presets(world: str, lat: float, lon: float) -> str:
 
 
 def _image(
-    w: _World, file: str | None, credit_idx: int | None, area_town: Town | None
+    w: _World, file: str | None, credit_idx: int | None, area_town: Town | None, source: str | None = None
 ) -> dict[str, Any] | None:
+    """The card photo; API v3 `source` = p18 | wikipedia | osm | geosearch | area (see `_photo_source`)."""
     if not file:
         return None
     credit = _CATALOGUE[0].credit(credit_idx) if _CATALOGUE else None
     credit_json = None
-    label = ru.text("poi.photo")
+    nearby = source == "geosearch"
+    label = ru.text("poi.photo_nearby" if nearby else "poi.photo")
     if credit is not None:
         credit_json = {"author": credit.author, "licence": credit.licence, "licenceUrl": credit.url}
         parts = [x for x in (credit.author, credit.licence) if x]
         if parts:
-            label = ru.text("poi.photo_credit", credit=" · ".join(parts))
+            key = "poi.photo_nearby_credit" if nearby else "poi.photo_credit"
+            label = ru.text(key, credit=" · ".join(parts))
     if area_town is not None:
         label = ru.text("poi.area_photo", town=area_town.name_ru)
-    return {**image_urls(file), "credit": credit_json, "isArea": area_town is not None, "labelRu": label}
+        source = "area"
+    return {
+        **image_urls(file),
+        "credit": credit_json,
+        "isArea": area_town is not None,
+        "labelRu": label,
+        "source": source or "p18",
+    }
 
 
 # Outdoor kinds whose photo may stand for the area when the town's own photo does not qualify (5.9 §3).
@@ -1199,6 +1456,21 @@ def _area_photo(w: _World, town: Town) -> tuple[str | None, int | None]:
     return (best[1], best[2]) if best else (None, None)
 
 
+EXTRACT_LICENCE = {
+    "wikipedia": "CC BY-SA 4.0",
+    "wikivoyage": "CC BY-SA 3.0",
+    "osm": "ODbL",
+    "wikidata": "CC0",
+}
+
+
+def _cat_poi(w: _World, place_id: str) -> Any:
+    if not _CATALOGUE or w.catalogue is None:
+        return None
+    qid = w.catalogue.qid_of_place.get(place_id, place_id)
+    return _CATALOGUE[0].poi_by_id.get(qid)
+
+
 def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
     w = _world(world)
     pid = _str(place_id, "place_id")
@@ -1220,20 +1492,42 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
                 "childRub": p.ticket_child_rub,
                 "estimate": p.source is not Source.CURATED,
             }
+        poi = _cat_poi(w, p.id)
+        if poi is not None and poi.hours and hours is not None:
+            hours = {"textRu": poi.hours, "verified": True, "source": "osm"}
+        attribution = []
+        if poi is not None and poi.extract_src:
+            attribution.append(ru.text(f"poi.source.{poi.extract_src}"))
+        if poi is not None and (poi.hours or poi.fee is not None):
+            attribution.append(ru.text("poi.osm"))
         return {
             "id": p.id,
             "kind": "sight",
-            "poiKind": _poi_kind(w, p),
+            "poiKind": card_kind(w, p),
             "nameRu": p.name_ru,
             "descriptionRu": p.description_ru,
+            # API v3 (ADR-0015 §3): the extra sources and the card level the 5.9 card is laid out for
+            "extractRu": poi.extract if poi else None,
+            "extractSource": None
+            if poi is None or not poi.extract_src
+            else {
+                "key": poi.extract_src,
+                "nameRu": ru.text(f"poi.source.{poi.extract_src}"),
+                "licence": EXTRACT_LICENCE[poi.extract_src],
+            },
+            "cardLevel": poi.level if poi else (4 if p.source is Source.CURATED else 2),
+            "quality": None if poi is None or poi.quality is None else round(poi.quality * 100),
+            "fee": poi.fee if poi else None,
+            "website": poi.website if poi else None,
             "townName": town.name_ru if town else None,
             "lat": p.point.lat,
             "lon": p.point.lon,
-            "image": _image(w, file, credit, None),
+            "image": _image(w, file, credit, None, _photo_source(w, p.id)),
+            "whyRu": why_ru(w, p),
             "hours": hours,
             "ticket": ticket,
             "isFictional": False,
-            "attributionRu": [],
+            "attributionRu": attribution,
             "wikidataId": w.catalogue.qid_of_place.get(p.id) if w.catalogue else None,
         }
     if p is not None and p.type is PlaceType.LODGING:

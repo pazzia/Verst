@@ -85,7 +85,8 @@ class CostTest(unittest.TestCase):
     def test_waybill_canvas_rounding(self) -> None:
         res = recompute(units(), CANVAS_CREW, True, 40_000)
         self.assertEqual([x.rub for x in res.lines], [3720, 0, 12000, 12600, 3000, 3130])
-        self.assertEqual([x.key for x in res.lines], list(CostKey))
+        # no parking units (fixture worlds) → no «Парковки» line (ADR-0015 §4)
+        self.assertEqual([x.key for x in res.lines], [k for k in CostKey if k is not CostKey.PARKING])
         self.assertEqual(res.subtotal_rub, 31320)
         self.assertEqual(res.total_rub, 34500)
         self.assertEqual(res.remaining_rub, 5500)

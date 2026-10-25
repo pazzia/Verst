@@ -14,6 +14,12 @@
    "poiKind": "museum",
    "nameRu": "Церковь Ильи Пророка",
    "descriptionRu": null,
+   "extractRu": null,
+   "extractSource": null,
+   "cardLevel": 1,
+   "quality": null,
+   "fee": null,
+   "website": null,
    "townName": "Ярославль",
    "lat": 57.62971748693183,
    "lon": 39.89288849931893,
@@ -27,8 +33,10 @@
      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0"
     },
     "isArea": false,
-    "labelRu": "Фото: Wikimedia Commons · ВладимирФото · CC BY-SA 4.0"
+    "labelRu": "Фото: Wikimedia Commons · ВладимирФото · CC BY-SA 4.0",
+    "source": "p18"
    },
+   "whyRu": null,
    "hours": {
     "textRu": "Tu-Su 10:00-18:00",
     "verified": true

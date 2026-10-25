@@ -193,6 +193,8 @@ class MobileTest(unittest.TestCase):
         self.assertEqual(driven, sorted(driven))
         self.assertEqual((driven[0], driven[-1]), (0, r["trip"]["km"]))
         self.assertTrue(all(s["kmDriven"] + s["kmLeft"] == r["trip"]["km"] for s in flat))
+        rests = [s for s in flat if s["kind"] in ("rest", "fuel")]
+        self.assertTrue(rests and all(set(s["amenities"]) <= set(s["tags"]) for s in rests))
 
     def test_plan_matches_golden_all(self) -> None:
         checked = 0
@@ -259,7 +261,10 @@ class MobileTest(unittest.TestCase):
         self.assertEqual(
             json.dumps(got["trip"], sort_keys=True, ensure_ascii=False),
             json.dumps(
-                mobile.with_driven_km(codec.plan_to_json(want, public=False)),
+                mobile.with_stop_details(
+                    mobile.with_amenities(mobile.with_driven_km(codec.plan_to_json(want, public=False))),
+                    mobile._WORLDS["central_russia_v1"],
+                ),
                 sort_keys=True,
                 ensure_ascii=False,
             ),

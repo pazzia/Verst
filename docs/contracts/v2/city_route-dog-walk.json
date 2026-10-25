@@ -1,0 +1,222 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-10",
+   "input_json": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "preset": "dog_walk",
+    "crew": {
+     "adults": 2,
+     "dog": true
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-10",
+   "titleRu": "Казань: прогулка с собакой",
+   "townId": "t_kazan",
+   "townName": "Казань",
+   "townPrep": "Казани",
+   "preset": "dog_walk",
+   "startAt": "2026-10-23T09:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T10:54",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 2.9,
+   "walkMin": 39,
+   "durationMin": 114,
+   "requestedDurationMin": 120,
+   "crewNotesRu": [
+    "С собакой: вода, пакеты и поводок; маршрут без закрытых мест."
+   ],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "finish": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "Q13205949",
+     "kind": "monument",
+     "nameRu": "Памятник Мусе Джалилю",
+     "lat": 55.79611,
+     "lon": 49.10833,
+     "arriveAt": "2026-10-23T09:00",
+     "departAt": "2026-10-23T09:10",
+     "dwellMin": 10,
+     "walkKmFromPrev": 0.0,
+     "walkMinFromPrev": 1,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w02",
+     "poiId": "Q4518730",
+     "kind": "park",
+     "nameRu": "Чёрное озеро (парк)",
+     "lat": 55.79481,
+     "lon": 49.11855,
+     "arriveAt": "2026-10-23T09:21",
+     "departAt": "2026-10-23T09:56",
+     "dwellMin": 35,
+     "walkKmFromPrev": 0.9,
+     "walkMinFromPrev": 11,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w03",
+     "poiId": "Q2047744",
+     "kind": "attraction",
+     "nameRu": "Татарский академический государственный театр оперы и балета имени Мусы Джалиля",
+     "lat": 55.79556,
+     "lon": 49.12472,
+     "arriveAt": "2026-10-23T10:03",
+     "departAt": "2026-10-23T10:23",
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 7,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w04",
+     "poiId": "Q4365764",
+     "kind": "square",
+     "nameRu": "Площадь Свободы",
+     "lat": 55.79694,
+     "lon": 49.125,
+     "arriveAt": "2026-10-23T10:26",
+     "departAt": "2026-10-23T10:36",
+     "dwellMin": 10,
+     "walkKmFromPrev": 0.2,
+     "walkMinFromPrev": 3,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    }
+   ],
+   "cost": {
+    "totalRub": 0,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     55.7963,
+     49.1088
+    ],
+    [
+     55.79611,
+     49.10833
+    ],
+    [
+     55.79481,
+     49.11855
+    ],
+    [
+     55.79556,
+     49.12472
+    ],
+    [
+     55.79694,
+     49.125
+    ],
+    [
+     55.7963,
+     49.1088
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "townId": null,
+    "preset": "dog_walk",
+    "durationMin": 120,
+    "interests": [],
+    "pace": "normal",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T09:00",
+    "crew": {
+     "adults": 2,
+     "children": 0,
+     "dog": true
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   },
+   "requestKey": "3526300f881a981e"
+  },
+  "ms": 0
+ }
+}

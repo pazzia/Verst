@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from verst_planner.domain.enums import Meal, WarningCode
+from verst_planner.domain.enums import Meal, Mood, WarningCode
 from verst_planner.domain.model import Alternative, DayPlan, NormalizedInput, PlanWarning
 from verst_planner.pipeline import Corridor, PlanContext, round_half_up
 from verst_planner.pipeline import fuel as fuel_stage
@@ -102,7 +102,7 @@ def final_repair(
     fixed one), re-plan a lunch that left its window (stage 8b, once), then re-plan the day's rests. Every
     change is followed by a fresh check, so `hours_open`, `lunch_window` and `break_spacing` hold."""
     profile = ctx.profile_for(corridor.route)
-    pool = RestPool.of(corridor)
+    pool = RestPool.of(corridor, inp.mood is Mood.FUN)
     warnings: list[PlanWarning] = []
     for day in days:
         lunch_replanned = False

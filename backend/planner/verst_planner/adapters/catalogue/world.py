@@ -11,11 +11,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
+from verst_planner import resources
 from verst_planner.adapters.catalogue.synthetic import cafes_for, hotels_for
 from verst_planner.adapters.fake.prices import FakePriceRepository
-from verst_planner.adapters.fake.world import FakeWorld
+from verst_planner.adapters.fake.world import Edge, FakeWorld, Node
 from verst_planner.catalogue import Catalogue, CatPoi
-from verst_planner.domain.enums import PlaceStatus, PlaceType, Source, Tag
+from verst_planner.domain.enums import PlaceStatus, PlaceType, RoadClass, Source, Tag
 from verst_planner.domain.model import LatLon, PartnerIds, Place, RegionInfo, Town
 
 WORLD_ID = "russia_v1"
@@ -53,6 +54,20 @@ def poi_rating(sitelinks: int) -> float:
     return round(3.6 + 1.3 * min(1.0, math.log10(1 + sitelinks) / math.log10(1 + 150)), 2)
 
 
+# catalogue kind → ADR-0015 §2 category (the diversity rules count «temple» and «monastery» as religious)
+POI_CATEGORY = {"church": "temple"}
+
+
+def _hours_ok(text: str) -> bool:
+    from verst_planner.hours import parse
+
+    try:
+        parse(text)
+    except Exception:
+        return False
+    return True
+
+
 def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
     ticket = POI_TICKETS.get(p.kind)
     tags = set(POI_TAGS[p.kind])
@@ -69,7 +84,7 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
         address=None,
         region_code=region,
         town_id=town_id,
-        opening_hours=POI_HOURS.get(p.kind),
+        opening_hours=p.hours if p.hours and _hours_ok(p.hours) else POI_HOURS.get(p.kind),
         dwell_min=dwell,
         avg_check_rub=None,
         price_night_rub=None,
@@ -82,6 +97,8 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
         source=Source.OSM,
         verified_at=None,
         status=PlaceStatus.LIVE,
+        category=POI_CATEGORY.get(p.kind, p.kind),
+        quality=p.quality,
     )
 
 
@@ -106,6 +123,40 @@ class CatalogueWorld:
     poi_kind: dict[str, str] = field(default_factory=dict)
     """Composed sight id → catalogue POI kind (fixture sights from their tags)."""
     synthetic_towns: set[str] = field(default_factory=set)
+
+
+def with_bypasses(
+    fixture: FakeWorld,
+) -> tuple[dict[str, Node], list[Edge], dict[str, list[tuple[Edge, str]]]]:
+    """The fixture graph plus `resources/bypass_roads.json` (МКАД, ЦКАД; ADR-0015 §2), for `russia_v1`."""
+    import json
+
+    doc = json.loads(resources.read_text("bypass_roads.json"))
+    nodes = dict(fixture.nodes)
+    for n in doc["nodes"]:
+        nodes[n["id"]] = Node(n["id"], LatLon(float(n["lat"]), float(n["lon"])), n["region"])
+    edges = list(fixture.edges)
+    adjacency = {k: list(v) for k, v in fixture.adjacency.items()}
+    for e in doc["edges"]:
+        a, b = e["from"], e["to"]
+        edge = Edge(
+            index=len(edges),
+            a=a,
+            b=b,
+            pa=nodes[a].point,
+            pb=nodes[b].point,
+            km=float(e["km"]),
+            speed_kmh=float(e["speedKmh"]),
+            road_class=RoadClass(e["roadClass"]),
+            ref=e.get("ref"),
+            toll=bool(e.get("toll", False)),
+        )
+        edges.append(edge)
+        adjacency.setdefault(a, []).append((edge, b))
+        adjacency.setdefault(b, []).append((edge, a))
+    for lst in adjacency.values():
+        lst.sort(key=lambda eo: (eo[1], eo[0].index))
+    return nodes, edges, adjacency
 
 
 def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> CatalogueWorld:
@@ -163,12 +214,13 @@ def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> Cat
         out.qid_of_place[place.id] = p.id
         out.poi_kind[place.id] = p.kind
 
+    nodes, edges, adjacency = with_bypasses(fixture)
     out.world = FakeWorld(
         id=world_id,
         as_of=fixture.as_of,
         regions=regions,
-        nodes=fixture.nodes,
-        edges=fixture.edges,
+        nodes=nodes,
+        edges=edges,
         towns=towns,
         town_node=fixture.town_node,
         places=places,
@@ -177,7 +229,7 @@ def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> Cat
         ready_routes=fixture.ready_routes,
         food_check_by_population=fixture.food_check_by_population,
         lodging_night_by_population=fixture.lodging_night_by_population,
-        adjacency=fixture.adjacency,
+        adjacency=adjacency,
     )
     return out
 

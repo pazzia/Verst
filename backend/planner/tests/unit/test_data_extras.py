@@ -94,6 +94,18 @@ class ExtrasTest(unittest.TestCase):
         self.assertEqual([t["id"] for t in self.x.geo_targets(raw_pois, osm, 10)], ["Q3", "Q1", "n9"])
         self.assertEqual(len(self.x.geo_targets(raw_pois, osm, 1)), 1)
 
+    def test_misplaced_poi(self) -> None:
+        b = load("build_catalogue")
+        by_name = {"москва": [(55.75, 37.62)]}
+        self.assertTrue(
+            b.misplaced({"name": "Памятник Чернышевскому (Москва)", "lat": 56.27, "lon": 38.09}, by_name)
+        )
+        self.assertFalse(
+            b.misplaced({"name": "Памятник Пушкину (Москва)", "lat": 55.76, "lon": 37.60}, by_name)
+        )
+        self.assertFalse(b.misplaced({"name": "Дом (Нигде)", "lat": 56.27, "lon": 38.09}, by_name))
+        self.assertFalse(b.misplaced({"name": "Собор", "lat": 56.27, "lon": 38.09}, by_name))
+
     def test_commons_names(self) -> None:
         self.assertEqual(self.x.commons_name("File:Abc_def.jpg"), "Abc def.jpg")
         self.assertEqual(self.x.commons_name("https://commons.wikimedia.org/wiki/File:X_y.jpg"), "X y.jpg")

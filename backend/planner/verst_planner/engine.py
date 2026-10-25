@@ -26,7 +26,7 @@ from verst_planner.cost.model import (
     sight_cost,
 )
 from verst_planner.cost.money import round_to
-from verst_planner.cost.recompute import effective_tickets, recompute, rooms_for
+from verst_planner.cost.recompute import effective_parking, effective_tickets, recompute, rooms_for
 from verst_planner.domain.enums import (
     FuelType,
     Meal,
@@ -61,6 +61,7 @@ from verst_planner.domain.model import (
     NormalizedInput,
     OvernightChoice,
     OvernightReason,
+    ParkingUnit,
     Place,
     PlannedStop,
     PlanWarning,
@@ -121,6 +122,7 @@ from verst_planner.pipeline.timeline import (
 from verst_planner.ports import (
     Clock,
     GeocodingPort,
+    ParkingPort,
     PlaceRepository,
     PriceRepository,
     RegionLocator,
@@ -164,8 +166,9 @@ class Planner:
         clock: Clock,
         config: PlannerConfig,
         templates: ReasonTemplates,
+        parking: ParkingPort | None = None,
     ) -> None:
-        self.ports = Ports(routing, places, prices, tolls, regions, geocoding)
+        self.ports = Ports(routing, places, prices, tolls, regions, geocoding, parking)
         self.clock = clock
         self.cfg = config
         self.templates = templates
@@ -712,7 +715,7 @@ class _FitEnv:
 
 def _units_after_replace(u: CostUnits, stop_id: str, alt: AltUnits) -> CostUnits:
     """Bake a replace into the units so that `recompute(units')` equals
-    `recompute(units, replaced={stop_id: alt})` (A§16.11.4 rules 1-4)."""
+    `recompute(units, replaced={stop_id: alt})` (A§16.11.4 rules 1-4, parking rule 5)."""
     regions = list(u.fuel.regions)
     codes = [r.region_code for r in regions]
     if alt.region_code in codes:
@@ -730,10 +733,12 @@ def _units_after_replace(u: CostUnits, stop_id: str, alt: AltUnits) -> CostUnits
         else m
         for m in u.meals
     )
-    tickets = tuple(effective_tickets(u, CostOverrides(replaced={stop_id: alt})))
+    ov = CostOverrides(replaced={stop_id: alt})
+    tickets = tuple(effective_tickets(u, ov))
+    parking = tuple(effective_parking(u, ov)) if u.parking else ()  # rule 5 (API v3)
     trip_km = None if u.fuel.trip_km is None else u.fuel.trip_km + alt.trip_km_delta
     fuel = dataclasses.replace(u.fuel, regions=tuple(regions), trip_km=trip_km)
-    return dataclasses.replace(u, fuel=fuel, meals=meals, tickets=tickets)
+    return dataclasses.replace(u, fuel=fuel, meals=meals, tickets=tickets, parking=parking)
 
 
 def _recrew_day(d: DayResult, units: CostUnits, inp: NormalizedInput, cfg: PlannerConfig) -> DayResult:
@@ -744,6 +749,7 @@ def _recrew_day(d: DayResult, units: CostUnits, inp: NormalizedInput, cfg: Plann
     tickets = {t.stop_id: t for t in units.tickets}
     lunches = {m.stop_id: m.check_rub for m in units.meals if m.meal is Meal.LUNCH and m.stop_id}
     nights = {n.stop_id: n for n in units.nights}
+    parks = {p.stop_id: p.rub or 0 for p in units.parking}  # crew-independent, kept in the alt deltas
     rooms = rooms_for(crew)
     cons = Decimal(repr(units.fuel.consumption_l_per_100km))
 
@@ -791,7 +797,8 @@ def _recrew_day(d: DayResult, units: CostUnits, inp: NormalizedInput, cfg: Plann
         for a in s.alternatives:
             au = a.units
             fuel = Decimal(repr(au.delta_km)) * cons / 100 * (au.price_rub or Decimal(0))
-            delta = round_to(exact(s.id, au) - exact(s.id, None) + fuel, 10)
+            park = (0 if au.parking is None else au.parking.rub or 0) - parks.get(s.id, 0)
+            delta = round_to(exact(s.id, au) - exact(s.id, None) + fuel + park, 10)
             alts.append(
                 dataclasses.replace(
                     a, delta_rub=delta, stop=dataclasses.replace(a.stop, cost_rub=alt_cost(a))
@@ -999,7 +1006,22 @@ def _cost_input(
         sights,
         prices.defaults_as_of(),
         trip_km,
+        _parking(days, ctx),
+        ctx.ports.parking.as_of if ctx.ports.parking is not None else None,
     )
+
+
+def _parking(days: Sequence[Sched], ctx: PlanContext) -> tuple[ParkingUnit, ...]:
+    """ADR-0015 §4: the car is parked at sights (hotels and cafés have their own parking)."""
+    model = ctx.ports.parking
+    if model is None:
+        return ()
+    out = []
+    for d in days:
+        for j, (s, slot) in enumerate(zip(d.stops, d.slots, strict=True)):
+            if s.kind is StopKind.SIGHT and s.place is not None and slot.arrive is not None:
+                out.append(model.unit(d.ids[j], s.name_ru, s.point, local(slot.arrive, d.tz), s.dwell_min))
+    return tuple(out)
 
 
 __all__ = ["Planner"]
