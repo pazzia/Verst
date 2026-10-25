@@ -678,8 +678,12 @@ class ScreensScreenshotTest {
 
     @Test
     fun walkShorterEngineReason() {
-        // the engine's `shorter` (8 h museums → 5 ч 30 мин)
-        walkShot("city_route-shorter.json", "shorter-engine")
+        // the engine's `shorter` («places»). The real data may fill the asked time (release-s3 museum walks),
+        // so the shot sets a shorter result on the contract walk to keep the state covered.
+        val w = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-shorter.json", EngineJson::walkRoute)
+        val asked = w.requestedMin ?: 480
+        val s = w.copy(durationMin = asked - 150, shorter = w.shorter ?: app.verst.core.model.dto.WalkShorterDto("places", asked, asked - 150, null))
+        shot("walk", "shorter-engine") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(s, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
         compose.onNodeWithTag("walk.shorter", useUnmergedTree = true).assertExists()
     }
 

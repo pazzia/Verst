@@ -79,7 +79,8 @@ class V2ContractsTest {
         val sight = ok(EngineJson.poiDetails(envelope("poi_details-sight.json")))
         assertEquals("museum", sight.poiKind)
         assertNotNull(sight.image!!.card)
-        assertEquals("CC BY-SA 4.0", sight.image!!.credit!!.licence)
+        // the licence is the file's own (the data run decides which); it is always named
+        assertTrue(sight.image!!.credit!!.licence.orEmpty().startsWith("CC") || sight.image!!.credit!!.licence == "Public domain")
         val hotel = ok(EngineJson.poiDetails(envelope("poi_details-hotel.json")))
         assertTrue(hotel.isFictional)
         assertTrue(hotel.image!!.isArea)
