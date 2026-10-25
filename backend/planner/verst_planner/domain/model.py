@@ -183,6 +183,10 @@ class Place:
     breakfast_included: bool = True
     family_price_rub: int | None = None
     """Price per night of a family room (≤ 4 guests, ADR-0011); None = `price_night_rub x 1.4`."""
+    category: str | None = None
+    """ADR-0015 §2 kind of an open-data sight (museum, temple, park, …); None = derived from the tags."""
+    quality: float | None = None
+    """ADR-0015 §2 quality score 0..1 of an open-data sight; None = curated (no threshold)."""
 
 
 @dataclass(frozen=True, slots=True)
