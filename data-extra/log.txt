@@ -1,0 +1,95 @@
+bars.json
+bars_failed.json
+class_check.json
+classes_resolved.json
+credits.json
+forms.json
+forms_report.json
+photos_check.json
+pois.json
+pois_failed.json
+sources.json
+towns.json
+classes: 10043 ids; resolved {}; unresolved []
+wikidata: 0/59255
+wikidata: 4000/59255
+wikidata: 8000/59255
+wikidata: 12000/59255
+wikidata: 16000/59255
+wikidata: 20000/59255
+wikidata: 24000/59255
+wikidata: 28000/59255
+wikidata: 32000/59255
+wikidata: 36000/59255
+wikidata: 40000/59255
+wikidata: 44000/59255
+wikidata: 48000/59255
+wikidata: 52000/59255
+wikidata: 56000/59255
+wikidata: 59255 items, 10826 with ru Wikipedia
+wikipedia: 0/10826
+wikipedia: 1000/10826
+wikipedia: 2000/10826
+wikipedia: 3000/10826
+wikipedia: 4000/10826
+wikipedia: 5000/10826
+wikipedia: 6000/10826
+wikipedia: 7000/10826
+wikipedia: 8000/10826
+wikipedia: 9000/10826
+wikipedia: 10000/10826
+wikipedia: 10824 pages, 10823 with an extract
+voyage: 136 Q-ids in listings
+osm: 210419 POI candidates, 8881 paid parking places
+geosearch: 0/6000
+geosearch: 500/6000
+geosearch: 1000/6000
+geosearch: 1500/6000
+geosearch: 2000/6000
+geosearch: 2500/6000
+geosearch: 3000/6000
+geosearch: 3500/6000
+geosearch: 4000/6000
+geosearch: 4500/6000
+geosearch: 5000/6000
+geosearch: 5500/6000
+geosearch: 4094 of 6000 POIs have nearby files
+candidates: 17402 photo files
+credits: 50/17402
+credits: 1050/17402
+credits: 2050/17402
+credits: 3050/17402
+credits: 4050/17402
+credits: 5050/17402
+credits: 6050/17402
+credits: 7050/17402
+credits: 8050/17402
+credits: 9050/17402
+credits: 10050/17402
+credits: 11050/17402
+credits: 12050/17402
+credits: 13050/17402
+credits: 14050/17402
+credits: 15050/17402
+credits: 16050/17402
+credits: 17050/17402
+credits: 17266 of 17402 files
+photo meta: 50/17402
+photo meta: 1050/17402
+photo meta: 2050/17402
+photo meta: 3050/17402
+photo meta: 4050/17402
+photo meta: 5050/17402
+photo meta: 6050/17402
+photo meta: 7050/17402
+photo meta: 8050/17402
+photo meta: 9050/17402
+photo meta: 10050/17402
+photo meta: 11050/17402
+photo meta: 12050/17402
+photo meta: 13050/17402
+photo meta: 14050/17402
+photo meta: 15050/17402
+photo meta: 16050/17402
+photo meta: 17050/17402
+photo meta: 17266 of 17402 files
