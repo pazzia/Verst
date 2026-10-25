@@ -1830,3 +1830,20 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   for it. For the Architect: a slimmer or lazier catalogue load.
 - ProcessDeath (fresh process, Москва → Ярославль) sometimes stops on Drive 0.6 s after ПОЕХАЛИ with an error CTA
   (runs 94, 101, 112; green in 95, 96, 103, 111). The test now logs the Drive error to identify it.
+
+## S4-RELEASE (branch dev/S4-RELEASE from dev/S4 4058edd; des/S4-QA @ f4d2487 merged)
+- **P1-01:** every left-the-car stop (sight, food, rest area, night) has a P part in a parking-aware trip, «P ?»
+  without a tariff; fuel never. Day headers count the same stops («≈ N ₽ + ?»), and the Waybill «+ ещё N без
+  данных» uses the same count and lists every unknown stop with «?» (also after the engine's breakdown).
+- **P1-02:** an address search that fails online reads `addr_failed`; «Ищем адрес…» while it runs; the offline
+  hint only offline (also when the connection drops during the call). `online_later` stays offline-only (the card).
+- **P1-03:** the costs line is a custom layout: the action is pinned right on the first line; price · P part share
+  the rest, and the P part moves under the price (no separator) when it does not fit.
+- **P1-04:** the unknown-tariff sheet shows `road_parking_note_unknown`.
+- **P1-05:** «Данные о месте: © участники OpenStreetMap» on every card whose data is from OSM: the engine's OSM
+  attribution, an OSM text or photo, a bar, or a sight without a Wikidata item that is not curated (M9's OSM flag,
+  `osmSource`, is read as soon as it comes). The Wikipedia-only attribution no longer triggers the OSM line.
+- **P2 done:** P2-01 one pictogram table from the place kind (row sign, mini sign, illustration, walk signs);
+  P2-02 no «Часы работы уточняйте» next to known hours, note parts joined as sentences; P2-05 «Установить…» as the
+  yellow note line; P2-06 offline / failed photos use the category illustration with the state caption.
+- **P2 left:** P2-03 (one merged info line needs new copy), P2-04 (engine reason length), P2-07 (known S3 P2-05).
