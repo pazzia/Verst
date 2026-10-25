@@ -1,5 +1,7 @@
 package app.verst.nav
 
+import app.verst.feature.card.cleanDescription
+
 import androidx.compose.runtime.snapshots.Snapshot
 import app.verst.core.model.EngineArgs
 import app.verst.core.model.EngineJson
@@ -686,7 +688,7 @@ class VerstFlowTest {
 
     @Test
     fun cardDescriptionThatOnlyRepeatsTheKindLineIsHidden() {
-        val clean = app.verst.feature.card::cleanDescription
+        val clean = ::cleanDescription
         assertNull(clean("площадь в г. Иваново", "площадь · Иваново", "Иваново"))
         assertNull(clean("монастырь в Костроме", "монастырь · Кострома", "Кострома"))
         assertEquals("Главный монастырь России, собор XV века.", clean("главный монастырь России, собор XV века", "монастырь · Сергиев Посад", "Сергиев Посад"))
