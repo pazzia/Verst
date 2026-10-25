@@ -194,7 +194,7 @@ def rest_pool(corridor: Corridor, fun: bool = False, secular: bool = False) -> l
     """Rest areas, short sights and fuel stations with a cafe (A§6.8), sorted by km; also the REST
     alternatives pool. `fun` («Весело и познавательно») adds every sight within the fun detour. `secular`
     (the open-data world, ADR-0015 §2): no church as a break — the religious share is the sights' budget."""
-    from verst_planner.pipeline.sights import RELIGIOUS, category_of
+    from verst_planner.pipeline.sights import RELIGIOUS, category_of, not_a_sight
 
     pool = [*corridor.rest, *[c for c in corridor.fuel if Tag.CAFE_AT_FUEL in c.place.tags]]
     pool += [
@@ -204,7 +204,10 @@ def rest_pool(corridor: Corridor, fun: bool = False, secular: bool = False) -> l
             (c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL
             or (fun and c.detour_min <= FUN_DETOUR_FALLBACK_MIN)
         )
-        and not (secular and (category_of(c.place) in RELIGIOUS or not _fun_quality_ok(c.place)))
+        and not (
+            secular
+            and (category_of(c.place) in RELIGIOUS or not _fun_quality_ok(c.place) or not_a_sight(c.place))
+        )
     ]
     return sorted(pool, key=lambda c: (c.km_at, c.place.id))
 

@@ -3,13 +3,14 @@ list of famous places on the real catalogue, and the text hygiene of the package
 
 from __future__ import annotations
 
+import dataclasses
 import re
 import unittest
 
 from tests.unit import test_mobile_v2
 from verst_planner import mobile
 from verst_planner.explain import ru
-from verst_planner.pipeline.sights import kind_of
+from verst_planner.pipeline.sights import kind_of, not_a_sight
 
 # (exact name, expected kind) — the CEO screenshots and the Designer's QA (des/S4-QA, s4-review.md) included
 FAMOUS = (
@@ -87,6 +88,16 @@ class FamousPlacesTest(unittest.TestCase):
                 kinds = self.by_name.get(name)
                 self.assertTrue(kinds, f"{name} is not in the catalogue")
                 self.assertEqual(kinds[0], want)
+
+    def test_not_a_sight(self) -> None:
+        """M9: a philharmonic is not a road-trip sight unless heritage and q ≥ 0.6."""
+        hall = [
+            p for p in self.w.world.places.values() if p.name_ru == "Ивановская государственная филармония"
+        ]
+        self.assertTrue(hall)
+        self.assertTrue(not_a_sight(hall[0]))
+        self.assertFalse(not_a_sight(dataclasses.replace(hall[0], heritage=True, quality=0.65)))
+        self.assertFalse(not_a_sight(dataclasses.replace(hall[0], name_ru="Ивановский музей")))
 
     def test_catalogue_text(self) -> None:
         """Names start with a capital, no space before punctuation, no bare «Детская площадка»."""

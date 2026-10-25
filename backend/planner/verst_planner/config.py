@@ -61,6 +61,10 @@ class SplitCfg:
     widened_hi: float
     template_hi: float
     template_lo: float
+    honour_template: int = 0
+    """M9 (Manager): a ready route keeps its template's minimum days and night towns even when the daily km
+    would allow fewer days (1 = on: the open-data world; the budget fitter may still pick the short variant).
+    Off for the fixture worlds, so G01-G13 keep their bytes."""
 
 
 @dataclass(frozen=True, slots=True)

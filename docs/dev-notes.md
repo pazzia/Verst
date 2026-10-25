@@ -1763,3 +1763,24 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   - Day 2: Ивановская филармония, Спасо-Евфимиев монастырь, Суздальский кремль, Золотые ворота.
   - The Ростовский кремль is tried first on day 1 but does not fit the pace: the two template visits
     already take 3 h of a 404 km day.
+
+### M9 follow-up 2: ready routes keep their template; no philharmonic as a sight
+- **Ready-route template, open-data world (`split.honour_template`):**
+  - A ready route keeps its template's night towns and days when every night town is on the route and has
+    a lodging for the crew, and no template day exceeds 105 % of the daily km. The old «too many days for
+    this daily km» rejection no longer applies.
+  - The budget fitter may still choose the short variant («· коротко»). The CEO case does: 26 400 ₽,
+    2 days, in budget.
+- **Moved lunch.** When a sight would push the lunch out of its window, a café in the sight's own town can
+  now come after the visit. In Ростов the café before the kremlin is at 11:57, after it is 13:20.
+- **Later start.** A sight in the overnight town that opens after the day starts moves the departure to its
+  opening (≤ 90 min; the day's duration does not grow).
+- **Not a sight:** a philharmonic, concert hall or house/palace of culture is not a road-trip sight unless it
+  is heritage and q ≥ 0.60. `Place.heritage` is new.
+- **G15 Golden Ring, 400 km/day:** 738 km, 3 days, 30 500 ₽.
+  - Day 1: Лавра → Плещеево озеро → Ростовский кремль → lunch Трапезная у кремля → Ярославский
+    музей-заповедник → night Ярославль.
+  - Day 2: Волжская башня → Стрелка → Костромская слобода → Ипатьевский монастырь → lunch Сбитенная →
+    night Суздаль.
+  - Day 3: Архиерейские палаты → Музей деревянного зодчества → Суздальский кремль → lunch Ресторан
+    «Клязьма» (Владимир) → Свято-Введенский монастырь → Фрязино.

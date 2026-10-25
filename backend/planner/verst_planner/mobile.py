@@ -264,7 +264,8 @@ def _num(v: Any, what: str) -> float:
 # ---------------------------------------------------------------------------------------------- planners
 
 
-OPEN_DATA_CONFIG: dict[str, Any] = {"sights": {"diversity": 1}}  # ADR-0015 §2 rules for russia_v1
+# ADR-0015 §2 rules and the M9 ready-route template rule for russia_v1
+OPEN_DATA_CONFIG: dict[str, Any] = {"sights": {"diversity": 1}, "split": {"honour_template": 1}}
 
 
 def _planner(fakes: FakePorts | CataloguePorts, clock: Any, config: dict[str, Any] | None = None) -> Planner:
