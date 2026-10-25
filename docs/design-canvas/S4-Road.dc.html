@@ -60,12 +60,13 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
       </a>
       <p style="margin: 10px 0 0; font-size: 13px; color: #B9B9C0">Знаки по пути — как увидите их на трассе. Любой можно заменить.</p>
       <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8C8C93"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 50%; border: 1.5px dotted #8C8C93; flex-shrink: 0"></span><span>— из открытых данных, часы уточняйте</span><span style="color: #7FA6D9; font-weight: 600; white-space: nowrap">· О данных</span></div>
+      <div style="margin-top: 6px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8C8C93"><span aria-hidden="true" style="width: 18px; height: 16px; box-sizing: border-box; background: #F4F4F0; border: 1px solid #141416; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 8px; color: #141416; flex-shrink: 0">73</span><span>— столбик у дороги: сколько км пройдено от старта</span></div>
     </div>
 
     <div style="position: relative; margin-top: 14px">
       <div aria-hidden="true" style="position: absolute; left: 10px; top: 0; bottom: 0; width: 52px; background: #3A3A3F; border-left: 3px solid #F4F4F0; border-right: 3px solid #F4F4F0; box-sizing: border-box; z-index: 0">
         <div class="lane" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px; z-index: 1"></div>
-        <div class="car" style="position: absolute; left: 3px; width: 18px; height: 32px; z-index: 3; filter: drop-shadow(0 0 1px #F4F4F0) drop-shadow(0 3px 4px rgba(0,0,0,.6))">
+        <div class="car" style="position: absolute; left: 0; width: 18px; height: 32px; z-index: 3; filter: drop-shadow(0 0 1px #F4F4F0) drop-shadow(0 3px 4px rgba(0,0,0,.6))">
           <svg width="18" height="32" viewBox="0 0 18 32"><g fill="#141416"><rect x="0" y="6" width="3" height="6" rx="1"></rect><rect x="15" y="6" width="3" height="6" rx="1"></rect><rect x="0" y="20" width="3" height="6" rx="1"></rect><rect x="15" y="20" width="3" height="6" rx="1"></rect></g><rect x="1.75" y="1" width="14.5" height="30" rx="5" fill="#FFD23F" stroke="#141416" stroke-width="1.5"></rect><rect x="4.5" y="4.5" width="9" height="3.5" rx="1.5" fill="#141416" opacity=".85"></rect><rect x="5" y="10" width="8" height="8" rx="2" fill="#FFE27A"></rect><path d="M3.8 19.5h10.4l-1.3 4.5H5.1z" fill="#141416"></path><rect x="3.5" y="28" width="3" height="1.6" rx=".8" fill="#F4F4F0"></rect><rect x="11.5" y="28" width="3" height="1.6" rx=".8" fill="#F4F4F0"></rect></svg>
         </div>
       </div>
@@ -82,8 +83,8 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
               <div aria-hidden="true" style="position: relative; height: 100%">
                 <span style="position: absolute; left: 60px; top: 30px; width: 8px; height: 3px; background: #55565C"></span>
                 <span style="{{r.postStyle}}">
-                  <span style="width: 26px; height: 28px; box-sizing: border-box; background: #F4F4F0; border: 1.5px solid #141416; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1">
-                    <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 11px; color: #141416">{{r.km}}</span>
+                  <span style="width: 22px; height: 26px; box-sizing: border-box; background: #F4F4F0; border: 1.5px solid #141416; border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 10px; letter-spacing: -.02em; color: #141416">{{r.km}}</span>
                     <span style="font-size: 8px; font-weight: 700; color: #141416; margin-top: 1px">км</span>
                   </span>
                   <span style="width: 4px; height: 10px; background: #F4F4F0; border-left: 1px solid #141416; border-right: 1px solid #141416; box-sizing: border-box"></span>
@@ -199,8 +200,8 @@ class Component extends DCLogic {
       return {
         time, name, note, signText: o.sign || '', icon: I[o.icon || 'monastery'],
         meta: (km === 'A' && !start) ? ahead + ' · пройдено ' + o.odo + n + 'км' : ahead,
-        km: o.odo, postStyle: showPost ? 'position:absolute;left:40px;top:4px;display:flex;flex-direction:column;align-items:center;z-index:2' : hide,
-        postLabel: label ? 'margin-top:2px;font-size:9px;font-weight:600;color:#B9B9C0;background:#161618;padding:0 2px;border-radius:2px' : hide,
+        km: o.odo, postStyle: showPost ? 'position:absolute;left:37px;top:4px;display:flex;flex-direction:column;align-items:center;z-index:2' : hide,
+        postLabel: hide,
         isCity: type === 'city', isBrown: type === 'brown',
         isService: ['fuel', 'food', 'rest', 'hotel'].indexOf(type) >= 0,
         isFuel: type === 'fuel', isFood: type === 'food', isRest: type === 'rest', isHotel: type === 'hotel',

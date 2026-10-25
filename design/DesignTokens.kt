@@ -1218,9 +1218,9 @@ object DesignTokens {
         /** Road-ahead car marker height */
         val carMarkerH: Dp = 32.dp
         /** Km post plate width */
-        val kmPostW: Dp = 26.dp
+        val kmPostW: Dp = 22.dp
         /** Km post plate height */
-        val kmPostH: Dp = 28.dp
+        val kmPostH: Dp = 26.dp
         /** Road-ahead road column width (incl. edges) */
         val roadW: Dp = 52.dp
         /** Bottom-sheet handle width (new) */

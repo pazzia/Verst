@@ -686,6 +686,7 @@
     <string name="road_odometer">%1$s км</string>
     <string name="road_meta_driven">%1$s · пройдено %2$s км</string>
     <string name="road_km_post_label">пройдено</string>
+    <string name="road_km_post_legend">— столбик у дороги: сколько км пройдено от старта</string>
     <string name="cd_road_km_post">пройдено %1$s километров</string>
     <string name="road_parking_inline_paid">≈ %1$s ₽</string>
     <string name="road_parking_inline_free">бесплатно</string>

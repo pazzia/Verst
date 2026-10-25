@@ -987,7 +987,8 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `cd_road_handoff_day` | Вести в навигаторе: день {n} | |
 | `road_odometer` | {km} км | km post number (variant B) = engine `kmDriven`; the odometer tag is retired (5.5 §10.7) |
 | `road_meta_driven` | {ahead} · пройдено {km} км | variant A — **not used** (CEO chose B) |
-| `road_km_post_label` | пройдено | under the first km post only (decision B) |
+| `road_km_post_label` | пройдено | **not used** (S4 QA: the label collided with the sign) |
+| `road_km_post_legend` | — столбик у дороги: сколько км пройдено от старта | legend under the chips, after a mini post |
 | `cd_road_km_post` | пройдено {km} километров | TalkBack |
 | `road_parking_inline_paid` | ≈ {amount} ₽ | P part of the costs line |
 | `road_parking_inline_free` | бесплатно | |
