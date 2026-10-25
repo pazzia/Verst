@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -77,7 +78,18 @@ fun BoxScope.ReportSheet(ui: ReportUi, windowH: Dp, a: ReportActions) {
             Reports.REASONS.forEach { r -> ReasonRow(labels.getValue(r), ui.reason == r, "report.reason.$r") { a.reason(r) } }
         }
         Spacer(Modifier.height(12.dp))
-        CommentField(ui.comment, a::comment)
+        // components §22 (S3-FINAL P1-03): no autofocus — the IME comes up only on a tap in the comment, then the
+        // comment and «ОТПРАВИТЬ» are brought into view above it
+        val bring = remember { androidx.compose.foundation.relocation.BringIntoViewRequester() }
+        var commentFocused by remember { mutableStateOf(false) }
+        androidx.compose.runtime.LaunchedEffect(commentFocused) {
+            if (commentFocused) {
+                kotlinx.coroutines.delay(350) // the IME animation
+                bring.bringIntoView()
+            }
+        }
+        Column(Modifier.fillMaxWidth().bringIntoViewRequester(bring)) {
+        CommentField(ui.comment, a::comment) { commentFocused = it }
         Spacer(Modifier.height(16.dp))
         val enabled = ui.reason != null
         val shape = RoundedCornerShape(DesignTokens.radius.r12)
@@ -90,6 +102,7 @@ fun BoxScope.ReportSheet(ui: ReportUi, windowH: Dp, a: ReportActions) {
             contentAlignment = Alignment.Center,
         ) {
             Txt(stringResource(R.string.report_send).uppercase(), T.cta.sm, if (enabled) C.text.onLight else C.text.disabled, maxLines = 1, align = TextAlign.Center)
+        }
         }
     }
 }
@@ -119,7 +132,7 @@ private fun ReasonRow(label: String, selected: Boolean, tag: String, onClick: ()
 
 /** NaviInput style (components §4): navi field, yellow border when focused, the placeholder `report_comment`. */
 @Composable
-private fun CommentField(value: String, onChange: (String) -> Unit) {
+private fun CommentField(value: String, onChange: (String) -> Unit, onFocused: (Boolean) -> Unit = {}) {
     var focused by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(DesignTokens.radius.r10)
     val hint = stringResource(R.string.report_comment)
@@ -135,7 +148,7 @@ private fun CommentField(value: String, onChange: (String) -> Unit) {
             cursorBrush = SolidColor(C.accent.yellow),
             maxLines = 4,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default),
-            modifier = Modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused }
+            modifier = Modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused; onFocused(it.isFocused) }
                 .semantics { contentDescription = hint }.testTag("report.comment"),
             decorationBox = { inner ->
                 Box {

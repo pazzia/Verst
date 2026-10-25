@@ -102,7 +102,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             )
         }
         // the fictional status is said once (S3-QA P1-05): no engine «Демо: вымышленная гостиница» line
-        val desc = d?.descriptionRu?.takeUnless { d.isFictional }
+        val desc = d?.descriptionRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kindLine(ui), d?.townName) }
         if (!desc.isNullOrBlank()) {
             var more by remember(desc) { mutableStateOf(false) }
             Txt(desc, T.body.md, C.text.note, Modifier.padding(top = 12.dp).clickable { more = !more }, maxLines = if (more) Int.MAX_VALUE else 6)
@@ -152,6 +152,22 @@ private fun SecondaryButton(text: String, tag: String, onClick: () -> Unit) {
             .background(C.dash.control).clickable(role = Role.Button, onClick = onClick).testTag(tag),
         contentAlignment = Alignment.Center,
     ) { Txt(text, T.button.md, C.text.primary, maxLines = 1) }
+}
+
+/**
+ * S3-FINAL P2-04: Wikidata descriptions like «площадь в г. Иваново» only repeat the kind line («площадь ·
+ * Иваново») — hidden; others start with a capital letter and end with a full stop.
+ */
+internal fun cleanDescription(text: String, kindLine: String, town: String?): String? {
+    val t = text.trim()
+    if (t.isEmpty()) return null
+    val filler = setOf("в", "г", "г.", "городе", "города", "на", "у", "близ", "·", "-", "—", ",")
+    val known = (kindLine.lowercase().split(' ', '·', ',') + (town ?: "").lowercase().split(' ', '-'))
+        .map { it.trim('.', ',', ' ') }.filter { it.isNotEmpty() }.toSet()
+    val words = t.lowercase().split(' ', ',').map { it.trim('.', ',', ' ') }.filter { it.isNotEmpty() && it !in filler }
+    if (words.isNotEmpty() && words.all { w -> known.any { k -> w == k || (k.length >= 4 && w.startsWith(k.dropLast(1))) } }) return null
+    val cap = t.replaceFirstChar { it.uppercase() }
+    return if (cap.last() in ".!?…»)") cap else "$cap."
 }
 
 @Composable
