@@ -139,7 +139,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2p
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1010}}'>
 class Component extends DCLogic {
-  constructor(p) { super(p); this.state = { l: 'adult', m: 'child', r: 'empty', front: true, dog: true, km: 300, b: 2, mood: 'fun' }; }
+  constructor(p) { super(p); this.state = { l: 'empty', m: 'child', r: 'empty', front: true, dog: true, km: 300, b: 2, mood: 'fun' }; }
   renderVals() {
     const st = this.state;
     const next = { empty: 'adult', adult: 'child', child: 'empty' };
