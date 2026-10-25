@@ -842,6 +842,9 @@
     <string name="walk_few_clear">Вернуть убранные места</string>
     <string name="walk_few_clear_sub">вы убрали %1$s — вернём их в подбор</string>
     <string name="online_later">уточним при интернете</string>
+    <string name="online_failed">Не получилось загрузить — попробуйте ещё раз</string>
+    <string name="addr_failed">Не получилось найти адрес — попробуйте ещё раз</string>
+    <string name="road_parking_note_unknown">Тариф неизвестен — в путевом листе это место «без данных», в сумму не входит.</string>
     <string name="cd_parking_loading">Парковка: загружаем</string>
     <!-- S4 dev: units the deck spells inline (5.5 §10.8 km post «км», ParkingSheet «Стоим ≈ 2 ч») -->
     <string name="common_km_unit">км</string>

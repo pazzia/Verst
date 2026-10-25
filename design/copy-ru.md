@@ -1169,6 +1169,9 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | Key | Text | Notes |
 | --- | --- | --- |
 | `online_later` | уточним при интернете | the only visible trace of missing online data: quiet inline text in the value's spot |
+| `online_failed` | Не получилось загрузить — попробуйте ещё раз | online, server error / unreadable answer (never `online_later`) |
+| `addr_failed` | Не получилось найти адрес — попробуйте ещё раз | address search, online error |
+| `road_parking_note_unknown` | Тариф неизвестен — в путевом листе это место «без данных», в сумму не входит. | parking sheet note for «P ?» |
 | `cd_parking_loading` | Парковка: загружаем | TalkBack for the shimmer (first-time fetch > 300 ms only) |
 
 Retired with the CEO decision (no live spaces, no visible states): `online_loading`, `online_updated_*`, `online_need_check`, `online_banner`, `online_cached_note`, `parking_live_*`, `parking_row_free_*`, `parking_free_*`, `parking_offline_*`, `parking_none_*` (the no-data sheet keeps `road_parking_unknown`), `parking_loading_note`, `cd_parking_live`.
