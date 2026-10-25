@@ -1825,3 +1825,8 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   Екатеринбург days 3–4 have no sight and a bare «Остановка у дороги» (5.5 §10.4 says never again); «дом Ипатьева»
   starts lower case; Wikipedia extracts keep spaces before punctuation («хозяйства , в», «Покрове .»); Фрязино
   custom 4 h with the remembered interest «история» gives 5 stops (2 ч 45 мин).
+- Decision: the background catalogue budget in `EngineStartupTest` goes from 3 000 to 4 000 ms. r7.3 is twice the
+  size (catalogue_pois 822 KB gz), 1.8–2.0 s warm and 3.3 s on a cold CI emulator; the first screen does not wait
+  for it. For the Architect: a slimmer or lazier catalogue load.
+- ProcessDeath (fresh process, Москва → Ярославль) sometimes stops on Drive 0.6 s after ПОЕХАЛИ with an error CTA
+  (runs 94, 101, 112; green in 95, 96, 103, 111). The test now logs the Drive error to identify it.

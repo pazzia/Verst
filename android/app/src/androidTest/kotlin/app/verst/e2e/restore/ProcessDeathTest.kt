@@ -81,7 +81,7 @@ class ProcessDeathTest {
         compose.onNodeWithTag("instruments.start").performClick()
         // diagnostics (runs 94 / 101): how long the first plan of a fresh process takes
         compose.waitUntil(150_000) { flow.top == Route.Road || flow.top == Route.NoFit || has("drive.error.cta") }
-        android.util.Log.i("VerstE2e", "ProcessDeath after start: top=${flow.top} after ${(System.nanoTime() - t0) / 1_000_000} ms")
+        android.util.Log.i("VerstE2e", "ProcessDeath after start: top=${flow.top} after ${(System.nanoTime() - t0) / 1_000_000} ms error=${flow.drive.error} lines=${flow.drive.lines}")
         waitTag("road.total", 45_000)
         assertEquals(Route.Road, flow.top)
         val trip = flow.result!!.trip
