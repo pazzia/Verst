@@ -17,6 +17,11 @@ from pathlib import Path
 from typing import Any
 
 PREPOSITIONS = {"на", "в", "под", "над", "у", "при"}
+# Run 2 oracle (46/48): «Сергиев Посад» → «Сергиеве Посаде» was wrong; the possessive first word of a
+# two-word name («Сергиев», «Павлов») declines as a short adjective. «Пушкино» (kept unchanged, unlike
+# «Иваново» → «Иванове») is an exception for name_overrides.tsv / the fixture, not a rule.
+POSSESSIVE_ENDINGS = ("ов", "ев", "ёв", "ин", "ын")
+POSSESSIVE = {"gent": "а", "loct": "ом"}
 CASES = {"gen": "gent", "prep": "loct"}
 WORD = re.compile(r"[А-Яа-яЁё]+")
 
@@ -48,8 +53,12 @@ def _inflect_part(morph: Any, part: str, case: str) -> str:
 
 
 def form(name: str, morph: Any, case: str) -> str:
+    words = name.split(" ")
     out = []
-    for word in name.split(" "):
+    for n, word in enumerate(words):
+        if n == 0 and len(words) > 1 and "-" not in word and word.lower().endswith(POSSESSIVE_ENDINGS):
+            out.append(word + POSSESSIVE[case])
+            continue
         pieces = word.split("-")
         keep_from = next((i for i, w in enumerate(pieces) if w.lower() in PREPOSITIONS), len(pieces))
         done = [_inflect_part(morph, w, case) if i < keep_from else w for i, w in enumerate(pieces)]

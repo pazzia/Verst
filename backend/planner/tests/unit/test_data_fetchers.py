@@ -169,6 +169,28 @@ class OverpassTest(unittest.TestCase):
         self.assertIn('"ISO3166-1"="RU"', self.op.QUERY_ALL)
 
 
+class ExtractTest(unittest.TestCase):
+    ex = load("bars_from_extract")
+
+    def test_features(self) -> None:
+        def f(fid: str, geom: dict[str, Any], **tags: Any) -> str:
+            return "\x1e" + json.dumps({"type": "Feature", "id": fid, "geometry": geom, "properties": tags})
+
+        lines = [
+            f("n1", {"type": "Point", "coordinates": [37.6, 55.7]}, name="Бар", amenity="bar"),
+            f("w2", {"type": "Polygon", "coordinates": [[[0, 0], [2, 0], [2, 2], [0, 2]]]}, name="Паб"),
+            f("r3", {"type": "MultiPolygon", "coordinates": [[[[10, 10], [12, 12]]]]}, name="Пивоварня"),
+            f("n4", {"type": "Point", "coordinates": [1, 1]}, amenity="pub"),  # no name
+            f("x5", {"type": "Point", "coordinates": [1, 1]}, name="?"),
+            "",
+        ]
+        els = self.ex.elements_from_features(lines)
+        self.assertEqual([(e["type"], e["id"]) for e in els], [("node", 1), ("way", 2), ("relation", 3)])
+        self.assertEqual((els[1]["lat"], els[1]["lon"]), (1.0, 1.0))
+        self.assertEqual((els[2]["lat"], els[2]["lon"]), (11.0, 11.0))
+        self.assertEqual(els[0]["tags"], {"name": "Бар", "amenity": "bar"})
+
+
 class CommonsTest(unittest.TestCase):
     cm = load("fetch_commons_meta")
 
@@ -254,6 +276,7 @@ class _Morph:
         "нижний": _Parse("ADJF,Qual masc,sing,nomn", {"gent": "нижнего", "loct": "нижнем"}),
         "новгород": _Parse("NOUN,inan,masc,Geox sing,nomn", {"gent": "новгорода", "loct": "новгороде"}),
         "ростов": _Parse("NOUN,inan,masc,Geox sing,nomn", {"gent": "ростова", "loct": "ростове"}),
+        "посад": _Parse("NOUN,inan,masc sing,nomn", {"gent": "посада", "loct": "посаде"}),
         "дону": _Parse("NOUN,inan,masc,Geox sing,datv", {"gent": "дона", "loct": "доне"}),
     }
 
@@ -272,6 +295,9 @@ class InflectTest(unittest.TestCase):
         )
         self.assertEqual(
             self.inf.forms("Ростов-на-Дону", m), {"gen": "Ростова-на-Дону", "prep": "Ростове-на-Дону"}
+        )
+        self.assertEqual(
+            self.inf.forms("Сергиев Посад", m), {"gen": "Сергиева Посада", "prep": "Сергиевом Посаде"}
         )
         self.assertEqual(self.inf.forms("Сочи", m), {"gen": "Сочи", "prep": "Сочи"})  # does not parse → kept
 

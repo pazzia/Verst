@@ -15,6 +15,10 @@ concurrency:
   group: data
   cancel-in-progress: false
 
+defaults:
+  run:
+    shell: bash   # -eo pipefail, so `| tee` keeps the exit code
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -32,15 +36,30 @@ jobs:
       - name: Wikidata class ids (ADR-0012 §1 check)
         id: classes
         continue-on-error: true
-        run: python3 backend/planner/tools/data/fetch_wikidata.py classes "$RAW"
+        run: mkdir -p "$RAW" && python3 backend/planner/tools/data/fetch_wikidata.py classes "$RAW" 2>&1 | tee -a "$RAW/log.txt"
       - name: Towns (Wikidata)
-        run: python3 backend/planner/tools/data/fetch_wikidata.py towns "$RAW"
+        run: python3 backend/planner/tools/data/fetch_wikidata.py towns "$RAW" 2>&1 | tee -a "$RAW/log.txt"
       - name: POIs (Wikidata, one around-query per town)
-        run: python3 backend/planner/tools/data/fetch_wikidata.py pois "$RAW"
+        run: python3 backend/planner/tools/data/fetch_wikidata.py pois "$RAW" 2>&1 | tee -a "$RAW/log.txt"
       - name: Name forms (pymorphy3)
-        run: python3 backend/planner/tools/data/inflect.py "$RAW"
-      - name: Bars (OSM Overpass)
-        run: python3 backend/planner/tools/data/fetch_overpass.py "$RAW"
+        run: python3 backend/planner/tools/data/inflect.py "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Bars (Geofabrik extract + osmium)
+        id: extract
+        continue-on-error: true
+        timeout-minutes: 40
+        run: |
+          sudo apt-get install -y -qq osmium-tool >/dev/null
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/ru.osm.pbf" https://download.geofabrik.de/russia-latest.osm.pbf
+          ls -l "$RUNNER_TEMP/ru.osm.pbf" | tee -a "$RAW/log.txt"
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/amenity=bar,pub,biergarten nwr/craft=brewery \
+            -o "$RUNNER_TEMP/bars.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/bars.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/bars.geojsonseq" --overwrite
+          python3 backend/planner/tools/data/bars_from_extract.py "$RAW" "$RUNNER_TEMP/bars.geojsonseq" 2>&1 \
+            | tee -a "$RAW/log.txt"
+      - name: Bars (OSM Overpass, fallback)
+        if: ${{ steps.extract.outcome == 'failure' }}
+        run: python3 backend/planner/tools/data/fetch_overpass.py "$RAW" 2>&1 | tee -a "$RAW/log.txt"
       - name: First build (to select the photos)
         run: |
           python3 - <<'PY'
@@ -51,7 +70,7 @@ jobs:
           PY
           python3 backend/planner/tools/data/build_catalogue.py "$RAW" --out "$FIRST"
       - name: Photo credits (Commons)
-        run: python3 backend/planner/tools/data/fetch_commons_meta.py "$RAW" "$FIRST"
+        run: python3 backend/planner/tools/data/fetch_commons_meta.py "$RAW" "$FIRST" 2>&1 | tee -a "$RAW/log.txt"
       - name: Final build
         run: |
           python3 backend/planner/tools/data/build_catalogue.py "$RAW" --out "$OUT" \
@@ -62,7 +81,7 @@ jobs:
         continue-on-error: true
         run: |
           python3 backend/planner/tools/data/check_photos.py "$OUT" "$RAW/photos_check.json" \
-            --n 50 --seed "${{ github.run_id }}"
+            --n 50 --seed "${{ github.run_id }}" 2>&1 | tee -a "$RAW/log.txt"
       - name: Archive the raw responses
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -78,7 +97,7 @@ jobs:
           git checkout -b "bot/data-${{ github.run_number }}"
           mkdir -p backend/planner/tools/data/report
           cp -f "$RAW"/class_check.json "$RAW"/forms_report.json "$RAW"/pois_failed.json "$RAW"/bars_failed.json \
-            "$RAW"/photos_check.json \
+            "$RAW"/photos_check.json "$RAW"/log.txt \
             backend/planner/tools/data/report/ 2>/dev/null || true
           git add backend/planner/verst_planner/resources/catalogue_*.json.gz backend/planner/tools/data/report \
                   backend/planner/tools/data/catalogue.lock 2>/dev/null || true
