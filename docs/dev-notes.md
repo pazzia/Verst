@@ -1547,3 +1547,83 @@ Inputs merged:
 - **Report sheet:**
   - 84: the sheet as opened, with the IME down and all four reasons + the button visible.
   - 84b: after a tap in the comment, with the button above the IME.
+
+## S4 — Sprint 4, Android side (branch dev/S4 from main cf8f335)
+
+Inputs: design `des/sprint-4` @ a405594 (tokens synced with `tools/sync_design_tokens.py`), engine
+`arch/s4-engine` M0 (b1f9fb7 API v3: `kmDriven`/`kmLeft`, Карты-first hand-off with `navigatorNext`, mood `fun`,
+merged), ADR-0015/0016 on `arch/sprint-4`, `docs/bugs/s4-walk-filters.md`. Later engine milestones (stop `poiKind`,
+`parking`, `units.parking`, walks with `crew.dog` / `durationMin: null` / `hours` / `requestKey`,
+`NOT_ENOUGH_POIS.suggestions`, `poi_details.whyRu`) are built against the ADR contracts and test fixtures; every new
+field is optional, so the M0 engine and saved trips render as before.
+
+### City mode from scratch (5.10, 5.11)
+- 5.10 does not take the car crew, mood or budget: its own adults / children / dog (persisted in the defaults),
+  the start field, the 18+ question only («Вам есть 18?», side-by-side Нет / Да; no child block anywhere),
+  2 / 4 / 6 / 8 ч or «без ограничения» (`durationMin: null`), `dog_walk` shown only with the dog.
+- Warnings are informative plates (child + bars, dog + indoor stops); ПОШЛИ stays on.
+- Bugs (a)(b)(c) fixed: any input change clears `exclude`; on 5.11 a change rebuilds in place after 400 ms
+  (`Пересобираем прогулку…` over the dimmed last result; stale answers dropped by a sequence number, `requestKey`
+  when the engine sends it); a failed or empty rebuild never leaves 5.11 (toast + «Повторить», or the
+  «Другой вариант» note); NOT_ENOUGH shows only the engine's suggestions; the custom values survive back + reopen.
+  The @Ignore'd test is now `customWalkRecoversAfterOtherVariantRunsOutOfPlaces`.
+- Untimed walks: header «Порядок по пути…», hours pills per stop, no clock times.
+- Decision: the 5.10 caption title may wrap to 2 lines («Пивной · без ограничения» does not fit one at 390).
+- Decision: the «мало мест» plate is brought into view when it appears (it answered ПОШЛИ).
+
+### Windshield, Instruments
+- `CityEntryPlate` under a 96 dp navigator panel («НАВИГАТОР · НА МАШИНЕ», hint line dropped); dashboard 344.
+  On short windows the dashboard shrinks to keep the sign clear and the caption row scrolls under the fade.
+- Three `MoodCard`s; `fun` is the default; v2 `more_stops` (saved defaults) reads as `fun`; the app never sends
+  `more_stops`. The caption meta ends with the mood in lower case (2 lines allowed).
+
+### Road ahead (5.5 §10, variant B)
+- `HandoffCta` (today's day of a running trip, else 1) and the day «вести» → the hand-off sheet; long-press always
+  opens the sheet.
+- Rows: tag row (`StretchTag` «РАЗМИНКА 30 МИН» for `funFor` stops, `KindTag` for sights, the dotted ring for open
+  data — «не проверено» is gone), description ≤ 2 lines with rest amenities inside it, one costs line
+  (price · P part → `ParkingSheet`; the line wraps instead of truncating).
+- P parts / day and footer totals show only with a parking-aware engine (a «Парковки» line or any stop
+  `parking`); then a parking stop without data reads «P ?». Parking stops: sight, food, rest, overnight.
+- Km posts at x 37 (post zone), the car (components §26.3) loops over the visible road in the car lane x 13–31,
+  parked at the top under reduced motion; the road column is x 10–62.
+- Decision: the ParkingSheet uses the standard `BottomSheet` title row (the stop name) and puts «ПАРКОВКА» with the
+  detail next to the big sign.
+
+### Hand-off (ADR-0015 §1, 5.13 §5)
+- Unsigned (no key yet): day tabs → Карты first with the whole day (`links.maps` / `web`), Навигатор gets
+  `navigatorNext` only (or a local next-point link for pre-v3 hand-offs); «До след.» → Навигатор first.
+  `handoffSigned` is the switch for the signed build (the RSA signing over `toSign` is not written yet: no key).
+- Not installed: Навигатор dims with «Установить из магазина приложений» (market:// then the Play web page);
+  Карты keeps its place and opens the web route. «Запомнить выбор» is persisted with the defaults.
+- The Sprint 3 day menu code stays for the stop menu path; the day link no longer opens it.
+
+### Waybill, CostCalculator
+- «Парковки» after «Билеты»: P 15, the engine formula (else built from the stops), «+ ещё N без данных»; expanded:
+  paid rows, the free stops in one 0 row, the unknown ones with «?», the note. Lever `parking_free` is named.
+- `CostCalculator`: `lines["parking"] = Σ units.parking[].rub` (unknown = 0), inside the subtotal, so in the
+  reserve base and ИТОГО; a replaced stop takes `AltUnits.parkingRub` when given. `ParkingCostTest` pins it until
+  `cost_recompute_cases.json` gains the 4 parking cases (Architect).
+
+### Card at data levels 1–5 (5.9 §9)
+- KindTag + kind line, «Почему здесь: …» (`whyRu`), «ФОТО РЯДОМ» for `image.source = nearby`, the category
+  illustration (kind mat, 135° stripe, sign 92 with the pictogram, the kind word) instead of «нет фото»; «фото пока
+  нет» only without a description. Source line under the text; facts as chips; one open-data line with the ring.
+- Offline with no description for a Wikidata place: «уточним при интернете» in its place.
+
+### Online data (ADR-0016 OR-1…OR-8)
+- One OkHttp client: connect 3 s, read 5 s per attempt, call 13.5 s (two attempts + jitter); photos 10 s total.
+  `OnlineInterceptor`: one retry with 0.5–1.5 s jitter for GET on an I/O error or 5xx (never 4xx/429), the per-host
+  `CircuitBreaker` (3 failures / 60 s → 5 min), `OnlineStats` counters in the debug panel. `jsonBodyOrNull`
+  drops non-JSON and > 1 MB bodies; parse errors become «no data».
+- An address search that fails is «уточним при интернете» (`AddressState.Later`), never «ничего не нашли».
+- Tests: `OnlineRulesTest` (MockWebServer: airplane, slow, 500/503/429, HTML, truncated, wrong types, 5 MB,
+  disconnect, breaker) and `Sprint4Test` on the emulator (airplane journey with 0 requests, slow, 500 + garbage).
+- Not done: cached parking with age (no live parking — CEO), the online Wikipedia summary fetch (nothing to
+  fetch yet, so the card shows the offline text only).
+
+### Tokens missing in the deck (used the nearest)
+- MoodCard on fill #1F1F17, HandoffAppCard recommended #1F2A14 → `dash.face` + the 2 dp yellow border;
+  CityEntryPlate pressed #173E82 → `sign.blueSelected`; HandoffCta pressed #E6BD38 → yellow at 90 %; car roof
+  #FFE27A → white 35 % over the yellow. `type.title.md` is 17 in the tokens, the spec says 19 for the city plate
+  title (used 19).
