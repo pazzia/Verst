@@ -1642,3 +1642,30 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   `parking_reserve_budget`.
 - The other stops' parking is not re-priced after a replace, even when their arrival moves. That matches
   tickets and keeps the offline recompute exact.
+
+### Sprint 4 data (catalogue wd-20261025-r7.3: run-7 raw files plus `bot/extras-1`)
+- **Shipped data:** 19 675 POIs. 8.3 k are Wikidata items; the rest are OSM-only, of which ≤ 6 playgrounds per
+  town. There are 3 284 bars and 1 114 towns. The catalogue is 1.05 MB, and 1.29 MB with the worlds and
+  resources, against the 2.5 MB limit.
+- **Card levels:** 4 = 258, 3 ≈ 4.8 k, 2 ≈ 3.9 k, 1 ≈ 11.2 k (mostly OSM playgrounds and parks).
+- **Extracts:** 4.7 k from Wikipedia, 0.55 k from Wikidata, 0.35 k from OSM. Wikivoyage listings name only
+  136 items.
+- **Photo sources:** p18 8.2 k; geosearch only 39. A nearby Commons photo is used only when its title shares
+  the place's own words (two words when the name has two or more) and its class word. The looser match put
+  «улица Шевченко» on «Памятник Тарасу Шевченко».
+- **Builder excludes:**
+  - names that are not sights: estate parts («Ограда…», «Главный дом…»), cafés, bare «Особняк», addresses
+    ending in a house number;
+  - POIs whose «(Город)» is more than 40 km away from their coordinates;
+  - OSM names without Cyrillic or that are generic, and minor natural features;
+  - websites that are map-service redirects.
+- **Engine, open-data world only:**
+  - The corridor keeps the best sights by quality, plus up to 4 more per 10 km within a 15-minute detour,
+    for the fun stops.
+  - The fun mood ranks the widened rest window together with the narrow one.
+  - A playground is never a fun stop without a child.
+  - Churches are never used as rest breaks.
+  - A view of a cathedral is a viewpoint, not a temple.
+- **Known limit:** the M-12 and M-4 trips get few sights and fun stops. The motorways bypass the towns:
+  Vladimir, Гороховец and Козьмодемьянск are 20–60 min away, and the quality bar is 0.40. On M-11
+  (Москва → СПб) the fun stops do appear. G17 therefore runs on M-11.

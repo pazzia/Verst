@@ -32,7 +32,7 @@
    "startAt": "2026-10-23T10:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T17:58",
+   "endAt": "2026-10-23T17:57",
    "unlimited": false,
    "tz": "Europe/Moscow",
    "walkKm": 9.1,
@@ -102,39 +102,16 @@
     },
     {
      "id": "w03",
-     "poiId": "Q4204534",
-     "kind": "monument",
-     "nameRu": "Исторический центр Ярославля",
-     "lat": 57.62361,
-     "lon": 39.8875,
-     "arriveAt": "2026-10-23T13:40",
-     "departAt": "2026-10-23T13:52",
-     "dwellMin": 12,
-     "walkKmFromPrev": 1.3,
-     "walkMinFromPrev": 22,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w04",
      "poiId": "pl_yar_spaso",
      "kind": "monastery",
      "nameRu": "Спасо-Преображенский монастырь",
      "lat": 57.618865,
      "lon": 39.894566,
-     "arriveAt": "2026-10-23T14:07",
-     "departAt": "2026-10-23T15:09",
+     "arriveAt": "2026-10-23T13:52",
+     "departAt": "2026-10-23T14:54",
      "dwellMin": 62,
-     "walkKmFromPrev": 0.9,
-     "walkMinFromPrev": 15,
+     "walkKmFromPrev": 2.0,
+     "walkMinFromPrev": 35,
      "costRub": 1000,
      "hoursVerified": true,
      "hours": {
@@ -147,21 +124,44 @@
      "tappable": true
     },
     {
-     "id": "w05",
+     "id": "w04",
      "poiId": "Q3329597",
      "kind": "museum",
      "nameRu": "Ярославский художественный музей",
      "lat": 57.62814,
      "lon": 39.89718,
-     "arriveAt": "2026-10-23T15:33",
-     "departAt": "2026-10-23T16:35",
+     "arriveAt": "2026-10-23T15:18",
+     "departAt": "2026-10-23T16:20",
      "dwellMin": 62,
      "walkKmFromPrev": 1.4,
      "walkMinFromPrev": 23,
      "costRub": 800,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "11:00–21:00",
+      "openNow": true,
+      "source": "osm"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w05",
+     "poiId": "Q4085572",
+     "kind": "monument",
+     "nameRu": "Беседка на Волжской набережной",
+     "lat": 57.62994,
+     "lon": 39.89631,
+     "arriveAt": "2026-10-23T16:25",
+     "departAt": "2026-10-23T16:37",
+     "dwellMin": 12,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 5,
+     "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "10:00–18:00",
+      "todayRu": "24 часа",
       "openNow": true,
       "source": "default"
      },
@@ -176,11 +176,11 @@
      "nameRu": "Церковь Ильи Пророка",
      "lat": 57.629717,
      "lon": 39.892888,
-     "arriveAt": "2026-10-23T16:42",
-     "departAt": "2026-10-23T17:44",
+     "arriveAt": "2026-10-23T16:41",
+     "departAt": "2026-10-23T17:43",
      "dwellMin": 62,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 7,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 5,
      "costRub": 400,
      "hoursVerified": true,
      "hours": {
@@ -224,16 +224,16 @@
      39.87074
     ],
     [
-     57.62361,
-     39.8875
-    ],
-    [
      57.618865,
      39.894566
     ],
     [
      57.62814,
      39.89718
+    ],
+    [
+     57.62994,
+     39.89631
     ],
     [
      57.629717,

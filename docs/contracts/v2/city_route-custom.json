@@ -35,21 +35,16 @@
    "startAt": "2026-10-23T09:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T12:11",
+   "endAt": "2026-10-23T12:59",
    "unlimited": false,
    "tz": "Europe/Moscow",
-   "walkKm": 4.6,
-   "walkMin": 79,
-   "durationMin": 192,
+   "walkKm": 4.8,
+   "walkMin": 83,
+   "durationMin": 240,
    "requestedDurationMin": 240,
    "crewNotesRu": [],
    "interestsWidened": false,
-   "shorter": {
-    "reason": "places",
-    "requestedMin": 240,
-    "actualMin": 192,
-    "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — больше открытых мест рядом нет"
-   },
+   "shorter": null,
    "returnToStart": true,
    "start": {
     "lat": 57.6261,
@@ -64,16 +59,39 @@
    "stops": [
     {
      "id": "w01",
+     "poiId": "Q19908952",
+     "kind": "park",
+     "nameRu": "Демидовский сад",
+     "lat": 57.62504,
+     "lon": 39.89724,
+     "arriveAt": "2026-10-23T09:17",
+     "departAt": "2026-10-23T10:01",
+     "dwellMin": 44,
+     "walkKmFromPrev": 1.0,
+     "walkMinFromPrev": 17,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "24 часа",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w02",
      "poiId": "pl_yar_embankment",
      "kind": "viewpoint",
      "nameRu": "Волжская набережная",
      "lat": 57.627909,
      "lon": 39.899599,
-     "arriveAt": "2026-10-23T09:20",
-     "departAt": "2026-10-23T09:39",
+     "arriveAt": "2026-10-23T10:08",
+     "departAt": "2026-10-23T10:27",
      "dwellMin": 19,
-     "walkKmFromPrev": 1.2,
-     "walkMinFromPrev": 21,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 8,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -86,14 +104,14 @@
      "tappable": true
     },
     {
-     "id": "w02",
+     "id": "w03",
      "poiId": "pl_yar_strelka",
      "kind": "viewpoint",
      "nameRu": "Стрелка и Волжская набережная",
      "lat": 57.633335,
      "lon": 39.909665,
-     "arriveAt": "2026-10-23T09:58",
-     "departAt": "2026-10-23T10:17",
+     "arriveAt": "2026-10-23T10:46",
+     "departAt": "2026-10-23T11:05",
      "dwellMin": 19,
      "walkKmFromPrev": 1.1,
      "walkMinFromPrev": 19,
@@ -109,14 +127,33 @@
      "tappable": true
     },
     {
-     "id": "w03",
+     "id": "w04",
+     "poiId": null,
+     "kind": "meal",
+     "nameRu": "Обед — кафе рядом",
+     "lat": 57.633335,
+     "lon": 39.909665,
+     "arriveAt": "2026-10-23T11:05",
+     "departAt": "2026-10-23T12:01",
+     "dwellMin": 56,
+     "walkKmFromPrev": 0.0,
+     "walkMinFromPrev": 0,
+     "costRub": 600,
+     "hoursVerified": true,
+     "hours": null,
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": false
+    },
+    {
+     "id": "w05",
      "poiId": "pl_yar_tower",
      "kind": "viewpoint",
      "nameRu": "Власьевская башня",
      "lat": 57.628813,
      "lon": 39.887855,
-     "arriveAt": "2026-10-23T10:48",
-     "departAt": "2026-10-23T11:07",
+     "arriveAt": "2026-10-23T12:32",
+     "departAt": "2026-10-23T12:51",
      "dwellMin": 19,
      "walkKmFromPrev": 1.8,
      "walkMinFromPrev": 31,
@@ -130,25 +167,6 @@
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
      "tappable": true
-    },
-    {
-     "id": "w04",
-     "poiId": null,
-     "kind": "meal",
-     "nameRu": "Обед — кафе рядом",
-     "lat": 57.628813,
-     "lon": 39.887855,
-     "arriveAt": "2026-10-23T11:07",
-     "departAt": "2026-10-23T12:03",
-     "dwellMin": 56,
-     "walkKmFromPrev": 0.0,
-     "walkMinFromPrev": 0,
-     "costRub": 600,
-     "hoursVerified": true,
-     "hours": null,
-     "noteRu": null,
-     "hasPhoto": false,
-     "tappable": false
     }
    ],
    "cost": {
@@ -169,10 +187,6 @@
     {
      "code": "HOURS_UNVERIFIED",
      "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
-    },
-    {
-     "code": "SHORTER_THAN_ASKED",
-     "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — больше открытых мест рядом нет"
     }
    ],
    "responsibleNoteRu": null,
@@ -180,6 +194,10 @@
     [
      57.6261,
      39.8845
+    ],
+    [
+     57.62504,
+     39.89724
     ],
     [
      57.627909,

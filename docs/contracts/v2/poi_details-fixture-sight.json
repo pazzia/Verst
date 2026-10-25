@@ -14,10 +14,14 @@
    "poiKind": "museum",
    "nameRu": "Церковь Ильи Пророка",
    "descriptionRu": null,
-   "extractRu": null,
-   "extractSource": null,
-   "cardLevel": 1,
-   "quality": null,
+   "extractRu": "Це́рковь Илии́ Проро́ка — православный храм в историческом центре Ярославля на Советской площади, выдающийся памятник архитектуры Ярославской школы зодчества и живописи XVII века.",
+   "extractSource": {
+    "key": "wikipedia",
+    "nameRu": "Описание: Википедия",
+    "licence": "CC BY-SA 4.0"
+   },
+   "cardLevel": 3,
+   "quality": 53,
    "fee": null,
    "website": null,
    "townName": "Ярославль",
@@ -47,7 +51,9 @@
     "estimate": false
    },
    "isFictional": false,
-   "attributionRu": [],
+   "attributionRu": [
+    "Описание: Википедия"
+   ],
    "wikidataId": "Q4177920"
   },
   "ms": 0

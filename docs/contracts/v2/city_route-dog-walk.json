@@ -32,12 +32,12 @@
    "startAt": "2026-10-23T09:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T10:54",
+   "endAt": "2026-10-23T10:58",
    "unlimited": false,
    "tz": "Europe/Moscow",
-   "walkKm": 2.9,
-   "walkMin": 39,
-   "durationMin": 114,
+   "walkKm": 4.4,
+   "walkMin": 59,
+   "durationMin": 119,
    "requestedDurationMin": 120,
    "crewNotesRu": [
     "С собакой: вода, пакеты и поводок; маршрут без закрытых мест."
@@ -58,16 +58,16 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "Q13205949",
-     "kind": "monument",
-     "nameRu": "Памятник Мусе Джалилю",
-     "lat": 55.79611,
-     "lon": 49.10833,
-     "arriveAt": "2026-10-23T09:00",
-     "departAt": "2026-10-23T09:10",
-     "dwellMin": 10,
-     "walkKmFromPrev": 0.0,
-     "walkMinFromPrev": 1,
+     "poiId": "Q30890544",
+     "kind": "embankment",
+     "nameRu": "Кремлёвская набережная",
+     "lat": 55.80383,
+     "lon": 49.11676,
+     "arriveAt": "2026-10-23T09:16",
+     "departAt": "2026-10-23T09:31",
+     "dwellMin": 15,
+     "walkKmFromPrev": 1.3,
+     "walkMinFromPrev": 17,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -76,21 +76,21 @@
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
-     "hasPhoto": false,
+     "hasPhoto": true,
      "tappable": true
     },
     {
      "id": "w02",
-     "poiId": "Q4518730",
+     "poiId": "Q4493322",
      "kind": "park",
-     "nameRu": "Чёрное озеро (парк)",
-     "lat": 55.79481,
-     "lon": 49.11855,
-     "arriveAt": "2026-10-23T09:21",
-     "departAt": "2026-10-23T09:56",
+     "nameRu": "Фуксовский сад",
+     "lat": 55.79973,
+     "lon": 49.12991,
+     "arriveAt": "2026-10-23T09:48",
+     "departAt": "2026-10-23T10:23",
      "dwellMin": 35,
-     "walkKmFromPrev": 0.9,
-     "walkMinFromPrev": 11,
+     "walkKmFromPrev": 1.2,
+     "walkMinFromPrev": 16,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -104,39 +104,16 @@
     },
     {
      "id": "w03",
-     "poiId": "Q2047744",
-     "kind": "attraction",
-     "nameRu": "Татарский академический государственный театр оперы и балета имени Мусы Джалиля",
-     "lat": 55.79556,
-     "lon": 49.12472,
-     "arriveAt": "2026-10-23T10:03",
-     "departAt": "2026-10-23T10:23",
-     "dwellMin": 20,
-     "walkKmFromPrev": 0.5,
-     "walkMinFromPrev": 7,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true
-    },
-    {
-     "id": "w04",
-     "poiId": "Q4365764",
-     "kind": "square",
-     "nameRu": "Площадь Свободы",
-     "lat": 55.79694,
-     "lon": 49.125,
-     "arriveAt": "2026-10-23T10:26",
-     "departAt": "2026-10-23T10:36",
+     "poiId": "Q55655321",
+     "kind": "monument",
+     "nameRu": "Памятник Ленину",
+     "lat": 55.79654,
+     "lon": 49.12505,
+     "arriveAt": "2026-10-23T10:31",
+     "departAt": "2026-10-23T10:41",
      "dwellMin": 10,
-     "walkKmFromPrev": 0.2,
-     "walkMinFromPrev": 3,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 8,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -172,20 +149,16 @@
      49.1088
     ],
     [
-     55.79611,
-     49.10833
+     55.80383,
+     49.11676
     ],
     [
-     55.79481,
-     49.11855
+     55.79973,
+     49.12991
     ],
     [
-     55.79556,
-     49.12472
-    ],
-    [
-     55.79694,
-     49.125
+     55.79654,
+     49.12505
     ],
     [
      55.7963,

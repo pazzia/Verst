@@ -47,8 +47,8 @@ def category_of(p: Place) -> str:
     """The ADR-0015 kind of a sight: the catalogue's, else from the curated tags and name."""
     if p.category is not None:
         return p.category
-    if RELIGIOUS_NAME.search(p.name_ru) and Tag.MONASTERY not in p.tags:
-        return "temple"
+    if RELIGIOUS_NAME.search(p.name_ru) and not ({Tag.MONASTERY, Tag.VIEW} & p.tags):
+        return "temple"  # a view of a cathedral is a viewpoint, not a temple
     return next((cat for tag, cat in TAG_CATEGORY if tag in p.tags), "attraction")
 
 
@@ -185,7 +185,7 @@ def plan_sights(
     profile = ctx.profile_for(corridor.route)
     max_n = ctx.cfg.sights.max_per_day.of(inp.mood)
     used = _used(days)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN)
+    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
     centres = big_city_centres(corridor)
     own = own_big_cities(inp, corridor, days)
     for day in days:
@@ -232,7 +232,7 @@ def lowest_sight(day: DayPlan) -> int:
 def plan_lunches(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
     """Stage 8 with the lunch probes checked by `day_ok` (rests reserved)."""
     profile = ctx.profile_for(corridor.route)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN)
+    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
     used = _used(days)
     plan_meals(days, corridor, inp, ctx, ok=lambda d: day_ok(d, inp, ctx, profile, rests, used))
 
@@ -284,6 +284,6 @@ def plan_lunch_after_sights(
     """Stage 8b over every day still without a lunch that now overlaps the lunch window."""
     profile = ctx.profile_for(corridor.route)
     used = _used(days)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN)
+    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
     for day in days:
         lunch_after_sights_day(day, corridor, inp, ctx, profile, used, rests)
