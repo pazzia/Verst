@@ -35,7 +35,14 @@ QUERY = """[out:json][timeout:90];
 (
   nwr["amenity"~"^(bar|pub|biergarten)$"]["name"](around:{r},{lat},{lon});
   nwr["craft"="brewery"]["name"](around:{r},{lat},{lon});
-  nwr["name"~"рюмочн",i](around:{r},{lat},{lon});
+);
+out center tags;"""
+
+QUERY_ALL = """[out:json][timeout:1200][maxsize:1073741824];
+area["ISO3166-1"="RU"][admin_level=2]->.ru;
+(
+  nwr["amenity"~"^(bar|pub|biergarten)$"]["name"](area.ru);
+  nwr["craft"="brewery"]["name"](area.ru);
 );
 out center tags;"""
 

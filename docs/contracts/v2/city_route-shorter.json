@@ -32,17 +32,17 @@
    "startAt": "2026-10-23T10:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T15:31",
+   "endAt": "2026-10-23T16:42",
    "tz": "Europe/Moscow",
-   "walkKm": 2.9,
-   "walkMin": 50,
-   "durationMin": 332,
+   "walkKm": 7.1,
+   "walkMin": 121,
+   "durationMin": 403,
    "requestedDurationMin": 480,
    "shorter": {
     "reason": "places",
     "requestedMin": 480,
-    "actualMin": 332,
-    "messageRu": "Получилось 5 ч 30 мин вместо 8 ч — больше открытых мест рядом нет"
+    "actualMin": 403,
+    "messageRu": "Получилось 6 ч 45 мин вместо 8 ч — больше открытых мест рядом нет"
    },
    "returnToStart": true,
    "start": {
@@ -58,65 +58,65 @@
    "stops": [
     {
      "id": "w01",
+     "poiId": "pl_yar_tolchkovo",
+     "kind": "museum",
+     "nameRu": "Церковь Иоанна Предтечи в Толчкове",
+     "lat": 57.636952,
+     "lon": 39.861012,
+     "arriveAt": "2026-10-23T10:41",
+     "departAt": "2026-10-23T12:15",
+     "dwellMin": 94,
+     "walkKmFromPrev": 2.4,
+     "walkMinFromPrev": 41,
+     "costRub": 300,
+     "hoursVerified": true,
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": true
+    },
+    {
+     "id": "w02",
+     "poiId": "Q1189431",
+     "kind": "museum",
+     "nameRu": "Мемориальный дом-музей М. Богдановича",
+     "lat": 57.62452,
+     "lon": 39.87074,
+     "arriveAt": "2026-10-23T12:48",
+     "departAt": "2026-10-23T14:22",
+     "dwellMin": 94,
+     "walkKmFromPrev": 1.9,
+     "walkMinFromPrev": 33,
+     "costRub": 800,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w03",
      "poiId": "pl_yar_ilya",
      "kind": "museum",
      "nameRu": "Церковь Ильи Пророка",
      "lat": 57.629717,
      "lon": 39.892888,
-     "arriveAt": "2026-10-23T10:14",
-     "departAt": "2026-10-23T11:48",
+     "arriveAt": "2026-10-23T14:54",
+     "departAt": "2026-10-23T16:28",
      "dwellMin": 94,
-     "walkKmFromPrev": 0.8,
-     "walkMinFromPrev": 14,
+     "walkKmFromPrev": 1.9,
+     "walkMinFromPrev": 32,
      "costRub": 400,
      "hoursVerified": true,
      "noteRu": null,
      "hasPhoto": true,
      "tappable": true
-    },
-    {
-     "id": "w02",
-     "poiId": "Q900203",
-     "kind": "museum",
-     "nameRu": "Ярославский художественный музей",
-     "lat": 57.6295,
-     "lon": 39.8975,
-     "arriveAt": "2026-10-23T11:54",
-     "departAt": "2026-10-23T13:28",
-     "dwellMin": 94,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 6,
-     "costRub": 800,
-     "hoursVerified": false,
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": false,
-     "tappable": true
-    },
-    {
-     "id": "w03",
-     "poiId": "Q900205",
-     "kind": "museum",
-     "nameRu": "Музей «Музыка и время»",
-     "lat": 57.6255,
-     "lon": 39.899,
-     "arriveAt": "2026-10-23T13:38",
-     "departAt": "2026-10-23T15:12",
-     "dwellMin": 94,
-     "walkKmFromPrev": 0.6,
-     "walkMinFromPrev": 10,
-     "costRub": 800,
-     "hoursVerified": false,
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": false,
-     "tappable": true
     }
    ],
    "cost": {
-    "totalRub": 2000,
+    "totalRub": 1500,
     "lines": [
      {
       "key": "tickets",
-      "rub": 2000
+      "rub": 1500
      }
     ],
     "budgetRub": null
@@ -128,7 +128,7 @@
     },
     {
      "code": "SHORTER_THAN_ASKED",
-     "messageRu": "Получилось 5 ч 30 мин вместо 8 ч — больше открытых мест рядом нет"
+     "messageRu": "Получилось 6 ч 45 мин вместо 8 ч — больше открытых мест рядом нет"
     }
    ],
    "responsibleNoteRu": null,
@@ -138,16 +138,16 @@
      39.8845
     ],
     [
+     57.636952,
+     39.861012
+    ],
+    [
+     57.62452,
+     39.87074
+    ],
+    [
      57.629717,
      39.892888
-    ],
-    [
-     57.6295,
-     39.8975
-    ],
-    [
-     57.6255,
-     39.899
     ],
     [
      57.6261,

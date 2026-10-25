@@ -10,10 +10,28 @@
    "apiVersion": 2,
    "python": "3.13.16",
    "tz": {
+    "Asia/Anadyr": true,
+    "Asia/Barnaul": true,
+    "Asia/Chita": true,
+    "Asia/Irkutsk": true,
+    "Asia/Kamchatka": true,
+    "Asia/Krasnoyarsk": true,
+    "Asia/Magadan": true,
+    "Asia/Novokuznetsk": true,
+    "Asia/Novosibirsk": true,
+    "Asia/Omsk": true,
+    "Asia/Sakhalin": true,
+    "Asia/Tomsk": true,
+    "Asia/Vladivostok": true,
+    "Asia/Yakutsk": true,
     "Asia/Yekaterinburg": true,
+    "Europe/Astrakhan": true,
+    "Europe/Kaliningrad": true,
     "Europe/Kirov": true,
     "Europe/Moscow": true,
     "Europe/Samara": true,
+    "Europe/Saratov": true,
+    "Europe/Ulyanovsk": true,
     "Europe/Volgograd": true
    },
    "resources": true,
@@ -23,11 +41,11 @@
     "russia_v1"
    ],
    "catalogue": {
-    "version": "sample",
+    "version": "wd-20261025-r7.1",
     "builtAt": "2026-10-25",
-    "towns": 16,
-    "pois": 19,
-    "bars": 11
+    "towns": 1114,
+    "pois": 11817,
+    "bars": 3284
    }
   },
   "ms": 0

@@ -55,6 +55,27 @@ class WikidataTest(unittest.TestCase):
         self.assertFalse(report["ok"])
         self.assertEqual(report["mismatches"], {"Q570116": "railway station"})
 
+    def test_resolve_classes(self) -> None:
+        e = "http://www.wikidata.org/entity/"
+        rows = {
+            "кремль": [{"c": lit(e + "Q5"), "n": lit("40")}, {"c": lit(e + "Q4"), "n": lit("40")}],
+            "набережная": [{"c": lit(e + "Q1851368"), "n": lit("3")}],
+        }
+        asked: list[str] = []
+
+        def query(q: str) -> list[dict[str, Any]]:
+            label = q.split('"')[1]
+            asked.append(label)
+            return rows.get(label, [])
+
+        report = {"mismatches": {"Q263274": "kremlin?", "Q1851368": "x", "Q999": "y"}}
+        self.assertEqual(self.wd.resolve_classes(report, query), {"Q263274": "Q4"})  # tie → smaller id
+        self.assertEqual(
+            asked, ["набережная", "кремль"]
+        )  # sorted ids: Q1851368 < Q263274  # Q999 has no ru label
+        self.assertIsNone(self.wd.pick_resolved([{"c": lit(e + "Q1"), "n": lit("0")}]))
+        self.assertIn("wdt:P17 wd:Q159", self.wd.Q_RESOLVE)
+
     def test_towns_aggregate(self) -> None:
         e = "http://www.wikidata.org/entity/"
         rows = [
@@ -150,6 +171,44 @@ class OverpassTest(unittest.TestCase):
         ]
         bars = self.op.bars_from_elements(els, "A")
         self.assertEqual([(b["osm"], b["lat"]) for b in bars], [("n5", 1.0), ("w6", 3.0)])
+
+    def test_assign_country_wide(self) -> None:
+        towns = [
+            {"qid": "A", "name": "a", "population": 2_000_000, "lat": 55.75, "lon": 37.62},  # 9 km
+            {"qid": "B", "name": "b", "population": 150_000, "lat": 55.80, "lon": 37.70},  # 4 km
+            {"qid": "C", "name": "c", "population": 150_000, "lat": 59.0, "lon": 30.0},
+        ]
+        els = [
+            {"type": "node", "id": 1, "lat": 55.751, "lon": 37.621, "tags": {"name": "x"}},  # A only
+            {"type": "node", "id": 2, "lat": 55.799, "lon": 37.699, "tags": {"name": "y"}},  # B nearer
+            {"type": "node", "id": 3, "lat": 56.5, "lon": 37.6, "tags": {"name": "z"}},  # nobody's
+            {"type": "way", "id": 4, "center": {"lat": 59.01, "lon": 30.01}, "tags": {"name": "w"}},
+        ]
+        got = [(b["osm"], b["townQid"]) for b in self.op.assign(els, towns)]
+        self.assertEqual(got, [("n1", "A"), ("n2", "B"), ("w4", "C")])
+        self.assertIn('"ISO3166-1"="RU"', self.op.QUERY_ALL)
+
+
+class ExtractTest(unittest.TestCase):
+    ex = load("bars_from_extract")
+
+    def test_features(self) -> None:
+        def f(fid: str, geom: dict[str, Any], **tags: Any) -> str:
+            return "\x1e" + json.dumps({"type": "Feature", "id": fid, "geometry": geom, "properties": tags})
+
+        lines = [
+            f("n1", {"type": "Point", "coordinates": [37.6, 55.7]}, name="Бар", amenity="bar"),
+            f("w2", {"type": "Polygon", "coordinates": [[[0, 0], [2, 0], [2, 2], [0, 2]]]}, name="Паб"),
+            f("r3", {"type": "MultiPolygon", "coordinates": [[[[10, 10], [12, 12]]]]}, name="Пивоварня"),
+            f("n4", {"type": "Point", "coordinates": [1, 1]}, amenity="pub"),  # no name
+            f("x5", {"type": "Point", "coordinates": [1, 1]}, name="?"),
+            "",
+        ]
+        els = self.ex.elements_from_features(lines)
+        self.assertEqual([(e["type"], e["id"]) for e in els], [("node", 1), ("way", 2), ("relation", 3)])
+        self.assertEqual((els[1]["lat"], els[1]["lon"]), (1.0, 1.0))
+        self.assertEqual((els[2]["lat"], els[2]["lon"]), (11.0, 11.0))
+        self.assertEqual(els[0]["tags"], {"name": "Бар", "amenity": "bar"})
 
 
     def test_assign_country_wide(self) -> None:
@@ -254,6 +313,7 @@ class _Morph:
         "нижний": _Parse("ADJF,Qual masc,sing,nomn", {"gent": "нижнего", "loct": "нижнем"}),
         "новгород": _Parse("NOUN,inan,masc,Geox sing,nomn", {"gent": "новгорода", "loct": "новгороде"}),
         "ростов": _Parse("NOUN,inan,masc,Geox sing,nomn", {"gent": "ростова", "loct": "ростове"}),
+        "посад": _Parse("NOUN,inan,masc sing,nomn", {"gent": "посада", "loct": "посаде"}),
         "дону": _Parse("NOUN,inan,masc,Geox sing,datv", {"gent": "дона", "loct": "доне"}),
     }
 
@@ -272,6 +332,9 @@ class InflectTest(unittest.TestCase):
         )
         self.assertEqual(
             self.inf.forms("Ростов-на-Дону", m), {"gen": "Ростова-на-Дону", "prep": "Ростове-на-Дону"}
+        )
+        self.assertEqual(
+            self.inf.forms("Сергиев Посад", m), {"gen": "Сергиева Посада", "prep": "Сергиевом Посаде"}
         )
         self.assertEqual(self.inf.forms("Сочи", m), {"gen": "Сочи", "prep": "Сочи"})  # does not parse → kept
 

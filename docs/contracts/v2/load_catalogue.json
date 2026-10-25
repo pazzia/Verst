@@ -6,13 +6,13 @@
  "response": {
   "ok": true,
   "result": {
-   "version": "sample",
+   "version": "wd-20261025-r7.1",
    "builtAt": "2026-10-25",
-   "towns": 16,
-   "pois": 19,
-   "bars": 11,
+   "towns": 1114,
+   "pois": 11817,
+   "bars": 3284,
    "world": "russia_v1",
-   "places": 497,
+   "places": 17582,
    "ms": 0
   },
   "ms": 0

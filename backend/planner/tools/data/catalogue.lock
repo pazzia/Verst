@@ -1,0 +1,88 @@
+{
+ "version": "wd-20261025-r7.1",
+ "builtAt": "2026-10-25",
+ "counts": {
+  "towns": 1114,
+  "pois": 11817,
+  "bars": 3284,
+  "links": 79,
+  "credits": 3503
+ },
+ "totalBytes": 669916,
+ "files": {
+  "catalogue_meta.json.gz": {
+   "bytes": 46527,
+   "sha256": "2224b200eb00a9336e1e3671a49beec0fc7547c6648cc1bc1ba966a6971278f5"
+  },
+  "catalogue_towns.json.gz": {
+   "bytes": 53013,
+   "sha256": "4860b140818d8fb1a40a72e74c75e672b82d3800f6385f2e47bc2442cc190f65"
+  },
+  "catalogue_pois.json.gz": {
+   "bytes": 497489,
+   "sha256": "1eb797e07c17dd627b18344faabf379d8f14584c3a2f4134f4c0b8a6a432d9c3"
+  },
+  "catalogue_bars.json.gz": {
+   "bytes": 72887,
+   "sha256": "6484b405b9edbe3c353244957f3711df7dcef4ca11298e52cf9c78fb48c484f0"
+  }
+ },
+ "sources": {
+  "wikidata": "query.wikidata.org",
+  "osm": "download.geofabrik.de/russia-latest.osm.pbf (Overpass fallback)",
+  "commons": "commons.wikimedia.org",
+  "fetchedAt": "2026-10-25T02:46:58+00:00",
+  "run": "40151703225",
+  "rebuilt": "sandbox, from bot/raw-7 with the builder at arch/sprint-3 (town filter, region overrides)"
+ },
+ "classCheck": {
+  "labels": {
+   "Q159": "Russia",
+   "Q2977": "cathedral",
+   "Q16970": "church building",
+   "Q22698": "park",
+   "Q44613": "monastery",
+   "Q23413": "castle",
+   "Q179700": "statue",
+   "Q33506": "museum",
+   "Q174782": "square",
+   "Q183342": "federal city of Russia",
+   "Q57821": "fortification",
+   "Q570116": "tourist attraction",
+   "Q1107656": "garden",
+   "Q263274": "kremlin",
+   "Q2319498": "architectural landmark",
+   "Q4989906": "monument",
+   "Q1851368": "waterfront",
+   "Q5003624": "memorial",
+   "Q6017969": "scenic viewpoint",
+   "Q7930989": "city or town"
+  },
+  "mismatches": {},
+  "ok": true,
+  "resolved": {},
+  "unresolved": []
+ },
+ "forms": {
+  "total": 48,
+  "match": 47,
+  "misses": [
+   {
+    "name": "Пушкино",
+    "got": {
+     "gen": "Пушкина",
+     "prep": "Пушкине"
+    },
+    "want": [
+     "Пушкино",
+     "Пушкино"
+    ]
+   }
+  ],
+  "pymorphy3": "2.0.2"
+ },
+ "failedTowns": {
+  "pois": [],
+  "bars": []
+ }
+}

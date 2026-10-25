@@ -29,25 +29,25 @@
    "budgetRub": 20000,
    "allowedRub": 21000,
    "minimum": {
-    "totalRub": 27400,
+    "totalRub": 26300,
     "levers": [
      {
       "code": "food_economy",
-      "savedRub": 2700
+      "savedRub": 3600
      },
      {
       "code": "sights_free",
-      "savedRub": 5600
+      "savedRub": 4800
      },
      {
       "code": "variant",
-      "savedRub": 22700
+      "savedRub": 24200
      }
     ],
     "trip": {
      "id": null,
      "title": "Золотое кольцо · коротко",
-     "km": 536,
+     "km": 541,
      "days": 2,
      "nights": 1,
      "roundTrip": true,
@@ -151,6 +151,94 @@
          "replaceable": true,
          "alternatives": [
           {
+           "id": "alt_d1s03_Q4144213",
+           "placeId": "Q4144213",
+           "name": "Горицкий Успенский монастырь",
+           "deltaMin": 22,
+           "deltaRub": 1330,
+           "shiftMin": 22,
+           "units": {
+            "deltaKm": -3.505,
+            "regionCode": "RU-YAR",
+            "checkRub": null,
+            "adultRub": 300,
+            "childRub": 150,
+            "name": "Горицкий Успенский монастырь",
+            "placeId": "Q4144213",
+            "priceRub": "61.90",
+            "regionName": "Ярославская область",
+            "tripKmDelta": -4
+           },
+           "stop": {
+            "id": "d1s03",
+            "seq": 3,
+            "day": 1,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "Q4144213",
+            "townId": "t_pereslavl",
+            "name": "Горицкий Успенский монастырь",
+            "note": "не проверено",
+            "lat": 56.721,
+            "lon": 38.824,
+            "arriveAt": "2026-10-24T11:29",
+            "departAt": "2026-10-24T12:29",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 65,
+            "kmAt": 137,
+            "dwellMin": 60,
+            "tags": [
+             "walk",
+             "monastery"
+            ],
+            "costRub": 1350,
+            "reason": "По открытым данным.",
+            "verified": false,
+            "replaceable": true,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+           },
+           "dayPatch": [
+            {
+             "stopId": "d1s01",
+             "seq": 1,
+             "arriveAt": null,
+             "departAt": "2026-10-24T08:00",
+             "kmFromPrev": 0
+            },
+            {
+             "stopId": "d1s02",
+             "seq": 2,
+             "arriveAt": "2026-10-24T09:05",
+             "departAt": "2026-10-24T10:35",
+             "kmFromPrev": 73
+            },
+            {
+             "stopId": "d1s03",
+             "seq": 3,
+             "arriveAt": "2026-10-24T11:29",
+             "departAt": "2026-10-24T12:29",
+             "kmFromPrev": 65
+            },
+            {
+             "stopId": "d1s04",
+             "seq": 4,
+             "arriveAt": "2026-10-24T13:24",
+             "departAt": "2026-10-24T14:24",
+             "kmFromPrev": 67
+            },
+            {
+             "stopId": "d1s05",
+             "seq": 5,
+             "arriveAt": "2026-10-24T15:16",
+             "departAt": null,
+             "kmFromPrev": 61
+            }
+           ]
+          },
+          {
            "id": "alt_d1s03_pl_prs_goritsky",
            "placeId": "pl_prs_goritsky",
            "name": "Горицкий монастырь",
@@ -239,23 +327,23 @@
            ]
           },
           {
-           "id": "alt_d1s03_pl_prs_botik",
-           "placeId": "pl_prs_botik",
-           "name": "Музей-усадьба «Ботик Петра Первого»",
-           "deltaMin": 25,
-           "deltaRub": 1530,
-           "shiftMin": 25,
+           "id": "alt_d1s03_Q16701537",
+           "placeId": "Q16701537",
+           "name": "Сретенский Новодевичий монастырь",
+           "deltaMin": 22,
+           "deltaRub": 1330,
+           "shiftMin": 22,
            "units": {
-            "deltaKm": -3.139,
+            "deltaKm": -3.97,
             "regionCode": "RU-YAR",
             "checkRub": null,
-            "adultRub": 350,
+            "adultRub": 300,
             "childRub": 150,
-            "name": "Музей-усадьба «Ботик Петра Первого»",
-            "placeId": "pl_prs_botik",
+            "name": "Сретенский Новодевичий монастырь",
+            "placeId": "Q16701537",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": -3
+            "tripKmDelta": -4
            },
            "stop": {
             "id": "d1s03",
@@ -263,25 +351,25 @@
             "day": 1,
             "kind": "sight",
             "sign": "tourist",
-            "placeId": "pl_prs_botik",
+            "placeId": "Q16701537",
             "townId": "t_pereslavl",
-            "name": "Музей-усадьба «Ботик Петра Первого»",
-            "note": null,
-            "lat": 56.72524753920452,
-            "lon": 38.82809565893488,
+            "name": "Сретенский Новодевичий монастырь",
+            "note": "не проверено",
+            "lat": 56.73537,
+            "lon": 38.85255,
             "arriveAt": "2026-10-24T11:31",
             "departAt": "2026-10-24T12:31",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 66,
-            "kmAt": 138,
+            "kmFromPrev": 68,
+            "kmAt": 140,
             "dwellMin": 60,
             "tags": [
-             "view",
-             "museum"
+             "walk",
+             "monastery"
             ],
-            "costRub": 1550,
-            "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
-            "verified": true,
+            "costRub": 1350,
+            "reason": "По открытым данным.",
+            "verified": false,
             "replaceable": true,
             "alternatives": [],
             "alternativesNote": null,
@@ -308,66 +396,99 @@
              "seq": 3,
              "arriveAt": "2026-10-24T11:31",
              "departAt": "2026-10-24T12:31",
-             "kmFromPrev": 66
+             "kmFromPrev": 68
             },
             {
              "stopId": "d1s04",
              "seq": 4,
-             "arriveAt": "2026-10-24T13:27",
-             "departAt": "2026-10-24T14:27",
-             "kmFromPrev": 67
+             "arriveAt": "2026-10-24T13:24",
+             "departAt": "2026-10-24T14:24",
+             "kmFromPrev": 64
             },
             {
              "stopId": "d1s05",
              "seq": 5,
-             "arriveAt": "2026-10-24T15:19",
+             "arriveAt": "2026-10-24T15:16",
              "departAt": null,
              "kmFromPrev": 61
             }
            ]
-          },
+          }
+         ],
+         "alternativesNote": null,
+         "hotelOptions": [],
+         "selectedHotelId": null
+        },
+        {
+         "id": "d1s04",
+         "seq": 4,
+         "day": 1,
+         "kind": "food",
+         "sign": "food",
+         "placeId": "syn_c_Q193342_1",
+         "townId": "Q193342",
+         "name": "Кафе «Пряник»",
+         "note": null,
+         "lat": 57.18604311519887,
+         "lon": 39.41003981919781,
+         "arriveAt": "2026-10-24T13:02",
+         "departAt": "2026-10-24T14:02",
+         "tz": "Europe/Moscow",
+         "kmFromPrev": 66,
+         "kmAt": 204,
+         "dwellMin": 60,
+         "tags": [
+          "kids_menu",
+          "parking"
+         ],
+         "costRub": 2750,
+         "reason": "Обед, есть детское меню.",
+         "verified": true,
+         "replaceable": true,
+         "alternatives": [
           {
-           "id": "alt_d1s03_pl_prs_iron",
-           "placeId": "pl_prs_iron",
-           "name": "Музей утюга",
-           "deltaMin": -8,
-           "deltaRub": 880,
-           "shiftMin": -8,
+           "id": "alt_d1s04_pl_rst_cafe_kremlin",
+           "placeId": "pl_rst_cafe_kremlin",
+           "name": "Трапезная у кремля",
+           "deltaMin": 0,
+           "deltaRub": 750,
+           "shiftMin": 0,
            "units": {
-            "deltaKm": -3.469,
+            "deltaKm": -0.173,
             "regionCode": "RU-YAR",
-            "checkRub": null,
-            "adultRub": 200,
-            "childRub": 100,
-            "name": "Музей утюга",
-            "placeId": "pl_prs_iron",
+            "checkRub": 700,
+            "adultRub": null,
+            "childRub": null,
+            "name": "Трапезная у кремля",
+            "placeId": "pl_rst_cafe_kremlin",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": -4
+            "tripKmDelta": 0
            },
            "stop": {
-            "id": "d1s03",
-            "seq": 3,
+            "id": "d1s04",
+            "seq": 4,
             "day": 1,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "pl_prs_iron",
-            "townId": "t_pereslavl",
-            "name": "Музей утюга",
+            "kind": "food",
+            "sign": "food",
+            "placeId": "pl_rst_cafe_kremlin",
+            "townId": "t_rostov",
+            "name": "Трапезная у кремля",
             "note": null,
-            "lat": 56.737908743465916,
-            "lon": 38.86085108526628,
-            "arriveAt": "2026-10-24T11:31",
-            "departAt": "2026-10-24T12:01",
+            "lat": 57.186204371732956,
+            "lon": 39.419572900749095,
+            "arriveAt": "2026-10-24T13:02",
+            "departAt": "2026-10-24T14:02",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 68,
-            "kmAt": 140,
-            "dwellMin": 30,
+            "kmFromPrev": 66,
+            "kmAt": 204,
+            "dwellMin": 60,
             "tags": [
-             "museum"
+             "kids_menu",
+             "parking"
             ],
-            "costRub": 900,
-            "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+            "costRub": 3500,
+            "reason": "Обед, есть детское меню.",
             "verified": true,
             "replaceable": true,
             "alternatives": [],
@@ -393,67 +514,35 @@
             {
              "stopId": "d1s03",
              "seq": 3,
-             "arriveAt": "2026-10-24T11:31",
-             "departAt": "2026-10-24T12:01",
-             "kmFromPrev": 68
+             "arriveAt": "2026-10-24T11:35",
+             "departAt": "2026-10-24T12:05",
+             "kmFromPrev": 70
             },
             {
              "stopId": "d1s04",
              "seq": 4,
-             "arriveAt": "2026-10-24T12:54",
-             "departAt": "2026-10-24T13:54",
-             "kmFromPrev": 64
+             "arriveAt": "2026-10-24T13:02",
+             "departAt": "2026-10-24T14:02",
+             "kmFromPrev": 66
             },
             {
              "stopId": "d1s05",
              "seq": 5,
-             "arriveAt": "2026-10-24T14:46",
+             "arriveAt": "2026-10-24T14:54",
              "departAt": null,
              "kmFromPrev": 61
             }
            ]
-          }
-         ],
-         "alternativesNote": null,
-         "hotelOptions": [],
-         "selectedHotelId": null
-        },
-        {
-         "id": "d1s04",
-         "seq": 4,
-         "day": 1,
-         "kind": "food",
-         "sign": "food",
-         "placeId": "pl_rst_cafe_kremlin",
-         "townId": "t_rostov",
-         "name": "Трапезная у кремля",
-         "note": null,
-         "lat": 57.186204371732956,
-         "lon": 39.419572900749095,
-         "arriveAt": "2026-10-24T13:02",
-         "departAt": "2026-10-24T14:02",
-         "tz": "Europe/Moscow",
-         "kmFromPrev": 66,
-         "kmAt": 204,
-         "dwellMin": 60,
-         "tags": [
-          "kids_menu",
-          "parking"
-         ],
-         "costRub": 3500,
-         "reason": "Обед, есть детское меню.",
-         "verified": true,
-         "replaceable": true,
-         "alternatives": [
+          },
           {
            "id": "alt_d1s04_pl_rst_cafe_podvorie",
            "placeId": "pl_rst_cafe_podvorie",
            "name": "Кафе «Русское подворье»",
            "deltaMin": 4,
-           "deltaRub": 0,
+           "deltaRub": 750,
            "shiftMin": 4,
            "units": {
-            "deltaKm": 0.838,
+            "deltaKm": 0.665,
             "regionCode": "RU-YAR",
             "checkRub": 700,
             "adultRub": null,
@@ -538,10 +627,10 @@
            "placeId": "pl_rst_cafe_nero",
            "name": "Кафе «Неро»",
            "deltaMin": 4,
-           "deltaRub": -250,
+           "deltaRub": 500,
            "shiftMin": 4,
            "units": {
-            "deltaKm": 0.919,
+            "deltaKm": 0.745,
             "regionCode": "RU-YAR",
             "checkRub": 650,
             "adultRub": null,
@@ -620,93 +709,6 @@
              "kmFromPrev": 62
             }
            ]
-          },
-          {
-           "id": "alt_d1s04_pl_rst_cafe_veliky",
-           "placeId": "pl_rst_cafe_veliky",
-           "name": "Трапезная «Ростов Великий»",
-           "deltaMin": 4,
-           "deltaRub": 250,
-           "shiftMin": 4,
-           "units": {
-            "deltaKm": 0.874,
-            "regionCode": "RU-YAR",
-            "checkRub": 750,
-            "adultRub": null,
-            "childRub": null,
-            "name": "Трапезная «Ростов Великий»",
-            "placeId": "pl_rst_cafe_veliky",
-            "priceRub": "61.90",
-            "regionName": "Ярославская область",
-            "tripKmDelta": 1
-           },
-           "stop": {
-            "id": "d1s04",
-            "seq": 4,
-            "day": 1,
-            "kind": "food",
-            "sign": "food",
-            "placeId": "pl_rst_cafe_veliky",
-            "townId": "t_rostov",
-            "name": "Трапезная «Ростов Великий»",
-            "note": null,
-            "lat": 57.18891748693183,
-            "lon": 39.407969465667875,
-            "arriveAt": "2026-10-24T13:04",
-            "departAt": "2026-10-24T14:04",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 67,
-            "kmAt": 204,
-            "dwellMin": 60,
-            "tags": [
-             "parking"
-            ],
-            "costRub": 3750,
-            "reason": "Обед, парковка у входа.",
-            "verified": true,
-            "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null
-           },
-           "dayPatch": [
-            {
-             "stopId": "d1s01",
-             "seq": 1,
-             "arriveAt": null,
-             "departAt": "2026-10-24T08:00",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d1s02",
-             "seq": 2,
-             "arriveAt": "2026-10-24T09:05",
-             "departAt": "2026-10-24T10:35",
-             "kmFromPrev": 73
-            },
-            {
-             "stopId": "d1s03",
-             "seq": 3,
-             "arriveAt": "2026-10-24T11:35",
-             "departAt": "2026-10-24T12:05",
-             "kmFromPrev": 70
-            },
-            {
-             "stopId": "d1s04",
-             "seq": 4,
-             "arriveAt": "2026-10-24T13:04",
-             "departAt": "2026-10-24T14:04",
-             "kmFromPrev": 67
-            },
-            {
-             "stopId": "d1s05",
-             "seq": 5,
-             "arriveAt": "2026-10-24T14:58",
-             "departAt": null,
-             "kmFromPrev": 61
-            }
-           ]
           }
          ],
          "alternativesNote": null,
@@ -777,11 +779,11 @@
       },
       {
        "day": 2,
-       "km": 264,
-       "driveMin": 226,
+       "km": 269,
+       "driveMin": 232,
        "tz": "Europe/Moscow",
        "startAt": "2026-10-25T09:00",
-       "endAt": "2026-10-25T15:01",
+       "endAt": "2026-10-25T15:07",
        "overBudget": false,
        "stops": [
         {
@@ -840,6 +842,94 @@
          "replaceable": true,
          "alternatives": [
           {
+           "id": "alt_d2s02_Q4144213",
+           "placeId": "Q4144213",
+           "name": "Горицкий Успенский монастырь",
+           "deltaMin": 15,
+           "deltaRub": 1350,
+           "shiftMin": 15,
+           "units": {
+            "deltaKm": 0.173,
+            "regionCode": "RU-YAR",
+            "checkRub": null,
+            "adultRub": 300,
+            "childRub": 150,
+            "name": "Горицкий Успенский монастырь",
+            "placeId": "Q4144213",
+            "priceRub": "61.90",
+            "regionName": "Ярославская область",
+            "tripKmDelta": 0
+           },
+           "stop": {
+            "id": "d2s02",
+            "seq": 8,
+            "day": 2,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "Q4144213",
+            "townId": "t_pereslavl",
+            "name": "Горицкий Успенский монастырь",
+            "note": "не проверено",
+            "lat": 56.721,
+            "lon": 38.824,
+            "arriveAt": "2026-10-25T11:14",
+            "departAt": "2026-10-25T12:14",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 3,
+            "kmAt": 389,
+            "dwellMin": 60,
+            "tags": [
+             "walk",
+             "monastery"
+            ],
+            "costRub": 1350,
+            "reason": "По открытым данным.",
+            "verified": false,
+            "replaceable": true,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+           },
+           "dayPatch": [
+            {
+             "stopId": "d2s01",
+             "seq": 6,
+             "arriveAt": null,
+             "departAt": "2026-10-25T09:00",
+             "kmFromPrev": 0
+            },
+            {
+             "stopId": "d2s03",
+             "seq": 7,
+             "arriveAt": "2026-10-25T10:41",
+             "departAt": "2026-10-25T11:11",
+             "kmFromPrev": 123
+            },
+            {
+             "stopId": "d2s02",
+             "seq": 8,
+             "arriveAt": "2026-10-25T11:14",
+             "departAt": "2026-10-25T12:14",
+             "kmFromPrev": 3
+            },
+            {
+             "stopId": "d2s04",
+             "seq": 9,
+             "arriveAt": "2026-10-25T13:55",
+             "departAt": "2026-10-25T14:55",
+             "kmFromPrev": 120
+            },
+            {
+             "stopId": "d2s05",
+             "seq": 10,
+             "arriveAt": "2026-10-25T15:22",
+             "departAt": null,
+             "kmFromPrev": 23
+            }
+           ]
+          },
+          {
            "id": "alt_d2s02_pl_prs_goritsky",
            "placeId": "pl_prs_goritsky",
            "name": "Горицкий монастырь",
@@ -856,7 +946,7 @@
             "placeId": "pl_prs_goritsky",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": 4
+            "tripKmDelta": 3
            },
            "stop": {
             "id": "d2s02",
@@ -914,103 +1004,16 @@
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T13:16",
-             "departAt": "2026-10-25T14:16",
-             "kmFromPrev": 69
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:23",
-             "departAt": null,
-             "kmFromPrev": 73
-            }
-           ]
-          },
-          {
-           "id": "alt_d2s02_pl_prs_iron",
-           "placeId": "pl_prs_iron",
-           "name": "Музей утюга",
-           "deltaMin": -15,
-           "deltaRub": 900,
-           "shiftMin": -15,
-           "units": {
-            "deltaKm": 0.209,
-            "regionCode": "RU-YAR",
-            "checkRub": null,
-            "adultRub": 200,
-            "childRub": 100,
-            "name": "Музей утюга",
-            "placeId": "pl_prs_iron",
-            "priceRub": "61.90",
-            "regionName": "Ярославская область",
-            "tripKmDelta": 1
-           },
-           "stop": {
-            "id": "d2s02",
-            "seq": 7,
-            "day": 2,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "pl_prs_iron",
-            "townId": "t_pereslavl",
-            "name": "Музей утюга",
-            "note": null,
-            "lat": 56.737908743465916,
-            "lon": 38.86085108526628,
-            "arriveAt": "2026-10-25T10:41",
-            "departAt": "2026-10-25T11:11",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 123,
-            "kmAt": 386,
-            "dwellMin": 30,
-            "tags": [
-             "museum"
-            ],
-            "costRub": 900,
-            "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
-            "verified": true,
-            "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null
-           },
-           "dayPatch": [
-            {
-             "stopId": "d2s01",
-             "seq": 6,
-             "arriveAt": null,
-             "departAt": "2026-10-25T09:00",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d2s02",
-             "seq": 7,
-             "arriveAt": "2026-10-25T10:41",
-             "departAt": "2026-10-25T11:11",
+             "arriveAt": "2026-10-25T14:02",
+             "departAt": "2026-10-25T15:02",
              "kmFromPrev": 123
             },
             {
-             "stopId": "d2s03",
-             "seq": 8,
-             "arriveAt": "2026-10-25T11:11",
-             "departAt": "2026-10-25T11:41",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d2s04",
-             "seq": 9,
-             "arriveAt": "2026-10-25T12:39",
-             "departAt": "2026-10-25T13:39",
-             "kmFromPrev": 69
-            },
-            {
              "stopId": "d2s05",
              "seq": 10,
-             "arriveAt": "2026-10-25T14:46",
+             "arriveAt": "2026-10-25T15:29",
              "departAt": null,
-             "kmFromPrev": 73
+             "kmFromPrev": 23
             }
            ]
           },
@@ -1031,7 +1034,7 @@
             "placeId": "pl_prs_botik",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": 1
+            "tripKmDelta": 0
            },
            "stop": {
             "id": "d2s02",
@@ -1089,16 +1092,16 @@
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T13:12",
-             "departAt": "2026-10-25T14:12",
-             "kmFromPrev": 66
+             "arriveAt": "2026-10-25T13:58",
+             "departAt": "2026-10-25T14:58",
+             "kmFromPrev": 121
             },
             {
              "stopId": "d2s05",
              "seq": 10,
-             "arriveAt": "2026-10-25T15:19",
+             "arriveAt": "2026-10-25T15:25",
              "departAt": null,
-             "kmFromPrev": 73
+             "kmFromPrev": 23
             }
            ]
           }
@@ -1136,6 +1139,94 @@
          "replaceable": true,
          "alternatives": [
           {
+           "id": "alt_d2s03_Q4144213",
+           "placeId": "Q4144213",
+           "name": "Горицкий Успенский монастырь",
+           "deltaMin": 30,
+           "deltaRub": 1350,
+           "shiftMin": 30,
+           "units": {
+            "deltaKm": 0.509,
+            "regionCode": "RU-YAR",
+            "checkRub": null,
+            "adultRub": 300,
+            "childRub": 150,
+            "name": "Горицкий Успенский монастырь",
+            "placeId": "Q4144213",
+            "priceRub": "61.90",
+            "regionName": "Ярославская область",
+            "tripKmDelta": 0
+           },
+           "stop": {
+            "id": "d2s03",
+            "seq": 8,
+            "day": 2,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "Q4144213",
+            "townId": "t_pereslavl",
+            "name": "Горицкий Успенский монастырь",
+            "note": "не проверено",
+            "lat": 56.721,
+            "lon": 38.824,
+            "arriveAt": "2026-10-25T11:29",
+            "departAt": "2026-10-25T12:29",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 5,
+            "kmAt": 389,
+            "dwellMin": 60,
+            "tags": [
+             "walk",
+             "monastery"
+            ],
+            "costRub": 1350,
+            "reason": "По открытым данным.",
+            "verified": false,
+            "replaceable": true,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+           },
+           "dayPatch": [
+            {
+             "stopId": "d2s01",
+             "seq": 6,
+             "arriveAt": null,
+             "departAt": "2026-10-25T09:00",
+             "kmFromPrev": 0
+            },
+            {
+             "stopId": "d2s02",
+             "seq": 7,
+             "arriveAt": "2026-10-25T10:40",
+             "departAt": "2026-10-25T11:25",
+             "kmFromPrev": 121
+            },
+            {
+             "stopId": "d2s03",
+             "seq": 8,
+             "arriveAt": "2026-10-25T11:29",
+             "departAt": "2026-10-25T12:29",
+             "kmFromPrev": 5
+            },
+            {
+             "stopId": "d2s04",
+             "seq": 9,
+             "arriveAt": "2026-10-25T14:10",
+             "departAt": "2026-10-25T15:10",
+             "kmFromPrev": 120
+            },
+            {
+             "stopId": "d2s05",
+             "seq": 10,
+             "arriveAt": "2026-10-25T15:37",
+             "departAt": null,
+             "kmFromPrev": 23
+            }
+           ]
+          },
+          {
            "id": "alt_d2s03_pl_prs_goritsky",
            "placeId": "pl_prs_goritsky",
            "name": "Горицкий монастырь",
@@ -1152,7 +1243,7 @@
             "placeId": "pl_prs_goritsky",
             "priceRub": "61.90",
             "regionName": "Ярославская область",
-            "tripKmDelta": 4
+            "tripKmDelta": 3
            },
            "stop": {
             "id": "d2s03",
@@ -1210,103 +1301,16 @@
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T13:31",
-             "departAt": "2026-10-25T14:31",
-             "kmFromPrev": 70
+             "arriveAt": "2026-10-25T14:17",
+             "departAt": "2026-10-25T15:17",
+             "kmFromPrev": 124
             },
             {
              "stopId": "d2s05",
              "seq": 10,
-             "arriveAt": "2026-10-25T15:38",
+             "arriveAt": "2026-10-25T15:44",
              "departAt": null,
-             "kmFromPrev": 73
-            }
-           ]
-          },
-          {
-           "id": "alt_d2s03_pl_prs_iron",
-           "placeId": "pl_prs_iron",
-           "name": "Музей утюга",
-           "deltaMin": 0,
-           "deltaRub": 900,
-           "shiftMin": 0,
-           "units": {
-            "deltaKm": 0.545,
-            "regionCode": "RU-YAR",
-            "checkRub": null,
-            "adultRub": 200,
-            "childRub": 100,
-            "name": "Музей утюга",
-            "placeId": "pl_prs_iron",
-            "priceRub": "61.90",
-            "regionName": "Ярославская область",
-            "tripKmDelta": 1
-           },
-           "stop": {
-            "id": "d2s03",
-            "seq": 8,
-            "day": 2,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "pl_prs_iron",
-            "townId": "t_pereslavl",
-            "name": "Музей утюга",
-            "note": null,
-            "lat": 56.737908743465916,
-            "lon": 38.86085108526628,
-            "arriveAt": "2026-10-25T11:26",
-            "departAt": "2026-10-25T11:56",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 2,
-            "kmAt": 386,
-            "dwellMin": 30,
-            "tags": [
-             "museum"
-            ],
-            "costRub": 900,
-            "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
-            "verified": true,
-            "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null
-           },
-           "dayPatch": [
-            {
-             "stopId": "d2s01",
-             "seq": 6,
-             "arriveAt": null,
-             "departAt": "2026-10-25T09:00",
-             "kmFromPrev": 0
-            },
-            {
-             "stopId": "d2s02",
-             "seq": 7,
-             "arriveAt": "2026-10-25T10:40",
-             "departAt": "2026-10-25T11:25",
-             "kmFromPrev": 121
-            },
-            {
-             "stopId": "d2s03",
-             "seq": 8,
-             "arriveAt": "2026-10-25T11:26",
-             "departAt": "2026-10-25T11:56",
-             "kmFromPrev": 2
-            },
-            {
-             "stopId": "d2s04",
-             "seq": 9,
-             "arriveAt": "2026-10-25T12:54",
-             "departAt": "2026-10-25T13:54",
-             "kmFromPrev": 69
-            },
-            {
-             "stopId": "d2s05",
-             "seq": 10,
-             "arriveAt": "2026-10-25T15:01",
-             "departAt": null,
-             "kmFromPrev": 73
+             "kmFromPrev": 23
             }
            ]
           },
@@ -1385,16 +1389,16 @@
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T13:27",
-             "departAt": "2026-10-25T14:27",
-             "kmFromPrev": 66
+             "arriveAt": "2026-10-25T14:13",
+             "departAt": "2026-10-25T15:13",
+             "kmFromPrev": 121
             },
             {
              "stopId": "d2s05",
              "seq": 10,
-             "arriveAt": "2026-10-25T15:34",
+             "arriveAt": "2026-10-25T15:40",
              "departAt": null,
-             "kmFromPrev": 73
+             "kmFromPrev": 23
             }
            ]
           }
@@ -1409,42 +1413,42 @@
          "day": 2,
          "kind": "food",
          "sign": "food",
-         "placeId": "pl_sps_cafe_posad",
-         "townId": "t_sergiev_posad",
-         "name": "Трапезная «Посадская»",
+         "placeId": "syn_c_Q23185_1",
+         "townId": "Q23185",
+         "name": "Кафе «Огонёк»",
          "note": null,
-         "lat": 56.3153,
-         "lon": 38.14551808665103,
-         "arriveAt": "2026-10-25T12:54",
-         "departAt": "2026-10-25T13:54",
+         "lat": 55.919383115198876,
+         "lon": 37.72691804924099,
+         "arriveAt": "2026-10-25T13:40",
+         "departAt": "2026-10-25T14:40",
          "tz": "Europe/Moscow",
-         "kmFromPrev": 69,
-         "kmAt": 454,
+         "kmFromPrev": 123,
+         "kmAt": 506,
          "dwellMin": 60,
          "tags": [
           "kids_menu",
           "parking"
          ],
-         "costRub": 3750,
+         "costRub": 3500,
          "reason": "Обед, есть детское меню.",
          "verified": true,
          "replaceable": true,
          "alternatives": [
           {
-           "id": "alt_d2s04_pl_sps_cafe_dvorik",
-           "placeId": "pl_sps_cafe_dvorik",
-           "name": "Кафе «Русский дворик»",
-           "deltaMin": 0,
-           "deltaRub": -250,
-           "shiftMin": 0,
+           "id": "alt_d2s04_syn_c_Q155309_1",
+           "placeId": "syn_c_Q155309_1",
+           "name": "Кафе «Пряник»",
+           "deltaMin": 2,
+           "deltaRub": 10,
+           "shiftMin": 2,
            "units": {
-            "deltaKm": 0.17,
+            "deltaKm": 1.053,
             "regionCode": "RU-MOS",
             "checkRub": 700,
             "adultRub": null,
             "childRub": null,
-            "name": "Кафе «Русский дворик»",
-            "placeId": "pl_sps_cafe_dvorik",
+            "name": "Кафе «Пряник»",
+            "placeId": "syn_c_Q155309_1",
             "priceRub": "61.80",
             "regionName": "Московская область",
             "tripKmDelta": 1
@@ -1455,17 +1459,17 @@
             "day": 2,
             "kind": "food",
             "sign": "food",
-            "placeId": "pl_sps_cafe_dvorik",
-            "townId": "t_sergiev_posad",
-            "name": "Кафе «Русский дворик»",
+            "placeId": "syn_c_Q155309_1",
+            "townId": "Q155309",
+            "name": "Кафе «Пряник»",
             "note": null,
-            "lat": 56.31801311519887,
-            "lon": 38.129321275565985,
-            "arriveAt": "2026-10-25T12:55",
-            "departAt": "2026-10-25T13:55",
+            "lat": 55.919383115198876,
+            "lon": 37.81025804924099,
+            "arriveAt": "2026-10-25T13:39",
+            "departAt": "2026-10-25T14:39",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 69,
-            "kmAt": 454,
+            "kmFromPrev": 121,
+            "kmAt": 503,
             "dwellMin": 60,
             "tags": [
              "kids_menu",
@@ -1505,37 +1509,37 @@
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T12:55",
-             "departAt": "2026-10-25T13:55",
-             "kmFromPrev": 69
+             "arriveAt": "2026-10-25T13:39",
+             "departAt": "2026-10-25T14:39",
+             "kmFromPrev": 121
             },
             {
              "stopId": "d2s05",
              "seq": 10,
-             "arriveAt": "2026-10-25T15:01",
+             "arriveAt": "2026-10-25T15:09",
              "departAt": null,
-             "kmFromPrev": 73
+             "kmFromPrev": 26
             }
            ]
           },
           {
-           "id": "alt_d2s04_pl_sps_cafe_bliny",
-           "placeId": "pl_sps_cafe_bliny",
-           "name": "Блинная у лавры",
-           "deltaMin": -4,
-           "deltaRub": -1000,
-           "shiftMin": -4,
+           "id": "alt_d2s04_syn_c_Q23185_0",
+           "placeId": "syn_c_Q23185_0",
+           "name": "Столовая «Щи да каша»",
+           "deltaMin": -3,
+           "deltaRub": -1010,
+           "shiftMin": -3,
            "units": {
-            "deltaKm": -0.349,
+            "deltaKm": -2.213,
             "regionCode": "RU-MOS",
-            "checkRub": 550,
+            "checkRub": 500,
             "adultRub": null,
             "childRub": null,
-            "name": "Блинная у лавры",
-            "placeId": "pl_sps_cafe_bliny",
+            "name": "Столовая «Щи да каша»",
+            "placeId": "syn_c_Q23185_0",
             "priceRub": "61.80",
             "regionName": "Московская область",
-            "tripKmDelta": 0
+            "tripKmDelta": -2
            },
            "stop": {
             "id": "d2s04",
@@ -1543,22 +1547,22 @@
             "day": 2,
             "kind": "food",
             "sign": "food",
-            "placeId": "pl_sps_cafe_bliny",
-            "townId": "t_sergiev_posad",
-            "name": "Блинная у лавры",
+            "placeId": "syn_c_Q23185_0",
+            "townId": "Q23185",
+            "name": "Столовая «Щи да каша»",
             "note": null,
-            "lat": 56.31801311519887,
-            "lon": 38.14713776775954,
-            "arriveAt": "2026-10-25T12:52",
-            "departAt": "2026-10-25T13:52",
+            "lat": 55.91486125653409,
+            "lon": 37.73813896306926,
+            "arriveAt": "2026-10-25T13:39",
+            "departAt": "2026-10-25T14:39",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 68,
-            "kmAt": 453,
+            "kmFromPrev": 122,
+            "kmAt": 506,
             "dwellMin": 60,
             "tags": [
              "parking"
             ],
-            "costRub": 2750,
+            "costRub": 2500,
             "reason": "Обед, парковка у входа.",
             "verified": true,
             "replaceable": true,
@@ -1592,16 +1596,104 @@
             {
              "stopId": "d2s04",
              "seq": 9,
-             "arriveAt": "2026-10-25T12:52",
-             "departAt": "2026-10-25T13:52",
-             "kmFromPrev": 68
+             "arriveAt": "2026-10-25T13:39",
+             "departAt": "2026-10-25T14:39",
+             "kmFromPrev": 122
             },
             {
              "stopId": "d2s05",
              "seq": 10,
-             "arriveAt": "2026-10-25T14:57",
+             "arriveAt": "2026-10-25T15:04",
              "departAt": null,
-             "kmFromPrev": 73
+             "kmFromPrev": 22
+            }
+           ]
+          },
+          {
+           "id": "alt_d2s04_syn_c_Q197620_1",
+           "placeId": "syn_c_Q197620_1",
+           "name": "Кафе «Печка»",
+           "deltaMin": 15,
+           "deltaRub": -700,
+           "shiftMin": 15,
+           "units": {
+            "deltaKm": 10.087,
+            "regionCode": "RU-MOS",
+            "checkRub": 550,
+            "adultRub": null,
+            "childRub": null,
+            "name": "Кафе «Печка»",
+            "placeId": "syn_c_Q197620_1",
+            "priceRub": "61.80",
+            "regionName": "Московская область",
+            "tripKmDelta": 10
+           },
+           "stop": {
+            "id": "d2s04",
+            "seq": 9,
+            "day": 2,
+            "kind": "food",
+            "sign": "food",
+            "placeId": "syn_c_Q197620_1",
+            "townId": "Q197620",
+            "name": "Кафе «Печка»",
+            "note": null,
+            "lat": 56.256213115198875,
+            "lon": 37.97035173905595,
+            "arriveAt": "2026-10-25T13:13",
+            "departAt": "2026-10-25T14:13",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 87,
+            "kmAt": 465,
+            "dwellMin": 60,
+            "tags": [
+             "kids_menu",
+             "parking"
+            ],
+            "costRub": 2750,
+            "reason": "Обед, есть детское меню.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+           },
+           "dayPatch": [
+            {
+             "stopId": "d2s01",
+             "seq": 6,
+             "arriveAt": null,
+             "departAt": "2026-10-25T09:00",
+             "kmFromPrev": 0
+            },
+            {
+             "stopId": "d2s02",
+             "seq": 7,
+             "arriveAt": "2026-10-25T10:40",
+             "departAt": "2026-10-25T11:25",
+             "kmFromPrev": 121
+            },
+            {
+             "stopId": "d2s03",
+             "seq": 8,
+             "arriveAt": "2026-10-25T11:26",
+             "departAt": "2026-10-25T11:56",
+             "kmFromPrev": 2
+            },
+            {
+             "stopId": "d2s04",
+             "seq": 9,
+             "arriveAt": "2026-10-25T13:13",
+             "departAt": "2026-10-25T14:13",
+             "kmFromPrev": 87
+            },
+            {
+             "stopId": "d2s05",
+             "seq": 10,
+             "arriveAt": "2026-10-25T15:22",
+             "departAt": null,
+             "kmFromPrev": 69
             }
            ]
           }
@@ -1622,10 +1714,10 @@
          "note": null,
          "lat": 55.7558,
          "lon": 37.6173,
-         "arriveAt": "2026-10-25T15:01",
+         "arriveAt": "2026-10-25T15:07",
          "departAt": null,
          "tz": "Europe/Moscow",
-         "kmFromPrev": 73,
+         "kmFromPrev": 23,
          "kmAt": 526,
          "dwellMin": 0,
          "tags": [],
@@ -1646,25 +1738,30 @@
        {
         "key": "fuel",
         "title": "Бензин АИ-95",
-        "rub": 2650,
-        "formula": "536 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 3 регионам)",
+        "rub": 2680,
+        "formula": "541 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 4 регионам)",
         "asOf": "2026-10",
         "enabled": true,
         "breakdown": [
          {
           "label": "Москва",
-          "formula": "26 км × 8 л/100 × 62,50 ₽ = 130 ₽",
-          "rub": 130
+          "formula": "16 км × 8 л/100 × 62,50 ₽ = 80 ₽",
+          "rub": 80
          },
          {
           "label": "Московская область",
-          "formula": "192 км × 8 л/100 × 61,80 ₽ = 950 ₽",
-          "rub": 950
+          "formula": "196 км × 8 л/100 × 61,80 ₽ = 970 ₽",
+          "rub": 970
+         },
+         {
+          "label": "Владимирская область",
+          "formula": "30 км × 8 л/100 × 61,40 ₽ = 150 ₽",
+          "rub": 150
          },
          {
           "label": "Ярославская область",
-          "formula": "318 км × 8 л/100 × 61,90 ₽ = 1 580 ₽",
-          "rub": 1580
+          "formula": "299 км × 8 л/100 × 61,90 ₽ = 1 480 ₽",
+          "rub": 1480
          }
         ]
        },
@@ -1695,20 +1792,20 @@
        {
         "key": "food",
         "title": "Питание",
-        "rub": 10250,
-        "formula": "5 чел. × 3 приёма × ≈ 680 (в среднем)",
-        "asOf": "2026-09",
+        "rub": 9250,
+        "formula": "5 чел. × 3 приёма × ≈ 620 (в среднем)",
+        "asOf": "2026-10",
         "enabled": true,
         "breakdown": [
          {
           "label": "День 1",
-          "formula": "обед 700 + ужин 600",
-          "rub": 6500
+          "formula": "обед 550 + ужин 600",
+          "rub": 5750
          },
          {
           "label": "День 2",
-          "formula": "обед 750",
-          "rub": 3750
+          "formula": "обед 700",
+          "rub": 3500
          }
         ]
        },
@@ -1724,7 +1821,7 @@
        {
         "key": "reserve",
         "title": "Резерв 10%",
-        "rub": 2490,
+        "rub": 2390,
         "formula": "на пробки и «давай заедем»",
         "asOf": "2026-09",
         "enabled": true,
@@ -1732,11 +1829,11 @@
        }
       ],
       "reserveOn": true,
-      "subtotalRub": 24900,
-      "totalRub": 27400,
-      "perPersonRub": 5500,
+      "subtotalRub": 23930,
+      "totalRub": 26300,
+      "perPersonRub": 5300,
       "budgetRub": 20000,
-      "remainingRub": -7400,
+      "remainingRub": -6300,
       "overBudget": true,
       "hints": [
        "Уберите пару платных мест",
@@ -1755,24 +1852,30 @@
          {
           "regionCode": "RU-MOW",
           "regionName": "Москва",
-          "km": 26.0,
+          "km": 16.0,
           "priceRub": "62.50"
          },
          {
           "regionCode": "RU-MOS",
           "regionName": "Московская область",
-          "km": 191.706,
+          "km": 196.081,
           "priceRub": "61.80"
+         },
+         {
+          "regionCode": "RU-VLA",
+          "regionName": "Владимирская область",
+          "km": 30.0,
+          "priceRub": "61.40"
          },
          {
           "regionCode": "RU-YAR",
           "regionName": "Ярославская область",
-          "km": 318.439,
+          "km": 298.612,
           "priceRub": "61.90"
          }
         ],
         "asOf": "2026-10",
-        "tripKm": 536
+        "tripKm": 541
        },
        "tolls": [],
        "nights": [
@@ -1804,7 +1907,7 @@
          "day": 1,
          "meal": "lunch",
          "stopId": "d1s04",
-         "checkRub": 700
+         "checkRub": 550
         },
         {
          "day": 1,
@@ -1816,7 +1919,7 @@
          "day": 2,
          "meal": "lunch",
          "stopId": "d2s04",
-         "checkRub": 750
+         "checkRub": 700
         }
        ],
        "tickets": [
@@ -1859,7 +1962,7 @@
         "fuel": "2026-10",
         "tolls": "2026-10",
         "lodging": "2026-09",
-        "food": "2026-09",
+        "food": "2026-10",
         "tickets": "2026-10",
         "reserve": "2026-09"
        },
@@ -2976,15 +3079,19 @@
       "regionKm": [
        [
         "RU-MOW",
-        26.0
+        16.0
        ],
        [
         "RU-MOS",
-        191.706
+        196.081
+       ],
+       [
+        "RU-VLA",
+        30.0
        ],
        [
         "RU-YAR",
-        318.439
+        298.612
        ]
       ],
       "tollHits": [],
@@ -3063,14 +3170,14 @@
          {
           "stopId": "d1s04",
           "kind": "food",
-          "kmAt": 204.24713634908792,
-          "detourKm": 0.5411097941742544,
+          "kmAt": 203.90584741186518,
+          "detourKm": 0.7144676577658207,
           "detourMin": 0,
           "dwellMin": 60,
           "fixed": false,
           "auto": true,
-          "score": 4.7,
-          "placeId": "pl_rst_cafe_kremlin",
+          "score": 5.1,
+          "placeId": "syn_c_Q193342_1",
           "regionCode": "RU-YAR",
           "reasonKey": "lunch.kids",
           "reasonParams": [],
@@ -3178,14 +3285,14 @@
          {
           "stopId": "d2s04",
           "kind": "food",
-          "kmAt": 453.5646051145481,
-          "detourKm": 1.125813111011013,
-          "detourMin": 4,
+          "kmAt": 505.9232714132162,
+          "detourKm": 5.500612627766976,
+          "detourMin": 10,
           "dwellMin": 60,
           "fixed": false,
           "auto": true,
-          "score": 4.2,
-          "placeId": "pl_sps_cafe_posad",
+          "score": 2.5,
+          "placeId": "syn_c_Q23185_1",
           "regionCode": "RU-MOS",
           "reasonKey": "lunch.kids",
           "reasonParams": [],
@@ -3217,6 +3324,546 @@
        }
       ],
       "candidates": [
+       {
+        "placeId": "Q1048694",
+        "kmAt": 0.0,
+        "lateralKm": 0.6863645968783499,
+        "detourKm": 1.78454795188371,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q129846",
+        "kmAt": 0.0,
+        "lateralKm": 0.5123365961293259,
+        "detourKm": 1.3320751499362475,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q133274",
+        "kmAt": 0.0,
+        "lateralKm": 0.45765298713504626,
+        "detourKm": 1.1898977665511203,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q183334",
+        "kmAt": 0.0,
+        "lateralKm": 1.6088006542319713,
+        "detourKm": 4.182881701003126,
+        "detourMin": 8,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q191414",
+        "kmAt": 0.0,
+        "lateralKm": 0.2854310569060625,
+        "detourKm": 0.7421207479557625,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q194474",
+        "kmAt": 0.0,
+        "lateralKm": 1.454356291023881,
+        "detourKm": 3.7813263566620905,
+        "detourMin": 8,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q202163",
+        "kmAt": 0.0,
+        "lateralKm": 5.945330325892808,
+        "detourKm": 15.457858847321301,
+        "detourMin": 25,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q215539",
+        "kmAt": 0.0,
+        "lateralKm": 0.8103647648905099,
+        "detourKm": 2.1069483887153257,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q41116",
+        "kmAt": 0.0,
+        "lateralKm": 0.24678844047640128,
+        "detourKm": 0.6416499452386434,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q181324",
+        "kmAt": 6.409951242747112,
+        "lateralKm": 3.5226411698528164,
+        "detourKm": 9.158867041617324,
+        "detourMin": 16,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q4365784",
+        "kmAt": 11.18228390085321,
+        "lateralKm": 9.448823975356476,
+        "detourKm": 24.566942335926836,
+        "detourMin": 39,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q98392410",
+        "kmAt": 11.183312789811088,
+        "lateralKm": 9.448321871277539,
+        "detourKm": 24.5656368653216,
+        "detourMin": 39,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q3013884",
+        "kmAt": 12.222712612800315,
+        "lateralKm": 14.703000557848712,
+        "detourKm": 38.22780145040665,
+        "detourMin": 59,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4126457",
+        "kmAt": 12.97504536028435,
+        "lateralKm": 10.50112356543849,
+        "detourKm": 27.302921270140075,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q32361905",
+        "kmAt": 13.408683914801065,
+        "lateralKm": 9.80360398774011,
+        "detourKm": 25.489370368124288,
+        "detourMin": 40,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q21644697",
+        "kmAt": 14.252403661333974,
+        "lateralKm": 2.250142066204545,
+        "detourKm": 5.850369372131817,
+        "detourMin": 11,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q118557708",
+        "kmAt": 14.555510021465036,
+        "lateralKm": 3.643367266830449,
+        "detourKm": 9.472754893759168,
+        "detourMin": 16,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4500731",
+        "kmAt": 17.109678059558068,
+        "lateralKm": 13.31894345432721,
+        "detourKm": 34.629252981250744,
+        "detourMin": 54,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4504594",
+        "kmAt": 17.217700580226808,
+        "lateralKm": 3.154111196774118,
+        "detourKm": 8.200689111612707,
+        "detourMin": 14,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4309603",
+        "kmAt": 19.502719729245733,
+        "lateralKm": 1.2305801864498545,
+        "detourKm": 3.1995084847696216,
+        "detourMin": 7,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q55657420",
+        "kmAt": 20.303883445366715,
+        "lateralKm": 0.050536841078073456,
+        "detourKm": 0.131395786802991,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4504634",
+        "kmAt": 20.525504449861252,
+        "lateralKm": 0.9928717049771432,
+        "detourKm": 2.581466432940572,
+        "detourMin": 6,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q3297833",
+        "kmAt": 21.972753584872603,
+        "lateralKm": 1.7954105677266718,
+        "detourKm": 4.668067476089347,
+        "detourMin": 9,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q100138159",
+        "kmAt": 23.188129118065213,
+        "lateralKm": 5.240263623693524,
+        "detourKm": 13.624685421603163,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q112876014",
+        "kmAt": 25.413553164038913,
+        "lateralKm": 4.519355784550287,
+        "detourKm": 11.750325039830747,
+        "detourMin": 20,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4504771",
+        "kmAt": 25.552387402242083,
+        "lateralKm": 4.719306388892914,
+        "detourKm": 12.270196611121577,
+        "detourMin": 20,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q3034485",
+        "kmAt": 27.680045876251018,
+        "lateralKm": 2.399948248496858,
+        "detourKm": 6.239865446091831,
+        "detourMin": 11,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q122951851",
+        "kmAt": 27.710120128379586,
+        "lateralKm": 4.053857671370268,
+        "detourKm": 10.540029945562697,
+        "detourMin": 18,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4513196",
+        "kmAt": 27.73043417549717,
+        "lateralKm": 0.6709845351640968,
+        "detourKm": 1.7445597914266517,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4505215",
+        "kmAt": 29.292108445983004,
+        "lateralKm": 1.1598394463482893,
+        "detourKm": 3.0155825605055524,
+        "detourMin": 7,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q107829177",
+        "kmAt": 30.826652040467764,
+        "lateralKm": 5.579314100554449,
+        "detourKm": 14.506216661441568,
+        "detourMin": 24,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q123478161",
+        "kmAt": 30.961077026165736,
+        "lateralKm": 0.5745316089081602,
+        "detourKm": 1.4937821831612166,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q59914886",
+        "kmAt": 31.003345660520182,
+        "lateralKm": 4.486749171893865,
+        "detourKm": 11.66554784692405,
+        "detourMin": 19,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q111353643",
+        "kmAt": 31.028224058337347,
+        "lateralKm": 1.1122081666456838,
+        "detourKm": 2.8917412332787777,
+        "detourMin": 6,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q55657264",
+        "kmAt": 32.03305364657148,
+        "lateralKm": 0.4237365131870335,
+        "detourKm": 1.101714934286287,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q120836002",
+        "kmAt": 32.14393720861755,
+        "lateralKm": 1.9053617471498265,
+        "detourKm": 4.9539405425895495,
+        "detourMin": 9,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4135784",
+        "kmAt": 32.14742872203958,
+        "lateralKm": 7.627210042203034,
+        "detourKm": 19.830746109727887,
+        "detourMin": 32,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q65665918",
+        "kmAt": 32.9031708530511,
+        "lateralKm": 0.6849739676046475,
+        "detourKm": 1.7809323157720836,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4384761",
+        "kmAt": 32.91557720691293,
+        "lateralKm": 0.5068205359769471,
+        "detourKm": 1.3177333935400626,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4505226",
+        "kmAt": 34.865574064922576,
+        "lateralKm": 0.8077477418821064,
+        "detourKm": 2.1001441288934766,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q55091947",
+        "kmAt": 47.66081716099619,
+        "lateralKm": 9.371749510178566,
+        "detourKm": 24.36654872646427,
+        "detourMin": 39,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q124516604",
+        "kmAt": 47.68443193104153,
+        "lateralKm": 9.398781424075235,
+        "detourKm": 24.43683170259561,
+        "detourMin": 39,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q108326040",
+        "kmAt": 50.769892302807676,
+        "lateralKm": 10.578452997264693,
+        "detourKm": 27.5039777928882,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4055021",
+        "kmAt": 58.928060985322304,
+        "lateralKm": 4.942232059124864,
+        "detourKm": 12.849803353724646,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947568",
+        "kmAt": 58.95749780017169,
+        "lateralKm": 4.9280496196413095,
+        "detourKm": 12.812929011067405,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947442",
+        "kmAt": 58.963582614368505,
+        "lateralKm": 4.959281908852412,
+        "detourKm": 12.894132963016272,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947544",
+        "kmAt": 58.972939222838455,
+        "lateralKm": 4.899578793026175,
+        "detourKm": 12.738904861868056,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947426",
+        "kmAt": 58.98174973343751,
+        "lateralKm": 4.9988962731747995,
+        "detourKm": 12.997130310254478,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q108068886",
+        "kmAt": 59.04519832541422,
+        "lateralKm": 5.1413355235129785,
+        "detourKm": 13.367472361133744,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947518",
+        "kmAt": 59.05538730323523,
+        "lateralKm": 5.0918897561686345,
+        "detourKm": 13.23891336603845,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q128791107",
+        "kmAt": 59.06885715663414,
+        "lateralKm": 5.069412513704191,
+        "detourKm": 13.180472535630898,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q128791111",
+        "kmAt": 59.891778455724285,
+        "lateralKm": 8.184037947079881,
+        "detourKm": 21.278498662407692,
+        "detourMin": 34,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4073213",
+        "kmAt": 60.045408116041145,
+        "lateralKm": 8.046997896629847,
+        "detourKm": 20.922194531237604,
+        "detourMin": 33,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4369337",
+        "kmAt": 61.34383295735513,
+        "lateralKm": 4.45961071326238,
+        "detourKm": 11.59498785448219,
+        "detourMin": 19,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q128791093",
+        "kmAt": 63.073744229636226,
+        "lateralKm": 5.701466911681991,
+        "detourKm": 14.823813970373177,
+        "detourMin": 24,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q55400330",
+        "kmAt": 66.53733274347687,
+        "lateralKm": 0.6289540824808629,
+        "detourKm": 1.6352806144502436,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4463570",
+        "kmAt": 71.25429174215469,
+        "lateralKm": 0.05893885618189776,
+        "detourKm": 0.1532410260729342,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4463519",
+        "kmAt": 71.31017610723421,
+        "lateralKm": 0.08797066661475314,
+        "detourKm": 0.22872373319835818,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q17056916",
+        "kmAt": 71.34969481612205,
+        "lateralKm": 0.022181486911293458,
+        "detourKm": 0.05767186596936299,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q18400739",
+        "kmAt": 71.63446788766998,
+        "lateralKm": 0.07129217237205765,
+        "detourKm": 0.1853596481673499,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
        {
         "placeId": "pl_sps_pyatnitskoe",
         "kmAt": 72.0,
@@ -3254,6 +3901,15 @@
         "regionCode": "RU-MOS"
        },
        {
+        "placeId": "Q4513561",
+        "kmAt": 73.28013261585804,
+        "lateralKm": 2.571642620100678,
+        "detourKm": 6.686270812261763,
+        "detourMin": 12,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
         "placeId": "pl_sps_gremyachiy",
         "kmAt": 74.00761888112115,
         "lateralKm": 0.39784217720327736,
@@ -3263,11 +3919,47 @@
         "regionCode": "RU-MOS"
        },
        {
+        "placeId": "Q115585428",
+        "kmAt": 97.2800245254682,
+        "lateralKm": 14.907254066673422,
+        "detourKm": 38.7588605733509,
+        "detourMin": 60,
+        "roadClass": "trunk",
+        "regionCode": "RU-VLA"
+       },
+       {
+        "placeId": "Q4350929",
+        "kmAt": 137.33810337719862,
+        "lateralKm": 0.1932445157483346,
+        "detourKm": 0.50243574094567,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4144213",
+        "kmAt": 137.35749837328015,
+        "lateralKm": 0.20127667145772613,
+        "detourKm": 0.523319345790088,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_prs_botik",
         "kmAt": 137.90245279283386,
         "lateralKm": 0.34193534331147946,
         "detourKm": 0.8890318926098466,
         "detourMin": 3,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4320910",
+        "kmAt": 138.9078254568995,
+        "lateralKm": 0.4111978344215381,
+        "detourKm": 1.0691143694959993,
+        "detourMin": 4,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
@@ -3290,6 +3982,42 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "Q4504871",
+        "kmAt": 139.82076068876276,
+        "lateralKm": 0.08343660236280374,
+        "detourKm": 0.21693516614328975,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q16701537",
+        "kmAt": 139.8594737821792,
+        "lateralKm": 0.022436606168198783,
+        "detourKm": 0.05833517603731684,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4350928",
+        "kmAt": 139.92049807267372,
+        "lateralKm": 0.21406192098395152,
+        "detourKm": 0.556560994558274,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q1975595",
+        "kmAt": 139.96118618349442,
+        "lateralKm": 0.12859835266237576,
+        "detourKm": 0.334355716922177,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_prs_goritsky",
         "kmAt": 140.0,
         "lateralKm": 1.3409208682049925,
@@ -3299,11 +4027,47 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "Q4369262",
+        "kmAt": 140.01910299473428,
+        "lateralKm": 0.41023515409332295,
+        "detourKm": 1.0666114006426397,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q121278074",
+        "kmAt": 140.1005511952776,
+        "lateralKm": 0.1515453939555729,
+        "detourKm": 0.39401802428448957,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q121278066",
+        "kmAt": 140.10063799059233,
+        "lateralKm": 0.06921944290851846,
+        "detourKm": 0.179970551562148,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_prs_pleshcheevo",
         "kmAt": 140.16083864883208,
         "lateralKm": 1.5491720176097092,
         "detourKm": 4.027847245785244,
         "detourMin": 8,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q121278058",
+        "kmAt": 140.179984488507,
+        "lateralKm": 0.07765282757730188,
+        "detourKm": 0.20189735170098488,
+        "detourMin": 0,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
@@ -3326,11 +4090,29 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "Q4419634",
+        "kmAt": 140.51903891571223,
+        "lateralKm": 0.15991077105395496,
+        "detourKm": 0.4157680047402829,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_prs_nikitsky",
         "kmAt": 141.70583070363722,
         "lateralKm": 0.13474169823138044,
         "detourKm": 0.35032841540158915,
         "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4430821",
+        "kmAt": 202.07335762549727,
+        "lateralKm": 0.603362271824894,
+        "detourKm": 1.5687419067447244,
+        "detourMin": 4,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
@@ -3353,11 +4135,38 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "Q4398502",
+        "kmAt": 203.96138400814147,
+        "lateralKm": 0.2013994025002009,
+        "detourKm": 0.5236384465005224,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4504860",
+        "kmAt": 203.9929009066318,
+        "lateralKm": 0.056795686179788696,
+        "detourKm": 0.14766878406745063,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_rst_avraamiev",
         "kmAt": 204.0,
         "lateralKm": 0.9393494921723584,
         "detourKm": 2.442308679648132,
         "detourMin": 6,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4478063",
+        "kmAt": 204.06103839286183,
+        "lateralKm": 0.030052423176321185,
+        "detourKm": 0.07813630025843508,
+        "detourMin": 0,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
@@ -3389,6 +4198,33 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "Q12140265",
+        "kmAt": 259.35222372317526,
+        "lateralKm": 0.8137192234561892,
+        "detourKm": 2.115669980986092,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q2084804",
+        "kmAt": 260.6028137216017,
+        "lateralKm": 0.5809974973373531,
+        "detourKm": 1.510593493077118,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4494153",
+        "kmAt": 260.75762622717446,
+        "lateralKm": 0.07140171108012162,
+        "detourKm": 0.18564444880831624,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_yar_spaso",
         "kmAt": 262.590807792684,
         "lateralKm": 0.9229906550494752,
@@ -3398,20 +4234,11 @@
         "regionCode": "RU-YAR"
        },
        {
-        "placeId": "Q900203",
+        "placeId": "Q4281966",
         "kmAt": 263.0,
-        "lateralKm": 0.8654843300722326,
-        "detourKm": 2.2502592581878047,
-        "detourMin": 5,
-        "roadClass": "trunk",
-        "regionCode": "RU-YAR"
-       },
-       {
-        "placeId": "Q900205",
-        "kmAt": 263.0,
-        "lateralKm": 0.8720435667579151,
-        "detourKm": 2.267313273570579,
-        "detourMin": 5,
+        "lateralKm": 1.22646433594106,
+        "detourKm": 3.1888072734467565,
+        "detourMin": 7,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
@@ -3452,19 +4279,28 @@
         "regionCode": "RU-YAR"
        },
        {
-        "placeId": "pl_yar_tower",
-        "kmAt": 263.0,
-        "lateralKm": 0.36122884656624443,
-        "detourKm": 0.9391950010722355,
-        "detourMin": 3,
+        "placeId": "Q4114893",
+        "kmAt": 263.425962235439,
+        "lateralKm": 0.7229686032405731,
+        "detourKm": 1.8797183684254901,
+        "detourMin": 5,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
        {
-        "placeId": "Q900206",
-        "kmAt": 263.03966845439135,
-        "lateralKm": 1.1717109649466155,
-        "detourKm": 3.0464485088612006,
+        "placeId": "Q1967106",
+        "kmAt": 264.6002676866349,
+        "lateralKm": 2.5264900495493747,
+        "detourKm": 6.568874128828375,
+        "detourMin": 12,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4055989",
+        "kmAt": 319.7391301255264,
+        "lateralKm": 1.2816771729449457,
+        "detourKm": 3.332360649656859,
         "detourMin": 7,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
@@ -3497,11 +4333,38 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "Q4478063",
+        "kmAt": 321.9389616071382,
+        "lateralKm": 0.03005242317632096,
+        "detourKm": 0.0781363002584345,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_rst_avraamiev",
         "kmAt": 322.0,
         "lateralKm": 0.9393494921723586,
         "detourKm": 2.4423086796481326,
         "detourMin": 6,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4504860",
+        "kmAt": 322.0070990933682,
+        "lateralKm": 0.056795686179787426,
+        "detourKm": 0.14766878406744732,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4398502",
+        "kmAt": 322.03861599185853,
+        "lateralKm": 0.20139940250019928,
+        "detourKm": 0.5236384465005182,
+        "detourMin": 0,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
@@ -3524,19 +4387,19 @@
         "regionCode": "RU-YAR"
        },
        {
-        "placeId": "pl_prs_nikitsky",
-        "kmAt": 384.2941692963628,
-        "lateralKm": 0.13474169823138346,
-        "detourKm": 0.35032841540159704,
-        "detourMin": 0,
+        "placeId": "Q4430821",
+        "kmAt": 323.92664237450276,
+        "lateralKm": 0.6033622718248977,
+        "detourKm": 1.568741906744734,
+        "detourMin": 4,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
        {
-        "placeId": "pl_prs_iron",
-        "kmAt": 385.5857273424213,
-        "lateralKm": 0.21509440329664659,
-        "detourKm": 0.5592454485712811,
+        "placeId": "pl_prs_nikitsky",
+        "kmAt": 384.2941692963628,
+        "lateralKm": 0.13474169823138346,
+        "detourKm": 0.35032841540159704,
         "detourMin": 0,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
@@ -3569,6 +4432,24 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "Q1975595",
+        "kmAt": 386.0388138165056,
+        "lateralKm": 0.12859835266237196,
+        "detourKm": 0.3343557169221671,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q4504871",
+        "kmAt": 386.1792393112372,
+        "lateralKm": 0.08343660236279733,
+        "detourKm": 0.21693516614327307,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_prs_fedorovsky",
         "kmAt": 386.34010020521254,
         "lateralKm": 1.5512067441508397,
@@ -3578,11 +4459,11 @@
         "regionCode": "RU-YAR"
        },
        {
-        "placeId": "pl_prs_blue_stone",
-        "kmAt": 386.6281286355064,
-        "lateralKm": 1.9327548589270764,
-        "detourKm": 5.025162633210399,
-        "detourMin": 10,
+        "placeId": "Q4320910",
+        "kmAt": 387.0921745431005,
+        "lateralKm": 0.4111978344215374,
+        "detourKm": 1.0691143694959973,
+        "detourMin": 4,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
@@ -3596,11 +4477,38 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "Q4144213",
+        "kmAt": 388.6425016267198,
+        "lateralKm": 0.20127667145772057,
+        "detourKm": 0.5233193457900736,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "Q115585428",
+        "kmAt": 428.7199754745318,
+        "lateralKm": 14.907254066673424,
+        "detourKm": 38.7588605733509,
+        "detourMin": 60,
+        "roadClass": "trunk",
+        "regionCode": "RU-VLA"
+       },
+       {
         "placeId": "pl_sps_gremyachiy",
         "kmAt": 451.9923811188788,
         "lateralKm": 0.3978421772032869,
         "detourKm": 1.034389660728546,
         "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4513561",
+        "kmAt": 452.71986738414193,
+        "lateralKm": 2.5716426201006786,
+        "detourKm": 6.686270812261765,
+        "detourMin": 12,
         "roadClass": "trunk",
         "regionCode": "RU-MOS"
        },
@@ -3641,6 +4549,771 @@
         "regionCode": "RU-MOS"
        },
        {
+        "placeId": "Q18400739",
+        "kmAt": 454.36553211233,
+        "lateralKm": 0.07129217237205322,
+        "detourKm": 0.18535964816733838,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q17056916",
+        "kmAt": 454.65030518387795,
+        "lateralKm": 0.02218148691129307,
+        "detourKm": 0.05767186596936198,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4463519",
+        "kmAt": 454.6898238927658,
+        "lateralKm": 0.08797066661475149,
+        "detourKm": 0.22872373319835387,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4463570",
+        "kmAt": 454.7457082578453,
+        "lateralKm": 0.058938856181896246,
+        "detourKm": 0.15324102607293025,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4369337",
+        "kmAt": 464.6561670426449,
+        "lateralKm": 4.4596107132623795,
+        "detourKm": 11.594987854482188,
+        "detourMin": 19,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4073213",
+        "kmAt": 465.95459188395887,
+        "lateralKm": 8.046997896629847,
+        "detourKm": 20.922194531237604,
+        "detourMin": 33,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q128791107",
+        "kmAt": 466.9311428433659,
+        "lateralKm": 5.069412513704191,
+        "detourKm": 13.180472535630898,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947518",
+        "kmAt": 466.94461269676475,
+        "lateralKm": 5.0918897561686345,
+        "detourKm": 13.23891336603845,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q108068886",
+        "kmAt": 466.9548016745858,
+        "lateralKm": 5.141335523512979,
+        "detourKm": 13.367472361133746,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947426",
+        "kmAt": 467.01825026656246,
+        "lateralKm": 4.998896273174802,
+        "detourKm": 12.997130310254486,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947544",
+        "kmAt": 467.0270607771615,
+        "lateralKm": 4.899578793026175,
+        "detourKm": 12.738904861868056,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947442",
+        "kmAt": 467.03641738563147,
+        "lateralKm": 4.959281908852414,
+        "detourKm": 12.894132963016276,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q126947568",
+        "kmAt": 467.04250219982833,
+        "lateralKm": 4.928049619641309,
+        "detourKm": 12.812929011067403,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4055021",
+        "kmAt": 467.0719390146777,
+        "lateralKm": 4.942232059124864,
+        "detourKm": 12.849803353724646,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q129472396",
+        "kmAt": 474.59127090474794,
+        "lateralKm": 11.58417325728532,
+        "detourKm": 30.118850468941833,
+        "detourMin": 47,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q129472382",
+        "kmAt": 475.10974262400094,
+        "lateralKm": 10.42539384200182,
+        "detourKm": 27.106023989204736,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q129472374",
+        "kmAt": 475.11037444774223,
+        "lateralKm": 10.608185139608509,
+        "detourKm": 27.58128136298212,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q129472378",
+        "kmAt": 475.2150711075707,
+        "lateralKm": 10.46467258572401,
+        "detourKm": 27.208148722882427,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q108326040",
+        "kmAt": 475.2301076971923,
+        "lateralKm": 10.578452997264694,
+        "detourKm": 27.503977792888207,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q129472878",
+        "kmAt": 475.2350009678191,
+        "lateralKm": 10.409058689967738,
+        "detourKm": 27.06355259391612,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q129472873",
+        "kmAt": 475.23563892986544,
+        "lateralKm": 10.363072562262776,
+        "detourKm": 26.943988661883218,
+        "detourMin": 42,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q129472387",
+        "kmAt": 475.5449349865488,
+        "lateralKm": 10.620596996363718,
+        "detourKm": 27.61355219054567,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q124516604",
+        "kmAt": 478.31556806895844,
+        "lateralKm": 9.398781424075237,
+        "detourKm": 24.436831702595615,
+        "detourMin": 39,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q55091947",
+        "kmAt": 478.3391828390038,
+        "lateralKm": 9.371749510178567,
+        "detourKm": 24.366548726464277,
+        "detourMin": 39,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q124516607",
+        "kmAt": 486.99561257592046,
+        "lateralKm": 1.9122033087040575,
+        "detourKm": 4.97172860263055,
+        "detourMin": 9,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q124516589",
+        "kmAt": 487.2231599392096,
+        "lateralKm": 1.5581945063926061,
+        "detourKm": 4.051305716620776,
+        "detourMin": 8,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q124516576",
+        "kmAt": 487.6480210079793,
+        "lateralKm": 0.2307713959627509,
+        "detourKm": 0.6000056295031524,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q124516591",
+        "kmAt": 487.6480210079793,
+        "lateralKm": 0.2307713959627509,
+        "detourKm": 0.6000056295031524,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q124516571",
+        "kmAt": 487.67368025003276,
+        "lateralKm": 0.2427055904399637,
+        "detourKm": 0.6310345351439056,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4505226",
+        "kmAt": 491.13442593507745,
+        "lateralKm": 0.8077477418821064,
+        "detourKm": 2.1001441288934766,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4384761",
+        "kmAt": 493.08442279308707,
+        "lateralKm": 0.5068205359769467,
+        "detourKm": 1.3177333935400612,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q65665918",
+        "kmAt": 493.0968291469489,
+        "lateralKm": 0.6849739676046482,
+        "detourKm": 1.7809323157720856,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q120836002",
+        "kmAt": 493.85606279138244,
+        "lateralKm": 1.905361747149825,
+        "detourKm": 4.953940542589545,
+        "detourMin": 9,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q55657264",
+        "kmAt": 493.9669463534285,
+        "lateralKm": 0.42373651318703076,
+        "detourKm": 1.10171493428628,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q111353643",
+        "kmAt": 494.97177594166266,
+        "lateralKm": 1.112208166645682,
+        "detourKm": 2.8917412332787733,
+        "detourMin": 6,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4505215",
+        "kmAt": 496.707891554017,
+        "lateralKm": 1.1598394463482888,
+        "detourKm": 3.015582560505551,
+        "detourMin": 7,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4513196",
+        "kmAt": 498.2695658245028,
+        "lateralKm": 0.6709845351640961,
+        "detourKm": 1.7445597914266497,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q122951851",
+        "kmAt": 498.2898798716204,
+        "lateralKm": 4.053857671370269,
+        "detourKm": 10.5400299455627,
+        "detourMin": 18,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q3034485",
+        "kmAt": 498.31995412374897,
+        "lateralKm": 2.3999482484968593,
+        "detourKm": 6.239865446091835,
+        "detourMin": 11,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4504771",
+        "kmAt": 500.44761259775794,
+        "lateralKm": 4.7193063888929165,
+        "detourKm": 12.270196611121584,
+        "detourMin": 20,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q112876014",
+        "kmAt": 500.5864468359611,
+        "lateralKm": 4.519355784550287,
+        "detourKm": 11.750325039830747,
+        "detourMin": 20,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q100138159",
+        "kmAt": 502.8118708819348,
+        "lateralKm": 5.240263623693523,
+        "detourKm": 13.62468542160316,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4504935",
+        "kmAt": 502.85312515081586,
+        "lateralKm": 5.179804873904941,
+        "detourKm": 13.467492672152847,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q3297833",
+        "kmAt": 504.0272464151274,
+        "lateralKm": 1.7954105677266727,
+        "detourKm": 4.668067476089349,
+        "detourMin": 9,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4504634",
+        "kmAt": 505.4744955501387,
+        "lateralKm": 0.9928717049771432,
+        "detourKm": 2.581466432940572,
+        "detourMin": 6,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q55657420",
+        "kmAt": 505.6961165546333,
+        "lateralKm": 0.05053684107807426,
+        "detourKm": 0.13139578680299308,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4309603",
+        "kmAt": 506.4972802707543,
+        "lateralKm": 1.2305801864498553,
+        "detourKm": 3.199508484769624,
+        "detourMin": 7,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4504594",
+        "kmAt": 508.7822994197732,
+        "lateralKm": 3.1541111967741178,
+        "detourKm": 8.200689111612707,
+        "detourMin": 14,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q4500731",
+        "kmAt": 508.89032194044194,
+        "lateralKm": 13.318943454327208,
+        "detourKm": 34.629252981250744,
+        "detourMin": 54,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q118557708",
+        "kmAt": 511.444489978535,
+        "lateralKm": 3.643367266830448,
+        "detourKm": 9.472754893759165,
+        "detourMin": 16,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q1130457",
+        "kmAt": 517.2516471600384,
+        "lateralKm": 2.869767777895574,
+        "detourKm": 7.461396222528493,
+        "detourMin": 13,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q627114",
+        "kmAt": 517.6775054220406,
+        "lateralKm": 2.00180025266147,
+        "detourKm": 5.204680656919823,
+        "detourMin": 10,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q855493",
+        "kmAt": 517.9526645397224,
+        "lateralKm": 2.881567005251158,
+        "detourKm": 7.492074213653011,
+        "detourMin": 13,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q1627784",
+        "kmAt": 518.4436688214608,
+        "lateralKm": 1.9923197061089375,
+        "detourKm": 5.180031235883238,
+        "detourMin": 10,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q2299609",
+        "kmAt": 518.4446349142239,
+        "lateralKm": 2.115888437579894,
+        "detourKm": 5.501309937707725,
+        "detourMin": 10,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q2054979",
+        "kmAt": 518.6887080383021,
+        "lateralKm": 5.787618685465873,
+        "detourKm": 15.04780858221127,
+        "detourMin": 25,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q1511291",
+        "kmAt": 518.6924644502755,
+        "lateralKm": 7.835764586673152,
+        "detourKm": 20.372987925350195,
+        "detourMin": 33,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q741351",
+        "kmAt": 518.8716312658205,
+        "lateralKm": 14.87917222968765,
+        "detourKm": 38.68584779718789,
+        "detourMin": 60,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "Q181324",
+        "kmAt": 519.5900487572529,
+        "lateralKm": 3.522641169852815,
+        "detourKm": 9.15886704161732,
+        "detourMin": 16,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q1048694",
+        "kmAt": 526.0,
+        "lateralKm": 0.6863645968783498,
+        "detourKm": 1.7845479518837095,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q129846",
+        "kmAt": 526.0,
+        "lateralKm": 0.5123365961293257,
+        "detourKm": 1.3320751499362469,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q133274",
+        "kmAt": 526.0,
+        "lateralKm": 0.45765298713504843,
+        "detourKm": 1.189897766551126,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q183334",
+        "kmAt": 526.0,
+        "lateralKm": 1.6088006542319728,
+        "detourKm": 4.182881701003129,
+        "detourMin": 8,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q191414",
+        "kmAt": 526.0,
+        "lateralKm": 0.2854310569060634,
+        "detourKm": 0.7421207479557649,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q194474",
+        "kmAt": 526.0,
+        "lateralKm": 1.4543562910238808,
+        "detourKm": 3.78132635666209,
+        "detourMin": 8,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q202163",
+        "kmAt": 526.0,
+        "lateralKm": 5.945330325892808,
+        "detourKm": 15.457858847321301,
+        "detourMin": 25,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q215539",
+        "kmAt": 526.0,
+        "lateralKm": 0.8103647648905101,
+        "detourKm": 2.106948388715326,
+        "detourMin": 5,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q41116",
+        "kmAt": 526.0,
+        "lateralKm": 0.2467884404764021,
+        "detourKm": 0.6416499452386455,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "Q4872",
+        "kmAt": 526.0,
+        "lateralKm": 1.1981388276458567,
+        "detourKm": 3.1151609518792274,
+        "detourMin": 7,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOW"
+       },
+       {
+        "placeId": "syn_c_Q193293_0",
+        "kmAt": 7.704137624077093,
+        "lateralKm": 13.350865124980324,
+        "detourKm": 34.71224932494884,
+        "detourMin": 54,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q193293_1",
+        "kmAt": 7.8384473298972,
+        "lateralKm": 12.502086000751895,
+        "detourKm": 32.50542360195493,
+        "detourMin": 51,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q23185_0",
+        "kmAt": 19.943736129700746,
+        "lateralKm": 1.2643664059180477,
+        "detourKm": 3.287352655386924,
+        "detourMin": 7,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q23185_1",
+        "kmAt": 20.076728586783805,
+        "lateralKm": 2.1156202414488368,
+        "detourKm": 5.500612627766976,
+        "detourMin": 10,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155309_0",
+        "kmAt": 22.411473111056452,
+        "lateralKm": 3.371763754823061,
+        "detourKm": 8.76658576253996,
+        "detourMin": 15,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155309_1",
+        "kmAt": 22.544465568139515,
+        "lateralKm": 2.5205099192922713,
+        "detourKm": 6.553325790159906,
+        "detourMin": 12,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q198369_0",
+        "kmAt": 27.83996148149007,
+        "lateralKm": 13.570248784444617,
+        "detourKm": 35.28264683955601,
+        "detourMin": 55,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q198369_1",
+        "kmAt": 27.972953938573138,
+        "lateralKm": 12.718994948913828,
+        "detourKm": 33.06938686717595,
+        "detourMin": 52,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q141538_0",
+        "kmAt": 30.958384511650188,
+        "lateralKm": 6.442567432146438,
+        "detourKm": 16.75067532358074,
+        "detourMin": 27,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q141538_1",
+        "kmAt": 31.09091913462889,
+        "lateralKm": 5.590453465039276,
+        "detourKm": 14.535179009102118,
+        "detourMin": 24,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q197386_0",
+        "kmAt": 33.0,
+        "lateralKm": 14.597732897643066,
+        "detourKm": 37.954105533871974,
+        "detourMin": 59,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q197386_1",
+        "kmAt": 33.07778065645565,
+        "lateralKm": 13.748364301159864,
+        "detourKm": 35.745747183015645,
+        "detourMin": 56,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155541_0",
+        "kmAt": 50.404091496075864,
+        "lateralKm": 11.384778415071098,
+        "detourKm": 29.600423879184856,
+        "detourMin": 46,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155541_1",
+        "kmAt": 50.52055320684346,
+        "lateralKm": 10.533068757918679,
+        "detourKm": 27.385978770588565,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q197620_0",
+        "kmAt": 61.07539872006759,
+        "lateralKm": 5.141159576794848,
+        "detourKm": 13.367014899666605,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q197620_1",
+        "kmAt": 61.19051910505097,
+        "lateralKm": 5.9953423644781205,
+        "detourKm": 15.587890147643114,
+        "detourMin": 25,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
         "placeId": "pl_sps_cafe_dvorik",
         "kmAt": 72.0,
         "lateralKm": 0.4982366044732593,
@@ -3664,6 +5337,42 @@
         "lateralKm": 0.2987622034524157,
         "detourKm": 0.776781728976281,
         "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q178175_1",
+        "kmAt": 82.69572829269802,
+        "lateralKm": 6.090173615969182,
+        "detourKm": 15.834451401519875,
+        "detourMin": 26,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q178175_0",
+        "kmAt": 82.82023904934313,
+        "lateralKm": 5.239638529646119,
+        "detourKm": 13.62306017707991,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155597_1",
+        "kmAt": 86.58166274775962,
+        "lateralKm": 5.66315489927488,
+        "detourKm": 14.724202738114688,
+        "detourMin": 24,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155597_0",
+        "kmAt": 86.7064600653143,
+        "lateralKm": 4.812334824948881,
+        "detourKm": 12.51207054486709,
+        "detourMin": 21,
         "roadClass": "trunk",
         "regionCode": "RU-MOS"
        },
@@ -3709,6 +5418,24 @@
         "lateralKm": 0.5614810231791825,
         "detourKm": 1.4598506602658745,
         "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "syn_c_Q193342_0",
+        "kmAt": 203.89017789155315,
+        "lateralKm": 0.5887428601652215,
+        "detourKm": 1.5307314364295759,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "syn_c_Q193342_1",
+        "kmAt": 203.90584741186518,
+        "lateralKm": 0.2747952529868541,
+        "detourKm": 0.7144676577658207,
+        "detourMin": 0,
         "roadClass": "trunk",
         "regionCode": "RU-YAR"
        },
@@ -3812,6 +5539,24 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "syn_c_Q193342_1",
+        "kmAt": 322.0941525881348,
+        "lateralKm": 0.27479525298685376,
+        "detourKm": 0.7144676577658198,
+        "detourMin": 0,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
+        "placeId": "syn_c_Q193342_0",
+        "kmAt": 322.10982210844685,
+        "lateralKm": 0.5887428601652219,
+        "detourKm": 1.530731436429577,
+        "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-YAR"
+       },
+       {
         "placeId": "pl_rst_cafe_nero",
         "kmAt": 322.49324384981867,
         "lateralKm": 0.5614810231791824,
@@ -3857,6 +5602,42 @@
         "regionCode": "RU-YAR"
        },
        {
+        "placeId": "syn_c_Q155597_0",
+        "kmAt": 439.29353993468567,
+        "lateralKm": 4.812334824948877,
+        "detourKm": 12.51207054486708,
+        "detourMin": 21,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155597_1",
+        "kmAt": 439.41833725224035,
+        "lateralKm": 5.663154899274875,
+        "detourKm": 14.724202738114675,
+        "detourMin": 24,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q178175_0",
+        "kmAt": 443.1797609506569,
+        "lateralKm": 5.23963852964612,
+        "detourKm": 13.623060177079912,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q178175_1",
+        "kmAt": 443.30427170730195,
+        "lateralKm": 6.09017361596918,
+        "detourKm": 15.834451401519868,
+        "detourMin": 26,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
         "placeId": "pl_sps_cafe_bliny",
         "kmAt": 453.26115770396507,
         "lateralKm": 0.29876220345241794,
@@ -3880,6 +5661,150 @@
         "lateralKm": 0.49823660447325346,
         "detourKm": 1.295415171630459,
         "detourMin": 4,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q197620_1",
+        "kmAt": 464.80948089494905,
+        "lateralKm": 5.995342364478119,
+        "detourKm": 15.58789014764311,
+        "detourMin": 25,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q197620_0",
+        "kmAt": 464.9246012799324,
+        "lateralKm": 5.141159576794848,
+        "detourKm": 13.367014899666605,
+        "detourMin": 22,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155541_1",
+        "kmAt": 475.4794467931565,
+        "lateralKm": 10.533068757918679,
+        "detourKm": 27.385978770588565,
+        "detourMin": 43,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155541_0",
+        "kmAt": 475.59590850392414,
+        "lateralKm": 11.384778415071098,
+        "detourKm": 29.600423879184856,
+        "detourMin": 46,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q197386_1",
+        "kmAt": 492.9222193435443,
+        "lateralKm": 13.748364301159864,
+        "detourKm": 35.745747183015645,
+        "detourMin": 56,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q197386_0",
+        "kmAt": 493.0,
+        "lateralKm": 14.597732897643068,
+        "detourKm": 37.95410553387198,
+        "detourMin": 59,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q141538_1",
+        "kmAt": 494.9090808653711,
+        "lateralKm": 5.5904534650392765,
+        "detourKm": 14.53517900910212,
+        "detourMin": 24,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q141538_0",
+        "kmAt": 495.0416154883498,
+        "lateralKm": 6.442567432146439,
+        "detourKm": 16.750675323580744,
+        "detourMin": 27,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q198369_1",
+        "kmAt": 498.02704606142686,
+        "lateralKm": 12.718994948913828,
+        "detourKm": 33.06938686717595,
+        "detourMin": 52,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q198369_0",
+        "kmAt": 498.1600385185099,
+        "lateralKm": 13.570248784444617,
+        "detourKm": 35.28264683955601,
+        "detourMin": 55,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155309_1",
+        "kmAt": 503.4555344318605,
+        "lateralKm": 2.5205099192922717,
+        "detourKm": 6.5533257901599065,
+        "detourMin": 12,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q155309_0",
+        "kmAt": 503.58852688894353,
+        "lateralKm": 3.371763754823061,
+        "detourKm": 8.76658576253996,
+        "detourMin": 15,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q23185_1",
+        "kmAt": 505.9232714132162,
+        "lateralKm": 2.1156202414488368,
+        "detourKm": 5.500612627766976,
+        "detourMin": 10,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q23185_0",
+        "kmAt": 506.05626387029923,
+        "lateralKm": 1.264366405918047,
+        "detourKm": 3.2873526553869223,
+        "detourMin": 7,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q193293_1",
+        "kmAt": 518.1615526701028,
+        "lateralKm": 12.502086000751897,
+        "detourKm": 32.50542360195493,
+        "detourMin": 51,
+        "roadClass": "trunk",
+        "regionCode": "RU-MOS"
+       },
+       {
+        "placeId": "syn_c_Q193293_0",
+        "kmAt": 518.2958623759229,
+        "lateralKm": 13.35086512498032,
+        "detourKm": 34.712249324948836,
+        "detourMin": 54,
         "roadClass": "trunk",
         "regionCode": "RU-MOS"
        },
@@ -4112,44 +6037,244 @@
       "rerun": 0,
       "townKms": [
        [
+        "Q133075",
+        0.0
+       ],
+       [
+        "Q135189",
+        0.0
+       ],
+       [
+        "Q155405",
+        0.0
+       ],
+       [
+        "Q155569",
+        0.0
+       ],
+       [
+        "Q159261",
+        0.0
+       ],
+       [
+        "Q175742",
+        0.0
+       ],
+       [
         "t_moscow",
         0.0
+       ],
+       [
+        "Q141358",
+        0.2354442702650412
+       ],
+       [
+        "Q193293",
+        7.748406096720551
+       ],
+       [
+        "Q197582",
+        8.620407194959961
+       ],
+       [
+        "Q104557",
+        14.399094204327742
+       ],
+       [
+        "Q135394",
+        14.792556953099034
+       ],
+       [
+        "Q23185",
+        19.987440067171185
+       ],
+       [
+        "Q155309",
+        22.45517704852689
+       ],
+       [
+        "Q157666",
+        22.87371090808738
+       ],
+       [
+        "Q198369",
+        27.88366541896051
+       ],
+       [
+        "Q141538",
+        31.001892234504442
+       ],
+       [
+        "Q197386",
+        33.0
        ],
        [
         "t_pushkino",
         33.0
        ],
        [
+        "Q155541",
+        50.44111073944248
+       ],
+       [
+        "Q197620",
+        61.111843109526745
+       ],
+       [
         "t_sergiev_posad",
         72.0
+       ],
+       [
+        "Q178175",
+        82.75588293476476
+       ],
+       [
+        "Q155597",
+        86.6419811389175
+       ],
+       [
+        "Q196497",
+        97.06355384852078
+       ],
+       [
+        "Q103377",
+        105.97537750349653
        ],
        [
         "t_pereslavl",
         140.0
        ],
        [
+        "Q193342",
+        203.88436075185137
+       ],
+       [
         "t_rostov",
         204.0
+       ],
+       [
+        "Q134315",
+        229.20103395975823
        ],
        [
         "t_yaroslavl",
         263.0
        ],
        [
+        "Q134315",
+        296.7989660402418
+       ],
+       [
         "t_rostov",
         322.0
+       ],
+       [
+        "Q193342",
+        322.1156392481486
        ],
        [
         "t_pereslavl",
         386.0
        ],
        [
+        "Q103377",
+        420.02462249650347
+       ],
+       [
+        "Q196497",
+        428.93644615147923
+       ],
+       [
+        "Q155597",
+        439.3580188610825
+       ],
+       [
+        "Q178175",
+        443.24411706523523
+       ],
+       [
         "t_sergiev_posad",
         454.0
        ],
        [
+        "Q197620",
+        464.8881568904733
+       ],
+       [
+        "Q155541",
+        475.5588892605575
+       ],
+       [
+        "Q197386",
+        493.0
+       ],
+       [
         "t_pushkino",
         493.0
+       ],
+       [
+        "Q141538",
+        494.99810776549555
+       ],
+       [
+        "Q198369",
+        498.1163345810395
+       ],
+       [
+        "Q157666",
+        503.1262890919126
+       ],
+       [
+        "Q155309",
+        503.5448229514731
+       ],
+       [
+        "Q23185",
+        506.0125599328288
+       ],
+       [
+        "Q135394",
+        511.20744304690095
+       ],
+       [
+        "Q104557",
+        511.60090579567225
+       ],
+       [
+        "Q197582",
+        517.37959280504
+       ],
+       [
+        "Q193293",
+        518.2515939032794
+       ],
+       [
+        "Q141358",
+        525.764555729735
+       ],
+       [
+        "Q133075",
+        526.0
+       ],
+       [
+        "Q135189",
+        526.0
+       ],
+       [
+        "Q155405",
+        526.0
+       ],
+       [
+        "Q155569",
+        526.0
+       ],
+       [
+        "Q159261",
+        526.0
+       ],
+       [
+        "Q175742",
+        526.0
        ],
        [
         "t_moscow",
@@ -4158,26 +6283,28 @@
       ]
      }
     },
-    "shareText": "Золотое кольцо · коротко · 536 км · 2 дня\nДень 1 · 272 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Трапезная у кремля\n14:54 Ярославль\nДень 2 · 264 км\n09:00 Ярославль\n10:40 Никитский монастырь\n11:26 Земляной вал Переславля\n12:54 Трапезная «Посадская»\n15:01 Москва\nИтого ≈ 27 400 ₽ на 5 чел.",
+    "shareText": "Золотое кольцо · коротко · 541 км · 2 дня\nДень 1 · 272 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Кафе «Пряник»\n14:54 Ярославль\nДень 2 · 269 км\n09:00 Ярославль\n10:40 Никитский монастырь\n11:26 Земляной вал Переславля\n13:40 Кафе «Огонёк»\n15:07 Москва\nИтого ≈ 26 300 ₽ на 5 чел.",
     "pricesMonthRu": "сентябрь",
     "pricesYear": "2026",
     "townPrepRu": {
      "t_sergiev_posad": "Сергиевом Посаде",
      "t_pereslavl": "Переславле-Залесском",
-     "t_rostov": "Ростове",
-     "t_yaroslavl": "Ярославле"
+     "Q193342": "Ростовом Великом",
+     "t_yaroslavl": "Ярославле",
+     "Q23185": "Мытищах"
     },
     "townGenRu": {
      "t_sergiev_posad": "Сергиева Посада",
      "t_pereslavl": "Переславля-Залесского",
-     "t_rostov": "Ростова",
-     "t_yaroslavl": "Ярославля"
+     "Q193342": "Ростова Великого",
+     "t_yaroslavl": "Ярославля",
+     "Q23185": "Мытищ"
     }
    },
    "options": [
     {
      "kind": "cheaper_route",
-     "totalRub": 23800,
+     "totalRub": 23200,
      "budgetRub": null,
      "days": 2,
      "dailyKm": null,
@@ -4189,7 +6316,7 @@
     {
      "kind": "raise_budget",
      "totalRub": null,
-     "budgetRub": 28000,
+     "budgetRub": 27000,
      "days": null,
      "dailyKm": null,
      "readyRouteId": null,
@@ -4198,7 +6325,7 @@
      "fits": true
     }
    ],
-   "textRu": "В 20 000 ₽ эта поездка не помещается даже в самом экономном варианте — минимум ≈ 27 400 ₽."
+   "textRu": "В 20 000 ₽ эта поездка не помещается даже в самом экономном варианте — минимум ≈ 26 300 ₽."
   },
   "ms": 0
  }

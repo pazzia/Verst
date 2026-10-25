@@ -168,3 +168,35 @@ There is a new adapter package, `verst_planner/adapters/catalogue/`. It is stdli
 | An image is a poor fit (wrong building, interior) | Ranking keeps P18, which is curated by the Wikidata community. The card has «Сообщить об ошибке» (stored locally, as today) |
 | Commons / Nominatim rate limits | Commons thumbnails are cached (64 MB); Nominatim gets explicit-submit only, ≤ 1/s, and a 24 h in-memory result cache |
 | The synthetic-distance error is noticeable to the CEO | The «расстояния приблизительные» line on Road ahead for synthetic routes (`route.synthetic = true` in the trip); fixture-area routes stay exact |
+
+## As-built (data runs 1–7, 2026-10-25)
+
+- **Shipped catalogue** `wd-20261025-r7.1`: 1 114 towns (1 083 with a photo), 11 817 POIs (9 608 with a Commons
+  photo, 9 542 of them with author/licence), 3 284 bars in 164 towns; 669 916 bytes gzip
+  (`tools/data/catalogue.lock`). Built in the sandbox from the raw responses of run 7 (`bot/raw-7`) with the
+  final builder rules; run 7 itself (`bot/data-7`) was green.
+- **Photo URLs:** run 7 requested 50 random `Special:FilePath` URLs at 800, 400, 500 and 960 px: **50/50 at every
+  width** (`report/photos_check.json`). The check is part of `data.yml` and fails a run under 95 %.
+- **Class ids:** the first-run check caught two wrong ids from memory: Q12035 is a spider and Q1501717 an HIV
+  trial. The classes step re-resolves a wrong id by its ru label and Russian instance count; it found
+  **Q263274** «кремль» (kremlin) and **Q1851368** «набережная» (waterfront), now hard-coded. The other 18
+  matched.
+- **Towns:** direct `P31` of «город России» missed Екатеринбург, Челябинск, Владивосток and ~200 others; the
+  subclasses (547) are fetched first (a `P31/P279*` path timed out). The builder then keeps a town only when it
+  has ≥ 800 people (Чекалин ≈ 900) and a plain name (no «Деревня …», «… район», «Серпухов-15», brackets). The
+  towns step fails when one of 24 must-have towns is missing. Towns whose P131 chain reaches no ISO 3166-2:RU
+  code are left out (this excludes the Crimean and other annexed towns that Wikidata files under Russia); two
+  Russian ones get their code from `region_overrides.tsv` (Люберцы, Канаш).
+- **Bars:** Overpass failed twice (runs 1–2: 502/504 on three mirrors, per-town read timeouts). The primary source is
+  now the Geofabrik extract (`russia-latest.osm.pbf`, 4.2 GB) filtered with `osmium tags-filter`; Overpass is the
+  fallback. Bars are assigned to the nearest town of ≥ 100 000 people or a tourist town whose radius covers them.
+- **Name forms:** pymorphy3 matches 47 of the 48 fixture forms (the miss is «Пушкино», covered by the fixture). Rules:
+  hyphen prefixes (Санкт-, Усть-, Нарьян-, …) and a linking -о («Кирово-Чепецк») stay unchanged; possessive first
+  words decline as short adjectives («в Сергиевом Посаде»); only singular parses are used; 4 new overrides.
+- **Credits:** e-mail addresses and URLs are stripped from Commons authors (the brand scan found
+  «…@yandex.ru»). POI names lose a Wikidata disambiguation suffix naming their own town («Площадь Свободы (Казань)»).
+- **APK data:** catalogue 0.67 MB + fixture worlds 0.21 MB + other engine resources 0.02 MB = **0.90 MB** (budget
+  2.5 MB). `load_catalogue` takes 206 ms on the sandbox desktop (about 1 s expected on a mid-range phone).
+- **Corridor thinning:** with real POIs the Золотое кольцо trip's `engineState` grew from 30 KB to 240 KB. The
+  corridor keeps at most 10 sights and 8 food places per 10 km of route (the fixture maximum is 8 and 6, so
+  G01–G13 stay byte-identical): 68 KB.

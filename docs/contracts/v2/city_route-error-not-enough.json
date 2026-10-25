@@ -6,9 +6,9 @@
    "request_id": "c-walk-6",
    "input_json": {
     "start": {
-     "lat": 56.8587,
-     "lon": 35.9176,
-     "label": "Тверь"
+     "lat": 55.55,
+     "lon": 98.66667,
+     "label": "Алзамай"
     },
     "preset": "beer",
     "adultConfirmed": true

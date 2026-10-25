@@ -1407,3 +1407,16 @@ specs; `tools/sync_design_tokens.py` run: `color.overlay.returnFlash`, `motion.r
   Example.jpg, the flag as a hotel area photo).
 - Ask for the Designer: the Пермь synthetic route shows three identical «Не нашли ночёвку…» plates (one per
   night). A day prefix (a key such as `road_warning_day` «Ночь {n}: …») would tell them apart.
+## ARCH-302 — real catalogue (M3)
+- `verst_planner/resources/catalogue_*.json.gz` = `wd-20261025-r7.1`: **1 114 towns, 11 817 POIs (9 608 with a
+  photo), 3 284 bars**, 0.67 MB. It replaces the sample, so `russia_v1` (the app's `DefaultWorld`) is the real
+  country now. G01–G13 run on the fixture worlds and are unchanged.
+- Contracts v2 were regenerated from the real data (ids are Wikidata Q-ids / OSM `n…`/`w…`). On `russia_v1`
+  the CEO case gives 26 300 ₽ (fits; G13 on the fixture world stays 27 400 ₽).
+- Every `town` object carries `tz`; `city_presets` gives `now`, `startAt` and `startsTomorrow` (S3-QA above).
+- Photo URLs: 50/50 resolve at 800/400 px in CI. Expect real photos on cards; the placeholder states remain for
+  the ~19 % of POIs without a P18 image and for offline use.
+- Rebuilding: `data.yml` (push to `data-request`) → `bot/data-<n>` (catalogue + report) and `bot/raw-<n>` (raw
+  responses). The builder is rerunnable in the sandbox from `bot/raw-<n>` (see ADR-0012 As-built).
+- Timings (sandbox desktop): engine import 133 ms, `load_catalogue` 206 ms, plan Москва → Екатеринбург 557 ms,
+  СПб → Сочи 406 ms, `city_route` 4 h in Казань 63 ms, `geo_search` 2 ms. A phone is about 5× slower.

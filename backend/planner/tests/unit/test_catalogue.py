@@ -87,6 +87,32 @@ class FormatTest(unittest.TestCase):
         self.assertLessEqual(total, TARGET_BYTES)
 
 
+class BuilderRulesTest(unittest.TestCase):
+    """Run 3/7 data findings: villages and districts as towns, e-mails in credits, «(Казань)» suffixes."""
+
+    b = builder()
+
+    def test_is_town(self) -> None:
+        ok = {"name": "Плёс", "population": 1796}
+        self.assertTrue(self.b.is_town(ok))
+        for name, pop in (
+            ("Деревня Габнаволок (Тамбицы)", 5000),
+            ("Адлерский район", 125715),
+            ("город Тельмана", 23407),
+            ("Серпухов-15", 3484),
+            ("73-й километр", 2000),
+            ("Зубалово", 0),
+            ("Старинный Суздаль историко градостроительный комплекс", 5000),
+        ):
+            self.assertFalse(self.b.is_town({"name": name, "population": pop}), name)
+
+    def test_author_and_poi_name(self) -> None:
+        self.assertEqual(self.b.clean_author("Иван (tibr1984@yandex.ru)"), "Иван")
+        self.assertIsNone(self.b.clean_author("https://flickr.com/x"))
+        self.assertEqual(self.b.poi_name("Площадь Свободы (Казань)", "Казань"), "Площадь Свободы")
+        self.assertEqual(self.b.poi_name("Собор (Москва)", "Казань"), "Собор (Москва)")
+
+
 class BuilderTest(unittest.TestCase):
     docs: dict[str, dict[str, Any]]
     b: Any
