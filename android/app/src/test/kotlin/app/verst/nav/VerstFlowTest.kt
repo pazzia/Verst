@@ -836,8 +836,9 @@ class VerstFlowTest {
             .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
         val p0 = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
         // v3 shape: a beer preset (18+) and the dog walk
-        val presets = p0.copy(presets = p0.presets.map { if (it.preset == "beer") it.copy(available = true, adultOnly = true) else it } +
-            app.verst.core.model.dto.CityPresetDto(preset = "dog_walk", count = 9, defaultDurationMin = 120))
+        val presets = p0.copy(presets = p0.presets.map { if (it.preset == "beer") it.copy(available = true, adultOnly = true) else it }.let { ps ->
+            if (ps.any { it.preset == "dog_walk" }) ps else ps + app.verst.core.model.dto.CityPresetDto(preset = "dog_walk", count = 9, defaultDurationMin = 120)
+        })
         val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
         val requests = mutableListOf<app.verst.core.model.WalkRequest>()
         val gw = object : PlannerGateway by FakeGateway() {

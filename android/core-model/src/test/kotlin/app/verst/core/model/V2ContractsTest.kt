@@ -101,8 +101,8 @@ class V2ContractsTest {
 
         val presets = ok(EngineJson.cityPresets(envelope("city_presets.json")))
         assertEquals("Ярославль", presets.town!!.name)
-        // availability comes from the data; the shape is fixed: the five presets, custom always available
-        assertEquals(setOf("overview", "museums", "ryumochnye", "beer", "custom"), presets.presets.map { it.preset }.toSet())
+        // availability comes from the data; the shape is fixed: the six presets (M4 adds «Прогулка с собакой»), custom always available
+        assertEquals(setOf("overview", "museums", "dog_walk", "ryumochnye", "beer", "custom"), presets.presets.map { it.preset }.toSet())
         assertTrue(presets.presets.first { it.preset == "custom" }.available)
         assertTrue(presets.presets.first { it.preset == "ryumochnye" }.adultOnly)
         for (f in listOf("city_route-overview.json", "city_route-custom.json", "city_route-museums-spb.json", "city_route-ryumochnye.json")) {

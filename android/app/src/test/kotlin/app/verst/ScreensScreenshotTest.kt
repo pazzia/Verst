@@ -438,7 +438,8 @@ class ScreensScreenshotTest {
         val trip = s4Trip()
         val stop = trip.daysList.flatMap { it.stops }.first { it.parking?.rubPerHour != null }
         shot("road", "s4-parking-sheet") { RoadScreen(RoadUi(trip, "NE", parking = stop), noRoad) }
-        compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("150", substring = true)
+        compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("платная зона", substring = true)
+        assertTrue(compose.onAllNodesWithText("150", substring = true).fetchSemanticsNodes().isNotEmpty()) // the tariff row
         compose.onNodeWithTag("parking.ok").assertExists()
     }
 
@@ -784,7 +785,9 @@ class ScreensScreenshotTest {
         selected: String = "overview", duration: Int? = 240, few: app.verst.nav.WalkFew? = null, picker: app.verst.nav.CityPicker? = null,
     ): app.verst.feature.city.CityUi {
         val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets)
-        val shown = presets.presets.filter { it.available }.let { if (dog) listOf(dogPreset) + it else it }
+        // M6 contracts carry «Прогулка с собакой» themselves; it shows only with the dog, first
+        val dogP = presets.presets.firstOrNull { it.preset == "dog_walk" } ?: dogPreset
+        val shown = presets.presets.filter { it.available && it.preset != "dog_walk" }.let { if (dog) listOf(dogP) + it else it }
         return app.verst.feature.city.CityUi(
             town = if (error == "NO_CITY") null else presets.town?.name,
             startLabel = if (error == "NO_CITY") "Толбухино" else "Советская пл., 1",
