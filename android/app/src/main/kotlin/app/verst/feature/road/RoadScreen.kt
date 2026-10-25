@@ -725,7 +725,7 @@ private fun StopRow(
         "fuel" -> if (s.costRub > 0) rub(s.costRub) else null
         else -> null
     }
-    val kindCd = app.verst.feature.common.kindWord(s.poiKind)?.lowercase()
+    val kindCd = (s.poiKindRu ?: app.verst.feature.common.kindWord(s.poiKind))?.lowercase()
     val parkingCd = if (showParking) stringResource(R.string.cd_road_parking_inline, parkingInline(s.parking)).substringBefore(". ") else null
     val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, cost, parkingCd).joinToString(", ")
     val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
@@ -793,6 +793,7 @@ private fun StopRow(
                 if (s.stretch) s.dwellMin.takeIf { it > 0 } ?: 30 else null,
                 openData = !s.verified,
                 modifier = Modifier.padding(vertical = 1.dp).testTag("road.tags.${s.id}"),
+                label = if (s.kind == "sight") s.poiKindRu else null,
             )
             if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note, maxLines = 2)
             val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()

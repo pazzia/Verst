@@ -144,6 +144,10 @@ data class PoiDetailsDto(
     val website: String? = null,
     /** M9: the place's data comes from OpenStreetMap (ODbL attribution on the card). */
     val osmSource: Boolean? = null,
+    /** M9: the category label as given; curated | wikidata | osm and the ODbL line for OSM-only places. */
+    val poiKindRu: String? = null,
+    val placeSource: String? = null,
+    val placeAttributionRu: String? = null,
 ) {
     /** The card text: the v3 extract, else the Sprint 3 description. */
     val textRu: String? get() = extractRu?.takeIf { it.isNotBlank() } ?: descriptionRu
@@ -236,6 +240,9 @@ data class WalkStopDto(
     val poiKind: String? = null,
     /** API v3: `osm | wikidata | default` — replaces `hoursVerified`. */
     val hoursSource: String? = null,
+    /** M9: the category label to show as given, and where the place comes from. */
+    val poiKindRu: String? = null,
+    val placeSource: String? = null,
 ) {
     val isBar: Boolean get() = kind in BarKinds
     /** Indoor places a dog usually may not enter (5.11 §10.4 `walk_stop_dog_no`). */

@@ -85,10 +85,11 @@ internal fun parkingAware(trip: TripDto): Boolean =
     trip.cost.lines.any { it.key == "parking" } || trip.daysList.any { d -> d.stops.any { it.parking != null } }
 
 /**
- * 5.5 §10.10 (S4-QA P1-01): in a parking-aware trip every left-the-car stop (sight, food, rest area, night) has a
- * P part, «P ?» when the engine has no tariff; fuel is the only row without it.
+ * 5.5 §10.10 (S4-QA P1-01) with M9: in a parking-aware trip every stop where the car is left has a P part — the
+ * engine sends a parking object on sights, cafés and rest areas (`rub: null` = «P ?»); a sight without one is «P ?»
+ * too. Fuel, the hotel (a hotel fact, ADR-0015 §4) and a roadside break have none.
  */
-internal fun showsParking(s: StopDto): Boolean = parkingStop(s)
+internal fun showsParking(s: StopDto): Boolean = parkingStop(s) && (s.parking != null || s.kind == "sight")
 
 /** Σ known stays of a day and the count of stops without data. */
 internal data class ParkingSum(val rub: Int, val unknown: Int)

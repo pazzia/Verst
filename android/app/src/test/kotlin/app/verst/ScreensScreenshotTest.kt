@@ -361,7 +361,8 @@ class ScreensScreenshotTest {
                         sight && k == 3 -> null
                         sight -> app.verst.core.model.dto.ParkingDto(rubPerHour = 150, rub = 300, source = "zone", hours = 2.0, zoneRu = "платная зона", whereRu = "у входа и на соседних улицах")
                         st.kind == "rest" -> app.verst.core.model.dto.ParkingDto(rub = 0, source = "free", freeRu = "площадка отдыха у трассы")
-                        st.kind == "overnight" -> app.verst.core.model.dto.ParkingDto(rub = 0, source = "free", freeRu = "у гостиницы, на ночь")
+                        // M9: cafés carry an object (unknown here: «P ?»); hotels carry none (a hotel fact)
+                        st.kind == "food" -> app.verst.core.model.dto.ParkingDto(rub = null, source = "unknown")
                         else -> null
                     },
                     amenities = if (st.kind == "rest" || st.kind == "fuel") listOf("toilets", "tables", "shelter") else emptyList(), // G02 has no rest areas
@@ -433,12 +434,12 @@ class ScreensScreenshotTest {
         assertTrue(compose.onAllNodesWithText("Разминка", substring = true).fetchSemanticsNodes().isNotEmpty())
         assertTrue(compose.onAllNodesWithTag("tag.opendata", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
         assertTrue(compose.onAllNodesWithText("туалет", substring = true).fetchSemanticsNodes().isNotEmpty())
-        // S4-QA P1-01: food and night rows have a P part too (fuel is the only row without one)
+        // S4-QA P1-01 + M9: cafés have a P part («P ?» when unknown); fuel and the hotel have none
         val trip = s4Trip()
-        trip.daysList.flatMap { it.stops }.filter { it.kind == "food" || it.kind == "overnight" }.take(2).forEach { st ->
+        trip.daysList.flatMap { it.stops }.filter { it.kind == "food" }.take(2).forEach { st ->
             compose.onNodeWithTag("road.stop.${st.id}.parking", useUnmergedTree = true).assertExists()
         }
-        trip.daysList.flatMap { it.stops }.filter { it.kind == "fuel" }.take(1).forEach { st ->
+        trip.daysList.flatMap { it.stops }.filter { it.kind == "fuel" || it.kind == "overnight" }.take(2).forEach { st ->
             compose.onNodeWithTag("road.stop.${st.id}.parking", useUnmergedTree = true).assertDoesNotExist()
         }
     }

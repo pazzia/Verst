@@ -28,7 +28,10 @@ import app.verst.core.ui.theme.DesignTokens
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
-/** The ADR-0015 §2 whitelist kind → its `kind_*` word (uppercase copy); null = no tag. */
+/**
+ * The ADR-0015 §2 whitelist kind → its `kind_*` word (uppercase copy); null = no tag. Only a fallback for data
+ * without the engine's `poiKindRu` (trips and walks saved before M9).
+ */
 @Composable
 fun kindWord(kind: String?): String? = when (kind) {
     "museum", "gallery" -> stringResource(R.string.kind_museum)
@@ -100,8 +103,9 @@ fun OpenDataRing(modifier: Modifier = Modifier) {
 
 /** One tag row: `StretchTag` and/or `KindTag`, then the open-data ring. Hidden when empty. */
 @Composable
-fun TagRow(kind: String?, stretchMin: Int?, openData: Boolean, modifier: Modifier = Modifier) {
-    val word = kindWord(kind)
+fun TagRow(kind: String?, stretchMin: Int?, openData: Boolean, modifier: Modifier = Modifier, label: String? = null) {
+    // M9: the engine's `poiKindRu` as given; the kind word only for trips saved before it
+    val word = label?.uppercase() ?: kindWord(kind)
     if (word == null && stretchMin == null && !openData) return
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         if (stretchMin != null) StretchTag(stretchMin)

@@ -87,17 +87,18 @@ data class StopDto(
     /** M6: why this sight («Объект культурного наследия · …»), and where its photo comes from (p18 … geosearch). */
     val whyRu: String? = null,
     val photoSource: String? = null,
+    /** M9: the engine's category label («Храм», «Музей», «Детская площадка»…), shown as given. */
+    val poiKindRu: String? = null,
+    /** M9: curated | wikidata | osm, and the ODbL line for OSM-only places. */
+    val placeSource: String? = null,
+    val placeAttributionRu: String? = null,
 ) {
     /**
      * A «Разминка» stop of the fun mood (5.5 §10.4): `funFor` (ADR-0015 §5) or, as the engine sends it today, a
      * sight with a `rest.fun.*` reason («Весело и познавательно: 30 минут — …»).
      */
-    val stretch: Boolean get() = funFor.isNotEmpty() ||
-        (kind == "sight" && listOfNotNull(reason, note).any { it.startsWith(FunReasonPrefix) })
+    val stretch: Boolean get() = funFor.isNotEmpty()
 }
-
-/** The engine's `rest.fun.*` reason text starts with the mood's name (reasons.ru.json). */
-const val FunReasonPrefix = "Весело и познавательно"
 
 /**
  * ADR-0015 §4 stop parking: `rub` = the stay (rounded to 10 ₽), `rubPerHour` the zone rate, `source`

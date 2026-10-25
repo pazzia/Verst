@@ -67,12 +67,12 @@ class ParkingCostTest {
         assertEquals(300, s.parking?.rub)
         assertTrue(s.parking!!.known)
         assertTrue(s.stretch)
-        // the engine marks fun stops by their reason today (`rest.fun.*`), not by `funFor`
+        // M9: `funFor` marks the fun stops; the reason text is not parsed
         val fun0 = EngineJson.json.decodeFromString(
             app.verst.core.model.dto.StopDto.serializer(),
             """{"id":"d1s3","kind":"sight","sign":"brown","name":"Парк","reason":"Весело и познавательно: 30 минут — ребёнку размяться и узнать новое."}""",
         )
-        assertTrue(fun0.stretch)
+        assertFalse(fun0.stretch)
         val free = EngineJson.json.decodeFromString(app.verst.core.model.dto.ParkingDto.serializer(), """{"rub":0,"source":"free"}""")
         assertTrue(free.free && free.known)
         val unknown = EngineJson.json.decodeFromString(app.verst.core.model.dto.ParkingDto.serializer(), """{"rubPerHour":null,"rub":null,"source":"unknown"}""")

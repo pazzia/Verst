@@ -75,7 +75,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
     val name = d?.nameRu ?: ui.name
     BottomSheet(name, a::close, "card", windowH, pane = stringResource(R.string.cd_card, name), leading = { CardMiniSign(ui) }) {
         // 5.9 §9: the KindTag + the kind/place line; «Почему здесь: …» when the engine says why
-        val tagWord = if (ui.kind == "sight") app.verst.feature.common.kindWord(d?.poiKind) else null
+        val tagWord = if (ui.kind == "sight") d?.poiKindRu?.uppercase() ?: app.verst.feature.common.kindWord(d?.poiKind) else null
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (tagWord != null) app.verst.feature.common.KindTag(tagWord)
             Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("card.kind"), maxLines = 1)
@@ -173,7 +173,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
         // line under the text already did
         val osmShown = !desc.isNullOrBlank() && d?.textSource == "osm"
         if (osmData(ui) && !osmShown) {
-            Txt(stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
+            Txt(d?.placeAttributionRu ?: stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
         }
     }
 }
@@ -256,7 +256,7 @@ private fun SecondaryButton(text: String, tag: String, onClick: () -> Unit) {
  */
 internal fun osmData(ui: CardUi): Boolean {
     val d = ui.details
-    return ui.kind == "bar" || d?.osmSource == true || d?.attributionRu?.any { it.contains("OpenStreetMap") } == true || d?.textSource == "osm" ||
+    return ui.kind == "bar" || d?.osmSource == true || d?.placeSource == "osm" || d?.placeAttributionRu != null || d?.attributionRu?.any { it.contains("OpenStreetMap") } == true || d?.textSource == "osm" ||
         d?.image?.source == "osm" || (ui.kind == "sight" && d != null && d.wikidataId == null && !d.id.startsWith("pl_"))
 }
 
@@ -298,6 +298,9 @@ private fun kindLine(ui: CardUi): String {
     val d = ui.details
     val town = d?.townName
     if (ui.kind == "hotel") return stringResource(R.string.card_kind_hotel, town ?: "")
+    // M9: the engine's label as given for sights («музей · Коломна»); the local words for bars and old data
+    val label = d?.poiKindRu?.takeIf { ui.kind == "sight" }?.lowercase()
+    if (label != null) return if (town.isNullOrBlank()) label else stringResource(R.string.card_kind_line, label, town)
     val word = when (d?.poiKind) {
         "museum" -> stringResource(R.string.card_kind_museum)
         "church" -> stringResource(R.string.card_kind_church)

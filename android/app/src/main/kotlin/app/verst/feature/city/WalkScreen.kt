@@ -555,7 +555,7 @@ private fun WalkStopRow(
             // S4 5.11 §10.3: the category tag; timed rows «открыто до 20:00», untimed rows the hours pill
             val hours = s.hours
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                kindWord(s.poiKind ?: s.kind)?.let { KindTag(it) }
+                (s.poiKindRu?.uppercase() ?: kindWord(s.poiKind ?: s.kind))?.let { KindTag(it) }
                 if (!untimed && hours != null && hours.source != "default") TimedHours(hours)
             }
             if (untimed) UntimedHours(hours)
