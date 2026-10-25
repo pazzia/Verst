@@ -1579,12 +1579,10 @@ object DesignTokens {
             const val toAlpha: Float = 1.0f
             const val infinite: Boolean = true
         }
-        object livePulse {
-            const val durationMs: Int = 1600
-            val easing: Easing = DesignTokens.motion.easing.easeInOut
-            const val fromAlpha: Float = 1.0f
-            const val toAlpha: Float = 0.35f
-            const val infinite: Boolean = true
+        object shimmerDelay {
+            const val durationMs: Int = 300
+            val easing: Easing = DesignTokens.motion.easing.linear
+            const val infinite: Boolean = false
         }
         object rebuildPulse {
             const val durationMs: Int = 1200

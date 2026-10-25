@@ -1164,28 +1164,11 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `walk_few_clear` | Вернуть убранные места | engine suggestion `clearExclude` |
 | `walk_few_clear_sub` | вы убрали {found} — вернём их в подбор | |
 
-### 16.8 Online data states (5.5 §10.9)
+### 16.8 Online data (5.5 §10.9) — under the hood
 
 | Key | Text | Notes |
 | --- | --- | --- |
-| `online_loading` | Загружаем данные о парковке… | sheet status while loading |
-| `online_updated_now` | обновлено только что | |
-| `online_updated_min` | обновлено {min} мин назад | |
-| `online_updated_hours` | обновлено {h} ч назад | |
-| `online_later` | уточним при интернете | deferred value (row P part, sheet cells) |
-| `online_need_check` | требуется уточнить при наличии интернета | generic, for any other online-only value |
-| `online_banner` | Нет сети — показываем сохранённое, остальное уточним при интернете | Road-ahead banner |
-| `online_cached_note` | Показываем сохранённое. Обновим, когда появится интернет. | |
-| `parking_live_status` | сейчас ≈ {k} мест · {rate} ₽/ч · обновлено только что | |
-| `parking_row_free_now` | Свободно сейчас | sheet row key (live) |
-| `parking_row_free_cached` | Свободно | sheet row key (cached) |
-| `parking_free_now` | ≈ {k} мест | |
-| `parking_free_cached` | было ≈ {k} · {min} мин назад | |
-| `parking_live_note` | Свободные места меняются каждую минуту — к приезду их может не быть. Сумма уже в путевом листе и в бюджете. | |
-| `parking_offline_status` | нет сети — уточним при интернете | |
-| `parking_offline_note` | В путевом листе это место пока без суммы — добавим, когда появится интернет. Маршрут и остальное работают без сети. | |
-| `parking_none_status` | нет данных о парковке | |
-| `parking_none_note` | Открытые источники ничего не знают об этой парковке. В путевом листе — «без данных», в сумму не входит. | |
-| `parking_loading_note` | Пока грузим, в путевом листе — сумма по справочнику тарифов. | |
-| `cd_parking_loading` | Парковка: загружаем | |
-| `cd_parking_live` | Парковка сейчас: примерно {k} свободных мест, {rate} рублей в час | |
+| `online_later` | уточним при интернете | the only visible trace of missing online data: quiet inline text in the value's spot |
+| `cd_parking_loading` | Парковка: загружаем | TalkBack for the shimmer (first-time fetch > 300 ms only) |
+
+Retired with the CEO decision (no live spaces, no visible states): `online_loading`, `online_updated_*`, `online_need_check`, `online_banner`, `online_cached_note`, `parking_live_*`, `parking_row_free_*`, `parking_free_*`, `parking_offline_*`, `parking_none_*` (the no-data sheet keeps `road_parking_unknown`), `parking_loading_note`, `cd_parking_live`.
