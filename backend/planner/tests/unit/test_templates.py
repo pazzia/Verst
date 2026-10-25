@@ -21,6 +21,7 @@ DOC_PARAMS: dict[str, dict[str, str | int | float]] = {
     "rest.generic": {"min": 20, "min_word": "минут", "drive": "двух часов"},
     "rest.who": {"min": 20, "min_word": "минут", "who": "ребёнку побегать, собаке погулять"},
     "rest.fun.child": {"min": 45, "min_word": "минут"},
+    "sight.detour": {"minutes": 35},
     "rest.fun.dog": {"min": 30, "min_word": "минут"},
     "rest.fun.adults": {"min": 40, "min_word": "минут"},
     "lunch.default": {"town_prep": "Переславле-Залесском"},

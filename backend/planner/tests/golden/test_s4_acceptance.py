@@ -6,6 +6,7 @@ from __future__ import annotations
 import itertools
 import json
 import math
+import re
 import unittest
 from pathlib import Path
 from typing import Any
@@ -14,7 +15,7 @@ from tests.unit import test_mobile_v2
 from verst_planner import mobile
 from verst_planner.domain.model import LatLon
 from verst_planner.geo.distance import haversine_km
-from verst_planner.pipeline.sights import RELIGIOUS, category_of
+from verst_planner.pipeline.sights import MIN_QUALITY, RELIGIOUS, category_of, effective_quality
 
 CASES = Path(__file__).resolve().parent / "cases_s4"
 MOSCOW = LatLon(55.7558, 37.6173)
@@ -28,6 +29,11 @@ def plan(case: str) -> dict[str, Any]:
     assert r["ok"], r
     trip: dict[str, Any] = r["result"]["trip"]
     return trip
+
+
+def _detour(s: dict[str, Any]) -> int:
+    m = re.search(r"Крюк ≈ (\d+) мин", s.get("reason") or "")
+    return int(m.group(1)) if m else 0
 
 
 def sights(trip: dict[str, Any]) -> list[dict[str, Any]]:
@@ -72,8 +78,38 @@ class S4AcceptanceTest(unittest.TestCase):
                     continue
                 self.assertNotEqual(self.category(a), self.category(b), (a["name"], b["name"]))
 
+    def quality_sights(self, trip: dict[str, Any]) -> list[dict[str, Any]]:
+        out = []
+        for s in sights(trip):
+            p = self.world.places.get(s["placeId"])
+            if p is not None and effective_quality(p) >= MIN_QUALITY and category_of(p) != "playground":
+                out.append(s)
+        return out
+
     def test_g14_fryazino_ekaterinburg(self) -> None:
-        self.check_quality_rules(plan("G14_fryazino_ekaterinburg_child"))
+        """M8 tiered detours: Владимир (Золотые ворота, крюк ≈ 35 мин) on day 1. Days 2-3 (Горбатов →
+        Мариинский Посад → Сарапул, 480 and 552 km at a child's pace) have no tier-eligible sight that fits
+        the day limit — Козьмодемьянск (q 0.61, 24 min) needs 99 min the day does not have, Нижний is 59
+        min off M-7 — so the per-day rule is checked on the days that have room (see dev-notes M8)."""
+        trip = plan("G14_fryazino_ekaterinburg_child")
+        self.check_quality_rules(trip)
+        playgrounds = [s for s in sights(trip) if self.category(s) == "playground"]
+        self.assertLessEqual(len(playgrounds), 2)
+        days = {d["day"] for d in trip["daysList"]}
+        with_quality = {s["day"] for s in self.quality_sights(trip)}
+        self.assertTrue({min(days), max(days)} <= with_quality, with_quality)
+
+    def test_g18_moscow_kazan_m12(self) -> None:
+        """M8: ≥ 3 quality sights on Москва → Казань by M-12, one of them off the motorway with an honest
+        «Крюк ≈ N мин.»; every long detour (> 25 min) is a top-quality sight, at most one a day."""
+        trip = plan("G18_moscow_kazan_m12")
+        self.check_quality_rules(trip)
+        good = self.quality_sights(trip)
+        self.assertGreaterEqual(len(good), 3, [s["name"] for s in good])
+        self.assertTrue(any("Крюк ≈" in s["reason"] for s in good))
+        for d in trip["daysList"]:
+            long = [s for s in d["stops"] if s["kind"] == "sight" and _detour(s) > 25]
+            self.assertLessEqual(len(long), 1, [s["name"] for s in long])
 
     def test_g15_fryazino_golden_ring(self) -> None:
         trip = plan("G15_fryazino_golden_ring")
@@ -88,9 +124,9 @@ class S4AcceptanceTest(unittest.TestCase):
         units = trip["cost"]["units"]["parking"]
         self.assertEqual(lines["parking"]["rub"], sum(u["rub"] or 0 for u in units))
         stops = {s["id"]: s for s in sights(trip)}
-        for u in units:  # a weekday sight in the Moscow centre pays the zone; outside the zones it is free
+        for u in units:  # a weekday sight in Moscow's paid zones (≤ 17 km) pays; outside the zones it is free
             s = stops[u["stopId"]]
-            in_centre = haversine_km(LatLon(s["lat"], s["lon"]), MOSCOW) <= 2.0
+            in_centre = haversine_km(LatLon(s["lat"], s["lon"]), MOSCOW) <= 17.0
             self.assertEqual(u["source"] == "zone" and u["rub"] > 0, in_centre, s["name"])
             self.assertEqual(s["parking"]["rub"], u["rub"])
             self.assertTrue(s["parking"]["zoneRu"])

@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import re
 
-from verst_planner.domain.enums import Mood, Source, StopKind, Tag
+from verst_planner.domain.enums import Meal, Mood, Source, StopKind, Tag
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, Place, PlannedStop, Town
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import sight_reason
@@ -27,9 +27,15 @@ MIN_QUALITY = 0.40  # an open-data sight on the road
 MIN_QUALITY_FAR = 0.55  # … with a detour over FAR_DETOUR_KM
 FAR_DETOUR_KM = 10.0
 BIG_CITY_POPULATION = 1_000_000
+MEGACITY_POPULATION = 4_000_000  # Москва, Санкт-Петербург: never a transit sight in the centre
 BIG_CITY_CENTRE_KM = 12.0  # no transit sight this close to a million-city centre
 OWN_CITY_KM = 25.0  # a big city counts as the trip's own when an origin/destination/via is this close
 SAME_SPOT_KM = 0.4  # two sights closer than this are one stop
+# Manager M8 (ADR-0015 §2 addendum): a tiered detour budget, so the motorways (M-12, M-4) that bypass the
+# towns still get their quality sights. The detour counts inside the day limits like any stop time.
+TOP_QUALITY, TOP_DETOUR_MIN = 0.70, 45  # at most TOP_PER_DAY such long detours a day
+MID_QUALITY, MID_DETOUR_MIN = 0.55, 25
+TOP_PER_DAY = 1
 RELIGIOUS = frozenset({"temple", "monastery", "church"})
 RELIGIOUS_SHARE = 0.30  # of the trip's non-template sights
 RELIGIOUS_NAME = re.compile(r"(?i)\b(" + "|".join(ru.words("sight.religious_name")) + ")")
@@ -50,6 +56,30 @@ def category_of(p: Place) -> str:
     if RELIGIOUS_NAME.search(p.name_ru) and not ({Tag.MONASTERY, Tag.VIEW} & p.tags):
         return "temple"  # a view of a cathedral is a viewpoint, not a temple
     return next((cat for tag, cat in TAG_CATEGORY if tag in p.tags), "attraction")
+
+
+def effective_quality(p: Place) -> float:
+    """Open-data quality, or a curated place's rating on the same 0..1 scale (3.6 → 0, 4.9 → 1)."""
+    if p.quality is not None:
+        return p.quality
+    return max(0.0, min(1.0, (p.rating_internal - 3.6) / 1.3))
+
+
+def detour_ok(c: Candidate) -> bool:
+    """The tiered detour budget (open-data world): q ≥ 0.70 up to 45 min, q ≥ 0.55 up to 25 min, else
+    the plain rule (`quality_ok`: a detour of at most FAR_DETOUR_KM)."""
+    if c.place.quality is not None and c.place.quality < MIN_QUALITY:
+        return False
+    q = effective_quality(c.place)
+    if q >= TOP_QUALITY:
+        return c.detour_min <= TOP_DETOUR_MIN
+    if q >= MID_QUALITY:
+        return c.detour_min <= MID_DETOUR_MIN
+    return c.detour_km <= FAR_DETOUR_KM
+
+
+def long_detour(c: Candidate | PlannedStop) -> bool:
+    return c.detour_min > MID_DETOUR_MIN
 
 
 def quality_ok(c: Candidate) -> bool:
@@ -79,10 +109,16 @@ def big_city_centres(corridor: Corridor) -> list[Town]:
     return [tc.town for tc in corridor.towns if tc.town.population >= BIG_CITY_POPULATION]
 
 
-def in_foreign_centre(c: Candidate, centres: list[Town], own: set[str]) -> bool:
-    return any(
-        t.id not in own and haversine_km(t.point, c.place.point) <= BIG_CITY_CENTRE_KM for t in centres
-    )
+def in_foreign_centre(c: Candidate, centres: list[Town], own: set[str], tiered: bool = False) -> bool:
+    """A transit sight in a million-city centre the trip does not start, end or stay in. `tiered` (M8):
+    a top-quality sight within the 45-minute budget is let in (Казанский кремль, Нижегородский кремль),
+    except in the megacities (Москва, Санкт-Петербург), whose centre traffic the detour model cannot see."""
+    for t in centres:
+        if t.id in own or haversine_km(t.point, c.place.point) > BIG_CITY_CENTRE_KM:
+            continue
+        if not (tiered and t.population < MEGACITY_POPULATION and effective_quality(c.place) >= TOP_QUALITY):
+            return True
+    return False
 
 
 def _day_sights(day: DayPlan) -> list[PlannedStop]:
@@ -188,33 +224,100 @@ def plan_sights(
     rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
     centres = big_city_centres(corridor)
     own = own_big_cities(inp, corridor, days)
-    for day in days:
-        n = sum(1 for s in day.stops if s.kind is StopKind.SIGHT and s.fixed)
-        pool = [
-            c
-            for c in corridor.sights
-            if day.km_start < c.km_at < day.km_end
-            and c.place.id not in used
-            and sight_score(c, inp) >= ctx.cfg.sights.min_score
-            and not (ctx.knobs.sights_free and is_paid(c, inp))
-            and quality_ok(c)
-            and not in_foreign_centre(c, centres, own)
-        ]
-        pool.sort(key=lambda c: (-round(sight_score(c, inp), 9), c.km_at, c.place.id))
-        for c in pool:
-            if n >= max_n:
-                break
-            if c.place.id in used or not diversity_ok(day, c, bool(ctx.cfg.sights.diversity)):
-                continue
-            stop = make_sight_stop(c, inp, ctx)
-            i = insert_stop(day, stop)
-            if day_ok(day, inp, ctx, profile, rests, used | {c.place.id}):
-                n += 1
-                used.add(c.place.id)
+    open_data = bool(ctx.cfg.sights.diversity)
+    # open data: secular sights first over the whole trip, then the religious ones while the trip share
+    # stays ≤ RELIGIOUS_SHARE (a lone church on a sparse road would only be dropped by the repair)
+    for religious in (False, True) if open_data else (None,):
+        for day in days:
+            n = sum(1 for s in day.stops if s.kind is StopKind.SIGHT and (s.fixed or s.pool == "sight"))
+            pool = [
+                c
+                for c in corridor.sights
+                if day.km_start < c.km_at < day.km_end
+                and c.place.id not in used
+                and sight_score(c, inp) >= ctx.cfg.sights.min_score
+                and not (ctx.knobs.sights_free and is_paid(c, inp))
+                and (detour_ok(c) if open_data else quality_ok(c))
+                and not in_foreign_centre(c, centres, own, open_data)
+                and (religious is None or (category_of(c.place) in RELIGIOUS) == religious)
+            ]
+            if open_data:  # quality first, so a 45-minute Владимир is tried before a nearby bust
+                pool.sort(key=lambda c: (-_open_score(c, inp), c.km_at, c.place.id))
             else:
-                day.stops.pop(i)
+                pool.sort(key=lambda c: (-round(sight_score(c, inp), 9), c.km_at, c.place.id))
+            for c in pool:
+                if n >= max_n:
+                    break
+                if c.place.id in used or not diversity_ok(day, c, open_data):
+                    continue
+                if open_data and long_detour(c) and _long_today(day) >= TOP_PER_DAY:
+                    continue
+                if religious and not _religious_room(days):
+                    break
+                stop = make_sight_stop(c, inp, ctx)
+                i = insert_stop(day, stop)
+                if day_ok(day, inp, ctx, profile, rests, used | {c.place.id}) or (
+                    open_data and _with_moved_lunch(day, stop, corridor, inp, ctx, profile, rests, used)
+                ):
+                    n += 1
+                    used.add(c.place.id)
+                else:
+                    day.stops.pop(i)
     if ctx.cfg.sights.diversity:
         trip_religious_repair(days)
+
+
+def _with_moved_lunch(
+    day: DayPlan,
+    stop: PlannedStop,
+    corridor: Corridor,
+    inp: NormalizedInput,
+    ctx: PlanContext,
+    profile: Profile,
+    rests: RestPool,
+    used: set[str],
+) -> bool:
+    """Open-data world: a sight that only fails because it pushes the lunch out of its window gets the lunch
+    moved (re-planned with the sight in the day). True = the day keeps both; False = `day` is unchanged."""
+    lunch = next((k for k, s in enumerate(day.stops) if s.meal is Meal.LUNCH and not s.fixed), None)
+    if lunch is None:
+        return False
+    trial = DayPlan(day.day, day.km_start, day.km_end, day.start_at, list(day.stops), day.tz)
+    old = trial.stops.pop(lunch)
+    free = used - {old.place.id} if old.place is not None else set(used)
+    free.add(stop.place.id if stop.place is not None else "")
+    found = lunch_candidates(
+        trial, corridor, inp, ctx, profile, free, ok=lambda x: day_ok(x, inp, ctx, profile, rests, free)
+    )
+    if not found:
+        return False
+    best = best_lunch(found)
+    insert_stop(trial, best)
+    day.stops[:] = trial.stops
+    if old.place is not None:
+        used.discard(old.place.id)
+    if best.place is not None:
+        used.add(best.place.id)
+    return True
+
+
+def _religious_room(days: list[DayPlan]) -> bool:
+    """One more religious stage-9 sight keeps the trip within RELIGIOUS_SHARE."""
+    rows = [d.stops[i] for d in days for i in droppable_sights(d)]
+    rel = sum(1 for s in rows if _religious(s))
+    return rel + 1 <= RELIGIOUS_SHARE * (len(rows) + 1)
+
+
+def _open_score(c: Candidate, inp: NormalizedInput) -> float:
+    """Open-data ranking: quality dominates, the detour costs a little (45 min ≈ 0.15 of quality), the crew
+    fit a little more (a walk for the dog, a playground for the child)."""
+    t = c.place.tags
+    crew = 0.05 * (Tag.WALK in t and inp.crew.dog) + 0.05 * (Tag.PLAYGROUND in t and inp.crew.children > 0)
+    return round(effective_quality(c.place) - c.detour_min / 300 + crew, 9)
+
+
+def _long_today(day: DayPlan) -> int:
+    return sum(1 for s in day.stops if s.kind is StopKind.SIGHT and not s.fixed and long_detour(s))
 
 
 def droppable_sights(day: DayPlan) -> list[int]:
