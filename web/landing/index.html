@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ru" data-v="a">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* ================================================================
+   КОНФИГУРАЦИЯ СТРАНИЦЫ — заполнить перед публикацией (см. README.md)
+   ================================================================ */
+window.VERST_CONFIG = {
+  // Ссылки-приглашения в Telegram-канал по ячейкам теста (ad-test-plan.md §8.2).
+  // Ячейка = utm_source + показанный вариант. Имена ссылок в Telegram: val02-yandex-a … val02-vk-c.
+  TELEGRAM_URLS: {
+    "yandex-a": "", "yandex-b": "", "yandex-c": "",
+    "vk-a": "",     "vk-b": "",     "vk-c": ""
+  },
+  // Запасная ссылка (site-organic): без UTM, другой источник или пустая ячейка.
+  // Пусто — на странице висит красное предупреждение «не настроено».
+  TELEGRAM_URL: "",
+  // Номер счётчика Яндекс Метрики (только цифры). Пусто — Метрика не загружается совсем.
+  METRIKA_ID: "",
+  // Адрес, который принимает POST с JSON {email, consent, consent_version, variant, utm_source}.
+  FORM_ENDPOINT: "",
+  // true — только после того, как юрист утвердил политику и текст согласия (D-IR-05).
+  // Форма включится, только если заполнены ещё FORM_ENDPOINT, PRIVACY_URL и CONSENT_VERSION.
+  FORM_ENABLED: false,
+  // Ссылка на утверждённую политику обработки персональных данных (готовит юрист).
+  PRIVACY_URL: "",
+  // Версия утверждённого текста согласия, уходит вместе с заявкой, например "2026-11-01".
+  CONSENT_VERSION: "",
+  // Контакт для связи (решает CEO): e-mail или ссылка https://...
+  CONTACT: ""
+};
+</script>
+<script>
+/* Вариант обещания: ?v=a|b|c, по умолчанию a. Ставится до отрисовки, без мигания. */
+(function (d) {
+  var m = /[?&]v=([abc])(?:&|#|$)/i.exec(location.search);
+  d.documentElement.setAttribute("data-v", m ? m[1].toLowerCase() : "a");
+})(document);
+</script>
+<title>Верста — поездки на машине по России с ночёвками и честной стоимостью</title>
+<meta name="description" content="Верста планирует поездку на машине на несколько дней: ночёвки под ваш темп, стоимость с формулами, фильтры для поездок с детьми и собакой. Приложение в тестировании.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#141416">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Верста — планировщик поездок на машине">
+<meta property="og:description" content="Ночёвки под ваш темп, стоимость с формулами, поездки с детьми и собакой. Мы в тестировании — следите за запуском.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231E4FA3'/%3E%3Crect x='3' y='3' width='26' height='26' rx='4' fill='none' stroke='%23F4F4F0' stroke-width='2'/%3E%3Cpath d='M10 9h7.5a4 4 0 0 1 0 8H10zm0 8h8.5a4 4 0 0 1 0 8H10z' fill='none' stroke='%23F4F4F0' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/verst-sans-narrow-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/verst-sans-narrow-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Verst Sans Narrow";src:url(fonts/verst-sans-narrow-400.woff2) format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Verst Sans Narrow";src:url(fonts/verst-sans-narrow-600.woff2) format("woff2");font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"Verst Sans Narrow";src:url(fonts/verst-sans-narrow-700.woff2) format("woff2");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Verst Hand";src:url(fonts/verst-hand-400.woff2) format("woff2");font-weight:400;font-style:normal;font-display:swap;unicode-range:U+0000-00D6,U+00D8-FFFF}
+
+/* Токены «За рулём» (design/tokens.json, SPEC §6) */
+:root{
+  --dash:#141416; --dash-raised:#1C1C1F; --control:#232327; --control-alt:#2A2A2E; --outline:#3A3A42;
+  --text:#F4F4F0; --text-2:#B9B9C0; --text-3:#8C8C93; --on-light:#141416; --on-light-2:#55565C;
+  --blue:#1E4FA3; --brown:#6B3E26; --white:#F4F4F0; --black:#141416;
+  --yellow:#FFD23F; --yellow-hi:#FFE27A; --red:#D8402B;
+  --navi:#0B1218; --navi-field:#16222C; --navi-border:#2B3D4D; --navi-label:#7FA6D9; --navi-text:#B9C6D3; --navi-divider:#1E2E3A;
+  --sky1:#2B2850; --sky2:#4E3768; --sky3:#8E4A6B; --sky4:#D9655A; --sky5:#F29A5E; --sun:#FFD99A; --hills:#3C3346; --ground:#2C3A33; --road:#3A3A3F;
+  --paper:#EEF2F4; --paper-lines:#9FB0BE; --paper-text:#22313D; --paper-label:#53687C; --ink:#1B3FA0;
+  --crew-adult:#E9E2F2; --crew-child:#FFD23F; --crew-dog:#C99A5B;
+  --font:"Verst Sans Narrow","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+  --hand:"Verst Hand","Verst Sans Narrow",cursive;
+  --gutter:16px; --maxw:1120px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--dash)}
+body{margin:0;background:var(--dash);color:var(--text);font:400 18px/1.5 var(--font);font-variant-numeric:lining-nums;overflow-wrap:break-word}
+h1,h2,h3,p,ol,ul,dl,dd,figure{margin:0}
+ol,ul{padding:0;list-style:none}
+img,svg{display:block}
+a{color:var(--yellow);text-underline-offset:.18em;text-decoration-thickness:1px}
+a:hover{color:var(--yellow-hi)}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:3px;border-radius:4px}
+[hidden]{display:none!important}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.wrap{width:100%;max-width:calc(var(--maxw) + 2*var(--gutter));margin-inline:auto;padding-inline:var(--gutter)}
+@media (min-width:600px){:root{--gutter:32px}}
+@media (min-width:1024px){:root{--gutter:48px}}
+
+/* Варианты: видна только версия, выбранная ?v= */
+html[data-v="a"] .v-b,html[data-v="a"] .v-c,
+html[data-v="b"] .v-a,html[data-v="b"] .v-c,
+html[data-v="c"] .v-a,html[data-v="c"] .v-b{display:none!important}
+
+/* Предупреждение для того, кто публикует: нет ни одной ссылки на Telegram */
+.config-warning{background:var(--red);color:#fff;font-weight:600;padding:10px var(--gutter);text-align:left}
+
+/* ---------- Крыша салона и знак «Верста» ---------- */
+.roof{background:var(--dash)}
+.roof .wrap{display:flex;align-items:center;gap:12px;min-height:60px}
+.logo{display:inline-block;background:var(--white);color:var(--black);font-weight:700;font-size:20px;line-height:1;padding:6px 12px 7px;border:3px solid var(--black);border-radius:5px;box-shadow:0 0 0 2px var(--white);text-decoration:none;letter-spacing:.01em}
+.logo:hover{color:var(--black)}
+.roof__what{color:var(--text-2);font-size:16px;line-height:1.25}
+
+/* ---------- Первый экран: лобовое стекло ---------- */
+.hero{display:grid;grid-template-columns:[full-start] var(--gutter) [main-start] minmax(0,1fr) [main-end] var(--gutter) [full-end];--horizon:112px}
+.scene{grid-column:full;grid-row:1;position:relative;margin-inline:6px;border-radius:30px 30px 0 0;overflow:hidden;
+  background:linear-gradient(180deg,var(--sky1) 0 26%,var(--sky2) 26% 46%,var(--sky3) 46% 62%,var(--sky4) 62% 78%,var(--sky5) 78% 100%)}
+.scene::before{content:"";position:absolute;inset:0 0 auto;height:12px;background:#1B1B26}
+.horizon{position:absolute;left:0;right:0;bottom:0;width:100%;height:var(--horizon)}
+.lane{stroke-dasharray:22 26;animation:lane 1.4s linear infinite}
+@keyframes lane{to{stroke-dashoffset:-48}}
+.sign-col{grid-column:main;grid-row:1;position:relative;z-index:1;padding:30px 0 calc(var(--horizon) + 4px)}
+.sign{position:relative;width:fit-content;max-width:100%;background:var(--blue);padding:5px;border-radius:12px;box-shadow:0 10px 24px rgba(10,10,30,.45)}
+.sign::before,.sign::after{content:"";position:absolute;top:-30px;width:8px;height:30px;background:#26262E;border-radius:2px}
+.sign::before{left:18%}.sign::after{right:18%}
+.sign__in{border:2px solid var(--white);border-radius:8px;padding:16px 16px 18px;display:flex;gap:12px;align-items:flex-start}
+.sign__arrow{flex:none;width:30px;height:30px;margin-top:4px;fill:var(--white)}
+.sign h1{font-weight:700;font-size:clamp(29px,8.2vw,54px);line-height:1.06;letter-spacing:-.005em;color:var(--white)}
+
+.hero-copy{grid-column:main;grid-row:2;padding:22px 0 8px}
+.lead{color:var(--text-2);font-size:19px;line-height:1.45;max-width:36em}
+.cta-block{margin-top:22px}
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:12px 22px;width:100%;
+  background:var(--yellow);color:var(--on-light);border-radius:14px;font-weight:700;font-size:20px;line-height:1.15;text-decoration:none;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.cta:hover{background:var(--yellow-hi);color:var(--on-light)}
+.cta:active{transform:translateY(1px)}
+.cta svg{flex:none;width:22px;height:22px;fill:currentColor}
+.cta-note{margin-top:12px;color:var(--text-2);font-size:16px;line-height:1.4;max-width:34em}
+.cta-facts{margin-top:6px;color:var(--text-3);font-size:16px;line-height:1.4}
+@media (min-width:600px){.cta{width:auto}}
+
+.hero-panel{grid-column:main;grid-row:3;padding:26px 0 8px}
+.hero-panel>*{max-width:520px}
+@media (min-width:1100px){.hero-panel>*{max-width:none}}
+
+@media (min-width:1100px){
+  .hero{--horizon:150px;grid-template-columns:[full-start] minmax(var(--gutter),1fr) [main-start] minmax(0,620px) 44px [panel-start] minmax(0,460px) [main-end] minmax(var(--gutter),1fr) [full-end]}
+  .scene{margin-inline:16px;border-radius:44px 44px 0 0}
+  .sign-col{grid-column:main-start/panel-start;padding:52px 0 calc(var(--horizon) + 8px)}
+  .sign__in{padding:22px 26px 26px;gap:16px}
+  .sign__arrow{width:40px;height:40px;margin-top:6px}
+  .hero-copy{grid-column:main-start/panel-start;padding-top:28px}
+  .hero-panel{grid-column:panel-start/main-end;grid-row:1/3;align-self:end;padding:0;position:relative;z-index:2}
+  .lead{font-size:21px}
+}
+
+/* ---------- Экран навигатора (общая рамка) ---------- */
+.navi{background:var(--control);padding:6px;border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.navi__screen{background:var(--navi);border-radius:12px;padding:16px;color:var(--navi-text)}
+.navi__label{color:var(--navi-label);font-size:15px;font-weight:600;letter-spacing:.02em}
+.navi__foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--navi-divider);font-size:15px;line-height:1.4;color:var(--navi-text)}
+.trip{margin-top:6px;color:var(--text);font-weight:700;font-size:24px;line-height:1.15}
+.trip-meta{margin-top:4px;font-size:16px;color:var(--navi-text)}
+
+/* Вариант a: дорога по дням */
+.road{margin-top:14px;position:relative;padding-left:0}
+.road li{position:relative;display:flex;gap:12px;align-items:flex-start;padding:7px 0}
+.road .day{display:block;margin-left:58px;padding:4px 0;color:var(--yellow);font-weight:600;font-size:16px}
+.road::before{content:"";position:absolute;left:21px;top:18px;bottom:18px;width:4px;border-radius:2px;background:repeating-linear-gradient(180deg,var(--outline) 0 10px,transparent 10px 16px)}
+.citysign{position:relative;flex:none;width:46px;display:flex;justify-content:center}
+.citysign span{display:block;width:34px;height:22px;background:var(--white);border:2px solid var(--black);box-shadow:0 0 0 2px var(--white);border-radius:3px}
+.stop-name{color:var(--text);font-weight:600;font-size:18px;line-height:1.25}
+.stop-meta{font-size:15px;color:var(--navi-text);line-height:1.35}
+.svc{position:relative;flex:none;width:46px;height:46px;background:var(--blue);border-radius:6px;padding:4px}
+.svc i{display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:var(--white);border-radius:3px}
+.svc svg{width:28px;height:28px;fill:var(--black)}
+.reason{margin-top:4px;font-size:15px;line-height:1.35;color:var(--text-2)}
+
+/* Вариант b: путевой лист */
+.paper{background:var(--paper);color:var(--paper-text);border-radius:8px;padding:18px 16px 16px;box-shadow:0 18px 40px rgba(0,0,0,.5);position:relative}
+.paper::before{content:"";position:absolute;top:-10px;left:50%;width:110px;height:22px;margin-left:-55px;background:#8C8C93;border-radius:5px;box-shadow:inset 0 -3px 0 #5D5D63}
+.paper__title{font-weight:700;font-size:22px;line-height:1.1;letter-spacing:.02em;color:var(--paper-text)}
+.paper__sub{font-size:14px;color:var(--paper-label)}
+.paper__head{border-bottom:2px solid var(--paper-text);padding-bottom:8px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.paper__meta{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin-top:10px;font-size:15px}
+.paper__meta dt{color:var(--paper-label)}
+.paper__meta dd{font-family:var(--hand);color:var(--ink);font-size:18px;line-height:1.25;border-bottom:1px solid var(--paper-lines)}
+.bill{width:100%;margin-top:12px;border-collapse:collapse;font-size:15px;line-height:1.3}
+.bill th{font-weight:600;font-size:13px;color:var(--paper-label);text-align:left;padding:4px 6px;border:1px solid var(--paper-text)}
+.bill th:last-child,.bill td:last-child{text-align:right;white-space:nowrap;width:1%;padding-left:10px}
+.bill td{border:1px solid var(--paper-lines);border-left-color:var(--paper-text);border-right-color:var(--paper-text);padding:6px 6px;vertical-align:top}
+.bill .item{font-weight:600;color:var(--paper-text)}
+.bill .calc{display:block;font-family:var(--hand);color:var(--ink);font-size:16px;line-height:1.25}
+.bill .sum{font-family:var(--hand);color:var(--ink);font-size:19px}
+.bill tfoot td{border:1px solid var(--paper-text);font-weight:700;font-size:17px}
+.bill tfoot .sum{font-size:24px}
+@media (max-width:420px){.paper{padding:16px 12px 14px}.bill .calc{font-size:15px}.bill .sum{font-size:17px}.bill tfoot .sum{font-size:20px}.bill td,.bill th{padding-inline:5px}}
+.paper__foot{margin-top:10px;font-size:14px;line-height:1.35;color:var(--paper-label)}
+
+/* Вариант c: зеркало и экипаж */
+.mirror{margin:12px auto 0;max-width:300px;background:linear-gradient(160deg,#1E1C2A 0%,#0D0D0F 60%);border:5px solid var(--control-alt);border-radius:28px;padding:14px 18px 10px;display:flex;justify-content:center;align-items:flex-end;gap:12px;position:relative;overflow:hidden}
+.mirror::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 0 30%,rgba(255,255,255,.07) 30% 42%,transparent 42%)}
+.mirror svg{width:44px;height:44px}
+.mirror .adult{fill:var(--crew-adult)}
+.mirror .child{width:36px;height:36px;fill:var(--crew-child)}
+.mirror .dog{width:40px;height:40px;fill:var(--crew-dog)}
+.mirror__label{text-align:center;margin-top:8px;font-weight:600;color:var(--crew-adult);font-size:16px}
+.filters{margin-top:12px;display:grid}
+.filters li{display:flex;gap:10px;align-items:flex-start;padding:8px 2px;border-bottom:1px solid var(--navi-divider);color:var(--text);font-size:17px;line-height:1.3}
+.filters li:last-child{border-bottom:0}
+.filters svg{flex:none;width:20px;height:20px;margin-top:1px;fill:var(--yellow)}
+
+/* ---------- Разделы ---------- */
+.section{padding:64px 0}
+.section + .section{border-top:1px solid var(--control)}
+.section h2{font-weight:700;font-size:clamp(30px,6vw,42px);line-height:1.1;letter-spacing:-.005em;max-width:20em}
+.section__intro{margin-top:12px;color:var(--text-2);max-width:36em}
+@media (min-width:960px){.section{padding:88px 0}}
+
+/* Как это работает: столбики вдоль дороги */
+.steps{margin-top:32px;position:relative;display:grid;gap:28px;max-width:44em}
+.steps::before{content:"";position:absolute;left:19px;top:6px;bottom:6px;width:10px;border-radius:5px;background:var(--road);
+  box-shadow:inset 3px 0 0 #2E2E33}
+.steps::after{content:"";position:absolute;left:23px;top:14px;bottom:14px;width:2px;background:repeating-linear-gradient(180deg,var(--text-3) 0 12px,transparent 12px 24px)}
+.step{position:relative;display:grid;grid-template-columns:48px 1fr;gap:16px;align-items:start}
+.post{position:relative;z-index:1;width:48px;display:flex;flex-direction:column;align-items:center}
+.post b{display:block;width:34px;background:var(--white);color:var(--black);border:2px solid var(--black);border-radius:4px 4px 2px 2px;font-weight:700;font-size:20px;line-height:1;text-align:center;padding:7px 0 6px;box-shadow:0 0 0 2px var(--white)}
+.post b::after{content:"";display:block;margin:6px auto 0;width:22px;height:3px;background:var(--black)}
+.step h3{font-weight:700;font-size:23px;line-height:1.2;padding-top:4px}
+.step p{margin-top:6px;color:var(--text-2)}
+@media (min-width:960px){
+  .how-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:start}
+  .how-grid .steps{margin-top:0}
+}
+
+/* Чем отличается: знаки сервиса на стойках */
+.signs{margin-top:36px;display:grid;gap:36px}
+.feature{display:grid;grid-template-columns:56px 1fr;gap:16px;align-items:start;align-content:start}
+.plate{display:flex;flex-direction:column;align-items:center}
+.plate__sign{width:56px;height:56px;background:var(--blue);border-radius:7px;padding:5px;box-shadow:0 0 0 2px var(--white) inset}
+.plate__sign i{display:flex;align-items:center;justify-content:center;gap:2px;width:100%;height:100%;background:var(--white);border-radius:4px;color:var(--black);font-style:normal;font-weight:700;font-size:28px;line-height:1}
+.plate__sign svg{width:32px;height:32px;fill:var(--black)}
+.plate__sign .pair svg{width:19px;height:19px}
+.plate__post{width:6px;height:26px;background:#5A5A62;border-radius:0 0 2px 2px}
+.feature h3{font-weight:700;font-size:23px;line-height:1.2}
+.feature p{margin-top:8px;color:var(--text-2)}
+.feature .honest{margin-top:10px;color:var(--text);border-left:3px solid var(--yellow);padding-left:12px}
+@media (min-width:960px){
+  .signs{grid-template-columns:repeat(3,minmax(0,1fr));gap:40px}
+  .feature{grid-template-columns:1fr;gap:16px}
+  .plate{align-items:flex-start}
+  .plate__sign{width:72px;height:72px;padding:6px;border-radius:8px}
+  .plate__sign i{font-size:34px}
+  .plate__sign svg{width:40px;height:40px}
+  .plate__sign .pair svg{width:24px;height:24px}
+  .plate__post{margin-left:33px}
+}
+
+/* Мы на старте: временный жёлтый знак */
+.works{margin-top:32px;max-width:760px;background:var(--yellow);color:var(--on-light);border-radius:14px;padding:6px;position:relative}
+.works__in{border:2px solid var(--black);border-radius:10px;padding:0 20px 22px;overflow:hidden}
+.works__band{height:14px;margin:0 -20px 18px;background:repeating-linear-gradient(-45deg,var(--red) 0 14px,var(--white) 14px 28px)}
+.works h2{color:var(--on-light);font-size:clamp(28px,6vw,38px)}
+.works ul{margin-top:14px;display:grid;gap:10px}
+.works li{position:relative;padding-left:22px;font-size:18px;line-height:1.45}
+.works li::before{content:"";position:absolute;left:2px;top:.6em;width:9px;height:9px;background:var(--black);transform:rotate(45deg)}
+
+/* Вопросы */
+.faq{margin-top:28px;max-width:46em;border-top:1px solid var(--control)}
+.faq details{border-bottom:1px solid var(--control)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:56px;padding:12px 2px;font-weight:600;font-size:20px;line-height:1.3}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";flex:none;width:12px;height:12px;border-right:3px solid var(--yellow);border-bottom:3px solid var(--yellow);transform:rotate(45deg) translate(-3px,-3px);transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(225deg) translate(-3px,-3px)}
+.faq summary:hover{color:var(--yellow-hi)}
+.faq details p{padding:0 2px 18px;color:var(--text-2);max-width:40em}
+
+/* Финальный призыв и e-mail */
+.final{background:var(--dash-raised)}
+.final .cta-block{margin-top:24px}
+.email{margin-top:36px;padding-top:24px;border-top:1px dashed var(--outline);max-width:36em}
+.email h3{font-weight:600;font-size:20px;line-height:1.3}
+.email__soon{margin-top:6px;color:var(--text-2)}
+.form{margin-top:12px;display:grid;gap:14px}
+.field label{display:block;font-weight:600;font-size:17px;margin-bottom:6px}
+.field input[type=email]{width:100%;min-height:52px;padding:12px 14px;background:var(--navi-field);color:var(--text);border:2px solid #768DA3;border-radius:10px;font:inherit}
+.field input[type=email]::placeholder{color:#8FA4B8}
+.field input[type=email]:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-color:var(--navi-label)}
+.field input[aria-invalid=true]{border-color:#E6604A}
+.field__err{margin-top:6px;color:#FF8A75;font-size:16px}
+.consent{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;font-size:16px;line-height:1.4;color:var(--text-2)}
+.consent input{width:24px;height:24px;margin:2px 0 0;accent-color:var(--yellow)}
+.btn2{min-height:52px;padding:12px 20px;border-radius:12px;border:2px solid var(--yellow);background:transparent;color:var(--yellow);font:700 18px/1.2 var(--font);cursor:pointer;justify-self:start}
+.btn2:hover{background:rgba(255,210,63,.1)}
+.btn2[disabled]{opacity:.7;cursor:progress}
+.form__status{font-size:16px;min-height:1.4em}
+.form__status.is-error{color:#FF8A75}
+.form__done{margin-top:12px;font-weight:600;color:var(--text)}
+.hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+
+/* Подвал и пометки «заполнить» */
+.foot{padding:40px 0 48px;color:var(--text-3);font-size:16px;line-height:1.5}
+.foot .wrap{display:grid;gap:14px}
+.foot p{max-width:46em}
+.foot__links{display:flex;flex-wrap:wrap;gap:8px 28px}
+.todo{display:inline-block;color:var(--text);border:2px dashed var(--yellow);border-radius:6px;padding:2px 8px;font-size:15px}
+
+@media (prefers-reduced-motion:reduce){
+  .lane{animation:none}
+  .faq summary::after{transition:none}
+  *{scroll-behavior:auto!important}
+}
+@media (forced-colors:active){
+  .cta,.btn2{border:2px solid ButtonText}
+  .sign,.works,.paper{border:2px solid CanvasText}
+}
+</style>
+</head>
+<body>
+<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+  <!-- Пиктограммы из design/icons (gen_icons.py), заливка задаётся при использовании -->
+  <symbol id="i-hotel" viewBox="0 0 24 24"><path d="M1.9 18L1.9 8L4.1 8L4.1 18ZM3 12.9L21 12.9L21 15.1L3 15.1ZM22.1 14L22.1 18L19.9 18L19.9 14ZM19.9 14L19.9 12L22.1 12L22.1 14ZM18 7.9A4.1 4.1 0 0 1 22.1 12L19.9 12A1.9 1.9 0 0 0 18 10.1ZM18 10.1L11 10.1L11 7.9L18 7.9ZM12.1 9L12.1 14L9.9 14L9.9 9ZM4.1 18A1.1 1.1 0 1 1 1.9 18A1.1 1.1 0 1 1 4.1 18ZM4.1 8A1.1 1.1 0 1 1 1.9 8A1.1 1.1 0 1 1 4.1 8ZM4.1 14A1.1 1.1 0 1 1 1.9 14A1.1 1.1 0 1 1 4.1 14ZM22.1 14A1.1 1.1 0 1 1 19.9 14A1.1 1.1 0 1 1 22.1 14ZM22.1 18A1.1 1.1 0 1 1 19.9 18A1.1 1.1 0 1 1 22.1 18ZM22.1 12A1.1 1.1 0 1 1 19.9 12A1.1 1.1 0 1 1 22.1 12ZM19.1 9A1.1 1.1 0 1 1 16.9 9A1.1 1.1 0 1 1 19.1 9ZM12.1 9A1.1 1.1 0 1 1 9.9 9A1.1 1.1 0 1 1 12.1 9ZM12.1 14A1.1 1.1 0 1 1 9.9 14A1.1 1.1 0 1 1 12.1 14ZM10.1 11A3.1 3.1 0 1 1 3.9 11A3.1 3.1 0 1 1 10.1 11ZM7.9 11A0.9 0.9 0 1 0 6.1 11A0.9 0.9 0 1 0 7.9 11Z"/></symbol>
+  <symbol id="i-adult" viewBox="0 0 24 24"><path d="M17.538 5.538A5.538 5.538 0 1 1 6.462 5.538A5.538 5.538 0 1 1 17.538 5.538ZM6.923 12L17.077 12A6 6 0 0 1 23.077 18L23.077 24L0.923 24L0.923 18A6 6 0 0 1 6.923 12Z"/></symbol>
+  <symbol id="i-child" viewBox="0 0 24 24"><path d="M16.26 9.799A4.26 4.26 0 1 1 7.74 9.799A4.26 4.26 0 1 1 16.26 9.799ZM8.095 14.769L15.905 14.769A4.615 4.615 0 0 1 20.521 19.385L20.521 24L3.479 24L3.479 19.385A4.615 4.615 0 0 1 8.095 14.769Z"/></symbol>
+  <symbol id="i-dog" viewBox="0 0 24 24"><path d="M9.75 4.5L14.25 4.5A9.75 9.75 0 0 1 24 14.25L24 16.5A7.5 7.5 0 0 1 16.5 24L7.5 24A7.5 7.5 0 0 1 0 16.5L0 14.25A9.75 9.75 0 0 1 9.75 4.5ZM6.253 0.257A3.375 3.375 0 0 1 10.505 2.424L11.664 5.99A3.375 3.375 0 0 1 9.497 10.243A3.375 3.375 0 0 1 5.245 8.076L4.086 4.51A3.375 3.375 0 0 1 6.253 0.257ZM17.747 0.257A3.375 3.375 0 0 1 19.914 4.51L18.755 8.076A3.375 3.375 0 0 1 14.503 10.243A3.375 3.375 0 0 1 12.336 5.99L13.495 2.424A3.375 3.375 0 0 1 17.747 0.257Z"/></symbol>
+  <symbol id="i-arrow-ur" viewBox="0 0 24 24"><path d="M5.939 15.939L15.939 5.939L18.061 8.061L8.061 18.061ZM9 5.5L17 5.5L17 8.5L9 8.5ZM18.5 7L18.5 15L15.5 15L15.5 7ZM8.5 17A1.5 1.5 0 1 1 5.5 17A1.5 1.5 0 1 1 8.5 17ZM18.5 7A1.5 1.5 0 1 1 15.5 7A1.5 1.5 0 1 1 18.5 7ZM10.5 7A1.5 1.5 0 1 1 7.5 7A1.5 1.5 0 1 1 10.5 7ZM18.5 15A1.5 1.5 0 1 1 15.5 15A1.5 1.5 0 1 1 18.5 15Z"/></symbol>
+  <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M4 10.5L20 10.5L20 13.5L4 13.5ZM14.061 3.939L21.061 10.939L18.939 13.061L11.939 6.061ZM21.061 13.061L14.061 20.061L11.939 17.939L18.939 10.939Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M9.2 18.4L2.6 11.8L4.7 9.7L9.2 14.2L19.3 4.1L21.4 6.2Z"/></symbol>
+</svg>
+
+<div class="config-warning" id="config-warning" role="alert" hidden>Страница не настроена: укажите ссылку TELEGRAM_URL (и TELEGRAM_URLS для ячеек теста) в блоке конфигурации в начале index.html.</div>
+
+<header class="roof">
+  <div class="wrap">
+    <span class="logo" translate="no">Верста</span>
+    <span class="roof__what">планировщик поездок на&nbsp;машине по&nbsp;России</span>
+  </div>
+</header>
+
+<main>
+<section class="hero" aria-labelledby="hero-title">
+  <div class="scene" aria-hidden="true">
+    <svg class="horizon" viewBox="0 0 1440 220" preserveAspectRatio="xMidYMax slice" focusable="false">
+      <circle cx="905" cy="78" r="46" fill="#FFD99A"/>
+      <path d="M0 86 L150 60 L300 80 L470 50 L640 76 L760 66 L900 84 L1060 52 L1220 78 L1340 58 L1440 72 L1440 220 L0 220Z" fill="#3C3346"/>
+      <rect x="0" y="86" width="1440" height="134" fill="#2C3A33"/>
+      <path d="M708 86 L732 86 L1010 220 L430 220Z" fill="#3A3A3F"/>
+      <path d="M708 86 L430 220" stroke="#F4F4F0" stroke-width="5"/>
+      <path d="M732 86 L1010 220" stroke="#F4F4F0" stroke-width="5"/>
+      <path class="lane" d="M720 90 L720 220" stroke="#F4F4F0" stroke-width="7"/>
+      <rect x="350" y="120" width="7" height="60" fill="#5A5A62"/>
+      <rect x="1085" y="120" width="7" height="60" fill="#5A5A62"/>
+    </svg>
+  </div>
+
+  <div class="sign-col">
+    <div class="sign">
+      <div class="sign__in">
+        <svg class="sign__arrow" aria-hidden="true" focusable="false"><use href="#i-arrow-ur"/></svg>
+        <h1 id="hero-title">
+          <span class="v-a">Маршрут с&nbsp;ночёвками под&nbsp;ваш темп&nbsp;— за&nbsp;10&nbsp;секунд</span>
+          <span class="v-b">Честная стоимость поездки: у&nbsp;каждой строки&nbsp;— формула</span>
+          <span class="v-c">С&nbsp;детьми и&nbsp;собакой&nbsp;— только туда, где&nbsp;вам&nbsp;рады</span>
+        </h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-copy">
+    <p class="lead v-a">Укажите, откуда и&nbsp;куда едете и&nbsp;сколько километров в&nbsp;день вам комфортно. Верста разобьёт дорогу на&nbsp;дни, подберёт город для ночёвки и&nbsp;объяснит, почему именно&nbsp;его.</p>
+    <p class="lead v-b">Бензин, платные дороги, ночёвки, еда, билеты и&nbsp;резерв 10&nbsp;%. Видно, из&nbsp;чего сложилась сумма и&nbsp;укладываетесь&nbsp;ли вы в&nbsp;бюджет&nbsp;— ещё до&nbsp;выезда.</p>
+    <p class="lead v-c">Отметьте, кто едет. Если с&nbsp;вами собака, Верста не&nbsp;предложит ночёвку, куда с&nbsp;ней не&nbsp;пускают. Такие места мы сейчас проверяем вручную&nbsp;— начинаем с&nbsp;поездок из&nbsp;Москвы.</p>
+    <div class="cta-block">
+      <a class="cta" data-tg="hero" href="#">
+        <svg aria-hidden="true" focusable="false"><use href="#i-arrow-r"/></svg>
+        Следить за&nbsp;запуском в&nbsp;Telegram
+      </a>
+      <p class="cta-note">В&nbsp;канале&nbsp;— новости запуска. Когда откроем тест, позовём оттуда.</p>
+      <p class="cta-facts">Приложение для Android, бесплатное, без&nbsp;регистрации.</p>
+    </div>
+  </div>
+
+  <div class="hero-panel">
+    <!-- a: дорога по дням -->
+    <figure class="navi v-a" aria-labelledby="cap-a">
+      <div class="navi__screen">
+        <p class="navi__label" id="cap-a">Пример плана в&nbsp;приложении</p>
+        <p class="trip">Москва → Казань</p>
+        <p class="trip-meta">≈&nbsp;810&nbsp;км · 2&nbsp;дня · ваш темп 450&nbsp;км в&nbsp;день</p>
+        <ol class="road">
+          <li><span class="citysign" aria-hidden="true"><span></span></span><div><p class="stop-name">Москва</p><p class="stop-meta">выезд в&nbsp;08:00</p></div></li>
+          <li class="day">День 1 · ≈&nbsp;420&nbsp;км · ≈&nbsp;5&nbsp;ч за&nbsp;рулём</li>
+          <li><span class="svc" aria-hidden="true"><i><svg focusable="false"><use href="#i-hotel"/></svg></i></span><div><p class="stop-name">Ночёвка: Нижний Новгород</p><p class="reason">На&nbsp;30&nbsp;км раньше вашей нормы: в&nbsp;большом городе больше вариантов ночёвки</p></div></li>
+          <li class="day">День 2 · ≈&nbsp;390&nbsp;км · ≈&nbsp;4&nbsp;ч 40&nbsp;мин</li>
+          <li><span class="citysign" aria-hidden="true"><span></span></span><div><p class="stop-name">Казань</p><p class="stop-meta">финиш</p></div></li>
+        </ol>
+        <p class="navi__foot">Пример для иллюстрации: расстояния и&nbsp;время приблизительные.</p>
+      </div>
+    </figure>
+
+    <!-- b: путевой лист -->
+    <figure class="paper v-b" aria-labelledby="cap-b">
+      <div class="paper__head">
+        <p class="paper__title" id="cap-b">ПУТЕВОЙ ЛИСТ</p>
+        <p class="paper__sub">пример расчёта</p>
+      </div>
+      <dl class="paper__meta">
+        <dt>Маршрут</dt><dd>Москва → Казань</dd>
+        <dt>Экипаж</dt><dd>2 взр., 1 реб.</dd>
+        <dt>Пробег</dt><dd>810&nbsp;км за&nbsp;2&nbsp;дня</dd>
+      </dl>
+      <table class="bill">
+        <caption class="sr-only">Пример расчёта стоимости поездки Москва — Казань по&nbsp;статьям</caption>
+        <thead><tr><th scope="col">Статья и&nbsp;расчёт</th><th scope="col">₽</th></tr></thead>
+        <tbody>
+          <tr><td><span class="item">Бензин</span><span class="calc">810&nbsp;км × 8,0&nbsp;л/100&nbsp;км × 63&nbsp;₽</span></td><td class="sum">4&#8239;080</td></tr>
+          <tr><td><span class="item">Платные дороги</span><span class="calc">участки трассы × тариф</span></td><td class="sum">3&#8239;100</td></tr>
+          <tr><td><span class="item">Ночёвка</span><span class="calc">1&nbsp;ночь × 1&nbsp;номер × 5&#8239;500&nbsp;₽</span></td><td class="sum">5&#8239;500</td></tr>
+          <tr><td><span class="item">Еда</span><span class="calc">(2&nbsp;+&nbsp;0,5&nbsp;реб.) × 4&nbsp;приёма × 700&nbsp;₽</span></td><td class="sum">7&#8239;000</td></tr>
+          <tr><td><span class="item">Билеты</span><span class="calc">2 × 500&nbsp;₽ + 1 × 250&nbsp;₽</span></td><td class="sum">1&#8239;250</td></tr>
+          <tr><td><span class="item">Резерв 10&nbsp;%</span><span class="calc">на&nbsp;пробки и&nbsp;«давай заедем»</span></td><td class="sum">2&#8239;090</td></tr>
+        </tbody>
+        <tfoot><tr><td>ИТОГО</td><td class="sum">≈&nbsp;23&#8239;000</td></tr></tfoot>
+      </table>
+      <p class="paper__foot">Цифры условные. В&nbsp;приложении&nbsp;— средние цены по&nbsp;трассе, точная цена&nbsp;— при бронировании.</p>
+    </figure>
+
+    <!-- c: экипаж -->
+    <figure class="navi v-c" aria-labelledby="cap-c">
+      <div class="navi__screen">
+        <p class="navi__label" id="cap-c">Экипаж в&nbsp;зеркале заднего вида</p>
+        <div class="mirror" role="img" aria-label="Двое взрослых, ребёнок и собака">
+          <svg class="adult" aria-hidden="true" focusable="false"><use href="#i-adult"/></svg>
+          <svg class="adult" aria-hidden="true" focusable="false"><use href="#i-adult"/></svg>
+          <svg class="child" aria-hidden="true" focusable="false"><use href="#i-child"/></svg>
+          <svg class="dog" aria-hidden="true" focusable="false"><use href="#i-dog"/></svg>
+        </div>
+        <p class="mirror__label" aria-hidden="true">2&nbsp;взр · 1&nbsp;реб · пёс</p>
+        <p class="sr-only">Что Верста учитывает для такого экипажа:</p>
+        <ul class="filters">
+          <li><svg aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Ночёвки, куда пускают с&nbsp;собакой</li>
+          <li><svg aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Кафе с&nbsp;детским меню</li>
+          <li><svg aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Семейные номера</li>
+          <li><svg aria-hidden="true" focusable="false"><use href="#i-check"/></svg>Детские площадки на&nbsp;остановках</li>
+        </ul>
+        <p class="navi__foot">Места с&nbsp;такими отметками мы проверяем вручную. Начинаем с&nbsp;маршрутов из&nbsp;Москвы.</p>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<section class="section" id="how" aria-labelledby="how-title">
+  <div class="wrap how-grid">
+    <div>
+      <h2 id="how-title">Как это работает</h2>
+      <p class="section__intro">Три шага от&nbsp;«куда&nbsp;бы съездить» до&nbsp;плана по&nbsp;дням.</p>
+    </div>
+    <ol class="steps">
+      <li class="step">
+        <span class="post" aria-hidden="true"><b>1</b></span>
+        <div><h3>Куда едем</h3><p>Выберите готовый маршрут рядом с&nbsp;домом или введите любые две точки в&nbsp;России: город, адрес или место на&nbsp;карте.</p></div>
+      </li>
+      <li class="step">
+        <span class="post" aria-hidden="true"><b>2</b></span>
+        <div><h3>Кто едет и&nbsp;в&nbsp;каком темпе</h3><p>Взрослые, дети, собака. Сколько километров в&nbsp;день вам комфортно&nbsp;— от&nbsp;150 до&nbsp;900. И&nbsp;бюджет, если он&nbsp;есть.</p></div>
+      </li>
+      <li class="step">
+        <span class="post" aria-hidden="true"><b>3</b></span>
+        <div><h3>Дорога по&nbsp;дням</h3><p>Верста делит путь на&nbsp;дни, ставит ночёвки, остановки на&nbsp;еду и&nbsp;заправку и&nbsp;считает стоимость. Любую остановку можно заменить, поездку&nbsp;— сохранить и&nbsp;открыть без&nbsp;сети, а&nbsp;день&nbsp;— передать в&nbsp;навигатор.</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" id="why" aria-labelledby="why-title">
+  <div class="wrap">
+    <h2 id="why-title">Чем Верста отличается от&nbsp;карт</h2>
+    <p class="section__intro">Карты ведут из&nbsp;точки в&nbsp;точку. Верста планирует поездку на&nbsp;несколько дней&nbsp;— с&nbsp;ночёвками, остановками и&nbsp;деньгами.</p>
+    <ul class="signs">
+      <li class="feature">
+        <span class="plate" aria-hidden="true"><span class="plate__sign"><i><svg focusable="false"><use href="#i-hotel"/></svg></i></span><span class="plate__post"></span></span>
+        <div>
+          <h3>Ночёвки под ваш темп</h3>
+          <p>Путь делится на&nbsp;дни по&nbsp;вашему километражу, а&nbsp;ночёвка сдвигается к&nbsp;ближайшему удобному городу. Рядом всегда написано почему: например, «на&nbsp;30&nbsp;км раньше&nbsp;— в&nbsp;большом городе больше вариантов».</p>
+        </div>
+      </li>
+      <li class="feature">
+        <span class="plate" aria-hidden="true"><span class="plate__sign"><i>₽</i></span><span class="plate__post"></span></span>
+        <div>
+          <h3>Стоимость с&nbsp;формулами</h3>
+          <p>Бензин, платные дороги, ночёвки, еда, билеты и&nbsp;резерв 10&nbsp;%&nbsp;— у&nbsp;каждой строки своя формула. Это оценка до&nbsp;поездки, а&nbsp;не&nbsp;счёт: точная цена&nbsp;— при бронировании.</p>
+        </div>
+      </li>
+      <li class="feature">
+        <span class="plate" aria-hidden="true"><span class="plate__sign"><i class="pair"><svg focusable="false"><use href="#i-child"/></svg><svg focusable="false"><use href="#i-dog"/></svg></i></span><span class="plate__post"></span></span>
+        <div>
+          <h3>Фильтры для экипажа</h3>
+          <p>Дети и&nbsp;собака меняют план: ночёвки, куда пускают с&nbsp;собакой, кафе с&nbsp;детским меню, семейные номера.</p>
+          <p class="honest">Честно: проверенных мест пока нет. Мы собираем и&nbsp;проверяем их&nbsp;вручную, начиная с&nbsp;маршрутов из&nbsp;Москвы. Непроверенное в&nbsp;приложении так и&nbsp;подписано&nbsp;— «не&nbsp;проверено».</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="status" aria-labelledby="status-title">
+  <div class="wrap">
+    <div class="works">
+      <div class="works__in">
+        <div class="works__band" aria-hidden="true"></div>
+        <h2 id="status-title">Мы на&nbsp;старте</h2>
+        <ul>
+          <li>Верста сейчас в&nbsp;тестировании, публичной версии ещё нет.</li>
+          <li>Подключаем настоящие дороги, гостиницы и&nbsp;цены и&nbsp;вручную проверяем места.</li>
+          <li>Первыми запустим поездки из&nbsp;Москвы.</li>
+          <li>Отзывов пока нет: они появятся после первых поездок тестировщиков.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq" aria-labelledby="faq-title">
+  <div class="wrap">
+    <h2 id="faq-title">Вопросы</h2>
+    <div class="faq">
+      <details data-faq="q1"><summary>Сколько это стоит?</summary><p>Бесплатно. Регистрация не&nbsp;нужна.</p></details>
+      <details data-faq="q2"><summary>Есть&nbsp;ли версия для iPhone?</summary><p>Пока нет. Сначала выпускаем приложение для Android. О&nbsp;других платформах напишем в&nbsp;канале.</p></details>
+      <details data-faq="q3"><summary>Для каких регионов?</summary><p>Маршрут строится между любыми точками России. Готовые маршруты и&nbsp;проверенные места начнём с&nbsp;поездок из&nbsp;Москвы: на&nbsp;выходные&nbsp;— до&nbsp;300&nbsp;км, на&nbsp;3–4&nbsp;дня&nbsp;— до&nbsp;700&nbsp;км.</p></details>
+      <details data-faq="q4"><summary>Что вы узнаете обо мне?</summary><p>Подписка на&nbsp;канал идёт через Telegram: мы не&nbsp;просим ни&nbsp;телефон, ни&nbsp;e-mail. На&nbsp;сайте работает Яндекс Метрика&nbsp;— она считает посещения и&nbsp;нажатия кнопок; имени, телефона и&nbsp;e-mail мы в&nbsp;неё не&nbsp;передаём. В&nbsp;приложении нет регистрации.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="section final" id="join" aria-labelledby="join-title">
+  <div class="wrap">
+    <h2 id="join-title">Расскажем, когда можно будет ехать</h2>
+    <p class="section__intro">Новости запуска и&nbsp;приглашение в&nbsp;тест&nbsp;— в&nbsp;Telegram-канале Версты. Отписаться можно в&nbsp;любой момент.</p>
+    <div class="cta-block">
+      <a class="cta" data-tg="final" href="#">
+        <svg aria-hidden="true" focusable="false"><use href="#i-arrow-r"/></svg>
+        Следить за&nbsp;запуском в&nbsp;Telegram
+      </a>
+    </div>
+
+    <div class="email" id="email">
+      <h3>Нет Telegram?</h3>
+      <p class="email__soon" id="email-soon">Подписку по&nbsp;e-mail откроем скоро&nbsp;— сначала опубликуем политику обработки персональных данных.</p>
+      <form class="form" id="email-form" novalidate hidden>
+        <div class="field">
+          <label for="email-input">E-mail</label>
+          <input id="email-input" name="email" type="email" inputmode="email" autocomplete="email" placeholder="name@mail.ru" required aria-describedby="email-err">
+          <p class="field__err" id="email-err" hidden></p>
+        </div>
+        <div class="hp" aria-hidden="true"><label for="hp-input">Не заполняйте это поле</label><input id="hp-input" name="company" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="consent">
+          <input id="consent" name="consent" type="checkbox" required aria-describedby="consent-err">
+          <!-- ЮРИСТ: здесь утверждённый текст согласия на обработку персональных данных (152-ФЗ). -->
+          <label for="consent">Даю согласие на&nbsp;обработку моего e-mail для писем о&nbsp;запуске Версты по&nbsp;<a id="privacy-inline" href="#">политике обработки персональных данных</a>. <span class="todo">ЮРИСТ: заменить на&nbsp;утверждённый текст согласия</span></label>
+        </div>
+        <p class="field__err" id="consent-err" hidden></p>
+        <button class="btn2" type="submit" id="email-submit">Записаться по&nbsp;e-mail</button>
+        <p class="form__status" id="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p><span translate="no">Верста</span>&nbsp;— планировщик поездок на&nbsp;машине по&nbsp;России. Приложение в&nbsp;тестировании. Схемы и&nbsp;цифры на&nbsp;странице&nbsp;— иллюстрации, суммы в&nbsp;примерах условные.</p>
+    <div class="foot__links">
+      <span id="privacy-slot"><span class="todo">Политика обработки персональных данных&nbsp;— ЮРИСТ: ссылка появится после утверждения</span></span>
+      <span id="contact-slot"><span class="todo">Контакты&nbsp;— CEO: e-mail или Telegram для связи</span></span>
+    </div>
+    <p>© 2026 Верста</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var C = window.VERST_CONFIG || {};
+  var d = document;
+  var variant = d.documentElement.getAttribute("data-v") || "a";
+  var events = window.verstEvents = []; // журнал событий для проверки (без персональных данных)
+
+  // UTM: белый список (tracking-plan.md §1.3). Неизвестный источник -> "other", без метки -> "none".
+  function param(name) {
+    var m = new RegExp("[?&]" + name + "=([^&#]*)").exec(location.search);
+    if (!m) return null;
+    try { return decodeURIComponent(m[1].replace(/\+/g, " ")).trim().toLowerCase(); } catch (e) { return ""; }
+  }
+  var SOURCES = ["yandex", "vk", "telegram", "interview", "community"];
+  var rawSrc = param("utm_source");
+  var src = rawSrc === null ? "none" : (SOURCES.indexOf(rawSrc) >= 0 ? rawSrc : "other");
+  function slug(name) {
+    var v = param(name);
+    return v === null ? "none" : (/^[a-z0-9]+(-[a-z0-9]+)*$/.test(v) && v.length <= 64 ? v : "other");
+  }
+
+  // Ячейка теста и её ссылка-приглашение; иначе запасная ссылка.
+  var TG_RE = /^https:\/\/t\.me\/[A-Za-z0-9_+\/-]+$/;
+  var urls = C.TELEGRAM_URLS || {};
+  var cell = src + "-" + variant;
+  var tg = TG_RE.test(String(urls[cell] || "")) ? String(urls[cell]) : "";
+  var tgSource = tg ? "cell " + cell : "default";
+  if (!tg) tg = TG_RE.test(String(C.TELEGRAM_URL || "")) ? String(C.TELEGRAM_URL) : "";
+  var tgOk = !!tg;
+  d.documentElement.setAttribute("data-tg-link", tgOk ? tgSource : "missing");
+  if (window.console) {
+    var missing = ["yandex-a", "yandex-b", "yandex-c", "vk-a", "vk-b", "vk-c"].filter(function (k) { return !TG_RE.test(String(urls[k] || "")); });
+    if (missing.length) console.warn("TELEGRAM_URLS: нет ссылок для ячеек " + missing.join(", ") + " — их посетители получат запасную ссылку");
+    console.info("Telegram: ячейка " + cell + " → " + (tgOk ? tgSource + " " + tg : "ссылка не задана"));
+  }
+  if (!tgOk) d.getElementById("config-warning").hidden = false;
+
+  // Яндекс Метрика: загружается только если задан номер счётчика. Вебвизор выключен.
+  var mid = /^\d{4,12}$/.test(String(C.METRIKA_ID || "")) ? Number(C.METRIKA_ID) : 0;
+  if (mid) {
+    (function (m, e, t, r, i, k, a) {
+      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
+      m[i].l = 1 * new Date();
+      k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+    })(window, d, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    window.ym(mid, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: false });
+  }
+
+  // Каждая цель несёт variant и utm_source; никаких персональных данных.
+  function goal(name, extra, cb) {
+    var p = { variant: variant, utm_source: src }, k;
+    for (k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) p[k] = extra[k];
+    events.push({ goal: name, params: p });
+    if (mid && typeof window.ym === "function") window.ym(mid, "reachGoal", name, p, cb);
+    else if (cb) cb();
+  }
+
+  goal("page_view", { utm_campaign: slug("utm_campaign"), utm_content: slug("utm_content") });
+
+  // Telegram: tg_click уходит до перехода — переход в колбэке Метрики или через 300 мс.
+  Array.prototype.forEach.call(d.querySelectorAll("[data-tg]"), function (a) {
+    if (tgOk) { a.href = tg; a.rel = "noopener"; }
+    a.addEventListener("click", function (ev) {
+      if (!tgOk) { ev.preventDefault(); return; }
+      var loc = a.getAttribute("data-tg");
+      var newTab = ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.button === 1;
+      if (newTab || !mid) { goal("tg_click", { cta_location: loc }); return; }
+      ev.preventDefault();
+      var gone = false;
+      function go() { if (!gone) { gone = true; location.href = tg; } }
+      goal("tg_click", { cta_location: loc }, go);
+      setTimeout(go, 300);
+    });
+  });
+
+  // Вопросы: какие возражения открывают (faq_id = q1…qN по порядку, без текста вопроса).
+  Array.prototype.forEach.call(d.querySelectorAll("details[data-faq]"), function (el) {
+    el.addEventListener("toggle", function () { if (el.open) goal("faq_open", { faq_id: el.getAttribute("data-faq") }); });
+  });
+
+  // Политика и контакты: подставляются из конфига, иначе остаются пометки для юриста и CEO.
+  var privacyOk = /^(https:\/\/|\/|\.\/)/.test(String(C.PRIVACY_URL || ""));
+  if (privacyOk) {
+    d.getElementById("privacy-slot").innerHTML = "";
+    var pl = d.createElement("a"); pl.href = C.PRIVACY_URL; pl.textContent = "Политика обработки персональных данных";
+    d.getElementById("privacy-slot").appendChild(pl);
+    d.getElementById("privacy-inline").href = C.PRIVACY_URL;
+  }
+  var contact = String(C.CONTACT || "");
+  if (contact) {
+    var cl = d.createElement("a");
+    if (/^https:\/\//.test(contact)) { cl.href = contact; cl.textContent = "Связаться с нами"; }
+    else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) { cl.href = "mailto:" + contact; cl.textContent = contact; }
+    if (cl.href) { var cs = d.getElementById("contact-slot"); cs.innerHTML = ""; cs.appendChild(cl); }
+  }
+
+  // Подписка по e-mail: выключена, пока юрист не утвердил политику и согласие (D-IR-05).
+  var formOn = C.FORM_ENABLED === true && /^https:\/\//.test(String(C.FORM_ENDPOINT || "")) && privacyOk && !!C.CONSENT_VERSION;
+  if (C.FORM_ENABLED === true && !formOn && window.console) {
+    console.error("Форма не включена: нужны FORM_ENDPOINT (https), PRIVACY_URL и CONSENT_VERSION");
+  }
+  if (!formOn) return;
+
+  var form = d.getElementById("email-form"), input = d.getElementById("email-input"),
+      err = d.getElementById("email-err"), consent = d.getElementById("consent"),
+      cerr = d.getElementById("consent-err"), btn = d.getElementById("email-submit"),
+      status = d.getElementById("form-status");
+  d.getElementById("email-soon").hidden = true;
+  form.hidden = false;
+
+  function emailError() {
+    var v = input.value.trim();
+    if (!v) return "Введите e-mail, например name@mail.ru";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return "Проверьте адрес: нужны @ и домен, например name@mail.ru";
+    return "";
+  }
+  function showEmail(msg) {
+    err.textContent = msg; err.hidden = !msg;
+    input.setAttribute("aria-invalid", msg ? "true" : "false");
+  }
+  function showConsent(msg) {
+    cerr.textContent = msg; cerr.hidden = !msg;
+    consent.setAttribute("aria-invalid", msg ? "true" : "false");
+  }
+  input.addEventListener("blur", function () { if (input.value) showEmail(emailError()); });
+  input.addEventListener("input", function () { if (input.getAttribute("aria-invalid") === "true") showEmail(emailError()); });
+  consent.addEventListener("change", function () { if (consent.checked) showConsent(""); });
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var e1 = emailError(), e2 = consent.checked ? "" : "Без согласия мы не можем сохранить e-mail. Или подпишитесь на канал в Telegram.";
+    showEmail(e1); showConsent(e2);
+    if (e1) { input.focus(); return; }
+    if (e2) { consent.focus(); return; }
+    if (d.getElementById("hp-input").value) return; // бот
+    btn.disabled = true; btn.textContent = "Отправляем…";
+    status.className = "form__status"; status.textContent = "";
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 10000);
+    fetch(C.FORM_ENDPOINT, {
+      method: "POST", headers: { "Content-Type": "application/json" }, signal: ctrl ? ctrl.signal : undefined,
+      body: JSON.stringify({ email: input.value.trim(), consent: true, consent_version: String(C.CONSENT_VERSION),
+        variant: variant, utm_source: src })
+    }).then(function (r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      goal("form_submit", { form: "email_waitlist" });
+      var done = d.createElement("p");
+      done.className = "form__done"; done.tabIndex = -1;
+      done.textContent = "Готово. Напишем на этот адрес, когда откроем тест.";
+      form.replaceWith(done); done.focus();
+    }).catch(function () {
+      clearTimeout(timer);
+      btn.disabled = false; btn.textContent = "Записаться по e-mail";
+      status.className = "form__status is-error";
+      status.textContent = "Не получилось отправить. Попробуйте ещё раз или подпишитесь на канал в Telegram.";
+    });
+  });
+})();
+</script>
+</body>
+</html>
