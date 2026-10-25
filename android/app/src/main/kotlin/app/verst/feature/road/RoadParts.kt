@@ -287,12 +287,12 @@ internal fun KmPost(km: Int, modifier: Modifier = Modifier) {
 
 /** The legends under the chips: the open-data ring (with «О данных») and the mini km post (5.5 §10.2, §10.8). */
 @Composable
-internal fun Legends(openData: Boolean, posts: Boolean, onAbout: () -> Unit) {
+internal fun Legends(openData: Boolean, posts: Boolean, onAbout: () -> Unit, about: Boolean = true) {
     if (openData) {
         Row(Modifier.fillMaxWidth().testTag("road.legend.opendata"), verticalAlignment = Alignment.CenterVertically) {
             OpenDataRing(Modifier.padding(end = 6.dp))
             Txt(stringResource(R.string.road_open_data_legend), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false))
-            Box(
+            if (about) Box(
                 Modifier.padding(start = 4.dp).defaultMinSize(minHeight = DesignTokens.size.touchMin)
                     .clickable(role = Role.Button, onClick = onAbout).testTag("road.approx.more"),
                 contentAlignment = Alignment.Center,

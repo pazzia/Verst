@@ -370,7 +370,7 @@ class ScreensScreenshotTest {
         }
         val parkingRub = days.sumOf { d -> d.stops.sumOf { it.parking?.rub ?: 0 } }
         val lines = t.cost.lines.filter { it.key != "reserve" } +
-            app.verst.core.model.dto.CostLineDto("parking", "Парковки", parkingRub, "${days.sumOf { d -> d.stops.count { it.parking?.rubPerHour != null } }} стоянки", unknownCount = 2) +
+            app.verst.core.model.dto.CostLineDto("parking", "Парковки", parkingRub, "${days.sumOf { d -> d.stops.count { it.parking?.rubPerHour != null } }} стоянки", unknownCount = days.sumOf { d -> d.stops.count { it.kind in setOf("sight", "food", "rest", "overnight") && it.parking == null } }) +
             t.cost.lines.filter { it.key == "reserve" }
         return t.copy(daysList = days, cost = t.cost.copy(lines = lines))
     }

@@ -603,7 +603,7 @@ private fun Intro(trip: TripDto, handoffDay: Int, a: RoadActions) {
             }
         }
         Legends(ringRows && !trip.approxDistances, posts = trip.daysList.any { d -> d.stops.any { it.kmDriven != null } }, onAbout)
-        if (ringRows && trip.approxDistances) Legends(true, posts = false, onAbout = {}) // «О данных» is on the line above
+        if (ringRows && trip.approxDistances) Legends(true, posts = false, onAbout = {}, about = false) // «О данных» is on the line above
         // S3-QA P1-06: one plate per night — the engine sentence, then the night's «Ближайшая подходящая: …» note
         val seen = mutableSetOf<String>()
         // S3-QA2: with more than one night plate each one says which night («Ночь 2: не нашли …»)

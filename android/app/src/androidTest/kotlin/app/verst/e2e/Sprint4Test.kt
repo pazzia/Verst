@@ -122,8 +122,9 @@ class Sprint4Test {
     fun s4AirplaneModeEverythingWorksAndNothingIsSent() {
         val server = MockWebServer().apply { start() }
         try {
+            val base = server.url("/").toString() // MockWebServer resolves its host: not on the main thread
             compose.runOnUiThread {
-                (flow.address as NominatimClient).baseUrl = server.url("/").toString()
+                (flow.address as NominatimClient).baseUrl = base
                 flow.setOffline(true)
             }
             OnlineStats.reset()
@@ -176,10 +177,11 @@ class Sprint4Test {
     }
 
     private fun addressSearch(server: MockWebServer, q: String) {
+        val base = server.url("/").toString()
         compose.runOnUiThread {
             while (flow.back()) Unit
             Net.breaker.reset()
-            (flow.address as NominatimClient).baseUrl = server.url("/").toString()
+            (flow.address as NominatimClient).baseUrl = base
         }
         waitTag("windshield.navi")
         compose.onNodeWithTag("windshield.navi").performClick()
@@ -250,7 +252,7 @@ class Sprint4Test {
             addressSearch(server, "Ленина 5")
             compose.waitUntil(15_000) { flow.addressState == AddressState.None }
             noErrorShown()
-            val host = server.url("/").host
+            val host = server.url("/").host // test thread
             Log.i("VerstE2e", "S4 online stats ${OnlineStats.snapshot()}")
             assertTrue("garbage counted (OR-8)", (OnlineStats.snapshot()[host]?.dropped ?: 0) >= 3)
             // the planner never waits for any of it

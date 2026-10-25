@@ -30,13 +30,26 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class ProcessDeathTest {
-    @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val compose = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule(order = 1) val onFailure = object : org.junit.rules.TestWatcher() {
+        override fun failed(e: Throwable?, description: org.junit.runner.Description) {
+            runCatching {
+                android.util.Log.i("VerstE2e", "ProcessDeath failed: top=${flow.top} stack=${flow.stack} toast=${flow.toast} result=${flow.result != null}")
+                shot("zz-failed-${description.methodName}")
+            }
+        }
+    }
 
     private val flow get() = (InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as VerstApp).flow
     private val marker get() = File(E2e.dir(), "process-death.txt")
 
     private fun waitTag(tag: String, ms: Long = 30_000) =
         compose.waitUntil(ms) { compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+
+    private fun has(tag: String) = compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+
+    private fun back() = compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
 
     private fun shot(name: String) {
         compose.waitForIdle()
@@ -63,7 +76,10 @@ class ProcessDeathTest {
         waitTag("navigator.start", 10_000)
         compose.onNodeWithTag("navigator.start").performClick()
         waitTag("instruments.start")
+        android.util.Log.i("VerstE2e", "ProcessDeath instruments: mood=${flow.mood} budget=${flow.budgetIndex} seats=${flow.seats.toList()} dog=${flow.dog}")
         compose.onNodeWithTag("instruments.start").performClick()
+        compose.waitUntil(45_000) { flow.top == Route.Road || flow.top == Route.NoFit || has("drive.error.cta") }
+        android.util.Log.i("VerstE2e", "ProcessDeath after start: top=${flow.top}")
         waitTag("road.total", 45_000)
         assertEquals(Route.Road, flow.top)
         val trip = flow.result!!.trip
