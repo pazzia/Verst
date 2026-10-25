@@ -27,7 +27,8 @@ Read from the sandbox without Actions log access:
     mkdir -p /tmp/ci && git archive origin/ci-logs runs/<run> | tar -x -C /tmp/ci   # PNGs
 
 Layout of runs/<run_id>-<attempt>/: summary.json/.md (whole run), errors.txt (all extracted errors),
-build/ e2e/ release/ (per-job diagnostics: logs/*.log.txt trimmed, tests/, lint/, apk.json),
+planner/ (unittest.log, errors.txt), build/ e2e/ release/ (per-job diagnostics: logs/*.log.txt trimmed,
+tests/, lint/, apk.json),
 screenshots/<screen>/<state>@<w>x<h>.png (Robolectric), e2e/screens/*.png (emulator).
 Retention: newest {keep} runs; PNGs only in the newest {keep_png} runs.
 """

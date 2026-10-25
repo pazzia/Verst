@@ -169,6 +169,8 @@ def denylist() -> list[str]:
 
 
 def denied(name: str, deny: Iterable[str]) -> bool:
+    """Substring match on purpose (HYG-01): a pre-filter stricter than the release gates' word-start match
+    (`tests/unit/test_brands.py`), so whatever the builder keeps also passes the gates."""
     low = name.casefold()
     return any(b in low for b in deny)
 

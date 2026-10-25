@@ -1,4 +1,4 @@
-# Verst mock MVP: build, test, screenshot, lint, emulator journey, GitHub pre-release, ci-logs.
+# Verst mock MVP: planner tests, build, test, screenshot, lint, emulator journey, GitHub pre-release, ci-logs.
 # Design: docs/architecture-android-mvp.md §12. Diagnostics are readable WITHOUT Actions logs:
 #   * check-run annotations  GET /repos/pazzia/Verst/check-runs/{job_id}/annotations
 #   * branch ci-logs         git fetch origin +ci-logs:refs/remotes/origin/ci-logs --depth=1
@@ -36,7 +36,7 @@ on:
         type: boolean
         default: true
       force_release:
-        description: "Publish even if the emulator journey failed or was skipped"
+        description: "Publish even if the emulator journey failed or was skipped (never past red planner or unit tests)"
         type: boolean
         default: false
 
@@ -58,6 +58,41 @@ defaults:
     shell: bash   # bash -eo pipefail: `cmd | tee log` fails when cmd fails
 
 jobs:
+  # ---------------------------------------------------------------------------------------- planner
+  # HYG-01: the engine's own suite (unit, contract, golden, brand deny-list) gates the release, on the
+  # interpreter line the APK ships (PYTHON_VERSION = Chaquopy). Runs in parallel with build.
+  planner:
+    name: planner tests (release gate)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      OUT: ${{ github.workspace }}/ci-out/planner
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: python3 -m unittest discover
+        working-directory: backend/planner
+        run: |
+          mkdir -p "$OUT"
+          python3 --version | tee "$OUT/unittest.log"
+          python3 -m unittest discover 2>&1 | tee -a "$OUT/unittest.log"
+
+      - name: Errors for ci-logs
+        if: ${{ failure() }}
+        run: grep -E '^(FAIL|ERROR):' "$OUT/unittest.log" > "$OUT/errors.txt" || echo "planner tests failed, see unittest.log" > "$OUT/errors.txt"
+
+      - name: Upload diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-planner
+          path: ci-out/
+          retention-days: 14
+
   # ------------------------------------------------------------------------------------------ build
   build:
     name: build · unit · screenshots · lint
@@ -276,9 +311,10 @@ jobs:
   # ---------------------------------------------------------------------------------------- release
   release:
     name: GitHub pre-release
-    needs: [build, e2e]
+    needs: [planner, build, e2e]
     if: >-
-      ${{ !cancelled() && github.ref == 'refs/heads/main' && needs.build.result == 'success'
+      ${{ !cancelled() && github.ref == 'refs/heads/main'
+          && needs.planner.result == 'success' && needs.build.result == 'success'
           && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.release))
           && (needs.e2e.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.force_release)) }}
     runs-on: ubuntu-24.04
@@ -363,7 +399,7 @@ jobs:
   # --------------------------------------------------------------------------------------- ci-logs
   ci-logs:
     name: publish diagnostics to ci-logs
-    needs: [build, e2e, release]
+    needs: [planner, build, e2e, release]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10

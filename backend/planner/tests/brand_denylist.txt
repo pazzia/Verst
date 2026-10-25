@@ -1,5 +1,8 @@
 # Release review P0-1: real brands that must not appear anywhere in the mock build (fixtures, engine copy,
-# goldens, contracts, shared text, Android strings, rendered screens). Case-insensitive substrings, one per line.
+# goldens, contracts, shared text, Android strings, rendered screens). One entry per line, case-insensitive.
+# HYG-01: the release gates (tests/unit/test_brands.py `starts_word`, Kotlin `BrandDenyList.hits`) match an
+# entry where it starts a word (not preceded by a letter): «в Яндексе», «Суточно.ру» hit, «круглосуточно» does
+# not. tools/data/build_catalogue.py `denied` drops a name containing an entry anywhere (stricter pre-filter).
 # Fuel
 Лукойл
 Lukoil

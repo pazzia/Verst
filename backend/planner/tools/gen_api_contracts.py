@@ -2,7 +2,8 @@
 
 One file per function and case: ``{"request": {"function", "args"}, "response": <envelope>}``. Arguments
 named ``*_json`` are passed to the bridge as JSON text; here they are shown parsed. The envelope's ``ms`` is
-written as 0. Everything runs in-process on the golden clock with both fixture worlds and the packaged
+written as 0 and ``selfcheck``'s ``python`` as `APP_PYTHON` (HYG-01: the host interpreter is environment
+data, like ``ms``; it made the file differ between 3.13.16, 3.13.17 and 3.12.3 hosts). Everything runs in-process on the golden clock with both fixture worlds and the packaged
 catalogue, so a re-run is byte-identical. ``index.json`` lists the files.
 
 Run from `backend/planner`: ``python3 tools/gen_api_contracts.py``. With ``VERST_GEN_IN_MEMORY=1`` nothing
@@ -22,6 +23,8 @@ from verst_planner.domain.model import LatLon  # noqa: E402
 
 OUT = ROOT.parents[1] / "docs" / "contracts" / "v2"
 GENERATED: dict[str, str] = {}
+# The app's interpreter line: Chaquopy `version = "3.12"` (android/app/build.gradle.kts), architecture §selfcheck.
+APP_PYTHON = "3.12.x"
 R = "russia_v1"
 FUEL_ID = json.loads((ROOT / "fixtures" / "worlds" / "central_russia_v1.json").read_text("utf-8"))["places"]
 FUEL_ID = next(p["id"] for p in FUEL_ID if p["type"] == "fuel")
@@ -40,6 +43,8 @@ def call(name, function, refs=None, **args):
     envelope["ms"] = 0
     if function == "load_catalogue" and envelope.get("ok"):
         envelope["result"]["ms"] = 0
+    if function == "selfcheck" and envelope.get("ok"):
+        envelope["result"]["python"] = APP_PYTHON
     GENERATED[f"{name}.json"] = text({"request": {"function": function, "args": shown}, "response": envelope})
     return envelope
 

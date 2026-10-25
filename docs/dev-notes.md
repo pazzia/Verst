@@ -1988,3 +1988,68 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   - `parkingFreePlusUnknownOnRoadAndWaybill` checks the footer and a day header for «бесплатно + ?».
   - `parkingFreePlusUnknownWaybillLine` checks «0 + ?».
   - `parkingSumPlusUnknownFooter` checks «≈ N ₽ + ?».
+
+## Investor-readiness / HYG-01
+
+Green `main` and a release gate. Architect, on branch ccr-013d3489-181fz2 (from the Sprint 4 release commit
+11f3a2b). Backlog: `docs/backlog-investor-readiness.md` § HYG-01.
+
+Status: done. Before: `python3 -m unittest discover` → `Ran 449 tests` / `FAILED (failures=2)`, on both
+Python 3.13.17 and 3.12.3.
+
+### 1. Brand deny-list: «Суточно» hit «круглосуточно»
+- **Cause:** `tests/unit/test_brands.py` `hits` matched deny-list entries as plain substrings. The Kotlin
+  side (`BrandDenyList.hits`) had already moved to «a brand starts a word» (`(?<!\p{L})`, case-insensitive).
+  Python was not changed with it.
+- **Fix:** `starts_word(brand, text)`: an entry hits where it is not preceded by a letter
+  (`str.isalpha` = Unicode L*, so Cyrillic too), case-insensitive, overlapping starts included. This is the
+  same rule as Kotlin. The deny-list and the allow-list are unchanged.
+- **Why not whole words:** the right side stays open on purpose. Whole-word matching would let
+  «в Яндексе», «у Лукойла», «yandexmaps://» and «Gazpromneft» through, which would weaken the gate.
+  On today's corpus (213 075 strings: worlds, resources, goldens, contracts and bundles, catalogue, Android
+  strings) whole-word and word-start give the same hits. Substring differs only on «круглосуточно».
+- **Parity:** jshell with `Pattern.CASE_INSENSITIVE | UNICODE_CASE` gives the same 16/16 results as the
+  Python regression cases. `javap` on kotlin-stdlib 2.0.21 shows that Kotlin's `Regex(…, IGNORE_CASE)`
+  adds `UNICODE_CASE` (`ensureUnicodeCase`). The Kotlin source is unchanged.
+- **Catalogue builder:** `tools/data/build_catalogue.py` `denied` stays a substring match on purpose. It is
+  a stricter pre-filter, so any name the builder keeps also passes the gates. A docstring now says so.
+  The semantics are written at the top of `brand_denylist.txt`.
+- **Regression test:** `test_matcher_brand_starts_a_word`.
+  - No hit: «круглосуточно», «КРУГЛОСУТОЧНО», «посуточно», «через2ГИС».
+  - Hit: «Суточно», «суточно», «СУТОЧНО», «в Суточно», «Суточно.ру», ««Суточно»», «24Суточно»,
+    «в Яндексе», «yandexmaps://…», «у Лукойла», «Gazpromneft», «booking.com».
+- **Known trade-off:** a word that starts with an entry still hits, e.g. «суточного» hits «Суточно». A
+  false hit fails loudly. A miss would leak a brand silently.
+
+### 2. `docs/contracts/v2/selfcheck.json` stale (3.13.16 vs 3.13.17)
+- **Cause:** there was no repo version bump. `selfcheck` reports the interpreter
+  (`sys.version_info[:3]`), and `gen_api_contracts.py` wrote it verbatim, so the contract depended on the
+  host Python. On 3.12.3 it read «3.12.3». CI's `setup-python "3.13"` floats to the latest patch, so a
+  plain re-run would have gone red again on the next Python patch release.
+- **Fix:** the generator writes `python` as `APP_PYTHON = "3.12.x"`, the app's Chaquopy line. The host
+  interpreter is environment data, and the generator already writes `ms` as 0 for the same reason.
+  `docs/architecture-android-mvp.md` already documents `"python": "3.12.x"`. The engine still returns the
+  real version at runtime, and the e2e `EngineStartupTest` records it.
+- **Regenerated** with `python3 tools/gen_api_contracts.py` (`38 files, 679842 bytes`). Only
+  `selfcheck.json` changed (`git status docs/contracts`). Goldens and fixtures have no diff.
+
+### 3. A red planner suite blocks the release
+- **New job:** `.github/workflows/android.yml` has a `planner` job that runs `python3 -m unittest discover`
+  in `backend/planner` on `env.PYTHON_VERSION` (3.12, the interpreter the APK ships). It runs in parallel
+  with `build`.
+- **Release:** `needs: [planner, build, e2e]` and requires `needs.planner.result == 'success'`.
+  `force_release` still bypasses only the emulator journey. Android unit tests already gated the release
+  through `needs.build.result`.
+- **ci-logs:** the job uploads `diag-planner` (`unittest.log`, `errors.txt` with the FAIL/ERROR lines).
+  `ci-logs` needs it. `tools/ci/combine_run.py` lists the `planner` job and counts it in the conclusion.
+- `planner.yml` (`make check` on 3.13) is unchanged. Between the two workflows, both interpreter lines are
+  covered.
+
+Commands (working tree):
+- `cd backend/planner && python3 -m unittest discover` → `Ran 450 tests` / `OK` (3.13.17); with
+  `python3.12` → `Ran 450 tests` / `OK`.
+- `make check` → `All checks passed!` / `Success: no issues found in 71 source files` / `Ran 450 tests` / `OK`.
+- Gate proof: the planner job's step script, run with `bash -eo pipefail` on a `git archive HEAD` snapshot,
+  exits 1. `errors.txt` holds the 2 FAIL lines.
+- `yaml.safe_load(android.yml)` → jobs `planner, build, e2e, release, ci-logs`.
+- `combine_run.py` with a failed planner → `conclusion: failure`, `release: skipped` in the table.
