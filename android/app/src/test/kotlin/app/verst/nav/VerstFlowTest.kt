@@ -694,4 +694,58 @@ class VerstFlowTest {
         assertEquals("Главный монастырь России, собор XV века.", clean("главный монастырь России, собор XV века", "монастырь · Сергиев Посад", "Сергиев Посад"))
         assertEquals("Музей под открытым небом.", clean("Музей под открытым небом.", "музей · Суздаль", "Суздаль"))
     }
+
+    /**
+     * S4 investigation (docs/bugs/s4-walk-filters.md): «Свой маршрут» in a town with few places (Фрязино). The fake
+     * engine behaves like the real one there: the first walk succeeds, a walk that excludes its stops is
+     * NOT_ENOUGH_POIS. Expected behaviour; this test FAILS on main (bugs a and c), the fix makes it pass.
+     */
+    @Test
+    fun customWalkRecoversAfterOtherVariantRunsOutOfPlaces() = runTest {
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val presets = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-custom.json")) as EngineResult.Ok).value
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                // like Фрязино: 3 places in reach; without them there is nothing left
+                return if (oneWalk.stops.any { it.poiId != null && it.poiId in request.exclude }) {
+                    EngineResult.Err(app.verst.core.model.dto.EngineErrorDto("NOT_ENOUGH_POIS", "not enough places", field = "preset"))
+                } else EngineResult.Ok(oneWalk.copy(id = "w${requests.size}"))
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        flow.selectCityPreset("custom")
+        flow.setCityDuration(240)
+        flow.toggleCityInterest("architecture")
+        flow.buildCustomWalk()
+        settle()
+        assertEquals(Route.Walk, flow.top)
+        // «Другой вариант» → the engine runs out of places
+        flow.otherWalk()
+        settle()
+        // (a) the screen drops out of the walk to the City plate…
+        assertEquals("NOT_ENOUGH_POIS", flow.cityError)
+        // …and every later build still excludes the first walk's stops, whatever the filters
+        flow.selectCityPreset("custom") // «Другой маршрут»
+        flow.setCityDuration(120)
+        flow.toggleCityInterest("parks")
+        flow.buildCustomWalk()
+        settle()
+        val last = requests.last()
+        assertEquals("filters reach the request", 120, last.durationMin)
+        assertTrue("filters reach the request", "parks" in last.interests)
+        // EXPECTED (fails on main): a filter change starts a fresh walk — the exclusions of «Другой вариант» are dropped
+        assertTrue("exclusions survive a filter change: ${last.exclude}", last.exclude.isEmpty())
+        assertEquals(Route.Walk, flow.top)
+        assertNull(flow.cityError)
+    }
 }
