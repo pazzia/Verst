@@ -1478,3 +1478,27 @@ Inputs merged:
   - Commons `author` fields can be whole sentences («This photo was taken by Anton Zelenov. Please credit
     this…»); the credit line ellipsizes them. A cleanup in the data build would help.
   - The СПб «Музейный» walk is 3 stops in 6 h, which is plausible (long dwells), for a look.
+
+## Release S3 engine polish (arch/release-s3 from main be0a266)
+- **Photo credits** (`build_catalogue.clean_author`): Commons «Artist» → a short name (≤ 40 chars, ≤ 4 words):
+  no HTML, URLs, e-mails, «This photo was taken by …», «Original uploader was …», «Own work», camera
+  locations, licences or timestamps; otherwise `author: null` and the label stays «Фото: Wikimedia Commons ·
+  <licence>». Before: 191 of 3 503 credits were sentence-like or > 40 chars (max 60, cut mid-word); after: 0
+  of 3 354 (15 without author). `test_credits_are_short_names` checks the whole catalogue.
+- **Museum walks** («Музейный»): a museum gets 50 min × pace, a big one (≥ 40 sitelinks) a flat 90 min with
+  the stop note «Большой музей: за 1 ч 30 мин — только главное»; up to 5 museums and at most 2 short sights
+  (churches, monuments, squares) between them. 6 h: СПб 3 → 5 stops (Русский музей, Эрмитаж, Кунсткамера, Спас
+  на Крови, Невский); Москва 3 → 5, Казань 3 → 5, Ярославль 3 → 5; 4 h: 2 → 4 everywhere.
+- **Open-data notice (S3-FINAL P1-2)**: `UNVERIFIED_PLACES` reads «Места — из открытых данных: часы и цены
+  уточняйте» and carries `"level": "info"` (5.5 §9: the info line, not a yellow plate). Warnings without
+  `level` are warnings.
+- **Area photos (S3-FINAL P1-4, 5.9 §3)**: `meta.areaBlock` lists the files that may not be «Фото района»:
+  collages/montages/maps/flags/coats of arms by file name or by a category that says what the file is
+  («Montages of Ufa», «Flags of …»), non-JPEG/TIFF/WebP, < 800 px wide, aspect > 2.5. The hotel card uses the
+  town photo, else the best square/embankment/viewpoint/park photo of the town, else none (city placeholder).
+  **971 of 1 116 towns keep an area photo** (943 own, 28 fallback; was 1 085 incl. collages such as
+  «Yarolslav colage.png» → now «Red Square in Yaroslavl 01.jpg», Казань → «Freedom Square, Kazan»).
+  Sizes and categories come from `data-photos.yml` (bot/photos-1; also a step of `data.yml`).
+- Catalogue `wd-20261025-r7.2` (rebuilt from bot/raw-7 + bot/photos-1): 0.676 MB. G01–G13 byte-identical.
+- `test_cancel_from_other_thread` pinned to the case clock (it failed on main once the system date passed
+  G03's start).

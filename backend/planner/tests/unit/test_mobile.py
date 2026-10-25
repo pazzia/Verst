@@ -221,6 +221,8 @@ class MobileTest(unittest.TestCase):
                     release.wait(10)
 
         c = case("G03")
+        call(mobile.set_clock(c["clock"]))  # the case's startAt is in the past on the system clock
+        self.addCleanup(lambda: call(mobile.set_clock("system")))
         out: dict[str, str] = {}
         t = threading.Thread(
             target=lambda: out.setdefault(

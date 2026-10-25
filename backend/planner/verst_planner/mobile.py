@@ -55,6 +55,7 @@ from verst_planner.city.walk import (
     WalkInput,
     bar_hours,
     dwell_for,
+    long_visit,
     parse_input,
     planned_start,
     weights_for,
@@ -981,6 +982,7 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                 hours_verified=p.source is Source.CURATED and p.opening_hours is not None,
                 cost_rub=cost,
                 dwell_min=dwell_for(kind, _sitelinks(p.id), inp),
+                long_visit=inp.preset == "museums" and long_visit(kind, _sitelinks(p.id)),
                 has_photo=_photo_file(w, p.id)[0] is not None,
                 weight=weight,
             )
@@ -1152,16 +1154,28 @@ def _image(
     return {**image_urls(file), "credit": credit_json, "isArea": area_town is not None, "labelRu": label}
 
 
+# Outdoor kinds whose photo may stand for the area when the town's own photo does not qualify (5.9 §3).
+AREA_FALLBACK_KINDS = ("square", "embankment", "viewpoint", "park")
+
+
 def _area_photo(w: _World, town: Town) -> tuple[str | None, int | None]:
+    """The town's photo, else the best outdoor sight photo in the town; never a collage, map or flag."""
+    blocked = _CATALOGUE[0].area_blocked if _CATALOGUE else frozenset()
     file, credit = _photo_file(w, town.id)
-    if file:
+    if file and file not in blocked:
         return file, credit
     best = None
     for p in w.world.places.values():
-        if p.town_id == town.id and p.type is PlaceType.SIGHT:
-            f, c = _photo_file(w, p.id)
-            if f and (best is None or (-_sitelinks(p.id), p.id) < best[0]):
-                best = ((-_sitelinks(p.id), p.id), f, c)
+        if (
+            p.town_id != town.id
+            or p.type is not PlaceType.SIGHT
+            or _poi_kind(w, p) not in AREA_FALLBACK_KINDS
+        ):
+            continue
+        f, c = _photo_file(w, p.id)
+        key = (AREA_FALLBACK_KINDS.index(_poi_kind(w, p)), -_sitelinks(p.id), p.id)
+        if f and f not in blocked and (best is None or key < best[0]):
+            best = (key, f, c)
     return (best[1], best[2]) if best else (None, None)
 
 

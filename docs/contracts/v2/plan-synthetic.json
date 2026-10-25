@@ -2490,8 +2490,9 @@
      {
       "code": "UNVERIFIED_PLACES",
       "day": null,
-      "message": "Часть мест по открытым данным — не проверены",
-      "detail": "osm_places"
+      "message": "Места — из открытых данных: часы и цены уточняйте",
+      "detail": "osm_places",
+      "level": "info"
      }
     ],
     "input": {

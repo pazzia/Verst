@@ -879,6 +879,17 @@ def budget_fit_from_json(d: Mapping[str, Any]) -> BudgetFit:
     )
 
 
+# S3-FINAL P1-2 (5.5 §9): notices about the data, not about this trip, are an info line, not a yellow plate.
+INFO_WARNINGS = frozenset({WarningCode.UNVERIFIED_PLACES})
+
+
+def _warning_to_json(w: PlanWarning) -> dict[str, Any]:
+    out: dict[str, Any] = {"code": w.code.value, "day": w.day, "message": w.message_ru, "detail": w.detail}
+    if w.code in INFO_WARNINGS:
+        out["level"] = "info"  # absent = "warning" (G01-G13 bytes unchanged)
+    return out
+
+
 def plan_to_json(p: TripPlan, public: bool = True, trip_id: str | None = None) -> Json:
     """`TripPlan` → PlanResponse-shaped dict. `public=True` (API default) omits `engineState`.
 
@@ -907,10 +918,7 @@ def plan_to_json(p: TripPlan, public: bool = True, trip_id: str | None = None) -
                 for r in p.overnight_reasons
             ]
         },
-        "warnings": [
-            {"code": w.code.value, "day": w.day, "message": w.message_ru, "detail": w.detail}
-            for w in p.warnings
-        ],
+        "warnings": [_warning_to_json(w) for w in p.warnings],
         "input": normalized_to_json(p.input),
         "engineVersion": p.engine_version,
     }

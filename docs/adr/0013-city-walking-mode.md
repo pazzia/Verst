@@ -190,3 +190,7 @@ The walk is self-contained, so the app saves it as a trip of kind `walk` (`Saved
 - **Meal stop:** the «еда» interest (custom, ≥ 4 h) adds one meal stop of 45 min (× pace) near the midpoint, at the previous stop's place, not tappable. It is not a fictional cafe in a real city.
 - **Measured** on the sandbox desktop, 60 candidates: 9 ms (2 h), 27 ms (4 h), 165 ms (8 h). Brute force: ≥ 0.9 × optimum in ≥ 190 of 200 random 8-candidate pools.
 - **Errors:** `NOT_ENOUGH_POIS` (`field = preset`), `NO_CITY`, `INVALID_INPUT` (`adultConfirmed` / `preset` children), `CANCELLED` through `cancel(request_id)`.
+
+- **Museum walks (release S3):** in «Музейный» a museum takes 50 min × pace and a big museum (≥ 40 Wikidata
+  sitelinks) a flat 90 min, never over 2 h, with «только главное»; caps: 5 museums, 2 other sights. A 6 h walk
+  in СПб, Москва, Казань or Ярославль has 5 stops (was 3).

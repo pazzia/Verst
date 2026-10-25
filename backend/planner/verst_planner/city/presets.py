@@ -49,6 +49,12 @@ DWELL = {
     "meal": 45,
 }
 BIG_MUSEUM_SITELINKS = 40
+BIG_MUSEUM_DWELL = 90
+# Release S3: «Музейный» in СПб gave 3 stops in 6 h (75-90 min per museum at the slow pace's 1.25). In this
+# preset a museum gets 50 min scaled by the pace and a big one (>= 40 sitelinks: Эрмитаж, ГИМ) a flat 90 min
+# (never over 2 h) with a «только главное» note; at most two short sights fill the gaps.
+MUSEUM_WALK_DWELL = 50
+MUSEUM_DWELL_CAP_MIN = 120
 DRINK_RUB = {"ryumochnaya": 300, "pub": 600, "craft": 600, "bar": 500}
 MEAL_RUB = 600
 TICKETS = {"museum": (400, 200), "kremlin": (300, 150), "monastery": (300, 150)}
@@ -107,7 +113,15 @@ PRESET_TABLE: dict[str, Preset] = {
         {"museum": 2},
         museum_dwell_cap=45,
     ),
-    "museums": Preset("museums", {"museum": 1.0}, frozenset({"museum"}), 3, 360, "slow", {"museum": 4}),
+    "museums": Preset(
+        "museums",
+        {"museum": 1.0, "kremlin": 0.3, "monastery": 0.25, "church": 0.2, "monument": 0.15, "square": 0.1},
+        frozenset({"museum"}),
+        3,
+        360,
+        "slow",
+        {"museum": 5, "others": 2},
+    ),
     "ryumochnye": Preset(
         "ryumochnye",
         {"ryumochnaya": 1.0, "bar": 0.5, "pub": 0.3},
