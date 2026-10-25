@@ -53,7 +53,7 @@ RESOURCES = PLANNER / "verst_planner" / "resources"
 
 # Wikidata class → POI kind, in priority order (a POI with several roots takes the first listed kind).
 CLASS_KIND: tuple[tuple[str, str], ...] = (
-    ("Q12035", "kremlin"),  # kremlin
+    ("Q263274", "kremlin"),  # kremlin (run 6 re-resolved; Q12035 is a spider)
     ("Q57821", "kremlin"),  # fortification
     ("Q23413", "kremlin"),  # castle
     ("Q44613", "monastery"),  # monastery
@@ -66,7 +66,7 @@ CLASS_KIND: tuple[tuple[str, str], ...] = (
     ("Q22698", "park"),  # park
     ("Q1107656", "park"),  # garden
     ("Q6017969", "viewpoint"),  # scenic viewpoint
-    ("Q1501717", "embankment"),  # embankment / promenade
+    ("Q1851368", "embankment"),  # waterfront «набережная» (run 6; Q1501717 is an HIV trial)
     ("Q174782", "square"),  # town square
     ("Q2319498", "attraction"),  # architectural landmark
     ("Q570116", "attraction"),  # tourist attraction

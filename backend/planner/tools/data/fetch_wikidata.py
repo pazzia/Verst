@@ -32,7 +32,7 @@ EXPECT: dict[str, tuple[str, ...]] = {
     "Q7930989": ("city", "town"),
     "Q183342": ("federal",),
     "Q159": ("russia",),
-    "Q12035": ("kremlin",),
+    "Q263274": ("kremlin",),
     "Q57821": ("fortification", "fortress"),
     "Q23413": ("castle",),
     "Q44613": ("monastery",),
@@ -45,7 +45,7 @@ EXPECT: dict[str, tuple[str, ...]] = {
     "Q22698": ("park",),
     "Q1107656": ("garden",),
     "Q6017969": ("viewpoint", "scenic", "lookout"),
-    "Q1501717": ("embankment", "promenade", "quay"),
+    "Q1851368": ("waterfront", "embankment", "promenade", "quay"),
     "Q174782": ("square",),
     "Q2319498": ("landmark",),
     "Q570116": ("tourist attraction", "attraction"),
@@ -53,7 +53,7 @@ EXPECT: dict[str, tuple[str, ...]] = {
 # Russian labels to re-resolve a class whose id fails the check (run 3: Q12035 is a spider, Q1501717 an HIV
 # trial): the class with this ru label that has the most instances in Russia (`resolve_query`).
 RU_LABEL: dict[str, str] = {
-    "Q12035": "кремль",
+    "Q263274": "кремль",
     "Q57821": "фортификационное сооружение",
     "Q23413": "замок",
     "Q44613": "монастырь",
@@ -66,7 +66,7 @@ RU_LABEL: dict[str, str] = {
     "Q22698": "парк",
     "Q1107656": "сад",
     "Q6017969": "смотровая площадка",
-    "Q1501717": "набережная",
+    "Q1851368": "набережная",
     "Q174782": "площадь",
     "Q2319498": "достопримечательность",
     "Q570116": "туристическая достопримечательность",
@@ -74,7 +74,7 @@ RU_LABEL: dict[str, str] = {
 RADIUS_KM = ((1_000_000, 10.0), (100_000, 6.0), (20_000, 4.0), (0, 2.0))
 CAPITALS = {"Москва": 15.0, "Санкт-Петербург": 15.0}
 # Run 3 had 1 058 towns but no Екатеринбург, Челябинск or Владивосток (their P31 is a subclass of «город
-# России», hence `wdt:P31/wdt:P279*`); the towns step now fails when one of these is missing.
+# России», hence the subclasses in Q_SUBCLASSES); the towns step now fails when one of these is missing.
 MUST_HAVE = (
     "Москва",
     "Санкт-Петербург",
@@ -265,10 +265,12 @@ Q_RESOLVE = """SELECT ?c (COUNT(DISTINCT ?i) AS ?n) WHERE {{
   ?i wdt:P31 ?c ; wdt:P17 wd:Q159 .
 }} GROUP BY ?c ORDER BY DESC(?n) LIMIT 5"""
 
+# Run 6: `wdt:P31/wdt:P279*` inside the towns query timed out (504); the subclasses come first, then VALUES.
+Q_SUBCLASSES = """SELECT DISTINCT ?c WHERE {{ VALUES ?root {{ {roots} }} ?c wdt:P279* ?root . }}"""
+
 Q_TOWNS = """SELECT ?town ?townLabel ?coord ?pop ?popDate ?iso ?regionLabel ?image WHERE {{
   VALUES ?cls {{ {classes} }}
-  ?town wdt:P31/wdt:P279* ?cls .
-  ?town wdt:P17 wd:{country}; wdt:P625 ?coord .
+  ?town wdt:P31 ?cls; wdt:P17 wd:{country}; wdt:P625 ?coord .
   FILTER NOT EXISTS {{ ?town wdt:P576 [] }}
   OPTIONAL {{ ?town p:P1082 ?ps . ?ps ps:P1082 ?pop . OPTIONAL {{ ?ps pq:P585 ?popDate }} }}
   OPTIONAL {{ ?town wdt:P131* ?region . ?region wdt:P300 ?iso . FILTER(STRSTARTS(?iso, "RU-")) }}
@@ -315,7 +317,10 @@ def main(argv: list[str]) -> int:
         # and EXPECT afterwards); the run fails at the end (data.yml) only for unresolved ids.
         return 0 if not report["unresolved"] else 2
     if cmd == "towns":
-        q = Q_TOWNS.format(classes=" ".join(f"wd:{c}" for c in TOWN_CLASSES), country=COUNTRY)
+        subs = sparql(Q_SUBCLASSES.format(roots=" ".join(f"wd:{c}" for c in TOWN_CLASSES)), pacer)
+        classes = sorted({qid(val(b, "c") or "") for b in subs} | set(TOWN_CLASSES))
+        print(f"town classes: {len(classes)}", flush=True)
+        q = Q_TOWNS.format(classes=" ".join(f"wd:{c}" for c in classes if c), country=COUNTRY)
         towns = towns_from_bindings(sparql(q, pacer))
         (out / "towns.json").write_text(json.dumps(towns, ensure_ascii=False), "utf-8")
         missing = missing_towns(towns)
