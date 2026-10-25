@@ -389,6 +389,26 @@ class ScreensScreenshotTest {
         assertEquals(known, trip.cost.lines.first { it.key == "parking" }.rub)
     }
 
+    /** M6 contract (Москва → Кремль 380 ₽): the engine's P part, the sheet from `zoneRu` / `whereRu` / `sundayRu`. */
+    @Test
+    fun roadM6MoscowParkingContract() {
+        val trip = v2PlanTrip("plan-moscow-parking.json").trip
+        val kremlin = trip.daysList.flatMap { it.stops }.first { it.parking != null }
+        shot("road", "m6-moscow-parking") { RoadScreen(RoadUi(trip, "N"), noRoad) }
+        compose.onNodeWithTag("road.stop.${kremlin.id}.parking", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
+        assertEquals(380, trip.cost.lines.first { it.key == "parking" }.rub)
+    }
+
+    @Test
+    fun roadM6ParkingSheetContract() {
+        val trip = v2PlanTrip("plan-moscow-parking.json").trip
+        val kremlin = trip.daysList.flatMap { it.stops }.first { it.parking != null }
+        shot("road", "m6-parking-sheet") { RoadScreen(RoadUi(trip, "N", parking = kremlin), noRoad) }
+        compose.onNodeWithTag("parking.detail", useUnmergedTree = true).assertTextContains("380", substring = true)
+        assertTrue(compose.onAllNodesWithText("воскресенье", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty())
+    }
+
     @Test
     fun roadS4Top() {
         shot("road", "s4-top") { RoadScreen(RoadUi(s4Trip(), "NE"), noRoad) }

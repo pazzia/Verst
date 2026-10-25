@@ -273,9 +273,9 @@ class VerstFlow(
         private set
     /** S4 5.11 §10.5 / 5.10: `NOT_ENOUGH_POIS` with the engine's verified suggestions (never guessed here). */
     var walkFew: WalkFew? by mutableStateOf(null)
+        private set
     /** M6: request input → the engine's `requestKey` (stale answers and same-request rebuilds). */
     private val walkKeyByInput = HashMap<String, String>()
-        private set
     /** S4: which picker sheet is open (5.10 prefs, 5.11 filter bar). */
     var cityPicker: CityPicker? by mutableStateOf(null)
         private set
