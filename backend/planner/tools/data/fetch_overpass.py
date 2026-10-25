@@ -46,15 +46,6 @@ area["ISO3166-1"="RU"][admin_level=2]->.ru;
 );
 out center tags;"""
 
-QUERY_ALL = """[out:json][timeout:1200][maxsize:1073741824];
-area["ISO3166-1"="RU"][admin_level=2]->.ru;
-(
-  nwr["amenity"~"^(bar|pub|biergarten)$"]["name"](area.ru);
-  nwr["craft"="brewery"]["name"](area.ru);
-  nwr["amenity"]["name"~"рюмочн",i](area.ru);
-);
-out center tags;"""
-
 
 def towns_to_query(towns: list[dict[str, Any]], pois: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Towns ≥ 100 000 people plus the top towns by POI sitelinks, biggest first."""
