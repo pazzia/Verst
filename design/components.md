@@ -751,10 +751,11 @@ Tabs: segmented control, fill `dash.well`, radius 12, padding 4, gap 4; tab min-
 
 ## 31. Online values (5.5 §10.9)
 
+No visible state machine. Two pieces only:
+
 | Control | Spec |
 | --- | --- |
-| Shimmer pill | inline 44 × 12 (row) / 90 × 12 (sheet cell), radius 6, fill `dash.controlAlt`, band 30–40 dp `dash.outline` moving with `motion.shimmer` |
-| Live dot | 6 dp (row) / 8 dp (sheet status) `hours.open`, `motion.livePulse` |
-| Freshness | `online_updated_now` / `online_updated_min` / `online_updated_hours`, 13 `text.secondary` (live: `hours.open`) |
-| Deferred value | `online_later` «уточним при интернете», `text.muted`; a row may wrap instead of truncating |
-| Offline banner | full width under the chips, min-h 32, padding 6 10, radius 8, fill `budget.overFill`, no-wifi glyph 14 `accent.redText`, 12 `text.primary` |
+| Shimmer pill | only for a first-time fetch that takes > 300 ms (`motion.shimmerDelay`): inline, the width of the expected value (row P part 44 × 12), radius 6, fill `dash.controlAlt`, band `dash.outline` with `motion.shimmer`. Never while refreshing a known value |
+| Deferred value | `online_later` «уточним при интернете», `text.muted`, same type size as the value it stands in for; no icon. A costs line may wrap instead of truncating |
+
+Retired from the draft: live dot, freshness label, offline banner, live/cached sheet rows.
