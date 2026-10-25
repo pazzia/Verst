@@ -26,7 +26,7 @@
     {
      "preset": "overview",
      "available": true,
-     "count": 9,
+     "count": 53,
      "startAt": "2026-10-24T09:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
@@ -37,7 +37,7 @@
     {
      "preset": "museums",
      "available": true,
-     "count": 4,
+     "count": 6,
      "startAt": "2026-10-24T10:00",
      "startsTomorrow": true,
      "defaultDurationMin": 360,
@@ -47,8 +47,8 @@
     },
     {
      "preset": "ryumochnye",
-     "available": true,
-     "count": 3,
+     "available": false,
+     "count": 1,
      "startAt": "2026-10-24T18:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
@@ -58,8 +58,8 @@
     },
     {
      "preset": "beer",
-     "available": false,
-     "count": 2,
+     "available": true,
+     "count": 3,
      "startAt": "2026-10-24T18:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
@@ -70,7 +70,7 @@
     {
      "preset": "custom",
      "available": true,
-     "count": 9,
+     "count": 53,
      "startAt": "2026-10-24T09:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,

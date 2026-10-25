@@ -15,17 +15,59 @@
   "result": [
    {
     "kind": "poi",
-    "name": "Эрмитаж",
+    "name": "Эрмитаж-Выборг",
+    "subtitle": "место · Ленинградская область",
+    "lat": 60.70833,
+    "lon": 28.7375,
+    "id": "Q4357088",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Ленинградская область",
+    "poiKind": "museum",
+    "hasPhoto": true
+   },
+   {
+    "kind": "poi",
+    "name": "Эрмитаж Кусково",
+    "subtitle": "место · Московская область",
+    "lat": 55.73731,
+    "lon": 37.80777,
+    "id": "Q116691114",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Московская область",
+    "poiKind": "attraction",
+    "hasPhoto": true
+   },
+   {
+    "kind": "poi",
+    "name": "Государственный Эрмитаж",
     "subtitle": "место · Санкт-Петербург",
-    "lat": 59.9398,
-    "lon": 30.3146,
-    "id": "Q900101",
+    "lat": 59.94056,
+    "lon": 30.31361,
+    "id": "Q132783",
     "nameGenRu": null,
     "namePrepRu": null,
     "population": null,
     "regionRu": "Санкт-Петербург",
     "poiKind": "museum",
     "hasPhoto": true
+   },
+   {
+    "kind": "poi",
+    "name": "Сад «Эрмитаж»",
+    "subtitle": "место · Республика Татарстан",
+    "lat": 55.79056,
+    "lon": 49.12889,
+    "id": "Q16693784",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Республика Татарстан",
+    "poiKind": "park",
+    "hasPhoto": false
    }
   ],
   "ms": 0

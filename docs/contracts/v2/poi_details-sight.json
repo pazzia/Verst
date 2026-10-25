@@ -3,31 +3,31 @@
   "function": "poi_details",
   "args": {
    "world": "russia_v1",
-   "place_id": "Q900101"
+   "place_id": "Q4357088"
   }
  },
  "response": {
   "ok": true,
   "result": {
-   "id": "Q900101",
+   "id": "Q4357088",
    "kind": "sight",
    "poiKind": "museum",
-   "nameRu": "Эрмитаж",
-   "descriptionRu": "художественный музей",
-   "townName": "Санкт-Петербург",
-   "lat": 59.9398,
-   "lon": 30.3146,
+   "nameRu": "Эрмитаж-Выборг",
+   "descriptionRu": null,
+   "townName": "Выборг",
+   "lat": 60.70833,
+   "lon": 28.7375,
    "image": {
-    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Hermitage_sample.jpg?width=800",
-    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Hermitage_sample.jpg?width=400",
-    "page": "https://commons.wikimedia.org/wiki/File:Hermitage_sample.jpg",
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/%D0%97%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5_%D0%BC%D1%83%D0%B7%D0%B5%D1%8F_%D0%B8%D0%B7%D1%8F%D1%89%D0%BD%D1%8B%D1%85_%D0%B8%D1%81%D0%BA%D1%83%D1%81%D1%81%D1%82%D0%B2_%D0%B8_%D1%88%D0%BA%D0%BE%D0%BB%D1%8B_%D0%B6%D0%B8%D0%B2%D0%BE%D0%BF%D0%B8%D1%81%D0%B8_(_%D0%92%D1%8B%D0%B1%D0%BE%D1%80%D0%B3,_%D1%83%D0%BB._%D0%9B%D1%83%D0%B6%D1%81%D0%BA%D0%B0%D1%8F,_1).JPG?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/%D0%97%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5_%D0%BC%D1%83%D0%B7%D0%B5%D1%8F_%D0%B8%D0%B7%D1%8F%D1%89%D0%BD%D1%8B%D1%85_%D0%B8%D1%81%D0%BA%D1%83%D1%81%D1%81%D1%82%D0%B2_%D0%B8_%D1%88%D0%BA%D0%BE%D0%BB%D1%8B_%D0%B6%D0%B8%D0%B2%D0%BE%D0%BF%D0%B8%D1%81%D0%B8_(_%D0%92%D1%8B%D0%B1%D0%BE%D1%80%D0%B3,_%D1%83%D0%BB._%D0%9B%D1%83%D0%B6%D1%81%D0%BA%D0%B0%D1%8F,_1).JPG?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:%D0%97%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5_%D0%BC%D1%83%D0%B7%D0%B5%D1%8F_%D0%B8%D0%B7%D1%8F%D1%89%D0%BD%D1%8B%D1%85_%D0%B8%D1%81%D0%BA%D1%83%D1%81%D1%81%D1%82%D0%B2_%D0%B8_%D1%88%D0%BA%D0%BE%D0%BB%D1%8B_%D0%B6%D0%B8%D0%B2%D0%BE%D0%BF%D0%B8%D1%81%D0%B8_(_%D0%92%D1%8B%D0%B1%D0%BE%D1%80%D0%B3,_%D1%83%D0%BB._%D0%9B%D1%83%D0%B6%D1%81%D0%BA%D0%B0%D1%8F,_1).JPG",
     "credit": {
-     "author": "Пример Автор",
-     "licence": "CC BY-SA 4.0",
-     "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+     "author": "И Ольга",
+     "licence": "CC BY-SA 3.0",
+     "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0"
     },
     "isArea": false,
-    "labelRu": "Фото: Wikimedia Commons · Пример Автор · CC BY-SA 4.0"
+    "labelRu": "Фото: Wikimedia Commons · И Ольга · CC BY-SA 3.0"
    },
    "hours": {
     "textRu": "Часы работы уточняйте",
@@ -40,7 +40,7 @@
    },
    "isFictional": false,
    "attributionRu": [],
-   "wikidataId": "Q900101"
+   "wikidataId": "Q4357088"
   },
   "ms": 0
  }

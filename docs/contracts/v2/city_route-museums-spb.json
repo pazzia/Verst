@@ -33,18 +33,13 @@
    "startAt": "2026-10-23T10:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T14:19",
+   "endAt": "2026-10-23T15:52",
    "tz": "Europe/Moscow",
-   "walkKm": 2.1,
-   "walkMin": 35,
-   "durationMin": 259,
+   "walkKm": 3.0,
+   "walkMin": 52,
+   "durationMin": 352,
    "requestedDurationMin": 360,
-   "shorter": {
-    "reason": "places",
-    "requestedMin": 360,
-    "actualMin": 259,
-    "messageRu": "Получилось 4 ч 15 мин вместо 6 ч — больше открытых мест рядом нет"
-   },
+   "shorter": null,
    "returnToStart": true,
    "start": {
     "lat": 59.9386,
@@ -59,34 +54,52 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "Q900103",
+     "poiId": "Q132783",
      "kind": "museum",
-     "nameRu": "Исаакиевский собор",
-     "lat": 59.9341,
-     "lon": 30.3062,
-     "arriveAt": "2026-10-23T10:14",
-     "departAt": "2026-10-23T12:06",
+     "nameRu": "Государственный Эрмитаж",
+     "lat": 59.94056,
+     "lon": 30.31361,
+     "arriveAt": "2026-10-23T10:04",
+     "departAt": "2026-10-23T11:56",
      "dwellMin": 112,
-     "walkKmFromPrev": 0.9,
-     "walkMinFromPrev": 15,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 5,
      "costRub": 1000,
      "hoursVerified": false,
      "noteRu": "Часы работы уточняйте",
-     "hasPhoto": false,
+     "hasPhoto": true,
      "tappable": true
     },
     {
      "id": "w02",
-     "poiId": "Q900101",
+     "poiId": "Q1277585",
      "kind": "museum",
-     "nameRu": "Эрмитаж",
-     "lat": 59.9398,
-     "lon": 30.3146,
-     "arriveAt": "2026-10-23T12:24",
-     "departAt": "2026-10-23T14:16",
-     "dwellMin": 112,
-     "walkKmFromPrev": 1.0,
-     "walkMinFromPrev": 18,
+     "nameRu": "Кунсткамера",
+     "lat": 59.94167,
+     "lon": 30.30444,
+     "arriveAt": "2026-10-23T12:08",
+     "departAt": "2026-10-23T13:42",
+     "dwellMin": 94,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 12,
+     "costRub": 1000,
+     "hoursVerified": false,
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true
+    },
+    {
+     "id": "w03",
+     "poiId": "Q975426",
+     "kind": "museum",
+     "nameRu": "Меншиковский дворец",
+     "lat": 59.93889,
+     "lon": 30.29583,
+     "arriveAt": "2026-10-23T13:55",
+     "departAt": "2026-10-23T15:29",
+     "dwellMin": 94,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 13,
      "costRub": 1000,
      "hoursVerified": false,
      "noteRu": "Часы работы уточняйте",
@@ -95,11 +108,11 @@
     }
    ],
    "cost": {
-    "totalRub": 2000,
+    "totalRub": 3000,
     "lines": [
      {
       "key": "tickets",
-      "rub": 2000
+      "rub": 3000
      }
     ],
     "budgetRub": null
@@ -108,10 +121,6 @@
     {
      "code": "HOURS_UNVERIFIED",
      "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
-    },
-    {
-     "code": "SHORTER_THAN_ASKED",
-     "messageRu": "Получилось 4 ч 15 мин вместо 6 ч — больше открытых мест рядом нет"
     }
    ],
    "responsibleNoteRu": null,
@@ -121,12 +130,16 @@
      30.3141
     ],
     [
-     59.9341,
-     30.3062
+     59.94056,
+     30.31361
     ],
     [
-     59.9398,
-     30.3146
+     59.94167,
+     30.30444
+    ],
+    [
+     59.93889,
+     30.29583
     ],
     [
      59.9386,

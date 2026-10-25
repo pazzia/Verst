@@ -18,12 +18,16 @@
    "lat": 57.62971748693183,
    "lon": 39.89288849931893,
    "image": {
-    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Ilya_church_sample.jpg?width=800",
-    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Ilya_church_sample.jpg?width=400",
-    "page": "https://commons.wikimedia.org/wiki/File:Ilya_church_sample.jpg",
-    "credit": null,
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/%D0%97%D0%B0%D0%B6%D0%B8%D0%B3%D0%B0%D1%8F_%D1%81%D0%B2%D0%B5%D1%82.jpg?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/%D0%97%D0%B0%D0%B6%D0%B8%D0%B3%D0%B0%D1%8F_%D1%81%D0%B2%D0%B5%D1%82.jpg?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:%D0%97%D0%B0%D0%B6%D0%B8%D0%B3%D0%B0%D1%8F_%D1%81%D0%B2%D0%B5%D1%82.jpg",
+    "credit": {
+     "author": "ВладимирФото",
+     "licence": "CC BY-SA 4.0",
+     "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
     "isArea": false,
-    "labelRu": "Фото: Wikimedia Commons"
+    "labelRu": "Фото: Wikimedia Commons · ВладимирФото · CC BY-SA 4.0"
    },
    "hours": {
     "textRu": "Tu-Su 10:00-18:00",
@@ -36,7 +40,7 @@
    },
    "isFictional": false,
    "attributionRu": [],
-   "wikidataId": "Q900201"
+   "wikidataId": "Q4177920"
   },
   "ms": 0
  }
