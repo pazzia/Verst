@@ -199,3 +199,23 @@ Until a person builds the same trips in Яндекс Карты from the same po
 The distance sources [S20]–[S25] were read through search-engine excerpts: tonkosti.ru, ru.wikipedia.org and
 geofabrik.de are not reachable from this sandbox. They are references for a person to confirm in Яндекс Карты,
 not acceptance values.
+
+## Amendment (2026-10-26): toll expressway speed
+
+The first `routing.yml` run on real data (Central + Volga, run 40349692421) routed Москва → Казань over М-7 even with
+tolls allowed (803 km, 692 min). The diagnosis run (40353574860) showed why:
+
+- М-12 is in the graph and routable: forced through a point in Чувашия, the route used 582 km of М-12.
+- Its time was no better, though: Москва → that point took 616 km in 529 min, about 70 km/h.
+- Most of М-12 is mapped as `highway=trunk` + `toll=yes` + `motorroad=yes` + `maxspeed=RU:rural`.
+- GraphHopper only parses numeric `maxspeed`, so these edges get the trunk default of 70 km/h, the same as the old
+  М-7 through towns.
+
+**Decision.** Both profiles use `custom_models/verst_car.json` instead of the bundled `car.json`. It is the same model
+plus one rule: `road_class == TRUNK && toll == ALL` is limited to 100 km/h (the motorway default, 110 × 0.9), and a
+numeric sign still limits it to `max_speed × 0.9`.
+
+**Not chosen.** `max_speed_calculator` + urban density would fix legal defaults for all roads. It costs a slower
+import, and the speeds it sets cannot raise `car_average_speed` without the same kind of rule. Revisit with the
+VAL-05 field trips, which measure minutes.
+
