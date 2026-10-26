@@ -2494,3 +2494,74 @@ Not implemented: `trip_driven_prompt_shown` (§2.5 #5, optional) needs the same 
    CEO. Until then every CI APK is the no-op.
 8. Architect (§2.5 q3): the engine could own `routingSource` explicitly instead of the app reading `approxDistances`.
    This becomes relevant once ENG-04 mixes GraphHopper and on-device routing.
+
+## Investor-readiness / ENG-04
+
+Minimal beta backend (Architect acting as Developer, 2026-10-26, branch `ccr-013d3489-181fz2`, not committed).
+Design: [ADR-0020](adr/0020-minimal-beta-backend.md). The engine is imported as a library; nothing under
+`backend/planner` was changed (another agent was changing the engine in parallel).
+
+### What exists now
+- `backend/api/verst_api`: FastAPI app — `POST /v1/devices`, `POST /v1/trips/plan` (JSON or SSE), `POST /v1/route`
+  (GraphHopper, ADR-0017 §5), `GET /v1/ready-routes`, `POST /v1/trips` (save + share slug), `DELETE /v1/trips/{id}`,
+  `GET /v1/shared/{slug}`, `GET /s/{slug}` (HTML, town only), `POST /v1/feedback`, `GET /v1/links/hotel`
+  (stub, `affiliate: false`), `/healthz`, `/readyz`, `/metrics`.
+- `backend/api/migrations/0001_api_beta.sql` (+ down): schema `api` on plain PostgreSQL 16 (no PostGIS).
+- `backend/api/requirements*.in|lock`: every dependency pinned with sha256 hashes (uv `--exclude-newer
+  2026-10-10`, i.e. ≥ 14 days old): fastapi 0.143.0, starlette 1.7.0, pydantic 2.14.0, pydantic-settings 2.15.0,
+  uvicorn 0.54.0, psycopg 3.3.6 (+binary), psycopg-pool 3.3.3, prometheus-client 0.26.0; dev: pytest 9.1.1,
+  httpx2 2.13.1 (Starlette 1.x's TestClient transport), ruff 0.17.0, mypy 2.4.0, coverage 7.16.2.
+- `infra/api`: Dockerfile (uid 10002, read-only FS), compose (Caddy, api, postgres, backup, graphhopper profile),
+  Caddyfile, `.env.example`, `restore-drill.sh`, README (VM runbook). `.github/workflows/api.yml`.
+
+### Deviations (for the Manager to fold into `docs/architecture.md`)
+1. Schema `api`, not `app` of 0001: catalogue text ids, no PostGIS, Place DB not live (ADR-0020 §5.1).
+2. Plans are not persisted (A§10.5): an explicit `POST /v1/trips` saves server- and phone-planned trips alike;
+   `POST /v1/trips/{id}/save` of A§10.2 becomes `POST /v1/trips`. Plan answers 200 (not 201); SSE `done` data =
+   the JSON body (no `tripId`).
+3. Migrations: a small SQL-file runner (`python -m verst_api.db`), not Alembic (ADR-0003).
+4. Rate limits and no cache in PostgreSQL instead of Redis; Caddy instead of nginx + certbot.
+5. Logs round coordinates to 2 decimals (R-07), not 3 (A§10.8); the access log is ours (uvicorn's and Caddy's off).
+6. `X-App-Version` is logged when present but not required (A§10.1): curl and the share page work without it.
+7. The host uses three bridge internals (`mobile._WORLDS`, `_trip_result`, `_no_fit_result`), checked at start;
+   follow-up for the planner owner in ADR-0020 §10.
+
+### Commands and output (sandbox: Python 3.12.3 venv with the locks; PostgreSQL 16 binaries; Docker 29.9.2)
+- `cd backend/api && pip install --require-hashes --no-deps -r requirements.lock -r requirements-dev.lock` → OK.
+- `ruff check .` → `All checks passed!`; `ruff format --check .` → `28 files already formatted`;
+  `mypy verst_api tests` (strict, pydantic plugin) → `Success: no issues found in 28 source files`.
+- `python -m coverage run -m pytest -q` → `112 passed in 26.53s` (throwaway cluster started by `tests/conftest.py`);
+  `coverage report` → `TOTAL … 94%` (gate 90 %).
+- While the parallel engine work had not yet regenerated `docs/contracts/v2`, the 4 "committed contract" tests
+  skipped with the reason "stale against the working-tree engine" (the planner's own `test_mobile_v2` failed too)
+  and the 4 "server == bridge" tests passed; against `git archive HEAD` (engine + contracts of the commit)
+  `pytest tests/test_contracts.py` → `18 passed`; after the regeneration the full suite ran with 0 skips.
+- Compose on this sandbox (images pulled through `mirror.gcr.io`: Docker Hub answered 429; the image built with the
+  locked wheels pre-downloaded, because pip cannot reach PyPI through the TLS proxy inside `docker build`; the
+  committed Dockerfile is built in CI): all services healthy; through Caddy (`VERST_DOMAIN=localhost`, internal CA)
+  `/healthz` 200, `/metrics` 404, register → 43-char token, SSE plan → 5 `stage` + 7 `stop` + `done`, save →
+  `{"title":"Москва → Ярославль","startTown":"Москва",…}`, `/s/<slug>` 200 with `content-language: ru`,
+  `x-robots-tag: noindex, nofollow`, HSTS; logs contain no `55.751234`, no label, no `lat=` (grep count 0);
+  `id` in the api container → uid 10002; writing to `/srv/verst` → "Read-only file system"; `/readyz` →
+  `{"status":"ok","engineVersion":"0.1.0","engine":true,"routing":"road_model","catalogue":"wd-20261025-r7.5","db":true}`;
+  a Golden Ring plan with `X-Request-Id: smoke-req-0001` → 200 in 0.21 s, both log lines carry that id and the
+  origin as `[55.76, 37.62]`.
+- Real GraphHopper 11.0 (the `verst/graphhopper:11.0` image on the synthetic mini map) on the compose network with
+  `VERST_ROUTING=graphhopper`: `POST /v1/route` → 19.954 km, ref М-11, toll; avoid tolls → 20.989 km, no toll; the
+  island point → 404 `UNREACHABLE`; the adapter's log lines carry the request id and 2-decimal points.
+- Backups: `docker compose exec backup /backup.sh` → "SQL backup created successfully";
+  `restore-drill.sh` → `migration 1 / devices 1 / trips 1 / feedback 0 / restore drill OK`.
+- `caddy validate` → "Valid configuration", `caddy fmt` → no diff; `docker compose --profile routing config` → OK;
+  `actionlint` 1.7.12 with shellcheck → clean; `shellcheck entrypoint.sh restore-drill.sh` → clean.
+
+### Only the VM (or CI) can verify
+- ≥ 99 % monthly uptime (external `/healthz` monitor), Let's Encrypt issuance for the real domain, restore drill on
+  real dumps, off-site copy; plan p95 ≤ 10 s with GraphHopper on the Russia graph; RAM of 2 workers + Postgres +
+  GraphHopper on the chosen VM size.
+- The committed Dockerfile's `pip install --require-hashes` from PyPI and the `postgres:16.14` CI service (first
+  run of `api.yml`).
+
+### Open questions (defaults applied; ADR-0020 §11)
+VM: Yandex Cloud ru-central1, 8 vCPU / 32 GB / 160 GB · domain `api.verst.app` placeholder (`VERST_DOMAIN`) · TLS
+by Caddy/Let's Encrypt · off-site backup: weekly manual copy to Yandex Object Storage · uptime monitor: external
+HTTPS check + Telegram · synthetic fallback off · feedback text kept 180 days.

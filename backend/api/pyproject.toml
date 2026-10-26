@@ -1,0 +1,52 @@
+[project]
+name = "verst-api"
+version = "0.1.0"
+description = "Verst minimal beta backend (ENG-04, ADR-0020); the engine is verst_planner (backend/planner)"
+requires-python = ">=3.12"
+# Pinned with hashes in requirements.lock / requirements-dev.lock (generated from requirements*.in).
+dependencies = []
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["verst_api"]
+known-third-party = ["verst_planner"]
+
+[tool.ruff.lint.per-file-ignores]
+# Russian user-facing copy (error messages, the share page) and Russian test fixtures.
+"verst_api/errors.py" = ["RUF001"]
+"verst_api/privacy.py" = ["RUF001", "RUF002", "RUF003"]
+"verst_api/share_page.py" = ["RUF001"]
+"verst_api/engine.py" = ["RUF002"]
+"tests/**" = ["RUF001", "RUF002", "RUF003"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "../planner"
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_decorators = false
+
+[tool.pytest.ini_options]
+pythonpath = [".", "../planner"]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+filterwarnings = ["error::pytest.PytestUnraisableExceptionWarning"]
+
+[tool.coverage.run]
+source = ["verst_api"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 90

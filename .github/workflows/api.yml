@@ -1,0 +1,90 @@
+name: api
+# verst-api (ENG-04, ADR-0020): lint, types and tests against PostgreSQL 16 with the pinned, hashed
+# dependencies; then the container image is built from the same lock. The API imports the engine and is tested
+# against the bridge contracts, so engine and contract changes run this workflow too.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/api/**"
+      - "backend/planner/verst_planner/**"
+      - "backend/planner/fixtures/worlds/**"
+      - "docs/contracts/v2/**"
+      - "infra/api/**"
+      - ".github/workflows/api.yml"
+  pull_request:
+    paths:
+      - "backend/api/**"
+      - "backend/planner/verst_planner/**"
+      - "backend/planner/fixtures/worlds/**"
+      - "docs/contracts/v2/**"
+      - "infra/api/**"
+      - ".github/workflows/api.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16.14-trixie
+        env:
+          POSTGRES_USER: verst
+          POSTGRES_PASSWORD: verst-ci-only
+          POSTGRES_DB: verst_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U verst -d verst_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      VERST_TEST_DATABASE_URL: postgresql://verst:verst-ci-only@localhost:5432/verst_test
+      VERST_TEST_REQUIRE_PG: "1"
+    defaults:
+      run:
+        working-directory: backend/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies (hashes required)
+        run: python -m pip install --require-hashes --no-deps -r requirements.lock -r requirements-dev.lock
+      - name: Ruff
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Mypy (strict)
+        run: mypy verst_api tests
+      - name: Tests with coverage (gate 90 %, pyproject.toml)
+        run: |
+          python -m coverage run -m pytest -q
+          python -m coverage report
+
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the image (context = repository root)
+        run: docker build -f infra/api/Dockerfile -t verst-api:ci .
+      - name: Runs as non-root and imports the app
+        run: |
+          test "$(docker run --rm --entrypoint id verst-api:ci -u)" = "10002"
+          docker run --rm --entrypoint python verst-api:ci -c "import verst_api.main, verst_planner.mobile"
+      - name: Compose file is valid with the example environment
+        working-directory: infra/api
+        run: |
+          sed 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci/' .env.example > .env
+          docker compose --profile routing config --quiet
