@@ -527,7 +527,8 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("road.day.1.parking", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("road.legend.kmpost", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("не проверено", substring = true).assertDoesNotExist()
+        // the old standalone «не проверено» badge stays off rows; ADR-0019 fact lines («… — не проверено») are allowed
+        compose.onNodeWithText("не проверено").assertDoesNotExist()
     }
 
     /** The long list at once: km posts, tags (Разминка, kinds, the open-data ring), costs lines with the P part. */
@@ -810,7 +811,8 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("card.desc.source", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("card.facts", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("card.opendata", useUnmergedTree = true).assertExists()
-        assertTrue(compose.onAllNodesWithText("не проверено", substring = true).fetchSemanticsNodes().isEmpty())
+        // no standalone «не проверено» badge; ADR-0019 fact lines («… — не проверено») are allowed
+        assertTrue(compose.onAllNodesWithText("не проверено").fetchSemanticsNodes().isEmpty())
     }
 
     /** Level 5 (OSM-only): no photo and no description → the illustration with «фото пока нет». */
@@ -856,7 +858,11 @@ class ScreensScreenshotTest {
         shot("card", "unknown-facts") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
         compose.onNodeWithText("часы не известны — уточните", useUnmergedTree = true).assertExists()
         compose.onNodeWithText("цена билета неизвестна", useUnmergedTree = true).assertExists()
-        compose.onAllNodesWithText("вход свободный", useUnmergedTree = true).assertCountEquals(0)
+        // only inside the card: the Road ahead behind it legitimately shows confirmed-free sights (Лавра)
+        compose.onAllNodes(
+            androidx.compose.ui.test.hasText("вход свободный") and androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag("card")),
+            useUnmergedTree = true,
+        ).assertCountEquals(0)
     }
 
     @Test
