@@ -64,6 +64,8 @@ W2–W6   ENG-01 road routing ──▶ ENG-02 tolls ──▶ ENG-04 backend
 W5–W8   ENG-05 analytics · ENG-06 web planner (MVP) · DES-01 usability test
 W8–W12  VAL-04 closed beta · VAL-05 field trips · BIZ-02…05 revenue pilots · BIZ-06 Pro waitlist pricing test
 W12–W13 INV-01 data room · INV-02 deck
+W1–W4   SOC-01 demand check for community routes (inside VAL-01 interviews)
+After   SOC-02 saved routes (after M2) ──▶ SOC-03 public routes + ratings (after VAL-04) ──▶ SOC-04 paid routes · SOC-05 contests
 ```
 
 ## Task list
@@ -100,6 +102,11 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 | BIZ-06 | Trip Pro waitlist with a price test (3 price points) | P1 | Growth Marketer + Developer | ENG-05 | 2 d |
 | DES-01 | Usability test of the «За рулём» UI on 10 people | P1 | UX Specialist + Designer | — | 3 d |
 | DES-02 | Seasonality plan: winter ready routes (New Year, Карелия, Казань) | P2 | Designer + Growth Marketer | DATA-02 | 2 d |
+| SOC-01 | Demand check for user and author routes: past-behaviour question in the VAL-01 interviews | P1 | UX Specialist (CEO asks) | — | 0.5 d |
+| SOC-02 | Save a planned or driven trip as a personal route and replan it later as a ready route | P2 | Architect + Developer + Designer | M2 (feature freeze), SOC-01 | 3 d |
+| SOC-03 | Public user and author routes, rated only by people who drove them | P2 | Architect + Developer + Designer + Data Curator (moderation) | SOC-02, VAL-04, DATA-03, LEG-02 | 5 d |
+| SOC-04 | Paid author routes (marketplace with a revenue share) | P2 | Business Analyst + Legal & Compliance + Developer | SOC-03, LEG-02 | 5 d |
+| SOC-05 | Contests with a cash prize for the best-rated routes | P2 | Growth Marketer + Legal & Compliance (CEO approves the prize fund) | SOC-03, LEG-02 | 2 d, then per contest |
 | TEAM-01 | Hire a part-time paid curator | P0 | CEO (Data Curator writes the brief) | LEG-02 | W2 |
 | TEAM-02 | Find a co-founder or advisor for partnerships and sales (tour operator, OTA or regional tourism background) | P1 | CEO | — | W1–W12 |
 | INV-01 | Data room: metrics, unit economics, legal, cap table, 12-month plan | P0 | Business Analyst + CEO | M1–M5 | 2 d |
@@ -314,6 +321,96 @@ Compare it with cost per install and cost per planned trip from VAL-02. The revi
 ### DES-02 — Seasonality
 
 **Acceptance.** 3 winter ready routes specified; a note on what changes in the engine in winter (daylight, slower speeds, closed sights).
+
+---
+
+## Community routes (CEO idea, Oct 26, 2026)
+
+**Idea.**
+- A trip a user planned or drove can be saved and reused later as a ready route.
+- Users and invited authors publish routes; people who drove a route rate it, so the best routes rise to the top. Authors can be local guides, travel bloggers or regional tourism bodies.
+- Later stages:
+  - paid author routes, as a marketplace with a revenue share;
+  - contests with a cash prize for the routes that collect the most positive ratings.
+
+**Why it matters to the investor.** It answers three gaps from the review:
+- **Content.** Today every ready route is built by the team (DATA-02). Community routes add content without adding curators.
+- **Distribution.** An author who publishes a route links to it for their own audience, so authors are a growth channel as well as content.
+- **Moat and money.** A catalogue rated by real drivers is hard to copy and gives a network effect, and the marketplace commission is a second revenue stream.
+
+**Risks to manage.**
+- **Cold start.** Ratings mean nothing with few users.
+  - Seed the catalogue with author routes first: invited authors, the 10 curated routes (DATA-02) and regional bodies (BIZ-03).
+  - Open publishing to all users only after the closed beta (VAL-04).
+- **Trust.** The product's promise is honest data. A community route keeps only the choice of stops and overnights; the engine re-checks every stop at plan time (opening hours, crew filters, «не проверено» per ADR-0019).
+- **Rating fraud.** The risk is highest once money is involved.
+  - Only users who confirmed they drove the route can rate it (`trip_driven_confirmed`, `docs/traction/tracking-plan.md`).
+  - One rating per person per route.
+  - Anomalies are reviewed before any payout.
+- **Privacy (152-FZ).** A GPS track is personal data and can reveal a home address.
+  - Publish the route's stops, never the raw track, and cut the first and last kilometres.
+  - Ask for explicit consent before publishing.
+  - The author name is a pseudonym by default.
+- **Legal.** Everything below goes to Legal before launch; it needs LEG-02.
+  - Terms of use: a licence for user content and the moderation duty.
+  - Contest rules (ГК РФ гл. 57, public contest). Entry is free, so the contest is not a lottery (138-FZ).
+  - Prize tax: НДФЛ, with the organiser as tax agent. If the contest counts as advertising, prizes above 4 000 ₽ a year are taxed at 35 %.
+  - Paid routes need a legal entity, payouts to authors (самозанятые or ИП) and receipts (54-FZ).
+- **Feature freeze.** The app code waits for M2. The demand check (SOC-01) runs now and decides whether SOC-03…05 go ahead.
+
+### SOC-01 — Demand check (now, no code)
+
+**Description.** Add one past-behaviour question to the VAL-01 interview kit, after Q6: «Вы когда-нибудь ехали по чужому маршруту — из блога, Telegram-канала, от друзей? А своим маршрутом после поездки с кем-нибудь делились? Как?». Q21 already asks whether people have paid for a ready route.
+
+**Acceptance.** `docs/traction/interviews.md` records three shares of interviewees: those who drove someone else's route in the last 2 years, those who shared their own, and those who paid for one. The go/no-go for SOC-03…05 is written next to these numbers.
+
+### SOC-02 — Save and reuse a route
+
+**Description.**
+- «Сохранить как маршрут» on the waybill keeps the trip's stops and overnights as a personal ready route.
+- The route can be replanned for new dates and a different crew; the engine re-checks every stop.
+- After a confirmed drive, the user marks which stops they actually made (the same flow as DATA-03) and saves the route as driven.
+- Recording the drive automatically needs background location (foreground service, a RuStore permission review). It is a later option, not the first version.
+- Routes are stored on the device first; backend sync (ENG-04) is optional.
+
+**Acceptance.**
+- A saved route replans within the ready-route time budget.
+- Replanning with a different crew applies the crew filters.
+- No raw GPS track is stored.
+
+### SOC-03 — Public routes and ratings
+
+**Description.**
+- An author publishes a saved route with a title, a short description and photos they own.
+- The catalogue shows routes near the user's start, sorted by rating from people who drove them.
+- A route goes public only after the Data Curator's moderation queue. Users can report wrong or unsafe content.
+
+**Acceptance.**
+- At least 20 author routes before publishing opens to all users.
+- Ratings come only from confirmed drivers.
+- Moderation takes 48 h or less.
+- Four weeks after launch, the share of planned trips started from community routes is measured.
+
+### SOC-04 — Paid author routes
+
+**Description.**
+- The author sets a price. The preview shows the outline; the buyer gets the full route with the author's notes and tips.
+- Revenue is shared with the author.
+- Run a price test first, as in BIZ-06, without taking payments.
+
+**Acceptance.**
+- BIZ-01 is updated with the marketplace commission.
+- A lawyer approves the payout scheme.
+- The first 10 paid sales are made.
+
+### SOC-05 — Contests
+
+**Description.** A contest per season or holiday, for example «лучший маршрут на майские». A cash prize goes to the route with the most positive ratings from confirmed drivers. The rules are published before the start, and entry is free.
+
+**Acceptance.**
+- Legal approves the rules.
+- Anti-fraud review is done before the payout.
+- The effect is measured against the month before: new routes published and trips planned during the contest.
 
 ---
 
