@@ -156,14 +156,6 @@ jobs:
           python3 infra/routing/check_routes.py --url http://127.0.0.1:8989 --out "$OUT" \
             --source "GraphHopper $GH_VERSION, Geofabrik $REGION extract $stamp"
 
-      - name: Diagnose М-12 (temporary)
-        if: always()
-        run: |
-          curl -fsSL --retry 3 -o "$RUNNER_TEMP/volga.pbf" https://download.geofabrik.de/russia/volga-fed-district-latest.osm.pbf
-          osmium tags-filter "$RUNNER_TEMP/volga.pbf" w/highway=motorway,trunk -o "$RUNNER_TEMP/mt.pbf" --overwrite
-          osmium export "$RUNNER_TEMP/mt.pbf" -f geojsonseq -o "$RUNNER_TEMP/mt.geojsonseq" --overwrite
-          python3 infra/routing/dev/diagnose_ref.py "$RUNNER_TEMP/mt.geojsonseq" http://127.0.0.1:8989 | tee "$OUT/diagnose-m12.txt"
-
       - name: Server memory (for VM sizing)
         if: always()
         run: |
