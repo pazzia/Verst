@@ -65,8 +65,12 @@ class ProcessDeathTest {
         E2e.noRealNominatim()
         compose.runOnUiThread {
             while (flow.back()) Unit
+            // Earlier tests (Sprint4Test GPS cases) leave the origin at Ярославль; planning «Яро» from there is
+            // a 0 km trip (TOO_SHORT, PR #1 run 128). Pin the default origin like Sprint4Test/Sprint4DataTest do.
+            flow.debugResetOrigin()
             flow.debugLocationAnswered()
         }
+        assertEquals("Москва", flow.origin.label)
         waitTag("windshield.navi")
         compose.onNodeWithTag("windshield.navi").performClick()
         waitTag("navigator.to")
