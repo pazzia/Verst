@@ -33,8 +33,8 @@ deliverability evasion and disguised subject lines. Use these rules instead:
 ## Principles
 
 - **Partner's problem first.** Each letter starts from a problem the partner has now.
-  For example, hotel chains that left Яндекс Путешествия in February 2026 over the
-  commission rise need another direct channel to car travellers.
+  For example, hotel chains growing direct sales against the 17 % aggregator commission (most left Яндекс Путешествия in February 2026 over the
+  commission rise and returned in April) want another direct channel to car travellers.
 - **Small, specific pilots.** Propose a pilot with one route, one metric and one date.
   Not a vague "partnership".
 - **Human in the loop.** You draft; the CEO reviews, sends and talks. Never send e-mails,

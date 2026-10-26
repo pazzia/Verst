@@ -93,7 +93,7 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 | LEG-01 | Lawyer's opinion on ODbL share-alike for the Place DB (OSM import in SPEC §9 step 1) | P0 | Legal & Compliance (CEO hires lawyer) | — | W1 |
 | LEG-02 | Legal entity (self-employed / ИП / ООО), Travelpayouts and partner accounts, privacy policy | P0 | Legal & Compliance + CEO | — | W1–W2 |
 | BIZ-01 | Unit-economics model in a spreadsheet: revenue per planned trip by stream versus CAC | P0 | Business Analyst | — | 1 d, then weekly |
-| BIZ-02 | Hotel chains that left Яндекс Путешествия in Feb 2026: offer a direct channel | P1 | Partnerships (CEO sends) | ENG-03 | W4–W12 |
+| BIZ-02 | Hotel chains growing direct sales against the 17 % aggregator commission: offer a direct channel | P1 | Partnerships (CEO sends) | ENG-03 | W4–W12 |
 | BIZ-03 | Regional tourism body pilot (B2G): paid placement of a ready route | P1 | Partnerships (CEO sends) | DATA-02 | W6–W12 |
 | BIZ-04 | Roadside service (cafes, fuel, motels) on Moscow corridors: sponsored stops | P2 | Partnerships (CEO sends) | DATA-02 | W8–W12 |
 | BIZ-05 | B2B engine licensing exploration (car rental, carsharing, in-car platforms) | P2 | Partnerships + Business Analyst | ENG-04 | 3 calls |
@@ -279,7 +279,7 @@ Compare it with cost per install and cost per planned trip from VAL-02. The revi
 
 ### BIZ-02 — Hotel chains
 
-**Description.** In February 2026, Azimut, Cosmos Hotel Group, Accor and Alean Collection left Яндекс Путешествия over the commission rise from 15 % to 17 %. Offer them Verst as an extra direct channel for car travellers on Moscow corridors.
+**Description.** In February 2026, Azimut, Cosmos Hotel Group, Accor, Alean Collection and others left Яндекс Путешествия over the commission rise from 15 % to 17 %; by 22.04.2026 most returned after an РСТ-brokered deal, with the 17 % base commission unchanged (see `docs/partners/targets.md`). Offer chains that are growing direct sales an extra direct channel for car travellers on Moscow corridors. Targets and drafts: `docs/partners/`.
 
 **Acceptance.** ≥ 5 conversations held; ≥ 1 letter of intent or pilot.
 
