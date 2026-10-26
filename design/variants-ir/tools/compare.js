@@ -1,6 +1,8 @@
-// Side-by-side comparison per screen: current build (CI run 126 screenshots on the ci-logs branch) vs A vs B vs C, at 390×844.
+// Side-by-side comparison per screen: current build (newest CI run on the ci-logs branch that has both screenshots) vs A vs B vs C, at 390×844.
 // Usage (repo root, after render.js):  node design/variants-ir/tools/compare.js
 // Needs the ci-logs ref:  git fetch origin +ci-logs:refs/remotes/origin/ci-logs --depth=1
+// ci-logs is one commit that CI force-pushes, so old runs disappear; the script takes the newest run that has
+// windshield/ and instruments/ default@390x844 (on 26.10.2026 run 40303949200-1 — byte-identical to run 126 of the review).
 const { chromium } = require('playwright');
 const { execFileSync } = require('child_process');
 const fs = require('fs');
@@ -9,12 +11,17 @@ const path = require('path');
 
 const DIR = path.resolve(__dirname, '..');
 const ROOT = path.resolve(DIR, '../..');
-const RUN = 'runs/40242420125-1/screenshots';
+const listing = execFileSync('git', ['-C', ROOT, 'ls-tree', '-r', '--name-only', 'origin/ci-logs', 'runs/']).toString().split('\n');
+const has = new Set(listing);
+const runs = [...new Set(listing.map(f => f.split('/')[1]).filter(Boolean))].sort().reverse();
+const RUN_ID = runs.find(r => ['windshield', 'instruments'].every(s => has.has(`runs/${r}/screenshots/${s}/default@390x844.png`)));
+if (!RUN_ID) throw new Error('no CI run with both screenshots on origin/ci-logs');
+const RUN = `runs/${RUN_ID}/screenshots`;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'verst-compare-'));
 
 const SCREENS = { windshield: 'Главный экран', instruments: 'Приборы' };
 const COLS = [
-  ['now', 'Сейчас', 'сборка CI 126'],
+  ['now', 'Сейчас', 'текущая сборка'],
   ['a', 'A · Чистое лобовое', 'та же ночь, меньше декораций'],
   ['b', 'B · Дневная трасса', 'A в светлой теме'],
   ['c', 'C · Простой контроль', 'метафора — только оформление'],
@@ -52,7 +59,7 @@ const COLS = [
     await page.waitForTimeout(100);
     const box = await page.locator('.wrap').boundingBox();
     await page.screenshot({ path: path.join(DIR, `compare-${screen}.png`), clip: box });
-    console.log(`compare-${screen}.png`);
+    console.log(`compare-${screen}.png (current build: ${RUN_ID})`);
     await page.close();
   }
   await browser.close();
