@@ -219,3 +219,12 @@ numeric sign still limits it to `max_speed × 0.9`.
 import, and the speeds it sets cannot raise `car_average_speed` without the same kind of rule. Revisit with the
 VAL-05 field trips, which measure minutes.
 
+**Verified (run 40356739346, graph rebuilt with the rule).**
+
+- Москва → Казань: 811.9 km, 531 min (was 692), 738 km on М-12, 748 toll km.
+- Москва → Казань without tolls: 803.3 km, 692 min, over М-7 as before.
+- Москва → Ярославль: unchanged, 264.2 km.
+- The Golden Ring loop now returns to Москва over М-12: 766.3 km, 655 min, 158 toll km.
+- All three plans pass.
+- Toll prices remain estimates until ENG-02.
+
