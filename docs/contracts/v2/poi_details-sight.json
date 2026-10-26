@@ -47,12 +47,14 @@
    "whyRu": "Объект культурного наследия",
    "hours": {
     "textRu": "Часы работы уточняйте",
-    "verified": false
+    "verified": false,
+    "known": true
    },
    "ticket": {
     "adultRub": 400,
     "childRub": 200,
-    "estimate": true
+    "estimate": true,
+    "known": true
    },
    "isFictional": false,
    "attributionRu": [

@@ -72,8 +72,8 @@
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
+      "todayRu": null,
+      "openNow": null,
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
@@ -207,8 +207,8 @@
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
+      "todayRu": null,
+      "openNow": null,
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",

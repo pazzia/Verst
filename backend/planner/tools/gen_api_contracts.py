@@ -73,6 +73,14 @@ def town_without_bars():
     raise AssertionError("no town without bars")
 
 
+def unpriced_sight():
+    """ADR-0019 E-2: the first catalogue sight (by id) whose kind has no default ticket and whose OSM data has
+    no `fee` — its price is unknown, so the card says «цена билета неизвестна», deterministic."""
+    cat = mobile._CATALOGUE[0]
+    places = mobile._WORLDS[R].world.places
+    return min(p.id for p in cat.pois if p.kind == "attraction" and p.fee is None and p.id in places)
+
+
 def dry_town_with_sights():
     """A catalogue town with no bar within 6 km where an overview walk works: a beer walk there fails with
     checked suggestions (the NOT_ENOUGH_POIS suggestions example), deterministic."""
@@ -304,6 +312,34 @@ call("poi_details-fixture-sight", "poi_details", world=R, place_id="pl_yar_ilya"
 call("poi_details-hotel", "poi_details", world=R, place_id="pl_yar_hotel_strelka")
 call("poi_details-bar", "poi_details", world=R, place_id=bar_in(YAR))
 call("poi_details-not-found", "poi_details", world=R, place_id=FUEL_ID)
+# ADR-0019 E-1 / E-2: a card whose opening hours nobody checked, and one whose ticket price is unknown
+call("poi_details-hours-unknown", "poi_details", world=R, place_id="pl_yar_strelka")
+call("poi_details-ticket-unknown", "poi_details", world=R, place_id=unpriced_sight())
+# The Windshield's three ready routes from Москва, each estimated for one crew (G02's: 2 adults + child + dog,
+# 40 000 ₽, Saturday 07.11 08:00) on the curated world: the km the screenshot fixture shows next to each ready
+# route (never a free trip's km, never the template's kmTotal)
+for slug, rid in (
+    ("tula", "rr_tula_yasnaya"),
+    ("yaroslavl", "rr_yaroslavl"),
+    ("golden-ring", "rr_golden_ring"),
+):
+    call(
+        f"estimate-ready-{slug}",
+        "estimate",
+        world="central_russia_v1",
+        request_id=f"c-rr-{slug}",
+        input_json=json.dumps(
+            {
+                "origin": msk,
+                "readyRouteId": rid,
+                "crew": {"adults": 2, "children": 1, "dog": True},
+                "dailyKm": 300,
+                "budget": 40000,
+                "startAt": "2026-11-07T08:00",
+            },
+            ensure_ascii=False,
+        ),
+    )
 trip = json.loads(graph_plan)["result"]["trip"]
 first_sight = next(s["id"] for d in trip["daysList"] for s in d["stops"] if s["kind"] == "sight")
 TRIP_REF = {

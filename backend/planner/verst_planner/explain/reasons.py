@@ -6,8 +6,9 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from verst_planner.config import PlannerConfig
-from verst_planner.domain.enums import OvernightFallback, Source, StopKind
-from verst_planner.domain.model import Crew, NormalizedInput, OvernightChoice, PlannedStop, ScoredTown
+from verst_planner.domain.enums import OvernightFallback, Source, StopKind, Tag
+from verst_planner.domain.facts import Known, tag_state
+from verst_planner.domain.model import Crew, NormalizedInput, OvernightChoice, Place, PlannedStop, ScoredTown
 from verst_planner.explain import ru
 from verst_planner.explain.templates import ReasonTemplates
 
@@ -94,12 +95,22 @@ def overnight_reason(
     return OvernightText(text, candidates)
 
 
-def sight_reason(dwell: int, crew: Crew, source: Source) -> tuple[str, dict[str, str | int | float]]:
+def dog_sight_key(crew: Crew, place: Place | None) -> str:
+    """ADR-0019 E-6: `sight.dog_waits` only when the place is known not to let dogs in, `sight.dog_ok` when
+    it is known to; unknown says nothing here (the stop's `unknown_ru` says it is not checked)."""
+    if not crew.dog or place is None:
+        return "sight.default"
+    state = tag_state(place, Tag.DOGS_ALLOWED)
+    if state is Known.YES:
+        return "sight.dog_ok"
+    return "sight.dog_waits" if state is Known.NO else "sight.default"
+
+
+def sight_reason(dwell: int, crew: Crew, place: Place) -> tuple[str, dict[str, str | int | float]]:
     """Reason key and params of a sight stop (also a short sight used as a rest, A§16.2)."""
-    if source is Source.OSM:
+    if place.source is Source.OSM:
         return "sight.osm", {}
-    key = "sight.dog_waits" if crew.dog else "sight.default"
-    return key, {"dwell": ru.duration_phrase(dwell)}
+    return dog_sight_key(crew, place), {"dwell": ru.duration_phrase(dwell)}
 
 
 DETOUR_NOTE_MIN = 10  # M8: a sight this far off the road says so («Крюк ≈ 35 мин.»)
@@ -148,7 +159,7 @@ def _stop_reason(
         return t.render("sight.osm")
     if s.kind is StopKind.SIGHT and s.fixed:
         dwell = ru.duration_phrase(s.dwell_min)
-        return t.render("sight.dog_waits" if inp.crew.dog else "sight.default", dwell=dwell)
+        return t.render(dog_sight_key(inp.crew, s.place), dwell=dwell)
     if not s.reason_key:
         return ""
     return t.render(s.reason_key, **s.reason_params)

@@ -222,6 +222,10 @@ it; §9.2 currently embeds 0001 verbatim and stays valid as 0001.
 
 ## 10. Engine follow-ups (not changed this week; goldens must stay identical)
 
+> **2026-10-26: done in [ADR-0019](0019-unknown-is-not-a-default.md)** (investor-readiness trust fixes). Where it
+> differs from the proposals below: E-1 keeps unknown-hours stops without a ranking penalty; E-2 leaves an unknown
+> price out of the total and names it instead of estimating it; E-5 also changes the engine (unrated ranks last).
+
 | # | Misleading default | Where | Proposed fix |
 | --- | --- | --- | --- |
 | E-1 | Empty hours = always open | `verst_planner/pipeline/__init__.py:121-124` (`hours()` returns None = «always open»); checklist §4 | Unknown ≠ open. `None` means «hours unknown»: prefer stops with known hours in the same window, keep an unknown-hours stop only as a fallback, with the reason «часы не проверены». The DB side is done (`place_live_hours`); the risk remains for open-data places. |

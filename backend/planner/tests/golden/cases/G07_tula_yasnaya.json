@@ -52,9 +52,9 @@
       "Ясная Поляна is a fixed stop on day 2 (Sunday 25.10, Tu-Su 09:00–17:00): ≈ 09:15 + 120 min → open",
       "fuel by region (8 l/100): Московская 244 + 1 = 245 km × 61.80 = 1 213; Тульская 130 + 9 = 139 km × 61.70 = 686; Москва 40 km × 62.50 = 200 → Σ 2 099 → 2 100 (±5 %)",
       "lodging (4 people → family room): Тульский кремль-отель 4.5 + 0.3 − 0.55 = 4.25 > Пряничный двор 4.35 + 0.3 − 0.48 = 4.17 → 5 500 × 1 room",
-      "food: 4 people (ages unknown → weight 1). Day 1 lunch in Тула ≈ 13:50: Кафе «Самовар» 4.2 + 2 + 1 = 7.2 > Пряничная 4.5 + 2 = 6.5 → 700; dinner Тула median_low(600, 650, 700, 850) = 650; breakfast included; day 2 lunch in Серпухов ≈ 13:35: Кафе «Ока» 4.2 + 2 + 1 = 7.2 > «Владычное» 7.0 → 650; finish = origin → 4 × 2 000 = 8 000",
+      "food: 4 people (ages unknown → weight 1). Day 1 lunch in Тула ≈ 13:50: Кафе «Самовар» 4.2 + 2 + 1 = 7.2 > Пряничная 4.5 + 2 = 6.5 → 700; dinner Тула median_low(600, 650, 700, 850) = 650; the hotel has no confirmed breakfast (ADR-0019 E-3) → day 2 breakfast 0.6 × 650 = 390; day 2 lunch in Серпухов ≈ 13:35: Кафе «Ока» 4.2 + 2 + 1 = 7.2 > «Владычное» 7.0 → 650; finish = origin → 4 × 2 390 = 9 560",
       "tickets (2 adults + 2 children): Серпуховский музей 2 × 250 + 2 × 100 = 700; Музей оружия 2 × 400 + 2 × 200 = 1 200; Ясная Поляна 2 × 500 + 2 × 250 = 1 500; Музей «Тульский пряник» 2 × 200 + 2 × 100 = 600 → 4 000",
-      "subtotal 2 100 + 0 + 5 500 + 8 000 + 4 000 = 19 600; reserve 1 960; total round_to(21 560, 100) = 21 600"
+      "subtotal 2 100 + 0 + 5 500 + 9 560 + 4 000 = 21 160; reserve 2 120 (2 116); total round_to(23 280, 100) = 23 300"
     ],
     "warnings": [],
     "stopKindsPerDay": {
@@ -72,7 +72,7 @@
       }
     },
     "costTotalRub": {
-      "value": 21600,
+      "value": 23300,
       "tolerancePct": 5
     }
   }

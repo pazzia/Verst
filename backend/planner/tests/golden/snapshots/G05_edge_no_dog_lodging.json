@@ -273,13 +273,18 @@
             "free_entry"
           ],
           "costRub": 0,
-          "reason": "4 ч на осмотр. Собака ждёт с одним из взрослых.",
+          "reason": "4 ч на осмотр.",
           "verified": true,
           "replaceable": true,
           "alternatives": [],
           "alternativesNote": "Других вариантов в это время поблизости нет.",
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours",
+            "dogs"
+          ],
+          "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
         },
         {
           "id": "d1s04",
@@ -621,13 +626,18 @@
             "free_entry"
           ],
           "costRub": 0,
-          "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+          "reason": "Полчаса на осмотр.",
           "verified": true,
           "replaceable": true,
           "alternatives": [],
           "alternativesNote": "Других вариантов в это время поблизости нет.",
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours",
+            "dogs"
+          ],
+          "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
         },
         {
           "id": "d2s04",
@@ -702,7 +712,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "fuel"
+                ],
+                "unknownRu": "Есть ли АИ-95 — не проверено"
               },
               "dayPatch": [
                 {
@@ -796,7 +810,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "fuel"
+                ],
+                "unknownRu": "Есть ли АИ-95 — не проверено"
               },
               "dayPatch": [
                 {
@@ -846,7 +864,12 @@
           ],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours",
+            "fuel"
+          ],
+          "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
         },
         {
           "id": "d2s05",

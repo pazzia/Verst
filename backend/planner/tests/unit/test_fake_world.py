@@ -79,6 +79,43 @@ class FakeWorldTest(unittest.TestCase):
         mutate(lambda d: d["tollSegments"][0].update({"toKm": 99}), "tollSegments[0].toKm")
         self.assertEqual(len(cases), 11)
 
+    def test_more_validation_rules(self) -> None:
+        """The loader's remaining error paths name the offending field (ADR-0019 touched this loader)."""
+
+        def mutate(fn: Any, expect: str) -> None:
+            d = copy.deepcopy(mini())
+            fn(d)
+            with self.subTest(expect=expect), self.assertRaises(ValueError) as cm:
+                FakeWorld.from_dict(d)
+            self.assertIn(expect, str(cm.exception))
+
+        mutate(lambda d: d.update({"asOf": "2026-13-01"}), "bad date")
+        mutate(lambda d: d["regionPrices"][0].update({"priceRub": "сто"}), "bad decimal")
+        mutate(lambda d: d.update({"nodes": {}}), "nodes: must be a list")
+        mutate(lambda d: d["regions"].append(dict(d["regions"][0])), "regions[2].code")
+        mutate(lambda d: d["nodes"][0].update({"region": "RU-XX"}), "nodes[0].region")
+        mutate(lambda d: d["edges"][0].update({"to": "N0"}), "edges[0].to: self-loop")
+        mutate(lambda d: d["edges"].append(dict(d["edges"][0])), "duplicate edge N0-N1")
+        mutate(lambda d: d["edges"][0].update({"speedKmh": 0}), "edges[0].speedKmh")
+        mutate(lambda d: d["edges"][0].update({"roadClass": "dirt"}), "edges[0].roadClass")
+        mutate(lambda d: d["places"][0]["anchor"].update({"node": "NOPE"}), "places[0].anchor.node")
+        mutate(lambda d: d["places"][0].update({"anchor": {"dxKm": 0.5}}), "anchor needs node or edge")
+        mutate(lambda d: d["places"][0].update({"region": "RU-XX"}), "places[0].region")
+        mutate(lambda d: d["places"][0].update({"type": "spa"}), "places[0].type")
+        mutate(lambda d: d["places"][0].update({"townId": "t_nope"}), "places[0].townId")
+        mutate(lambda d: d["towns"].append(dict(d["towns"][0])), ".id: duplicate id 't_alpha'")
+        mutate(lambda d: d["towns"][0].update({"quality": 9}), "towns[0].quality")
+        mutate(lambda d: d["towns"][0].update({"region": "RU-XX"}), "towns[0].region")
+        mutate(lambda d: d["regionPrices"][0].update({"region": "RU-XX"}), "regionPrices[0].region")
+        mutate(lambda d: d["regionPrices"][0].update({"fuelType": "ai100"}), "regionPrices[0].fuelType")
+        mutate(lambda d: d["tollSegments"].append(dict(d["tollSegments"][0])), "duplicate id 'ts_m12'")
+        mutate(lambda d: d["readyRoutes"].append(dict(d["readyRoutes"][0])), "duplicate id 'rr_mini'")
+        mutate(lambda d: d["readyRoutes"][0].update({"hubTownId": "t_nope"}), "readyRoutes[0].hubTownId")
+        mutate(lambda d: d["readyRoutes"][0]["points"][0].update({"townId": "t_nope"}), "points[0].townId")
+        mutate(lambda d: d["readyRoutes"][0]["points"][0].update({"role": "night"}), "points[0].role")
+        mutate(lambda d: d["readyRoutes"][0].update({"ring": "short"}), "readyRoutes[0].ring")
+        mutate(lambda d: d["readyRoutes"][0].update({"parentId": "rr_nope"}), "parentId: unknown ready route")
+
 
 if __name__ == "__main__":
     unittest.main()

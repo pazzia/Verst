@@ -1,3 +1,4 @@
+import dataclasses
 import unittest
 from datetime import datetime
 from typing import Any
@@ -144,9 +145,12 @@ class SightsTest(unittest.TestCase):
         self.assertEqual(sight_ids(d), [])
 
     def test_reason_dog_waits(self) -> None:
+        """ADR-0019 E-6: «Собака ждёт» only for a sight known not to let dogs in."""
         ctx, inp = setup(crew=Crew(2, 0, True))
         d = day(300)
-        plan_sights([d], corridor([sight("a", 100, 5.0, dwell=90)]), inp, ctx)
+        base = sight("a", 100, 5.0, dwell=90).place
+        no_dogs = dataclasses.replace(base, tags_no=frozenset({Tag.DOGS_ALLOWED}))
+        plan_sights([d], corridor([dataclasses.replace(sight("a", 100, 5.0), place=no_dogs)]), inp, ctx)
         s = next(x for x in d.stops if x.kind is StopKind.SIGHT)
         self.assertEqual((s.reason_key, s.reason_params), ("sight.dog_waits", {"dwell": "полтора часа"}))
         self.assertEqual(
@@ -156,6 +160,17 @@ class SightsTest(unittest.TestCase):
         slot = schedule_day(d, ctx.profile_for(ROUTE))[1]
         assert slot.arrive is not None
         self.assertEqual(local(slot.arrive, "Europe/Moscow"), datetime(2026, 10, 24, 9, 40))
+
+    def test_reason_dogs_allowed_and_unknown(self) -> None:
+        """ADR-0019 E-6: a sight that lets dogs in says so; an unchecked one makes no claim either way."""
+        ctx, inp = setup(crew=Crew(2, 0, True))
+        for tags, key in (({Tag.DOGS_ALLOWED}, "sight.dog_ok"), (set(), "sight.default")):
+            with self.subTest(key=key):
+                d = day(300)
+                plan_sights([d], corridor([sight("a", 100, 5.0, dwell=90, tags=tags)]), inp, ctx)
+                s = next(x for x in d.stops if x.kind is StopKind.SIGHT)
+                self.assertEqual(s.reason_key, key)
+        self.assertEqual(ctx.templates.render("sight.dog_ok", dwell="час"), "Час на осмотр, с собакой можно.")
 
 
 if __name__ == "__main__":

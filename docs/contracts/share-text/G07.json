@@ -207,7 +207,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -505,7 +509,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -1386,8 +1394,8 @@
         {
           "key": "food",
           "title": "Питание",
-          "rub": 8000,
-          "formula": "4 чел. × 3 приёма × ≈ 670 (в среднем)",
+          "rub": 9560,
+          "formula": "4 чел. × 4 приёма × ≈ 600 (в среднем)",
           "asOf": "2026-09",
           "enabled": true,
           "breakdown": [
@@ -1398,8 +1406,8 @@
             },
             {
               "label": "День 2",
-              "formula": "обед 650",
-              "rub": 2600
+              "formula": "завтрак 390 + обед 650",
+              "rub": 4160
             }
           ]
         },
@@ -1436,7 +1444,7 @@
         {
           "key": "reserve",
           "title": "Резерв 10%",
-          "rub": 1960,
+          "rub": 2120,
           "formula": "на пробки и «давай заедем»",
           "asOf": "2026-09",
           "enabled": true,
@@ -1444,9 +1452,9 @@
         }
       ],
       "reserveOn": true,
-      "subtotalRub": 19600,
-      "totalRub": 21600,
-      "perPersonRub": 5400,
+      "subtotalRub": 21160,
+      "totalRub": 23300,
+      "perPersonRub": 5800,
       "budgetRub": null,
       "remainingRub": null,
       "overBudget": false,
@@ -1492,16 +1500,16 @@
               {
                 "placeId": "pl_tul_hotel_kremlin",
                 "priceNightRub": 5500,
-                "breakfastIncluded": true
+                "breakfastIncluded": false
               },
               {
                 "placeId": "pl_tul_hotel_pryanik",
                 "priceNightRub": 4800,
-                "breakfastIncluded": true
+                "breakfastIncluded": false
               }
             ],
             "defaultPrice": false,
-            "breakfastIncluded": true,
+            "breakfastIncluded": false,
             "breakfastCheckRub": 390
           }
         ],
@@ -1621,5 +1629,5 @@
     },
     "engineVersion": "0.1.0"
   },
-  "text": "Тула · Ясная Поляна · 425 км · 2 дня\nДень 1 · 188 км\n09:00 Москва\n10:14 Серпуховский историко-художественный музей\n12:13 Музей оружия\n13:52 Кафе «Самовар»\n15:01 Тула\nДень 2 · 237 км\n09:00 Тула\n09:17 Ясная Поляна\n11:52 Музей «Тульский пряник»\n13:36 Кафе «Ока»\n15:50 Москва\nИтого ≈ 21 600 ₽ на 4 чел."
+  "text": "Тула · Ясная Поляна · 425 км · 2 дня\nДень 1 · 188 км\n09:00 Москва\n10:14 Серпуховский историко-художественный музей\n12:13 Музей оружия\n13:52 Кафе «Самовар»\n15:01 Тула\nДень 2 · 237 км\n09:00 Тула\n09:17 Ясная Поляна\n11:52 Музей «Тульский пряник»\n13:36 Кафе «Ока»\n15:50 Москва\nИтого ≈ 23 300 ₽ на 4 чел."
 }

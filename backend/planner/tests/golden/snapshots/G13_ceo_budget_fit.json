@@ -67,13 +67,17 @@
             "free_entry"
           ],
           "costRub": 0,
-          "reason": "Полтора часа на осмотр. Собака ждёт с одним из взрослых.",
+          "reason": "Полтора часа на осмотр.",
           "verified": true,
           "replaceable": false,
           "alternatives": [],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "dogs"
+          ],
+          "unknownRu": "Пускают ли с собакой — не проверено"
         },
         {
           "id": "d1s03",
@@ -100,7 +104,7 @@
             "free_entry"
           ],
           "costRub": 0,
-          "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+          "reason": "Полчаса на осмотр.",
           "verified": true,
           "replaceable": true,
           "alternatives": [
@@ -146,13 +150,17 @@
                   "monastery"
                 ],
                 "costRub": 1350,
-                "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Час на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -234,13 +242,17 @@
                   "museum"
                 ],
                 "costRub": 1550,
-                "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Час на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -321,13 +333,17 @@
                   "museum"
                 ],
                 "costRub": 900,
-                "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Полчаса на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -370,7 +386,12 @@
           ],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours",
+            "dogs"
+          ],
+          "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
         },
         {
           "id": "d1s04",
@@ -789,7 +810,7 @@
             "free_entry"
           ],
           "costRub": 0,
-          "reason": "45 мин на осмотр. Собака ждёт с одним из взрослых.",
+          "reason": "45 мин на осмотр.",
           "verified": true,
           "replaceable": true,
           "alternatives": [
@@ -835,13 +856,17 @@
                   "monastery"
                 ],
                 "costRub": 1350,
-                "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Час на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -922,13 +947,17 @@
                   "museum"
                 ],
                 "costRub": 900,
-                "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Полчаса на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -1010,13 +1039,17 @@
                   "museum"
                 ],
                 "costRub": 1550,
-                "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Час на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -1059,7 +1092,11 @@
           ],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "dogs"
+          ],
+          "unknownRu": "Пускают ли с собакой — не проверено"
         },
         {
           "id": "d2s03",
@@ -1085,7 +1122,7 @@
             "free_entry"
           ],
           "costRub": 0,
-          "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+          "reason": "Полчаса на осмотр.",
           "verified": true,
           "replaceable": true,
           "alternatives": [
@@ -1131,13 +1168,17 @@
                   "monastery"
                 ],
                 "costRub": 1350,
-                "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Час на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -1218,13 +1259,17 @@
                   "museum"
                 ],
                 "costRub": 900,
-                "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Полчаса на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -1306,13 +1351,17 @@
                   "museum"
                 ],
                 "costRub": 1550,
-                "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+                "reason": "Час на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "dogs"
+                ],
+                "unknownRu": "Пускают ли с собакой — не проверено"
               },
               "dayPatch": [
                 {
@@ -1355,7 +1404,12 @@
           ],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours",
+            "dogs"
+          ],
+          "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
         },
         {
           "id": "d2s04",
@@ -1649,8 +1703,8 @@
       {
         "key": "food",
         "title": "Питание",
-        "rub": 10250,
-        "formula": "5 чел. × 3 приёма × ≈ 680 (в среднем)",
+        "rub": 12050,
+        "formula": "5 чел. × 4 приёма × ≈ 600 (в среднем)",
         "asOf": "2026-09",
         "enabled": true,
         "breakdown": [
@@ -1661,8 +1715,8 @@
           },
           {
             "label": "День 2",
-            "formula": "обед 750",
-            "rub": 3750
+            "formula": "завтрак 360 + обед 750",
+            "rub": 5550
           }
         ]
       },
@@ -1678,7 +1732,7 @@
       {
         "key": "reserve",
         "title": "Резерв 10%",
-        "rub": 2490,
+        "rub": 2670,
         "formula": "на пробки и «давай заедем»",
         "asOf": "2026-09",
         "enabled": true,
@@ -1686,11 +1740,11 @@
       }
     ],
     "reserveOn": true,
-    "subtotalRub": 24900,
-    "totalRub": 27400,
-    "perPersonRub": 5500,
+    "subtotalRub": 26700,
+    "totalRub": 29400,
+    "perPersonRub": 5900,
     "budgetRub": 30000,
-    "remainingRub": 2600,
+    "remainingRub": 600,
     "overBudget": false,
     "hints": [],
     "hintKeys": [],
@@ -1734,16 +1788,16 @@
             {
               "placeId": "pl_yar_hotel_strelka",
               "priceNightRub": 6000,
-              "breakfastIncluded": true
+              "breakfastIncluded": false
             },
             {
               "placeId": "pl_yar_hotel_volga",
               "priceNightRub": 7000,
-              "breakfastIncluded": true
+              "breakfastIncluded": false
             }
           ],
           "defaultPrice": false,
-          "breakfastIncluded": true,
+          "breakfastIncluded": false,
           "breakfastCheckRub": 360
         }
       ],
@@ -1866,20 +1920,20 @@
     "status": "fits",
     "budgetRub": 30000,
     "allowedRub": 31500,
-    "initialTotalRub": 58400,
-    "totalRub": 27400,
+    "initialTotalRub": 64000,
+    "totalRub": 29400,
     "levers": [
       {
         "code": "food_economy",
-        "savedRub": 2700
+        "savedRub": 4000
       },
       {
         "code": "sights_free",
-        "savedRub": 5600
+        "savedRub": 5700
       },
       {
         "code": "variant",
-        "savedRub": 22700
+        "savedRub": 24900
       }
     ],
     "textRu": "Подогнали под бюджет 30 000 ₽: кафе попроще, бесплатные места, короткий вариант маршрута.",

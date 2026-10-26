@@ -107,7 +107,7 @@ def effective_parking(units: CostUnits, ov: CostOverrides) -> list[ParkingUnit]:
 def _alt_ticket(stop_id: str, alt: AltUnits) -> TicketUnit:
     adult = alt.adult_rub or 0
     child = alt.child_rub if alt.child_rub is not None else adult
-    return TicketUnit(stop_id, alt.place_id, alt.name_ru, adult, child)
+    return TicketUnit(stop_id, alt.place_id, alt.name_ru, adult, child, alt.ticket_known)
 
 
 def recompute(
@@ -257,6 +257,7 @@ def recompute(
     tickets = effective_tickets(units, ov)
     ticket_exact = ZERO
     paid = 0
+    unknown_tickets = sum(1 for t in tickets if not t.known)  # ADR-0019 E-2: 0 ₽, named, not in the total
     ticket_rows = []
     for t in tickets:
         cost = dec(crew.adults * t.adult_rub + crew.children * t.child_rub)
@@ -274,7 +275,7 @@ def recompute(
             CostKey.TICKETS,
             fm.title(CostKey.TICKETS, fuel_t, units.reserve_frac),
             tickets_rub,
-            fm.tickets_formula(paid, crew.adults, crew.children),
+            fm.tickets_formula(paid, crew.adults, crew.children, unknown_tickets),
             _as_of(units, CostKey.TICKETS, units.fuel.as_of),
             tuple(ticket_rows),
         )
@@ -339,4 +340,5 @@ def recompute(
         hint_keys=tuple(hints),
         prices_as_of=prices_as_of,
         units=units,
+        total_note_ru=fm.total_note(unknown_tickets),
     )

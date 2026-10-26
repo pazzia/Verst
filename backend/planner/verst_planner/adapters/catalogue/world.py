@@ -69,6 +69,11 @@ POI_TICKETS = {
     "zoo": (500, 250),
     "interactive": (500, 300),
 }
+FREE_KINDS = frozenset(
+    {"church", "monument", "park", "viewpoint", "embankment", "square", "theatre", "nature", "playground"}
+)
+"""ADR-0019 E-2: kinds with no entry to pay (public spaces, a theatre seen from its square, a church) are free
+by their kind; any other kind without a price is «цена неизвестна», never silently free."""
 BIG_MUSEUM_SITELINKS = 40
 
 
@@ -115,8 +120,19 @@ def _tags(kind: str, free: bool) -> frozenset[Tag]:
     return t
 
 
+def poi_ticket(p: CatPoi) -> tuple[tuple[int, int] | None, bool]:
+    """(ticket estimate, free). OSM `fee=no` is free; a kind with a default ticket gets the estimate (the card
+    says «примерная»); a free kind without `fee=yes` is free; anything else has an unknown price (E-2)."""
+    if p.fee is False:
+        return None, True
+    ticket = POI_TICKETS.get(p.kind)
+    if ticket is not None:
+        return ticket, False
+    return None, p.fee is None and p.kind in FREE_KINDS
+
+
 def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
-    ticket = None if p.fee is False else POI_TICKETS.get(p.kind)  # OSM fee=no: free entry
+    ticket, free = poi_ticket(p)
     dwell = POI_DWELL[p.kind]
     if p.kind == "museum" and p.sitelinks >= BIG_MUSEUM_SITELINKS:
         dwell = 90
@@ -135,7 +151,7 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
         ticket_adult_rub=ticket[0] if ticket else None,
         ticket_child_rub=ticket[1] if ticket else None,
         rating_internal=poi_rating(p.sitelinks),
-        tags=_tags(p.kind, ticket is None),
+        tags=_tags(p.kind, free),
         description_ru=p.desc,
         partner_ids=_NO_PARTNERS,
         source=Source.OSM,

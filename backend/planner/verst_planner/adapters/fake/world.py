@@ -321,9 +321,19 @@ class _Loader:
             if region not in regions:
                 raise ValueError(f"{path}.region: unknown region {region!r}")
             tags_raw = p.get("tags", [])
-            for j, t in enumerate(tags_raw):
-                if t not in _TAG_VALUES:
-                    raise ValueError(f"{path}.tags[{j}]: unknown tag {t!r}")
+            tags_no_raw = p.get("tagsNo", [])  # ADR-0019 E-6: tags confirmed absent
+            for key, raw in (("tags", tags_raw), ("tagsNo", tags_no_raw)):
+                for j, t in enumerate(raw):
+                    if t not in _TAG_VALUES:
+                        raise ValueError(f"{path}.{key}[{j}]: unknown tag {t!r}")
+            fuels: dict[str, frozenset[FuelType]] = {}
+            for key in ("fuelKinds", "fuelKindsNo"):  # ADR-0019 E-4: absent = the station's fuels are unknown
+                try:
+                    fuels[key] = frozenset(FuelType(f) for f in p.get(key, []))
+                except ValueError:
+                    raise ValueError(f"{path}.{key}: unknown fuel in {p.get(key)!r}") from None
+            rating = p.get("rating")
+            breakfast = p.get("breakfastIncluded")
             try:
                 ptype = PlaceType(self._req(p, "type", path))
             except ValueError:
@@ -348,14 +358,17 @@ class _Loader:
                 price_night_rub=p.get("priceNightRub"),
                 ticket_adult_rub=p.get("ticketAdultRub"),
                 ticket_child_rub=p.get("ticketChildRub"),
-                rating_internal=float(p.get("rating", 3.0)),
+                rating_internal=None if rating is None else float(rating),  # E-5: no rating, no 3.0
                 tags=frozenset(Tag(t) for t in tags_raw),
                 description_ru=p.get("descriptionRu"),
                 partner_ids=PartnerIds(partner.get("yandexTravelId"), partner.get("tripsterId")),
                 source=source,
                 verified_at=None if verified is None else self._date(verified, f"{path}.verifiedAt"),
                 status=PlaceStatus(p.get("status", "live")),
-                breakfast_included=bool(p.get("breakfastIncluded", True)),
+                breakfast_included=None if breakfast is None else bool(breakfast),  # E-3: unknown
+                tags_no=frozenset(Tag(t) for t in tags_no_raw),
+                fuel_kinds=fuels["fuelKinds"],
+                fuel_kinds_no=fuels["fuelKindsNo"],
             )
         return out
 

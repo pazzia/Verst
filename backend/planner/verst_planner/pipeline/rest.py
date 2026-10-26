@@ -21,6 +21,7 @@ import dataclasses
 from dataclasses import dataclass
 
 from verst_planner.domain.enums import Mood, PlaceType, StopKind, Tag
+from verst_planner.domain.facts import rank_rating
 from verst_planner.domain.model import Candidate, DayPlan, LatLon, NormalizedInput, Place, PlannedStop, Route
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import sight_reason
@@ -161,7 +162,7 @@ def rest_score(c: Candidate, inp: NormalizedInput) -> float:
         + 1.5 * (Tag.WALK in t and inp.crew.dog)
         + 1.0 * (Tag.WC in t)
         + 0.5 * (Tag.VIEW in t)
-        + 0.5 * c.place.rating_internal * sight
+        + 0.5 * rank_rating(c.place) * sight
         - c.detour_min / 5
     )
 
@@ -232,7 +233,7 @@ def make_rest_stop(c: Candidate, inp: NormalizedInput, ctx: PlanContext, drove_m
             max(c.place.dwell_min or dm.rest, ctx.cfg.rest.break_min_dwell),
             False,
         )
-        key, params = sight_reason(dwell, inp.crew, c.place.source)
+        key, params = sight_reason(dwell, inp.crew, c.place)
     else:
         kind, dwell, coffee = StopKind.REST, dm.rest, False
         key, params = _reason(inp, dwell, drove_min)

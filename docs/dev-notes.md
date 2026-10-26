@@ -2565,3 +2565,100 @@ Design: [ADR-0020](adr/0020-minimal-beta-backend.md). The engine is imported as 
 VM: Yandex Cloud ru-central1, 8 vCPU / 32 GB / 160 GB · domain `api.verst.app` placeholder (`VERST_DOMAIN`) · TLS
 by Caddy/Let's Encrypt · off-site backup: weekly manual copy to Yandex Object Storage · uptime monitor: external
 HTTPS check + Telegram · synthetic fallback off · feedback text kept 180 days.
+
+## Investor-readiness / trust fixes
+
+Engine behaviours that misled users (ADR-0018 §10 E-1…E-6) plus two known bugs. Architect acting as Developer, on
+branch ccr-013d3489-181fz2, not committed. Design: `docs/adr/0019-unknown-is-not-a-default.md`.
+
+### Files
+- Engine: `verst_planner/domain/facts.py` (new: every yes / no / unknown rule), `domain/model.py` (`Place`
+  `rating_internal: float | None`, `breakfast_included: bool | None = None`, `tags_no`, `fuel_kinds`,
+  `fuel_kinds_no`; `ScheduledStop.unknown_facts/unknown_ru`; `TicketUnit.known`; `AltUnits.ticket_known`;
+  `CostResult.total_note_ru`; `HotelPrice.breakfast_included` default False), `domain/codec.py`,
+  `pipeline/{assemble,corridor,fuel,sights,meals,overnight,rest,alternatives}.py`, `pipeline/__init__.py`
+  (docstring), `explain/{reasons,templates}.py`, `cost/{model,recompute,formulas}.py`,
+  `adapters/fake/world.py`, `adapters/catalogue/{world,synthetic}.py`, `city/route.py`, `mobile.py`,
+  `resources/{strings,reasons}.ru.json`.
+- Tests: `tests/unit/test_trust_facts.py` (new, 22 tests), `test_fake_world.py` (+ loader error paths),
+  `test_sights.py`, `test_walk_s4.py`, `test_templates.py`, `tests/golden/ties.py`; golden cases G01, G02, G03,
+  G06, G07, G13 (expectations and hand workings) and 10 snapshots.
+- Contracts: `tools/gen_api_contracts.py` (+ `poi_details-hours-unknown`, `poi_details-ticket-unknown`,
+  `estimate-ready-{tula,yaroslavl,golden-ring}`), `tools/gen_mobile_contracts.py` (`afterFlags`); regenerated
+  `docs/contracts/v2/*`, `replace/*`, `patch/*`, `share-text/*`, `plan-response.example.json`.
+- Android (minimal): `CardSheet.kt`, `RoadScreen.kt`, `WaybillScreen.kt`, `dto/Dtos.kt`, `dto/V2Dtos.kt`,
+  `core-ui/.../strings.xml`, `ScreensScreenshotTest.kt`. `VerstFlow.kt` and `MainActivity.kt` untouched.
+- Docs: ADR-0019 (new), ADR-0018 §10 (pointer), `docs/architecture.md` (Place model, hours, breakfast, D-6),
+  `docs/architecture-android-mvp.md` (`poi_details` `known`).
+
+### What each fix does
+- **E-1 hours.** `opening_hours` None = unknown; the stop stays allowed (no scheduling change). Curated sight / café /
+  fuel rows say «Часы не известны — уточните»; open-data rows keep their ring; the card shows the chip «часы не
+  известны — уточните»; a walk stop without hours sends `todayRu`/`openNow` null («часы не указаны»), not «24 часа».
+- **E-2 tickets.** Unknown price ≠ free: 0 ₽ in the sums, «цена билета неизвестна» on the row and the card, the line
+  names it, `totalNoteRu` under the total; the «бесплатные места» lever keeps only confirmed-free sights; the
+  catalogue no longer adds `free_entry` to `attraction` items or `fee=yes` items without a default ticket.
+- **E-3 breakfast.** Unknown = costed (decision and reasons: ADR-0019 §2).
+- **E-4 fuel.** A station known not to sell the car's fuel is skipped; a confirmed one wins the window; otherwise the
+  row says «Есть ли АИ-95 — не проверено».
+- **E-5 rating.** None ranks with 0.0 (below every rated place); the fixture loader no longer invents 3.0.
+- **E-6 yes / no / unknown.** «Собака ждёт с одним из взрослых» only for a confirmed «no»; «…, с собакой можно» for
+  a confirmed «yes»; unknown → «Пускают ли с собакой — не проверено». The walk's kind-based line is hedged
+  («С собакой внутрь обычно нельзя.»).
+- **«Описание: Описание: Викиданные».** The engine's `extractSource.nameRu` is the whole source line
+  (`poi.source.wikidata` = «Описание: Викиданные»); `CardSheet` wrapped it again in `card_desc_source`
+  («Описание: %1$s»). The card now shows `nameRu · licence` as given; the unused string is removed.
+- **Ярославль 542 km.** `ScreensScreenshotTest.engineKm` took `rr_yaroslavl` from the G01 snapshot (a free
+  Москва → Ярославль trip, 542 km). It now reads the engine's `estimate` of each ready route for one crew (G02's)
+  from `docs/contracts/v2/estimate-ready-*.json`: Тула 425, Ярославль **536**, Золотое кольцо 761 (= G02). The
+  templates' `kmTotal`/`kmSign` (526/263) are the base-route sign figures and are never shown as the trip km
+  (A§6.12); unchanged.
+
+### Golden diffs and their justification (repo rule: goldens change only with a written reason)
+In every changed golden the stops, places, times, km and alternatives' places are byte-identical (checked
+stop by stop). What changes:
+
+| Golden | Total | Why |
+| --- | --- | --- |
+| G01 Москва ⇄ Ярославль | 16 500 → 17 700 | E-3: Стрелка has no `breakfastIncluded` → day-2 breakfast 2 × 540 costed (food 4 900 → 5 980, reserve 1 500 → 1 610). E-1: «Земляной вал Переславля» and «Плещеево озеро» (curated, no hours) get «Часы не известны — уточните»; 10 alternatives' stops get their markers. |
+| G02 Золотое кольцо, dog | 33 800 → 37 200 | E-3: both hotels unconfirmed → breakfasts 540 + 480 for 3 people (food 11 250 → 14 310); still within 40 000 (remaining 6 200 → 2 800). E-6: 6 sight reasons lose «Собака ждёт…» (no sight has a confirmed «no»), 6 rows get «Пускают ли с собакой — не проверено» (one with the hours). E-4: the fuel stop gets «Есть ли АИ-95 — не проверено». |
+| G03 Москва → Волгоград, dog + child | 16 200 → 17 200 | E-3: Державинская unconfirmed → breakfast 2.5 × 390 (food 4 630 → 5 600). E-6 + E-1: 3 open-air sights (no hours, dogs unknown). E-4: the fuel stop. |
+| G04 Москва → Казань, just drive | 8 900 = | E-1 + E-4: the fuel stop (no hours, no `24h`, fuels unknown) gets «Не проверено: часы работы, есть ли АИ-95 — уточните». |
+| G05 edge, no dog hotel | 11 500 = | E-6 + E-1: 2 sights; E-1 + E-4: 1 fuel stop. The overnight fallback is unchanged (it never used breakfast). |
+| G06 Москва → Казань, no tolls | 18 200 → 19 300 | E-3: «Волга» unconfirmed → breakfast 2 × 480 (food 4 300 → 5 260). E-1: 4 curated sights without hours; E-4: the fuel stop. |
+| G07 Тула · Ясная Поляна | 21 600 → 23 300 | E-3: the Тула hotel unconfirmed → breakfast 4 × 390 (food 8 000 → 9 560). Otherwise only 2 alternatives' stops get markers. |
+| G08 Москва → Суздаль | 5 700 = | Only 5 alternatives' stops get markers (4 without hours, 1 fuel stop with hours and fuel unknown). |
+| G11 edge fuel gap | unchanged | — |
+| G12 edge day over budget | 3 900 = | E-1: «Большой краеведческий музей» and «Парк-усадьба «Долгая»» (curated, no hours). |
+| G13 CEO budget fit | 27 400 → 29 400 | E-3: the plain plan rises 58 400 → 64 000 (food 18 750 → 23 850); the same levers in the same order (food_economy, sights_free, variant) still fit 30 000 (remaining 600); E-6 on 4 sights. Replace/patch contracts: 9 replace items and 1 patch item now flip `breaksBudget` of other days' alternatives (the edit crosses the 31 500 tolerance) → carried as `afterFlags`. |
+
+Case files: `costTotalRub`, `costLinesRub.food` (G02, G03), the food formula texts (G02, G03) and the hand workings
+(food, subtotal, reserve, total) were recomputed by hand and match the engine to the rouble.
+
+### Commands and results (2026-10-26, Python 3.13)
+- `make golden-update` → snapshots rewritten; then `python3 -m unittest tests.golden.test_golden` → 15 OK.
+- `python3 tools/gen_api_contracts.py` → 43 files; `python3 tools/gen_mobile_contracts.py` → 22 bundles,
+  143 replace items, 28 patch items (counts unchanged, the Kotlin tests pin them); `python3 -m
+  tests.golden.export_contracts`; `python3 tools/gen_cost_contract.py` → 52 cases, file unchanged.
+- `cd backend/planner && python3 -m unittest discover` → `Ran 527 tests` / `OK` (503 before + 24 new).
+- `make check` → `All checks passed!`, `Success: no issues found in 76 source files`, `Ran 527 tests` / `OK`.
+- `python3 tools/stdlib_coverage.py --fail-under 95` → total 98.0 % (527 tests); `domain/facts.py`,
+  `cost/formulas.py`, `cost/recompute.py`, `pipeline/fuel.py`, `explain/reasons.py` 100 %; every touched module
+  ≥ 96.2 % (`domain/codec.py`); the fake world loader 89.7 % → 97.8 % (its error paths got tests).
+- Generators re-run a second time → no diff (byte-identical).
+
+### Only Android CI can verify
+- Compilation of the Kotlin changes; `ScreensScreenshotTest` new tests (`readyRouteKmIsTheReadyRoutes`,
+  `cardWikidataSourceOnce`, `cardUnknownHoursAndTicket`, `roadUnknownTicket`, `waybillTotalNote`, the extra
+  assertions in `roadG02`, `waybillDefault`, `walkDogWarning`) and the changed screenshots (Windshield km 536,
+  G02 waybill/road totals, the new row line); `CostCalculatorContractTest` (numbers unchanged by design);
+  `V2ContractsTest`, `ContractFilesTest`, `EngineJsonTest` on the regenerated files; Android lint
+  (`card_desc_source` removed).
+
+### Open questions (default applied)
+1. Fixture hotels without `breakfastIncluded`: left unknown (costed), not rewritten to `true`; the fixture never said
+   it. If the demo should keep the old totals, set the flag in `tools/gen_worlds.py` (a data decision).
+2. Share text total: unchanged (pinned by the Kotlin `ShareTextBuilder` contract); a «без билетов…» suffix is a
+   separate change.
+3. Curation docs still describe the old engine (checklist §2.4, §3.2, §3.3, §4): left to the Data Curator; the release
+   gates stay valid. `design/variants-ir/README.md` §9 quotes pre-E-3 totals (Ярославль 17 300 → 19 100 now).

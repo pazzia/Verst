@@ -29,11 +29,11 @@
    "budgetRub": 20000,
    "allowedRub": 21000,
    "minimum": {
-    "totalRub": 26400,
+    "totalRub": 28300,
     "levers": [
      {
       "code": "food_economy",
-      "savedRub": 3600
+      "savedRub": 4900
      },
      {
       "code": "sights_free",
@@ -41,7 +41,7 @@
      },
      {
       "code": "variant",
-      "savedRub": 24300
+      "savedRub": 26700
      }
     ],
     "trip": {
@@ -115,13 +115,17 @@
           "free_entry"
          ],
          "costRub": 0,
-         "reason": "Полтора часа на осмотр. Собака ждёт с одним из взрослых.",
+         "reason": "Полтора часа на осмотр.",
          "verified": true,
          "replaceable": false,
          "alternatives": [],
          "alternativesNote": null,
          "hotelOptions": [],
          "selectedHotelId": null,
+         "unknownFacts": [
+          "dogs"
+         ],
+         "unknownRu": "Пускают ли с собакой — не проверено",
          "kmDriven": 73,
          "kmLeft": 475,
          "parking": {
@@ -166,7 +170,7 @@
           "free_entry"
          ],
          "costRub": 0,
-         "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+         "reason": "Полчаса на осмотр.",
          "verified": true,
          "replaceable": true,
          "alternatives": [
@@ -217,13 +221,18 @@
              "free_entry"
             ],
             "costRub": 0,
-            "reason": "Полчаса на осмотр. Собака ждёт с одним из взрослых.",
+            "reason": "Полчаса на осмотр.",
             "verified": true,
             "replaceable": true,
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "hours",
+             "dogs"
+            ],
+            "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните",
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -332,6 +341,11 @@
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "hours",
+             "dogs"
+            ],
+            "unknownRu": null,
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -433,13 +447,17 @@
              "monastery"
             ],
             "costRub": 1350,
-            "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+            "reason": "Час на осмотр.",
             "verified": true,
             "replaceable": true,
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "dogs"
+            ],
+            "unknownRu": "Пускают ли с собакой — не проверено",
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -499,6 +517,11 @@
          "alternativesNote": null,
          "hotelOptions": [],
          "selectedHotelId": null,
+         "unknownFacts": [
+          "hours",
+          "dogs"
+         ],
+         "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните",
          "kmDriven": 143,
          "kmLeft": 405,
          "parking": {
@@ -994,7 +1017,7 @@
           "free_entry"
          ],
          "costRub": 0,
-         "reason": "45 мин на осмотр. Собака ждёт с одним из взрослых.",
+         "reason": "45 мин на осмотр.",
          "verified": true,
          "replaceable": true,
          "alternatives": [
@@ -1051,6 +1074,11 @@
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "hours",
+             "dogs"
+            ],
+            "unknownRu": null,
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -1152,13 +1180,17 @@
              "monastery"
             ],
             "costRub": 1350,
-            "reason": "Час на осмотр. Собака ждёт с одним из взрослых.",
+            "reason": "Час на осмотр.",
             "verified": true,
             "replaceable": true,
             "alternatives": [],
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "dogs"
+            ],
+            "unknownRu": "Пускают ли с собакой — не проверено",
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -1267,6 +1299,11 @@
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "hours",
+             "dogs"
+            ],
+            "unknownRu": null,
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -1326,6 +1363,10 @@
          "alternativesNote": null,
          "hotelOptions": [],
          "selectedHotelId": null,
+         "unknownFacts": [
+          "dogs"
+         ],
+         "unknownRu": "Пускают ли с собакой — не проверено",
          "kmDriven": 393,
          "kmLeft": 155,
          "parking": {
@@ -1775,6 +1816,11 @@
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "hours",
+             "dogs"
+            ],
+            "unknownRu": null,
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -1883,6 +1929,11 @@
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "hours",
+             "dogs"
+            ],
+            "unknownRu": null,
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -1991,6 +2042,11 @@
             "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
+            "unknownFacts": [
+             "hours",
+             "dogs"
+            ],
+            "unknownRu": null,
             "parking": {
              "rub": 0,
              "rubPerHour": 0,
@@ -2050,6 +2106,11 @@
          "alternativesNote": null,
          "hotelOptions": [],
          "selectedHotelId": null,
+         "unknownFacts": [
+          "hours",
+          "dogs"
+         ],
+         "unknownRu": null,
          "kmDriven": 537,
          "kmLeft": 11,
          "parking": {
@@ -2161,8 +2222,8 @@
        {
         "key": "food",
         "title": "Питание",
-        "rub": 9250,
-        "formula": "5 чел. × 3 приёма × ≈ 620 (в среднем)",
+        "rub": 11050,
+        "formula": "5 чел. × 4 приёма × ≈ 550 (в среднем)",
         "asOf": "2026-10",
         "enabled": true,
         "breakdown": [
@@ -2173,8 +2234,8 @@
          },
          {
           "label": "День 2",
-          "formula": "обед 700",
-          "rub": 3500
+          "formula": "завтрак 360 + обед 700",
+          "rub": 5300
          }
         ]
        },
@@ -2230,7 +2291,7 @@
        {
         "key": "reserve",
         "title": "Резерв 10%",
-        "rub": 2400,
+        "rub": 2580,
         "formula": "на пробки и «давай заедем»",
         "asOf": "2026-09",
         "enabled": true,
@@ -2238,11 +2299,11 @@
        }
       ],
       "reserveOn": true,
-      "subtotalRub": 23960,
-      "totalRub": 26400,
-      "perPersonRub": 5300,
+      "subtotalRub": 25760,
+      "totalRub": 28300,
+      "perPersonRub": 5700,
       "budgetRub": 20000,
-      "remainingRub": -6400,
+      "remainingRub": -8300,
       "overBudget": true,
       "hints": [
        "Уберите пару платных мест",
@@ -2298,16 +2359,16 @@
           {
            "placeId": "pl_yar_hotel_strelka",
            "priceNightRub": 6000,
-           "breakfastIncluded": true
+           "breakfastIncluded": false
           },
           {
            "placeId": "pl_yar_hotel_volga",
            "priceNightRub": 7000,
-           "breakfastIncluded": true
+           "breakfastIncluded": false
           }
          ],
          "defaultPrice": false,
-         "breakfastIncluded": true,
+         "breakfastIncluded": false,
          "breakfastCheckRub": 360
         }
        ],
@@ -3623,7 +3684,7 @@
           "score": 6.066666666666666,
           "placeId": "pl_prs_pleshcheevo",
           "regionCode": "RU-YAR",
-          "reasonKey": "sight.dog_waits",
+          "reasonKey": "sight.default",
           "reasonParams": [
            [
             "dwell",
@@ -3714,7 +3775,7 @@
           "score": 5.4,
           "placeId": "pl_prs_nikitsky",
           "regionCode": "RU-YAR",
-          "reasonKey": "sight.dog_waits",
+          "reasonKey": "sight.default",
           "reasonParams": [
            [
             "dwell",
@@ -7295,7 +7356,7 @@
       ]
      }
     },
-    "shareText": "Золотое кольцо · коротко · 548 км · 2 дня\nДень 1 · 272 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Кафе «Пряник»\n14:54 Ярославль\nДень 2 · 276 км\n09:00 Ярославль\n10:40 Никитский монастырь\n13:10 Кафе «Огонёк»\n14:35 Выставка достижений народного хозяйства\n15:30 Москва\nИтого ≈ 26 400 ₽ на 5 чел.",
+    "shareText": "Золотое кольцо · коротко · 548 км · 2 дня\nДень 1 · 272 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Кафе «Пряник»\n14:54 Ярославль\nДень 2 · 276 км\n09:00 Ярославль\n10:40 Никитский монастырь\n13:10 Кафе «Огонёк»\n14:35 Выставка достижений народного хозяйства\n15:30 Москва\nИтого ≈ 28 300 ₽ на 5 чел.",
     "pricesMonthRu": "сентябрь",
     "pricesYear": "2026",
     "townPrepRu": {
@@ -7319,7 +7380,7 @@
     {
      "kind": "raise_budget",
      "totalRub": null,
-     "budgetRub": 27000,
+     "budgetRub": 29000,
      "days": null,
      "dailyKm": null,
      "readyRouteId": null,
@@ -7328,7 +7389,7 @@
      "fits": true
     }
    ],
-   "textRu": "В 20 000 ₽ эта поездка не помещается даже в самом экономном варианте — минимум ≈ 26 400 ₽."
+   "textRu": "В 20 000 ₽ эта поездка не помещается даже в самом экономном варианте — минимум ≈ 28 300 ₽."
   },
   "ms": 0
  }

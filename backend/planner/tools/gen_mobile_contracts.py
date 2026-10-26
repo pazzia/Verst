@@ -12,6 +12,9 @@ One gzip bundle per golden case with a snapshot; the trip before the edit is sto
   choice for every night with ≥ 2 options (`hotel_<stopId>`, the first option that is not selected).
   `afterHotel` is null or `{"stopId", "placeId", "selectedHotelId", "costRub", "tags"}` (the changed fields of
   that overnight stop). Asserted the same way: `before` + these parts == the trip `recompute_cost` returns.
+- Both kinds carry `afterFlags` = `[{"stopId", "altId", "breaksBudget"}]` only when the edit re-flags an
+  alternative elsewhere in the trip (ADR-0011 flags trip-wide; it happens when the edit moves the total
+  across the budget tolerance, e.g. G13 after ADR-0019). The app takes those flags from the engine's answer.
 
 The generator also asserts ≤ `MAX_ALTERNATIVES` (3) alternatives per stop and that `before` is the golden
 snapshot. Files are compact JSON + newline, gzipped deterministically (`GzipFile(filename="", mtime=0)`,
@@ -61,12 +64,46 @@ def day_index(trip, stop_id):
     return next(i for i, d in enumerate(trip["daysList"]) if any(s["id"] == stop_id for s in d["stops"]))
 
 
+def flags(trip, skip_day):
+    """`breaksBudget` of every alternative outside day index `skip_day`: {(stopId, altId): flag}."""
+    return {
+        (s["id"], a["id"]): bool(a.get("breaksBudget", False))
+        for i, d in enumerate(trip["daysList"])
+        if i != skip_day
+        for s in d["stops"]
+        for a in s["alternatives"]
+    }
+
+
+def changed_flags(before, after, skip_day=None):
+    old, new = flags(before, skip_day), flags(after, skip_day)
+    return [
+        {"stopId": sid, "altId": aid, "breaksBudget": new[(sid, aid)]}
+        for sid, aid in old
+        if new[(sid, aid)] != old[(sid, aid)]
+    ]
+
+
+def apply_flags(out, item):
+    """ADR-0011 re-flags `breaksBudget` trip-wide after an edit; `afterFlags` lists the flips (rare: only when
+    the edit moves the total across the budget tolerance), so `before` + the parts still equals the trip."""
+    for f in item.get("afterFlags", []):
+        for d in out["daysList"]:
+            for s in d["stops"]:
+                for a in s["alternatives"] if s["id"] == f["stopId"] else ():
+                    if a["id"] == f["altId"]:
+                        a.pop("breaksBudget", None)
+                        if f["breaksBudget"]:
+                            a["breaksBudget"] = True
+    return out
+
+
 def apply_replace(before, item):
     out = copy.deepcopy(before)
     out["daysList"][day_index(before, item["stopId"])] = item["afterDay"]
     out["cost"] = item["afterCost"]
     out["km"] = item["afterKm"]
-    return out
+    return apply_flags(out, item)
 
 
 def apply_patch(before, item):
@@ -77,7 +114,7 @@ def apply_patch(before, item):
     if hotel is not None:
         stop = next(s for d in out["daysList"] for s in d["stops"] if s["id"] == hotel["stopId"])
         stop.update({k: hotel[k] for k in HOTEL_FIELDS})
-    return out
+    return apply_flags(out, item)
 
 
 for path in sorted(CASES.glob("G*.json")):
@@ -104,6 +141,9 @@ for path in sorted(CASES.glob("G*.json")):
                     "afterCost": after["cost"],
                     "afterKm": after["km"],
                 }
+                changed = changed_flags(before, after, day_index(before, s.id))
+                if changed:  # only when the replace moves the total across the budget tolerance
+                    item["afterFlags"] = changed
                 assert apply_replace(before, item) == after, (cid, s.id, a.id, "other parts changed")
                 items.append(item)
     GENERATED[f"replace/{cid}.json.gz"] = text({"case": cid, "before": before, "items": items})
@@ -131,6 +171,9 @@ for path in sorted(CASES.glob("G*.json")):
             "afterInput": after["input"],
             "afterHotel": hotel,
         }
+        changed = changed_flags(before, after)
+        if changed:
+            item["afterFlags"] = changed
         assert apply_patch(before, item) == after, (cid, kind, "other parts changed")
         items.append(item)
     GENERATED[f"patch/{cid}.json.gz"] = text({"case": cid, "before": before, "items": items})

@@ -766,7 +766,8 @@ private fun StopRow(
     val openDataCd = if (!s.verified) stringResource(R.string.cd_open_data) else null
     val kmCd = kmPost?.let { stringResource(R.string.cd_road_km_post, RuFormat.thousands(it)) }
     val cost: String? = when (s.kind) {
-        "sight" -> if (s.costRub == 0) stringResource(R.string.road_free) else rub(s.costRub)
+        // ADR-0019 E-2: 0 ₽ of an unknown price is not «вход свободный»
+        "sight" -> if ("ticket" in s.unknownFacts) stringResource(R.string.road_ticket_unknown) else if (s.costRub == 0) stringResource(R.string.road_free) else rub(s.costRub)
         "food", "overnight" -> rub(s.costRub)
         "rest" -> stringResource(R.string.common_rub, "0")
         "fuel" -> if (s.costRub > 0) rub(s.costRub) else null
@@ -774,7 +775,7 @@ private fun StopRow(
     }
     val kindCd = (s.poiKindRu ?: app.verst.feature.common.kindWord(s.poiKind))?.lowercase()
     val parkingCd = if (showParking) stringResource(R.string.cd_road_parking_inline, parkingInline(s.parking)).substringBefore(". ") else null
-    val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, cost, parkingCd).joinToString(", ")
+    val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, s.unknownRu, cost, parkingCd).joinToString(", ")
     val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
     // S3-R1: the restored row flashes `accent.yellow` at 14 % and fades (reduced motion: on, then off).
     val reduced = LocalReducedMotion.current
@@ -843,6 +844,8 @@ private fun StopRow(
                 label = if (s.kind == "sight") s.poiKindRu else null,
             )
             if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note, maxLines = 2)
+            // ADR-0019: what nobody checked for this stop («Часы не известны — уточните»), under the reason
+            s.unknownRu?.let { Txt(it, T.body.sm, C.text.muted, Modifier.testTag("road.unknown.${s.id}"), maxLines = 2) }
             val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
             if (cost != null || canReplace || hotel || showParking) {
                 CostsLine(cost, s.parking, showParking, "road.stop.${s.id}", onParking) {

@@ -73,6 +73,7 @@ from verst_planner.domain.errors import (
     TooShort,
     Unreachable,
 )
+from verst_planner.domain.facts import hours_known, rank_rating, ticket_known
 from verst_planner.domain.model import UNSET, CostPatch, GeoSuggestion, LatLon, Place, Town, TripPlan
 from verst_planner.engine import Planner
 from verst_planner.events import NULL_SINK, CancelToken, PlanEvent, event_to_json
@@ -1199,7 +1200,7 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                 name=p.name_ru,
                 kind=kind,
                 point=p.point,
-                popularity=max(0.0, min(1.0, (p.rating_internal - 3.5) / 1.5)),
+                popularity=max(0.0, min(1.0, (rank_rating(p) - 3.5) / 1.5)),
                 heritage=False,
                 hours=hours,
                 hours_verified=(p.source is Source.CURATED and p.opening_hours is not None) or osm_hours,
@@ -1550,12 +1551,14 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
     if p is not None and p.type is PlaceType.SIGHT:
         file, credit = _photo_file(w, p.id)
         town = w.world.towns.get(p.town_id or "")
-        hours = None
-        if p.opening_hours:
+        # ADR-0019 E-1: unknown hours are said («часы не известны — уточните»), never left out as if open
+        hours: dict[str, Any] = {"textRu": ru.text("poi.hours_unknown"), "verified": False, "known": False}
+        if hours_known(p):
             verified = p.source is Source.CURATED
             hours = {
-                "textRu": p.opening_hours if verified else ru.text("poi.hours_default"),
+                "textRu": (p.opening_hours or "24/7") if verified else ru.text("poi.hours_default"),
                 "verified": verified,
+                "known": True,
             }
         ticket = None
         if p.ticket_adult_rub and Tag.FREE_ENTRY not in p.tags:
@@ -1563,10 +1566,13 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
                 "adultRub": p.ticket_adult_rub,
                 "childRub": p.ticket_child_rub,
                 "estimate": p.source is not Source.CURATED,
+                "known": True,
             }
+        elif not ticket_known(p):  # ADR-0019 E-2: «цена билета неизвестна», never «вход свободный»
+            ticket = {"adultRub": None, "childRub": None, "estimate": False, "known": False}
         poi = _cat_poi(w, p.id)
-        if poi is not None and poi.hours and hours is not None:
-            hours = {"textRu": poi.hours, "verified": True, "source": "osm"}
+        if poi is not None and poi.hours and hours["known"]:
+            hours = {"textRu": poi.hours, "verified": True, "source": "osm", "known": True}
         attribution = []
         if poi is not None and poi.extract_src:
             attribution.append(

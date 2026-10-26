@@ -265,6 +265,10 @@
            "alternativesNote": null,
            "hotelOptions": [],
            "selectedHotelId": null,
+           "unknownFacts": [
+            "hours"
+           ],
+           "unknownRu": "Часы не известны — уточните",
            "parking": {
             "rub": 0,
             "rubPerHour": 0,
@@ -373,6 +377,10 @@
            "alternativesNote": null,
            "hotelOptions": [],
            "selectedHotelId": null,
+           "unknownFacts": [
+            "hours"
+           ],
+           "unknownRu": null,
            "parking": {
             "rub": null,
             "rubPerHour": null,

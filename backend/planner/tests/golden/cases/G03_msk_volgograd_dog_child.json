@@ -75,7 +75,7 @@
       }
     },
     "costTotalRub": {
-      "value": 16200,
+      "value": 17200,
       "tolerancePct": 5
     },
     "costLinesRub": {
@@ -92,12 +92,12 @@
         "tolerancePct": 5
       },
       "food": {
-        "value": 4630,
+        "value": 5600,
         "tolerancePct": 0
       }
     },
     "costFormulaContains": {
-      "food": "2,5 чел. × 3 приёма"
+      "food": "2,5 чел. × 4 приёма"
     },
     "remainingIsBudgetMinusTotal": true,
     "invariants": [
@@ -107,10 +107,10 @@
       "route: Москва → Волгоград on М-4/Р-22, 980 km of edges + detours ≈ 11 km → ≈ 991 km",
       "fuel by region (8 l/100): Волгоградская 299 + 2 = 301 km × 61.30 = 1 474; Тамбовская 185 + 6 = 191 km × 60.50 = 923; Рязанская 166 + 2 = 168 km × 61.20 = 820; Московская 133 + 1 = 134 km × 61.80 = 662; Воронежская 125 + 1 = 126 km × 61.00 = 614; Липецкая 53 km × 60.80 = 258; Москва 19 km × 62.50 = 95 → Σ 4 845 → 4 850 (±5 %)",
       "lodging (dog + family, 3 people): Тамбов Державинская 4.4 + 0.5 (guarded) + 0.3 − 0.52 = 4.68 > «Тамбов» 4.3 + 0.3 − 0.45 = 4.15 → 5 200 × 1 room",
-      "food: 2 adults + child of 5 (weight 0.5) = 2.5 people. Day 1 lunch Кафе «У дороги», Р-22 at km 445 (500, roadside check 500 + (k mod 4) · 100); dinner Тамбов median_low(650, 650, 850) = 650; breakfast included at Державинская; day 2 lunch Кафе «Придорожное», Р-22 at km 745 → 700; finish 17:47 < 19:00 → no dinner. 2.5 × (500 + 650 + 700) = 4 625 → 4 630",
+      "food: 2 adults + child of 5 (weight 0.5) = 2.5 people. Day 1 lunch Кафе «У дороги», Р-22 at km 445 (500, roadside check 500 + (k mod 4) · 100); dinner Тамбов median_low(650, 650, 850) = 650; Державинская has no confirmed breakfast (ADR-0019 E-3) → day 2 breakfast 0.6 × 650 = 390; day 2 lunch Кафе «Придорожное», Р-22 at km 745 → 700; finish 17:47 < 19:00 → no dinner. 2.5 × (500 + 650 + 390 + 700) = 5 600",
       "sights (DEV-113 T1): day 1 cap 2 reached at Скопинское озеро 5.23 > next in pool Городской парк Скопина 3.6 + 0.5·walk·dog + 0.5·playground·kids + 0.5·curated = 5.1 (fixture 3.7 → 3.6, margin was 0.033)",
       "tickets: Скопинское городище, Сад Мичурина, Набережная Тамбова are free → 0",
-      "subtotal 4 850 + 0 + 5 200 + 4 630 + 0 = 14 680; reserve 1 470 (1 468); total round_to(16 150, 100) = 16 200 (half up)"
+      "subtotal 4 850 + 0 + 5 200 + 5 600 + 0 = 15 650; reserve 1 570 (1 565 half up); total round_to(17 220, 100) = 17 200"
     ]
   }
 }

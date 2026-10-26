@@ -338,7 +338,12 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours",
+                    "fuel"
+                  ],
+                  "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
                 },
                 "dayPatch": [
                   {
@@ -620,7 +625,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -838,7 +847,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -1198,7 +1211,12 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours",
+                    "fuel"
+                  ],
+                  "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
                 },
                 "dayPatch": [
                   {
@@ -1590,7 +1608,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -1654,7 +1676,11 @@
             ],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "unknownFacts": [
+              "hours"
+            ],
+            "unknownRu": "Часы не известны — уточните"
           },
           {
             "id": "d1s08",
@@ -1796,7 +1822,11 @@
             "alternatives": [],
             "alternativesNote": "Других вариантов в это время поблизости нет.",
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "unknownFacts": [
+              "hours"
+            ],
+            "unknownRu": "Часы не известны — уточните"
           },
           {
             "id": "d2s03",
@@ -1997,7 +2027,12 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours",
+                    "fuel"
+                  ],
+                  "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
                 },
                 "dayPatch": [
                   {
@@ -2152,7 +2187,12 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours",
+                    "fuel"
+                  ],
+                  "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
                 },
                 "dayPatch": [
                   {
@@ -2274,7 +2314,12 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours",
+                    "fuel"
+                  ],
+                  "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
                 },
                 "dayPatch": [
                   {
@@ -2352,7 +2397,11 @@
             ],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "unknownFacts": [
+              "fuel"
+            ],
+            "unknownRu": "Есть ли АИ-95 — не проверено"
           },
           {
             "id": "d2s05",
@@ -2676,7 +2725,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "fuel"
+                  ],
+                  "unknownRu": "Есть ли АИ-95 — не проверено"
                 },
                 "dayPatch": [
                   {
@@ -3234,7 +3287,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -3358,7 +3415,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -3436,7 +3497,11 @@
             ],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "unknownFacts": [
+              "hours"
+            ],
+            "unknownRu": "Часы не известны — уточните"
           },
           {
             "id": "d2s08",
@@ -3514,7 +3579,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -3592,7 +3661,11 @@
             ],
             "alternativesNote": "Нашли только один вариант в это время.",
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "unknownFacts": [
+              "hours"
+            ],
+            "unknownRu": "Часы не известны — уточните"
           },
           {
             "id": "d2s09",
@@ -4096,8 +4169,8 @@
         {
           "key": "food",
           "title": "Питание",
-          "rub": 4300,
-          "formula": "2 чел. × 3 приёма × ≈ 720 (в среднем)",
+          "rub": 5260,
+          "formula": "2 чел. × 4 приёма × ≈ 660 (в среднем)",
           "asOf": "2026-09",
           "enabled": true,
           "breakdown": [
@@ -4108,8 +4181,8 @@
             },
             {
               "label": "День 2",
-              "formula": "обед 650",
-              "rub": 1300
+              "formula": "завтрак 480 + обед 650",
+              "rub": 2260
             }
           ]
         },
@@ -4136,7 +4209,7 @@
         {
           "key": "reserve",
           "title": "Резерв 10%",
-          "rub": 1660,
+          "rub": 1750,
           "formula": "на пробки и «давай заедем»",
           "asOf": "2026-09",
           "enabled": true,
@@ -4144,9 +4217,9 @@
         }
       ],
       "reserveOn": true,
-      "subtotalRub": 16550,
-      "totalRub": 18200,
-      "perPersonRub": 9100,
+      "subtotalRub": 17510,
+      "totalRub": 19300,
+      "perPersonRub": 9700,
       "budgetRub": null,
       "remainingRub": null,
       "overBudget": false,
@@ -4210,21 +4283,21 @@
               {
                 "placeId": "pl_nnv_hotel_volga",
                 "priceNightRub": 7200,
-                "breakfastIncluded": true
+                "breakfastIncluded": false
               },
               {
                 "placeId": "pl_nnv_hotel_kremlin",
                 "priceNightRub": 6500,
-                "breakfastIncluded": true
+                "breakfastIncluded": false
               },
               {
                 "placeId": "pl_nnv_hotel_pokrovka",
                 "priceNightRub": 5000,
-                "breakfastIncluded": true
+                "breakfastIncluded": false
               }
             ],
             "defaultPrice": false,
-            "breakfastIncluded": true,
+            "breakfastIncluded": false,
             "breakfastCheckRub": 480
           }
         ],
@@ -4365,5 +4438,5 @@
     },
     "engineVersion": "0.1.0"
   },
-  "text": "Москва → Казань · 832 км · 2 дня\nДень 1 · 432 км\n08:00 Москва\n09:10 Площадка отдыха, М-7, 80 км\n10:55 Золотые ворота\n11:26 Дмитриевский собор\n13:16 Площадка отдыха, М-7, 75 км\n14:27 Кафе «Привал», М-7\n15:41 Старый Гороховец\n17:54 Нижний Новгород\nДень 2 · 400 км\n09:00 Нижний Новгород\n09:03 Набережная Фёдоровского\n10:35 Площадка отдыха, М-7, 300 км\n11:31 АЗС, М-7, 340 км\n12:26 Площадка отдыха, М-7, 390 км\n14:00 Чувашская кухня\n15:04 Чебоксарский залив\n15:54 Монумент Матери-покровительнице\n17:39 Площадка отдыха, М-7, 570 км\n18:49 Казань\nИтого ≈ 18 200 ₽ на 2 чел."
+  "text": "Москва → Казань · 832 км · 2 дня\nДень 1 · 432 км\n08:00 Москва\n09:10 Площадка отдыха, М-7, 80 км\n10:55 Золотые ворота\n11:26 Дмитриевский собор\n13:16 Площадка отдыха, М-7, 75 км\n14:27 Кафе «Привал», М-7\n15:41 Старый Гороховец\n17:54 Нижний Новгород\nДень 2 · 400 км\n09:00 Нижний Новгород\n09:03 Набережная Фёдоровского\n10:35 Площадка отдыха, М-7, 300 км\n11:31 АЗС, М-7, 340 км\n12:26 Площадка отдыха, М-7, 390 км\n14:00 Чувашская кухня\n15:04 Чебоксарский залив\n15:54 Монумент Матери-покровительнице\n17:39 Площадка отдыха, М-7, 570 км\n18:49 Казань\nИтого ≈ 19 300 ₽ на 2 чел."
 }

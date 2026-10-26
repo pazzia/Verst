@@ -1,0 +1,69 @@
+{
+ "request": {
+  "function": "poi_details",
+  "args": {
+   "world": "russia_v1",
+   "place_id": "Q100138159"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "id": "Q100138159",
+   "kind": "sight",
+   "poiKind": "attraction",
+   "poiKindRu": "Достопримечательность",
+   "nameRu": "Усадьба Костино",
+   "descriptionRu": "Усадьба Костино, находящаяся в городе Королёв",
+   "extractRu": "Костино — усадьба, расположенная в исторической части Королёва Костино городского округа Королёв Московской области.",
+   "extractSource": {
+    "key": "wikipedia",
+    "nameRu": "Из статьи Википедии, текст сокращён",
+    "licence": "CC BY-SA 4.0",
+    "url": "https://www.wikidata.org/wiki/Special:GoToLinkedPage/ruwiki/Q100138159",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "abridged": true
+   },
+   "cardLevel": 3,
+   "quality": 38,
+   "fee": null,
+   "website": null,
+   "townName": "Королёв",
+   "lat": 55.91318,
+   "lon": 37.85355,
+   "image": {
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/P70914-182229.jpg?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/P70914-182229.jpg?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:P70914-182229.jpg",
+    "credit": {
+     "author": "Avia-tor",
+     "licence": "CC BY-SA 4.0",
+     "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    "isArea": false,
+    "labelRu": "Фото: Wikimedia Commons · Avia-tor · CC BY-SA 4.0",
+    "source": "p18"
+   },
+   "whyRu": "Объект культурного наследия",
+   "hours": {
+    "textRu": "часы не известны — уточните",
+    "verified": false,
+    "known": false
+   },
+   "ticket": {
+    "adultRub": null,
+    "childRub": null,
+    "estimate": false,
+    "known": false
+   },
+   "isFictional": false,
+   "attributionRu": [
+    "Из статьи Википедии, текст сокращён · CC BY-SA 4.0"
+   ],
+   "wikidataId": "Q100138159",
+   "placeSource": "wikidata",
+   "placeAttributionRu": null
+  },
+  "ms": 0
+ }
+}

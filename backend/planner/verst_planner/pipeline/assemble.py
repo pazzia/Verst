@@ -10,6 +10,15 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from verst_planner.domain.enums import SIGN_BY_KIND, SignType, Source, StopKind, Tag
+from verst_planner.domain.facts import (
+    HOURS_TYPES,
+    Fact,
+    Known,
+    fuel_state,
+    hours_known,
+    tag_state,
+    ticket_known,
+)
 from verst_planner.domain.model import (
     Alternative,
     CandidateState,
@@ -68,6 +77,38 @@ def hotel_option(
     )
 
 
+def unknown_facts(s: PlannedStop, inp: NormalizedInput) -> tuple[Fact, ...]:
+    """ADR-0019: the facts this stop relies on that nobody confirmed — opening hours of a sight, café or fuel
+    station (E-1), a sight's ticket price (E-2), the car's fuel at a fuel stop (E-4) and, with a dog in the
+    crew, whether a sight lets dogs in (E-6). Template points and anchors (no place) have none."""
+    p = s.place
+    if p is None or s.kind in (StopKind.START, StopKind.FINISH, StopKind.VIA, StopKind.OVERNIGHT):
+        return ()
+    out: list[Fact] = []
+    if p.type in HOURS_TYPES and not hours_known(p):
+        out.append(Fact.HOURS)
+    if s.kind is StopKind.SIGHT and not ticket_known(p):
+        out.append(Fact.TICKET)
+    if s.kind is StopKind.FUEL and fuel_state(p, inp.vehicle.fuel_type) is not Known.YES:
+        out.append(Fact.FUEL)
+    if s.kind is StopKind.SIGHT and inp.crew.dog and tag_state(p, Tag.DOGS_ALLOWED) is Known.UNKNOWN:
+        out.append(Fact.DOGS)
+    return tuple(out)
+
+
+def unknown_line(facts: tuple[Fact, ...], inp: NormalizedInput) -> str | None:
+    """The row's line for the unknown facts except the ticket (the cost texts name it): one fact in its own
+    words (`unknown.hours`), several joined into `unknown.many` (strings.ru.json)."""
+    shown = [f for f in facts if f is not Fact.TICKET]
+    if not shown:
+        return None
+    fuel = ru.fuel_type_label(inp.vehicle.fuel_type.value)
+    if len(shown) == 1:
+        return ru.text(f"unknown.{shown[0].value}", fuel=fuel)
+    items = ", ".join(ru.text(f"unknown.item.{f.value}", fuel=fuel) for f in shown)
+    return ru.text("unknown.many", facts=items)
+
+
 @dataclass(slots=True)
 class StopView:
     """Rendering context of one stop that the planned stop itself does not carry."""
@@ -107,6 +148,10 @@ def render_stop(
         note = ru.text("note.unverified")
     town_id = s.town.id if s.town is not None else (s.place.town_id if s.place is not None else None)
     name = s.name_ru
+    facts = unknown_facts(s, inp)
+    # open data: the open-data marker («из открытых данных, уточняйте») already says it (ADR-0019 E-1)
+    open_data = s.place is not None and s.place.source is Source.OSM
+    unknown_ru = None if open_data else unknown_line(facts, inp)
     if ctx.cfg.sights.diversity and s.place is not None and s.place.id.startswith(SYNTHETIC_ROADSIDE):
         name = roadside_name(s.km_at, s.point, None, ctx, s.name_ru)  # M9: never a bare rest area name
     return ScheduledStop(
@@ -136,6 +181,8 @@ def render_stop(
         selected_hotel_id=s.place.id if s.kind is StopKind.OVERNIGHT and s.place is not None else None,
         alternatives_note_ru=v.alternatives_note,
         fun_for=fun_for(s.place, inp) if s.reason_key.startswith("rest.fun.") and s.place is not None else (),
+        unknown_facts=tuple(f.value for f in facts),
+        unknown_ru=unknown_ru,
     )
 
 

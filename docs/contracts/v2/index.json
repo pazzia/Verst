@@ -19,6 +19,9 @@
   "city_route-unlimited.json",
   "estimate-budget-fit.json",
   "estimate-no-fit.json",
+  "estimate-ready-golden-ring.json",
+  "estimate-ready-tula.json",
+  "estimate-ready-yaroslavl.json",
   "estimate-synthetic.json",
   "geo_nearest-outside.json",
   "geo_nearest.json",
@@ -35,8 +38,10 @@
   "poi_details-bar.json",
   "poi_details-fixture-sight.json",
   "poi_details-hotel.json",
+  "poi_details-hours-unknown.json",
   "poi_details-not-found.json",
   "poi_details-sight.json",
+  "poi_details-ticket-unknown.json",
   "selfcheck.json"
  ]
 }

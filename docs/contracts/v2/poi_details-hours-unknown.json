@@ -1,0 +1,43 @@
+{
+ "request": {
+  "function": "poi_details",
+  "args": {
+   "world": "russia_v1",
+   "place_id": "pl_yar_strelka"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "id": "pl_yar_strelka",
+   "kind": "sight",
+   "poiKind": "embankment",
+   "poiKindRu": "Набережная",
+   "nameRu": "Стрелка и Волжская набережная",
+   "descriptionRu": null,
+   "extractRu": null,
+   "extractSource": null,
+   "cardLevel": 4,
+   "quality": null,
+   "fee": null,
+   "website": null,
+   "townName": "Ярославль",
+   "lat": 57.63333497386366,
+   "lon": 39.90966549795677,
+   "image": null,
+   "whyRu": null,
+   "hours": {
+    "textRu": "часы не известны — уточните",
+    "verified": false,
+    "known": false
+   },
+   "ticket": null,
+   "isFictional": false,
+   "attributionRu": [],
+   "wikidataId": null,
+   "placeSource": "curated",
+   "placeAttributionRu": null
+  },
+  "ms": 0
+ }
+}

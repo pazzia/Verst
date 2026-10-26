@@ -133,13 +133,23 @@ class ScreensScreenshotTest {
         )
     }
 
-    /** Engine km of the ready routes (golden plans) — the Windshield never shows the template km. */
+    /**
+     * Engine km of the ready routes — the Windshield never shows the template km. Each is the engine's `estimate` of
+     * that ready route for one crew (`docs/contracts/v2/estimate-ready-*.json`, G02's crew): Ярославль is the ready
+     * route `rr_yaroslavl` (536 km), not the free trip G01 (542 km) the fixture used to take.
+     */
     private val engineKm by lazy {
         mapOf(
-            "rr_golden_ring" to snapshot("G02_golden_ring").km,
-            "rr_yaroslavl" to snapshot("G01_msk_yar_round").km,
-            "rr_tula_yasnaya" to snapshot("G07_tula_yasnaya").km,
+            "rr_golden_ring" to v2("estimate-ready-golden-ring.json", EngineJson::estimate).km,
+            "rr_yaroslavl" to v2("estimate-ready-yaroslavl.json", EngineJson::estimate).km,
+            "rr_tula_yasnaya" to v2("estimate-ready-tula.json", EngineJson::estimate).km,
         )
+    }
+
+    @Test
+    fun readyRouteKmIsTheReadyRoutes() {
+        assertEquals(536, engineKm.getValue("rr_yaroslavl"))
+        assertEquals(snapshot("G02_golden_ring").km, engineKm.getValue("rr_golden_ring")) // same input as G02
     }
 
     private fun windshield(data: WindshieldData) =
@@ -339,6 +349,19 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("road.total").assertExists()
         compose.onNodeWithTag("road.save").assertExists()
         compose.onNodeWithText("Дорога впереди").assertExists()
+        // ADR-0019 E-6: G02's crew has a dog and nobody checked whether the first sight lets dogs in
+        compose.onNodeWithTag("road.unknown.d1s02", useUnmergedTree = true).assertExists()
+    }
+
+    /** ADR-0019 E-2: a sight whose ticket price is unknown is never «вход свободный» on its row. */
+    @Test
+    fun roadUnknownTicket() {
+        val t = snapshot("G02_golden_ring")
+        val trip = t.copy(daysList = t.daysList.map { d ->
+            d.copy(stops = d.stops.map { s -> if (s.id == "d1s02") s.copy(costRub = 0, unknownFacts = s.unknownFacts + "ticket") else s })
+        })
+        shot("road", "unknown-ticket") { RoadScreen(RoadUi(trip, "NE"), noRoad) }
+        compose.onNodeWithText("цена билета неизвестна", useUnmergedTree = true).assertExists()
     }
 
     /**
@@ -814,6 +837,28 @@ class ScreensScreenshotTest {
         shot("card", "fixture-sight") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
     }
 
+    /** Investor-readiness: a Wikidata text names its source once — never «Описание: Описание: Викиданные». */
+    @Test
+    fun cardWikidataSourceOnce() {
+        val real = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails)
+        val d = real.copy(
+            extractRu = "Музей в историческом центре города.",
+            extractSource = app.verst.core.model.dto.ExtractSourceDto(key = "wikidata", nameRu = "Описание: Викиданные", licence = "CC0"),
+        )
+        shot("card", "wikidata-source") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
+        compose.onNodeWithTag("card.desc.source", useUnmergedTree = true).assertTextEquals("Описание: Викиданные · CC0")
+    }
+
+    /** ADR-0019 E-1 / E-2: unknown hours and an unknown ticket price are said; neither reads as open or free. */
+    @Test
+    fun cardUnknownHoursAndTicket() {
+        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-ticket-unknown.json", EngineJson::poiDetails)
+        shot("card", "unknown-facts") { CardOverRoad(card(d.nameRu, "sight", "tourist", d)) }
+        compose.onNodeWithText("часы не известны — уточните", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("цена билета неизвестна", useUnmergedTree = true).assertExists()
+        compose.onAllNodesWithText("вход свободный", useUnmergedTree = true).assertCountEquals(0)
+    }
+
     @Test
     fun photoFrameStates() {
         // DEV-300: loading, loaded (a fake image, crop and contain), error and offline — the frame never changes size.
@@ -866,9 +911,10 @@ class ScreensScreenshotTest {
     fun waybillFitted() {
         val trip = snapshot("G02_golden_ring")
         val fitted = trip.copy(
-            cost = trip.cost.copy(budgetRub = 35_000, remainingRub = 35_000 - trip.cost.totalRub, overBudget = false),
+            // G02 with the unconfirmed breakfasts costed (ADR-0019 E-3) is 37 200 ₽: a 40 000 ₽ budget keeps it fitted
+            cost = trip.cost.copy(budgetRub = 40_000, remainingRub = 40_000 - trip.cost.totalRub, overBudget = false),
             budgetFit = app.verst.core.model.dto.BudgetFitDto(
-                "fits", 35_000, 36_700, trip.cost.totalRub + 10_700, trip.cost.totalRub,
+                "fits", 40_000, 42_000, trip.cost.totalRub + 10_700, trip.cost.totalRub,
                 listOf(app.verst.core.model.dto.BudgetLeverDto("lodging_cheap", 6_000), app.verst.core.model.dto.BudgetLeverDto("food_economy", 4_700)),
             ),
         )
@@ -1072,7 +1118,7 @@ class ScreensScreenshotTest {
         val w = w0.copy(stops = w0.stops.mapIndexed { i, st -> if (i == 0) st.copy(poiKind = "museum") else st })
         shot("walk", "dog-warning") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false, filters = walkFilters(dog = true)), noWalk) }
         compose.onNodeWithTag("walk.warn.dog", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("С собакой внутрь нельзя.", substring = true).assertExists()
+        compose.onNodeWithText("С собакой внутрь обычно нельзя.", substring = true).assertExists() // ADR-0019 E-6
     }
 
     @Test
@@ -1238,6 +1284,16 @@ class ScreensScreenshotTest {
         shot("waybill", "default") { WaybillScreen(waybill(snapshot("G02_golden_ring")), noWaybill) }
         compose.onNodeWithTag("waybill.line.fuel", useUnmergedTree = true).assertExists()
         compose.onNodeWithText("ПУТЕВОЙ ЛИСТ").assertExists()
+        compose.onNodeWithTag("waybill.total.note", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    /** ADR-0019 E-2: the total says it leaves out the tickets whose price is unknown. */
+    @Test
+    fun waybillTotalNote() {
+        val t = snapshot("G02_golden_ring")
+        val trip = t.copy(cost = t.cost.copy(totalNoteRu = "Без билетов в 1 место — цена неизвестна"))
+        shot("waybill", "total-note") { WaybillScreen(waybill(trip), noWaybill) }
+        compose.onNodeWithTag("waybill.total.note", useUnmergedTree = true).assertTextEquals("Без билетов в 1 место — цена неизвестна")
     }
 
     @Test

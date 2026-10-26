@@ -14,6 +14,7 @@ import re
 from datetime import timedelta
 
 from verst_planner.domain.enums import Meal, Mood, Source, StopKind, Tag
+from verst_planner.domain.facts import confirmed_free, rank_rating
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, Place, PlannedStop, Town
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import sight_reason
@@ -130,7 +131,7 @@ def effective_quality(p: Place) -> float:
     """Open-data quality, or a curated place's rating on the same 0..1 scale (3.6 → 0, 4.9 → 1)."""
     if p.quality is not None:
         return p.quality
-    return max(0.0, min(1.0, (p.rating_internal - 3.6) / 1.3))
+    return max(0.0, min(1.0, (rank_rating(p) - 3.6) / 1.3))
 
 
 def detour_ok(c: Candidate) -> bool:
@@ -259,7 +260,7 @@ def trip_religious_repair(days: list[DayPlan]) -> None:
 def sight_score(c: Candidate, inp: NormalizedInput) -> float:
     t = c.place.tags
     return (
-        c.place.rating_internal
+        rank_rating(c.place)
         + 0.5 * bool(NOTABLE & t)
         + 0.5 * (c.place.source is Source.CURATED)
         + 0.5 * (Tag.WALK in t and inp.crew.dog)
@@ -269,17 +270,20 @@ def sight_score(c: Candidate, inp: NormalizedInput) -> float:
 
 
 def is_paid(c: Candidate, inp: NormalizedInput) -> bool:
-    """ADR-0011 `sights_free`: a ticket costs this crew money (`free_entry` / no price = free)."""
+    """ADR-0011 `sights_free`: a ticket costs this crew money. ADR-0019 E-2: an unknown price is not
+    free, so the «бесплатные места» lever does not keep it (only `free_entry` or a 0 ₽ ticket are free)."""
     p = c.place
-    if Tag.FREE_ENTRY in p.tags or not p.ticket_adult_rub:
+    if confirmed_free(p):
         return False
+    if p.ticket_adult_rub is None:
+        return True
     child = p.ticket_child_rub if p.ticket_child_rub is not None else p.ticket_adult_rub
     return inp.crew.adults * p.ticket_adult_rub + inp.crew.children * child > 0
 
 
 def make_sight_stop(c: Candidate, inp: NormalizedInput, ctx: PlanContext) -> PlannedStop:
     dwell = c.place.dwell_min or ctx.cfg.dwell_min.sight_default
-    key, params = sight_reason(dwell, inp.crew, c.place.source)
+    key, params = sight_reason(dwell, inp.crew, c.place)
     return PlannedStop(
         kind=StopKind.SIGHT,
         km_at=c.km_at,
