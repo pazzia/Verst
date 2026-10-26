@@ -93,7 +93,7 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 | DATA-03 | User verification loop: "here they let us in with the dog: yes/no", "closed", "price wrong" | P1 | Developer + Designer + Data Curator | ENG-04, DATA-01 | 3 d |
 | DATA-04 | "Verified places per route" as a tracked KPI in the admin | P1 | Architect + Data Curator | DATA-02 | 1 d |
 | LEG-01 | Lawyer's opinion on ODbL share-alike for the Place DB (OSM import in SPEC §9 step 1) | P0 | Legal & Compliance (CEO hires lawyer) | — | W1 |
-| LEG-02 | Legal entity (self-employed / ИП / ООО), Travelpayouts and partner accounts, privacy policy | P0 | Legal & Compliance + CEO | — | W1–W2 |
+| LEG-02 | Legal entity (self-employed / ИП / ООО), Travelpayouts and partner accounts, Яндекс hand-off signing key (D-IR-17), privacy policy | P0 | Legal & Compliance + CEO | — | W1–W2 |
 | BIZ-01 | Unit-economics model in a spreadsheet: revenue per planned trip by stream versus CAC | P0 | Business Analyst | — | 1 d, then weekly |
 | BIZ-02 | Hotel chains growing direct sales against the 17 % aggregator commission: offer a direct channel | P1 | Partnerships (CEO sends) | ENG-03 | W4–W12 |
 | BIZ-03 | Regional tourism body pilot (B2G): paid placement of a ready route | P1 | Partnerships (CEO sends) | DATA-02 | W6–W12 |
@@ -266,7 +266,7 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 
 ### LEG-02 — Entity and accounts
 
-**Acceptance.** A legal entity for payouts; Travelpayouts (or a direct partner) account with the `verst_app` marker; RuStore developer account; privacy policy and terms published (SPEC §16, 152-FZ).
+**Acceptance.** A legal entity for payouts; Travelpayouts (or a direct partner) account with the `verst_app` marker; RuStore developer account; privacy policy and terms published (SPEC §16, 152-FZ). The Яндекс URL-signing key is requested once the entity, the domain and the RuStore page exist, and arrives before VAL-04 (D-IR-17); the app can already sign the links; the key is to live on our backend, not in the public APK (decision open).
 
 ---
 
