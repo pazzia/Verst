@@ -1,26 +1,26 @@
 {
- "version": "wd-20261025-r7.4",
+ "version": "wd-20261025-r7.5",
  "builtAt": "2026-10-25",
  "counts": {
   "towns": 1114,
-  "pois": 10922,
+  "pois": 10921,
   "bars": 3284,
   "links": 79,
-  "credits": 3646
+  "credits": 3632
  },
- "totalBytes": 853197,
+ "totalBytes": 853619,
  "files": {
   "catalogue_meta.json.gz": {
-   "bytes": 97753,
-   "sha256": "3d9ec542095b31320a9908bfc1b821d16b98de408a39e77ca015a3145c113fbf"
+   "bytes": 98377,
+   "sha256": "9ca90322a51f2c1b7236bb0dc49a2bf9f35d91bbb30e0bc11d5b1cfc118e01db"
   },
   "catalogue_towns.json.gz": {
    "bytes": 52995,
    "sha256": "9ff68f042d50dc7c803c8725493f94efc82e7e5d5452889a850c9c91b460f22f"
   },
   "catalogue_pois.json.gz": {
-   "bytes": 629562,
-   "sha256": "2a06b3e79f33db931cbfe26cd10e8bc853b1e28f2dc38b48a7cd19d9f52f0c7d"
+   "bytes": 629360,
+   "sha256": "2c546bc5a88f52cb8a7b9e0b1e32c01f81a66cf837b45666726987258c45ddc6"
   },
   "catalogue_bars.json.gz": {
    "bytes": 72887,
@@ -33,7 +33,7 @@
   "commons": "commons.wikimedia.org",
   "fetchedAt": "2026-10-25T02:46:58+00:00",
   "run": "40151703225",
-  "rebuilt": "sandbox, from bot/raw-7 with the builder at arch/sprint-3 (town filter, region overrides)"
+  "rebuilt": "sandbox, from bot/raw-7 + bot/extras-1 + bot/photos-1 with the builder of the ODbL package (meta.licence, no GFDL-only photos)"
  },
  "classCheck": {
   "labels": {

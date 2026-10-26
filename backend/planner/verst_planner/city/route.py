@@ -60,8 +60,12 @@ def _budget_min(inp: WalkInput) -> int:
 
 
 def _hours_today(c: Candidate, day: datetime) -> dict[str, Any]:
-    """ADR-0015 §6: today's opening hours of a stop (OSM `opening_hours`, curated, or the kind's default)."""
-    if c.hours is None or c.hours.always:
+    """ADR-0015 §6: today's opening hours of a stop (OSM `opening_hours`, curated, or the kind's default).
+    ADR-0019 E-1: no hours at all is «unknown» (`todayRu` and `openNow` null, the app's «часы не указаны»),
+    never «24 часа · открыто»."""
+    if c.hours is None:
+        return {"todayRu": None, "openNow": None, "source": c.hours_source}
+    if c.hours.always:
         return {"todayRu": ru.text("walk.hours.always"), "openNow": True, "source": c.hours_source}
     spans = c.hours.day_intervals(day.weekday())
     if not spans:

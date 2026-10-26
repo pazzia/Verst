@@ -93,8 +93,7 @@
         "kmAt": 0,
         "dwellMin": 30,
         "tags": [
-         "walk",
-         "free_entry"
+         "walk"
         ],
         "costRub": 0,
         "reason": "По открытым данным.",
@@ -104,6 +103,11 @@
         "alternativesNote": "Других вариантов в это время поблизости нет.",
         "hotelOptions": [],
         "selectedHotelId": null,
+        "unknownFacts": [
+         "hours",
+         "ticket"
+        ],
+        "unknownRu": null,
         "kmDriven": 1,
         "kmLeft": 392,
         "parking": {
@@ -153,6 +157,10 @@
         "alternativesNote": "Других вариантов в это время поблизости нет.",
         "hotelOptions": [],
         "selectedHotelId": null,
+        "unknownFacts": [
+         "hours"
+        ],
+        "unknownRu": null,
         "kmDriven": 7,
         "kmLeft": 386,
         "parking": {
@@ -247,7 +255,11 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "unknownFacts": [
+            "fuel"
+           ],
+           "unknownRu": "Есть ли АИ-95 — не проверено"
           },
           "dayPatch": [
            {
@@ -364,7 +376,11 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "unknownFacts": [
+            "fuel"
+           ],
+           "unknownRu": "Есть ли АИ-95 — не проверено"
           },
           "dayPatch": [
            {
@@ -527,7 +543,11 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "unknownFacts": [
+            "fuel"
+           ],
+           "unknownRu": "Есть ли АИ-95 — не проверено"
           },
           "dayPatch": [
            {
@@ -644,7 +664,11 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "unknownFacts": [
+            "fuel"
+           ],
+           "unknownRu": "Есть ли АИ-95 — не проверено"
           },
           "dayPatch": [
            {
@@ -980,7 +1004,11 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "unknownFacts": [
+            "fuel"
+           ],
+           "unknownRu": "Есть ли АИ-95 — не проверено"
           },
           "dayPatch": [
            {
@@ -1097,7 +1125,11 @@
            "alternatives": [],
            "alternativesNote": null,
            "hotelOptions": [],
-           "selectedHotelId": null
+           "selectedHotelId": null,
+           "unknownFacts": [
+            "fuel"
+           ],
+           "unknownRu": "Есть ли АИ-95 — не проверено"
           },
           "dayPatch": [
            {
@@ -1499,6 +1531,7 @@
            "priceRub": "61.50",
            "regionName": "Тюменская область",
            "tripKmDelta": -3,
+           "ticketKnown": false,
            "parkingRub": 50,
            "parkingRubPerHour": 50,
            "parkingHours": 1,
@@ -1523,8 +1556,7 @@
            "kmAt": 379,
            "dwellMin": 30,
            "tags": [
-            "walk",
-            "free_entry"
+            "walk"
            ],
            "costRub": 0,
            "reason": "По открытым данным.",
@@ -1534,6 +1566,11 @@
            "alternativesNote": null,
            "hotelOptions": [],
            "selectedHotelId": null,
+           "unknownFacts": [
+            "hours",
+            "ticket"
+           ],
+           "unknownRu": null,
            "parking": {
             "rub": 50,
             "rubPerHour": 50,
@@ -1732,7 +1769,7 @@
        "key": "tickets",
        "title": "Билеты",
        "rub": 800,
-       "formula": "1 место × 2 взр.",
+       "formula": "1 место × 2 взр. + ещё 1 — цена билета неизвестна",
        "asOf": "2026-10",
        "enabled": true,
        "breakdown": [
@@ -1845,7 +1882,8 @@
         "placeId": "Q1381934",
         "name": "Дом Ипатьева",
         "adultRub": 0,
-        "childRub": 0
+        "childRub": 0,
+        "known": false
        },
        {
         "stopId": "d1s03",
@@ -1936,7 +1974,8 @@
         "source": "osm"
        }
       ]
-     }
+     },
+     "totalNoteRu": "Без билетов в 1 место — цена неизвестна"
     },
     "reasons": {
      "overnights": []

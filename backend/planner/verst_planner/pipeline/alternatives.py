@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 
 from verst_planner.domain.enums import Meal, StopKind, Tag, WarningCode
+from verst_planner.domain.facts import ticket_known, ticket_prices
 from verst_planner.domain.model import (
     Alternative,
     AltUnits,
@@ -24,7 +25,6 @@ from verst_planner.domain.model import (
     DayPlan,
     NormalizedInput,
     ParkingUnit,
-    Place,
     PlannedStop,
     ReplaceableKinds,
     StopTime,
@@ -214,14 +214,6 @@ def _shift(trial: Trial, old_slots: list[Slot], old_stops: list[PlannedStop]) ->
     return round_half_up((new_arr - old_arr).total_seconds() / 60)
 
 
-def ticket_prices(p: Place) -> tuple[int, int]:
-    """(adult, child) ticket as costed (A§7.1): `free_entry` or no price → 0, child falls back to adult."""
-    if Tag.FREE_ENTRY in p.tags or p.ticket_adult_rub is None:
-        return 0, 0
-    adult = p.ticket_adult_rub
-    return adult, p.ticket_child_rub if p.ticket_child_rub is not None else adult
-
-
 def food_people(inp: NormalizedInput, ctx: PlanContext) -> Decimal:
     """`adults + Σ child weight` (0.5 under 7) as in the food line [D-14]."""
     crew = inp.crew
@@ -266,8 +258,10 @@ def alt_units(new: PlannedStop, old: PlannedStop, inp: NormalizedInput, ctx: Pla
     assert place is not None
     adult: int | None = None
     child: int | None = None
+    known = True
     if new.kind is StopKind.SIGHT:
         adult, child = ticket_prices(place)
+        known = ticket_known(place)  # ADR-0019 E-2: (0, 0) and named in the ticket line
     info = ctx.region_info(new.region_code) or ctx.region_at(new.point)
     return AltUnits(
         delta_km=round(new.detour_km - old.detour_km, 3),
@@ -279,6 +273,7 @@ def alt_units(new: PlannedStop, old: PlannedStop, inp: NormalizedInput, ctx: Pla
         place_id=place.id,
         price_rub=ctx.ports.prices.fuel_price(new.region_code, inp.vehicle.fuel_type).price_rub,
         region_name_ru=info.name_ru,
+        ticket_known=known,
     )
 
 

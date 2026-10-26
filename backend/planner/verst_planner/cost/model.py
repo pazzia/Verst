@@ -13,7 +13,8 @@ from datetime import date, datetime, time
 from verst_planner.config import PlannerConfig
 from verst_planner.cost.money import dec, round_to
 from verst_planner.cost.recompute import child_ages, recompute, rooms_for
-from verst_planner.domain.enums import CostKey, Meal, Mood, Tag
+from verst_planner.domain.enums import CostKey, Meal, Mood
+from verst_planner.domain.facts import breakfast_confirmed, ticket_known, ticket_prices
 from verst_planner.domain.model import (
     CostOverrides,
     CostResult,
@@ -112,14 +113,6 @@ def toll_unit(t: TollInput, cfg: PlannerConfig) -> TollUnit:
     return TollUnit(seg.id, seg.road_ref, rub, night, ym(seg.as_of))
 
 
-def ticket_prices(p: Place) -> tuple[int, int]:
-    """(adult, child) ticket; `free_entry` or no price -> 0; child falls back to the adult price."""
-    if Tag.FREE_ENTRY in p.tags or p.ticket_adult_rub is None:
-        return 0, 0
-    adult = p.ticket_adult_rub
-    return adult, p.ticket_child_rub if p.ticket_child_rub is not None else adult
-
-
 def breakfast_check(base: int, cfg: PlannerConfig) -> int:
     return round_to(dec(base) * cfg.cost.breakfast_price_frac, 10)
 
@@ -144,14 +137,16 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
     for n in ci.nights:
         plans = {o.id: room_plan(o, inp.crew, n.family_rooms) for o in n.options}
         options = tuple(
-            HotelPrice(o.id, plans[o.id][1], o.breakfast_included, plans[o.id][0] if plans[o.id][2] else None)
+            HotelPrice(
+                o.id, plans[o.id][1], breakfast_confirmed(o), plans[o.id][0] if plans[o.id][2] else None
+            )
             for o in n.options
         )
         rooms: int | None = None
         if n.hotel is not None:
             r, price, explicit = room_plan(n.hotel, inp.crew, n.family_rooms)
             rooms = r if explicit else None
-            default, bf = False, n.hotel.breakfast_included
+            default, bf = False, breakfast_confirmed(n.hotel)  # E-3: unknown = breakfast costed
             if n.hotel.verified_at:
                 lodging_dates.append(n.hotel.verified_at)
             else:
@@ -201,7 +196,8 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
     ticket_dates: list[date] = []
     for s in ci.sights:
         adult, child = ticket_prices(s.place)
-        tickets.append(TicketUnit(s.stop_id, s.place.id, s.place.name_ru, adult, child))
+        known = ticket_known(s.place)
+        tickets.append(TicketUnit(s.stop_id, s.place.id, s.place.name_ru, adult, child, known))
         if adult > 0:
             ticket_dates.append(s.place.verified_at or ci.defaults_as_of)
 

@@ -145,13 +145,28 @@ def food_row(day: int, meals: list[tuple[Meal, int]], rub: int) -> CostBreakdown
 # ------------------------------------------------------------------ tickets
 
 
-def tickets_formula(paid: int, adults: int, children: int) -> str:
+def tickets_formula(paid: int, adults: int, children: int, unknown: int = 0) -> str:
+    """ADR-0019 E-2: «вход свободный» only when no place has an unknown price; those are named instead."""
     if paid == 0:
+        if unknown:
+            seats_unknown = ru.plural_word(unknown, "plural.seat")
+            return ru.text("cost.tickets.only_unknown", n=unknown, seats_word=seats_unknown)
         return ru.text("cost.tickets.none")
     seats = ru.plural_word(paid, "plural.seat")
     if children == 0:
-        return ru.text("cost.tickets.formula_adults", n=paid, seats_word=seats, adults=adults)
-    return ru.text("cost.tickets.formula", n=paid, seats_word=seats, adults=adults, children=children)
+        out = ru.text("cost.tickets.formula_adults", n=paid, seats_word=seats, adults=adults)
+    else:
+        out = ru.text("cost.tickets.formula", n=paid, seats_word=seats, adults=adults, children=children)
+    return out + (" " + ru.text("cost.tickets.unknown", n=unknown) if unknown else "")
+
+
+def total_note(unknown_tickets: int) -> str | None:
+    """ADR-0019 E-2: the total leaves out the tickets whose price is unknown."""
+    if not unknown_tickets:
+        return None
+    return ru.text(
+        "cost.total.no_tickets", n=unknown_tickets, seats_word=ru.plural_word(unknown_tickets, "plural.seat")
+    )
 
 
 def ticket_row(name: str, adults: int, adult: int, children: int, child: int, rub: int) -> CostBreakdownRow:

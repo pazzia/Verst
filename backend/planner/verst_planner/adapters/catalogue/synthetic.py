@@ -57,7 +57,7 @@ def _place(
     family_price: int | None = None,
     avg_check: int | None = None,
     hours: str | None = None,
-    breakfast: bool = True,
+    breakfast: bool | None = None,
 ) -> Place:
     return Place(
         id=pid,

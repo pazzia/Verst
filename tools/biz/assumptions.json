@@ -1,0 +1,654 @@
+{
+  "meta": {
+    "model": "BIZ-01 unit economics: revenue per 1 000 planned trips versus acquisition cost",
+    "version": "1.0",
+    "as_of": "2026-10-25",
+    "currency": "RUB",
+    "owner": "Business Analyst",
+    "scenarios": [
+      "conservative",
+      "base",
+      "optimistic"
+    ],
+    "scenario_labels_ru": {
+      "conservative": "Консерв.",
+      "base": "База",
+      "optimistic": "Оптим."
+    },
+    "planning_scenario": "conservative",
+    "status_values": [
+      "assumed",
+      "measured",
+      "cited"
+    ],
+    "access_note": "Cited web figures were found by web search on 2026-10-25. Direct page fetches were blocked by the sandbox egress policy, so every cited URL must be re-opened once by a human (and the partner terms re-read in the Travelpayouts dashboard after LEG-02) before the number goes into the deck."
+  },
+  "sources": {
+    "S01": {
+      "title": "SPEC Версты, §1 метрики успеха (цель: клик на партнёра ≥ 8 % построенных поездок; ≥ 60 % установок строят маршрут), §14 монетизация (в MVP нет оплат внутри приложения)",
+      "url": "docs/SPEC.md",
+      "published": "2026-10-23",
+      "accessed": "2026-10-25"
+    },
+    "S02": {
+      "title": "Бэклог investor-readiness, BIZ-01 (оценка ревью: 8 % × ~10 % × ~12 000 ₽ × 8 %), BIZ-03, BIZ-04, TEAM-01",
+      "url": "docs/backlog-investor-readiness.md",
+      "published": "2026-10-25",
+      "accessed": "2026-10-25"
+    },
+    "S03": {
+      "title": "Цены по умолчанию в движке Версты: lodgingNightByPopulation 4 000 / 5 000 / 7 000 ₽ (города < 100 тыс. / 100 тыс.–1 млн / > 1 млн), asOf 2026-10-01; семейный номер ×1,4; номеров = ceil(взрослых / 2); 4 готовых маршрута на 1–3 ночи",
+      "url": "backend/planner/fixtures/worlds/central_russia_v1.json; backend/planner/verst_planner/adapters/catalogue/synthetic.py",
+      "published": "2026-10-01",
+      "accessed": "2026-10-25"
+    },
+    "S04": {
+      "title": "Travelpayouts, оффер «Яндекс Путешествия»: 8 % от стоимости брони отеля в России (3 % за рубежом, 5 % ж/д); засчитывается оплата в течение 30 дней после перехода; вознаграждение подтверждается через 2 дня после выезда; отменённые брони и сторонние промокоды не учитываются",
+      "url": "https://www.travelpayouts.com/ru/offers/yandex-travel-partnerskaya-programma/",
+      "published": "не указано (живая карточка оффера)",
+      "accessed": "2026-10-25"
+    },
+    "S05": {
+      "title": "Travelpayouts, оффер «Ostrovok.ru»: 6 % от стоимости брони; переход засчитывается, только если он был до открытия формы бронирования; срок cookie в найденном тексте не указан",
+      "url": "https://www.travelpayouts.com/ru/offers/ostrovokru-partnerskaya-programma",
+      "published": "не указано (живая карточка оффера)",
+      "accessed": "2026-10-25"
+    },
+    "S06": {
+      "title": "Travelpayouts, оффер «Tripster»: 10 % за экскурсию, 8 % за билеты в музеи, 4 % за многодневные туры; средний чек 7 600 (₽ по контексту); cookie 90 дней",
+      "url": "https://www.travelpayouts.com/ru/offers/tripster-partnerskaya-programma/",
+      "published": "≈ сентябрь 2025 (поисковик показал возраст ≈ 414 дней)",
+      "accessed": "2026-10-25"
+    },
+    "S07": {
+      "title": "Справка Travelpayouts: срок cookie у большинства брендов 30 дней (точный — во вкладке About программы); атрибуция по последнему клику",
+      "url": "https://support.travelpayouts.com/hc/en-us/articles/203955763",
+      "published": "не указано",
+      "accessed": "2026-10-25"
+    },
+    "S08": {
+      "title": "Яндекс Путешествия, «Итоги 2025 года»: средняя ночь в отеле по России 6 858 ₽; Центральный федеральный округ 6 970 ₽",
+      "url": "https://travel.yandex.ru/pro/itogi-2025-goda-chto-pokazal-analiz-bronirovaniy-oteley/",
+      "published": "начало 2026 (итоги 2025)",
+      "accessed": "2026-10-25"
+    },
+    "S09": {
+      "title": "Газета.ru: города Золотого кольца — средняя ночь ≈ 8 000 ₽ (+14 % г/г), Ярославль ≈ 7 800 ₽",
+      "url": "https://www.gazeta.ru/social/news/2025/08/03/26409188.shtml",
+      "published": "2025-08-03",
+      "accessed": "2026-10-25"
+    },
+    "S10": {
+      "title": "РИА Новости: бронирования на бархатный сезон 2026 — в среднем ≈ 6 200 ₽ за ночь (−9 % г/г)",
+      "url": "https://ria.ru/20260729/otel-2107652428.html",
+      "published": "2026-07-29",
+      "accessed": "2026-10-25"
+    },
+    "S11": {
+      "title": "Яндекс Путешествия для отельеров: базовая комиссия 15 % → 17 % с 01.02.2026 (контекст: условия Яндекса и партнёрок меняются)",
+      "url": "https://travel.yandex.ru/pro/komissiya-servisa/",
+      "published": "2026",
+      "accessed": "2026-10-25"
+    },
+    "S12": {
+      "title": "Т—Ж: новые правила для гостиниц с 01.03.2026 — полный возврат предоплаты при отмене до дня заезда",
+      "url": "https://t-j.ru/news/new-hotel-rules/",
+      "published": "2026",
+      "accessed": "2026-10-25"
+    },
+    "S13": {
+      "title": "RuStore, платежи в приложении: комиссия магазина 15 %; с 01.02.2026 самозанятые и физлица не могут продавать через биллинг RuStore (нужны ИП или ООО)",
+      "url": "https://kod.ru/rustore-new-monetization-apps",
+      "published": "2026-07-03 (дата из поиска; перепроверить)",
+      "accessed": "2026-10-25"
+    },
+    "S14": {
+      "title": "RevenueCat, бенчмарки подписочных приложений 2026: freemium — доля скачиваний с оплатой к 35-му дню ≈ 2,1 % (мир, все категории)",
+      "url": "https://www.revenuecat.com/blog/growth/subscription-app-trends-benchmarks-2026",
+      "published": "2026",
+      "accessed": "2026-10-25"
+    },
+    "S15": {
+      "title": "Ориентиры CPI (блоги, низкая надёжность, категории «путешествия» нет): журнал Битрикс24 — e-commerce 108–172 ₽, финансы 129–198 ₽, игры 231–289 ₽ за установку; VK: у приложений из RuStore в VK Рекламе CPI в первых тестах ниже на ≈ 20 %",
+      "url": "https://www.bitrix24.ru/journal/cpi/ ; https://wnhub.io/ru/news/marketing/item-20370",
+      "published": "не указано",
+      "accessed": "2026-10-25"
+    },
+    "S16": {
+      "title": "Налоги: УСН «доходы» 6 % (НК РФ, ст. 346.20 п. 1); НПД 6 % с доходов от юрлиц и ИП (422-ФЗ, ст. 10)",
+      "url": "https://www.consultant.ru/document/cons_doc_LAW_28165/ ; https://www.consultant.ru/document/cons_doc_LAW_311977/",
+      "published": "действующая редакция",
+      "accessed": "2026-10-25"
+    },
+    "S17": {
+      "title": "Журнал решений D-IR-03: бюджет теста рекламы VAL-02 по умолчанию 30 000 ₽ (нужно одобрение CEO)",
+      "url": "docs/decisions.md",
+      "published": "2026-10-25",
+      "accessed": "2026-10-25"
+    },
+    "S18": {
+      "title": "Архитектура §12.2: ВМ-A 4 vCPU / 8 ГБ + ВМ-B 8 vCPU / 32 ГБ (GraphHopper + Photon + тайлы) + еженедельная временная ВМ сборки; провайдер Selectel или Yandex Cloud (решение CEO)",
+      "url": "docs/architecture.md",
+      "published": "2026-10-23",
+      "accessed": "2026-10-25"
+    }
+  },
+  "inputs": {
+    "hotel_ctr": {
+      "label_ru": "Отели: доля поездок с кликом «Забронировать ночь»",
+      "group": "hotel",
+      "unit": "share of planned trips",
+      "values": {
+        "conservative": 0.05,
+        "base": 0.08,
+        "optimistic": 0.12
+      },
+      "status": "assumed",
+      "sources": [
+        "S01"
+      ],
+      "reasoning": "Base = SPEC §1 target (a target, not a measurement). Conservative assumes a demo-quality first release where many trips are day trips with no overnight; optimistic assumes ready routes dominate (all 4 have ≥ 1 night). Measure: ENG-05 event hotel_link_clicked / plan_succeeded in VAL-04.",
+      "date": "2026-10-25"
+    },
+    "hotel_booking_conversion": {
+      "label_ru": "Отели: доля кликнувших поездок с оплаченной бронью",
+      "group": "hotel",
+      "unit": "share of trips with a hotel click",
+      "values": {
+        "conservative": 0.04,
+        "base": 0.08,
+        "optimistic": 0.12
+      },
+      "status": "assumed",
+      "sources": [
+        "S02"
+      ],
+      "reasoning": "The review used ~10 %. No credible public click-to-booking benchmark for Yandex Travel via Travelpayouts was found (searched 2026-10-25). Verst's click is high-intent (dates, guests and town prefilled) but the user often already has a favourite booking app. Measure: Travelpayouts statistics by sub-id / hotel clicks (VAL-04, M5).",
+      "date": "2026-10-25"
+    },
+    "hotel_price_night": {
+      "label_ru": "Отели: цена ночи за номер экипажа",
+      "group": "hotel",
+      "unit": "RUB per room-night",
+      "values": {
+        "conservative": 5000,
+        "base": 6970,
+        "optimistic": 8000
+      },
+      "status": {
+        "conservative": "assumed",
+        "base": "cited",
+        "optimistic": "cited"
+      },
+      "sources": [
+        "S03",
+        "S08",
+        "S09"
+      ],
+      "reasoning": "Conservative = engine default for a 100k–1M town (standard room); the engine's lodging_cheap knob pushes families to cheaper hotels. Base = Яндекс Путешествия 2025 average for the Central Federal District (6 970 ₽); cross-check: engine family room 5 000 × 1.4 = 7 000 ₽. Optimistic = Golden Ring 2025 average (Газета.ru, ≈ 8 000 ₽). Measure: price bucket of hotel_link_clicked + partner order value.",
+      "date": "2026-10-25"
+    },
+    "hotel_nights_per_booking": {
+      "label_ru": "Отели: ночей в одной брони",
+      "group": "hotel",
+      "unit": "nights per booking",
+      "values": {
+        "conservative": 1.0,
+        "base": 1.3,
+        "optimistic": 1.6
+      },
+      "status": "assumed",
+      "sources": [
+        "S03"
+      ],
+      "reasoning": "The link books one night per overnight town (checkout = check-in + 1, architecture §links). Engine ready routes: 3 of 4 have 1 night, the Golden Ring 2–3 nights → mean ≈ 1.4 nights per trip; some users book only one of two towns through Verst. Measure: partner order nights.",
+      "date": "2026-10-25"
+    },
+    "hotel_season_price_index": {
+      "label_ru": "Сезонность: индекс цены ночи в моделируемом месяце",
+      "group": "hotel",
+      "unit": "multiplier vs annual average",
+      "values": {
+        "conservative": 0.9,
+        "base": 1.0,
+        "optimistic": 1.0
+      },
+      "status": {
+        "conservative": "cited",
+        "base": "assumed",
+        "optimistic": "assumed"
+      },
+      "sources": [
+        "S08",
+        "S10"
+      ],
+      "reasoning": "Conservative models an off-peak month: velvet-season 2026 bookings ≈ 6 200 ₽ vs 2025 annual 6 858 ₽ → 0.90 (two different sources and years; arithmetic only). Base and optimistic use the annual average; the optimistic price is already a peak-destination figure, so no extra uplift (no double counting). Volume seasonality is the separate input low_month_volume_index.",
+      "date": "2026-10-25"
+    },
+    "hotel_cancellation_rate": {
+      "label_ru": "Отели: доля отменённых броней",
+      "group": "hotel",
+      "unit": "share of paid bookings",
+      "values": {
+        "conservative": 0.3,
+        "base": 0.2,
+        "optimistic": 0.15
+      },
+      "status": "assumed",
+      "sources": [
+        "S04",
+        "S12"
+      ],
+      "reasoning": "Travelpayouts pays only for completed stays (S04). No credible 2025–2026 Russian cancellation statistic was found. Since 2026-03-01 a guest gets a full refund until the check-in day (S12), which makes cancelling free and likely raises the rate. Measure: confirmed vs created orders in Travelpayouts statistics.",
+      "date": "2026-10-25"
+    },
+    "hotel_attribution_leakage": {
+      "label_ru": "Отели: потеря атрибуции (cookie/приложение/last click)",
+      "group": "hotel",
+      "unit": "share of Verst-driven bookings not credited",
+      "values": {
+        "conservative": 0.5,
+        "base": 0.35,
+        "optimistic": 0.2
+      },
+      "status": "assumed",
+      "sources": [
+        "S04",
+        "S07"
+      ],
+      "reasoning": "Attribution is a 30-day web cookie with last-click (S04, S07). Losses: (1) Android may open travel.yandex.ru links in the installed Яндекс Путешествия / Яндекс app, where the browser cookie is absent; (2) the user returns later from another device or directly in the app; (3) a cashback or coupon site's link wins last click; (4) third-party promo codes void the reward. Range is reasoned, not measured. Measure: ENG-03 test booking through the installed app + ratio of Verst-reported bookings (VAL-04 post-trip question) to partner-credited bookings.",
+      "date": "2026-10-25"
+    },
+    "hotel_commission": {
+      "label_ru": "Отели: комиссия партнёра для вебмастера",
+      "group": "hotel",
+      "unit": "share of completed booking value",
+      "values": {
+        "conservative": 0.06,
+        "base": 0.08,
+        "optimistic": 0.08
+      },
+      "status": "cited",
+      "sources": [
+        "S04",
+        "S05",
+        "S11"
+      ],
+      "reasoning": "Base/optimistic = Яндекс Путешествия via Travelpayouts, 8 % for hotels in Russia (S04). Conservative = Ostrovok.ru via Travelpayouts, 6 % (S05) — the ENG-03 fallback if Yandex terms or attribution are poor; also covers a cut of the Yandex rate (Yandex raised hotel-side commission in Feb 2026, S11, so terms do move).",
+      "date": "2026-10-25"
+    },
+    "exc_ctr": {
+      "label_ru": "Экскурсии: доля поездок с кликом на Tripster",
+      "group": "excursion",
+      "unit": "share of planned trips",
+      "values": {
+        "conservative": 0.01,
+        "base": 0.02,
+        "optimistic": 0.04
+      },
+      "status": "assumed",
+      "sources": [
+        "S01"
+      ],
+      "reasoning": "Only sights with a tripster_id show the button (SPEC §14); a road-trip family mostly self-guides. Set at a quarter to a third of the hotel click rate. Measure: excursion_link_clicked / plan_succeeded.",
+      "date": "2026-10-25"
+    },
+    "exc_conversion": {
+      "label_ru": "Экскурсии: доля кликов с оплаченной экскурсией",
+      "group": "excursion",
+      "unit": "share of trips with an excursion click",
+      "values": {
+        "conservative": 0.03,
+        "base": 0.05,
+        "optimistic": 0.08
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "No public Tripster conversion benchmark found. Lower than hotels: an excursion is optional, a bed is not. Measure: Travelpayouts Tripster statistics by sub-id.",
+      "date": "2026-10-25"
+    },
+    "exc_avg_check": {
+      "label_ru": "Экскурсии: средний чек заказа",
+      "group": "excursion",
+      "unit": "RUB per order",
+      "values": {
+        "conservative": 4000,
+        "base": 7600,
+        "optimistic": 7600
+      },
+      "status": {
+        "conservative": "assumed",
+        "base": "cited",
+        "optimistic": "cited"
+      },
+      "sources": [
+        "S06",
+        "S01"
+      ],
+      "reasoning": "Base = average check 7 600 on the Travelpayouts Tripster card (network-wide, includes trips abroad; currency ₽ by context). Conservative = a short town walk for a family (SPEC shows «Экскурсия от 1 900 ₽» per person).",
+      "date": "2026-10-25"
+    },
+    "exc_loss_rate": {
+      "label_ru": "Экскурсии: отмены + потеря атрибуции",
+      "group": "excursion",
+      "unit": "share of orders not credited",
+      "values": {
+        "conservative": 0.2,
+        "base": 0.15,
+        "optimistic": 0.1
+      },
+      "status": "assumed",
+      "sources": [
+        "S06"
+      ],
+      "reasoning": "90-day cookie (S06) and no dominant competing app make leakage lower than for hotels; weather cancellations remain.",
+      "date": "2026-10-25"
+    },
+    "exc_commission": {
+      "label_ru": "Экскурсии: комиссия Tripster через Travelpayouts",
+      "group": "excursion",
+      "unit": "share of order value",
+      "values": {
+        "conservative": 0.1,
+        "base": 0.1,
+        "optimistic": 0.1
+      },
+      "status": "cited",
+      "sources": [
+        "S06"
+      ],
+      "reasoning": "10 % per excursion (8 % museum tickets, 4 % multi-day tours) on the Travelpayouts Tripster card.",
+      "date": "2026-10-25"
+    },
+    "pro_planner_to_paid": {
+      "label_ru": "Trip Pro: доля активных пользователей, купивших Pro",
+      "group": "pro",
+      "unit": "share of activated users",
+      "values": {
+        "conservative": 0.0,
+        "base": 0.01,
+        "optimistic": 0.021
+      },
+      "status": {
+        "conservative": "cited",
+        "base": "assumed",
+        "optimistic": "cited"
+      },
+      "sources": [
+        "S01",
+        "S14"
+      ],
+      "reasoning": "Conservative (planning case) = 0: SPEC §14 ships no in-app payments in the MVP, and RuStore billing needs an ИП/ООО (S13), so no Pro cash inside the planning horizon. Base = 1 % of activated users, an assumption. Optimistic = RevenueCat global freemium download-to-paid by day 35 (2.1 %, S14) applied to activated users; the benchmark is mostly iOS / Western markets, so for an Android app in Russia it is an upper bound. Revenue is booked once per payer per year and spread over that payer's planned trips. Measure: BIZ-06 waitlist rate per price point (intent, not payment).",
+      "date": "2026-10-25"
+    },
+    "pro_price_year": {
+      "label_ru": "Trip Pro: цена в год",
+      "group": "pro",
+      "unit": "RUB per paying user per year",
+      "values": {
+        "conservative": 490,
+        "base": 790,
+        "optimistic": 1290
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "Placeholder price points for the BIZ-06 three-price test; revenue is booked once per payer per year and spread over that payer's planned trips.",
+      "date": "2026-10-25"
+    },
+    "store_fee": {
+      "label_ru": "Trip Pro: комиссия магазина (RuStore)",
+      "group": "pro",
+      "unit": "share of Pro price",
+      "values": {
+        "conservative": 0.15,
+        "base": 0.15,
+        "optimistic": 0.15
+      },
+      "status": "cited",
+      "sources": [
+        "S13"
+      ],
+      "reasoning": "RuStore commission 15 %; RuStore billing needs an ИП or ООО since 2026-02-01 (affects LEG-02).",
+      "date": "2026-10-25"
+    },
+    "cpi": {
+      "label_ru": "Привлечение: цена установки (VK Реклама / Яндекс Директ)",
+      "group": "acquisition",
+      "unit": "RUB per install",
+      "values": {
+        "conservative": 250,
+        "base": 150,
+        "optimistic": 90
+      },
+      "status": "assumed",
+      "sources": [
+        "S15"
+      ],
+      "reasoning": "assumed — VAL-02 will measure. No credible public CPI for Russian travel apps on VK Реклама or Яндекс Директ was found; only blog ranges for other categories (108–289 ₽, S15). Range set inside those references. VAL-02 measures cost per landing lead, which is not a CPI either: the first real CPI comes from the RuStore beta campaign.",
+      "date": "2026-10-25"
+    },
+    "install_to_planner": {
+      "label_ru": "Воронка: доля установок, построивших ≥ 1 поездку",
+      "group": "acquisition",
+      "unit": "share of installs",
+      "values": {
+        "conservative": 0.4,
+        "base": 0.6,
+        "optimistic": 0.7
+      },
+      "status": "assumed",
+      "sources": [
+        "S01"
+      ],
+      "reasoning": "Base = SPEC §1 target «≥ 60 % of installs build ≥ 1 route» (a target, not a measurement). Measure: AppMetrica install → plan_succeeded (ENG-05).",
+      "date": "2026-10-25"
+    },
+    "trips_per_planner": {
+      "label_ru": "Воронка: поездок на активного пользователя (90 дней)",
+      "group": "acquisition",
+      "unit": "planned trips per activated user",
+      "values": {
+        "conservative": 1.0,
+        "base": 1.3,
+        "optimistic": 1.6
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "A family plans few car trips per season; repeat planning (alternatives, re-plans) counts as one trip_id only if saved as a new trip. Measure: distinct trip_id per device in 90 days.",
+      "date": "2026-10-25"
+    },
+    "revenue_tax_rate": {
+      "label_ru": "Налог с выручки (УСН «доходы» / НПД)",
+      "group": "tax",
+      "unit": "share of revenue",
+      "values": {
+        "conservative": 0.06,
+        "base": 0.06,
+        "optimistic": 0.06
+      },
+      "status": "cited",
+      "sources": [
+        "S16"
+      ],
+      "reasoning": "Both entity options in LEG-02 tax this income at 6 %. VAT is not modelled (not due at this revenue scale; re-check if revenue grows).",
+      "date": "2026-10-25"
+    },
+    "b2g_pilots_per_year": {
+      "label_ru": "B2G: платных пилотов в год",
+      "group": "fixed",
+      "unit": "pilots per year",
+      "values": {
+        "conservative": 0,
+        "base": 1,
+        "optimistic": 2
+      },
+      "status": "assumed",
+      "sources": [
+        "S02"
+      ],
+      "reasoning": "BIZ-03 target is ≥ 1 pilot «paid or free with a paid follow-up»; the planning case counts it as free.",
+      "date": "2026-10-25"
+    },
+    "b2g_revenue_per_pilot": {
+      "label_ru": "B2G: выручка с пилота",
+      "group": "fixed",
+      "unit": "RUB per pilot per year",
+      "values": {
+        "conservative": 150000,
+        "base": 300000,
+        "optimistic": 600000
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "No public price for a curated-route placement was found. Placeholder for one region's promotion of one route with analytics; per-contract, not per trip. Measure: BIZ-03 offers and replies.",
+      "date": "2026-10-25"
+    },
+    "sponsored_businesses": {
+      "label_ru": "Спонсорские остановки: число платящих точек",
+      "group": "fixed",
+      "unit": "businesses",
+      "values": {
+        "conservative": 0,
+        "base": 3,
+        "optimistic": 10
+      },
+      "status": "assumed",
+      "sources": [
+        "S02"
+      ],
+      "reasoning": "BIZ-04 target is ≥ 3 businesses agreeing to a test (a test may be free, hence 0 in the planning case). Ads must carry 38-FZ labelling.",
+      "date": "2026-10-25"
+    },
+    "sponsored_fee_month": {
+      "label_ru": "Спонсорские остановки: плата точки в месяц",
+      "group": "fixed",
+      "unit": "RUB per business per month",
+      "values": {
+        "conservative": 2000,
+        "base": 3000,
+        "optimistic": 5000
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "Placeholder for a roadside cafe or fuel station on one corridor. Measure: BIZ-04 answers on price.",
+      "date": "2026-10-25"
+    },
+    "burn_hosting": {
+      "label_ru": "Расходы: хостинг (2 ВМ в РФ + сборка + бэкапы)",
+      "group": "burn",
+      "unit": "RUB per month",
+      "values": {
+        "conservative": 35000,
+        "base": 25000,
+        "optimistic": 18000
+      },
+      "status": "assumed",
+      "sources": [
+        "S18"
+      ],
+      "reasoning": "Sizing from architecture §12.2 (4/8 + 8/32 VMs, weekly 16/64 spot build). No provider quote yet (CEO decision Q-3); replace with the Selectel / Yandex Cloud calculator figure.",
+      "date": "2026-10-25"
+    },
+    "burn_curator": {
+      "label_ru": "Расходы: куратор мест, частичная занятость",
+      "group": "burn",
+      "unit": "RUB per month incl. taxes",
+      "values": {
+        "conservative": 50000,
+        "base": 40000,
+        "optimistic": 30000
+      },
+      "status": "assumed",
+      "sources": [
+        "S02"
+      ],
+      "reasoning": "TEAM-01 part-time paid curator (verification calls, photos, tags). Replace with the signed contract amount.",
+      "date": "2026-10-25"
+    },
+    "burn_ads": {
+      "label_ru": "Расходы: платная реклама",
+      "group": "burn",
+      "unit": "RUB per month",
+      "values": {
+        "conservative": 30000,
+        "base": 30000,
+        "optimistic": 30000
+      },
+      "status": "assumed",
+      "sources": [
+        "S17"
+      ],
+      "reasoning": "Same in all scenarios so scenarios compare unit economics, not budgets: the D-IR-03 test budget (not yet approved) repeated monthly.",
+      "date": "2026-10-25"
+    },
+    "burn_accounting": {
+      "label_ru": "Расходы: бухгалтерия и банк",
+      "group": "burn",
+      "unit": "RUB per month",
+      "values": {
+        "conservative": 4000,
+        "base": 3000,
+        "optimistic": 2000
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "Online accounting + bank account for an ИП on УСН. Replace with the chosen bank's tariff.",
+      "date": "2026-10-25"
+    },
+    "burn_tools": {
+      "label_ru": "Расходы: домены, почта, сервисы, маркировка рекламы",
+      "group": "burn",
+      "unit": "RUB per month",
+      "values": {
+        "conservative": 5000,
+        "base": 4000,
+        "optimistic": 3000
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "AppMetrica and Travelpayouts are free; this covers domains, mail, monitoring and ERID labelling costs. Founder and developer pay are excluded (see the note in unit-economics.md).",
+      "date": "2026-10-25"
+    },
+    "low_month_volume_index": {
+      "label_ru": "Сезонность: поездок в слабый месяц к среднему месяцу",
+      "group": "season",
+      "unit": "ratio of organic planned trips",
+      "values": {
+        "conservative": 0.35,
+        "base": 0.5,
+        "optimistic": 0.6
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "Car trips concentrate in May–September and holiday weekends; no monthly series for road trips in Russia was found. Used only for the cash-planning line «trips per average month so that the weakest month also breaks even». Measure: plan_succeeded by month over the first year.",
+      "date": "2026-10-25"
+    }
+  },
+  "reference": {
+    "review_estimate": {
+      "label_ru": "Оценка из ревью (BIZ-01)",
+      "ctr": 0.08,
+      "booking_conversion": 0.1,
+      "booking_value_rub": 12000,
+      "commission": 0.08,
+      "stated_result_rub_per_trip": 10,
+      "source": "S02"
+    },
+    "engine_lodging": {
+      "label_ru": "Цены ночи в движке Версты",
+      "night_by_population_rub": {
+        "lt_100k": 4000,
+        "100k_to_1m": 5000,
+        "gt_1m": 7000
+      },
+      "family_room_factor": 1.4,
+      "as_of": "2026-10-01",
+      "source": "S03"
+    },
+    "licensing": {
+      "label_ru": "Лицензирование движка (BIZ-05)",
+      "note": "Excluded from per-trip revenue: a B2B licence is priced per contract and does not scale with Verst's own planned trips. Modelled after BIZ-05 calls give price expectations.",
+      "note_ru": "B2B-лицензия оценивается по договору и не растёт с числом поездок в самой Версте; модель появится после звонков BIZ-05 с ожиданиями по цене."
+    }
+  }
+}

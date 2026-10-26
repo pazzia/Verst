@@ -156,6 +156,8 @@ private fun Sheet(ui: WaybillUi, a: WaybillActions) {
                 cost.lines.firstOrNull { it.key == "reserve" }?.let { ReserveRow(it, cost.reserveOn, ui.busy, a::toggleReserve) }
                 TotalRow(cost.totalRub)
             }
+            // ADR-0019 E-2: the total says what it leaves out («Без билетов в 1 место — цена неизвестна»)
+            cost.totalNoteRu?.let { Txt(it, T.paper.label, C.paper.text, Modifier.padding(top = 4.dp, end = 100.dp).testTag("waybill.total.note")) }
             // 5.8 §3: «Подогнали под бюджет» + one line per lever (the savings sum to initial − total)
             val fit = trip.budgetFit
             if (fit != null && fit.levers.isNotEmpty()) LeverLines(fit)

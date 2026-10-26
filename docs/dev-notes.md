@@ -1988,3 +1988,677 @@ Contracts: `docs/contracts/v2/` (38 files, new `plan-moscow-parking.json`); cost
   - `parkingFreePlusUnknownOnRoadAndWaybill` checks the footer and a day header for «бесплатно + ?».
   - `parkingFreePlusUnknownWaybillLine` checks «0 + ?».
   - `parkingSumPlusUnknownFooter` checks «≈ N ₽ + ?».
+
+## Investor-readiness / HYG-01
+
+Green `main` and a release gate. Architect, on branch ccr-013d3489-181fz2 (from the Sprint 4 release commit
+11f3a2b). Backlog: `docs/backlog-investor-readiness.md` § HYG-01.
+
+Status: done. Before: `python3 -m unittest discover` → `Ran 449 tests` / `FAILED (failures=2)`, on both
+Python 3.13.17 and 3.12.3.
+
+### 1. Brand deny-list: «Суточно» hit «круглосуточно»
+- **Cause:** `tests/unit/test_brands.py` `hits` matched deny-list entries as plain substrings. The Kotlin
+  side (`BrandDenyList.hits`) had already moved to «a brand starts a word» (`(?<!\p{L})`, case-insensitive).
+  Python was not changed with it.
+- **Fix:** `starts_word(brand, text)`: an entry hits where it is not preceded by a letter
+  (`str.isalpha` = Unicode L*, so Cyrillic too), case-insensitive, overlapping starts included. This is the
+  same rule as Kotlin. The deny-list and the allow-list are unchanged.
+- **Why not whole words:** the right side stays open on purpose. Whole-word matching would let
+  «в Яндексе», «у Лукойла», «yandexmaps://» and «Gazpromneft» through, which would weaken the gate.
+  On today's corpus (213 075 strings: worlds, resources, goldens, contracts and bundles, catalogue, Android
+  strings) whole-word and word-start give the same hits. Substring differs only on «круглосуточно».
+- **Parity:** jshell with `Pattern.CASE_INSENSITIVE | UNICODE_CASE` gives the same 16/16 results as the
+  Python regression cases. `javap` on kotlin-stdlib 2.0.21 shows that Kotlin's `Regex(…, IGNORE_CASE)`
+  adds `UNICODE_CASE` (`ensureUnicodeCase`). The Kotlin source is unchanged.
+- **Catalogue builder:** `tools/data/build_catalogue.py` `denied` stays a substring match on purpose. It is
+  a stricter pre-filter, so any name the builder keeps also passes the gates. A docstring now says so.
+  The semantics are written at the top of `brand_denylist.txt`.
+- **Regression test:** `test_matcher_brand_starts_a_word`.
+  - No hit: «круглосуточно», «КРУГЛОСУТОЧНО», «посуточно», «через2ГИС».
+  - Hit: «Суточно», «суточно», «СУТОЧНО», «в Суточно», «Суточно.ру», ««Суточно»», «24Суточно»,
+    «в Яндексе», «yandexmaps://…», «у Лукойла», «Gazpromneft», «booking.com».
+- **Known trade-off:** a word that starts with an entry still hits, e.g. «суточного» hits «Суточно». A
+  false hit fails loudly. A miss would leak a brand silently.
+
+### 2. `docs/contracts/v2/selfcheck.json` stale (3.13.16 vs 3.13.17)
+- **Cause:** there was no repo version bump. `selfcheck` reports the interpreter
+  (`sys.version_info[:3]`), and `gen_api_contracts.py` wrote it verbatim, so the contract depended on the
+  host Python. On 3.12.3 it read «3.12.3». CI's `setup-python "3.13"` floats to the latest patch, so a
+  plain re-run would have gone red again on the next Python patch release.
+- **Fix:** the generator writes `python` as `APP_PYTHON = "3.12.x"`, the app's Chaquopy line. The host
+  interpreter is environment data, and the generator already writes `ms` as 0 for the same reason.
+  `docs/architecture-android-mvp.md` already documents `"python": "3.12.x"`. The engine still returns the
+  real version at runtime, and the e2e `EngineStartupTest` records it.
+- **Regenerated** with `python3 tools/gen_api_contracts.py` (`38 files, 679842 bytes`). Only
+  `selfcheck.json` changed (`git status docs/contracts`). Goldens and fixtures have no diff.
+
+### 3. A red planner suite blocks the release
+- **New job:** `.github/workflows/android.yml` has a `planner` job that runs `python3 -m unittest discover`
+  in `backend/planner` on `env.PYTHON_VERSION` (3.12, the interpreter the APK ships). It runs in parallel
+  with `build`.
+- **Release:** `needs: [planner, build, e2e]` and requires `needs.planner.result == 'success'`.
+  `force_release` still bypasses only the emulator journey. Android unit tests already gated the release
+  through `needs.build.result`.
+- **ci-logs:** the job uploads `diag-planner` (`unittest.log`, `errors.txt` with the FAIL/ERROR lines).
+  `ci-logs` needs it. `tools/ci/combine_run.py` lists the `planner` job and counts it in the conclusion.
+- `planner.yml` (`make check` on 3.13) is unchanged. Between the two workflows, both interpreter lines are
+  covered.
+
+Commands (working tree):
+- `cd backend/planner && python3 -m unittest discover` → `Ran 450 tests` / `OK` (3.13.17); with
+  `python3.12` → `Ran 450 tests` / `OK`.
+- `make check` → `All checks passed!` / `Success: no issues found in 71 source files` / `Ran 450 tests` / `OK`.
+- Gate proof: the planner job's step script, run with `bash -eo pipefail` on a `git archive HEAD` snapshot,
+  exits 1. `errors.txt` holds the 2 FAIL lines.
+- `yaml.safe_load(android.yml)` → jobs `planner, build, e2e, release, ci-logs`.
+- `combine_run.py` with a failed planner → `conclusion: failure`, `release: skipped` in the table.
+
+## Investor-readiness / DATA-01
+
+Our place facts kept apart from OSM. Architect, on branch ccr-013d3489-181fz2. Backlog:
+`docs/backlog-investor-readiness.md` § DATA-01 (and the views for DATA-04). Decision record:
+`docs/adr/0018-verst-facts-apart-from-osm.md`.
+
+Status: done, except the schema note in `docs/architecture.md` §9.2, which the Manager integrates (DATA-01
+acceptance item 1). The engine is untouched. Goldens: `git status backend/planner/tests/golden` is clean.
+
+### Files
+- `backend/migrations/sql/0002_place_provenance.sql`: runs once, inside the Alembic transaction (ADR-0008).
+  Reference rows are upserts.
+- `backend/migrations/sql/0002_place_provenance.down.sql`: the lossy reverse for `alembic downgrade`
+  (architecture §9.4).
+- `backend/planner/tests/test_schema_separation.py`: rules R1–R7, stdlib DDL parser.
+- `.github/workflows/planner.yml`: `backend/migrations/**` is added to the push paths, so a migration-only
+  change on `main` runs the test. Pull requests already ran it.
+
+### What 0002 does (ADR-0018 §3, §5)
+- **OSM by id only.** `core.place.osm_id` and `core.town.osm_id` move to `core.place_osm_ref` /
+  `core.town_osm_ref` (`osm_type`, `osm_id bigint`, `match_method`, `linked_at`, `linked_by`), then they are
+  dropped. `source = 'osm'` is gone. The migration aborts if such a row exists.
+- **Provenance.** `core.evidence` has one row per observed fact; it mirrors the curator sheet «Доказательства».
+  `core.place_check` is the verification log; the latest `pass` sets `verified_at`/`verified_by`.
+  `core.curator` holds pseudonymous ids (`cur-01`, `sys-users`, `sys-partner`, `legacy-0001`). The e-mail in the
+  old `verified_by` is discarded.
+- **Curator gaps closed:** `core.place_tag` (yes / no / unknown + conditions), `core.place_fuel`,
+  `core.place_photo` (author, licence, rights), `core.road` (11 federal roads seeded) + `core.place_road`
+  (km post, direction) + `core.ready_route_road`.
+- **Caches.** `tags`, `photo_keys`, `verified_at`, `verified_by` are computed by the trigger `place_derive`.
+  Direct writes are overwritten.
+- **Gates.** No `live`, and no curator `pass`, while `core.place_missing_evidence(id)` is not empty.
+- **Defaults.** `breakfast_included` is nullable (NULL = unknown). `geom` is nullable for non-live rows.
+  New `NOT VALID` live rules: hours present; sight ticket or `free_entry`.
+- **KPI (DATA-04):** `core.place_verified`, `core.place_route_membership`, `core.kpi_verified_total`,
+  `core.kpi_verified_by_route`, `core.kpi_verified_by_corridor`. Buckets: < 90 d, 90–180 d, stale.
+  `core.place_evidence_missing` is the curator's queue.
+
+### Why the test lives in the planner suite
+- `backend/api/tests/db/` (architecture §13) does not exist yet. It needs a PostGIS container (DEV-B02).
+- The planner suite is the only Python suite that CI runs: `make check` in planner.yml, and the planner job of
+  android.yml. A stdlib file in `backend/planner/tests/` therefore runs in the normal discovery path with no new
+  dependency.
+- It sits next to `tests/test_layering.py`, which is also a repository-structure test.
+- When the API DB tests exist, the file can move there unchanged.
+
+### Commands and results (2026-10-25)
+- `cd backend/planner && python3 -m unittest discover` → `Ran 503 tests` / `OK`. The count includes work by other
+  roles in this tree. 6 of the tests are new here.
+- `python3 -m unittest tests.test_schema_separation -v` → 6 tests OK:
+  - the rules hold on 0001+0002;
+  - the same rules flag 0001 (`osm_id` ×2, `'osm'` source, `verified_by` not a curator, no evidence);
+  - 13 injected violations are caught;
+  - the parser sees the 0002 model;
+  - the parser fails closed on 4 unknown DDL forms;
+  - the 0001 sha256 is pinned.
+- `make lint-planner typecheck-planner` → `All checks passed!` / `Success: no issues found in 75 source files`.
+- **PostgreSQL:** `which psql postgres` → `/usr/bin/psql` only. The server binaries of `postgresql-16` (16.15) are
+  pre-installed in `/usr/lib/postgresql/16/bin`. PostGIS is not installed, and nothing was installed.
+  - Setup: a throwaway cluster, `initdb` + `pg_ctl` as user `postgres` under `/var/lib/postgresql`, unix socket
+    only. It was stopped and deleted afterwards.
+  - Shim: 0001 was applied with `geometry`/`geography` shimmed as domains over `point` (a text substitution for
+    the dry run only). 0002 uses no PostGIS function, so it ran unmodified.
+  - Results:
+    - 0001 + seeds + 0002 → OK on an empty DB.
+    - Legacy rows (`osm_id` n42/w77/r123, an e-mail in `verified_by`, tags, two photo keys) → OSM ids moved to
+      `*_osm_ref` as node 42 / way 77 / relation 123; `verified_by = legacy-0001`; tags kept as `yes`; photos
+      kept as legacy drafts, `photo_keys = {}`; no `osm` column is left outside `*_osm_ref`.
+    - A `source = 'osm'` row → `ERROR: ADR-0018: 1 core.place rows have source = osm …`, rolled back (no
+      `evidence` table exists afterwards).
+    - Scenario: 29/29 checks (18 expected rejections, 11 assertions). Among them: the live gate and check gate
+      list the missing evidence; an openstreetmap.org URL is refused; `geom` from `reviews` is refused; dogs
+      «до 10 кг» do not reach `tags`; a direct `tags` write is overwritten; fuel rows only on `fuel`, and the
+      type change is blocked; an unlicensed live photo is refused; the KPI views give total `all 2 (1 fresh / 1
+      ageing)`, route `golden-ring` 2, corridor М-8 1 and М-2 0; deleting the only `pass` of a live place is
+      refused; 0001's auto-hide still works and removes the place from the KPI.
+    - `up → down`: sorted `pg_dump -s` equals that of 0001 (the re-added `osm_id` is the last column);
+      `osm_id` values are restored. `up` then applies again.
+
+### For the Manager
+- `docs/architecture.md` §9.2 needs a schema note pointing to ADR-0018 / 0002 (DATA-01 acceptance item 1).
+  §9.1 should add the new tables to `core`. §9.5 Directus: the «stamp `verified_at/by`» flow becomes a
+  `place_check` insert; the cached columns are read-only; the map widget is not a coordinate source (ADR-0018 §9).
+- Lawyer: add ADR-0018 §11 L1–L5 to the brief §5. L4 (sight hours and fee from two layers) also needs a CEO
+  decision.
+- Data Curator: checklist §2.4, §5.1.4 and §6 map to the new tables (ADR-0018 §9). The coordinate-source rule
+  (§4) may slow down hotels with no published coordinates. Measure it in the W3 test task (ADR-0018 §12 q1).
+- Engine follow-ups E-1…E-6 (ADR-0018 §10) each change plans. They need their own task and regenerated goldens.
+
+## Investor-readiness / ODbL package
+
+CEO decision D-IR-07 = option (a): the repository and the APK pre-releases are public, so the catalogue is already
+being conveyed and the ODbL package is closed now (docs/legal/risk-register.md R-01, R-09, R-10; lawyer brief
+appendix B). Developer, on branch ccr-013d3489-181fz2. Not committed.
+
+### What changed
+1. **Notice in the APK:** `android/core-ui/src/main/assets/licenses/data.txt` (Russian + English): the sources
+   and what each fed, «© участники OpenStreetMap, данные доступны по лицензии ODbL 1.0», the ODbL and
+   openstreetmap.org/copyright URIs, Wikidata CC0, Wikipedia/Wikivoyage CC BY-SA 4.0 «тексты сокращены»,
+   Commons per-file licences (GFDL-only files not used), the catalogue's own ODbL licence and the free copy URL.
+   - **Folder spelling:** the existing source folder `assets/licenses/` (font NOTICE and OFL texts) is used.
+     ADR-0012 wrote `assets/licences/data.txt`. The APK has both spellings: `licences/chaquopy.txt` is generated by
+     `chaquopyLicences` in `app/build.gradle.kts`. Unifying them is left as an open question.
+   - **Shown in «О данных»** (`AboutDataSheet`, RoadScreen.kt). There was no licences UI to reuse. The sheet now has
+     three link rows (copy, ODbL 1.0, OSM copyright; ↗, opened with `LocalUriHandler`) and a toggle that shows the
+     whole `data.txt` in place. The body scrolls inside the sheet. The URIs are in `DataLicence`.
+2. **`meta.licence` in the catalogue:** `build_catalogue.licence_block(version)` holds ODbL 1.0 for the whole
+   database (`scope`, `derivativeOf: OpenStreetMap`), the English notice of appendix B, the attribution per source
+   with the catalogue parts it fed, the licence and source URIs, the free copy and `build` (= `meta.version`). The
+   key sits right after `builtAt`.
+3. **Real rebuild, no hand patch.** The raw inputs are public branches. With the builder at HEAD (before any
+   change), `bot/raw-7` + `bot/extras-1` + `bot/photos-1` (plus `meta.sources` as `sources.json`) rebuild
+   `wd-20261025-r7.4` **byte-identically, all 4 files and `catalogue.lock`**. So the shipped catalogue is rebuilt
+   with the new generator as **`wd-20261025-r7.5`**, and the lock comes from `write_lock.py`. No patch script was
+   needed. The recipe is in `data/catalogue/README.md`. It was re-run from a copy of the tree: 4/4 files identical.
+4. **GFDL-only photos (R-10):** `gfdl_only(licence)` is true when every licence named is a GFDL
+   («GFDL», «GFDL 1.2», «GNU Free Documentation License»). A GFDL + CC file stays. `image_and_credit` treats a
+   GFDL-only file as non-free, so the next candidate (Wikipedia image, OSM tag, geosearch) is tried, as for
+   «Fair use».
+   - **r7.4 → r7.5 diff:**
+     - credits 3 646 → 3 632: the 14 GFDL credit entries are gone;
+     - 22 POI photos and 1 fixture link photo (`pl_yar_spaso`, «Спасо-Преображенский монастырь», Ярославль) are
+       dropped;
+     - `areaBlock` 549 → 541;
+     - POIs 10 922 → 10 921. Losing the photo costs 0.10 quality: 7 POIs drop out (6 under the per-town cap, Q124671437 under
+       the 0.25 floor) and 6 that the cap used to cut come in. 15 POIs keep their place with a lower level (3 → 2, Q1078595 4 → 2);
+     - towns and bars are unchanged.
+   - **Effect on the engine:** the v2 contracts changed only where expected (`load_catalogue`/`selfcheck` version
+     and counts, the corridor sights of the two Золотое кольцо budget plans, and three Ярославль walks where one stop
+     lost its photo and the times moved by 1 min). They
+     are regenerated by `tools/gen_api_contracts.py`. Goldens are byte-identical.
+5. **Free copy (ODbL 4.6):** `data/catalogue/README.md` (RU + EN) covers the 4 files and their paths, the format,
+   the licence and per-source contents table, the attribution to give, the scripts and workflows, and the
+   byte-identical rebuild recipe. It also notes that the `bot/raw-*` branches hold OSM extracts under ODbL.
+   - `data/catalogue/LICENSE-ODbL.txt` is Open Data Commons' own plain text
+     (opendatacommons.org/licenses/odbl/odbl-10.txt, from github.com/okfn/opendatacommons.org;
+     opendatacommons.org itself is blocked by the proxy). sha256 `6076807…beaf5`, pinned in a test.
+   - It was compared word by word with SPDX `ODbL-1.0.txt`. The only differences are the title line, «-» vs «–»
+     after the defined terms, and an SPDX typo: «Section 4.74 a.» where the official text has «4.7 a.». So the
+     official text is the one shipped.
+   - The file keeps its trailing spaces; `.editorconfig` exempts it.
+   - The root README has a «Data and licences» section and a table row. The android.yml release notes have one
+     line: «Данные: … ODbL 1.0 … https://github.com/<repo>/tree/<sha>/data/catalogue», i.e. the copy of exactly
+     that build.
+6. **«О данных» copy** (`about_data_body`, per appendix B, shortened): Wikidata CC0; OSM data «© участники
+   OpenStreetMap, данные доступны по лицензии ODbL 1.0»; the catalogue is a derivative database under ODbL and a
+   copy can be downloaded free; Wikipedia/Wikivoyage CC BY-SA 4.0, texts abridged, the link is on the card;
+   Commons credit under the photo. The approximate-distances line and the demo line are kept. There are new keys
+   `about_data_copy/odbl/osm/notice/notice_hide`. Brand gate: OpenStreetMap, Wikipedia and GitHub are not on
+   `brand_denylist.txt`; `test_brands` and the Robolectric `shot()` deny-list check pass on the new text.
+7. **Extract credit (R-09):**
+   - `poi_details.extractSource` gains `url`, `licenceUrl` and `abridged`; the other fields are unchanged, so
+     `API_VERSION` stays 3. The `url` uses Wikidata `Special:GoToLinkedPage/ruwiki/{Q}`, because the catalogue
+     keeps no article titles and the extract is the intro of the item's own ruwiki sitelink. A Wikivoyage listing
+     links its town's ruwikivoyage guide (0 Wikivoyage extracts ship today).
+   - Wikivoyage's licence is now CC BY-SA 4.0 (the Wikimedia Terms of Use moved every project to 4.0 in 2023).
+   - `attributionRu` reads «Из статьи Википедии, текст сокращён · CC BY-SA 4.0».
+   - Android: `card_desc_wikipedia/wikivoyage` = «Из статьи Википедии / Из Викигида, текст сокращён ·
+     CC BY-SA 4.0». The line opens `extractSource.url` through `CardActions.openPage`, the photo credit's path.
+     `ExtractSourceDto` gets the three fields with defaults.
+
+### Tests
+- New `tests/unit/test_data_licence.py` (5 tests). It keeps these in step: `data.txt`, the Kotlin `DataLicence`
+  URIs, the builder's URIs, the README's relative links (all resolve), the pinned licence text, the Android copy
+  (appendix B phrases, «текст сокращён», «· CC BY-SA 4.0») and the release-notes link.
+- `test_catalogue.py` (+5): `gfdl_only` cases, `licence_block` content, the sample build's `meta.licence` and key
+  order, and a GFDL regression on the recorded samples (re-licensed copy: GFDL / GFDL 1.2 dropped, GFDL + CC kept).
+  It also checks that the packaged catalogue carries `licence_block(meta.version)` and no GFDL-only credit.
+- `test_mobile_v2.py` (+1, and `test_poi_details` extended): the full `extractSource` object and attribution
+  line; `extract_page` for wikipedia / wikivoyage / osm / wikidata / non-Q ids.
+- Android (not run here, no SDK):
+  - `ScreensScreenshotTest.cardSight`: the source line text and its click action;
+  - new `aboutData` (shot `road/about-data@390x1000`): the links, the toggle and the asset text;
+  - `V2ContractsTest`: the `extractSource` fields.
+
+### Commands and results (2026-10-25)
+- `cd backend/planner && python3 -m unittest discover` → `Ran 503 tests` / `OK`, 0 skipped. This includes other
+  roles' new tests in this tree; 11 of the tests are new here. The baseline before any change was `Ran 450` / `OK`.
+- `make check` → `All checks passed!` / `Success: no issues found in 75 source files` / `Ran 503 tests` / `OK`.
+- `make coverage-planner` → TOTAL 97.6 %, `mobile.py` 97.1 %.
+- `git diff --quiet -- backend/planner/tests/golden` → exit 0.
+- Rebuild proof: the HEAD builder on the three bot branches → `cmp` equal for the 4 r7.4 files, and
+  `write_lock.py` → `diff` equal to the committed lock.
+
+### Not verified here
+- No Android SDK (`ANDROID_HOME` empty), so Kotlin compile, Robolectric and screenshots run in CI only. The
+  `aboutData` test assumes Robolectric's merged assets include core-ui's `assets/licenses/data.txt`. AGP merges
+  library assets for unit tests when `isIncludeAndroidResources = true`.
+- `Special:GoToLinkedPage` and the GitHub `tree/main/data/catalogue` URL could not be opened: wikidata.org and
+  opendatacommons.org are blocked by the proxy.
+
+### Open questions (default applied)
+- The asset folder spelling `licenses/` vs `licences/` (Chaquopy). Default: keep `licenses/`, the existing source
+  folder; ADR-0012 is amended.
+- The `pl_yar_spaso` fixture sight (Ярославль) lost its only photo, which was GFDL. Default: no photo (the
+  illustration). A Data Curator can pick a free Commons file for it in the next data run.
+- «О данных» is reachable only from the «Расстояния приблизительные» line and the debug screen. ODbL 4.3 asks
+  that users of Produced Works can learn of the source. Each OSM card already says «© участники OpenStreetMap».
+  Default: unchanged. The Designer should add a permanent entry, e.g. on the Windshield or in the overflow.
+- Pre-existing, not changed: for `extractSrc = wikidata` the card shows «Описание: Описание: Викиданные · CC0»,
+  because `card_desc_source` and the engine's `nameRu` both carry «Описание:». It is a one-line fix in either
+  place.
+- Legal owns `docs/legal/*`: R-01/R-09/R-10 and the brief still name `assets/licences/data.txt` and «[ссылка]».
+
+## Investor-readiness / ENG-01
+
+Real road routing, week 2 slice. Architect, on branch ccr-013d3489-181fz2 (not committed). Design:
+`docs/adr/0017-real-road-routing-graphhopper.md`. Backlog: `docs/backlog-investor-readiness.md` § ENG-01.
+
+Status: adapter, server config, CI workflow and ADR done; the real-graph numbers need one run of
+`.github/workflows/routing.yml` (manual). Nothing is wired into the app or the goldens.
+
+### Files
+- `backend/planner/verst_planner/adapters/graphhopper/` — `mapping.py` (pure GraphHopper JSON → `Route`),
+  `transport.py` (stdlib `urllib`, deadline-bounded), `routing.py` (`GraphHopperRouting`, `GraphHopperSettings`).
+- `backend/planner/tests/unit/test_graphhopper.py` (36 tests) and `backend/planner/tests/data/graphhopper/*.json`
+  (12 responses recorded from a real GraphHopper 11.0 server on a synthetic mini map).
+- `infra/routing/`: `config.yml`, `custom_models/avoid_tolls.json`, `build_graph.sh`, `Dockerfile`,
+  `docker-compose.yml`, `check_routes.py`, `references.json`, `README.md`, `dev/make_mini_osm.py`,
+  `dev/record_fixtures.sh`.
+- `.github/workflows/routing.yml` (`workflow_dispatch` only).
+
+### Decisions (ADR-0017)
+- GraphHopper 11.0 (Apache-2.0), jar from Maven Central with a pinned sha256; our own Docker image (upstream has none).
+- Two CH profiles, `car` and `car_avoid_tolls` (`toll == ALL` → priority ×0.01), instead of a per-request custom
+  model; no turn costs; `index.max_region_search: 8` so GraphHopper snaps up to ~3 km and the adapter applies the
+  2 km rule.
+- VM: all of Russia. CI: Central + Volga merged (Казань is in the Volga FD; a Central-only graph cannot route it).
+- The phone never calls GraphHopper and the on-device engine does no I/O: online, Kotlin fetches the route from
+  verst-api `POST /v1/route` and passes it in (`PrefetchedRouting`, ENG-04); offline, the demo flavour stays on
+  `HybridRouting` (labelled), the beta flavour shows no synthetic trip unless `allowSyntheticOffline` is on.
+
+### Deviations from A§5.3.1 (for the Manager to fold into `docs/architecture.md`)
+1. Avoid tolls = profile `car_avoid_tolls` (CH), not `custom_model` + `ch.disable` (would need LM).
+2. `details` adds `leg_distance` (exact waypoint indices); `snap_preventions` = motorway, tunnel, bridge, ferry.
+3. The 2 km snap rule is enforced by the adapter (`Unreachable(i, snap_km)`); `ConnectionNotFound` is resolved to
+   the failing leg by routing the legs one by one.
+4. The polyline is densified to ≤ 1 km segments (GraphHopper sends a straight 16 km motorway as one segment).
+5. `graph.encoded_values` adds `road_class_link`; `street_ref` is a built-in path detail, not an encoded value.
+6. The adapter lives in `verst_planner.adapters.graphhopper` (stdlib), not `verst_api.adapters` (does not exist yet).
+7. Logs round coordinates to 2 decimals (R-07 asks 2 for stored trips; A§ said 3 for logs) and scrub GraphHopper's
+   error messages, which quote the request coordinates in full.
+
+### Commands (sandbox, Python 3.13.17, OpenJDK 21.0.12)
+- `cd backend/planner && python3 -m unittest tests.unit.test_graphhopper` → `Ran 36 tests` / `OK`.
+- `cd backend/planner && python3 -m unittest discover` → `Ran 503 tests` / `OK` (includes the other week-2
+  agents' tests on this working tree); `git status backend/planner/tests/golden` → clean (goldens byte-identical).
+- `make lint-planner` → `All checks passed!`; `make typecheck-planner` → `Success: no issues found in 75 source
+  files`; `mypy --strict tests/unit/test_graphhopper.py` → no issues; `ruff check infra/routing` → passed.
+- `python3 tools/stdlib_coverage.py` → total 97.6 %; `adapters/graphhopper`: mapping 98.2 %, routing 99.3 %,
+  transport 91.8 %.
+- `infra/routing/dev/record_fixtures.sh graphhopper-web-11.0.jar` → 12 fixtures, HTTP 200 ×6 / 400 ×6
+  (sha1 of the jar = Maven's `4cba3d3b…`).
+- `yaml.safe_load(routing.yml)` → OK; `actionlint` 1.7.12 with shellcheck → exit 0; `shellcheck build_graph.sh
+  dev/record_fixtures.sh` → clean; `docker compose config --quiet` → OK.
+- Docker: image built (jar copied in: this sandbox's TLS proxy breaks curl inside `docker build`), `docker compose
+  up -d graphhopper` on the mini graph → `healthy`, `id` → uid 10001; `GraphHopperRouting.from_env(...)` against
+  it → 19.954 km with the М-11 toll detail, 20.989 km avoiding tolls.
+- `build_graph.sh central …` with a curl shim serving the mini map as PBF → import OK, `build.json` written.
+- `check_routes.py` against a stub serving `HybridRouting` in GraphHopper's format → exit 0; 4 routes, 3 full
+  plans on `russia_v1` in 83–164 ms (p50).
+
+### Only CI or the VM can verify
+- Real km vs references (±7 % published, ±3 % once `yandexKm` is filled by a person), refs М-8/М-12/М-7/Р-132,
+  М-12 toll km ≥ 200, routing p95 ≤ 1 s, plan p95 ≤ 10 s with real routes.
+- Extract download, `osmium merge` of two districts, import time, graph size, server RSS (sizing in
+  `infra/routing/README.md` is an estimate until then), the graph cache.
+- After the run: download `routing-recordings`, review, add the real responses as
+  `backend/planner/tests/data/graphhopper/real/*.json` with a test each (week 3).
+
+## Investor-readiness / ENG-05
+
+App side of the analytics funnel (SPEC §15, §16; `docs/traction/tracking-plan.md` §2; risk register R-07). Developer,
+on branch ccr-013d3489-181fz2, not committed. The weekly report script and the dashboard are not part of this slice.
+
+Status: code and tests written; the Kotlin journey tests, the Robolectric test and the APK build run in CI only (no
+Android SDK here). The pure-Kotlin part (buckets, privacy guard, app-open tracker) was compiled and run on the JVM.
+
+### Files
+- `android/app/src/main/kotlin/app/verst/analytics/`:
+  - `Analytics.kt`: the `Analytics` interface, `NoopAnalytics` (the default), `GuardedAnalytics` (every event goes
+    through `PrivacyGuard` before an `EventSink`);
+  - `AnalyticsEvent.kt`: one data class per event, typed properties, enums for every closed value list;
+  - `Buckets.kt`: the §2.4 buckets, the date and the token rules;
+  - `PrivacyGuard.kt`: the runtime check (below);
+  - `AppOpenTracker.kt`: `app_open` cold / warm;
+  - `VerstAnalytics.kt`: the process singleton, AppMetrica activation and configuration, `AnalyticsKey`.
+- `android/app/src/test/kotlin/app/verst/analytics/`: `AnalyticsJourneyTest` (5 tests on `VerstFlow`),
+  `PrivacyGuardTest` (5), `BucketsTest` (3), `AppOpenTrackerTest` (1), `VerstAnalyticsTest` (2, Robolectric),
+  `TrackingPlanContract` (the plan's events, properties and value lists as data), `RecordingAnalytics` (the fake).
+- `VerstFlow.kt`: the event calls, `analytics`, `tripId`, `selectReadyRoute`, `toggleFrontAdult`, `toggleDog`,
+  `appOpened`, `tripShared`, `answerTripDriven` + `DrivenAnswer`.
+- `MainActivity.kt`: `VerstAnalytics.install` in `onCreate`, `app_open` in `onStart` / `onStop`, the Windshield row,
+  the front seat and the dog go through the flow, «Поделиться» reports `trip_shared`.
+- `gradle/libs.versions.toml` (`appmetrica = "8.6.0"`), `app/build.gradle.kts` (the dependency and
+  `BuildConfig.APPMETRICA_API_KEY`).
+
+### SDK
+- `io.appmetrica.analytics:analytics:8.6.0` (MIT), the current release: `maven-metadata.xml` has
+  `<latest>`/`<release>` 8.6.0, published 2026-09-29.
+  - Version page: https://central.sonatype.com/artifact/io.appmetrica.analytics/analytics/8.6.0
+  - Files: https://repo1.maven.org/maven2/io/appmetrica/analytics/analytics/8.6.0/
+- Checked with curl against repo1.maven.org:
+  - the AAR's sha256 `b9b93b57…200631c4b` equals the published `.sha256`;
+  - all 17 `io.appmetrica.analytics:*:8.6.0` modules it depends on answer 200.
+  - The one non-Central dependency, `com.android.installreferrer:installreferrer:2.2` (Google Maven), is blocked
+    by the proxy here. CI resolves it through `google()`.
+- API checked with `javap` on the 8.6.0 AAR: `AppMetrica.activate`, `reportEvent(String, Map)`,
+  `setLocationTracking`, `enableActivityAutoTracking`; `AppMetricaConfig.Builder.withLocationTracking`,
+  `withAdvIdentifiersTracking`, `withRevenueAutoTrackingEnabled`, `withAppOpenTrackingEnabled`, `withCrashReporting`.
+
+### How to set the key for a build
+- Release builds read the Gradle property `verst.appmetricaKey`, else the env var `VERST_APPMETRICA_KEY`.
+- `debug` and `demo` builds read only `verst.appmetricaTestKey` / `VERST_APPMETRICA_TEST_KEY`. This is the separate
+  key of tracking plan §0.7 (proposal §2.5 #4). The release key never reaches a demo or debug APK: `demo` is created
+  with `initWith(release)` before `release` gets its key, and sets its own key explicitly.
+- Empty (the default everywhere) means `BuildConfig.APPMETRICA_API_KEY = ""`. `VerstAnalytics.install` then returns
+  `NoopAnalytics` and never activates the SDK, so **the public demo APK sends nothing** until the CEO sets a test key.
+- A non-empty key that is not a UUID fails the Gradle configuration with a message. It never ships as a dead key.
+- Local: `./gradlew :app:assembleRelease -Pverst.appmetricaKey=<uuid>`.
+- CI (the Manager's change; workflows are outside this task): add a repository secret and pass it in the env of
+  the build step, e.g. `VERST_APPMETRICA_TEST_KEY: ${{ secrets.VERST_APPMETRICA_TEST_KEY }}` for the demo APK. A
+  release key belongs only in a job that builds the `release` type.
+- The AppMetrica key is a public app key, the kind SPEC §16 allows in the APK. It still stays out of the repository,
+  so the CEO controls which builds report.
+
+### Events as implemented vs the tracking plan (§2.2)
+Every property is sent only when it has a value. `device_id` and the app version are not repeated as properties:
+AppMetrica attaches its device id and `appVersionName` to every event (§2.1).
+
+| Event | Fires (code) | Properties | Difference from tracking-plan.md |
+| --- | --- | --- | --- |
+| `app_open` | `MainActivity.onStart` via `AppOpenTracker`: the first start of the process = `cold`, a return from the background = `warm`, a rotation = nothing | `start_type`, `offline` | — |
+| `ready_route_shown` | the Windshield is on top with the engine's list, once per showing (snapshot of top + list + origin) | `count`, `start_city` | `count` = routes the engine has for this start (the screen shows the first 4); an empty list (`NoRoutes`) is sent as `count = 0`, which is the coverage signal. `start_city` = the engine's catalogue town within 30 km of the start (`reverse`), else `other`; never the address or the GPS point |
+| `ready_route_selected` | a ready-route row tapped (`selectReadyRoute`) | `route_id`, `rank` (row from 1) | Literal trigger: ПОЕХАЛИ on the pre-selected first row without a tap sends no `ready_route_selected`; `ready_route_id` on `plan_requested` covers it (below) |
+| `search_started` | the first suggestion request (≥ 2 chars) of a Navigator visit (reset when Navigator is pushed) | `query_len` | — |
+| `search_selected` | a suggestion picked (`pick`) | `query_len`, `result_type`, `rank` | engine kinds `place`/`poi` → `place`; `rank = 0` when the row is not in a shown list; `pin` has no source yet |
+| `params_changed` | each change on Instruments: seat cycle, front seat, dog, pace stepper, budget stepper | `field` (`adults`/`children`/`dog`/`pace`/`budget`), `value_bucket` | fuel and date have no control, so no such fields; mood is not in the plan's list (it is on `plan_requested`); an adult seat turned child sends two events |
+| `plan_requested` | ПОЕХАЛИ on Instruments (`go`) | `km_bucket`, `days`, `dog`, `children`, `mood`, **`ready_route_id`** | `km_bucket`/`days` come from the engine estimate of exactly this request; before it answers `km_bucket = unknown` and no `days`. `ready_route_id`: Manager's addition for the regional pilot report (`docs/partners/regions-pack.md`), the template id or `none` for a free A → B trip. Retry and «Подогнать под бюджет» are not new requests |
+| `plan_succeeded` | the plan's trip is shown (after the Drive pacer) | `trip_id`, `latency_ms`, `routing_source`, **`ready_route_id`** | `latency_ms` = engine time (start of the plan → the engine's answer), not the 400 ms text pacing. `routing_source`: `fallback` when the trip has `approxDistances` (synthetic route), else `road`. Today `road` is the on-device road graph; it means GraphHopper once ENG-04 wires `PrefetchedRouting`. `ready_route_id` as above |
+| `plan_failed` | engine error or no result (not `CANCELLED`) | `latency_ms`, `error_code` | **also for a 5.8 no-fit (`error_code = NO_FIT`)**: the request ends without a trip, so the plan_requested denominator stays explained. The reliability dashboard must leave `NO_FIT` out. Codes not shaped like a token are sent as `OTHER` |
+| `stop_replaced` | D-6 «ЗАМЕНИТЬ» succeeded | `trip_id`, `kind`, `alt_rank` | — |
+| `waybill_opened` | Waybill pushed | `trip_id`, `total_bucket`, `over_budget` | — |
+| `reserve_toggled` | the reserve row tapped | `trip_id`, `state` | — |
+| `hotel_link_clicked` | «Забронировать ночь» online (`book`) | `trip_id`, `stop_id`, `price_bucket` | In this build the mock partner sheet (D-13) stands for the browser. When ENG-03 opens the real link, the call moves to after the intent succeeds. `price_bucket` = the selected hotel's price for the crew, the price 5.7 shows (`priceCrewRub`) |
+| `excursion_link_clicked` | — | `trip_id`, `place_id` | defined, **no UI hook** (no excursion link in the app) |
+| `navigator_opened` | a car hand-off opened an app: day menu, «навигатор отсюда», the hand-off sheet, the remembered app | `trip_id`, `app`, `day` | **`app = web`** added: no maps app, so the maps site opened in the browser. Hand-offs that fail are not sent. Walks are not reported (out of this funnel). No 2ГИС hand-off exists yet |
+| `trip_saved` | «Сохранить» succeeded (not the silent re-save of a booking mark) | `trip_id`, `start_date`, `days`, **`ready_route_id`** | `ready_route_id`: the planned request's template, else the one the engine echoes in the trip input (reopened / restored trip), else `none`. Walks are not reported |
+| `trip_shared` | «Поделиться» on Road ahead / Waybill opens the system share sheet | `trip_id`, `channel` | **`channel = unknown` and fires on opening the sheet**: the chooser does not tell the app the target without a chooser callback receiver (a manifest change, not in this task) |
+| `pro_waitlist_joined` | — | `source` | defined, **no UI hook** (BIZ-06) |
+| `feedback_sent` | D-7 «Отправить» | `trip_id` (road), `kind` (= reason `closed`/`tags`/`price`/`other`) | replaces the old `Log.i("VerstEvent", …)` line, which wrote the place id to logcat; the comment never leaves the local queue |
+| `trip_driven_confirmed` | `VerstFlow.answerTripDriven(id, answer, today)` — **no caller yet** (the post-trip question is a later UI task; feature freeze) | `trip_id`, `completion`, `days_since_end`, `km_bucket`, `dog`, `children`, `source` | as §2.3. The values come from the saved trip. «Нет», a trip that is not saved, a trip without a start date, or one not over yet (`today ≤ E`) send nothing. The E + 14 window and «one per trip_id» are left to the report script (§2.3: «считаем первое событие»), so the function does not store answers |
+
+Not implemented: `trip_driven_prompt_shown` (§2.5 #5, optional) needs the same future UI.
+
+### `trip_id` (tracking plan §2.5 q3, default applied)
+- A random UUID is made on the phone for each ПОЕХАЛИ. A retry of a failed plan, D-6 replace, re-cost, the
+  no-fit minimum and «Подогнать под бюджет» on an unsaved trip keep it.
+- A saved trip is stored under its `trip_id`, so a trip reopened from «Мои поездки» reports the same id. This
+  matters for `trip_driven_confirmed` days later. The refit of a saved trip becomes a second saved trip, as before,
+  so it gets a new id.
+- `last.json` keys the current trip by its `trip_id` instead of `"last"`, so an unsaved trip keeps its id across
+  process death. An old file with `"last"` gets a new id.
+- If the id is already taken by another saved entry, the trip is saved under a new id, as before ENG-05, and the
+  `trip_id` follows it. This happens when the saved copy was deleted and then restored with «Вернуть».
+- Trips saved before this build have ids no `plan_succeeded` carried. The script counts them as data errors (§3.4).
+
+### Privacy guarantees (R-07, SPEC §16, tracking plan §0.3)
+- **No key, no SDK.** Without a key `AppMetrica.activate` is never called.
+- **SDK config** (`VerstAnalytics.config`, unit-tested):
+  - `withLocationTracking(false)`, plus `AppMetrica.setLocationTracking(false)` after activation;
+  - `withAdvIdentifiersTracking(false)`;
+  - no automatic revenue or deeplink events;
+  - `setLocation` and `setUserProfileID` are never called.
+  - AppMetrica's own device id is the only identifier. `trip_id` is a random per-trip UUID, not derived from the
+    device or a person.
+- **What events carry.** Integers, booleans, and tokens from closed lists. Ids are run through `Buckets.token`
+  (`[A-Za-z0-9_]{1,32}`, else `OTHER`). Dates are ISO days. The one word is `start_city`, the engine's town name.
+  Never sent: coordinates, addresses, the search query (only its length), report comments, hotel or place names,
+  free text.
+- **Runtime guard.** `GuardedAnalytics` runs `PrivacyGuard` on every event and drops the whole event when a rule
+  breaks. Logcat gets only the event name and the rule names. The rules:
+  - `key`: not `snake_case`, or a personal-data name (`lat`, `lon`, `address`, `email`, `phone`, `name`, `query`,
+    `comment`, …);
+  - `type`: not Int, Long, Boolean or String (a Double is a coordinate);
+  - `coordinates`: a decimal number inside a string;
+  - `email`: an `@`;
+  - `phone`: 10 or more digits in one run of digits, spaces, `+()-` (UUIDs exempt);
+  - `free_text`: longer than 40 characters, or a line break.
+- **Tests.**
+  - `TrackingPlanContract.assertClean` runs every event of every journey test through the guard and through the
+    plan's key and value lists. A new property or value fails CI until the plan and this table change.
+  - `PrivacyGuardTest` proves each rule fires on coordinates, e-mails, phones, long text and personal-data keys,
+    and that the values the app really sends pass.
+
+### Commands and results (2026-10-26)
+- Pure-Kotlin part on the JVM (Gradle 8.14.3, Kotlin 2.2.0, JDK 21; a scratch project with copies of
+  `Analytics.kt`, `AnalyticsEvent.kt`, `Buckets.kt`, `PrivacyGuard.kt`, `AppOpenTracker.kt` and the five pure test
+  files): `gradle test` → `BucketsTest` 3, `AppOpenTrackerTest` 1, `PrivacyGuardTest` 5: 9 tests, 0 failures.
+- The guard's regexes were cross-checked in Python on all 35 test strings, with the same verdicts.
+- `AnalyticsJourneyTest` and `VerstAnalyticsTest` were **not run** (they need `VerstFlow`/Compose runtime and
+  Robolectric).
+
+### Only CI can verify
+- `:app:compileDebugKotlin`, `:app:testDebugUnitTest`, lint, and assembling the demo APK with AppMetrica 8.6.0
+  (dependency resolution including `installreferrer` from Google Maven).
+- `AnalyticsJourneyTest` (5) and `VerstAnalyticsTest` (2, Robolectric): the builder must work under Robolectric
+  without activation. The existing `VerstFlowTest` must stay green after the `save` / `last.json` id change.
+- The merged manifest and APK size. AppMetrica adds:
+  - its service and an **exported** `PreloadInfoContentProvider`;
+  - a `<queries>` entry for the RuStore install referrer;
+  - through `analytics-identifiers` / `analytics-appsetid`, `play-services-ads-identifier` 18.1.0,
+    `play-services-appset` 16.1.0 and the `com.google.android.gms.permission.AD_ID` permission.
+  - Collection is off by config. The permission and the classes are still in the APK.
+  - SPEC §16 caps the APK at 30 MB.
+- That the activity-time activation records sessions (`enableActivityAutoTracking`). AppMetrica prefers
+  `Application.onCreate`, and `VerstApp` was outside this task.
+- Events arriving in the AppMetrica console. This needs a test key and a device: check the test-key app's event
+  list after one journey.
+
+### Open questions (default applied)
+1. `NO_FIT` as `plan_failed`. Default: yes, with the dashboard excluding it from reliability. The alternative is a
+   separate `plan_no_fit` event (a plan change, Architect / Growth Marketer).
+2. `navigator_opened.app = web` (a value outside the plan). Default: send it; add it to tracking-plan §2.2.
+3. `trip_shared.channel = unknown`, sent when the sheet opens. Default: keep it. A chooser callback receiver
+   (`EXTRA_CHOSEN_COMPONENT`, mapped to messenger / social / other) needs a manifest change; a follow-up if virality
+   by channel matters before the beta.
+4. `ready_route_selected` only on a real row tap (literal plan). Default: keep; the template of every plan is now on
+   `plan_requested.ready_route_id`.
+5. Remove the AD_ID permission and the GMS id libraries from the APK. Default: not done (manifest / exclusions are
+   outside this task, and excluding `analytics-appsetid` would break the SDK: its no-op retriever implements an
+   interface from that module, checked with `javap`). Recommended: `<uses-permission
+   android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>` in the app manifest, and Legal lists
+   AppMetrica (Yandex) as a processor in the privacy policy (R-07 (г)).
+6. Move `VerstAnalytics.install` into `VerstApp.onCreate`, AppMetrica's recommended place. Default: activity
+   `onCreate` (my write scope); the flow and the tracker are process-wide either way.
+7. CI secrets `VERST_APPMETRICA_TEST_KEY` / `VERST_APPMETRICA_KEY` and their env lines in `android.yml`: Manager /
+   CEO. Until then every CI APK is the no-op.
+8. Architect (§2.5 q3): the engine could own `routingSource` explicitly instead of the app reading `approxDistances`.
+   This becomes relevant once ENG-04 mixes GraphHopper and on-device routing.
+
+## Investor-readiness / ENG-04
+
+Minimal beta backend (Architect acting as Developer, 2026-10-26, branch `ccr-013d3489-181fz2`, not committed).
+Design: [ADR-0020](adr/0020-minimal-beta-backend.md). The engine is imported as a library; nothing under
+`backend/planner` was changed (another agent was changing the engine in parallel).
+
+### What exists now
+- `backend/api/verst_api`: FastAPI app — `POST /v1/devices`, `POST /v1/trips/plan` (JSON or SSE), `POST /v1/route`
+  (GraphHopper, ADR-0017 §5), `GET /v1/ready-routes`, `POST /v1/trips` (save + share slug), `DELETE /v1/trips/{id}`,
+  `GET /v1/shared/{slug}`, `GET /s/{slug}` (HTML, town only), `POST /v1/feedback`, `GET /v1/links/hotel`
+  (stub, `affiliate: false`), `/healthz`, `/readyz`, `/metrics`.
+- `backend/api/migrations/0001_api_beta.sql` (+ down): schema `api` on plain PostgreSQL 16 (no PostGIS).
+- `backend/api/requirements*.in|lock`: every dependency pinned with sha256 hashes (uv `--exclude-newer
+  2026-10-10`, i.e. ≥ 14 days old): fastapi 0.143.0, starlette 1.7.0, pydantic 2.14.0, pydantic-settings 2.15.0,
+  uvicorn 0.54.0, psycopg 3.3.6 (+binary), psycopg-pool 3.3.3, prometheus-client 0.26.0; dev: pytest 9.1.1,
+  httpx2 2.13.1 (Starlette 1.x's TestClient transport), ruff 0.17.0, mypy 2.4.0, coverage 7.16.2.
+- `infra/api`: Dockerfile (uid 10002, read-only FS), compose (Caddy, api, postgres, backup, graphhopper profile),
+  Caddyfile, `.env.example`, `restore-drill.sh`, README (VM runbook). `.github/workflows/api.yml`.
+
+### Deviations (for the Manager to fold into `docs/architecture.md`)
+1. Schema `api`, not `app` of 0001: catalogue text ids, no PostGIS, Place DB not live (ADR-0020 §5.1).
+2. Plans are not persisted (A§10.5): an explicit `POST /v1/trips` saves server- and phone-planned trips alike;
+   `POST /v1/trips/{id}/save` of A§10.2 becomes `POST /v1/trips`. Plan answers 200 (not 201); SSE `done` data =
+   the JSON body (no `tripId`).
+3. Migrations: a small SQL-file runner (`python -m verst_api.db`), not Alembic (ADR-0003).
+4. Rate limits and no cache in PostgreSQL instead of Redis; Caddy instead of nginx + certbot.
+5. Logs round coordinates to 2 decimals (R-07), not 3 (A§10.8); the access log is ours (uvicorn's and Caddy's off).
+6. `X-App-Version` is logged when present but not required (A§10.1): curl and the share page work without it.
+7. The host uses three bridge internals (`mobile._WORLDS`, `_trip_result`, `_no_fit_result`), checked at start;
+   follow-up for the planner owner in ADR-0020 §10.
+
+### Commands and output (sandbox: Python 3.12.3 venv with the locks; PostgreSQL 16 binaries; Docker 29.9.2)
+- `cd backend/api && pip install --require-hashes --no-deps -r requirements.lock -r requirements-dev.lock` → OK.
+- `ruff check .` → `All checks passed!`; `ruff format --check .` → `28 files already formatted`;
+  `mypy verst_api tests` (strict, pydantic plugin) → `Success: no issues found in 28 source files`.
+- `python -m coverage run -m pytest -q` → `112 passed in 26.53s` (throwaway cluster started by `tests/conftest.py`);
+  `coverage report` → `TOTAL … 94%` (gate 90 %).
+- While the parallel engine work had not yet regenerated `docs/contracts/v2`, the 4 "committed contract" tests
+  skipped with the reason "stale against the working-tree engine" (the planner's own `test_mobile_v2` failed too)
+  and the 4 "server == bridge" tests passed; against `git archive HEAD` (engine + contracts of the commit)
+  `pytest tests/test_contracts.py` → `18 passed`; after the regeneration the full suite ran with 0 skips.
+- Compose on this sandbox (images pulled through `mirror.gcr.io`: Docker Hub answered 429; the image built with the
+  locked wheels pre-downloaded, because pip cannot reach PyPI through the TLS proxy inside `docker build`; the
+  committed Dockerfile is built in CI): all services healthy; through Caddy (`VERST_DOMAIN=localhost`, internal CA)
+  `/healthz` 200, `/metrics` 404, register → 43-char token, SSE plan → 5 `stage` + 7 `stop` + `done`, save →
+  `{"title":"Москва → Ярославль","startTown":"Москва",…}`, `/s/<slug>` 200 with `content-language: ru`,
+  `x-robots-tag: noindex, nofollow`, HSTS; logs contain no `55.751234`, no label, no `lat=` (grep count 0);
+  `id` in the api container → uid 10002; writing to `/srv/verst` → "Read-only file system"; `/readyz` →
+  `{"status":"ok","engineVersion":"0.1.0","engine":true,"routing":"road_model","catalogue":"wd-20261025-r7.5","db":true}`;
+  a Golden Ring plan with `X-Request-Id: smoke-req-0001` → 200 in 0.21 s, both log lines carry that id and the
+  origin as `[55.76, 37.62]`.
+- Real GraphHopper 11.0 (the `verst/graphhopper:11.0` image on the synthetic mini map) on the compose network with
+  `VERST_ROUTING=graphhopper`: `POST /v1/route` → 19.954 km, ref М-11, toll; avoid tolls → 20.989 km, no toll; the
+  island point → 404 `UNREACHABLE`; the adapter's log lines carry the request id and 2-decimal points.
+- Backups: `docker compose exec backup /backup.sh` → "SQL backup created successfully";
+  `restore-drill.sh` → `migration 1 / devices 1 / trips 1 / feedback 0 / restore drill OK`.
+- `caddy validate` → "Valid configuration", `caddy fmt` → no diff; `docker compose --profile routing config` → OK;
+  `actionlint` 1.7.12 with shellcheck → clean; `shellcheck entrypoint.sh restore-drill.sh` → clean.
+
+### Only the VM (or CI) can verify
+- ≥ 99 % monthly uptime (external `/healthz` monitor), Let's Encrypt issuance for the real domain, restore drill on
+  real dumps, off-site copy; plan p95 ≤ 10 s with GraphHopper on the Russia graph; RAM of 2 workers + Postgres +
+  GraphHopper on the chosen VM size.
+- The committed Dockerfile's `pip install --require-hashes` from PyPI and the `postgres:16.14` CI service (first
+  run of `api.yml`).
+
+### Open questions (defaults applied; ADR-0020 §11)
+VM: Yandex Cloud ru-central1, 8 vCPU / 32 GB / 160 GB · domain `api.verst.app` placeholder (`VERST_DOMAIN`) · TLS
+by Caddy/Let's Encrypt · off-site backup: weekly manual copy to Yandex Object Storage · uptime monitor: external
+HTTPS check + Telegram · synthetic fallback off · feedback text kept 180 days.
+
+## Investor-readiness / trust fixes
+
+Engine behaviours that misled users (ADR-0018 §10 E-1…E-6) plus two known bugs. Architect acting as Developer, on
+branch ccr-013d3489-181fz2, not committed. Design: `docs/adr/0019-unknown-is-not-a-default.md`.
+
+### Files
+- Engine: `verst_planner/domain/facts.py` (new: every yes / no / unknown rule), `domain/model.py` (`Place`
+  `rating_internal: float | None`, `breakfast_included: bool | None = None`, `tags_no`, `fuel_kinds`,
+  `fuel_kinds_no`; `ScheduledStop.unknown_facts/unknown_ru`; `TicketUnit.known`; `AltUnits.ticket_known`;
+  `CostResult.total_note_ru`; `HotelPrice.breakfast_included` default False), `domain/codec.py`,
+  `pipeline/{assemble,corridor,fuel,sights,meals,overnight,rest,alternatives}.py`, `pipeline/__init__.py`
+  (docstring), `explain/{reasons,templates}.py`, `cost/{model,recompute,formulas}.py`,
+  `adapters/fake/world.py`, `adapters/catalogue/{world,synthetic}.py`, `city/route.py`, `mobile.py`,
+  `resources/{strings,reasons}.ru.json`.
+- Tests: `tests/unit/test_trust_facts.py` (new, 22 tests), `test_fake_world.py` (+ loader error paths),
+  `test_sights.py`, `test_walk_s4.py`, `test_templates.py`, `tests/golden/ties.py`; golden cases G01, G02, G03,
+  G06, G07, G13 (expectations and hand workings) and 10 snapshots.
+- Contracts: `tools/gen_api_contracts.py` (+ `poi_details-hours-unknown`, `poi_details-ticket-unknown`,
+  `estimate-ready-{tula,yaroslavl,golden-ring}`), `tools/gen_mobile_contracts.py` (`afterFlags`); regenerated
+  `docs/contracts/v2/*`, `replace/*`, `patch/*`, `share-text/*`, `plan-response.example.json`.
+- Android (minimal): `CardSheet.kt`, `RoadScreen.kt`, `WaybillScreen.kt`, `dto/Dtos.kt`, `dto/V2Dtos.kt`,
+  `core-ui/.../strings.xml`, `ScreensScreenshotTest.kt`. `VerstFlow.kt` and `MainActivity.kt` untouched.
+- Docs: ADR-0019 (new), ADR-0018 §10 (pointer), `docs/architecture.md` (Place model, hours, breakfast, D-6),
+  `docs/architecture-android-mvp.md` (`poi_details` `known`).
+
+### What each fix does
+- **E-1 hours.** `opening_hours` None = unknown; the stop stays allowed (no scheduling change). Curated sight / café /
+  fuel rows say «Часы не известны — уточните»; open-data rows keep their ring; the card shows the chip «часы не
+  известны — уточните»; a walk stop without hours sends `todayRu`/`openNow` null («часы не указаны»), not «24 часа».
+- **E-2 tickets.** Unknown price ≠ free: 0 ₽ in the sums, «цена билета неизвестна» on the row and the card, the line
+  names it, `totalNoteRu` under the total; the «бесплатные места» lever keeps only confirmed-free sights; the
+  catalogue no longer adds `free_entry` to `attraction` items or `fee=yes` items without a default ticket.
+- **E-3 breakfast.** Unknown = costed (decision and reasons: ADR-0019 §2).
+- **E-4 fuel.** A station known not to sell the car's fuel is skipped; a confirmed one wins the window; otherwise the
+  row says «Есть ли АИ-95 — не проверено».
+- **E-5 rating.** None ranks with 0.0 (below every rated place); the fixture loader no longer invents 3.0.
+- **E-6 yes / no / unknown.** «Собака ждёт с одним из взрослых» only for a confirmed «no»; «…, с собакой можно» for
+  a confirmed «yes»; unknown → «Пускают ли с собакой — не проверено». The walk's kind-based line is hedged
+  («С собакой внутрь обычно нельзя.»).
+- **«Описание: Описание: Викиданные».** The engine's `extractSource.nameRu` is the whole source line
+  (`poi.source.wikidata` = «Описание: Викиданные»); `CardSheet` wrapped it again in `card_desc_source`
+  («Описание: %1$s»). The card now shows `nameRu · licence` as given; the unused string is removed.
+- **Ярославль 542 km.** `ScreensScreenshotTest.engineKm` took `rr_yaroslavl` from the G01 snapshot (a free
+  Москва → Ярославль trip, 542 km). It now reads the engine's `estimate` of each ready route for one crew (G02's)
+  from `docs/contracts/v2/estimate-ready-*.json`: Тула 425, Ярославль **536**, Золотое кольцо 761 (= G02). The
+  templates' `kmTotal`/`kmSign` (526/263) are the base-route sign figures and are never shown as the trip km
+  (A§6.12); unchanged.
+
+### Golden diffs and their justification (repo rule: goldens change only with a written reason)
+In every changed golden the stops, places, times, km and alternatives' places are byte-identical (checked
+stop by stop). What changes:
+
+| Golden | Total | Why |
+| --- | --- | --- |
+| G01 Москва ⇄ Ярославль | 16 500 → 17 700 | E-3: Стрелка has no `breakfastIncluded` → day-2 breakfast 2 × 540 costed (food 4 900 → 5 980, reserve 1 500 → 1 610). E-1: «Земляной вал Переславля» and «Плещеево озеро» (curated, no hours) get «Часы не известны — уточните»; 10 alternatives' stops get their markers. |
+| G02 Золотое кольцо, dog | 33 800 → 37 200 | E-3: both hotels unconfirmed → breakfasts 540 + 480 for 3 people (food 11 250 → 14 310); still within 40 000 (remaining 6 200 → 2 800). E-6: 6 sight reasons lose «Собака ждёт…» (no sight has a confirmed «no»), 6 rows get «Пускают ли с собакой — не проверено» (one with the hours). E-4: the fuel stop gets «Есть ли АИ-95 — не проверено». |
+| G03 Москва → Волгоград, dog + child | 16 200 → 17 200 | E-3: Державинская unconfirmed → breakfast 2.5 × 390 (food 4 630 → 5 600). E-6 + E-1: 3 open-air sights (no hours, dogs unknown). E-4: the fuel stop. |
+| G04 Москва → Казань, just drive | 8 900 = | E-1 + E-4: the fuel stop (no hours, no `24h`, fuels unknown) gets «Не проверено: часы работы, есть ли АИ-95 — уточните». |
+| G05 edge, no dog hotel | 11 500 = | E-6 + E-1: 2 sights; E-1 + E-4: 1 fuel stop. The overnight fallback is unchanged (it never used breakfast). |
+| G06 Москва → Казань, no tolls | 18 200 → 19 300 | E-3: «Волга» unconfirmed → breakfast 2 × 480 (food 4 300 → 5 260). E-1: 4 curated sights without hours; E-4: the fuel stop. |
+| G07 Тула · Ясная Поляна | 21 600 → 23 300 | E-3: the Тула hotel unconfirmed → breakfast 4 × 390 (food 8 000 → 9 560). Otherwise only 2 alternatives' stops get markers. |
+| G08 Москва → Суздаль | 5 700 = | Only 5 alternatives' stops get markers (4 without hours, 1 fuel stop with hours and fuel unknown). |
+| G11 edge fuel gap | unchanged | — |
+| G12 edge day over budget | 3 900 = | E-1: «Большой краеведческий музей» and «Парк-усадьба «Долгая»» (curated, no hours). |
+| G13 CEO budget fit | 27 400 → 29 400 | E-3: the plain plan rises 58 400 → 64 000 (food 18 750 → 23 850); the same levers in the same order (food_economy, sights_free, variant) still fit 30 000 (remaining 600); E-6 on 4 sights. Replace/patch contracts: 9 replace items and 1 patch item now flip `breaksBudget` of other days' alternatives (the edit crosses the 31 500 tolerance) → carried as `afterFlags`. |
+
+Case files: `costTotalRub`, `costLinesRub.food` (G02, G03), the food formula texts (G02, G03) and the hand workings
+(food, subtotal, reserve, total) were recomputed by hand and match the engine to the rouble.
+
+### Commands and results (2026-10-26, Python 3.13)
+- `make golden-update` → snapshots rewritten; then `python3 -m unittest tests.golden.test_golden` → 15 OK.
+- `python3 tools/gen_api_contracts.py` → 43 files; `python3 tools/gen_mobile_contracts.py` → 22 bundles,
+  143 replace items, 28 patch items (counts unchanged, the Kotlin tests pin them); `python3 -m
+  tests.golden.export_contracts`; `python3 tools/gen_cost_contract.py` → 52 cases, file unchanged.
+- `cd backend/planner && python3 -m unittest discover` → `Ran 527 tests` / `OK` (503 before + 24 new).
+- `make check` → `All checks passed!`, `Success: no issues found in 76 source files`, `Ran 527 tests` / `OK`.
+- `python3 tools/stdlib_coverage.py --fail-under 95` → total 98.0 % (527 tests); `domain/facts.py`,
+  `cost/formulas.py`, `cost/recompute.py`, `pipeline/fuel.py`, `explain/reasons.py` 100 %; every touched module
+  ≥ 96.2 % (`domain/codec.py`); the fake world loader 89.7 % → 97.8 % (its error paths got tests).
+- Generators re-run a second time → no diff (byte-identical).
+
+### Only Android CI can verify
+- Compilation of the Kotlin changes; `ScreensScreenshotTest` new tests (`readyRouteKmIsTheReadyRoutes`,
+  `cardWikidataSourceOnce`, `cardUnknownHoursAndTicket`, `roadUnknownTicket`, `waybillTotalNote`, the extra
+  assertions in `roadG02`, `waybillDefault`, `walkDogWarning`) and the changed screenshots (Windshield km 536,
+  G02 waybill/road totals, the new row line); `CostCalculatorContractTest` (numbers unchanged by design);
+  `V2ContractsTest`, `ContractFilesTest`, `EngineJsonTest` on the regenerated files; Android lint
+  (`card_desc_source` removed).
+
+### Open questions (default applied)
+1. Fixture hotels without `breakfastIncluded`: left unknown (costed), not rewritten to `true`; the fixture never said
+   it. If the demo should keep the old totals, set the flag in `tools/gen_worlds.py` (a data decision).
+2. Share text total: unchanged (pinned by the Kotlin `ShareTextBuilder` contract); a «без билетов…» suffix is a
+   separate change.
+3. Curation docs still describe the old engine (checklist §2.4, §3.2, §3.3, §4): left to the Data Curator; the release
+   gates stay valid. `design/variants-ir/README.md` §9 quotes pre-E-3 totals (Ярославль 17 300 → 19 100 now).

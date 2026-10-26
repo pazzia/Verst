@@ -42,6 +42,7 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "lunch.default",
     "sight.default",
     "sight.dog_waits",
+    "sight.dog_ok",
     "sight.osm",
     "sight.detour",
     "start.default",

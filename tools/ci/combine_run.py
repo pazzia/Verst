@@ -3,7 +3,7 @@
 
     combine_run.py <run-dir>
 
-Expects <run-dir>/{build,e2e,release}/summary.json (any may be missing) and env:
+Expects <run-dir>/{planner,build,e2e,release}/summary.json (any may be missing) and env:
   NEEDS_JSON   toJSON(needs) of the ci-logs job (job results)
   GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT, GITHUB_RUN_NUMBER, GITHUB_SHA, GITHUB_REF, GITHUB_EVENT_NAME
   HEAD_COMMIT_MESSAGE (optional)
@@ -17,7 +17,7 @@ import os
 import sys
 from pathlib import Path
 
-JOBS = ("build", "e2e", "release")
+JOBS = ("planner", "build", "e2e", "release")
 
 
 def main() -> int:
@@ -37,7 +37,8 @@ def main() -> int:
         if e.exists():
             errors += e.read_text(encoding="utf-8").splitlines()
     pngs = sorted(str(p.relative_to(run)) for p in run.rglob("*.png"))
-    conclusion = "success" if results["build"] == "success" and results["e2e"] in ("success", "skipped") else (
+    green = results["planner"] == "success" and results["build"] == "success"  # HYG-01: planner gates too
+    conclusion = "success" if green and results["e2e"] in ("success", "skipped") else (
         "failure" if "failure" in results.values() else "incomplete")
     summary = {
         "schema": 1,

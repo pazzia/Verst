@@ -39,6 +39,10 @@ import app.verst.core.model.dto.EstimateDto
 import app.verst.core.model.dto.HandoffDto
 import app.verst.core.model.dto.HandoffLinksDto
 import app.verst.core.model.dto.HandoffPartDto
+import app.verst.analytics.Analytics
+import app.verst.analytics.AnalyticsEvent
+import app.verst.analytics.Buckets
+import app.verst.analytics.NoopAnalytics
 import app.verst.data.TripStore
 import app.verst.data.TripsLoad
 import app.verst.engine.PlannerGateway
@@ -452,6 +456,76 @@ class VerstFlow(
     var debugForceError: String? by mutableStateOf(null)
     val debugWorld: String get() = gateway.world
 
+    // ---- ENG-05 analytics (SPEC §15, docs/traction/tracking-plan.md §2)
+    /** Set by the activity ([app.verst.analytics.VerstAnalytics]); [NoopAnalytics] until then and in tests. */
+    var analytics: Analytics = NoopAnalytics
+
+    /**
+     * The analytics `trip_id` of [result]: a new random id for each ПОЕХАЛИ, kept through replace, re-cost and refit
+     * of an unsaved trip; once the trip is saved it is its saved id (so a reopened trip reports the same id).
+     */
+    var tripId: String? = null
+        private set
+
+    /** The `trip_id` the running (or last) plan will give its trip. */
+    private var planTripId: String? = null
+
+    /** `search_started` was sent in this Navigator visit. */
+    private var searchStarted = false
+
+    /** `start_city` of the last origin asked (the engine's catalogue town within 30 km, else `other`). */
+    private var startCity: Pair<GeoPoint, String>? = null
+
+    /** Builds and sends an event only when analytics is on (a no-op build computes nothing). */
+    private inline fun track(event: () -> AnalyticsEvent?) {
+        val a = analytics
+        if (a.enabled) event()?.let(a::track)
+    }
+
+    /** `app_open` (the activity knows cold / warm, see [app.verst.analytics.AppOpenTracker]). */
+    fun appOpened(start: AnalyticsEvent.StartType) = track { AnalyticsEvent.AppOpen(start, offline = !connectivity.online) }
+
+    /** The trip's share sheet was opened (Road ahead / Waybill «Поделиться»); the chosen app is not known. */
+    fun tripShared() = track { AnalyticsEvent.TripShared(tripId, AnalyticsEvent.ShareChannel.UNKNOWN) }
+
+    /**
+     * ENG-05 `trip_driven_confirmed` (tracking plan §2.3): the answer to «Вы съездили?» for saved trip [id], dated
+     * [today] (Moscow). «Да» / «Частично» send the event, «Нет» sends nothing; so does a trip that is not saved, has no
+     * start date, or has not ended yet (the question comes from the day after its last day E). The post-trip question
+     * that calls this is a later UI task (feature freeze). Returns whether the event was sent.
+     */
+    fun answerTripDriven(id: String, answer: DrivenAnswer, today: java.time.LocalDate = java.time.LocalDate.now(MOSCOW)): Boolean {
+        val completion = when (answer) {
+            DrivenAnswer.FULL -> AnalyticsEvent.Completion.FULL
+            DrivenAnswer.PARTIAL -> AnalyticsEvent.Completion.PARTIAL
+            DrivenAnswer.NO -> return false
+        }
+        val t = saved.firstOrNull { it.id == id && it.kind == "trip" } ?: return false
+        val start = Buckets.date(t.startAt)?.let { java.time.LocalDate.parse(it) } ?: return false
+        val end = start.plusDays((t.days - 1).coerceAtLeast(0).toLong())
+        val sinceEnd = java.time.temporal.ChronoUnit.DAYS.between(end, today).toInt()
+        if (sinceEnd < 1) return false
+        val event = AnalyticsEvent.TripDrivenConfirmed(t.id, completion, sinceEnd, Buckets.km(t.km), t.dog, Buckets.children(t.children))
+        if (!analytics.enabled) return false
+        analytics.track(event)
+        return true
+    }
+
+    /**
+     * `ready_route_id` of trip [r]: the template of the request it was planned from, else (a reopened or restored trip)
+     * the one the engine echoes in the trip's input; [AnalyticsEvent.NO_READY_ROUTE] for a free A → B trip.
+     */
+    private fun readyRouteIdOf(r: PlanResultDto): String =
+        resultRequest?.readyRouteId ?: r.trip.input.readyRouteId ?: AnalyticsEvent.NO_READY_ROUTE
+
+    /** `navigator_opened.app` of a hand-off target (the e2e dry runs count as the app they stand for). */
+    private fun naviApp(target: HandoffTarget): AnalyticsEvent.NaviApp? = when (target) {
+        HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> AnalyticsEvent.NaviApp.YANDEX_NAVIGATOR
+        HandoffTarget.Maps, HandoffTarget.MapsDryRun -> AnalyticsEvent.NaviApp.YANDEX_MAPS
+        HandoffTarget.Browser, HandoffTarget.BrowserDryRun -> AnalyticsEvent.NaviApp.WEB
+        HandoffTarget.None -> null
+    }
+
     fun openDebug() = push(Route.Debug)
 
     /** e2e: the location question counts as answered («Выберу сам»), so no rationale sheet covers the screens. */
@@ -600,6 +674,24 @@ class VerstFlow(
                 }
             }
         }
+        // ENG-05 `ready_route_shown`: once per showing of the Windshield list; an empty list (NoRoutes) counts as 0.
+        scope.launch {
+            snapshotFlow {
+                if (top != Route.Windshield) {
+                    null
+                } else {
+                    when (val w = windshield) {
+                        is WindshieldData.Routes -> w.routes.size to origin
+                        WindshieldData.NoRoutes -> 0 to origin
+                        else -> null
+                    }
+                }
+            }.distinctUntilChanged().collect { shown ->
+                if (shown != null && analytics.enabled) {
+                    analytics.track(AnalyticsEvent.ReadyRouteShown(shown.first, startCityOf(shown.second)))
+                }
+            }
+        }
         // Navigator / Instruments: estimate the draft on the engine 300 ms after it settles; leaving the screens
         // (or a newer draft) cancels the running estimate in the engine too.
         scope.launch {
@@ -622,6 +714,7 @@ class VerstFlow(
 
     fun push(route: Route) {
         locationSheet = false // the rationale belongs to the screen that asked
+        if (route == Route.Navigator) searchStarted = false // ENG-05: a new Navigator visit
         stack.add(route)
     }
 
@@ -742,6 +835,20 @@ class VerstFlow(
     val selected: ReadyRouteDto?
         get() = (windshield as? WindshieldData.Routes)?.routes?.getOrNull(selectedRoute)
 
+    /** A ready-route row tapped on the Windshield (ENG-05 `ready_route_selected`; rank = the row from 1). */
+    fun selectReadyRoute(i: Int) {
+        selectedRoute = i
+        track { (windshield as? WindshieldData.Routes)?.routes?.getOrNull(i)?.let { AnalyticsEvent.ReadyRouteSelected(it.id, i + 1) } }
+    }
+
+    /** `start_city` of [o]: the engine's catalogue town within 30 km (`reverse`), never the address or the point. */
+    private suspend fun startCityOf(o: GeoPoint): String {
+        startCity?.takeIf { it.first == o }?.let { return it.second }
+        val town = (gateway.reverse(o) as? EngineResult.Ok)?.value?.name ?: AnalyticsEvent.OTHER
+        startCity = o to town
+        return town
+    }
+
     /** The request Instruments will plan for ready route [r] (same pace rule as [openReadyRoute]). */
     fun routeRequest(r: ReadyRouteDto): PlanRequest = PlanRequest(
         origin = origin, destination = null, readyRouteId = r.id, adults = adults, children = children, dog = dog,
@@ -788,6 +895,10 @@ class VerstFlow(
             return
         }
         searching = true
+        if (!searchStarted) {
+            searchStarted = true
+            track { AnalyticsEvent.SearchStarted(q.trim().length) } // the length only, never the query
+        }
         suggestJob = scope.launch {
             delay(250) // 5.2 debounce
             when (val r = gateway.geoSearch(q.trim(), origin)) {
@@ -830,6 +941,10 @@ class VerstFlow(
     }
 
     fun pick(s: SuggestionDto) {
+        track {
+            val rank = listOf(addressResults, suggestions, popular).firstNotNullOfOrNull { rows -> rows.indexOf(s).takeIf { it >= 0 } }
+            AnalyticsEvent.SearchSelected(query.trim().length, AnalyticsEvent.SearchResultType.of(s.kind), rank?.plus(1) ?: 0)
+        }
         clearAddresses()
         if (editingFrom && cityPickingStart) {
             // 5.10 «изменить»: the walk start, back to «По городу»
@@ -902,11 +1017,34 @@ class VerstFlow(
 
     /** Seat cycle empty → adult → child → empty; ≤ 8 people incl. the driver (OI-07). */
     fun cycleSeat(i: Int) {
+        val a = adults
+        val c = children
         seats[i] = when (seats[i]) {
             Seat.EMPTY -> Seat.ADULT
             Seat.ADULT -> Seat.CHILD
             Seat.CHILD -> Seat.EMPTY
         }
+        crewChanged(a, c)
+    }
+
+    /** Instruments front passenger seat (adult / empty). */
+    fun toggleFrontAdult() {
+        val a = adults
+        val c = children
+        frontAdult = !frontAdult
+        crewChanged(a, c)
+    }
+
+    /** Instruments dog. */
+    fun toggleDog() {
+        dog = !dog
+        track { AnalyticsEvent.ParamsChanged(AnalyticsEvent.ParamField.DOG, Buckets.yesNo(dog)) }
+    }
+
+    /** ENG-05 `params_changed` for the crew counts that moved (an adult seat turned child moves both). */
+    private fun crewChanged(adultsBefore: Int, childrenBefore: Int) {
+        if (adults != adultsBefore) track { AnalyticsEvent.ParamsChanged(AnalyticsEvent.ParamField.ADULTS, Buckets.adults(adults)) }
+        if (children != childrenBefore) track { AnalyticsEvent.ParamsChanged(AnalyticsEvent.ParamField.CHILDREN, Buckets.children(children)) }
     }
 
     fun pickMood(m: Mood) {
@@ -915,11 +1053,19 @@ class VerstFlow(
     }
 
     fun stepKm(delta: Int) {
+        val before = dailyKm
         dailyKmTouched = true
         dailyKm = (dailyKm + delta).coerceIn(TripMath.KM_MIN, TripMath.KM_MAX)
+        if (dailyKm != before) track { AnalyticsEvent.ParamsChanged(AnalyticsEvent.ParamField.PACE, Buckets.pace(dailyKm)) }
     }
 
     fun stepBudget(delta: Int) {
+        val before = budgetRub
+        stepBudgetValue(delta)
+        if (budgetRub != before) track { AnalyticsEvent.ParamsChanged(AnalyticsEvent.ParamField.BUDGET, Buckets.budget(budgetRub)) }
+    }
+
+    private fun stepBudgetValue(delta: Int) {
         val custom = budgetCustom
         budgetCustom = null
         if (custom != null) {
@@ -951,28 +1097,42 @@ class VerstFlow(
     /** ПОЕХАЛИ on 5.3 → Drive; the plan runs on `verst-python`, the steps are paced ≥ 400 ms (5.4 §6). */
     fun go() {
         if (top != Route.Drive) push(Route.Drive)
-        startPlan()
+        val r = request()
+        track {
+            // the engine's estimate of exactly this request; none yet → `unknown`
+            val f = figures?.takeUnless { it.stale }?.figures
+            AnalyticsEvent.PlanRequested(
+                Buckets.km(f?.km), f?.days, r.dog, Buckets.children(r.children), r.mood?.wire,
+                r.readyRouteId ?: AnalyticsEvent.NO_READY_ROUTE,
+            )
+        }
+        startPlan(r, planId = UUID.randomUUID().toString()) // tracking plan §2.5 q3: a new trip_id per ПОЕХАЛИ only
     }
 
     fun retryPlan() = startPlan(lastPlanRequest ?: request())
 
     private var lastPlanRequest: PlanRequest? = null
 
-    private fun startPlan(request: PlanRequest = request()) {
+    /** [planId]: the `trip_id` the planned trip gets (a retry keeps the one of the plan it retries). */
+    private fun startPlan(request: PlanRequest = request(), planId: String = planTripId ?: UUID.randomUUID().toString()) {
         planJob?.cancel()
         drive = DriveUi()
         lastPlanRequest = request
+        planTripId = planId
         val id = UUID.randomUUID().toString()
+        val startedAt = now()
         planJob = scope.launch {
             val pending = ArrayDeque<Pair<String, Float>>() // stage text, engine progress at that stage
             var days = 0
             var finished: EngineResult<app.verst.core.model.dto.PlanOutcome>? = null
+            var doneAt: Long? = null // ENG-05 latency: when the engine answered (the pacer below only paces the text)
             val forced = debugForceError
             val slowMs = debugSlowSec * 1000L
             val engine = launch {
                 if (forced != null) {
                     delay(STEP_GAP_MS)
                     finished = EngineResult.Err(EngineErrorDto(forced, "debug: forced"))
+                    doneAt = now()
                     return@launch
                 }
                 finished = gateway.planOutcome(id, request) { ev ->
@@ -987,6 +1147,7 @@ class VerstFlow(
                     }
                     Unit
                 }
+                doneAt = now()
                 if (slowMs > 0) delay(slowMs) // debug «Задержать готовность плана»
             }
             // Pacer: reveal one step per 400 ms while the engine works (or until the queue is empty); the bar
@@ -1000,13 +1161,18 @@ class VerstFlow(
                 }
                 delay(STEP_GAP_MS)
             }
+            val latencyMs = (doneAt ?: now()) - startedAt
             when (val r = finished) {
                 is EngineResult.Ok -> when (val o = r.value) {
                     is app.verst.core.model.dto.PlanOutcome.Plan -> {
                         val bearing = readyRoute?.bearing8 ?: request.destination?.let { TripMath.bearing8(request.origin, it) } ?: "N"
                         noFit = null
                         showingMinimum = false
-                        showTrip(o.result, request, bearing, savedId = null, fromSaved = false)
+                        showTrip(o.result, request, bearing, savedId = null, fromSaved = false, tripId = planId)
+                        track {
+                            val source = if (o.result.trip.approxDistances) AnalyticsEvent.RoutingSource.FALLBACK else AnalyticsEvent.RoutingSource.ROAD
+                            AnalyticsEvent.PlanSucceeded(planId, latencyMs, source, request.readyRouteId ?: AnalyticsEvent.NO_READY_ROUTE)
+                        }
                         drive = drive.copy(progress = 1f, done = true, days = o.result.trip.days)
                         delay(AUTO_ADVANCE_MS)
                         if (top == Route.Drive) openRoad()
@@ -1014,6 +1180,7 @@ class VerstFlow(
                     is app.verst.core.model.dto.PlanOutcome.NoFit -> {
                         // 5.8: «Смотреть варианты», auto-advance after 1 s as for a plan
                         noFit = o.noFit
+                        track { AnalyticsEvent.PlanFailed(latencyMs, NO_FIT_CODE) }
                         drive = drive.copy(progress = 1f, done = true, noFit = true)
                         delay(AUTO_ADVANCE_MS)
                         if (top == Route.Drive) openNoFit()
@@ -1022,9 +1189,13 @@ class VerstFlow(
                 is EngineResult.Err -> if (r.error.code == "CANCELLED") {
                     if (top == Route.Drive) stack.removeAt(stack.lastIndex)
                 } else {
+                    track { AnalyticsEvent.PlanFailed(latencyMs, r.error.code) }
                     drive = drive.copy(error = r.error)
                 }
-                null -> drive = drive.copy(error = EngineErrorDto("INTERNAL", "no result"))
+                null -> {
+                    track { AnalyticsEvent.PlanFailed(latencyMs, "INTERNAL") }
+                    drive = drive.copy(error = EngineErrorDto("INTERNAL", "no result"))
+                }
             }
         }
     }
@@ -1035,9 +1206,11 @@ class VerstFlow(
         bearing: String,
         savedId: String?,
         fromSaved: Boolean,
+        tripId: String?,
         bookedStops: Map<String, String> = emptyMap(),
     ) {
         result = r
+        this.tripId = tripId
         tripSession += 1
         booked.clear()
         booked.putAll(bookedStops)
@@ -1134,8 +1307,9 @@ class VerstFlow(
     /** «В навигатор: день N». */
     fun dayMenuGo() {
         val h = dayHandoff ?: return
+        val day = dayMenu
         dayMenu = null
-        launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false)
+        launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false, day = h.day ?: day)
     }
 
     // ---- 5.13 §5 (S4) the hand-off sheet
@@ -1248,6 +1422,7 @@ class VerstFlow(
             handoffLauncher?.openIn(app, uri, web) ?: HandoffTarget.None
         }
         lastHandoff = HandoffLinksDto(navigator = if (app == HandoffApp.NAVI) uri else null, maps = if (app == HandoffApp.MAPS) uri else null, web = web) to target
+        naviApp(target)?.let { opened -> track { AnalyticsEvent.NavigatorOpened(tripId, opened, h.day) } }
         when (target) {
             HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> showToast(Toast.HandoffOpen(navi = true))
             HandoffTarget.Maps, HandoffTarget.MapsDryRun -> showToast(Toast.HandoffOpen(navi = false))
@@ -1278,9 +1453,10 @@ class VerstFlow(
     /** «Открыть в навигаторе отсюда»: from this stop to the end of its day. */
     fun navigatorFromStop() {
         val h = stopHandoff ?: return
+        val day = stopMenu?.day
         stopMenu = null
         stopHandoff = null
-        launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false)
+        launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false, day = day)
         roadFocusSeq += 1 // back from the app: the row (5.9 §5)
     }
 
@@ -1310,8 +1486,11 @@ class VerstFlow(
     private suspend fun engineHandoff(routeJson: String, options: String): HandoffDto? =
         (gateway.handoff(routeJson, options) as? EngineResult.Ok)?.value?.takeIf { h -> h.parts.isNotEmpty() }
 
-    /** One tap opens the target (no chooser); a web fallback says so; offline without an app → «нужен интернет». */
-    private fun launchHandoff(links: HandoffLinksDto, walk: Boolean) {
+    /**
+     * One tap opens the target (no chooser); a web fallback says so; offline without an app → «нужен интернет».
+     * [day]: the trip day handed off (ENG-05 `navigator_opened`; walks are not reported).
+     */
+    private fun launchHandoff(links: HandoffLinksDto, walk: Boolean, day: Int? = null) {
         val resolved = if (walk) walkTarget else carTarget
         if (resolved == HandoffTarget.Browser && !connectivity.online) {
             showToast(Toast.HandoffOffline)
@@ -1327,6 +1506,7 @@ class VerstFlow(
             handoffLauncher?.open(links, walk) ?: HandoffTarget.None
         }
         lastHandoff = links to target
+        if (!walk) naviApp(target)?.let { app -> track { AnalyticsEvent.NavigatorOpened(tripId, app, day) } }
         when (target) {
             HandoffTarget.Browser -> showToast(Toast.HandoffWeb(walk))
             HandoffTarget.None -> showToast(Toast.HandoffFailed)
@@ -1442,7 +1622,7 @@ class VerstFlow(
         )
         pendingReports += r
         writes.trySend(Unit)
-        runCatching { android.util.Log.i("VerstEvent", "feedback_sent reason=$reason source=${t.source} place=${t.placeId}") }
+        track { AnalyticsEvent.FeedbackSent(if (t.fromWalk) null else tripId, reason) } // the comment never leaves the queue
         reportsSent += 1
         closeReport()
         showToast(if (online) Toast.ReportThanks else Toast.ReportQueued)
@@ -1558,7 +1738,7 @@ class VerstFlow(
     fun showMinimum() {
         val nf = noFit ?: return
         val m = nf.minimum ?: return
-        showTrip(m, lastPlanRequest, readyRoute?.bearing8 ?: "N", savedId = null, fromSaved = false)
+        showTrip(m, lastPlanRequest, readyRoute?.bearing8 ?: "N", savedId = null, fromSaved = false, tripId = planTripId)
         showingMinimum = true
         if (top == Route.NoFit) stack[stack.lastIndex] = Route.Road else push(Route.Road)
     }
@@ -1569,7 +1749,9 @@ class VerstFlow(
         val i = stack.lastIndexOf(Route.Road)
         if (i >= 0) while (stack.size > i) stack.removeAt(stack.lastIndex)
         push(Route.Drive)
-        startPlan(req)
+        // ENG-05: the fitted plan is the same trip while it is unsaved; a saved trip's refit is saved as a new trip
+        // (a new entry in «Мои поездки»), so it gets a new trip_id.
+        startPlan(req, planId = tripId?.takeIf { savedId == null } ?: UUID.randomUUID().toString())
     }
 
     /** Instruments caption: the engine's budget verdict for the current draft (`estimate.outcome`). */
@@ -2170,9 +2352,10 @@ class VerstFlow(
 
     /** Road footer «ПУТЕВОЙ ЛИСТ · СКОЛЬКО СТОИТ» → Waybill 5.6. */
     fun openWaybill() {
-        if (result == null) return
+        val r = result ?: return
         expandedLine = null
         push(Route.Waybill)
+        track { AnalyticsEvent.WaybillOpened(tripId, Buckets.total(r.trip.cost.totalRub), r.trip.cost.overBudget) }
     }
 
     /** 5.6 P-09: one line expanded at a time. */
@@ -2187,6 +2370,7 @@ class VerstFlow(
         costBusy = true
         val on = !r.trip.cost.reserveOn
         val session = tripSession
+        track { AnalyticsEvent.ReserveToggled(tripId, on) }
         // Local first (DEV-104 CostCalculator), then the engine's answer overwrites the whole trip.
         localCost(r) { trip -> CostApply.apply(r.trip, LocalCost.reserve(trip, on), on) }
         scope.launch {
@@ -2255,6 +2439,13 @@ class VerstFlow(
             return
         }
         partnerOpen = true
+        // ENG-05 `hotel_link_clicked`: in this build the mock partner sheet stands for the partner's page (D-13)
+        track {
+            val sid = exitStopId ?: return@track null
+            val stop = result?.trip?.daysList?.flatMap { it.stops }?.firstOrNull { it.id == sid }
+            val hotel = stop?.hotelOptions?.firstOrNull { it.placeId == selectedHotel(sid) }
+            AnalyticsEvent.HotelLinkClicked(tripId, sid, Buckets.price(hotel?.priceCrewRub))
+        }
     }
 
     fun needInternet() = showToast(Toast.NeedInternet)
@@ -2351,6 +2542,7 @@ class VerstFlow(
                     replace = null
                     roadFocusSeq += 1
                     showToast(Toast.Replaced(n.value.trip.cost.totalRub))
+                    track { AnalyticsEvent.StopReplaced(tripId, ui.stop.kind, ui.stop.alternatives.indexOfFirst { it.id == alt } + 1) }
                 }
                 is EngineResult.Err -> {
                     result = r
@@ -2403,13 +2595,22 @@ class VerstFlow(
             pendingSave = true // P1-1: never write before the stored trips are in memory
             return
         }
-        val id = savedId ?: UUID.randomUUID().toString()
+        // ENG-05: a new saved trip is keyed by its trip_id, so a reopened trip reports the same id; if that key is
+        // taken (the saved copy was deleted and brought back), a new key as before, and the trip_id follows it.
+        val id = savedId ?: tripId?.takeIf { t -> saved.none { it.id == t } } ?: UUID.randomUUID().toString()
         when (val up = SavedTrips.upsert(saved.toList(), SavedTrips.entry(id, now(), r, resultBearing, booked.toMap()))) {
             SavedTrips.Upsert.LimitReached -> limitDialog = true
             is SavedTrips.Upsert.Saved -> {
                 saved.clear()
                 saved.addAll(up.trips)
                 savedId = id
+                tripId = id
+                if (!silent) {
+                    track {
+                        val start = r.trip.daysList.firstOrNull()?.startAt ?: r.trip.input.startAt
+                        AnalyticsEvent.TripSaved(id, Buckets.date(start), r.trip.days, readyRouteIdOf(r))
+                    }
+                }
                 savedCurrent = true
                 if (!silent) showToast(if (up.nearLimit) Toast.SavedNearLimit(up.count) else Toast.Saved)
                 persist()
@@ -2479,7 +2680,7 @@ class VerstFlow(
         pendingLast = r?.let {
             runCatching {
                 LastTripDto(
-                    trip = SavedTrips.entry(savedId ?: "last", now(), it, resultBearing, booked.toMap()),
+                    trip = SavedTrips.entry(savedId ?: tripId ?: LAST_ID, now(), it, resultBearing, booked.toMap()),
                     savedId = savedId, screen = lastScreen(), exitStopId = exitStopId,
                     roadFocusId = roadFocusId, roadTopId = roadTopId, roadScrollY = roadScrollY,
                 )
@@ -2494,7 +2695,12 @@ class VerstFlow(
         val screen = l.screen ?: return
         val r = runCatching { SavedTrips.result(l.trip) }.getOrNull() ?: return
         val stillSaved = l.savedId != null && saved.any { it.id == l.savedId }
-        showTrip(r, request = null, bearing = l.trip.bearing8, savedId = if (stillSaved) l.savedId else null, fromSaved = true, bookedStops = l.trip.bookedHotels)
+        // ENG-05: last.json keys the trip by its trip_id (`enqueueLast`); a pre-ENG-05 file has «last» → a new id
+        val restoredId = l.trip.id.takeUnless { it == LAST_ID } ?: UUID.randomUUID().toString()
+        showTrip(
+            r, request = null, bearing = l.trip.bearing8, savedId = if (stillSaved) l.savedId else null, fromSaved = true,
+            tripId = restoredId, bookedStops = l.trip.bookedHotels,
+        )
         savedCurrent = false
         stack.clear()
         stack.add(Route.Windshield)
@@ -2618,7 +2824,7 @@ class VerstFlow(
             return
         }
         tripsSheet = false
-        showTrip(SavedTrips.result(s), request = null, bearing = s.bearing8, savedId = s.id, fromSaved = true, bookedStops = s.bookedHotels)
+        showTrip(SavedTrips.result(s), request = null, bearing = s.bearing8, savedId = s.id, fromSaved = true, tripId = s.id, bookedStops = s.bookedHotels)
         while (stack.size > 1) stack.removeAt(stack.lastIndex)
         push(Route.Road)
     }
@@ -2637,10 +2843,22 @@ class VerstFlow(
         const val ESTIMATE_DEBOUNCE_MS = 300L
         const val LAST_DEBOUNCE_MS = 300L
         val ENGINE_START_CODES = setOf("NO_ENGINE", "ENGINE_START", "NO_WORLD", "TZDATA_MISSING")
+
+        /** The id of the current trip in last.json before ENG-05 (now its trip_id). */
+        private const val LAST_ID = "last"
+
+        /** ENG-05 `plan_failed.error_code` of a plan that found no trip within the budget (5.8). */
+        const val NO_FIT_CODE = "NO_FIT"
+
+        /** Moscow time: the tracking plan's clock (§0.4), and the day a «Вы съездили?» answer is dated. */
+        val MOSCOW: java.time.ZoneId = java.time.ZoneId.of("Europe/Moscow")
     }
 }
 
 enum class GpsState { Off, Waiting, On, Failed }
+
+/** The answers to the post-trip question «Вы съездили?» (tracking plan §2.3, VAL-04). */
+enum class DrivenAnswer { FULL, PARTIAL, NO }
 
 /** Where a hand-off went. */
 /** Where a hand-off went (or would go: the dry runs of the e2e). */

@@ -1,0 +1,16 @@
+Fonts in this folder are distributed under the SIL Open Font License 1.1.
+
+verst-sans-narrow-{400,600,700}.woff2 — «Verst Sans Narrow»
+  Derived from IBM Plex Sans v3 (Copyright 2017–2019 IBM Corp.): static instances at wdth 75
+  (see android/core-ui/src/main/assets/licenses/NOTICE.txt and design/decisions.md DES-100),
+  renamed because «Plex» is a Reserved Font Name. For the web they are further subset to
+  Latin + Russian Cyrillic + typographic punctuation (« » — … № ₽ ≈ → ↓ ×, U+00A0, U+202F)
+  and converted to WOFF2. Licence: OFL-verst-sans-narrow.txt.
+
+verst-hand-400.woff2 — «Verst Hand»
+  Derived from Marck Script (Copyright (c) 2011 Denis Masharov & Marck Fogel): subset to the
+  same character set and converted to WOFF2. Because «Marck Script» is a Reserved Font Name and
+  subsetting is a modification under the OFL, the family is renamed «Verst Hand» in the name
+  table (copyright and licence records kept). Licence: OFL-verst-hand.txt.
+
+Generated with fontTools 4.67 (pyftsubset API); no glyph outlines were edited.

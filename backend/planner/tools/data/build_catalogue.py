@@ -15,7 +15,8 @@ plus the hand-maintained `region_tz.tsv` and `name_overrides.tsv` next to this f
 
 Usage (from `backend/planner`): ``python3 tools/data/build_catalogue.py RAW_DIR [--out DIR] [--version V]``.
 Writes ``catalogue_{meta,towns,pois,bars}.json.gz`` (default: `verst_planner/resources/`) and prints a
-summary. `build(...)` returns the documents for tests.
+summary. `build(...)` returns the documents for tests. `meta.licence` carries the ODbL 1.0 notice of the
+whole catalogue (`licence_block`); Commons files that are GFDL-only are not used (`gfdl_only`).
 """
 
 from __future__ import annotations
@@ -109,6 +110,113 @@ BRANDED_TAGS = ("brand", "brand:wikidata", "brand:ru")
 RYUMKA = re.compile(r"рюмочн", re.IGNORECASE)
 
 
+# ------------------------------------------------------------------------------------------- licence
+
+# ODbL package (CEO D-IR-07; docs/legal/risk-register.md R-01, R-09, R-10; lawyer brief appendix B). The whole
+# catalogue is a Derivative Database of OpenStreetMap and is licensed under ODbL 1.0 as a database (ODbL 4.4);
+# the contents keep their sources' licences. `meta.licence` is the notice the database carries (ODbL 4.2) and
+# names the free copy (ODbL 4.6). The same URIs are in the app's `assets/licenses/data.txt` and
+# `data/catalogue/README.md` (`tests/unit/test_data_licence.py` keeps them in step).
+ODBL_URI = "https://opendatacommons.org/licenses/odbl/1-0/"
+OSM_COPYRIGHT_URI = "https://www.openstreetmap.org/copyright"
+CC0_URI = "https://creativecommons.org/publicdomain/zero/1.0/"
+CC_BY_SA_4_URI = "https://creativecommons.org/licenses/by-sa/4.0/"
+CATALOGUE_COPY_URI = "https://github.com/pazzia/Verst/tree/main/data/catalogue"
+LICENCE_NOTICE = (
+    "Verst place catalogue (catalogue_*.json.gz). Contains information from OpenStreetMap "
+    f"({OSM_COPYRIGHT_URI}), which is made available here under the Open Database License (ODbL) 1.0: "
+    f"{ODBL_URI}. © OpenStreetMap contributors. This catalogue is a Derivative Database of OpenStreetMap "
+    "and is licensed under ODbL 1.0. Wikidata content: CC0 1.0. Wikipedia / Wikivoyage extracts: "
+    "CC BY-SA 4.0, abridged. Photos: Wikimedia Commons, licence per file (see credits). "
+    f"A free machine-readable copy: {CATALOGUE_COPY_URI}"
+)
+
+
+def licence_block(version: str) -> dict[str, Any]:
+    """`meta.licence`: ODbL 1.0 for the database as a whole, the attributions per source (which parts of the
+    catalogue each one fed), the source and licence URIs, the free copy and the build id (= `meta.version`)."""
+    return {
+        "database": {
+            "licence": "ODbL-1.0",
+            "name": "Open Database License (ODbL) 1.0",
+            "uri": ODBL_URI,
+            "scope": "the catalogue as a whole: catalogue_meta, catalogue_towns, catalogue_pois, catalogue_bars",
+            "derivativeOf": "OpenStreetMap",
+        },
+        "notice": LICENCE_NOTICE,
+        "attribution": [
+            {
+                "source": "OpenStreetMap",
+                "text": "© OpenStreetMap contributors",
+                "licence": "ODbL-1.0",
+                "licenceUri": ODBL_URI,
+                "uri": OSM_COPYRIGHT_URI,
+                "parts": [
+                    "bars",
+                    "pois with an osm_* id",
+                    "pois.hours, pois.fee, pois.website",
+                    "pois.extract where extractSrc = osm",
+                    "pois.image where imageSrc = osm (the file named by the OSM tag)",
+                    "meta.parking",
+                ],
+            },
+            {
+                "source": "Wikidata",
+                "text": "Wikidata",
+                "licence": "CC0-1.0",
+                "licenceUri": CC0_URI,
+                "uri": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+                "parts": [
+                    "towns",
+                    "pois with a Q* id",
+                    "pois.desc, pois.extract where extractSrc = wikidata",
+                    "meta.regions, meta.links",
+                ],
+            },
+            {
+                "source": "Wikipedia (ru)",
+                "text": "Wikipedia contributors (the article's history)",
+                "licence": "CC-BY-SA-4.0",
+                "licenceUri": CC_BY_SA_4_URI,
+                "uri": "https://ru.wikipedia.org/",
+                "abridged": True,
+                "parts": ["pois.extract where extractSrc = wikipedia (the first sentence of the article)"],
+            },
+            {
+                "source": "Wikivoyage (ru)",
+                "text": "Wikivoyage contributors (the article's history)",
+                "licence": "CC-BY-SA-4.0",
+                "licenceUri": CC_BY_SA_4_URI,
+                "uri": "https://ru.wikivoyage.org/",
+                "abridged": True,
+                "parts": ["pois.extract where extractSrc = wikivoyage (the first sentence of the listing)"],
+            },
+            {
+                "source": "Wikimedia Commons",
+                "text": "the author named in meta.credits",
+                "licence": "per file (meta.credits); GFDL-only files are not used",
+                "licenceUri": None,
+                "uri": "https://commons.wikimedia.org/",
+                "parts": ["towns.image, pois.image, meta.links.image (file names only)", "meta.credits"],
+            },
+        ],
+        "copy": CATALOGUE_COPY_URI,
+        "build": version,
+    }
+
+
+GFDL = re.compile(r"(?:gfdl|gnu free documentation licen[cs]e)\b", re.I)
+LICENCE_SEP = re.compile(r"\s*(?:[,;|/+]|\bor\b|\band\b|\bили\b)\s*", re.I)
+
+
+def gfdl_only(licence: str | None) -> bool:
+    """R-10: a Commons file whose only licence is the GFDL (any version). The GFDL wants its full text with every
+    copy, which a photo credit cannot carry, so the builder does not use the file. A file that also offers
+    another licence («GFDL, CC BY-SA 3.0») stays: the credit then names that licence."""
+    parts = [p for p in LICENCE_SEP.split((licence or "").strip()) if p]
+    return bool(parts) and all(GFDL.match(p) for p in parts)
+
+
 # ------------------------------------------------------------------------------------------- helpers
 
 MISPLACED_KM = 40.0
@@ -169,6 +277,8 @@ def denylist() -> list[str]:
 
 
 def denied(name: str, deny: Iterable[str]) -> bool:
+    """Substring match on purpose (HYG-01): a pre-filter stricter than the release gates' word-start match
+    (`tests/unit/test_brands.py`), so whatever the builder keeps also passes the gates."""
     low = name.casefold()
     return any(b in low for b in deny)
 
@@ -448,7 +558,7 @@ def build(
             taken.add(qid)
             links[fid] = {"wikidata": qid, "image": r.get("image")}
 
-    # ---- credits (only free files keep their image)
+    # ---- credits (only free files keep their image; GFDL-only files are dropped too, R-10)
     credit_list: list[dict[str, Any]] = []
     credit_idx: dict[tuple[Any, ...], int] = {}
 
@@ -458,7 +568,7 @@ def build(
         c = credits_in.get(file)
         if c is None:
             return file, None  # unknown credits: shown as «Фото: Wikimedia Commons»
-        if not c.get("free", True):
+        if not c.get("free", True) or gfdl_only(c.get("licence")):
             return None, None
         author = c.get("author")
         if author:
@@ -659,6 +769,7 @@ def build(
         "v": FORMAT_VERSION,
         "version": version,
         "builtAt": built_at,
+        "licence": licence_block(version),
         "regions": [{"code": c, "nameRu": region_names[c], "tz": tz[c]} for c in regions_sorted],
         "poiKinds": list(POI_KINDS),
         "barKinds": list(BAR_KINDS),

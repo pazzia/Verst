@@ -246,9 +246,11 @@ Town(id: str, name_ru: str, name_prep_ru: str | None, point: LatLon, region_code
 Place(id: str, type: PlaceType, name_ru: str, point: LatLon, address: str | None, region_code: str,
       town_id: str | None, opening_hours: str | None, dwell_min: int | None, avg_check_rub: int | None,
       price_night_rub: int | None, ticket_adult_rub: int | None, ticket_child_rub: int | None,
-      rating_internal: float, tags: frozenset[Tag], description_ru: str | None,
+      rating_internal: float | None, tags: frozenset[Tag], description_ru: str | None,
       partner_ids: PartnerIds, source: Source, verified_at: date | None, status: PlaceStatus,
-      breakfast_included: bool = True)
+      breakfast_included: bool | None = None, …, tags_no: frozenset[Tag] = frozenset(),
+      fuel_kinds: frozenset[FuelType] = frozenset(), fuel_kinds_no: frozenset[FuelType] = frozenset())
+      # ADR-0019: None / absent = unknown, never a convenient default; the rules live in `domain/facts.py`
 ReadyRoutePoint(seq: int, role: Literal["via", "stop"], town_id: str | None, place_id: str | None)
 ReadyRoute(id: str, hub_town_id: str, title_ru: str, subtitle_ru: str, points: tuple[ReadyRoutePoint, ...],
            suggested_nights: tuple[str, ...],   # town ids, ordered by night number
@@ -779,7 +781,7 @@ rest_score(c) = 1·[type rest] + 2·[playground ∧ children>0] + 1.5·[walk ∧
 Meals:
 - **Lunch**: if the day's schedule covers any part of `lunch_window` (12:00–14:30 local), choose among `corridor.food` in the day's km range the candidates whose `eta_if_inserted` ∈ window; `lunch_score = rating_internal + 2·[kids_menu ∧ children>0] + 1·[parking|parking_guarded] + 0.5·[view] + 0.5·[ETA ∈ 12:30–13:30] − detour_min/5`; insert with `dwell = lunch (60)`, `meal = LUNCH`, `auto=True`. No feasible candidate → no lunch stop; the meal is still costed at the town default (§7.1).
 - **Dinner** is not a separate stop [D-5]: it is attached to the overnight (`meal = DINNER` in cost units) at the overnight town's median `avg_check_rub` of live food places in that town, else `food_default_check(population)`.
-- **Breakfast** is included when the chosen hotel has `breakfast_included = true`; otherwise one breakfast per person the next morning at `breakfast_price_frac (0.6) × default check`.
+- **Breakfast** is included when the chosen hotel has `breakfast_included = true`; otherwise (false **or unknown**, ADR-0019 E-3) one breakfast per person the next morning at `breakfast_price_frac (0.6) × default check`.
 
 ### 6.9 Stage 9: sights
 
@@ -802,7 +804,7 @@ sight_score(c) = rating_internal + 0.5·[{kremlin, monastery, museum, view} ∩ 
 ```
 `frozen=True` (re-run) means: keep the current sights, add none.
 
-Opening hours (`hours.py`): supported OSM subset — `24/7`; rules separated by `;`; each rule = optional weekday selector (`Mo`…`Su`, ranges `Tu-Su`, lists `Sa,Su`) followed by comma-separated time ranges `HH:MM-HH:MM` (end may be `24:00` or wrap past midnight) or `off`/`closed`; later rules override earlier ones for the days they name; rules starting with `PH` or `SH` are ignored. Anything else → `OpeningHoursParseError`. `opening_hours = None` means always open (outdoor sights, walks). API: `parse(s) -> OpeningHours`, `OpeningHours.is_open(local_dt) -> bool`, `OpeningHours.covers(start_local, end_local) -> bool`.
+Opening hours (`hours.py`): supported OSM subset — `24/7`; rules separated by `;`; each rule = optional weekday selector (`Mo`…`Su`, ranges `Tu-Su`, lists `Sa,Su`) followed by comma-separated time ranges `HH:MM-HH:MM` (end may be `24:00` or wrap past midnight) or `off`/`closed`; later rules override earlier ones for the days they name; rules starting with `PH` or `SH` are ignored. Anything else → `OpeningHoursParseError`. `opening_hours = None` means **hours unknown** (ADR-0019 E-1): the stop is still allowed (scheduled as if open) but the plan never claims it is open — the stop carries `unknownFacts: ["hours"]` and «Часы не известны — уточните»; `24/7` is the explicit «always open». API: `parse(s) -> OpeningHours`, `OpeningHours.is_open(local_dt) -> bool`, `OpeningHours.covers(start_local, end_local) -> bool`.
 
 ### 6.10 Stage 10: schedule with the single re-run rule
 
@@ -870,7 +872,7 @@ All money arithmetic uses `decimal.Decimal` with `ROUND_HALF_UP`; integers only 
 | `tickets` | `Σ_sights adults × ticket_adult + children × (ticket_child ?? ticket_adult)`; `free_entry` or null prices ⇒ 0 | `«3 места × (2 взр. + 1 реб.)»`; none paid: `«вход свободный»` | one per paid sight: `«Ростовский кремль: 2 × 400 + 1 × 200»` |
 | `reserve` | `reserve_frac × Σ rounded(lines 1–5)` | `«10% на пробки и «давай заедем»»` | — |
 
-Meal counting [D-6]: for each day `d`: **lunch** = 1 if the day's driving schedule overlaps the lunch window (12:00–14:30); priced at the lunch stop's `avg_check_rub`, else town/region default for the nearest town at the lunch ETA. **Dinner** = 1 for every night (priced at the overnight town, §6.8) + 1 on the last day if the finish arrival is after `dinner_last_day_after` (19:00) and the finish is not the origin. **Breakfast** = 0 on day 1 (at home, SPEC §8) and after nights whose hotel has `breakfast_included = true`; otherwise 1 at `breakfast_price_frac × check(town)`.
+Meal counting [D-6]: for each day `d`: **lunch** = 1 if the day's driving schedule overlaps the lunch window (12:00–14:30); priced at the lunch stop's `avg_check_rub`, else town/region default for the nearest town at the lunch ETA. **Dinner** = 1 for every night (priced at the overnight town, §6.8) + 1 on the last day if the finish arrival is after `dinner_last_day_after` (19:00) and the finish is not the origin. **Breakfast** = 0 on day 1 (at home, SPEC §8) and after nights whose hotel has `breakfast_included = true`; otherwise (false or unknown, ADR-0019 E-3) 1 at `breakfast_price_frac × check(town)`.
 
 Fuel region attribution: the planner samples the route every 10 km (`RegionLocator.locate`, memoised), assigns each 10 km bucket to the sample at its midpoint, and adds each stop's `detour_km` to the stop's region. Result is stored in `EngineState.region_km`.
 
@@ -1000,6 +1002,9 @@ The same `key` may be emitted more than once; the client replaces the text of th
 Ids: `uuid` (`gen_random_uuid()`) for curated entities and devices; trips use text ids `trp_` + 12 Crockford base32 chars (`app.trip.id`), stops `d{day}s{nn}`. The planner treats all ids as opaque strings (fixtures use readable ids).
 
 ### 9.2 DDL (`backend/migrations/sql/0001_initial.sql`)
+
+> **DATA-01 (2026-10-25): superseded in part by migration `0002_place_provenance.sql` and [ADR-0018](adr/0018-verst-facts-apart-from-osm.md).** Verst's own facts live apart from OSM: `place.osm_id` / `town.osm_id` move to `core.place_osm_ref` / `core.town_osm_ref` (reference only), `source = 'osm'` is removed, per-fact proof is in `core.evidence` (OSM URLs rejected), checks in `core.place_check`, curators are pseudonymous (`core.curator`), tags are tri-state with conditions, photos carry author and licence, places carry road and km post, and DATA-04 KPI views exist. `tags`, `photo_keys`, `verified_at`, `verified_by` on `core.place` are trigger-maintained caches, so the engine/API contract is unchanged. Breakfast is NULL = unknown. The DDL below is 0001 as written; read ADR-0018 §3–§5 for what 0002 changes. Directus (§9.5): «Проверено» inserts a `place_check` row; the four cached columns are read-only; the map widget is not a coordinate source until LEG-01 answers. Separation is enforced by `backend/planner/tests/test_schema_separation.py`.
+
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -1820,7 +1825,7 @@ G01–G12 are Sprint 1 (G01–G05 are the Manager's mandatory set). SPEC §17 co
 | D-3 | Ready-route template fit | template nights used if every template day ≤ 105 % × dailyKm and number of days ≤ ceil(total / (0.9 × dailyKm)) |
 | D-4 | Overnight fallback chain | F1 window 70–105 % → F2 widened 40–130 % (capped at 105 % of dailyKm) → F3 one extra day → F4 town/road point without hotel; F2–F4 raise `NO_LODGING` |
 | D-5 | Dinner placement | dinner is costed at the overnight town, not inserted as a separate stop |
-| D-6 | Meal counting | lunch on days overlapping 12:00–14:30; dinner each night; breakfast from hotel unless `breakfast_included=false` |
+| D-6 | Meal counting | lunch on days overlapping 12:00–14:30; dinner each night; breakfast from hotel only when `breakfast_included=true` (unknown is costed, ADR-0019) |
 | D-7 | Android applicationId | `app.verst` (domain `verst.app` is a CEO open question) |
 | D-8 | Location source | `LocationManager` network provider (no Google Play Services dependency for RuStore devices) |
 | D-9 | Detour model | `2 × lateral × 1.3` at 40 km/h + 2 min access (+5 min motorway exit); config |

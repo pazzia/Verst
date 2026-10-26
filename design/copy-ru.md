@@ -928,7 +928,12 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `route_approx_open_data` | Расстояния приблизительные · места из открытых данных | one info line when both `approxDistances` and `UNVERIFIED_PLACES` apply; followed by the «О данных» link (S3-FINAL) |
 | `route_approx_more` | О данных | link → «О данных» |
 | `about_data_title` | О данных | screen |
-| `about_data_body` | Города и места — Wikidata (CC0). Бары и адреса — © участники OpenStreetMap (ODbL). Фото — Wikimedia Commons, у каждого своя лицензия и автор. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные. | |
+| `about_data_body` | Города и достопримечательности — Wikidata (CC0). Бары, детские площадки, парковки, часы работы, часть описаний и адреса — © участники OpenStreetMap, данные доступны по лицензии ODbL 1.0. Каталог мест в приложении — производная база данных OpenStreetMap; он тоже распространяется по ODbL 1.0, копию можно скачать бесплатно. Описания из Википедии и Викигида — CC BY-SA 4.0, тексты сокращены, ссылка на статью — в карточке. Фото — Wikimedia Commons: автор и лицензия — в подписи под фото. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные. | ODbL package (D-IR-07, lawyer brief appendix B) |
+| `about_data_copy` | Скачать копию каталога (ODbL) | link ↗ → `data/catalogue` (free copy, ODbL 4.6) |
+| `about_data_odbl` | Лицензия ODbL 1.0 | link ↗ → opendatacommons.org/licenses/odbl/1-0/ |
+| `about_data_osm` | Авторские права OpenStreetMap | link ↗ → openstreetmap.org/copyright |
+| `about_data_notice` | Полный текст уведомления о лицензиях | toggle: shows `assets/licenses/data.txt` in the sheet |
+| `about_data_notice_hide` | Скрыть уведомление | the same toggle, open |
 | `cd_loc_searching` | Ищем, где вы | |
 | `cd_addr_row` | {name}, {sub}, примерно {km} километров | |
 
@@ -1091,8 +1096,8 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | Key | Text | Notes |
 | --- | --- | --- |
 | `card_why` | Почему здесь: {why} | engine `whyRu` |
-| `card_desc_wikipedia` | Описание: Википедия · CC BY-SA | link to the article |
-| `card_desc_wikivoyage` | Описание: Викигид · CC BY-SA | |
+| `card_desc_wikipedia` | Из статьи Википедии, текст сокращён · CC BY-SA 4.0 | link to the article (`extractSource.url`); CC BY-SA 4.0, abridged (R-09) |
+| `card_desc_wikivoyage` | Из Викигида, текст сокращён · CC BY-SA 4.0 | link to the town guide (`extractSource.url`); CC BY-SA 4.0, abridged (R-09) |
 | `card_photo_nearby_label` | ФОТО РЯДОМ | label over a Commons geosearch photo |
 | `card_photo_nearby_credit` | Фото рядом с местом · Wikimedia Commons · {author} · {licence} | |
 | `card_illustration_none` | фото пока нет | small caption in the category illustration, **only** when the place has no text either |

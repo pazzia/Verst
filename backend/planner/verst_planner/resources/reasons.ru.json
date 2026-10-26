@@ -29,6 +29,7 @@
   "lunch.default": "Обед в {town_prep}.",
   "sight.default": "{dwell} на осмотр.",
   "sight.dog_waits": "{dwell} на осмотр. Собака ждёт с одним из взрослых.",
+  "sight.dog_ok": "{dwell} на осмотр, с собакой можно.",
   "sight.osm": "По открытым данным.",
   "sight.detour": "Крюк ≈ {minutes} мин.",
   "start.default": "Выезд в {time}.",

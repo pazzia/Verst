@@ -1,0 +1,5 @@
+{
+  "priority": [
+    { "if": "toll == ALL", "multiply_by": "0.01" }
+  ]
+}

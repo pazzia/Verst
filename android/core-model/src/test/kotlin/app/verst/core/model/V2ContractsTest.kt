@@ -81,6 +81,12 @@ class V2ContractsTest {
         assertNotNull(sight.image!!.card)
         // the licence is the file's own (the data run decides which); it is always named
         assertTrue(sight.image!!.credit!!.licence.orEmpty().startsWith("CC") || sight.image!!.credit!!.licence == "Public domain")
+        // R-09 (ODbL package): the extract's source carries its article, the licence URI and the abridgement
+        val src = sight.extractSource!!
+        assertEquals("CC BY-SA 4.0", src.licence)
+        assertTrue(src.url!!.startsWith("https://www.wikidata.org/wiki/Special:GoToLinkedPage/ruwiki/Q"))
+        assertEquals("https://creativecommons.org/licenses/by-sa/4.0/", src.licenceUrl)
+        assertTrue(src.abridged)
         val hotel = ok(EngineJson.poiDetails(envelope("poi_details-hotel.json")))
         assertTrue(hotel.isFictional)
         // release-s3: only single photographs may be area photos — when there is one, it is labelled as such

@@ -2,7 +2,8 @@
 
 One file per function and case: ``{"request": {"function", "args"}, "response": <envelope>}``. Arguments
 named ``*_json`` are passed to the bridge as JSON text; here they are shown parsed. The envelope's ``ms`` is
-written as 0. Everything runs in-process on the golden clock with both fixture worlds and the packaged
+written as 0 and ``selfcheck``'s ``python`` as `APP_PYTHON` (HYG-01: the host interpreter is environment
+data, like ``ms``; it made the file differ between 3.13.16, 3.13.17 and 3.12.3 hosts). Everything runs in-process on the golden clock with both fixture worlds and the packaged
 catalogue, so a re-run is byte-identical. ``index.json`` lists the files.
 
 Run from `backend/planner`: ``python3 tools/gen_api_contracts.py``. With ``VERST_GEN_IN_MEMORY=1`` nothing
@@ -22,6 +23,8 @@ from verst_planner.domain.model import LatLon  # noqa: E402
 
 OUT = ROOT.parents[1] / "docs" / "contracts" / "v2"
 GENERATED: dict[str, str] = {}
+# The app's interpreter line: Chaquopy `version = "3.12"` (android/app/build.gradle.kts), architecture §selfcheck.
+APP_PYTHON = "3.12.x"
 R = "russia_v1"
 FUEL_ID = json.loads((ROOT / "fixtures" / "worlds" / "central_russia_v1.json").read_text("utf-8"))["places"]
 FUEL_ID = next(p["id"] for p in FUEL_ID if p["type"] == "fuel")
@@ -40,6 +43,8 @@ def call(name, function, refs=None, **args):
     envelope["ms"] = 0
     if function == "load_catalogue" and envelope.get("ok"):
         envelope["result"]["ms"] = 0
+    if function == "selfcheck" and envelope.get("ok"):
+        envelope["result"]["python"] = APP_PYTHON
     GENERATED[f"{name}.json"] = text({"request": {"function": function, "args": shown}, "response": envelope})
     return envelope
 
@@ -66,6 +71,14 @@ def town_without_bars():
         if t.population >= 5000 and all(haversine_km(t.point, b.point) > 6 for b in cat.bars):
             return {"lat": t.point.lat, "lon": t.point.lon, "label": t.name}
     raise AssertionError("no town without bars")
+
+
+def unpriced_sight():
+    """ADR-0019 E-2: the first catalogue sight (by id) whose kind has no default ticket and whose OSM data has
+    no `fee` — its price is unknown, so the card says «цена билета неизвестна», deterministic."""
+    cat = mobile._CATALOGUE[0]
+    places = mobile._WORLDS[R].world.places
+    return min(p.id for p in cat.pois if p.kind == "attraction" and p.fee is None and p.id in places)
 
 
 def dry_town_with_sights():
@@ -299,6 +312,34 @@ call("poi_details-fixture-sight", "poi_details", world=R, place_id="pl_yar_ilya"
 call("poi_details-hotel", "poi_details", world=R, place_id="pl_yar_hotel_strelka")
 call("poi_details-bar", "poi_details", world=R, place_id=bar_in(YAR))
 call("poi_details-not-found", "poi_details", world=R, place_id=FUEL_ID)
+# ADR-0019 E-1 / E-2: a card whose opening hours nobody checked, and one whose ticket price is unknown
+call("poi_details-hours-unknown", "poi_details", world=R, place_id="pl_yar_strelka")
+call("poi_details-ticket-unknown", "poi_details", world=R, place_id=unpriced_sight())
+# The Windshield's three ready routes from Москва, each estimated for one crew (G02's: 2 adults + child + dog,
+# 40 000 ₽, Saturday 07.11 08:00) on the curated world: the km the screenshot fixture shows next to each ready
+# route (never a free trip's km, never the template's kmTotal)
+for slug, rid in (
+    ("tula", "rr_tula_yasnaya"),
+    ("yaroslavl", "rr_yaroslavl"),
+    ("golden-ring", "rr_golden_ring"),
+):
+    call(
+        f"estimate-ready-{slug}",
+        "estimate",
+        world="central_russia_v1",
+        request_id=f"c-rr-{slug}",
+        input_json=json.dumps(
+            {
+                "origin": msk,
+                "readyRouteId": rid,
+                "crew": {"adults": 2, "children": 1, "dog": True},
+                "dailyKm": 300,
+                "budget": 40000,
+                "startAt": "2026-11-07T08:00",
+            },
+            ensure_ascii=False,
+        ),
+    )
 trip = json.loads(graph_plan)["result"]["trip"]
 first_sight = next(s["id"] for d in trip["daysList"] for s in d["stops"] if s["kind"] == "sight")
 TRIP_REF = {

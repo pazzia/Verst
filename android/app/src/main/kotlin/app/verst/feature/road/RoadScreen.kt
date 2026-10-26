@@ -467,11 +467,58 @@ internal fun HandoffItem(title: String, target: HandoffTarget, truncated: Boolea
     }
 }
 
-/** 5.12 §3 «О данных». */
+/**
+ * The ODbL package (CEO D-IR-07, docs/legal/risk-register.md R-01): where the catalogue's free copy, the ODbL text
+ * and the OpenStreetMap copyright page live, and the notice file the APK ships. The URIs are the ones in
+ * `backend/planner/tools/data/build_catalogue.py` (`meta.licence`) and in the notice; `test_data_licence.py` keeps
+ * the three in step.
+ */
+internal object DataLicence {
+    /** core-ui `src/main/assets/licenses/` (the folder of the font NOTICE; ADR-0012 spelled it `licences`). */
+    const val NOTICE_ASSET = "licenses/data.txt"
+    const val CATALOGUE_COPY = "https://github.com/pazzia/Verst/tree/main/data/catalogue"
+    const val ODBL = "https://opendatacommons.org/licenses/odbl/1-0/"
+    const val OSM_COPYRIGHT = "https://www.openstreetmap.org/copyright"
+}
+
+/**
+ * 5.12 §3 «О данных»: the sources and licences, then the links (the free catalogue copy, ODbL 1.0, OpenStreetMap
+ * copyright; each leaves the app, ↗) and the full notice `assets/licenses/data.txt`, shown in place. The body
+ * scrolls inside the sheet once the notice is open.
+ */
 @Composable
 internal fun androidx.compose.foundation.layout.BoxScope.AboutDataSheet(windowH: androidx.compose.ui.unit.Dp, onClose: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val uri = androidx.compose.ui.platform.LocalUriHandler.current
+    val notice = remember {
+        runCatching { context.assets.open(DataLicence.NOTICE_ASSET).bufferedReader(Charsets.UTF_8).use { it.readText() } }.getOrNull()
+    }
+    var full by remember { mutableStateOf(false) }
+    val open: (String) -> Unit = { url -> runCatching { uri.openUri(url) } }
+    // BottomSheet already scrolls its content (a weighted verticalScroll column); a second weighted scroll column
+    // here measured at 0 height inside it and hid the whole body (CI run 125).
     BottomSheet(stringResource(R.string.about_data_title), onClose, "aboutdata", windowH) {
         Txt(stringResource(R.string.about_data_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 8.dp))
+        DataLink(stringResource(R.string.about_data_copy), "aboutdata.copy") { open(DataLicence.CATALOGUE_COPY) }
+        DataLink(stringResource(R.string.about_data_odbl), "aboutdata.odbl") { open(DataLicence.ODBL) }
+        DataLink(stringResource(R.string.about_data_osm), "aboutdata.osm") { open(DataLicence.OSM_COPYRIGHT) }
+        if (notice != null) {
+            DataLink(stringResource(if (full) R.string.about_data_notice_hide else R.string.about_data_notice), "aboutdata.notice", external = false) { full = !full }
+            if (full) Txt(notice, T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("aboutdata.notice.text"))
+        }
+    }
+}
+
+/** A link row of «О данных»: `type.body.mdStrong` `color.navi.label` like `route_approx_more`, touch 44; ↗ when it leaves the app. */
+@Composable
+private fun DataLink(title: String, tag: String, external: Boolean = true, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.touchMin)
+            .clickable(role = Role.Button, onClick = onClick).testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Txt(title, T.body.mdStrong, C.navi.label, Modifier.weight(1f))
+        if (external) GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 16.dp)
     }
 }
 
@@ -719,7 +766,8 @@ private fun StopRow(
     val openDataCd = if (!s.verified) stringResource(R.string.cd_open_data) else null
     val kmCd = kmPost?.let { stringResource(R.string.cd_road_km_post, RuFormat.thousands(it)) }
     val cost: String? = when (s.kind) {
-        "sight" -> if (s.costRub == 0) stringResource(R.string.road_free) else rub(s.costRub)
+        // ADR-0019 E-2: 0 ₽ of an unknown price is not «вход свободный»
+        "sight" -> if ("ticket" in s.unknownFacts) stringResource(R.string.road_ticket_unknown) else if (s.costRub == 0) stringResource(R.string.road_free) else rub(s.costRub)
         "food", "overnight" -> rub(s.costRub)
         "rest" -> stringResource(R.string.common_rub, "0")
         "fuel" -> if (s.costRub > 0) rub(s.costRub) else null
@@ -727,7 +775,7 @@ private fun StopRow(
     }
     val kindCd = (s.poiKindRu ?: app.verst.feature.common.kindWord(s.poiKind))?.lowercase()
     val parkingCd = if (showParking) stringResource(R.string.cd_road_parking_inline, parkingInline(s.parking)).substringBefore(". ") else null
-    val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, cost, parkingCd).joinToString(", ")
+    val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, s.unknownRu, cost, parkingCd).joinToString(", ")
     val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
     // S3-R1: the restored row flashes `accent.yellow` at 14 % and fades (reduced motion: on, then off).
     val reduced = LocalReducedMotion.current
@@ -796,6 +844,8 @@ private fun StopRow(
                 label = if (s.kind == "sight") s.poiKindRu else null,
             )
             if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note, maxLines = 2)
+            // ADR-0019: what nobody checked for this stop («Часы не известны — уточните»), under the reason
+            s.unknownRu?.let { Txt(it, T.body.sm, C.text.muted, Modifier.testTag("road.unknown.${s.id}"), maxLines = 2) }
             val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
             if (cost != null || canReplace || hotel || showParking) {
                 CostsLine(cost, s.parking, showParking, "road.stop.${s.id}", onParking) {

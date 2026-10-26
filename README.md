@@ -11,11 +11,17 @@ Verst is an Android road-trip planner for Russia. It builds a multi-day car trip
 | `docs/architecture.md` | Architecture: containers, planner design and algorithms, DB schema, API, Android, infra, testing |
 | `docs/adr/` | Architecture decision records |
 | `docs/backlog-sprint1.md` | Sprint 1 tasks with acceptance criteria |
+| `docs/backlog-investor-readiness.md` | 90-day investor-readiness backlog: demand proof, real data, revenue signal, legal, team |
 | `backend/planner/` | `verst_planner`: the pure-Python route and cost engine (stdlib only), fake adapters, fixture worlds, golden trips |
 | `backend/api/` | FastAPI service (Sprint 2, needs package registry access) |
 | `backend/migrations/` | PostgreSQL 16 + PostGIS schema (SQL-first, Alembic) |
 | `android/` | Kotlin + Jetpack Compose app (needs Gradle/Android SDK access) |
 | `infra/`, `admin/` | Docker Compose, nginx, map-service build scripts; Directus admin config |
+| `data/catalogue/` | The open-data place catalogue the app ships: licence (ODbL 1.0), sources, how it is built |
+
+## Data and licences
+
+The app ships a place catalogue built from OpenStreetMap, Wikidata, Wikipedia/Wikivoyage extracts and Wikimedia Commons file metadata (`backend/planner/verst_planner/resources/catalogue_*.json.gz`). It is a Derivative Database of OpenStreetMap: © OpenStreetMap contributors, available under the [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/1-0/) ([copyright](https://www.openstreetmap.org/copyright)). The free copy, the full licence text, the per-source licences and the reproducible build are described in [`data/catalogue/README.md`](data/catalogue/README.md). In the app the same notice is under «О данных» (`assets/licenses/data.txt`).
 
 ## Requirements
 

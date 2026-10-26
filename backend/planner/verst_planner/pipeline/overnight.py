@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from verst_planner.domain.enums import OvernightFallback, Tag, WarningCode
+from verst_planner.domain.facts import rank_rating
 from verst_planner.domain.model import (
     Candidate,
     NormalizedInput,
@@ -48,7 +49,7 @@ def h_fit(passing: list[Candidate], ctx: PlanContext) -> float:
 def hotel_score(h: Candidate, tc: TownCandidate) -> float:
     p = h.place
     return (
-        p.rating_internal
+        rank_rating(p)
         + (0.5 if Tag.PARKING_GUARDED in p.tags else 0.0)
         + (0.3 if haversine_km(p.point, tc.town.point) <= HOTEL_CENTRE_KM else 0.0)
         - (p.price_night_rub or 0) / 10000

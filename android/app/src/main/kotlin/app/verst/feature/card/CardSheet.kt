@@ -137,9 +137,18 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
                 "wikipedia" -> stringResource(R.string.card_desc_wikipedia)
                 "wikivoyage" -> stringResource(R.string.card_desc_wikivoyage)
                 "osm" -> stringResource(R.string.card_osm)
-                else -> d?.extractSource?.nameRu?.let { n -> stringResource(R.string.card_desc_source, listOfNotNull(n, d?.extractSource?.licence).joinToString(" · ")) }
+                // the engine's `nameRu` is the whole line («Описание: Викиданные»): no second «Описание:» here
+                else -> d?.extractSource?.nameRu?.let { n -> listOfNotNull(n, d?.extractSource?.licence).joinToString(" · ") }
             }
-            if (src != null) Txt(src, T.caption.md, C.text.muted, Modifier.padding(top = 4.dp).testTag("card.desc.source"))
+            // R-09 (CC BY-SA 4.0): the line names the licence and the abridgement and opens the article, like the photo credit
+            val page = d?.extractSource?.url
+            if (src != null) {
+                Txt(
+                    src, T.caption.md, C.text.muted,
+                    Modifier.padding(top = 4.dp).then(if (page != null) Modifier.clickable(role = Role.Button) { a.openPage(page) } else Modifier)
+                        .testTag("card.desc.source"),
+                )
+            }
         }
         if (ui.kind == "hotel") {
             val facts = facts(ui)
@@ -190,6 +199,8 @@ private fun FactChips(ui: CardUi) {
     val h = d.hours
     if (h != null) {
         when {
+            // ADR-0019 E-1: unknown hours are said, never left out as if the place were open
+            !h.known -> chips += Triple(stringResource(R.string.card_hours_unknown), C.text.secondary, C.dash.control)
             h.allDay -> chips += Triple(stringResource(R.string.hours_24), C.hours.open, C.hours.openFill)
             h.openNow == true && h.todayRu != null -> chips += Triple(stringResource(R.string.hours_today_open, h.todayRu ?: ""), C.hours.open, C.hours.openFill)
             h.openNow == false -> chips += Triple(stringResource(R.string.hours_closed), C.hours.closed, C.hours.closedFill)
@@ -197,7 +208,10 @@ private fun FactChips(ui: CardUi) {
         }
     }
     val t = d.ticket
-    if (t != null && (t.adultRub ?: 0) > 0) {
+    if (t != null && !t.known) {
+        // ADR-0019 E-2: an unknown price is not «вход свободный»
+        chips += Triple(stringResource(R.string.card_ticket_unknown), C.text.secondary, C.dash.control)
+    } else if (t != null && (t.adultRub ?: 0) > 0) {
         var line = stringResource(R.string.card_ticket, RuFormat.thousands(t.adultRub ?: 0), RuFormat.thousands(t.childRub ?: 0))
         if (t.estimate) line += stringResource(R.string.common_join_dot) + stringResource(R.string.card_price_estimate)
         chips += Triple(line, C.text.secondary, C.dash.control)
@@ -225,7 +239,7 @@ private fun FactChips(ui: CardUi) {
             }
         }
     }
-    if (!d.verified || h?.verified == false) {
+    if (!d.verified || (h?.verified == false && h?.known != false)) { // unknown hours have their own chip
         Row(Modifier.padding(top = 8.dp).testTag("card.opendata"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             app.verst.feature.common.OpenDataRing()
             Txt(stringResource(R.string.card_open_data), T.body.sm, C.text.muted)
@@ -336,9 +350,12 @@ private fun facts(ui: CardUi): List<String> {
         }
         return out
     }
-    if (d?.hours?.verified == false) out += stringResource(R.string.card_hours_unverified)
+    if (d?.hours?.known == false) out += stringResource(R.string.card_hours_unknown)
+    else if (d?.hours?.verified == false) out += stringResource(R.string.card_hours_unverified)
     val t = d?.ticket
-    if (t != null && (t.adultRub ?: 0) > 0) {
+    if (t != null && !t.known) {
+        out += stringResource(R.string.card_ticket_unknown)
+    } else if (t != null && (t.adultRub ?: 0) > 0) {
         var line = stringResource(R.string.card_ticket, RuFormat.thousands(t.adultRub ?: 0), RuFormat.thousands(t.childRub ?: 0))
         if (t.estimate) line += stringResource(R.string.common_join_dot) + stringResource(R.string.card_price_estimate)
         out += line

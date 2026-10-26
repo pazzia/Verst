@@ -53,11 +53,20 @@ def strings(node: Any, parent: str | None = None) -> Iterator[str]:
             yield from strings(v, parent)
 
 
+def starts_word(brand: str, text: str) -> bool:
+    """HYG-01: a deny-list entry hits where it starts a word, case-insensitive: «Суточно», «в Суточно»,
+    «Суточно.ру», «в Яндексе», «yandexmaps://» hit; «круглосуточно» and «посуточно» do not. «Starts a word»
+    means not preceded by a letter (`str.isalpha` = Unicode category L*, so Cyrillic too). The right side
+    stays open on purpose: whole-word matching would let inflections and compounds through. Same rule as
+    `BrandDenyList.hits` on the Kotlin side (`(?<!\\p{L})`, IGNORE_CASE + UNICODE_CASE)."""
+    pattern = "(?=" + re.escape(brand) + ")"  # look-ahead: every start, overlapping ones included
+    return any(m.start() == 0 or not text[m.start() - 1].isalpha() for m in re.finditer(pattern, text, re.I))
+
+
 def hits(texts: Iterator[str]) -> list[str]:
     out = []
     for t in texts:
-        low = t.lower()
-        out += [f"{b!r} in {t[:80]!r}" for b in DENY if b.lower() in low]
+        out += [f"{b!r} in {t[:80]!r}" for b in DENY if starts_word(b, t)]
     return out
 
 
@@ -66,6 +75,26 @@ class BrandDenyListTest(unittest.TestCase):
         self.assertIn("Лукойл", DENY)
         self.assertIn("Яндекс", DENY)
         self.assertTrue(hits(iter(["АЗС Лукойл, М-8"])))  # the matcher works
+
+    def test_matcher_brand_starts_a_word(self) -> None:
+        """HYG-01 regression: «Суточно» (a booking brand) is not inside «круглосуточно» / «посуточно»."""
+        for text in ("круглосуточно", "Открыто КРУГЛОСУТОЧНО", "Квартиры посуточно"):
+            with self.subTest(text):
+                self.assertEqual(hits(iter([text])), [])
+        for text in ("Суточно", "суточно", "СУТОЧНО", "в Суточно", "Суточно.ру", "«Суточно»", "24Суточно"):
+            with self.subTest(text):
+                self.assertEqual(hits(iter([text])), [f"'Суточно' in {text!r}"])
+        # Starts a word, right side open: inflections and compounds still hit.
+        for text, brand in (
+            ("в Яндексе", "Яндекс"),
+            ("yandexmaps://build_route", "Yandex"),
+            ("у Лукойла", "Лукойл"),
+            ("Gazpromneft", "Gazprom"),
+            ("https://www.booking.com/x", "Booking"),
+            ("через2ГИС", None),  # preceded by a letter: not a word start
+        ):
+            with self.subTest(text):
+                self.assertEqual(hits(iter([text])), [f"{brand!r} in {text!r}"] if brand else [])
 
     def test_fixture_worlds(self) -> None:
         for name in ("central_russia_v1", "edge_cases_v1"):

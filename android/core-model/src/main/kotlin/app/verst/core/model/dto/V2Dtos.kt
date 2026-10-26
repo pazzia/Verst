@@ -105,10 +105,18 @@ data class PoiHoursDto(
     val todayRu: String? = null,
     val openNow: Boolean? = null,
     val allDay: Boolean = false,
+    /** ADR-0019 E-1: false = nobody knows the hours («часы не известны — уточните»); absent in older engines. */
+    val known: Boolean = true,
 )
 
 @Serializable
-data class PoiTicketDto(val adultRub: Int? = null, val childRub: Int? = null, val estimate: Boolean = false)
+data class PoiTicketDto(
+    val adultRub: Int? = null,
+    val childRub: Int? = null,
+    val estimate: Boolean = false,
+    /** ADR-0019 E-2: false = the price is unknown («цена билета неизвестна»), never «вход свободный». */
+    val known: Boolean = true,
+)
 
 /** `poi_details`: sights, hotels and bars only (fuel / rest / start / finish → `NOT_FOUND`). */
 @Serializable
@@ -155,8 +163,16 @@ data class PoiDetailsDto(
     val textSource: String? get() = extractSource?.key ?: descSource
 }
 
+/** R-09 (ODbL package): [url] = the article the extract comes from (Wikipedia / Wikivoyage), [abridged] = the text is cut. */
 @Serializable
-data class ExtractSourceDto(val key: String? = null, val nameRu: String? = null, val licence: String? = null)
+data class ExtractSourceDto(
+    val key: String? = null,
+    val nameRu: String? = null,
+    val licence: String? = null,
+    val url: String? = null,
+    val licenceUrl: String? = null,
+    val abridged: Boolean = false,
+)
 
 // ------------------------------------------------------------------------------------------ hand-off (ADR-0014)
 

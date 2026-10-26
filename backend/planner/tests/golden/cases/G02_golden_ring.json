@@ -45,7 +45,7 @@
       "pl_suz_hotel_pushkarskaya"
     ],
     "costTotalRub": {
-      "value": 33800,
+      "value": 37200,
       "tolerancePct": 5
     },
     "costLinesRub": {
@@ -62,7 +62,7 @@
         "tolerancePct": 5
       },
       "food": {
-        "value": 11250,
+        "value": 14310,
         "tolerancePct": 0
       },
       "tickets": {
@@ -72,7 +72,7 @@
     },
     "costFormulaContains": {
       "lodging": "Ярославль + Суздаль, 2 × 6 000",
-      "food": "3 чел. × 5 приёмов"
+      "food": "3 чел. × 7 приёмов"
     },
     "remainingIsBudgetMinusTotal": true,
     "invariants": [
@@ -82,9 +82,9 @@
       "route: template ring Москва → Сергиев Посад → … → Владимир → Москва, 745 km of edges + detours ≈ 16 km → ≈ 761 km",
       "fuel by region (8 l/100): Ярославская 196 + 5 = 201 km × 61.90 = 997; Владимирская 183 + 7 = 190 km × 61.40 = 931; Московская 164 + 1 = 165 km × 61.80 = 814; Костромская 92 + 3 = 95 km × 62.20 = 473; Ивановская 91 + 1 = 92 km × 61.60 = 452; Москва 19 km × 62.50 = 95 → Σ 3 763 → 3 760 (±5 %)",
       "lodging (2 adults + child + dog: dogs_allowed and family_room): Ярославль Стрелка 4.30 > Волга 4.10 → 6 000; Суздаль only Пушкарская passes → 6 000; 1 room each → 12 000",
-      "food: 3 people (child age unknown → 8 → weight 1). Day 1 lunch in Ростов ≈ 13:00: Трапезная у кремля 4.5 + 2 (kids) + 1 (parking) + 0.5 = 8.0 → 700; dinner Ярославль median_low = 900. Day 2: stage 8 runs before the sights, so the lunch is picked on the bare day (Кострома is passed ≈ 10:15, outside the window): first café reached in the window on Р-600 is Кафе «Привал» (kids + parking) → 700; after the sights it is reached ≈ 14:08, still in the window. Dinner Суздаль median_low(700, 800, 800, 850, 900, 1000) = 800. Day 3 lunch in Покров ≈ 12:35: Кафе «Покровское» 4.2 + 2 + 1 + 0.5 = 7.7 > Подворье 7.5 → 650. Breakfasts included at both hotels; no last-day dinner (finish = origin) → 3 × 3 750 = 11 250",
+      "food: 3 people (child age unknown → 8 → weight 1). Day 1 lunch in Ростов ≈ 13:00: Трапезная у кремля 4.5 + 2 (kids) + 1 (parking) + 0.5 = 8.0 → 700; dinner Ярославль median_low = 900. Day 2: stage 8 runs before the sights, so the lunch is picked on the bare day (Кострома is passed ≈ 10:15, outside the window): first café reached in the window on Р-600 is Кафе «Привал» (kids + parking) → 700; after the sights it is reached ≈ 14:08, still in the window. Dinner Суздаль median_low(700, 800, 800, 850, 900, 1000) = 800. Day 3 lunch in Покров ≈ 12:35: Кафе «Покровское» 4.2 + 2 + 1 + 0.5 = 7.7 > Подворье 7.5 → 650. Neither hotel has a confirmed breakfast (ADR-0019 E-3): breakfast day 2 at 0.6 × 900 = 540, day 3 at 0.6 × 800 = 480; no last-day dinner (finish = origin) → 3 × (700 + 900 + 540 + 700 + 800 + 480 + 650) = 3 × 4 770 = 14 310",
       "tickets (calm, ≤ 2 sights/day incl. the fixed ones): lavra free; Плещеево free; Костромская слобода 2 × 300 + 150 = 750; Ипатьевский (fixed) 2 × 500 + 250 = 1 250; Музей деревянного зодчества 2 × 300 + 150 = 750; Музей шоколада 2 × 350 + 250 = 950 → 3 700",
-      "subtotal 3 760 + 0 + 12 000 + 11 250 + 3 700 = 30 710; reserve 3 070; total round_to(33 780, 100) = 33 800; remaining 40 000 − 33 800 = 6 200"
+      "subtotal 3 760 + 0 + 12 000 + 14 310 + 3 700 = 33 770; reserve 3 380 (3 377); total round_to(37 150, 100) = 37 200 (half up); remaining 40 000 − 37 200 = 2 800"
     ]
   }
 }

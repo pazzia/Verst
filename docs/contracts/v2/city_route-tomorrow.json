@@ -37,7 +37,7 @@
    "tz": "Europe/Moscow",
    "walkKm": 6.2,
    "walkMin": 83,
-   "durationMin": 232,
+   "durationMin": 233,
    "requestedDurationMin": 240,
    "crewNotesRu": [],
    "interestsWidened": false,
@@ -69,8 +69,8 @@
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
+      "todayRu": null,
+      "openNow": null,
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
@@ -96,8 +96,8 @@
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
+      "todayRu": null,
+      "openNow": null,
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
@@ -123,8 +123,8 @@
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
+      "todayRu": null,
+      "openNow": null,
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
@@ -150,8 +150,8 @@
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
-      "todayRu": "24 часа",
-      "openNow": true,
+      "todayRu": null,
+      "openNow": null,
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
@@ -169,8 +169,8 @@
      "nameRu": "Церковь Николая Чудотворца в Рубленом Городе",
      "lat": 57.62251,
      "lon": 39.8983,
-     "arriveAt": "2026-10-24T10:56",
-     "departAt": "2026-10-24T11:16",
+     "arriveAt": "2026-10-24T10:55",
+     "departAt": "2026-10-24T11:15",
      "dwellMin": 20,
      "walkKmFromPrev": 0.4,
      "walkMinFromPrev": 6,
@@ -196,8 +196,8 @@
      "nameRu": "Спасо-Преображенский монастырь",
      "lat": 57.618865,
      "lon": 39.894566,
-     "arriveAt": "2026-10-24T11:23",
-     "departAt": "2026-10-24T12:13",
+     "arriveAt": "2026-10-24T11:24",
+     "departAt": "2026-10-24T12:14",
      "dwellMin": 50,
      "walkKmFromPrev": 0.6,
      "walkMinFromPrev": 8,
@@ -209,7 +209,7 @@
       "source": "curated"
      },
      "noteRu": null,
-     "hasPhoto": true,
+     "hasPhoto": false,
      "tappable": true,
      "poiKind": "monastery",
      "poiKindRu": "Монастырь",

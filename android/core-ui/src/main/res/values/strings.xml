@@ -255,6 +255,7 @@
     <string name="road_name_night">Ночёвка · %1$s</string>
     <string name="road_name_rest">Место отдыха</string>
     <string name="road_free">вход свободный</string>
+    <string name="road_ticket_unknown">цена билета неизвестна</string>
     <string name="road_swap">заменить</string>
     <string name="road_pick_hotel">Выбрать отель →</string>
     <string name="road_booked">Забронировано</string>
@@ -523,6 +524,8 @@
     <string name="card_hours_unverified">часы уточняйте</string>
     <string name="card_ticket">билет ≈ %1$s ₽, детский ≈ %2$s ₽</string>
     <string name="card_ticket_free">вход свободный</string>
+    <string name="card_ticket_unknown">цена билета неизвестна</string>
+    <string name="card_hours_unknown">часы не известны — уточните</string>
     <string name="card_per_night">за ночь</string>
     <string name="card_price_estimate">цена примерная</string>
     <string name="card_heritage">объект культурного наследия</string>
@@ -650,7 +653,12 @@
     <string name="route_approx_open_data">Расстояния приблизительные · места из открытых данных</string>
     <string name="route_approx_more">О данных</string>
     <string name="about_data_title">О данных</string>
-    <string name="about_data_body">Города и места — Wikidata (CC0). Бары и адреса — © участники OpenStreetMap (ODbL). Фото — Wikimedia Commons, у каждого своя лицензия и автор. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные.</string>
+    <string name="about_data_body">Города и достопримечательности — Wikidata (CC0). Бары, детские площадки, парковки, часы работы, часть описаний и адреса — © участники OpenStreetMap, данные доступны по лицензии ODbL 1.0. Каталог мест в приложении — производная база данных OpenStreetMap; он тоже распространяется по ODbL 1.0, копию можно скачать бесплатно. Описания из Википедии и Викигида — CC BY-SA 4.0, тексты сокращены, ссылка на статью — в карточке. Фото — Wikimedia Commons: автор и лицензия — в подписи под фото. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные.</string>
+    <string name="about_data_copy">Скачать копию каталога (ODbL)</string>
+    <string name="about_data_odbl">Лицензия ODbL 1.0</string>
+    <string name="about_data_osm">Авторские права OpenStreetMap</string>
+    <string name="about_data_notice">Полный текст уведомления о лицензиях</string>
+    <string name="about_data_notice_hide">Скрыть уведомление</string>
     <string name="cd_loc_searching">Ищем, где вы</string>
     <string name="cd_addr_row">%1$s, %2$s, примерно %3$s километров</string>
     <string name="handoff_navigator">Открыть в Яндекс Навигаторе</string>
@@ -776,8 +784,8 @@
     <string name="handoff_open_maps">Открываем Яндекс Карты</string>
     <string name="handoff_open_navi">Открываем Яндекс Навигатор</string>
     <string name="card_why">Почему здесь: %1$s</string>
-    <string name="card_desc_wikipedia">Описание: Википедия · CC BY-SA</string>
-    <string name="card_desc_wikivoyage">Описание: Викигид · CC BY-SA</string>
+    <string name="card_desc_wikipedia">Из статьи Википедии, текст сокращён · CC BY-SA 4.0</string>
+    <string name="card_desc_wikivoyage">Из Викигида, текст сокращён · CC BY-SA 4.0</string>
     <string name="card_photo_nearby_label">ФОТО РЯДОМ</string>
     <string name="card_photo_nearby_credit">Фото рядом с местом · Wikimedia Commons · %1$s · %2$s</string>
     <string name="card_illustration_none">фото пока нет</string>
@@ -824,7 +832,7 @@
     <string name="walk_info_child">С ребёнком: добавили детскую площадку и кафе с детским меню.</string>
     <string name="walk_info_child_museums">С ребёнком: взяли интерактивные музеи и паузы каждые полтора часа.</string>
     <string name="walk_info_dog">С собакой: парки, набережные, виды и площади — без закрытых помещений.</string>
-    <string name="walk_stop_dog_no">С собакой внутрь нельзя.</string>
+    <string name="walk_stop_dog_no">С собакой внутрь обычно нельзя.</string>
     <string name="walk_untimed_header">Порядок по пути · заходите, куда открыто</string>
     <string name="walk_untimed_facts">Без расписания · %1$s по пути · ≈ %2$s км</string>
     <string name="walk_filters_cd">Условия прогулки</string>
@@ -853,7 +861,6 @@
     <string name="common_hours_approx">≈ %1$d ч</string>
     <string name="common_hours_short">%1$d ч</string>
     <string name="card_hours_daily">ежедневно</string>
-    <string name="card_desc_source">Описание: %1$s</string>
     <!-- S4 dev: the M6 amenity tags of rest / fuel rows the deck has no word for -->
     <string name="road_amenity_walk">где погулять</string>
     <string name="road_amenity_view">вид</string>

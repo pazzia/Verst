@@ -67,9 +67,15 @@ def record_picks(case: dict[str, Any]) -> list[Pick]:
 
     real_pick = fuel_stage._pick
 
-    def pick(cands: list[Any], days: list[Any], ctx: Any, latest: bool = False) -> Any:
-        chosen = real_pick(cands, days, ctx, latest)
-        scores = [fuel_stage.fuel_score(c, days, ctx) + (0.01 * c.km_at if latest else 0.0) for c in cands]
+    def pick(cands: list[Any], days: list[Any], ctx: Any, inp: Any, latest: bool = False) -> Any:
+        chosen = real_pick(cands, days, ctx, inp, latest)
+
+        # ADR-0019 E-4: the score decides only among stations of the chosen one's fuel state
+        def unknown(c: Any) -> bool:
+            return fuel_stage.fuel_state(c.place, inp.vehicle.fuel_type) is not fuel_stage.Known.YES
+
+        same = [c for c in cands if unknown(c) == unknown(chosen)]
+        scores = [fuel_stage.fuel_score(c, days, ctx) + (0.01 * c.km_at if latest else 0.0) for c in same]
         add("fuel", chosen.place.id, scores)
         return chosen
 

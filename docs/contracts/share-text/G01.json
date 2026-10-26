@@ -121,7 +121,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -215,7 +219,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -310,7 +318,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -1164,7 +1176,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -1499,7 +1515,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -1717,7 +1737,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -2077,7 +2101,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -2141,7 +2169,11 @@
             ],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "unknownFacts": [
+              "hours"
+            ],
+            "unknownRu": "Часы не известны — уточните"
           },
           {
             "id": "d2s04",
@@ -2438,7 +2470,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -2502,7 +2538,11 @@
             ],
             "alternativesNote": null,
             "hotelOptions": [],
-            "selectedHotelId": null
+            "selectedHotelId": null,
+            "unknownFacts": [
+              "hours"
+            ],
+            "unknownRu": "Часы не известны — уточните"
           },
           {
             "id": "d2s05",
@@ -3403,7 +3443,11 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
                 },
                 "dayPatch": [
                   {
@@ -3512,7 +3556,12 @@
                   "alternatives": [],
                   "alternativesNote": null,
                   "hotelOptions": [],
-                  "selectedHotelId": null
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours",
+                    "fuel"
+                  ],
+                  "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
                 },
                 "dayPatch": [
                   {
@@ -3663,8 +3712,8 @@
         {
           "key": "food",
           "title": "Питание",
-          "rub": 4900,
-          "formula": "2 чел. × 3 приёма × ≈ 820 (в среднем)",
+          "rub": 5980,
+          "formula": "2 чел. × 4 приёма × ≈ 750 (в среднем)",
           "asOf": "2026-09",
           "enabled": true,
           "breakdown": [
@@ -3675,8 +3724,8 @@
             },
             {
               "label": "День 2",
-              "formula": "обед 850",
-              "rub": 1700
+              "formula": "завтрак 540 + обед 850",
+              "rub": 2780
             }
           ]
         },
@@ -3703,7 +3752,7 @@
         {
           "key": "reserve",
           "title": "Резерв 10%",
-          "rub": 1500,
+          "rub": 1610,
           "formula": "на пробки и «давай заедем»",
           "asOf": "2026-09",
           "enabled": true,
@@ -3711,9 +3760,9 @@
         }
       ],
       "reserveOn": true,
-      "subtotalRub": 14990,
-      "totalRub": 16500,
-      "perPersonRub": 8300,
+      "subtotalRub": 16070,
+      "totalRub": 17700,
+      "perPersonRub": 8900,
       "budgetRub": null,
       "remainingRub": null,
       "overBudget": false,
@@ -3759,21 +3808,21 @@
               {
                 "placeId": "pl_yar_hotel_strelka",
                 "priceNightRub": 6000,
-                "breakfastIncluded": true
+                "breakfastIncluded": false
               },
               {
                 "placeId": "pl_yar_hotel_volga",
                 "priceNightRub": 7000,
-                "breakfastIncluded": true
+                "breakfastIncluded": false
               },
               {
                 "placeId": "pl_yar_hotel_kotorosl",
                 "priceNightRub": 4800,
-                "breakfastIncluded": true
+                "breakfastIncluded": false
               }
             ],
             "defaultPrice": false,
-            "breakfastIncluded": true,
+            "breakfastIncluded": false,
             "breakfastCheckRub": 540
           }
         ],
@@ -3920,5 +3969,5 @@
     },
     "engineVersion": "0.1.0"
   },
-  "text": "Москва → Ярославль → Москва · 542 км · 2 дня\nДень 1 · 268 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:32 Никитский монастырь\n13:09 Трапезная у кремля\n14:09 Ростовский кремль\n16:31 Ярославль\nДень 2 · 274 км\n09:00 Ярославль\n09:52 Спасо-Яковлевский монастырь\n11:45 Земляной вал Переславля\n12:19 Плещеево озеро\n12:55 Ресторан «Плещеево»\n14:01 Горицкий монастырь\n16:24 Площадка отдыха, М-8, 40 км\n17:25 Москва\nИтого ≈ 16 500 ₽ на 2 чел."
+  "text": "Москва → Ярославль → Москва · 542 км · 2 дня\nДень 1 · 268 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:32 Никитский монастырь\n13:09 Трапезная у кремля\n14:09 Ростовский кремль\n16:31 Ярославль\nДень 2 · 274 км\n09:00 Ярославль\n09:52 Спасо-Яковлевский монастырь\n11:45 Земляной вал Переславля\n12:19 Плещеево озеро\n12:55 Ресторан «Плещеево»\n14:01 Горицкий монастырь\n16:24 Площадка отдыха, М-8, 40 км\n17:25 Москва\nИтого ≈ 17 700 ₽ на 2 чел."
 }

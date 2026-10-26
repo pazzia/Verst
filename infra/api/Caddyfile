@@ -1,0 +1,33 @@
+# Public entry (ADR-0020 §7): TLS from Let's Encrypt (automatic HTTPS), reverse proxy to verst-api.
+# No access log on purpose: request URIs carry coordinates in query strings (R-07); verst-api logs a
+# privacy-safe JSON line per request instead.
+{
+	email {$VERST_ACME_EMAIL}
+}
+
+{$VERST_DOMAIN} {
+	# Private endpoints stay on the internal network (Prometheus scrapes api:8000 directly).
+	@private path /metrics /readyz /docs /docs/* /openapi.json
+	respond @private 404
+
+	request_body {
+		max_size 2MB
+	}
+
+	# Never compress the plan progress stream: SSE must reach the phone event by event.
+	@compressible not header Accept *text/event-stream*
+	encode @compressible zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+
+	reverse_proxy api:8000 {
+		flush_interval -1
+		transport http {
+			read_timeout 40s
+		}
+	}
+}

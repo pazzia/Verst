@@ -310,7 +310,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "fuel"
+                ],
+                "unknownRu": "Есть ли АИ-95 — не проверено"
               },
               "dayPatch": [
                 {
@@ -628,7 +632,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "fuel"
+                ],
+                "unknownRu": "Есть ли АИ-95 — не проверено"
               },
               "dayPatch": [
                 {
@@ -754,7 +762,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "fuel"
+                ],
+                "unknownRu": "Есть ли АИ-95 — не проверено"
               },
               "dayPatch": [
                 {
@@ -849,7 +861,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "fuel"
+                ],
+                "unknownRu": "Есть ли АИ-95 — не проверено"
               },
               "dayPatch": [
                 {
@@ -899,7 +915,12 @@
           ],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours",
+            "fuel"
+          ],
+          "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
         },
         {
           "id": "d1s05",

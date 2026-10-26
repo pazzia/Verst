@@ -351,7 +351,12 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours",
+                  "fuel"
+                ],
+                "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
               },
               "dayPatch": [
                 {
@@ -527,7 +532,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -759,7 +768,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -908,7 +921,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -1140,7 +1157,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {

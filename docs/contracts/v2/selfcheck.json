@@ -8,7 +8,7 @@
   "result": {
    "engineVersion": "0.1.0",
    "apiVersion": 3,
-   "python": "3.13.16",
+   "python": "3.12.x",
    "tz": {
     "Asia/Anadyr": true,
     "Asia/Barnaul": true,
@@ -41,10 +41,10 @@
     "russia_v1"
    ],
    "catalogue": {
-    "version": "wd-20261025-r7.4",
+    "version": "wd-20261025-r7.5",
     "builtAt": "2026-10-25",
     "towns": 1114,
-    "pois": 10922,
+    "pois": 10921,
     "bars": 3284
    }
   },

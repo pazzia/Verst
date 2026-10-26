@@ -119,7 +119,9 @@ class PlanContext:
 
     # ------------------------------------------------------------------ opening hours
     def hours(self, place: Place) -> OpeningHours | None:
-        """Parsed opening hours (None = always open). Unparseable places were dropped in stage 3."""
+        """Parsed opening hours. None = hours unknown (ADR-0019 E-1): the stop stays allowed and is scheduled
+        as if open, and the rendered stop says the hours are unknown (`unknown_facts`). Unparseable places
+        were dropped in stage 3."""
         if place.opening_hours is None:
             return None
         if place.id not in self._hours:

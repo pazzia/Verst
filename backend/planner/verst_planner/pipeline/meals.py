@@ -6,6 +6,7 @@ from collections.abc import Callable
 from datetime import datetime
 
 from verst_planner.domain.enums import Meal, StopKind, Tag
+from verst_planner.domain.facts import rank_rating
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop, Town, TownCandidate
 from verst_planner.explain import ru
 from verst_planner.pipeline import Corridor, PlanContext
@@ -32,7 +33,7 @@ def lunch_score(c: Candidate, inp: NormalizedInput, eta_local: datetime, ctx: Pl
         ECONOMY_W * (c.place.avg_check_rub or ECONOMY_UNKNOWN_CHECK) / 1000 if ctx.knobs.food_economy else 0.0
     )
     return (
-        c.place.rating_internal
+        rank_rating(c.place)
         + 2.0 * (Tag.KIDS_MENU in t and inp.crew.children > 0)
         + 1.0 * bool(PARKING & t)
         + 0.5 * (Tag.VIEW in t)

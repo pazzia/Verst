@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from verst_planner.domain.enums import StopKind, Tag, WarningCode
+from verst_planner.domain.facts import Known, fuel_state
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop, PlanWarning, Vehicle
 from verst_planner.pipeline import Corridor, PlanContext, round_half_up
 from verst_planner.pipeline.timeline import day_for_km, insert_stop
@@ -49,10 +50,16 @@ def fuel_score(c: Candidate, days: list[DayPlan], ctx: PlanContext) -> float:
     )
 
 
-def _pick(cands: list[Candidate], days: list[DayPlan], ctx: PlanContext, latest: bool = False) -> Candidate:
-    def key(c: Candidate) -> tuple[float, float, str]:
+def _pick(
+    cands: list[Candidate], days: list[DayPlan], ctx: PlanContext, inp: NormalizedInput, latest: bool = False
+) -> Candidate:
+    """The best station of the window; ADR-0019 E-4: one confirmed to sell the car's fuel ranks above any
+    whose fuels are unknown (stations known not to sell it never reach the corridor)."""
+
+    def key(c: Candidate) -> tuple[bool, float, float, str]:
         score = fuel_score(c, days, ctx) + (0.01 * c.km_at if latest else 0.0)
-        return (-round(score, 9), c.km_at, c.place.id)
+        unknown = fuel_state(c.place, inp.vehicle.fuel_type) is not Known.YES
+        return (unknown, -round(score, 9), c.km_at, c.place.id)
 
     return min(cands, key=key)
 
@@ -108,7 +115,7 @@ def plan_fuel(
             remaining = full
             last_fill = pos
             continue
-        best = _pick(cands, days, ctx, latest)
+        best = _pick(cands, days, ctx, inp, latest)
         if reason == "fuel.range" and _coincide(best, days, ctx):
             reason = "fuel.coincide"
         params: dict[str, str | int | float] = {}

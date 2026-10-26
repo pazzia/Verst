@@ -1,0 +1,88 @@
+# GraphHopper 11.0 server config for Verst (ADR-0017). Based on the upstream config-example.yml of the 11.0 tag:
+# https://raw.githubusercontent.com/graphhopper/graphhopper/11.0/config-example.yml
+#
+# Paths are relative to the working directory of the java process (/srv/graphhopper in the Docker image,
+# infra/routing in CI). Every key can be overridden on the command line with -Ddw.graphhopper.<key>=<value>,
+# e.g. -Ddw.graphhopper.datareader.file=/data/region.osm.pbf (the documented Dropwizard override).
+graphhopper:
+  # The OSM extract. Set per run: build_graph.sh passes -Ddw.graphhopper.datareader.file=...
+  datareader.file: ""
+  graph.location: graph-cache
+
+  ##### Profiles (ADR-0017 §3) #####
+  # Two speed-mode (CH) profiles instead of one profile + per-request custom model:
+  # - `car`: the bundled car.json (car_access, car_average_speed; avoids private roads since 11.0).
+  # - `car_avoid_tolls`: the same plus custom_models/avoid_tolls.json (priority x0.01 on toll == ALL), i.e. a
+  #   toll edge costs 100x its time, the same soft rule as FakeRouting.TOLL_AVOID_FACTOR. Toll roads stay usable
+  #   when there is no other way.
+  # A per-request `custom_model` would need `ch.disable=true` and a landmark (LM) preparation; CH answers a
+  # 1 500 km query in milliseconds and keeps RAM per request flat (docs/core/deploy.md, "none-CH requests").
+  # No turn costs this week: CH with turn costs is ~5x slower to prepare (deploy.md: 25 h vs 5 h for the planet).
+  # Navigation itself is handed off to Yandex Navigator / 2GIS, so a missing turn restriction only shifts km
+  # by metres. Revisit with ENG-04 (see infra/routing/README.md "Knobs").
+  profiles:
+    - name: car
+      custom_model_files: [car.json]
+    - name: car_avoid_tolls
+      custom_model_files: [car.json, avoid_tolls.json]
+  custom_models.directory: custom_models
+
+  profiles_ch:
+    - profile: car
+    - profile: car_avoid_tolls
+  profiles_lm: []
+
+  ##### Encoded values #####
+  # car.json needs car_access, car_average_speed, road_access (comment at the top of the bundled car.json).
+  # Path details used by verst_planner.adapters.graphhopper: road_class, toll (encoded values) and street_ref,
+  # distance, time, leg_distance (built in, PathDetailsBuilderFactory in graphhopper-web-11.0.jar).
+  # road_class_link, road_environment, max_speed: kept for ENG-02 (toll segments on links) and diagnostics.
+  graph.encoded_values: car_access, car_average_speed, road_access, road_class, road_class_link, road_environment, toll, max_speed
+
+  ##### Subnetworks #####
+  # Islands smaller than 200 edges are removed, so a point snaps to the main network (upstream default).
+  prepare.min_network_size: 200
+  prepare.subnetworks.threads: 1
+  # CH preparation threads: 2 profiles in parallel on the 4-vCPU CI runner and the 8-vCPU VM.
+  prepare.ch.threads: 2
+
+  ##### Routing #####
+  routing.snap_preventions_default: tunnel, bridge, ferry
+  # Flexible (non-CH) requests are not used by Verst; keep the upstream cap so one cannot eat the heap.
+  routing.non_ch.max_waypoint_distance: 1000000
+  # Abort a runaway query after 5 s, below the adapter's 6 s timeout (SPEC §10).
+  routing.timeout_ms: 5000
+
+  ##### Storage #####
+  # Car-only graph: drop ways a car never uses. `track` stays: rural Russia has sights at the end of dirt roads.
+  import.osm.ignored_highways: footway,construction,cycleway,path,steps,pedestrian,bridleway,proposed
+  graph.dataaccess.default_type: RAM_STORE
+  # Snap search radius in location-index cells (300 m each by default, index.high_resolution). SPEC §7.2 step 1
+  # snaps up to 2 km; with the upstream default of 4 GraphHopper gives up at ~1.2-1.4 km (measured on the mini
+  # map: 1.1 km snapped, 1.45 km "Cannot find point"). With 8 it snapped at 2.55 km and 3.1 km, so the 2 km
+  # rule is enforced by the adapter (Unreachable with snap_km), not by GraphHopper.
+  index.max_region_search: 8
+
+server:
+  application_connectors:
+    - type: http
+      port: 8989
+      # Docker publishes the port on the private network only (docker-compose.yml); CI overrides to localhost.
+      bind_host: 0.0.0.0
+      max_request_header_size: 50k
+  # No request log: GET query strings carry coordinates (risk register R-07). The adapter uses POST anyway.
+  request_log:
+    appenders: []
+  admin_connectors:
+    - type: http
+      port: 8990
+      bind_host: 0.0.0.0
+
+logging:
+  appenders:
+    - type: console
+      time_zone: UTC
+      log_format: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  loggers:
+    "com.graphhopper.osm_warnings":
+      level: WARN

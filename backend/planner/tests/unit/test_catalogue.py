@@ -102,6 +102,17 @@ class FormatTest(unittest.TestCase):
         self.assertGreaterEqual(with_forms / len(c.towns), 0.95)
         self.assertGreaterEqual(sum(1 for p in c.pois if p.image) / len(c.pois), 0.3)
 
+    def test_packaged_licence_and_photos(self) -> None:
+        """ODbL package (D-IR-07): the shipped catalogue carries the builder's licence block for its own
+        build id, right after `builtAt`, and no GFDL-only photo credit (R-10)."""
+        b = builder()
+        meta = cat.load_gz(resources.read_bytes(cat.FILES["meta"]), "meta")
+        self.assertEqual(meta["licence"], b.licence_block(meta["version"]))
+        self.assertEqual(list(meta)[:4], ["v", "version", "builtAt", "licence"])
+        self.assertEqual(meta["licence"]["database"]["licence"], "ODbL-1.0")
+        self.assertEqual(meta["licence"]["build"], meta["version"])
+        self.assertEqual([c for c in meta["credits"] if b.gfdl_only(c.get("licence"))], [])
+
     def test_size_budget(self) -> None:
         total = sum(len(resources.read_bytes(name)) for name in cat.FILES.values())
         self.assertLessEqual(total, HARD_LIMIT_BYTES)
@@ -144,6 +155,45 @@ class BuilderRulesTest(unittest.TestCase):
         ):
             self.assertFalse(self.b.area_ok(name, meta), name)
         self.assertTrue(self.b.area_ok("Belogorsk.jpg", {**jpeg, "cats": ["Belogorsk"]}))  # not «logo»
+
+    def test_gfdl_only(self) -> None:
+        """R-10: GFDL-only Commons files are dropped; a file that also offers another licence stays."""
+        gfdl = ("GFDL", "gfdl", "GFDL 1.2", "GFDL-1.3", "GNU Free Documentation License", "GFDL, GFDL 1.2")
+        for licence in gfdl:
+            self.assertTrue(self.b.gfdl_only(licence), licence)
+        for licence in (
+            None,
+            "",
+            "CC BY-SA 4.0",
+            "Public domain",
+            "GFDL, CC BY-SA 3.0",
+            "CC BY-SA 3.0 or GFDL",
+            "GFDL/CC BY 2.5",
+            "Attribution",
+        ):
+            self.assertFalse(self.b.gfdl_only(licence), licence)
+
+    def test_licence_block(self) -> None:
+        """ODbL 4.2/4.4/4.6: ODbL 1.0 for the whole database, every source with its licence and URIs,
+        the free copy."""
+        block = self.b.licence_block("wd-x")
+        self.assertEqual(block["database"]["uri"], "https://opendatacommons.org/licenses/odbl/1-0/")
+        self.assertEqual(block["build"], "wd-x")
+        self.assertEqual(block["copy"], "https://github.com/pazzia/Verst/tree/main/data/catalogue")
+        by_source = {a["source"]: a for a in block["attribution"]}
+        self.assertEqual(
+            sorted(by_source),
+            ["OpenStreetMap", "Wikidata", "Wikimedia Commons", "Wikipedia (ru)", "Wikivoyage (ru)"],
+        )
+        osm = by_source["OpenStreetMap"]
+        self.assertEqual((osm["text"], osm["licence"]), ("© OpenStreetMap contributors", "ODbL-1.0"))
+        self.assertEqual(osm["uri"], "https://www.openstreetmap.org/copyright")
+        self.assertEqual(by_source["Wikidata"]["licence"], "CC0-1.0")
+        for wiki in ("Wikipedia (ru)", "Wikivoyage (ru)"):
+            self.assertEqual(by_source[wiki]["licence"], "CC-BY-SA-4.0")
+            self.assertTrue(by_source[wiki]["abridged"])
+        for uri in (block["database"]["uri"], osm["uri"], block["copy"]):
+            self.assertIn(uri, block["notice"])
 
     def test_author_and_poi_name(self) -> None:
         self.assertEqual(self.b.clean_author("Иван (tibr1984@yandex.ru)"), "Иван")
@@ -212,6 +262,41 @@ class BuilderTest(unittest.TestCase):
         self.assertEqual(cat.POI_KINDS[pois["Петропавловская крепость"]["kind"]], "kremlin")
         meta = self.docs["meta"]
         self.assertEqual(meta["credits"][0]["author"], "Пример Автор")  # HTML stripped
+
+    def test_meta_licence(self) -> None:
+        meta = self.docs["meta"]
+        self.assertEqual(meta["licence"], self.b.licence_block("sample"))
+        self.assertEqual(list(meta)[:4], ["v", "version", "builtAt", "licence"])
+
+    def test_gfdl_only_photo_is_dropped(self) -> None:
+        """R-10 regression: the same recorded samples with the Hermitage photo re-licensed GFDL-only → no
+        image and no credit for it; a GFDL + CC BY-SA file keeps its image."""
+        import shutil
+
+        name = "Эрмитаж"
+        base = {p["name"]: p for p in self.table("pois", cat.POI_COLS)}
+        self.assertEqual(base[name]["image"], "Hermitage sample.jpg")
+        for licence, kept in (("GFDL", False), ("GFDL 1.2", False), ("GFDL, CC BY-SA 3.0", True)):
+            with self.subTest(licence=licence), tempfile.TemporaryDirectory() as tmp:
+                raw = Path(tmp)
+                for f in SAMPLES.iterdir():
+                    shutil.copy(f, raw / f.name)
+                credits = json.loads((raw / "credits.json").read_text("utf-8"))
+                credits["Hermitage sample.jpg"]["licence"] = licence
+                (raw / "credits.json").write_text(json.dumps(credits, ensure_ascii=False), "utf-8")
+                docs = self.b.build(raw, "sample", "2026-10-25")
+                poi = {p["name"]: p for p in cat.decode_table(docs["pois"], cat.POI_COLS, "pois")}[name]
+                licences = [c["licence"] for c in docs["meta"]["credits"]]
+                if kept:
+                    self.assertEqual(poi["image"], "Hermitage sample.jpg")
+                    self.assertIn(licence, licences)
+                else:
+                    self.assertIsNone(poi["image"])
+                    self.assertIsNone(poi["credit"])
+                    self.assertNotIn(licence, licences)
+                    towns = cat.decode_table(docs["towns"], cat.TOWN_COLS, "towns")
+                    used = [r["image"] for r in towns] + [v["image"] for v in docs["meta"]["links"].values()]
+                    self.assertNotIn("Hermitage sample.jpg", used)
 
     def test_bars_filters(self) -> None:
         bars = {b["name"]: b for b in self.table("bars", cat.BAR_COLS)}

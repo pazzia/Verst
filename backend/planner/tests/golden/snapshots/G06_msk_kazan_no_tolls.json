@@ -337,7 +337,12 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours",
+                  "fuel"
+                ],
+                "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
               },
               "dayPatch": [
                 {
@@ -619,7 +624,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -837,7 +846,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -1197,7 +1210,12 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours",
+                  "fuel"
+                ],
+                "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
               },
               "dayPatch": [
                 {
@@ -1589,7 +1607,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -1653,7 +1675,11 @@
           ],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours"
+          ],
+          "unknownRu": "Часы не известны — уточните"
         },
         {
           "id": "d1s08",
@@ -1795,7 +1821,11 @@
           "alternatives": [],
           "alternativesNote": "Других вариантов в это время поблизости нет.",
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours"
+          ],
+          "unknownRu": "Часы не известны — уточните"
         },
         {
           "id": "d2s03",
@@ -1996,7 +2026,12 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours",
+                  "fuel"
+                ],
+                "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
               },
               "dayPatch": [
                 {
@@ -2151,7 +2186,12 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours",
+                  "fuel"
+                ],
+                "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
               },
               "dayPatch": [
                 {
@@ -2273,7 +2313,12 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours",
+                  "fuel"
+                ],
+                "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
               },
               "dayPatch": [
                 {
@@ -2351,7 +2396,11 @@
           ],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "fuel"
+          ],
+          "unknownRu": "Есть ли АИ-95 — не проверено"
         },
         {
           "id": "d2s05",
@@ -2675,7 +2724,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "fuel"
+                ],
+                "unknownRu": "Есть ли АИ-95 — не проверено"
               },
               "dayPatch": [
                 {
@@ -3233,7 +3286,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -3357,7 +3414,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -3435,7 +3496,11 @@
           ],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours"
+          ],
+          "unknownRu": "Часы не известны — уточните"
         },
         {
           "id": "d2s08",
@@ -3513,7 +3578,11 @@
                 "alternatives": [],
                 "alternativesNote": null,
                 "hotelOptions": [],
-                "selectedHotelId": null
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
               },
               "dayPatch": [
                 {
@@ -3591,7 +3660,11 @@
           ],
           "alternativesNote": "Нашли только один вариант в это время.",
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours"
+          ],
+          "unknownRu": "Часы не известны — уточните"
         },
         {
           "id": "d2s09",
@@ -4095,8 +4168,8 @@
       {
         "key": "food",
         "title": "Питание",
-        "rub": 4300,
-        "formula": "2 чел. × 3 приёма × ≈ 720 (в среднем)",
+        "rub": 5260,
+        "formula": "2 чел. × 4 приёма × ≈ 660 (в среднем)",
         "asOf": "2026-09",
         "enabled": true,
         "breakdown": [
@@ -4107,8 +4180,8 @@
           },
           {
             "label": "День 2",
-            "formula": "обед 650",
-            "rub": 1300
+            "formula": "завтрак 480 + обед 650",
+            "rub": 2260
           }
         ]
       },
@@ -4135,7 +4208,7 @@
       {
         "key": "reserve",
         "title": "Резерв 10%",
-        "rub": 1660,
+        "rub": 1750,
         "formula": "на пробки и «давай заедем»",
         "asOf": "2026-09",
         "enabled": true,
@@ -4143,9 +4216,9 @@
       }
     ],
     "reserveOn": true,
-    "subtotalRub": 16550,
-    "totalRub": 18200,
-    "perPersonRub": 9100,
+    "subtotalRub": 17510,
+    "totalRub": 19300,
+    "perPersonRub": 9700,
     "budgetRub": null,
     "remainingRub": null,
     "overBudget": false,
@@ -4209,21 +4282,21 @@
             {
               "placeId": "pl_nnv_hotel_volga",
               "priceNightRub": 7200,
-              "breakfastIncluded": true
+              "breakfastIncluded": false
             },
             {
               "placeId": "pl_nnv_hotel_kremlin",
               "priceNightRub": 6500,
-              "breakfastIncluded": true
+              "breakfastIncluded": false
             },
             {
               "placeId": "pl_nnv_hotel_pokrovka",
               "priceNightRub": 5000,
-              "breakfastIncluded": true
+              "breakfastIncluded": false
             }
           ],
           "defaultPrice": false,
-          "breakfastIncluded": true,
+          "breakfastIncluded": false,
           "breakfastCheckRub": 480
         }
       ],

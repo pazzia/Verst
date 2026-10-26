@@ -92,6 +92,10 @@ data class StopDto(
     /** M9: curated | wikidata | osm, and the ODbL line for OSM-only places. */
     val placeSource: String? = null,
     val placeAttributionRu: String? = null,
+    /** ADR-0019: facts of this stop nobody confirmed (`hours`, `ticket`, `fuel`, `dogs`); absent = none. */
+    val unknownFacts: List<String> = emptyList(),
+    /** ADR-0019: the engine's line for them («Часы не известны — уточните»); null for open data (its ring says it). */
+    val unknownRu: String? = null,
 ) {
     /**
      * A «Разминка» stop of the fun mood (5.5 §10.4): `funFor` (ADR-0015 §5) or, as the engine sends it today, a
@@ -188,6 +192,8 @@ data class CostDto(
     val subtotalRub: Int = 0,
     val hints: List<String> = emptyList(),
     val pricesAsOf: String? = null,
+    /** ADR-0019 E-2: what the total leaves out («Без билетов в 1 место — цена неизвестна»); null = nothing. */
+    val totalNoteRu: String? = null,
 )
 
 @Serializable

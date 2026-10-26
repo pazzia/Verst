@@ -95,7 +95,10 @@ class WalkS4Test(unittest.TestCase):
         self.assertTrue(w["stops"])
         for s in w["stops"]:
             self.assertIsNone(s["arriveAt"])
-            self.assertTrue(s["hours"]["todayRu"])
+            # ADR-0019 E-1: hours are today's text, or explicitly unknown (null text and null «open now»)
+            h = s["hours"]
+            self.assertTrue(h["todayRu"] or (h["todayRu"] is None and h["openNow"] is None), h)
+        self.assertTrue(any(s["hours"]["todayRu"] for s in w["stops"]))
         self.assertLessEqual(len(w["stops"]), 12)
 
     def test_durations_constant(self) -> None:

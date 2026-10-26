@@ -200,3 +200,26 @@ There is a new adapter package, `verst_planner/adapters/catalogue/`. It is stdli
 - **Corridor thinning:** with real POIs the Золотое кольцо trip's `engineState` grew from 30 KB to 240 KB. The
   corridor keeps at most 10 sights and 8 food places per 10 km of route (the fixture maximum is 8 and 6, so
   G01–G13 stay byte-identical): 68 KB.
+
+## Amendment 2026-10-25 — the ODbL package (CEO D-IR-07)
+
+Status: amended 2026-10-25 (Developer; for the Architect's review) · Refs: docs/legal/risk-register.md R-01, R-09,
+R-10; docs/legal/lawyer-brief-odbl.md appendix B; docs/dev-notes.md «Investor-readiness / ODbL package».
+
+- **Licence of the catalogue.** §3 said only the OSM-derived bars were a derived database. The catalogue mixes OSM
+  and Wikidata places in one table and attaches OSM properties to Wikidata items. So the **whole catalogue** is
+  now a Derivative Database of OpenStreetMap under ODbL 1.0; its contents keep their sources' licences.
+  `catalogue_meta` carries `licence` (`build_catalogue.licence_block`): ODbL 1.0 for the database, the notice,
+  the attribution per source with the parts it fed, the URIs, the free copy and the build id.
+- **Notice file.** §3 promised `assets/licences/data.txt`. It ships as **`assets/licenses/data.txt`** (core-ui,
+  the existing folder of the font NOTICE), in Russian and English, and «О данных» shows it in full. It links
+  the ODbL text, openstreetmap.org/copyright and the free copy.
+- **Free copy (ODbL 4.6).** `data/catalogue/README.md` + `LICENSE-ODbL.txt`. The files stay in
+  `verst_planner/resources/`. The raw inputs are on the public `bot/raw-*`, `bot/extras-*` and `bot/photos-*`
+  branches, and the documented recipe rebuilds the shipped files byte for byte. Release notes link the copy at
+  the release commit.
+- **Photos (§1, §6).** A Commons file whose only licence is the GFDL is treated as non-free and not used
+  (`gfdl_only`). Shipped as catalogue `wd-20261025-r7.5`.
+- **Extract credit (§6, ADR-0015 §3).** `poi_details.extractSource` adds `url` (the article, via Wikidata
+  `Special:GoToLinkedPage`), `licenceUrl` and `abridged`. The card line reads «Из статьи Википедии, текст
+  сокращён · CC BY-SA 4.0» and opens the article. Wikivoyage text is CC BY-SA 4.0 (Wikimedia ToU 2023), not 3.0.

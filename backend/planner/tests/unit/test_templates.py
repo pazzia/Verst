@@ -27,6 +27,7 @@ DOC_PARAMS: dict[str, dict[str, str | int | float]] = {
     "lunch.default": {"town_prep": "Переславле-Залесском"},
     "sight.default": {"dwell": "Полтора часа"},
     "sight.dog_waits": {"dwell": "Полтора часа"},
+    "sight.dog_ok": {"dwell": "Полтора часа"},
     "start.default": {"time": "08:00"},
     "finish.home": {"part_of_day": "вечеру"},
     "stage.split": {"n": 3, "days_word": "дня", "km": 250},

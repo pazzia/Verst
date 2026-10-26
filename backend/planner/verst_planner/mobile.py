@@ -73,6 +73,7 @@ from verst_planner.domain.errors import (
     TooShort,
     Unreachable,
 )
+from verst_planner.domain.facts import hours_known, rank_rating, ticket_known
 from verst_planner.domain.model import UNSET, CostPatch, GeoSuggestion, LatLon, Place, Town, TripPlan
 from verst_planner.engine import Planner
 from verst_planner.events import NULL_SINK, CancelToken, PlanEvent, event_to_json
@@ -1199,7 +1200,7 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                 name=p.name_ru,
                 kind=kind,
                 point=p.point,
-                popularity=max(0.0, min(1.0, (p.rating_internal - 3.5) / 1.5)),
+                popularity=max(0.0, min(1.0, (rank_rating(p) - 3.5) / 1.5)),
                 heritage=False,
                 hours=hours,
                 hours_verified=(p.source is Source.CURATED and p.opening_hours is not None) or osm_hours,
@@ -1501,12 +1502,39 @@ def _area_photo(w: _World, town: Town) -> tuple[str | None, int | None]:
     return (best[1], best[2]) if best else (None, None)
 
 
+# Wikimedia's Terms of Use (June 2023) put the text of every project, Wikivoyage included, under CC BY-SA 4.0.
 EXTRACT_LICENCE = {
     "wikipedia": "CC BY-SA 4.0",
-    "wikivoyage": "CC BY-SA 3.0",
+    "wikivoyage": "CC BY-SA 4.0",
     "osm": "ODbL",
     "wikidata": "CC0",
 }
+EXTRACT_LICENCE_URL = {
+    "wikipedia": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "wikivoyage": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "osm": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "wikidata": "https://creativecommons.org/publicdomain/zero/1.0/",
+}
+# R-09 (CC BY-SA 4.0 §3(a)): an encyclopaedic extract is the first sentence of a longer text, so it says so.
+ABRIDGED_SOURCES = frozenset({"wikipedia", "wikivoyage"})
+LINKED_PAGE = "https://www.wikidata.org/wiki/Special:GoToLinkedPage/{site}/{qid}"
+
+
+def _is_qid(s: str) -> bool:
+    return len(s) > 1 and s[0] == "Q" and s[1:].isdigit()
+
+
+def extract_page(poi: Any) -> str | None:
+    """R-09: the page an extract comes from, for the credit line's link (CC BY-SA 4.0 §3(a)(1)(A)(v)).
+
+    The catalogue keeps no article titles, so the link is Wikidata's `Special:GoToLinkedPage`, which redirects
+    to the item's ru sitelink. A Wikipedia extract is the intro of the item's own ruwiki article; a Wikivoyage
+    listing sits in its town's guide. OSM and Wikidata texts get no page (their line names the source)."""
+    if poi.extract_src == "wikipedia" and _is_qid(poi.id):
+        return LINKED_PAGE.format(site="ruwiki", qid=poi.id)
+    if poi.extract_src == "wikivoyage" and _is_qid(poi.town):
+        return LINKED_PAGE.format(site="ruwikivoyage", qid=poi.town)
+    return None
 
 
 def _cat_poi(w: _World, place_id: str) -> Any:
@@ -1523,12 +1551,14 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
     if p is not None and p.type is PlaceType.SIGHT:
         file, credit = _photo_file(w, p.id)
         town = w.world.towns.get(p.town_id or "")
-        hours = None
-        if p.opening_hours:
+        # ADR-0019 E-1: unknown hours are said («часы не известны — уточните»), never left out as if open
+        hours: dict[str, Any] = {"textRu": ru.text("poi.hours_unknown"), "verified": False, "known": False}
+        if hours_known(p):
             verified = p.source is Source.CURATED
             hours = {
-                "textRu": p.opening_hours if verified else ru.text("poi.hours_default"),
+                "textRu": (p.opening_hours or "24/7") if verified else ru.text("poi.hours_default"),
                 "verified": verified,
+                "known": True,
             }
         ticket = None
         if p.ticket_adult_rub and Tag.FREE_ENTRY not in p.tags:
@@ -1536,13 +1566,18 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
                 "adultRub": p.ticket_adult_rub,
                 "childRub": p.ticket_child_rub,
                 "estimate": p.source is not Source.CURATED,
+                "known": True,
             }
+        elif not ticket_known(p):  # ADR-0019 E-2: «цена билета неизвестна», never «вход свободный»
+            ticket = {"adultRub": None, "childRub": None, "estimate": False, "known": False}
         poi = _cat_poi(w, p.id)
-        if poi is not None and poi.hours and hours is not None:
-            hours = {"textRu": poi.hours, "verified": True, "source": "osm"}
+        if poi is not None and poi.hours and hours["known"]:
+            hours = {"textRu": poi.hours, "verified": True, "source": "osm", "known": True}
         attribution = []
         if poi is not None and poi.extract_src:
-            attribution.append(ru.text(f"poi.source.{poi.extract_src}"))
+            attribution.append(
+                ru.text(f"poi.source.{poi.extract_src}") + " · " + EXTRACT_LICENCE[poi.extract_src]
+            )
         if poi is not None and (poi.hours or poi.fee is not None):
             attribution.append(ru.text("poi.osm"))
         return {
@@ -1560,6 +1595,10 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
                 "key": poi.extract_src,
                 "nameRu": ru.text(f"poi.source.{poi.extract_src}"),
                 "licence": EXTRACT_LICENCE[poi.extract_src],
+                # R-09: the credit line links the article and the licence and says the text is abridged
+                "url": extract_page(poi),
+                "licenceUrl": EXTRACT_LICENCE_URL[poi.extract_src],
+                "abridged": poi.extract_src in ABRIDGED_SOURCES,
             },
             "cardLevel": poi.level if poi else (4 if p.source is Source.CURATED else 2),
             "quality": None if poi is None or poi.quality is None else round(poi.quality * 100),

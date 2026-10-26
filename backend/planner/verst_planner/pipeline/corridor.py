@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from verst_planner.domain.enums import PlaceType, RoadClass, StopKind
 from verst_planner.domain.errors import OpeningHoursParseError
+from verst_planner.domain.facts import Known, fuel_state, rank_rating
 from verst_planner.domain.model import Candidate, NormalizedInput, Place, PlannedStop, Route, TownCandidate
 from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.index import PolylineIndex
@@ -65,7 +66,7 @@ def _thin(cands: list[Candidate], cap: int | None) -> list[Candidate]:
         by.setdefault(int(c.km_at // THIN_BUCKET_KM), []).append(c)
     out: list[Candidate] = []
     for lst in by.values():
-        lst.sort(key=lambda c: (-c.place.rating_internal, c.detour_min, c.place.id, c.km_at))
+        lst.sort(key=lambda c: (-rank_rating(c.place), c.detour_min, c.place.id, c.km_at))
         out.extend(lst[:cap])
     return out
 
@@ -77,7 +78,7 @@ NEAR_DETOUR_MIN = 30  # the fun stops: 15 min, up to 30 when nothing nearer (M8)
 def _q(c: Candidate) -> float:
     """Open-data quality, or the curated rating on the same 0..1 scale (3.6 → 0, 4.9 → 1)."""
     q = c.place.quality
-    return q if q is not None else max(0.0, (c.place.rating_internal - 3.6) / 1.3)
+    return q if q is not None else max(0.0, (rank_rating(c.place) - 3.6) / 1.3)
 
 
 def _thin_sights(cands: list[Candidate], cap: int, open_data: bool) -> list[Candidate]:
@@ -124,6 +125,8 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
     for p in roadside:
         if p.type not in stop_types or not _hours_ok(p):
             continue
+        if p.type is PlaceType.FUEL and fuel_state(p, inp.vehicle.fuel_type) is Known.NO:
+            continue  # ADR-0019 E-4: a station known not to sell the car's fuel is no fuel stop
         buckets[p.type].extend(_candidates(p, index, radius_by_type[p.type], motorway.get(p.type), ctx))
 
     lodging_places: dict[str, Place] = {}

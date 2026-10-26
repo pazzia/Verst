@@ -71,7 +71,11 @@
           "alternatives": [],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours"
+          ],
+          "unknownRu": "Часы не известны — уточните"
         },
         {
           "id": "d1s03",
@@ -133,7 +137,11 @@
           "alternatives": [],
           "alternativesNote": null,
           "hotelOptions": [],
-          "selectedHotelId": null
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours"
+          ],
+          "unknownRu": "Часы не известны — уточните"
         },
         {
           "id": "d1s05",

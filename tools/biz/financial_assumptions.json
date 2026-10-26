@@ -1,0 +1,404 @@
+{
+  "meta": {
+    "model": "18-month monthly financial model: cohort-based planned trips, revenue from the BIZ-01 unit economics, itemised costs, burn, runway, use of funds per tranche",
+    "version": "1.0",
+    "as_of": "2026-10-26",
+    "currency": "RUB",
+    "owner": "Business Analyst",
+    "start_month": "2026-11",
+    "months": 18,
+    "planning_scenario": "conservative",
+    "note": "Month 1 = November 2026 (backlog W1 starts Mon 26.10.2026; its last 6 days are counted in November). Every ₽ is a cash payment including VAT where VAT applies (the company is on УСН and cannot deduct it). Revenue per planned trip, CPI, activation, trips per user, Pro, B2G, sponsored stops, tax, the weak-month index and the tools budget come from tools/biz/assumptions.json (BIZ-01) and are not duplicated here."
+  },
+  "sources": {
+    "F01": {
+      "title": "Бэклог investor-readiness: вехи M1–M6 (W1, W6, W8, W10, W12, W13), таблица целей на W13 (≥ 1 000 запланированных поездок, ≥ 100 семей в бете), VAL-04, VAL-05, ENG-03, ENG-04, TEAM-01",
+      "url": "docs/backlog-investor-readiness.md",
+      "published": "2026-10-25",
+      "accessed": "2026-10-26"
+    },
+    "F02": {
+      "title": "Журнал решений: D-IR-03 (тест рекламы 30 000 ₽, нужно одобрение CEO), D-IR-09 (ООО на УСН, если инвестиции в ближайшие 6 месяцев), D-IR-10 (30 000 ₽ с НДС 22 % = 24 588 ₽ в кабинеты), D-IR-12 (платная реклама — только измерение)",
+      "url": "docs/decisions.md",
+      "published": "2026-10-25",
+      "accessed": "2026-10-26"
+    },
+    "F03": {
+      "title": "Размеры ВМ: architecture.md §12.2 (ВМ-A 4 vCPU / 8 ГБ / 100 ГБ; ВМ-B 8 vCPU / 32 ГБ / 200 ГБ; сборка 16 vCPU / 64 ГБ spot раз в неделю; staging 2 vCPU / 4 ГБ); infra/routing/README.md «Sizing» (GraphHopper на всю Россию ≈ 10 ГБ при работе; импорт можно делать на бесплатном CI-раннере публичного репозитория; 4 vCPU / 16 ГБ обслуживает Россию, но пересборка с простоем)",
+      "url": "docs/architecture.md ; infra/routing/README.md",
+      "published": "2026-10-23 / 2026-10-25",
+      "accessed": "2026-10-26"
+    },
+    "F04": {
+      "title": "План курирования: §5.2–5.3 (до M3 ≈ 158 ч в сценарии A и ≈ 120 ч в сценарии B, W3–W8), §5.4 (после M3: перепроверка ≈ 2,6 ч/нед, отзывы 1–2 ч/нед, смена сезона ≈ 10 ч 1 мая и 1 октября), §8 вопр. 6 (ставка 400 ₽/ч, диапазон 350–450 ₽/ч — допущение; тестовое задание 1 500 ₽)",
+      "url": "docs/curation/work-plan.md",
+      "published": "2026-10-25",
+      "accessed": "2026-10-26"
+    },
+    "F05": {
+      "title": "Набор на интервью VAL-01, §3: благодарность 1 000 ₽ за разговор, рекомендация утвердить до 40 000 ₽ (решение CEO)",
+      "url": "docs/traction/recruitment.md",
+      "published": "2026-10-25",
+      "accessed": "2026-10-26"
+    },
+    "F06": {
+      "title": "LEG-02: рекомендация ООО на УСН при инвестициях в горизонте 6 месяцев; порядок регистрации, УКЭП, расчётный счёт, бухгалтер, товарный знак (R-12)",
+      "url": "docs/legal/leg-02-checklist.md",
+      "published": "2026-10-25",
+      "accessed": "2026-10-26"
+    },
+    "F07": {
+      "title": "ФНС: при электронной подаче документов госпошлина за регистрацию юрлица и ИП не уплачивается (с 2019 года); на бумаге — 4 000 ₽ за ООО, 800 ₽ за ИП (Финансы Mail.ru, 2026)",
+      "url": "https://www.nalog.gov.ru/rn26/news/activities_fts/8251820/ ; https://finance.mail.ru/article/gosposhlina-za-registratsiyu-ip-i-ooo-69193813/",
+      "published": "2019 / 2026 (по выдержке из поиска)",
+      "accessed": "2026-10-26"
+    },
+    "F08": {
+      "title": "Пошлины за товарный знак: минимум ≈ 35 000 ₽ за один класс после повышения в октябре 2024 (TenChat); от 33 000 ₽ при подаче через Госуслуги (Vitvet); с 04.10.2025 — +500 ₽ за каждую позицию сверх 10 в классе (Хабр). Источники низкой надёжности, сверить с Роспатентом",
+      "url": "https://tenchat.ru/media/2651606-uvelicheniye-poshlin-za-registratsiyu-brenda ; https://vitvet.com/articles/intellekt/tovarnye_znaki/registraciya_tovarnogo_znaka_2026/ ; https://habr.com/ru/articles/951918",
+      "published": "2024–2025 (по выдержке из поиска)",
+      "accessed": "2026-10-26"
+    },
+    "F09": {
+      "title": "Средняя начисленная зарплата, Москва, 2024: 162 571,7 ₽ в месяц (АиФ со ссылкой на Росстат; приведено в curator-job.md B2)",
+      "url": "https://aif.ru/money/business/kakaya-srednyaya-zarplata-v-moskve-i-regionah-rossii-na-2026-god ; docs/curation/curator-job.md",
+      "published": "2025–2026 (по выдержке из поиска)",
+      "accessed": "2026-10-26"
+    },
+    "F10": {
+      "title": "Юнит-экономика BIZ-01 (tools/biz/assumptions.json): CPI, доля установок с поездкой, поездок на пользователя, выручка на поездку, Pro, B2G, спонсорские остановки, налог 6 %, индекс слабого месяца, бюджет сервисов",
+      "url": "tools/biz/assumptions.json ; docs/traction/unit-economics.md",
+      "published": "2026-10-25",
+      "accessed": "2026-10-26"
+    },
+    "F11": {
+      "title": "Yandex Cloud, тарифы Compute Cloud: цены в рублях указаны с НДС (сами цены в выдаче поиска не найдены)",
+      "url": "https://yandex.cloud/ru/docs/compute/pricing",
+      "published": "обновлено 01.07.2026 (по выдержке из поиска)",
+      "accessed": "2026-10-26"
+    }
+  },
+  "plan": {
+    "milestones": [
+      {"id": "M1", "week": 1, "month": 1, "label_ru": "Чистая база: main зелёный, лендинг и лист ожидания, 10 интервью, ответ юриста по ODbL"},
+      {"id": "M2", "week": 6, "month": 2, "label_ru": "Реальная поездка: дороги, реальные отели с ценами и партнёрской ссылкой, 10 маршрутов без предупреждений"},
+      {"id": "M3", "week": 8, "month": 2, "label_ru": "Проверенные данные: ≥ 300 проверенных мест на 10 маршрутах"},
+      {"id": "M4", "week": 10, "month": 3, "label_ru": "Закрытая бета: ≥ 100 семей, дашборд воронки, 3 полевые поездки с чеками"},
+      {"id": "M5", "week": 12, "month": 3, "label_ru": "Денежный сигнал: первые брони в статистике партнёра или подписанный пилот"},
+      {"id": "M6", "week": 13, "month": 3, "label_ru": "Пакет для инвестора: дата-рум и дека на реальных числах"}
+    ],
+    "tranches": [
+      {"id": "T1", "months": [1, 3], "label_ru": "Доказательства (90 дней бэклога)", "gate_ru": "подписание; финансирует M1–M6", "milestones": ["M1", "M2", "M3", "M4", "M5", "M6"]},
+      {"id": "T2", "months": [4, 9], "label_ru": "Первый сезон 2027", "gate_ru": "M6 выполнена: таблица целей W13 заполнена реальными числами", "milestones": []},
+      {"id": "T3", "months": [10, 18], "label_ru": "До следующего раунда", "gate_ru": "предложение (не из бэклога): выручка на поездку измерена за сезон и есть ≥ 1 платный контракт (B2G, спонсор или прямой канал отелю)", "milestones": []}
+    ],
+    "raise_sizes": [3000000, 6000000, 12000000],
+    "raise_sizes_status": "assumed",
+    "raise_sizes_reasoning": "Three round sizes for the CEO to choose from (no term sheet exists): 3 mln ₽ — close to the 18-month planning-case burn without founder pay; 6 mln ₽ — the same plus most of one founder's market salary; 12 mln ₽ — founder pay for 18 months with room for a second paid person. Runway is computed as if the whole amount arrived in month 1; tranches are a release schedule, not extra money.",
+    "opening_cash": 0,
+    "opening_cash_status": "assumed",
+    "opening_cash_reasoning": "Unknown: the CEO has not stated cash in hand. 0 means every rouble of burn must come from the raise (or from the CEO personally until it closes).",
+    "founder_pay_enabled": false,
+    "founder_pay_reasoning": "Founder pay is a separate visible line, off by default (the CEO is unpaid today). `--founder-pay` or setting this to true turns it on everywhere; the runway table always shows both.",
+    "season_shape": [0.6, 0.5, 0.6, 0.8, 1.2, 1.5, 1.7, 1.6, 1.1, 0.8, 0.5, 0.7],
+    "season_shape_status": "assumed",
+    "season_shape_reasoning": "Relative volume of new users and repeat trips by calendar month (January … December): car trips concentrate in May–September and holiday weekends; no monthly series for road trips in Russia was found. The script normalises the shape to a mean of 1 and stretches it so that the weakest month equals the scenario's low_month_volume_index from BIZ-01 (0.35 / 0.5 / 0.6). Measure: plan_succeeded by month.",
+    "vms": [
+      {"key": "host_app", "label_ru": "ВМ-A: API, Postgres, Directus, мониторинг (4 vCPU / 8 ГБ / 100 ГБ)", "vcpu": 4, "ram_gb": 8, "ssd_gb": 100, "start_month": 2, "milestone": "M4", "source": "F03"},
+      {"key": "host_maps", "label_ru": "ВМ-B: GraphHopper, Photon, тайлы (8 vCPU / 32 ГБ / 200 ГБ)", "vcpu": 8, "ram_gb": 32, "ssd_gb": 200, "start_month": 2, "milestone": "M2", "source": "F03"},
+      {"key": "host_staging", "label_ru": "ВМ staging (2 vCPU / 4 ГБ / 50 ГБ)", "vcpu": 2, "ram_gb": 4, "ssd_gb": 50, "start_month": 3, "milestone": "M4", "source": "F03"}
+    ],
+    "build_vm": {"label_ru": "Еженедельная сборка графа (16 vCPU / 64 ГБ, spot)", "vcpu": 16, "ram_gb": 64, "start_month": 2, "milestone": "M2", "source": "F03"},
+    "backup": {"label_ru": "Резервные копии (объектное хранилище)", "gb": 300, "start_month": 2, "milestone": "M4", "source": "F03", "status": "assumed"}
+  },
+  "inputs": {
+    "beta_new_users": {
+      "label_ru": "Бета (мес. 3): новых пользователей",
+      "group": "acquisition", "unit": "users", "values": {"conservative": 150, "base": 400, "optimistic": 800},
+      "status": "assumed", "sources": ["F01"],
+      "reasoning": "Closed beta (RuStore closed test + web planner) in January 2027 from the waitlist, interviews and communities. The M4 target is ≥ 100 families; the W13 target of ≥ 1 000 planned trips needs far more (see «Сверки»). No waitlist exists yet (landing not published, D-IR-04).",
+      "date": "2026-10-26"
+    },
+    "launch_new_users": {
+      "label_ru": "Публичный запуск (мес. 4): новых пользователей в месяц до сезонности",
+      "group": "acquisition", "unit": "users per month", "values": {"conservative": 150, "base": 400, "optimistic": 800},
+      "status": "assumed", "sources": [],
+      "reasoning": "Organic only (D-IR-12): RuStore search, the web planner and SEO pages «сколько стоит поездка из Москвы в X» (ENG-06), car and family communities, sharing. No benchmark for a Russian road-trip planner was found; TripforTeam and Дом.Кругом have < 1 000 RuStore downloads in total (competitors.md S32/S33), which argues for the conservative value.",
+      "date": "2026-10-26"
+    },
+    "organic_growth": {
+      "label_ru": "Рост органики в месяц (тренд без сезонности)",
+      "group": "acquisition", "unit": "growth per month", "values": {"conservative": 0.05, "base": 0.08, "optimistic": 0.12},
+      "status": "assumed", "sources": [],
+      "reasoning": "SEO pages and shared trip links compound slowly; seasonality is applied separately. Measure: weekly new users in ENG-05.",
+      "date": "2026-10-26"
+    },
+    "repeat_trips_month": {
+      "label_ru": "Повторные поездки после 90 дней: на активного пользователя в месяц",
+      "group": "acquisition", "unit": "trips per user per month", "values": {"conservative": 0.03, "base": 0.05, "optimistic": 0.08},
+      "status": "assumed", "sources": [],
+      "reasoning": "A family takes a few car trips a year; trips in the first 90 days follow BIZ-01 trips_per_planner, later trips follow this rate × survival × seasonality. Measure: distinct trip_id per device after day 90.",
+      "date": "2026-10-26"
+    },
+    "churn_month": {
+      "label_ru": "Отток активных пользователей в месяц после 90 дней",
+      "group": "acquisition", "unit": "share per month", "values": {"conservative": 0.15, "base": 0.1, "optimistic": 0.07},
+      "status": "assumed", "sources": [],
+      "reasoning": "Survival of a cohort's repeat planners: (1 − churn)^(age − 3). Measure: cohort retention in ENG-05.",
+      "date": "2026-10-26"
+    },
+    "affiliate_start_month": {
+      "label_ru": "С какого месяца есть партнёрские ссылки (ENG-03 + юрлицо)",
+      "group": "timing", "unit": "model month", "values": {"conservative": 3, "base": 3, "optimistic": 3},
+      "status": "assumed", "sources": ["F01", "F06"],
+      "reasoning": "ENG-03 (real hotels and links) needs LEG-02 (entity, Travelpayouts account); the beta (month 3) is the first month with real users and real links.",
+      "date": "2026-10-26"
+    },
+    "launch_month": {
+      "label_ru": "Месяц публичного запуска",
+      "group": "timing", "unit": "model month", "values": {"conservative": 4, "base": 4, "optimistic": 4},
+      "status": "assumed", "sources": ["F01"],
+      "reasoning": "After M6 (W13, January 2027): February 2027, three months before the season.",
+      "date": "2026-10-26"
+    },
+    "pro_start_month": {
+      "label_ru": "Месяц, с которого продаётся Trip Pro",
+      "group": "timing", "unit": "model month", "values": {"conservative": 7, "base": 7, "optimistic": 7},
+      "status": "assumed", "sources": ["F10"],
+      "reasoning": "Needs ООО/ИП billing in RuStore (S13 in BIZ-01) and the BIZ-06 price test; May 2027. In the conservative case Pro conversion is 0 anyway (SPEC §14: no payments in the MVP).",
+      "date": "2026-10-26"
+    },
+    "contracts_start_month": {
+      "label_ru": "Месяц, с которого идут деньги по контрактам (B2G, спонсоры)",
+      "group": "timing", "unit": "model month", "values": {"conservative": 7, "base": 7, "optimistic": 7},
+      "status": "assumed", "sources": ["F01", "F10"],
+      "reasoning": "BIZ-03/04 talks run W6–W12; a paid placement realistically starts with the 2027 season (May). Number and price of contracts come from BIZ-01 (conservative: 0 contracts).",
+      "date": "2026-10-26"
+    },
+    "lag_affiliate": {
+      "label_ru": "Задержка денег партнёрки",
+      "group": "timing", "unit": "months", "values": {"conservative": 2, "base": 2, "optimistic": 2},
+      "status": "assumed", "sources": ["F10"],
+      "reasoning": "Travelpayouts confirms the reward 2 days after check-out (S04 in BIZ-01); the stay is usually weeks after the booking, and payouts to a bank account go monthly with a 10 000 ₽ minimum for ИП/ЮЛ (LEG-02 S29). Two months is an assumption.",
+      "date": "2026-10-26"
+    },
+    "lag_pro": {
+      "label_ru": "Задержка денег Pro (выплата RuStore)",
+      "group": "timing", "unit": "months", "values": {"conservative": 1, "base": 1, "optimistic": 1},
+      "status": "assumed", "sources": [],
+      "reasoning": "Store payouts monthly; to be read from the RuStore developer agreement after LEG-02.",
+      "date": "2026-10-26"
+    },
+    "lag_contracts": {
+      "label_ru": "Задержка денег по контрактам",
+      "group": "timing", "unit": "months", "values": {"conservative": 2, "base": 2, "optimistic": 2},
+      "status": "assumed", "sources": [],
+      "reasoning": "Regional bodies and businesses pay after an act of acceptance; assumed two months.",
+      "date": "2026-10-26"
+    },
+    "price_vcpu_month": {
+      "label_ru": "Хостинг: цена 1 vCPU в месяц с НДС",
+      "group": "hosting", "unit": "RUB per month", "values": {"conservative": 1200, "base": 1000, "optimistic": 800},
+      "status": "assumed", "sources": ["F11"],
+      "reasoning": "No ruble price list could be read (Selectel and Yandex Cloud pages are not in search snippets; Yandex Cloud states ruble prices include VAT). Replace with the provider calculator figure (architecture Q-3, CEO decision).",
+      "date": "2026-10-26"
+    },
+    "price_ram_gb_month": {
+      "label_ru": "Хостинг: цена 1 ГБ RAM в месяц с НДС",
+      "group": "hosting", "unit": "RUB per month", "values": {"conservative": 450, "base": 380, "optimistic": 300},
+      "status": "assumed", "sources": ["F11"],
+      "reasoning": "Same as price_vcpu_month: placeholder until a quote.",
+      "date": "2026-10-26"
+    },
+    "price_ssd_gb_month": {
+      "label_ru": "Хостинг: цена 1 ГБ SSD в месяц с НДС",
+      "group": "hosting", "unit": "RUB per month", "values": {"conservative": 18, "base": 14, "optimistic": 10},
+      "status": "assumed", "sources": ["F11"],
+      "reasoning": "Placeholder until a quote.",
+      "date": "2026-10-26"
+    },
+    "price_object_gb_month": {
+      "label_ru": "Хостинг: объектное хранилище, 1 ГБ в месяц с НДС",
+      "group": "hosting", "unit": "RUB per month", "values": {"conservative": 3, "base": 2.5, "optimistic": 2},
+      "status": "assumed", "sources": ["F11"],
+      "reasoning": "Placeholder until a quote; backups only.",
+      "date": "2026-10-26"
+    },
+    "build_hours_month": {
+      "label_ru": "Хостинг: часов сборочной ВМ в месяц",
+      "group": "hosting", "unit": "hours per month", "values": {"conservative": 13, "base": 9, "optimistic": 0},
+      "status": "assumed", "sources": ["F03"],
+      "reasoning": "Weekly rebuild × 4.33 weeks: ≈ 3 h (conservative, all of Russia with Photon and tiles) or ≈ 2 h (base). Optimistic imports on the free CI runner of the public repository (README «Sizing»), so 0 h.",
+      "date": "2026-10-26"
+    },
+    "spot_price_factor": {
+      "label_ru": "Хостинг: цена spot-ВМ к обычной",
+      "group": "hosting", "unit": "multiplier", "values": {"conservative": 0.5, "base": 0.35, "optimistic": 0.3},
+      "status": "assumed", "sources": [],
+      "reasoning": "Preemptible VMs are much cheaper than on-demand; exact discount to be read from the provider.",
+      "date": "2026-10-26"
+    },
+    "curator_rate": {
+      "label_ru": "Куратор: ставка в час",
+      "group": "curator", "unit": "RUB per hour", "values": {"conservative": 450, "base": 400, "optimistic": 350},
+      "status": "assumed", "sources": ["F04"],
+      "reasoning": "Work plan §8 q.6: 400 ₽/h, range 350–450 (itself an assumption from hh.ru call-centre ads). Contract with a самозанятый: no payroll taxes on top. Replace with the signed contract.",
+      "date": "2026-10-26"
+    },
+    "curator_hours_m3": {
+      "label_ru": "Куратор: часов до M3 (волна 1, 10 маршрутов)",
+      "group": "curator", "unit": "hours", "values": {"conservative": 158, "base": 120, "optimistic": 120},
+      "status": "assumed", "sources": ["F04"],
+      "reasoning": "Work plan §5.3: scenario A (curator does everything) 158 h; scenario B (Data Curator pre-collects web data) 120 h. W3–W8: half in November, half in December.",
+      "date": "2026-10-26"
+    },
+    "curator_tests": {
+      "label_ru": "Куратор: тестовые задания и онбординг (разово, мес. 1)",
+      "group": "curator", "unit": "RUB", "values": {"conservative": 5300, "base": 3800, "optimistic": 2200},
+      "status": "assumed", "sources": ["F04"],
+      "reasoning": "1 500 ₽ per test task (work plan) × 3 / 2 / 1 candidates + 2 h onboarding at the scenario rate (≈ 800 ₽).",
+      "date": "2026-10-26"
+    },
+    "curator_maint_hours_week": {
+      "label_ru": "Куратор после M3: часов в неделю (перепроверка + отзывы)",
+      "group": "curator", "unit": "hours per week", "values": {"conservative": 4.6, "base": 3.6, "optimistic": 3.1},
+      "status": "assumed", "sources": ["F04"],
+      "reasoning": "Work plan §5.4: recheck every 180 days ≈ 2.6 h/week + user reports 2.0 / 1.0 / 0.5 h/week. Doubles once wave 2 is live (the script scales it by verified routes).",
+      "date": "2026-10-26"
+    },
+    "curator_season_hours": {
+      "label_ru": "Куратор: смена сезонных часов работы мест (май и октябрь)",
+      "group": "curator", "unit": "hours", "values": {"conservative": 10, "base": 10, "optimistic": 10},
+      "status": "assumed", "sources": ["F04"],
+      "reasoning": "Work plan §5.4: ≈ 60 places × 10 min ≈ 10 h on 1 May and 1 October (model months 7 and 12), scaled by verified routes.",
+      "date": "2026-10-26"
+    },
+    "curator_wave2_hours": {
+      "label_ru": "Куратор: волна 2 — ещё 10 маршрутов к сезону 2027 (мес. 4–6), часов",
+      "group": "curator", "unit": "hours", "values": {"conservative": 158, "base": 120, "optimistic": 120},
+      "status": "assumed", "sources": ["F04"],
+      "reasoning": "A plan decision for the CEO (open question): repeat wave 1 for 10 more ready routes before the May season (allowed after M3). Same hours per route as wave 1.",
+      "date": "2026-10-26"
+    },
+    "ads_val02": {
+      "label_ru": "Реклама: тест лендинга VAL-02 (мес. 1, даёт заявки, не установки)",
+      "group": "ads", "unit": "RUB", "values": {"conservative": 30000, "base": 30000, "optimistic": 30000},
+      "status": "assumed", "sources": ["F02"],
+      "reasoning": "D-IR-03 / D-IR-10: 30 000 ₽ including VAT, not yet approved by the CEO. Same in all scenarios: a budget decision, not an uncertainty.",
+      "date": "2026-10-26"
+    },
+    "ads_beta": {
+      "label_ru": "Реклама: замер CPI на RuStore-сборке в бете (мес. 3)",
+      "group": "ads", "unit": "RUB", "values": {"conservative": 30000, "base": 30000, "optimistic": 30000},
+      "status": "assumed", "sources": ["F02", "F10"],
+      "reasoning": "D-IR-12: paid ads measure, they do not grow. VAL-02 gives cost per lead only; the first real CPI comes from an install campaign (BIZ-01 §5).",
+      "date": "2026-10-26"
+    },
+    "ads_measure_month": {
+      "label_ru": "Реклама: постоянный замер CPI и конверсий, в месяц (мес. 6–18)",
+      "group": "ads", "unit": "RUB per month", "values": {"conservative": 10000, "base": 10000, "optimistic": 10000},
+      "status": "assumed", "sources": ["F02"],
+      "reasoning": "A small always-on measurement budget so CPI and landing conversion stay measured through the season (D-IR-12). Not a growth channel.",
+      "date": "2026-10-26"
+    },
+    "vat_rate": {
+      "label_ru": "НДС в рекламных платежах",
+      "group": "ads", "unit": "share", "values": {"conservative": 0.22, "base": 0.22, "optimistic": 0.22},
+      "status": "cited", "sources": ["F02"],
+      "reasoning": "D-IR-10: payments include VAT 22 %; only the net amount buys installs (24 588 of 30 000 ₽).",
+      "date": "2026-10-26"
+    },
+    "research_val01": {
+      "label_ru": "Исследования: благодарности за интервью VAL-01 (мес. 1)",
+      "group": "research", "unit": "RUB", "values": {"conservative": 40000, "base": 40000, "optimistic": 40000},
+      "status": "assumed", "sources": ["F05"],
+      "reasoning": "recruitment.md §3: 1 000 ₽ × 40 conversations, recommended, needs CEO approval.",
+      "date": "2026-10-26"
+    },
+    "research_des01": {
+      "label_ru": "Исследования: благодарности за юзабилити-тест DES-01 (мес. 2)",
+      "group": "research", "unit": "RUB", "values": {"conservative": 10000, "base": 10000, "optimistic": 10000},
+      "status": "assumed", "sources": ["F05"],
+      "reasoning": "10 participants × 1 000 ₽ (same rule as VAL-01; the amount is an open CEO question in usability-test.md).",
+      "date": "2026-10-26"
+    },
+    "field_trips": {
+      "label_ru": "Полевые поездки VAL-05: бензин, платные дороги, ночёвки, еда, билеты (мес. 2–3)",
+      "group": "research", "unit": "RUB", "values": {"conservative": 90000, "base": 76000, "optimistic": 60000},
+      "status": "assumed", "sources": ["F01"],
+      "reasoning": "Three trips with receipts: a day trip (≈ 6 000 ₽), a 2-day trip (≈ 25 000 ₽) and the Golden Ring for 3 days (≈ 45 000 ₽) at base; ±20 %. The receipts themselves become measured data for the cost-error target.",
+      "date": "2026-10-26"
+    },
+    "legal_odbl": {
+      "label_ru": "Юрист: заключение по ODbL, LEG-01 (мес. 1)",
+      "group": "legal", "unit": "RUB", "values": {"conservative": 60000, "base": 40000, "optimistic": 25000},
+      "status": "assumed", "sources": ["F01"],
+      "reasoning": "No quote yet (the brief is docs/legal/lawyer-brief-odbl.md). Replace with the lawyer's invoice.",
+      "date": "2026-10-26"
+    },
+    "legal_privacy": {
+      "label_ru": "Юрист: политика, согласие, условия, уведомление РКН (мес. 2)",
+      "group": "legal", "unit": "RUB", "values": {"conservative": 30000, "base": 20000, "optimistic": 15000},
+      "status": "assumed", "sources": ["F06"],
+      "reasoning": "Review of the LEG-02 drafts (§4) before the e-mail form and the app policy go live. No quote yet.",
+      "date": "2026-10-26"
+    },
+    "entity_setup": {
+      "label_ru": "Регистрация ООО: госпошлина 0 ₽ (электронно) + токен для УКЭП (мес. 1)",
+      "group": "legal", "unit": "RUB", "values": {"conservative": 2000, "base": 2000, "optimistic": 2000},
+      "status": "assumed", "sources": ["F06", "F07"],
+      "reasoning": "State duty is 0 ₽ for electronic filing (F07; 4 000 ₽ on paper). The director's qualified e-signature from the FNS is free, but needs a certified USB token (≈ 2 000 ₽, assumed).",
+      "date": "2026-10-26"
+    },
+    "accounting_month": {
+      "label_ru": "Бухгалтерия и банк для ООО, в месяц (с мес. 2)",
+      "group": "legal", "unit": "RUB per month", "values": {"conservative": 12000, "base": 8000, "optimistic": 5000},
+      "status": "assumed", "sources": ["F06"],
+      "reasoning": "ООО needs full bookkeeping and reporting (LEG-02 §1.1); higher than the ИП figure in BIZ-01 (burn_accounting 4 000 / 3 000 / 2 000). Replace with the chosen bank and accountant tariffs.",
+      "date": "2026-10-26"
+    },
+    "corporate_docs": {
+      "label_ru": "Юрист: устав под инвестора, корпоративный договор, доли (мес. 4)",
+      "group": "legal", "unit": "RUB", "values": {"conservative": 150000, "base": 100000, "optimistic": 60000},
+      "status": "assumed", "sources": ["F06"],
+      "reasoning": "LEG-02 questions (в)–(г): rights to code, database and brand moved to the company; charter terms for future investors. Paid when the round documents are drafted, after M6.",
+      "date": "2026-10-26"
+    },
+    "trademark": {
+      "label_ru": "Товарный знак «Верста»: пошлины (мес. 5)",
+      "group": "legal", "unit": "RUB", "values": {"conservative": 70000, "base": 35000, "optimistic": 35000},
+      "status": {"conservative": "assumed", "base": "cited", "optimistic": "cited"},
+      "sources": ["F08"],
+      "reasoning": "≈ 35 000 ₽ minimum for one class (F08, low-reliability sources); conservative assumes two classes (apps and travel services). Only after a clean FIPS search (risk R-12). No patent attorney fee included.",
+      "date": "2026-10-26"
+    },
+    "ai_tools_month": {
+      "label_ru": "ИИ-инструменты разработки и подписки, в месяц",
+      "group": "tools", "unit": "RUB per month", "values": {"conservative": 20000, "base": 20000, "optimistic": 20000},
+      "status": "assumed", "sources": [],
+      "reasoning": "The product is built by AI agents; their subscription is a real monthly cost that BIZ-01 left out. Placeholder until the CEO states the actual bill (open question).",
+      "date": "2026-10-26"
+    },
+    "contingency_rate": {
+      "label_ru": "Резерв на непредвиденное, доля расходов",
+      "group": "tools", "unit": "share", "values": {"conservative": 0.2, "base": 0.15, "optimistic": 0.1},
+      "status": "assumed", "sources": [],
+      "reasoning": "startup-financial-modeling: add a buffer to expense estimates (20 % in the planning case). Applied to all costs except founder pay.",
+      "date": "2026-10-26"
+    },
+    "founder_pay_gross": {
+      "label_ru": "Оплата основателя: начислено в месяц (по умолчанию выключено)",
+      "group": "founder", "unit": "RUB per month", "values": {"conservative": 162572, "base": 162572, "optimistic": 162572},
+      "status": "cited", "sources": ["F09"],
+      "reasoning": "Moscow average accrued salary for 2024 (162 571,7 ₽, F09), rounded: a market-rate reference, not a proposal. One founder (the CEO).",
+      "date": "2026-10-26"
+    },
+    "founder_load_factor": {
+      "label_ru": "Оплата основателя: множитель на взносы",
+      "group": "founder", "unit": "multiplier", "values": {"conservative": 1.3, "base": 1.3, "optimistic": 1.3},
+      "status": "assumed", "sources": [],
+      "reasoning": "Employer insurance contributions on a salary from an ООО ≈ 30 % (to be confirmed by the accountant; SME reduced rates may apply above the threshold).",
+      "date": "2026-10-26"
+    }
+  }
+}

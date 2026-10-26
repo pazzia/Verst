@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import app.verst.analytics.VerstAnalytics
 import app.verst.platform.IntentHandoffLauncher
 import app.verst.platform.openAppSettings
 import androidx.compose.runtime.Composable
@@ -86,6 +87,8 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
+        // ENG-05: AppMetrica only when this build has a key, else the no-op (once per process; app-scoped like the flow).
+        flow.analytics = VerstAnalytics.install(application)
         // S3-R1: activity-bound platform hooks (cleared in onDestroy so the app-scoped flow never leaks us).
         (application as VerstApp).startNetwork()
         flow.handoffLauncher = launcher
@@ -100,6 +103,17 @@ class MainActivity : ComponentActivity() {
         flow.openLocationSettings = { app.verst.platform.openLocationSettings(this) }
         Log.i(EngineHost.TAG, "build ${BuildConfig.BUILD_NUMBER} ${BuildConfig.GIT_SHA}")
         setContent { VerstRoot(flow) }
+    }
+
+    /** ENG-05 `app_open`: the first start of the process is cold, a return from the background warm. */
+    override fun onStart() {
+        super.onStart()
+        VerstAnalytics.appOpen.onStart()?.let { flow.appOpened(it) }
+    }
+
+    override fun onStop() {
+        VerstAnalytics.appOpen.onStop(isChangingConfigurations)
+        super.onStop()
     }
 
     override fun onDestroy() {
@@ -194,7 +208,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 flow.origin.label, flow.windshield, flow.selectedRoute, flow.adults, flow.children, flow.dog,
                 trips = SavedTrips.ordered(flow.saved), tripsSheet = flow.tripsSheet, originGen = flow.originGen, routeKm = flow.routeKm,
             ),
-            onSelect = { flow.selectedRoute = it },
+            onSelect = flow::selectReadyRoute,
             onStart = flow::openReadyRoute,
             onNavigator = flow::openNavigator,
             onRetry = flow::retryWindshield,
@@ -272,12 +286,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                     flow.back()
                 }
                 override fun seat(i: Int) = flow.cycleSeat(i)
-                override fun front() {
-                    flow.frontAdult = !flow.frontAdult
-                }
-                override fun dog() {
-                    flow.dog = !flow.dog
-                }
+                override fun front() = flow.toggleFrontAdult()
+                override fun dog() = flow.toggleDog()
                 override fun km(delta: Int) = flow.stepKm(delta)
                 override fun budget(delta: Int) = flow.stepBudget(delta)
                 override fun mood(m: app.verst.core.model.Mood) = flow.pickMood(m)
@@ -324,7 +334,10 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         }
                         override fun waybill() = flow.openWaybill()
                         override fun save() = flow.save()
-                        override fun share() = share(context, r.shareText)
+                        override fun share() {
+                            flow.tripShared()
+                            share(context, r.shareText)
+                        }
                         override fun replace(stop: StopDto) = flow.openReplace(stop)
                         override fun pick(altId: String?) = flow.pickAlternative(altId)
                         override fun confirmReplace() = flow.confirmReplace()
@@ -407,7 +420,10 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun toggleLine(key: String) = flow.toggleLine(key)
                         override fun toggleReserve() = flow.toggleReserve()
                         override fun save() = flow.save()
-                        override fun share() = share(context, r.shareText)
+                        override fun share() {
+                            flow.tripShared()
+                            share(context, r.shareText)
+                        }
                         override fun refit() = flow.refit()
                     },
                 )

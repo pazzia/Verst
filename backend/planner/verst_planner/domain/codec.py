@@ -358,6 +358,8 @@ def alt_units_to_json(u: AltUnits) -> Json:
         "regionName": u.region_name_ru,
         "tripKmDelta": u.trip_km_delta,
     }
+    if not u.ticket_known:  # ADR-0019 E-2: only when unknown, so plans without one keep their bytes
+        out["ticketKnown"] = False
     if u.parking is not None:
         out.update(_alt_parking_to_json(u.parking))
     return out
@@ -384,6 +386,7 @@ def alt_units_from_json(d: Mapping[str, Any]) -> AltUnits:
         price_rub=None if d.get("priceRub") is None else _dec(d["priceRub"]),
         region_name_ru=d.get("regionName", ""),
         trip_km_delta=int(d.get("tripKmDelta", 0)),
+        ticket_known=bool(d.get("ticketKnown", True)),
         parking=None
         if "parkingSource" not in d
         else ParkingUnit(
@@ -442,7 +445,7 @@ def _alternative_from_json(d: Mapping[str, Any]) -> Alternative:
 
 
 def stop_to_json(s: ScheduledStop) -> Json:
-    return {
+    out: Json = {
         "id": s.id,
         "seq": s.seq,
         "day": s.day,
@@ -470,6 +473,9 @@ def stop_to_json(s: ScheduledStop) -> Json:
         "hotelOptions": [_hotel_option_to_json(h) for h in s.hotel_options],
         "selectedHotelId": s.selected_hotel_id,
     } | ({"funFor": list(s.fun_for)} if s.fun_for else {})  # only on fun stops: G01-G13 keep their bytes
+    if s.unknown_facts:  # ADR-0019: only on stops with an unknown fact (the other stops keep their bytes)
+        out |= {"unknownFacts": list(s.unknown_facts), "unknownRu": s.unknown_ru}
+    return out
 
 
 def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
@@ -500,6 +506,8 @@ def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
         selected_hotel_id=d["selectedHotelId"],
         fun_for=tuple(d.get("funFor", ())),
         alternatives_note_ru=d.get("alternativesNote"),
+        unknown_facts=tuple(d.get("unknownFacts", ())),
+        unknown_ru=d.get("unknownRu"),
     )
 
 
@@ -597,6 +605,7 @@ def units_to_json(u: CostUnits) -> Json:
                 "adultRub": t.adult_rub,
                 "childRub": t.child_rub,
             }
+            | ({} if t.known else {"known": False})  # ADR-0019 E-2: price unknown (0 here, named)
             for t in u.tickets
         ],
         "reserveFrac": dec_to_str(u.reserve_frac),
@@ -626,6 +635,12 @@ def units_to_json(u: CostUnits) -> Json:
     )
 
 
+def _hotel_price_from_json(o: Mapping[str, Any]) -> HotelPrice:
+    # ADR-0019 E-3: a unit without the flag (older JSON) never claims the breakfast
+    breakfast = bool(o.get("breakfastIncluded", False))
+    return HotelPrice(o["placeId"], o["priceNightRub"], breakfast, o.get("rooms"))
+
+
 def units_from_json(d: Mapping[str, Any]) -> CostUnits:
     f = d["fuel"]
     ages = d["childAges"]
@@ -650,12 +665,7 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
                 town_name_ru=n["townName"],
                 selected_place_id=n["selectedPlaceId"],
                 price_night_rub=n["priceNightRub"],
-                options=tuple(
-                    HotelPrice(
-                        o["placeId"], o["priceNightRub"], o.get("breakfastIncluded", True), o.get("rooms")
-                    )
-                    for o in n["options"]
-                ),
+                options=tuple(_hotel_price_from_json(o) for o in n["options"]),
                 default_price=n["defaultPrice"],
                 breakfast_included=n["breakfastIncluded"],
                 breakfast_check_rub=n["breakfastCheckRub"],
@@ -665,7 +675,9 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
         ),
         meals=tuple(MealUnit(m["day"], Meal(m["meal"]), m["stopId"], m["checkRub"]) for m in d["meals"]),
         tickets=tuple(
-            TicketUnit(t["stopId"], t["placeId"], t["name"], t["adultRub"], t["childRub"])
+            TicketUnit(
+                t["stopId"], t["placeId"], t["name"], t["adultRub"], t["childRub"], bool(t.get("known", True))
+            )
             for t in d["tickets"]
         ),
         reserve_frac=_dec(d["reserveFrac"]),
@@ -721,7 +733,7 @@ def cost_to_json(c: CostResult) -> Json:
         "hintKeys": list(c.hint_keys),
         "pricesAsOf": c.prices_as_of,
         "units": units_to_json(c.units),
-    }
+    } | ({"totalNoteRu": c.total_note_ru} if c.total_note_ru else {})  # ADR-0019 E-2
 
 
 def cost_from_json(d: Mapping[str, Any]) -> CostResult:
@@ -738,6 +750,7 @@ def cost_from_json(d: Mapping[str, Any]) -> CostResult:
         prices_as_of=d["pricesAsOf"],
         units=units_from_json(d["units"]),
         hints_ru=tuple(d["hints"]),
+        total_note_ru=d.get("totalNoteRu"),
     )
 
 

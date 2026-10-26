@@ -2,7 +2,7 @@ name: planner
 on:
   push:
     branches: [main]
-    paths: ["backend/planner/**", "Makefile", ".github/workflows/planner.yml"]
+    paths: ["backend/planner/**", "backend/migrations/**", "Makefile", ".github/workflows/planner.yml"]
   pull_request:
   workflow_dispatch:
 jobs:

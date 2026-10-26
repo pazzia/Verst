@@ -168,19 +168,24 @@ class Place:
     region_code: str
     town_id: str | None
     opening_hours: str | None
+    """OSM `opening_hours` subset; None = hours unknown, never «always open» (ADR-0019 E-1; `24/7` is)."""
     dwell_min: int | None
     avg_check_rub: int | None
     price_night_rub: int | None
     ticket_adult_rub: int | None
+    """None without `free_entry` = price unknown, not free (ADR-0019 E-2); 0 = free."""
     ticket_child_rub: int | None
-    rating_internal: float
+    rating_internal: float | None
+    """0..5; None = no rating, ranked below every rated place (ADR-0019 E-5, `facts.rank_rating`)."""
     tags: frozenset[Tag]
+    """Confirmed «yes» tags; a tag in neither `tags` nor `tags_no` is unknown (ADR-0019 E-6)."""
     description_ru: str | None
     partner_ids: PartnerIds
     source: Source
     verified_at: date | None
     status: PlaceStatus
-    breakfast_included: bool = True
+    breakfast_included: bool | None = None
+    """None = unknown, costed as not included (ADR-0019 E-3)."""
     family_price_rub: int | None = None
     """Price per night of a family room (≤ 4 guests, ADR-0011); None = `price_night_rub x 1.4`."""
     category: str | None = None
@@ -189,6 +194,12 @@ class Place:
     """ADR-0015 §2 quality score 0..1 of an open-data sight; None = curated (no threshold)."""
     heritage: bool = False
     """An open-data sight with a heritage designation (Wikidata P1435)."""
+    tags_no: frozenset[Tag] = frozenset()
+    """Tags confirmed absent (DB `core.place_tag.state = 'no'`, ADR-0019 E-6)."""
+    fuel_kinds: frozenset[FuelType] = frozenset()
+    """Fuels the station is confirmed to sell (`core.place_fuel` yes); empty = unknown (ADR-0019 E-4)."""
+    fuel_kinds_no: frozenset[FuelType] = frozenset()
+    """Fuels the station is confirmed not to sell (`core.place_fuel` no); such a station is skipped."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -426,7 +437,8 @@ class TollUnit:
 class HotelPrice:
     place_id: str
     price_night_rub: int
-    breakfast_included: bool = True
+    breakfast_included: bool = False
+    """Breakfast confirmed included; unknown = False, so the morning meal is costed (ADR-0019 E-3)."""
     rooms: int | None = None
     """Rooms the engine chose for this option (family rooms, ADR-0011); None = `ceil(adults / 2)`."""
 
@@ -461,6 +473,8 @@ class TicketUnit:
     name_ru: str
     adult_rub: int
     child_rub: int
+    known: bool = True
+    """False = the price is unknown (ADR-0019 E-2): 0 ₽ here, outside the total, named in the line."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -513,6 +527,8 @@ class AltUnits:
     parking: ParkingUnit | None = None
     """API v3 (ADR-0015 §4): the alternative's own parking at its arrival and dwell, when the trip is priced
     with a parking model; None = no parking data (no line) or not a car-parked stop (rest, food, fuel)."""
+    ticket_known: bool = True
+    """False = a sight whose ticket price is unknown (ADR-0019 E-2; `adult_rub` is then 0)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -567,6 +583,11 @@ class ScheduledStop:
     """A§16.6: «Других вариантов…» / «Нашли только один…» when fewer than two alternatives were found."""
     fun_for: tuple[str, ...] = ()
     """ADR-0015 §5 (API v3 `funFor`): who a «Весело и познавательно» stop is for — child, dog, adults."""
+    unknown_facts: tuple[str, ...] = ()
+    """ADR-0019: facts this stop relies on that are not known (`facts.Fact`: hours, ticket, fuel, dogs)."""
+    unknown_ru: str | None = None
+    """ADR-0019: one line for the row («Часы не известны — уточните»); None for open-data places, whose
+    open-data marker already says «уточняйте», and for the ticket, which the cost texts name."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -639,6 +660,8 @@ class CostResult:
     prices_as_of: str
     units: CostUnits
     hints_ru: tuple[str, ...] = ()
+    total_note_ru: str | None = None
+    """ADR-0019 E-2: what the total leaves out («Без билетов в 1 место: цена неизвестна»); None = nothing."""
 
 
 @dataclass(frozen=True, slots=True)
