@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A · Чистое лобовое · Приборы</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+/* Instruments, variants A and B. Top: the mirror, odometer and fuel gauge as a read-only summary («итог»).
+   Below: plain controls with words. Nothing on this screen needs an instruction line. */
+.phone { background: var(--raised); }
+.strip { position: relative; flex-shrink: 0; height: 88px; overflow: hidden; }
+.strip .sky { position: absolute; inset: 0; background: linear-gradient(var(--sky1) 0 62%, var(--sky2) 62% 82%, var(--sky3) 82% 100%); }
+[data-theme="day"] .strip .sky { background: linear-gradient(var(--sky1) 0 62%, var(--sky2) 62% 100%); }
+.strip .liner { position: absolute; left: 0; right: 0; top: 0; height: 12px; background: var(--liner); border-radius: 0 0 50% 50% / 0 0 10px 10px; }
+.strip .cap { position: absolute; left: 0; right: 0; bottom: -2px; height: 24px; background: var(--raised); border-radius: 50% 50% 0 0 / 22px 22px 0 0; }
+.top { position: absolute; left: 6px; right: 16px; top: 12px; display: flex; align-items: center; gap: 4px; z-index: 1; }
+.back { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: var(--text); }
+.top .t { display: flex; flex-direction: column; min-width: 0; }
+.top .t b { font-weight: 700; font-size: 20px; line-height: 24px; color: var(--text); }
+.top .t small { font-size: 14px; line-height: 18px; color: var(--mirror-label); }
+[data-theme="day"] .top .t small { color: var(--text-2); }
+
+.cluster { padding: 0 20px; margin-top: 4px; position: relative; z-index: 1; }
+.mir { position: relative; height: 80px; border-radius: 30px; border: 4px solid var(--mirror-bezel); background: var(--bench); overflow: hidden; box-shadow: 0 8px 18px rgba(0,0,0,.35); }
+[data-theme="day"] .mir { box-shadow: 0 6px 14px rgba(40,50,60,.22); }
+.mir i { position: absolute; display: block; }
+.who { margin: 8px 0 0; font-weight: 700; font-size: 18px; line-height: 24px; text-align: center; }
+.wells { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 10px; }
+.well .cap b { color: var(--text); font-weight: 600; }
+.wells .well { justify-content: center; }
+
+.pace { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; }
+.pace .v { text-align: center; }
+.pace .v b { font-weight: 700; font-size: 22px; line-height: 26px; font-variant-numeric: tabular-nums; }
+.pace .v span { font-size: 16px; color: var(--text-2); }
+.gear { color: var(--text-2); }
+@media (max-height: 700px) {
+  .strip { height: 78px; }
+  .top { top: 6px; }
+  .mir { height: 62px; border-radius: 26px; }
+  .wells svg { width: 96px; height: 50px; }
+  .odo span { width: 20px; height: 26px; font-size: 18px; line-height: 26px; }
+  .well .v { font-size: 18px; line-height: 22px; }
+  .who { font-size: 17px; margin-top: 6px; }
+  .wells { margin-top: 8px; }
+  .well { padding: 8px 6px 10px; gap: 4px; }
+  .sect { margin-top: 18px; }
+}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="strip">
+    <div class="sky" aria-hidden="true"></div>
+    <div class="liner" aria-hidden="true"></div>
+    <div class="cap" aria-hidden="true"></div>
+    <div class="top">
+      <button class="back" aria-label="Назад к готовым поездкам">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4M11 5l-7 7 7 7"/></svg>
+      </button>
+      <h1 class="t" style="margin:0;font:inherit"><b>Золотое кольцо</b><small>из Москвы · 761 км по кругу</small></h1>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <section class="cluster" aria-label="Итог">
+      <div class="mir" role="img" aria-label="В зеркале: 2 взрослых, 1 ребёнок, собака">
+        <i style="left:0;right:0;top:0;height:26px;background:var(--mirror-sky)"></i>
+        <i style="left:0;right:0;top:26px;height:10px;background:var(--mirror-ground)"></i>
+        <i style="left:50%;top:26px;width:60px;height:10px;margin-left:-30px;background:var(--road);clip-path:polygon(42% 0,58% 0,100% 100%,0 100%)"></i>
+        <!-- adult, adult, child, dog on the back bench (the mirror shows the whole crew as a summary) -->
+        <i style="left:16%;bottom:0;width:36px;height:40px"><i style="left:8px;top:0;width:20px;height:20px;border-radius:50%;background:var(--adult)"></i><i style="left:0;top:22px;width:36px;height:18px;border-radius:16px 16px 0 0;background:var(--adult)"></i></i>
+        <i style="left:36%;bottom:0;width:36px;height:40px"><i style="left:8px;top:0;width:20px;height:20px;border-radius:50%;background:var(--adult)"></i><i style="left:0;top:22px;width:36px;height:18px;border-radius:16px 16px 0 0;background:var(--adult)"></i></i>
+        <i style="left:56%;bottom:0;width:28px;height:30px"><i style="left:6.5px;top:0;width:15px;height:15px;border-radius:50%;background:var(--child)"></i><i style="left:0;top:16px;width:28px;height:14px;border-radius:12px 12px 0 0;background:var(--child)"></i></i>
+        <i style="left:74%;bottom:4px;width:30px;height:24px;border-radius:12px 12px 8px 8px;background:var(--dog)"></i>
+        <i style="left:calc(74% + 3px);bottom:22px;width:8px;height:12px;border-radius:4px;background:var(--dog);transform:rotate(-18deg)"></i>
+        <i style="left:calc(74% + 19px);bottom:22px;width:8px;height:12px;border-radius:4px;background:var(--dog);transform:rotate(18deg)"></i>
+      </div>
+      <p class="who" aria-live="polite">2 взрослых · 1 ребёнок · собака</p>
+      <div class="wells">
+        <div class="well" role="group" aria-label="300 километров в день, примерно 4 часа 20 минут за рулём, 3 дня на кольцо">
+          <div class="odo num" aria-hidden="true"><span>0</span><span>3</span><span>0</span><span>0</span></div>
+          <div class="cap" aria-hidden="true"><b>км в день</b><br>≈ 4 ч 20 мин за рулём<br>3 дня на кольцо</div>
+        </div>
+        <div class="well" role="group" aria-label="Оценка поездки примерно 33 800 рублей из бюджета 40 000 — в бюджете">
+          <svg width="120" height="62" viewBox="0 0 120 62" fill="none" aria-hidden="true">
+            <path d="M12 56 A48 48 0 0 1 108 56" stroke="var(--gauge-track)" stroke-width="8" stroke-linecap="round"/>
+            <path d="M12 56 A48 48 0 0 1 102.4 33.5" stroke="var(--gauge-fill)" stroke-width="8" stroke-linecap="round"/>
+            <path d="M60 56 L92.5 38.8" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="60" cy="56" r="6" fill="var(--text)"/>
+          </svg>
+          <div class="v" aria-hidden="true">≈ 33 800 ₽</div>
+          <div class="cap" aria-hidden="true">из 40 000 ₽<br>в бюджете</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sect" aria-labelledby="h-crew">
+      <h2 id="h-crew">Кто едет</h2>
+      <div class="row">
+        <span class="lbl"><b>Взрослые</b><small>вместе с вами</small></span>
+        <span class="stepper" role="group" aria-label="Взрослые: 2">
+          <button class="key" aria-label="Меньше взрослых"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <span class="val">2</span>
+          <button class="key" aria-label="Больше взрослых"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+        </span>
+      </div>
+      <div class="row">
+        <span class="lbl"><b>Дети</b></span>
+        <span class="stepper" role="group" aria-label="Дети: 1">
+          <button class="key" aria-label="Меньше детей"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <span class="val">1</span>
+          <button class="key" aria-label="Больше детей"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+        </span>
+      </div>
+      <div class="row">
+        <span class="lbl"><b>Собака</b></span>
+        <span class="seg" role="radiogroup" aria-label="Собака">
+          <button class="chip" role="radio" aria-checked="false">не едет</button>
+          <button class="chip" role="radio" aria-checked="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>едет</button>
+        </span>
+      </div>
+    </section>
+
+    <section class="sect" aria-labelledby="h-pace">
+      <h2 id="h-pace">Сколько проезжать за день</h2>
+      <div class="pace" role="group" aria-label="300 километров в день">
+        <button class="key" aria-label="Меньше на 50 км"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+        <span class="v"><b>300 км</b> <span>в день</span></span>
+        <button class="key" aria-label="Больше на 50 км"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+      </div>
+    </section>
+
+    <section class="sect" aria-labelledby="h-budget">
+      <h2 id="h-budget">Бюджет на всю поездку</h2>
+      <div class="chips num" role="radiogroup" aria-labelledby="h-budget">
+        <button class="chip" role="radio" aria-checked="false">20 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="false">30 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>40 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="false">60 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="false">80 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="false">не важно</button>
+      </div>
+    </section>
+
+    <section class="sect" aria-labelledby="h-mood">
+      <h2 id="h-mood">Как едем</h2>
+      <div role="radiogroup" aria-labelledby="h-mood">
+        <button class="radio" role="radio" aria-checked="true"><span class="dot" aria-hidden="true"></span><span class="t"><b>Спокойно</b><small>короче перегоны, длинные перерывы</small></span></button>
+        <button class="radio" role="radio" aria-checked="false"><span class="dot" aria-hidden="true"></span><span class="t"><b>Весело и познавательно</b><small>каждые полтора часа — интересное место у трассы</small></span></button>
+        <button class="radio" role="radio" aria-checked="false"><span class="dot" aria-hidden="true"></span><span class="t"><b>Только доехать</b><small>заправки, еда и ночёвки</small></span></button>
+      </div>
+    </section>
+
+    <section class="sect">
+      <button class="plate-row" aria-label="Машина и выезд: АИ-95, расход 8 литров, выезд в субботу в 8:00. Изменить">
+        <svg class="gear" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span class="t"><b>Машина и выезд</b><small>АИ-95 · 8,0 л на 100 км · сб 08:00</small></span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+  </div>
+
+  <div class="go">
+    <div class="sum" aria-live="polite"><span>761 км · 3 дня</span><span><b>≈ 33 800 ₽</b> — в бюджете</span></div>
+    <button class="cta"><span>Построить маршрут</span></button>
+  </div>
+</div>
+</body>
+</html>
