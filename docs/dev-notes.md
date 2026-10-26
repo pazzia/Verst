@@ -2323,3 +2323,174 @@ Status: adapter, server config, CI workflow and ADR done; the real-graph numbers
   `infra/routing/README.md` is an estimate until then), the graph cache.
 - After the run: download `routing-recordings`, review, add the real responses as
   `backend/planner/tests/data/graphhopper/real/*.json` with a test each (week 3).
+
+## Investor-readiness / ENG-05
+
+App side of the analytics funnel (SPEC §15, §16; `docs/traction/tracking-plan.md` §2; risk register R-07). Developer,
+on branch ccr-013d3489-181fz2, not committed. The weekly report script and the dashboard are not part of this slice.
+
+Status: code and tests written; the Kotlin journey tests, the Robolectric test and the APK build run in CI only (no
+Android SDK here). The pure-Kotlin part (buckets, privacy guard, app-open tracker) was compiled and run on the JVM.
+
+### Files
+- `android/app/src/main/kotlin/app/verst/analytics/`:
+  - `Analytics.kt`: the `Analytics` interface, `NoopAnalytics` (the default), `GuardedAnalytics` (every event goes
+    through `PrivacyGuard` before an `EventSink`);
+  - `AnalyticsEvent.kt`: one data class per event, typed properties, enums for every closed value list;
+  - `Buckets.kt`: the §2.4 buckets, the date and the token rules;
+  - `PrivacyGuard.kt`: the runtime check (below);
+  - `AppOpenTracker.kt`: `app_open` cold / warm;
+  - `VerstAnalytics.kt`: the process singleton, AppMetrica activation and configuration, `AnalyticsKey`.
+- `android/app/src/test/kotlin/app/verst/analytics/`: `AnalyticsJourneyTest` (5 tests on `VerstFlow`),
+  `PrivacyGuardTest` (5), `BucketsTest` (3), `AppOpenTrackerTest` (1), `VerstAnalyticsTest` (2, Robolectric),
+  `TrackingPlanContract` (the plan's events, properties and value lists as data), `RecordingAnalytics` (the fake).
+- `VerstFlow.kt`: the event calls, `analytics`, `tripId`, `selectReadyRoute`, `toggleFrontAdult`, `toggleDog`,
+  `appOpened`, `tripShared`, `answerTripDriven` + `DrivenAnswer`.
+- `MainActivity.kt`: `VerstAnalytics.install` in `onCreate`, `app_open` in `onStart` / `onStop`, the Windshield row,
+  the front seat and the dog go through the flow, «Поделиться» reports `trip_shared`.
+- `gradle/libs.versions.toml` (`appmetrica = "8.6.0"`), `app/build.gradle.kts` (the dependency and
+  `BuildConfig.APPMETRICA_API_KEY`).
+
+### SDK
+- `io.appmetrica.analytics:analytics:8.6.0` (MIT), the current release: `maven-metadata.xml` has
+  `<latest>`/`<release>` 8.6.0, published 2026-09-29.
+  - Version page: https://central.sonatype.com/artifact/io.appmetrica.analytics/analytics/8.6.0
+  - Files: https://repo1.maven.org/maven2/io/appmetrica/analytics/analytics/8.6.0/
+- Checked with curl against repo1.maven.org:
+  - the AAR's sha256 `b9b93b57…200631c4b` equals the published `.sha256`;
+  - all 17 `io.appmetrica.analytics:*:8.6.0` modules it depends on answer 200.
+  - The one non-Central dependency, `com.android.installreferrer:installreferrer:2.2` (Google Maven), is blocked
+    by the proxy here. CI resolves it through `google()`.
+- API checked with `javap` on the 8.6.0 AAR: `AppMetrica.activate`, `reportEvent(String, Map)`,
+  `setLocationTracking`, `enableActivityAutoTracking`; `AppMetricaConfig.Builder.withLocationTracking`,
+  `withAdvIdentifiersTracking`, `withRevenueAutoTrackingEnabled`, `withAppOpenTrackingEnabled`, `withCrashReporting`.
+
+### How to set the key for a build
+- Release builds read the Gradle property `verst.appmetricaKey`, else the env var `VERST_APPMETRICA_KEY`.
+- `debug` and `demo` builds read only `verst.appmetricaTestKey` / `VERST_APPMETRICA_TEST_KEY`. This is the separate
+  key of tracking plan §0.7 (proposal §2.5 #4). The release key never reaches a demo or debug APK: `demo` is created
+  with `initWith(release)` before `release` gets its key, and sets its own key explicitly.
+- Empty (the default everywhere) means `BuildConfig.APPMETRICA_API_KEY = ""`. `VerstAnalytics.install` then returns
+  `NoopAnalytics` and never activates the SDK, so **the public demo APK sends nothing** until the CEO sets a test key.
+- A non-empty key that is not a UUID fails the Gradle configuration with a message. It never ships as a dead key.
+- Local: `./gradlew :app:assembleRelease -Pverst.appmetricaKey=<uuid>`.
+- CI (the Manager's change; workflows are outside this task): add a repository secret and pass it in the env of
+  the build step, e.g. `VERST_APPMETRICA_TEST_KEY: ${{ secrets.VERST_APPMETRICA_TEST_KEY }}` for the demo APK. A
+  release key belongs only in a job that builds the `release` type.
+- The AppMetrica key is a public app key, the kind SPEC §16 allows in the APK. It still stays out of the repository,
+  so the CEO controls which builds report.
+
+### Events as implemented vs the tracking plan (§2.2)
+Every property is sent only when it has a value. `device_id` and the app version are not repeated as properties:
+AppMetrica attaches its device id and `appVersionName` to every event (§2.1).
+
+| Event | Fires (code) | Properties | Difference from tracking-plan.md |
+| --- | --- | --- | --- |
+| `app_open` | `MainActivity.onStart` via `AppOpenTracker`: the first start of the process = `cold`, a return from the background = `warm`, a rotation = nothing | `start_type`, `offline` | — |
+| `ready_route_shown` | the Windshield is on top with the engine's list, once per showing (snapshot of top + list + origin) | `count`, `start_city` | `count` = routes the engine has for this start (the screen shows the first 4); an empty list (`NoRoutes`) is sent as `count = 0`, which is the coverage signal. `start_city` = the engine's catalogue town within 30 km of the start (`reverse`), else `other`; never the address or the GPS point |
+| `ready_route_selected` | a ready-route row tapped (`selectReadyRoute`) | `route_id`, `rank` (row from 1) | Literal trigger: ПОЕХАЛИ on the pre-selected first row without a tap sends no `ready_route_selected`; `ready_route_id` on `plan_requested` covers it (below) |
+| `search_started` | the first suggestion request (≥ 2 chars) of a Navigator visit (reset when Navigator is pushed) | `query_len` | — |
+| `search_selected` | a suggestion picked (`pick`) | `query_len`, `result_type`, `rank` | engine kinds `place`/`poi` → `place`; `rank = 0` when the row is not in a shown list; `pin` has no source yet |
+| `params_changed` | each change on Instruments: seat cycle, front seat, dog, pace stepper, budget stepper | `field` (`adults`/`children`/`dog`/`pace`/`budget`), `value_bucket` | fuel and date have no control, so no such fields; mood is not in the plan's list (it is on `plan_requested`); an adult seat turned child sends two events |
+| `plan_requested` | ПОЕХАЛИ on Instruments (`go`) | `km_bucket`, `days`, `dog`, `children`, `mood`, **`ready_route_id`** | `km_bucket`/`days` come from the engine estimate of exactly this request; before it answers `km_bucket = unknown` and no `days`. `ready_route_id`: Manager's addition for the regional pilot report (`docs/partners/regions-pack.md`), the template id or `none` for a free A → B trip. Retry and «Подогнать под бюджет» are not new requests |
+| `plan_succeeded` | the plan's trip is shown (after the Drive pacer) | `trip_id`, `latency_ms`, `routing_source`, **`ready_route_id`** | `latency_ms` = engine time (start of the plan → the engine's answer), not the 400 ms text pacing. `routing_source`: `fallback` when the trip has `approxDistances` (synthetic route), else `road`. Today `road` is the on-device road graph; it means GraphHopper once ENG-04 wires `PrefetchedRouting`. `ready_route_id` as above |
+| `plan_failed` | engine error or no result (not `CANCELLED`) | `latency_ms`, `error_code` | **also for a 5.8 no-fit (`error_code = NO_FIT`)**: the request ends without a trip, so the plan_requested denominator stays explained. The reliability dashboard must leave `NO_FIT` out. Codes not shaped like a token are sent as `OTHER` |
+| `stop_replaced` | D-6 «ЗАМЕНИТЬ» succeeded | `trip_id`, `kind`, `alt_rank` | — |
+| `waybill_opened` | Waybill pushed | `trip_id`, `total_bucket`, `over_budget` | — |
+| `reserve_toggled` | the reserve row tapped | `trip_id`, `state` | — |
+| `hotel_link_clicked` | «Забронировать ночь» online (`book`) | `trip_id`, `stop_id`, `price_bucket` | In this build the mock partner sheet (D-13) stands for the browser. When ENG-03 opens the real link, the call moves to after the intent succeeds. `price_bucket` = the selected hotel's price for the crew, the price 5.7 shows (`priceCrewRub`) |
+| `excursion_link_clicked` | — | `trip_id`, `place_id` | defined, **no UI hook** (no excursion link in the app) |
+| `navigator_opened` | a car hand-off opened an app: day menu, «навигатор отсюда», the hand-off sheet, the remembered app | `trip_id`, `app`, `day` | **`app = web`** added: no maps app, so the maps site opened in the browser. Hand-offs that fail are not sent. Walks are not reported (out of this funnel). No 2ГИС hand-off exists yet |
+| `trip_saved` | «Сохранить» succeeded (not the silent re-save of a booking mark) | `trip_id`, `start_date`, `days`, **`ready_route_id`** | `ready_route_id`: the planned request's template, else the one the engine echoes in the trip input (reopened / restored trip), else `none`. Walks are not reported |
+| `trip_shared` | «Поделиться» on Road ahead / Waybill opens the system share sheet | `trip_id`, `channel` | **`channel = unknown` and fires on opening the sheet**: the chooser does not tell the app the target without a chooser callback receiver (a manifest change, not in this task) |
+| `pro_waitlist_joined` | — | `source` | defined, **no UI hook** (BIZ-06) |
+| `feedback_sent` | D-7 «Отправить» | `trip_id` (road), `kind` (= reason `closed`/`tags`/`price`/`other`) | replaces the old `Log.i("VerstEvent", …)` line, which wrote the place id to logcat; the comment never leaves the local queue |
+| `trip_driven_confirmed` | `VerstFlow.answerTripDriven(id, answer, today)` — **no caller yet** (the post-trip question is a later UI task; feature freeze) | `trip_id`, `completion`, `days_since_end`, `km_bucket`, `dog`, `children`, `source` | as §2.3. The values come from the saved trip. «Нет», a trip that is not saved, a trip without a start date, or one not over yet (`today ≤ E`) send nothing. The E + 14 window and «one per trip_id» are left to the report script (§2.3: «считаем первое событие»), so the function does not store answers |
+
+Not implemented: `trip_driven_prompt_shown` (§2.5 #5, optional) needs the same future UI.
+
+### `trip_id` (tracking plan §2.5 q3, default applied)
+- A random UUID is made on the phone for each ПОЕХАЛИ. A retry of a failed plan, D-6 replace, re-cost, the
+  no-fit minimum and «Подогнать под бюджет» on an unsaved trip keep it.
+- A saved trip is stored under its `trip_id`, so a trip reopened from «Мои поездки» reports the same id. This
+  matters for `trip_driven_confirmed` days later. The refit of a saved trip becomes a second saved trip, as before,
+  so it gets a new id.
+- `last.json` keys the current trip by its `trip_id` instead of `"last"`, so an unsaved trip keeps its id across
+  process death. An old file with `"last"` gets a new id.
+- If the id is already taken by another saved entry, the trip is saved under a new id, as before ENG-05, and the
+  `trip_id` follows it. This happens when the saved copy was deleted and then restored with «Вернуть».
+- Trips saved before this build have ids no `plan_succeeded` carried. The script counts them as data errors (§3.4).
+
+### Privacy guarantees (R-07, SPEC §16, tracking plan §0.3)
+- **No key, no SDK.** Without a key `AppMetrica.activate` is never called.
+- **SDK config** (`VerstAnalytics.config`, unit-tested):
+  - `withLocationTracking(false)`, plus `AppMetrica.setLocationTracking(false)` after activation;
+  - `withAdvIdentifiersTracking(false)`;
+  - no automatic revenue or deeplink events;
+  - `setLocation` and `setUserProfileID` are never called.
+  - AppMetrica's own device id is the only identifier. `trip_id` is a random per-trip UUID, not derived from the
+    device or a person.
+- **What events carry.** Integers, booleans, and tokens from closed lists. Ids are run through `Buckets.token`
+  (`[A-Za-z0-9_]{1,32}`, else `OTHER`). Dates are ISO days. The one word is `start_city`, the engine's town name.
+  Never sent: coordinates, addresses, the search query (only its length), report comments, hotel or place names,
+  free text.
+- **Runtime guard.** `GuardedAnalytics` runs `PrivacyGuard` on every event and drops the whole event when a rule
+  breaks. Logcat gets only the event name and the rule names. The rules:
+  - `key`: not `snake_case`, or a personal-data name (`lat`, `lon`, `address`, `email`, `phone`, `name`, `query`,
+    `comment`, …);
+  - `type`: not Int, Long, Boolean or String (a Double is a coordinate);
+  - `coordinates`: a decimal number inside a string;
+  - `email`: an `@`;
+  - `phone`: 10 or more digits in one run of digits, spaces, `+()-` (UUIDs exempt);
+  - `free_text`: longer than 40 characters, or a line break.
+- **Tests.**
+  - `TrackingPlanContract.assertClean` runs every event of every journey test through the guard and through the
+    plan's key and value lists. A new property or value fails CI until the plan and this table change.
+  - `PrivacyGuardTest` proves each rule fires on coordinates, e-mails, phones, long text and personal-data keys,
+    and that the values the app really sends pass.
+
+### Commands and results (2026-10-26)
+- Pure-Kotlin part on the JVM (Gradle 8.14.3, Kotlin 2.2.0, JDK 21; a scratch project with copies of
+  `Analytics.kt`, `AnalyticsEvent.kt`, `Buckets.kt`, `PrivacyGuard.kt`, `AppOpenTracker.kt` and the five pure test
+  files): `gradle test` → `BucketsTest` 3, `AppOpenTrackerTest` 1, `PrivacyGuardTest` 5: 9 tests, 0 failures.
+- The guard's regexes were cross-checked in Python on all 35 test strings, with the same verdicts.
+- `AnalyticsJourneyTest` and `VerstAnalyticsTest` were **not run** (they need `VerstFlow`/Compose runtime and
+  Robolectric).
+
+### Only CI can verify
+- `:app:compileDebugKotlin`, `:app:testDebugUnitTest`, lint, and assembling the demo APK with AppMetrica 8.6.0
+  (dependency resolution including `installreferrer` from Google Maven).
+- `AnalyticsJourneyTest` (5) and `VerstAnalyticsTest` (2, Robolectric): the builder must work under Robolectric
+  without activation. The existing `VerstFlowTest` must stay green after the `save` / `last.json` id change.
+- The merged manifest and APK size. AppMetrica adds:
+  - its service and an **exported** `PreloadInfoContentProvider`;
+  - a `<queries>` entry for the RuStore install referrer;
+  - through `analytics-identifiers` / `analytics-appsetid`, `play-services-ads-identifier` 18.1.0,
+    `play-services-appset` 16.1.0 and the `com.google.android.gms.permission.AD_ID` permission.
+  - Collection is off by config. The permission and the classes are still in the APK.
+  - SPEC §16 caps the APK at 30 MB.
+- That the activity-time activation records sessions (`enableActivityAutoTracking`). AppMetrica prefers
+  `Application.onCreate`, and `VerstApp` was outside this task.
+- Events arriving in the AppMetrica console. This needs a test key and a device: check the test-key app's event
+  list after one journey.
+
+### Open questions (default applied)
+1. `NO_FIT` as `plan_failed`. Default: yes, with the dashboard excluding it from reliability. The alternative is a
+   separate `plan_no_fit` event (a plan change, Architect / Growth Marketer).
+2. `navigator_opened.app = web` (a value outside the plan). Default: send it; add it to tracking-plan §2.2.
+3. `trip_shared.channel = unknown`, sent when the sheet opens. Default: keep it. A chooser callback receiver
+   (`EXTRA_CHOSEN_COMPONENT`, mapped to messenger / social / other) needs a manifest change; a follow-up if virality
+   by channel matters before the beta.
+4. `ready_route_selected` only on a real row tap (literal plan). Default: keep; the template of every plan is now on
+   `plan_requested.ready_route_id`.
+5. Remove the AD_ID permission and the GMS id libraries from the APK. Default: not done (manifest / exclusions are
+   outside this task, and excluding `analytics-appsetid` would break the SDK: its no-op retriever implements an
+   interface from that module, checked with `javap`). Recommended: `<uses-permission
+   android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>` in the app manifest, and Legal lists
+   AppMetrica (Yandex) as a processor in the privacy policy (R-07 (г)).
+6. Move `VerstAnalytics.install` into `VerstApp.onCreate`, AppMetrica's recommended place. Default: activity
+   `onCreate` (my write scope); the flow and the tracker are process-wide either way.
+7. CI secrets `VERST_APPMETRICA_TEST_KEY` / `VERST_APPMETRICA_KEY` and their env lines in `android.yml`: Manager /
+   CEO. Until then every CI APK is the no-op.
+8. Architect (§2.5 q3): the engine could own `routingSource` explicitly instead of the app reading `approxDistances`.
+   This becomes relevant once ENG-04 mixes GraphHopper and on-device routing.

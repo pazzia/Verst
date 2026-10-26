@@ -9,6 +9,22 @@ plugins {
 }
 val repoRoot: File = rootDir.parentFile
 val buildNumber = (System.getenv("VERST_BUILD_NUMBER") ?: "1").toInt()
+
+/**
+ * ENG-05: an AppMetrica API key from the Gradle property [property] or the environment variable [env] (property
+ * first). Empty = analytics off: the app uses its no-op and never activates the SDK. A key is a UUID; anything else
+ * fails the build rather than shipping a silently dead key.
+ */
+fun appMetricaKey(property: String, env: String): String {
+    val key = ((findProperty(property) as String?)?.trim()?.takeIf { it.isNotEmpty() } ?: System.getenv(env)?.trim()).orEmpty()
+    require(key.isEmpty() || Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}").matches(key)) {
+        "$property / $env: an AppMetrica API key is a UUID (got ${key.length} characters)"
+    }
+    return key
+}
+// Tracking plan §0.7: release builds report to the real key; debug and demo builds only ever see the separate test key.
+val appMetricaReleaseKey = appMetricaKey("verst.appmetricaKey", "VERST_APPMETRICA_KEY")
+val appMetricaTestKey = appMetricaKey("verst.appmetricaTestKey", "VERST_APPMETRICA_TEST_KEY")
 android {
     namespace = "app.verst"
     compileSdk = 36
@@ -39,10 +55,16 @@ android {
             applicationIdSuffix = ".demo"
             signingConfig = signingConfigs.getByName("demo")
             matchingFallbacks += listOf("release")
+            buildConfigField("String", "APPMETRICA_API_KEY", "\"$appMetricaTestKey\"")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
             signingConfig = signingConfigs.getByName("demo")
+            buildConfigField("String", "APPMETRICA_API_KEY", "\"$appMetricaTestKey\"")
+        }
+        // After `demo` on purpose: `initWith(release)` above must not copy the release key into the demo APK.
+        getByName("release") {
+            buildConfigField("String", "APPMETRICA_API_KEY", "\"$appMetricaReleaseKey\"")
         }
     }
     testBuildType = "demo" // androidTest APK targets the APK the CEO installs
@@ -162,6 +184,8 @@ dependencies {
     // Sprint 3 (ADR-0012 §6–7): the only two network uses — Commons photos (Coil) and Nominatim addresses.
     implementation(libs.okhttp)
     implementation(libs.coil.compose)
+    // ENG-05: AppMetrica (MIT). Activated only when the build has a key (`APPMETRICA_API_KEY`).
+    implementation(libs.appmetrica.analytics)
     // Release review P2-4: no ui-test-manifest in the demo APK (it merges an exported ComponentActivity); the
     // Robolectric screen tests run on `debug` (CI `:app:testDebugUnitTest`).
     debugImplementation(libs.compose.ui.test.manifest)
