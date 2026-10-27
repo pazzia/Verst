@@ -64,6 +64,9 @@ class IndexTest(unittest.TestCase):
         self.assertEqual(poi_index.classify({"amenity": "place_of_worship", "wikidata": "Q1"}), "temple")
         self.assertEqual(poi_index.classify({"tourism": "museum"}), "museum")
         self.assertEqual(poi_index.classify({"natural": "waterfall"}), "waterfall")
+        self.assertIsNone(poi_index.classify({"natural": "spring"}))
+        self.assertIsNone(poi_index.classify({"natural": "peak"}))
+        self.assertEqual(poi_index.classify({"natural": "peak", "wikidata": "Q5"}), "volcano")
 
     def test_build_reads_geojsonseq_with_any_geometry(self) -> None:
         lines = [

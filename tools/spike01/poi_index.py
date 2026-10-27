@@ -24,9 +24,9 @@ KINDS: list[tuple[str, str, tuple[str, ...]]] = [
     ("viewpoint", "tourism", ("viewpoint",)),
     ("waterfall", "natural", ("waterfall",)),
     ("beach", "natural", ("beach",)),
-    ("volcano", "natural", ("volcano", "peak")),
+    ("volcano", "natural", ("volcano", "peak")),  # a peak only if notable (classify)
     ("cave", "natural", ("cave_entrance",)),
-    ("hot_spring", "natural", ("hot_spring", "spring")),
+    ("hot_spring", "natural", ("hot_spring",)),
     ("nature_reserve", "leisure", ("nature_reserve",)),
     ("park", "leisure", ("park", "garden")),
     ("castle", "historic", ("castle", "fort", "manor", "city_gate", "kremlin")),
@@ -65,6 +65,8 @@ def classify(tags: dict[str, Any]) -> str | None:
                 return None  # an ordinary church or prayer house: not a sight unless notable (ADR-0015 §2)
             if kind == "park" and not tags.get("wikidata") and not tags.get("tourism"):
                 return None  # unnamed-notability city greenery
+            if kind == "volcano" and tags.get("natural") == "peak" and not (tags.get("wikidata") or tags.get("tourism")):
+                return None  # an ordinary hilltop, not a destination
             return kind
     return None
 

@@ -77,7 +77,7 @@ jobs:
         run: |
           filter='nwr/tourism=museum,gallery,aquarium,zoo,theme_park,viewpoint,attraction,hotel,guest_house,motel,hostel,chalet
             nwr/leisure=water_park,nature_reserve,park,garden
-            nwr/natural=waterfall,beach,volcano,peak,cave_entrance,hot_spring,spring
+            nwr/natural=waterfall,beach,volcano,peak,cave_entrance,hot_spring
             nwr/historic=castle,fort,manor,city_gate,kremlin,monastery,ruins,archaeological_site,monument,memorial
             nwr/amenity=place_of_worship,restaurant,cafe,fast_food,food_court,fuel'
           # Москва → Казань corridor box; Bali whole
@@ -116,6 +116,7 @@ jobs:
           python3 tools/spike01/dynamic_plan.py --index RU="$WORK/ru/index.jsonl" --index ID="$WORK/id/index.jsonl" \
             --out "$WORK/out" --baseline
           cp "$WORK/ru/build.json" "$WORK/out/build-ru.json" || true
+          cat "$WORK/out/report.md"   # the step summary is not in the job log; print it for reviewers
 
       - uses: actions/upload-artifact@v4
         if: always()
