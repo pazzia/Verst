@@ -372,6 +372,8 @@ Compare it with cost per install and cost per planned trip from VAL-02. The revi
 
 **Description.** Add one past-behaviour question to the VAL-01 interview kit, after Q6: «Вы когда-нибудь ехали по чужому маршруту — из блога, Telegram-канала, от друзей? А своим маршрутом после поездки с кем-нибудь делились? Как?». Q21 already asks whether people have paid for a ready route.
 
+**Status (2026-10-27).** Question 6а is in `docs/traction/interview-kit.md` together with its note field; the shares are counted once the interviews are done.
+
 **Acceptance.** `docs/traction/interviews.md` records three shares of interviewees: those who drove someone else's route in the last 2 years, those who shared their own, and those who paid for one. The go/no-go for SOC-03…05 is written next to these numbers.
 
 ### SOC-02 — Save and reuse a route
