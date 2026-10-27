@@ -64,7 +64,14 @@ def test_request_validation_errors(
     assert e["code"] == "INVALID_INPUT" and e["details"]["field"] == field
 
 
-def test_unreachable_and_too_short(client: TestClient, auth: dict[str, str]) -> None:
+@pytest.mark.parametrize("mood", ["calm", "fun", "more_stops", "just_drive"])
+def test_every_mood_the_phone_sends_is_accepted(client: TestClient, auth: dict[str, str], mood: str) -> None:
+    """SRV-01 regression: the phone sends the v3 `fun` («Весело и познавательно»); the schema once knew only v2."""
+    body = trip(mood=mood, crew={"adults": 2, "children": 0, "dog": False}, budget=None)
+    r = client.post("/v1/trips/plan", json=body, headers=auth)
+    assert r.status_code == 200, r.text
+    assert r.json()["outcome"] in ("plan", "no_fit")
+
     r = client.post("/v1/trips/plan", json=trip(destination={"lat": 55.0, "lon": 150.0}), headers=auth)
     assert r.status_code == 404
     assert error(r) == {

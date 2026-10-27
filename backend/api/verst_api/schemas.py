@@ -83,7 +83,8 @@ class TripInputIn(Request):
     budget: StrictInt | None = None
     vehicle: VehicleIn | None = None
     startAt: str | None = Field(None, max_length=32)
-    mood: Literal["calm", "more_stops", "just_drive"] | None = None
+    # "fun" is the v3 «Весело и познавательно» the phone sends; "more_stops" its v2 name (saved trips)
+    mood: Literal["calm", "fun", "more_stops", "just_drive"] | None = None
     avoidTolls: StrictBool | None = None
     reserveOn: StrictBool | None = None
     simplify: StrictBool | None = None
