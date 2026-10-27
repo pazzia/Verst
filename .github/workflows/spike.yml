@@ -1,0 +1,125 @@
+# SPIKE-01 (ADR-0021 §5): dynamic planning prototype on provider-agnostic sources. Research only: builds a
+# GraphHopper graph for Центр + Поволжье and for Bali, an open place index (OSM + Wikidata) for the case corridors,
+# plans tools/spike01/cases.json and uploads report.md / report.json. Commercial providers are simulated (cost
+# only): no keys are configured.
+name: spike01
+on:
+  pull_request:
+    paths:
+      - "tools/spike01/**"
+      - ".github/workflows/spike.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spike01-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  GH_VERSION: "11.0"
+  GH_SHA256: b59c024afe172ec6ec85b6327006c3138ec58c7d0bcd26253d0e42853f613def
+  WORK: ${{ github.workspace }}/_spike
+  PYTHONPATH: ${{ github.workspace }}/backend/planner:${{ github.workspace }}/tools/spike01
+
+jobs:
+  spike:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s tools/spike01 -p 'test_*.py' -v 2>&1 | tail -15
+
+      - name: Tools
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool > /dev/null
+          mkdir -p "$WORK/ru" "$WORK/id/osm" "$WORK/out"
+          JAR="$WORK/graphhopper-web-$GH_VERSION.jar"
+          curl -fsSL --retry 5 -o "$JAR" "https://repo1.maven.org/maven2/com/graphhopper/graphhopper-web/$GH_VERSION/graphhopper-web-$GH_VERSION.jar"
+          echo "$GH_SHA256  $JAR" | sha256sum -c -
+          echo "JAR=$JAR" >> "$GITHUB_ENV"
+          df -h / | tail -1
+
+      - name: Russia graph (Центр + Поволжье)
+        timeout-minutes: 60
+        run: infra/routing/build_graph.sh central+volga "$WORK/ru" "$JAR" 10g
+
+      - name: Bali extract and graph
+        timeout-minutes: 40
+        run: |
+          curl -fL --retry 5 --retry-delay 20 --retry-all-errors -o "$WORK/id/osm/indonesia.osm.pbf" \
+            https://download.geofabrik.de/asia/indonesia-latest.osm.pbf
+          osmium extract --bbox 114.40,-8.90,115.75,-8.00 "$WORK/id/osm/indonesia.osm.pbf" \
+            -o "$WORK/id/osm/region.osm.pbf" --overwrite
+          rm -f "$WORK/id/osm/indonesia.osm.pbf"
+          ls -l "$WORK/id/osm/region.osm.pbf"
+          cd infra/routing
+          java -Xmx3g -Xms3g -XX:+UseParallelGC \
+            "-Ddw.graphhopper.datareader.file=$WORK/id/osm/region.osm.pbf" "-Ddw.graphhopper.graph.location=$WORK/id/graph-cache" \
+            -jar "$JAR" import config.yml > "$WORK/id/import.log" 2>&1
+          test -f "$WORK/id/graph-cache/properties.txt"
+
+      - name: Open place index (OSM POIs in the case corridors)
+        run: |
+          filter='nwr/tourism=museum,gallery,aquarium,zoo,theme_park,viewpoint,attraction,hotel,guest_house,motel,hostel,chalet
+            nwr/leisure=water_park,nature_reserve,park,garden
+            nwr/natural=waterfall,beach,volcano,peak,cave_entrance,hot_spring,spring
+            nwr/historic=castle,fort,manor,city_gate,kremlin,monastery,ruins,archaeological_site,monument,memorial
+            nwr/amenity=place_of_worship,restaurant,cafe,fast_food,food_court,fuel'
+          # Москва → Казань corridor box; Bali whole
+          osmium extract --bbox 36.9,54.6,49.6,57.3 "$WORK/ru/osm/region.osm.pbf" -o "$WORK/ru/corridor.pbf" --overwrite
+          for c in ru id; do
+            src="$WORK/$c/osm/region.osm.pbf"; [ "$c" = ru ] && src="$WORK/ru/corridor.pbf"
+            # shellcheck disable=SC2086
+            osmium tags-filter "$src" $filter -o "$WORK/$c/pois.pbf" --overwrite
+            osmium export "$WORK/$c/pois.pbf" -f geojsonseq -o "$WORK/$c/pois.geojsonseq" --overwrite
+          done
+          python3 tools/spike01/poi_index.py --in "$WORK/ru/pois.geojsonseq" --lang ru --out "$WORK/ru/index.jsonl"
+          python3 tools/spike01/poi_index.py --in "$WORK/id/pois.geojsonseq" --lang en --out "$WORK/id/index.jsonl"
+
+      - name: Start GraphHopper (RU 8989, ID 8992)
+        run: |
+          cd infra/routing
+          start() {  # name xmx graph port admin
+            nohup java "-Xmx$2" "-Xms$2" "-Ddw.graphhopper.datareader.file=/absent.pbf" \
+              "-Ddw.graphhopper.graph.location=$3" \
+              "-Ddw.server.application_connectors[0].port=$4" "-Ddw.server.application_connectors[0].bind_host=127.0.0.1" \
+              "-Ddw.server.admin_connectors[0].port=$5" "-Ddw.server.admin_connectors[0].bind_host=127.0.0.1" \
+              -jar "$JAR" server config.yml > "$WORK/out/server-$1.log" 2>&1 &
+          }
+          start ru 6g "$WORK/ru/graph-cache" 8989 8991
+          start id 1g "$WORK/id/graph-cache" 8992 8993
+          for port in 8989 8992; do
+            for i in $(seq 1 120); do curl -fs "http://127.0.0.1:$port/health" > /dev/null && break; sleep 5; done
+            curl -fs "http://127.0.0.1:$port/info" | python3 -c 'import json,sys; i=json.load(sys.stdin); print(i["version"], i["bbox"])'
+          done
+
+      - name: Plan the cases
+        env:
+          SPIKE_GH_URL_RU: http://127.0.0.1:8989
+          SPIKE_GH_URL_ID: http://127.0.0.1:8992
+        run: |
+          python3 tools/spike01/dynamic_plan.py --index RU="$WORK/ru/index.jsonl" --index ID="$WORK/id/index.jsonl" \
+            --out "$WORK/out" --baseline
+          cp "$WORK/ru/build.json" "$WORK/out/build-ru.json" || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spike01-report
+          path: ${{ env.WORK }}/out
+          retention-days: 30
