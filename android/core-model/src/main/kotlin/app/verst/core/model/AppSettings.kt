@@ -26,6 +26,8 @@ data class AppSettings(
     val folderUri: String? = null,
     /** The folder's display name, for the settings row. */
     val folderName: String? = null,
+    /** SRV-01: build the trip on the server (`POST /v1/trips/plan`) when online; the phone engine otherwise. */
+    val planOnServer: Boolean = false,
 ) {
     /** A setting that only takes effect after the app restarts (the palette is read once per process). */
     fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme

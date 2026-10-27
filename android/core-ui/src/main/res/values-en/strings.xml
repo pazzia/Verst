@@ -904,4 +904,19 @@
     <string name="settings_builds_seen">BUILDS ON THIS PHONE</string>
     <string name="settings_builds_row">Build %1$d · %2$s · since %3$s</string>
     <string name="settings_dev">For developers</string>
+    <!-- SRV-01 server (settings) -->
+    <string name="settings_server">SERVER</string>
+    <string name="settings_server_none">This build has no server: trips are planned on the phone</string>
+    <string name="settings_server_url">Address: %1$s</string>
+    <string name="settings_server_plan">Where to plan the trip</string>
+    <string name="settings_server_plan_phone">On the phone</string>
+    <string name="settings_server_plan_server">On the server</string>
+    <string name="settings_server_note">The route points and the crew go to the server. No trips are stored there. Offline, the trip is planned on the phone.</string>
+    <string name="settings_server_check">Check the connection</string>
+    <string name="settings_server_checking">Checking…</string>
+    <string name="settings_server_ok">The server answers in %1$d ms, this device is registered</string>
+    <string name="settings_server_ok_unregistered">The server answers in %1$d ms, but registration failed</string>
+    <string name="settings_server_failed">No connection: %1$s</string>
+    <string name="settings_server_last_server">The last trip was planned on the server in %1$d ms</string>
+    <string name="settings_server_last_phone">The last trip was planned on the phone (%1$s)</string>
 </resources>

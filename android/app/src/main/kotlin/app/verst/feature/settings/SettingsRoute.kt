@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import app.verst.BuildConfig
@@ -23,6 +24,7 @@ import app.verst.engine.EngineStatus
 import app.verst.nav.VerstFlow
 import app.verst.settings.AppPrefs
 import app.verst.settings.Themes
+import kotlinx.coroutines.launch
 
 /** D-IR-20: the settings screen with the app's state and the activity-bound actions (picker, restart, clipboard). */
 @Composable
@@ -33,6 +35,9 @@ fun SettingsRoute(flow: VerstFlow) {
     val status by app.engine.status.collectAsState()
     val catalogue by app.engine.catalogueVersion.collectAsState()
     var copied by remember { mutableStateOf(false) }
+    var serverChecking by remember { mutableStateOf(false) }
+    var serverCheck by remember { mutableStateOf<app.verst.data.net.ServerCheck?>(null) }
+    val scope = rememberCoroutineScope()
     val s = AppPrefs.settings
     val ready = status as? EngineStatus.Ready
     val build = BuildLines(
@@ -42,6 +47,7 @@ fun SettingsRoute(flow: VerstFlow) {
     val ui = SettingsUi(
         s, AppPrefs.rates, build, AppPrefs.builds, AppPrefs.folderStatus,
         themePending = Themes.isDay(ctx, s.theme) != Palette.day, copied = copied,
+        serverUrl = AppPrefs.serverUrl, serverChecking = serverChecking, serverCheck = serverCheck, lastPlan = app.gateway.lastPlan,
     )
     SettingsScreen(
         ui,
@@ -88,6 +94,19 @@ fun SettingsRoute(flow: VerstFlow) {
             }
 
             override fun developer() = flow.openDebug()
+
+            override fun planOnServer(on: Boolean) {
+                AppPrefs.update { it.copy(planOnServer = on) }
+            }
+
+            override fun checkServer() {
+                if (serverChecking) return
+                serverChecking = true
+                scope.launch {
+                    serverCheck = app.server.check()
+                    serverChecking = false
+                }
+            }
         },
     )
 }

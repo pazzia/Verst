@@ -227,6 +227,11 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 
 **Acceptance.** The beta runs on it for 4 weeks with ≥ 99 % uptime; daily backups are restorable (tested once).
 
+**Status 27.10.2026 — test server up, the app talks to it (SRV-01).**
+- The CEO's VM in the Netherlands (4 vCPU, 5.8 GB, Ubuntu 24.04) runs verst-api + PostgreSQL + daily backups behind its existing `nginx-certbot` container: `https://212-108-82-26.sslip.io/healthz` → ok, Let's Encrypt renews itself (`infra/api/README.md` "Test VM with its own nginx"). Routing is the road model until the graph is copied there. **Tests only** (friends and team): 152-FZ keeps the beta with real users on a VM in Russia.
+- The app (SRV-01): `ServerClient` registers the device (`POST /v1/devices`, token in `files/settings/server.json`), plans on the server over SSE (`POST /v1/trips/plan`) and shows «Проверить соединение» and «Где строить маршрут: на телефоне / на сервере» in the settings. The server is opt-in; offline or when the server is unreachable the phone engine plans and the settings say why (`ServerPlannerGateway`). The build knows its server from `VERST_SERVER_URL` (CI: the test VM).
+- Routing memory (routing.yml run 4): the Central + Volga graph (822 MB of files) serves 60.8 routes/s with the graph on disk (MMAP, 1 GB heap, cold start) against 65.8 routes/s on the heap (RSS 1.8 GB), all route and plan checks pass: the VM gets MMAP with a graph built in CI and copied over (`infra/routing/README.md` "Sizing").
+
 ### ENG-05 — Analytics funnel
 
 **Acceptance.**

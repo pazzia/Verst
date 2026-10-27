@@ -40,6 +40,8 @@ android {
         buildConfigField("String", "GIT_SHA", "\"${(System.getenv("VERST_GIT_SHA") ?: "local").take(12)}\"")
         // D-IR-20 build details: the UTC time CI built the APK (local builds say "local")
         buildConfigField("String", "BUILD_DATE", "\"${System.getenv("VERST_BUILD_DATE") ?: "local"}\"")
+        // SRV-01: the test backend (ADR-0020); empty = no server, the phone engine only
+        buildConfigField("String", "SERVER_URL", "\"${System.getenv("VERST_SERVER_URL") ?: ""}\"")
     }
     signingConfigs {
         create("demo") {

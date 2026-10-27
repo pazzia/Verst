@@ -50,6 +50,8 @@ concurrency:
 env:
   VERST_BUILD_NUMBER: ${{ github.run_number }}
   VERST_GIT_SHA: ${{ github.sha }}
+  # SRV-01: the CEO's test VM in the Netherlands (tests only, 152-FZ: the beta backend moves to Russia)
+  VERST_SERVER_URL: https://212-108-82-26.sslip.io
   JAVA_VERSION: "17"
   PYTHON_VERSION: "3.12"   # must equal chaquopy.defaultConfig.version (bytecode compiled at build time)
 

@@ -37,6 +37,8 @@ import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.ScreenRoot
+import app.verst.data.net.ServerCheck
+import app.verst.engine.PlanSource
 import app.verst.settings.BuildSeen
 import app.verst.settings.FolderStatus
 import java.text.SimpleDateFormat
@@ -66,6 +68,11 @@ data class SettingsUi(
     /** The theme picked differs from the palette this process draws with: offer a restart. */
     val themePending: Boolean,
     val copied: Boolean = false,
+    /** SRV-01: the backend of this build (null = none), the last connection check and where the last plan ran. */
+    val serverUrl: String? = null,
+    val serverChecking: Boolean = false,
+    val serverCheck: ServerCheck? = null,
+    val lastPlan: PlanSource? = null,
 )
 
 interface SettingsActions {
@@ -79,6 +86,8 @@ interface SettingsActions {
     fun writeFolderNow()
     fun copyBuild()
     fun developer()
+    fun planOnServer(on: Boolean)
+    fun checkServer()
 }
 
 @Composable
@@ -148,6 +157,37 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
                 stringResource(R.string.settings_storage_cloud), stringResource(R.string.settings_storage_cloud_sub),
                 selected = false, enabled = false, tag = "settings.storage.cloud", onClick = {},
             )
+
+            Section(stringResource(R.string.settings_server))
+            if (ui.serverUrl == null) {
+                Note(stringResource(R.string.settings_server_none), Modifier.testTag("settings.server.none"))
+            } else {
+                Note(stringResource(R.string.settings_server_url, ui.serverUrl))
+                Choices(
+                    listOf(false to stringResource(R.string.settings_server_plan_phone), true to stringResource(R.string.settings_server_plan_server)),
+                    ui.settings.planOnServer, "settings.server.plan", a::planOnServer,
+                )
+                Note(stringResource(R.string.settings_server_note))
+                Button(stringResource(R.string.settings_server_check), "settings.server.check", C.dash.control, C.text.primary, a::checkServer)
+                val status = when {
+                    ui.serverChecking -> stringResource(R.string.settings_server_checking)
+                    ui.serverCheck is ServerCheck.Ok && ui.serverCheck.registered -> stringResource(R.string.settings_server_ok, ui.serverCheck.ms)
+                    ui.serverCheck is ServerCheck.Ok -> stringResource(R.string.settings_server_ok_unregistered, ui.serverCheck.ms)
+                    ui.serverCheck is ServerCheck.Failed -> stringResource(R.string.settings_server_failed, ui.serverCheck.reason)
+                    else -> null
+                }
+                if (status != null) {
+                    val failed = ui.serverCheck is ServerCheck.Failed && !ui.serverChecking
+                    Txt(status, T.body.sm, if (failed) C.accent.redText else C.text.secondary, Modifier.testTag("settings.server.status"))
+                }
+                ui.lastPlan?.let { p ->
+                    Note(
+                        if (p.server) stringResource(R.string.settings_server_last_server, p.ms)
+                        else stringResource(R.string.settings_server_last_phone, p.fallbackReason ?: "—"),
+                        Modifier.testTag("settings.server.last"),
+                    )
+                }
+            }
 
             Section(stringResource(R.string.settings_build))
             val b = ui.build

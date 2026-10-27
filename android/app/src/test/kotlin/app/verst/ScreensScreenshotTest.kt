@@ -1466,6 +1466,8 @@ class ScreensScreenshotTest {
         override fun writeFolderNow() { calls += "now" }
         override fun copyBuild() { calls += "copy" }
         override fun developer() { calls += "dev" }
+        override fun planOnServer(on: Boolean) { calls += "server:$on" }
+        override fun checkServer() { calls += "check" }
     }
 
     @Test

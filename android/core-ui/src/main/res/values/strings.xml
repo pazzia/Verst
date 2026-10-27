@@ -904,4 +904,19 @@
     <string name="settings_builds_seen">СБОРКИ НА ЭТОМ ТЕЛЕФОНЕ</string>
     <string name="settings_builds_row">Сборка %1$d · %2$s · с %3$s</string>
     <string name="settings_dev">Для разработчиков</string>
+    <!-- SRV-01 server (settings) -->
+    <string name="settings_server">СЕРВЕР</string>
+    <string name="settings_server_none">В этой сборке сервера нет: маршрут строится на телефоне</string>
+    <string name="settings_server_url">Адрес: %1$s</string>
+    <string name="settings_server_plan">Где строить маршрут</string>
+    <string name="settings_server_plan_phone">На телефоне</string>
+    <string name="settings_server_plan_server">На сервере</string>
+    <string name="settings_server_note">На сервер уходят точки маршрута и состав экипажа. Поездки на нём не хранятся. Нет связи — маршрут строится на телефоне.</string>
+    <string name="settings_server_check">Проверить соединение</string>
+    <string name="settings_server_checking">Проверяем…</string>
+    <string name="settings_server_ok">Сервер отвечает за %1$d мс, устройство зарегистрировано</string>
+    <string name="settings_server_ok_unregistered">Сервер отвечает за %1$d мс, но регистрация не прошла</string>
+    <string name="settings_server_failed">Нет связи: %1$s</string>
+    <string name="settings_server_last_server">Последний маршрут построен на сервере за %1$d мс</string>
+    <string name="settings_server_last_phone">Последний маршрут построен на телефоне (%1$s)</string>
 </resources>

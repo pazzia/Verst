@@ -18,10 +18,25 @@ class VerstApp : Application(), coil.ImageLoaderFactory {
     /** D-IR-20: saved trips in the app, mirrored into the folder the user picked (settings «Где хранить поездки»). */
     val tripStore: app.verst.settings.MirroringTripStore by lazy { app.verst.settings.MirroringTripStore(FileTripStore(this), this) }
 
+    /** SRV-01: the test backend of this build (ADR-0020); the phone engine stays the fallback. */
+    val server: app.verst.data.net.ServerClient by lazy {
+        app.verst.data.net.ServerClient(
+            { app.verst.settings.AppPrefs.serverUrl }, app.verst.settings.AppPrefs.serverAuth,
+            BuildConfig.VERSION_NAME, { app.verst.settings.AppPrefs.settings.language.tag },
+        )
+    }
+
+    val gateway: app.verst.engine.ServerPlannerGateway by lazy {
+        app.verst.engine.ServerPlannerGateway(
+            ChaquopyPlannerGateway(engine), server,
+            enabled = { app.verst.settings.AppPrefs.settings.planOnServer }, online = { flow.connectivity.online },
+        )
+    }
+
     /** App-scoped (survives activity recreation); created on first use from the main thread. */
     val flow: VerstFlow by lazy {
         VerstFlow(
-            ChaquopyPlannerGateway(engine),
+            gateway,
             CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
             tripStore,
         ) { engine.restart() }.also { it.locator = AndroidLocator(this) }
