@@ -212,11 +212,12 @@ jobs:
           python3 infra/routing/check_routes.py --url http://127.0.0.1:8989 --out "$M/check" \
             --source "MMAP check" > "$M/check.txt" 2>&1 && echo "MMAP: all route and plan checks pass" | tee -a "$GITHUB_STEP_SUMMARY" \
             || { echo "MMAP: route/plan checks failed (see mmap/check.txt)" | tee -a "$GITHUB_STEP_SUMMARY"; tail -40 "$M/check.txt"; }
-          pid=$(pgrep -f config-mmap.yml | head -1)
+          pid=$(pgrep -n -x java)   # the java process itself, not the sudo/systemd-run wrapper that carries the same cmdline
+          scope=$(sudo cat "/proc/$pid/cgroup" | sed 's/^0:://')
           { ps -o rss=,vsz= -p "$pid" | awk '{printf "MMAP server RSS %.2f GB, VSZ %.2f GB\n", $1/1048576, $2/1048576}'
             grep -E '^(RssAnon|RssFile)' "/proc/$pid/status"
-            scope=$(sudo cat "/proc/$pid/cgroup" | sed 's/^0:://')
-            echo "cgroup memory.peak $(( $(sudo cat /sys/fs/cgroup$scope/memory.peak) / 1048576 )) MB of cap $CAP"; } | tee "$M/memory.txt"
+            echo "scope $scope: memory.max $(sudo cat /sys/fs/cgroup$scope/memory.max), memory.current $(( $(sudo cat /sys/fs/cgroup$scope/memory.current) / 1048576 )) MB, memory.peak $(( $(sudo cat /sys/fs/cgroup$scope/memory.peak) / 1048576 )) MB (heap + page cache of the graph files)"
+            sudo grep -E '^(anon|file) ' /sys/fs/cgroup$scope/memory.stat | awk '{printf "  %s %d MB\n", $1, $2/1048576}'; } | tee "$M/memory.txt"
           { echo '```'; cat "$M/memory.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           sudo kill "$pid" || true
 
