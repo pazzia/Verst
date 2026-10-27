@@ -64,6 +64,9 @@ W2–W6   ENG-01 road routing ──▶ ENG-02 tolls ──▶ ENG-04 backend
 W5–W8   ENG-05 analytics · ENG-06 web planner (MVP) · DES-01 usability test
 W8–W12  VAL-04 closed beta · VAL-05 field trips · BIZ-02…05 revenue pilots · BIZ-06 Pro waitlist pricing test
 W12–W13 INV-01 data room · INV-02 deck
+W1–W4   SOC-01 demand check for community routes (inside VAL-01 interviews)
+Now     SPIKE-01 dynamic planning prototype (research, allowed under the freeze) ──▶ after M2: ARCH-01 · DATA-05 · ENG-10 · DES-03 ──▶ ENG-09 / LEG-03 · BIZ-07
+After   SOC-02 saved routes (after M2) ──▶ SOC-03 public routes + ratings (after VAL-04) ──▶ SOC-04 paid routes · SOC-05 contests
 ```
 
 ## Task list
@@ -91,7 +94,7 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 | DATA-03 | User verification loop: "here they let us in with the dog: yes/no", "closed", "price wrong" | P1 | Developer + Designer + Data Curator | ENG-04, DATA-01 | 3 d |
 | DATA-04 | "Verified places per route" as a tracked KPI in the admin | P1 | Architect + Data Curator | DATA-02 | 1 d |
 | LEG-01 | Lawyer's opinion on ODbL share-alike for the Place DB (OSM import in SPEC §9 step 1) | P0 | Legal & Compliance (CEO hires lawyer) | — | W1 |
-| LEG-02 | Legal entity (self-employed / ИП / ООО), Travelpayouts and partner accounts, privacy policy | P0 | Legal & Compliance + CEO | — | W1–W2 |
+| LEG-02 | Legal entity (self-employed / ИП / ООО), Travelpayouts and partner accounts, Яндекс hand-off signing key (D-IR-17), privacy policy | P0 | Legal & Compliance + CEO | — | W1–W2 |
 | BIZ-01 | Unit-economics model in a spreadsheet: revenue per planned trip by stream versus CAC | P0 | Business Analyst | — | 1 d, then weekly |
 | BIZ-02 | Hotel chains growing direct sales against the 17 % aggregator commission: offer a direct channel | P1 | Partnerships (CEO sends) | ENG-03 | W4–W12 |
 | BIZ-03 | Regional tourism body pilot (B2G): paid placement of a ready route | P1 | Partnerships (CEO sends) | DATA-02 | W6–W12 |
@@ -100,6 +103,20 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 | BIZ-06 | Trip Pro waitlist with a price test (3 price points) | P1 | Growth Marketer + Developer | ENG-05 | 2 d |
 | DES-01 | Usability test of the «За рулём» UI on 10 people | P1 | UX Specialist + Designer | — | 3 d |
 | DES-02 | Seasonality plan: winter ready routes (New Year, Карелия, Казань) | P2 | Designer + Growth Marketer | DATA-02 | 2 d |
+| SPIKE-01 | Prototype of dynamic planning on provider-agnostic sources (ADR-0021 §5): Москва → Казань and Денпасар → Убуд → Ловина; quality, time, cost per plan | P1 | Architect + Developer + Data Curator (rating) | ENG-01 | 1–2 wk |
+| ARCH-01 | Capability ports, provider manifest and `ProviderSelector` with fallback to open data (ADR-0021 §2.1–2.3) | P1 | Architect | SPIKE-01 | 3 d |
+| DATA-05 | Server-side open place index (OSM + Wikidata) with corridor search, beyond Russia; the packaged catalogue becomes the offline cache | P1 | Architect + Data Curator | SPIKE-01, LEG-01 | 5–7 d |
+| ENG-08 | Routing graphs per country (Russia whole, then the countries chosen after SPIKE-01) | P2 | Architect | ENG-01 | 3 d |
+| ENG-09 | Commercial place search / enrichment adapters with licence-driven storage, attribution and cost guard (ADR-0021 §2.4–2.6) | P2 | Developer + Legal & Compliance | ARCH-01, LEG-03 | 5 d |
+| ENG-10 | `POST /v2/plan` on the server with the preference profile; the app plans online through it and falls back to the on-device engine offline | P1 | Architect + Developer | ARCH-01, ENG-04 | 3–5 d |
+| DES-03 | Questionnaire 2.0 (level, density, interests, free text) and vendor-map display where a licence requires it | P1 | Designer + UX Specialist | SPIKE-01 | 3 d |
+| LEG-03 | Terms review of each candidate provider (storage, display, attribution) and the foreign-entity question for providers abroad | P1 | Legal & Compliance (lawyer) | LEG-02 | 1 wk |
+| BIZ-07 | Cost per plan of commercial providers in the BIZ-01 model; budget per plan and per month | P1 | Business Analyst | SPIKE-01 | 1 d |
+| SOC-01 | Demand check for user and author routes: past-behaviour question in the VAL-01 interviews | P1 | UX Specialist (CEO asks) | — | 0.5 d |
+| SOC-02 | Save a planned or driven trip as a personal route and replan it later as a ready route | P2 | Architect + Developer + Designer | M2 (feature freeze), SOC-01 | 3 d |
+| SOC-03 | Public user and author routes, rated only by people who drove them | P2 | Architect + Developer + Designer + Data Curator (moderation) | SOC-02, VAL-04, DATA-03, LEG-02 | 5 d |
+| SOC-04 | Paid author routes (marketplace with a revenue share) | P2 | Business Analyst + Legal & Compliance + Developer | SOC-03, LEG-02 | 5 d |
+| SOC-05 | Contests with a cash prize for the best-rated routes | P2 | Growth Marketer + Legal & Compliance (CEO approves the prize fund) | SOC-03, LEG-02 | 2 d, then per contest |
 | TEAM-01 | Hire a part-time paid curator | P0 | CEO (Data Curator writes the brief) | LEG-02 | W2 |
 | TEAM-02 | Find a co-founder or advisor for partnerships and sales (tour operator, OTA or regional tourism background) | P1 | CEO | — | W1–W12 |
 | INV-01 | Data room: metrics, unit economics, legal, cap table, 12-month plan | P0 | Business Analyst + CEO | M1–M5 | 2 d |
@@ -259,7 +276,7 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 
 ### LEG-02 — Entity and accounts
 
-**Acceptance.** A legal entity for payouts; Travelpayouts (or a direct partner) account with the `verst_app` marker; RuStore developer account; privacy policy and terms published (SPEC §16, 152-FZ).
+**Acceptance.** A legal entity for payouts; Travelpayouts (or a direct partner) account with the `verst_app` marker; RuStore developer account; privacy policy and terms published (SPEC §16, 152-FZ). The Яндекс URL-signing key is requested once the entity, the domain and the RuStore page exist, and arrives before VAL-04 (D-IR-17); the app can already sign the links; the key is to live on our backend, not in the public APK (decision open).
 
 ---
 
@@ -314,6 +331,125 @@ Compare it with cost per install and cost per planned trip from VAL-02. The revi
 ### DES-02 — Seasonality
 
 **Acceptance.** 3 winter ready routes specified; a note on what changes in the engine in winter (daylight, slower speeds, closed sights).
+
+---
+
+## Community routes (CEO idea, Oct 26, 2026)
+
+**Idea.**
+- A trip a user planned or drove can be saved and reused later as a ready route.
+- Users and invited authors publish routes; people who drove a route rate it, so the best routes rise to the top. Authors can be local guides, travel bloggers or regional tourism bodies.
+- Later stages:
+  - paid author routes, as a marketplace with a revenue share;
+  - contests with a cash prize for the routes that collect the most positive ratings.
+
+**Why it matters to the investor.** It answers three gaps from the review:
+- **Content.** Today every ready route is built by the team (DATA-02). Community routes add content without adding curators.
+- **Distribution.** An author who publishes a route links to it for their own audience, so authors are a growth channel as well as content.
+- **Moat and money.** A catalogue rated by real drivers is hard to copy and gives a network effect, and the marketplace commission is a second revenue stream.
+
+**Risks to manage.**
+- **Cold start.** Ratings mean nothing with few users.
+  - Seed the catalogue with author routes first: invited authors, the 10 curated routes (DATA-02) and regional bodies (BIZ-03).
+  - Open publishing to all users only after the closed beta (VAL-04).
+- **Trust.** The product's promise is honest data. A community route keeps only the choice of stops and overnights; the engine re-checks every stop at plan time (opening hours, crew filters, «не проверено» per ADR-0019).
+- **Rating fraud.** The risk is highest once money is involved.
+  - Only users who confirmed they drove the route can rate it (`trip_driven_confirmed`, `docs/traction/tracking-plan.md`).
+  - One rating per person per route.
+  - Anomalies are reviewed before any payout.
+- **Privacy (152-FZ).** A GPS track is personal data and can reveal a home address.
+  - Publish the route's stops, never the raw track, and cut the first and last kilometres.
+  - Ask for explicit consent before publishing.
+  - The author name is a pseudonym by default.
+- **Legal.** Everything below goes to Legal before launch; it needs LEG-02.
+  - Terms of use: a licence for user content and the moderation duty.
+  - Contest rules (ГК РФ гл. 57, public contest). Entry is free, so the contest is not a lottery (138-FZ).
+  - Prize tax: НДФЛ, with the organiser as tax agent. If the contest counts as advertising, prizes above 4 000 ₽ a year are taxed at 35 %.
+  - Paid routes need a legal entity, payouts to authors (самозанятые or ИП) and receipts (54-FZ).
+- **Feature freeze.** The app code waits for M2. The demand check (SOC-01) runs now and decides whether SOC-03…05 go ahead.
+
+### SOC-01 — Demand check (now, no code)
+
+**Description.** Add one past-behaviour question to the VAL-01 interview kit, after Q6: «Вы когда-нибудь ехали по чужому маршруту — из блога, Telegram-канала, от друзей? А своим маршрутом после поездки с кем-нибудь делились? Как?». Q21 already asks whether people have paid for a ready route.
+
+**Acceptance.** `docs/traction/interviews.md` records three shares of interviewees: those who drove someone else's route in the last 2 years, those who shared their own, and those who paid for one. The go/no-go for SOC-03…05 is written next to these numbers.
+
+### SOC-02 — Save and reuse a route
+
+**Description.**
+- «Сохранить как маршрут» on the waybill keeps the trip's stops and overnights as a personal ready route.
+- The route can be replanned for new dates and a different crew; the engine re-checks every stop.
+- After a confirmed drive, the user marks which stops they actually made (the same flow as DATA-03) and saves the route as driven.
+- Recording the drive automatically needs background location (foreground service, a RuStore permission review). It is a later option, not the first version.
+- Routes are stored on the device first; backend sync (ENG-04) is optional.
+
+**Acceptance.**
+- A saved route replans within the ready-route time budget.
+- Replanning with a different crew applies the crew filters.
+- No raw GPS track is stored.
+
+### SOC-03 — Public routes and ratings
+
+**Description.**
+- An author publishes a saved route with a title, a short description and photos they own.
+- The catalogue shows routes near the user's start, sorted by rating from people who drove them.
+- A route goes public only after the Data Curator's moderation queue. Users can report wrong or unsafe content.
+
+**Acceptance.**
+- At least 20 author routes before publishing opens to all users.
+- Ratings come only from confirmed drivers.
+- Moderation takes 48 h or less.
+- Four weeks after launch, the share of planned trips started from community routes is measured.
+
+### SOC-04 — Paid author routes
+
+**Description.**
+- The author sets a price. The preview shows the outline; the buyer gets the full route with the author's notes and tips.
+- Revenue is shared with the author.
+- Run a price test first, as in BIZ-06, without taking payments.
+
+**Acceptance.**
+- BIZ-01 is updated with the marketplace commission.
+- A lawyer approves the payout scheme.
+- The first 10 paid sales are made.
+
+### SOC-05 — Contests
+
+**Description.** A contest per season or holiday, for example «лучший маршрут на майские». A cash prize goes to the route with the most positive ratings from confirmed drivers. The rules are published before the start, and entry is free.
+
+**Acceptance.**
+- Legal approves the rules.
+- Anti-fraud review is done before the payout.
+- The effect is measured against the month before: new routes published and trips planned during the contest.
+
+---
+
+## Dynamic planning without vendor lock-in (CEO concept, Oct 27, 2026; ADR-0021)
+
+**Concept.**
+- The user gives any two points in any country, plus wishes and constraints. The engine builds the road skeleton, searches places along it in live data, scores them against the questionnaire and re-routes through the best ones.
+- Good trips are saved, and an owner can publish one for others to repeat exactly (SOC-02/03).
+- **No binding to a vendor.** Each capability (routing, place search, enrichment, lodging, map display, hand-off) is served by a provider chosen per request: coverage, licence, budget and health decide. The chain always ends in open data and our own facts.
+
+**Why not one vendor.**
+- Google or Яндекс costs ≈ $1–2 per plan against ≈ 3 ₽ of revenue per trip.
+- Their terms forbid storing place data, so saved and shared trips would break.
+- Google billing is closed to Russian companies.
+- It means lock-in to the main platform competitor.
+
+**Order.**
+1. SPIKE-01 measures quality, time and cost per plan on Москва → Казань and a Bali corridor.
+2. Then ARCH-01, DATA-05 and ENG-10, after M2 under the feature freeze unless the CEO moves it.
+3. ENG-09 and LEG-03 for the commercial providers.
+4. DES-03 for the questionnaire and vendor maps.
+5. BIZ-07 for the money.
+
+**Acceptance (SPIKE-01).** The report gives:
+- the share of stops worth stopping at, against the current catalogue;
+- the share of stops with known hours;
+- server plan time p95 ≤ 5 s;
+- the commercial cost per plan in ₽;
+- a go / no-go.
 
 ---
 

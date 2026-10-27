@@ -213,8 +213,12 @@ class VerstFlow(
         private set
     var handoffRememberedApp: HandoffApp? by mutableStateOf(null)
         private set
-    /** ADR-0015 §1: the signing key has not arrived; unsigned → Карты get the whole day, Навигатор the next point. */
-    var handoffSigned = false
+    /**
+     * ADR-0015 §1: the build's Яндекс signing key (MainActivity, from BuildConfig). Without it the hand-off is
+     * unsigned: Карты get the whole day and the Навигатор the next point only (5 unsigned launches a day).
+     */
+    var handoffSigner: app.verst.core.model.HandoffSigner? = null
+    val handoffSigned: Boolean get() = handoffSigner != null
 
     // ---- 5.9 cards
     var card: CardState? by mutableStateOf(null)
@@ -1294,7 +1298,7 @@ class VerstFlow(
         dayHandoff = null
         val session = tripSession
         scope.launch {
-            val h = engineHandoff(r.tripJson, HandoffArgs.day(day)) ?: r.trip.daysList.firstOrNull { it.day == day }?.let { NaviLinks.day(it) }?.toDto(day)
+            val h = engineHandoff(r.tripJson, HandoffArgs.day(day, handoffSigner?.client)) ?: r.trip.daysList.firstOrNull { it.day == day }?.let { NaviLinks.day(it) }?.toDto(day)
             if (session == tripSession && dayMenu == day) dayHandoff = h
         }
     }
@@ -1346,7 +1350,7 @@ class VerstFlow(
     }
 
     private suspend fun dayHandoffOf(r: PlanResultDto, day: Int): HandoffDto? =
-        engineHandoff(r.tripJson, HandoffArgs.day(day)) ?: r.trip.daysList.firstOrNull { it.day == day }?.let { NaviLinks.day(it) }?.toDto(day)
+        engineHandoff(r.tripJson, HandoffArgs.day(day, handoffSigner?.client)) ?: r.trip.daysList.firstOrNull { it.day == day }?.let { NaviLinks.day(it) }?.toDto(day)
 
     /** A tab: «День N» or «До след.» ([day] = null, the next point of the sheet's day). */
     fun handoffScope(day: Int?) {
@@ -1439,7 +1443,7 @@ class VerstFlow(
         stopHandoff = null
         val session = tripSession
         scope.launch {
-            val h = engineHandoff(r.tripJson, HandoffArgs.fromStop(stop.id)) ?: NaviLinks.fromStop(r.trip, stop.id)?.toDto(null)
+            val h = engineHandoff(r.tripJson, HandoffArgs.fromStop(stop.id, handoffSigner?.client)) ?: NaviLinks.fromStop(r.trip, stop.id)?.toDto(null)
             if (session == tripSession && stopMenu?.id == stop.id) stopHandoff = h
         }
     }
@@ -1485,6 +1489,7 @@ class VerstFlow(
 
     private suspend fun engineHandoff(routeJson: String, options: String): HandoffDto? =
         (gateway.handoff(routeJson, options) as? EngineResult.Ok)?.value?.takeIf { h -> h.parts.isNotEmpty() }
+            ?.let { h -> handoffSigner?.sign(h) ?: h }
 
     /**
      * One tap opens the target (no chooser); a web fallback says so; offline without an app → «нужен интернет».
@@ -2293,7 +2298,7 @@ class VerstFlow(
     private fun loadWalkHandoff() {
         val w = walk ?: return
         scope.launch {
-            val h = engineHandoff(w.json, HandoffArgs.walk())
+            val h = engineHandoff(w.json, HandoffArgs.walk(handoffSigner?.client))
             if (walk?.id == w.id) walkHandoff = h ?: localWalkHandoff(w)
         }
     }

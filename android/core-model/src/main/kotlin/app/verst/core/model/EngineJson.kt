@@ -161,23 +161,33 @@ data class WalkRequest(
     }.toString()
 }
 
-/** `handoff` options (ADR-0014): car day / from a stop / from here, or walk. */
+/**
+ * `handoff` options (ADR-0014): car day / from a stop / from here, or walk. [client]: the Яндекс signing id
+ * (ADR-0015 §1); the engine then adds `client=` to the app links and lists them in `toSign` for [HandoffSigner].
+ */
 object HandoffArgs {
-    fun day(day: Int): String = buildJsonObject {
+    fun day(day: Int, client: String? = null): String = buildJsonObject {
         put("mode", "car")
         put("day", day)
         put("fromHere", true)
+        signing(client)
     }.toString()
 
-    fun fromStop(stopId: String): String = buildJsonObject {
+    fun fromStop(stopId: String, client: String? = null): String = buildJsonObject {
         put("mode", "car")
         put("fromStopId", stopId)
+        signing(client)
     }.toString()
 
-    fun walk(): String = buildJsonObject {
+    fun walk(client: String? = null): String = buildJsonObject {
         put("mode", "walk")
         put("fromHere", false)
+        signing(client)
     }.toString()
+
+    private fun kotlinx.serialization.json.JsonObjectBuilder.signing(client: String?) {
+        if (client != null) put("signing", buildJsonObject { put("client", client) })
+    }
 }
 
 /** Bodies of `patch_cost` (A§16.9) and `estimate_points`. */

@@ -7,7 +7,8 @@ GraphHopper 11.0 with two car profiles over a Geofabrik Russia extract, used by 
 | File | What |
 | --- | --- |
 | `config.yml` | GraphHopper config: profiles `car` and `car_avoid_tolls` (CH), encoded values for path details, snap radius |
-| `custom_models/avoid_tolls.json` | `toll == ALL` → priority ×0.01 (the bundled `car.json` comes from the jar) |
+| `custom_models/verst_car.json` | The bundled `car.json` plus one rule: a toll trunk (М-12, ЦКАД) runs at the motorway default of 100 km/h, because `maxspeed=RU:rural` is not parsed and such roads otherwise fall back to the 70 km/h trunk default |
+| `custom_models/avoid_tolls.json` | `toll == ALL` → priority ×0.01 |
 | `build_graph.sh` | Download the extract (Central + Volga, Central, or Russia), merge, import, write `build.json` |
 | `Dockerfile`, `docker-compose.yml` | The server and the weekly build on the maps VM |
 | `check_routes.py`, `references.json` | The ENG-01 integration check: reference trips, full plans, recordings |
@@ -89,7 +90,9 @@ Estimate (scaled by PBF size from the planet figures; **to be replaced by the CI
 - **Per-request custom models** (`ch.disable=true` + `profiles_lm`): needed only for request-time weighting
   (e.g. "avoid unpaved"). Costs an extra LM preparation (planet: ~80 GB and ~4 h, deploy.md).
 - **`max_speed_calculator` / urban density**: country speed defaults; slower import. The km gate does not need
-  them; the minutes are checked against Яндекс Карты in VAL-05 field trips.
+  them; the minutes are checked against Яндекс Карты in VAL-05 field trips. One narrow substitute is on:
+  `verst_car.json` drives toll trunks at 100 km/h, because without it М-12 ties with М-7 (both 70 km/h) and
+  Москва → Казань never takes М-12 (first real-data run, Oct 26, 2026).
 
 ## CI
 

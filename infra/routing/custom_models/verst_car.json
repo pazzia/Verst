@@ -1,0 +1,21 @@
+// Verst car model (ADR-0017 amendment, Oct 26 2026). Replaces the bundled car.json in both profiles.
+//
+// Why: GraphHopper derives car_average_speed from `highway` plus a numeric `maxspeed`. Russian legal-default tags such as
+// `maxspeed=RU:rural` are not numbers, so a tolled expressway mapped as highway=trunk (М-12 «Восток», ЦКАД, parts of
+// М-11) falls back to the trunk default of 70 km/h, the same as the old two-lane М-7 through towns. The first CI run on
+// real data routed Москва → Казань over М-7 even with tolls allowed; forced through М-12 it was 19 min "slower".
+//
+// Rule: a toll trunk is a grade-separated expressway with a 110 km/h legal limit on most of its length, so it gets the
+// motorway default (100 = 110 × 0.9, GraphHopper's own factor). A numeric sign still wins (`max_speed` is +inf when the
+// tag is missing or not a number). Everything else is exactly the bundled car.json.
+{
+  "distance_influence": 90,
+  "priority": [
+    { "if": "!car_access", "multiply_by": "0" }
+  ],
+  "speed": [
+    { "if": "road_class == TRUNK && toll == ALL", "limit_to": "100" },
+    { "else": "", "limit_to": "car_average_speed" },
+    { "if": "road_class == TRUNK && toll == ALL && max_speed < 150", "limit_to": "max_speed * 0.9" }
+  ]
+}

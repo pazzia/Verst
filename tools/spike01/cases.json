@@ -1,0 +1,41 @@
+{
+  "_about": "SPIKE-01 cases (ADR-0021 §5). points: [lat, lon], first = start, last = finish, middle = fixed vias. profile v1 (ADR-0021 §2.7); freeText is not parsed in the spike.",
+  "cases": [
+    {
+      "id": "msk_kzn_family",
+      "title": "Москва → Казань, семья с ребёнком 7 лет",
+      "country": "RU",
+      "points": [[55.7558, 37.6173], [55.7963, 49.1088]],
+      "profile": {
+        "crew": {"adults": 2, "children": [7], "pets": null},
+        "dailyKm": 500, "level": "comfort", "density": 3, "avoidTolls": false,
+        "interests": {"history": 1.0, "kids": 1.0, "nature": 0.7, "views": 0.5, "religion": 0.3},
+        "freeText": "Хотим, чтобы ребёнку было интересно, и поменьше церквей"
+      }
+    },
+    {
+      "id": "msk_kzn_dog",
+      "title": "Москва → Казань без платных дорог, двое взрослых и собака",
+      "country": "RU",
+      "points": [[55.7558, 37.6173], [55.7963, 49.1088]],
+      "profile": {
+        "crew": {"adults": 2, "children": [], "pets": {"dog": "medium"}},
+        "dailyKm": 450, "level": "active", "density": 3, "avoidTolls": true,
+        "interests": {"nature": 1.0, "views": 1.0, "history": 0.6, "religion": 0.2},
+        "freeText": "Природа и виды, с собакой"
+      }
+    },
+    {
+      "id": "bali_family",
+      "title": "Бали: Денпасар → Убуд → Ловина, семья с ребёнком 7 лет",
+      "country": "ID",
+      "points": [[-8.6705, 115.2126], [-8.5069, 115.2625], [-8.1586, 115.0253]],
+      "profile": {
+        "crew": {"adults": 2, "children": [7], "pets": null},
+        "dailyKm": 120, "level": "comfort", "density": 4, "avoidTolls": false,
+        "interests": {"nature": 1.0, "views": 1.0, "religion": 0.8, "kids": 0.8, "beach": 0.6, "history": 0.5},
+        "freeText": "Водопады, рисовые террасы, пара храмов, не слишком долго в машине"
+      }
+    }
+  ]
+}

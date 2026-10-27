@@ -85,6 +85,20 @@ everything before it.
 
 ---
 
+### As built: signing in the app (2026-10-26)
+
+- **Signer.** `core-model/HandoffSigner.kt` follows the scheme above:
+  - SHA256withRSA over the URL string;
+  - the signature is Base64-encoded, URL-encoded and appended as the last `&signature=`;
+  - it takes a PKCS#8 key, as PEM or bare Base64.
+- **Engine call.** `HandoffArgs.day/fromStop/walk(…, client)` pass `signing.client` to the engine. `VerstFlow.engineHandoff` then signs every link the engine lists in `toSign`.
+- **Navigator choice.** `handoffSigned` is now `handoffSigner != null`. With a key, «В Навигатор: день N» sends the whole day.
+- **Where the key comes from: open.** Shipping the private key inside the public APK was blocked as a secret leak.
+  - Recommended: sign on the backend (ENG-04), so the key never leaves the server.
+  - Alternative: the key in `BuildConfig`, as decided above, which needs the CEO's explicit yes.
+  - Until a signer is set, `handoffSigner` stays null and the unsigned hand-off ships.
+- **Status.** The application is waiting for an entity, a domain and a RuStore page (D-IR-17).
+
 ## 2. POI quality, exclusions, diversity, and the «Красная площадь» detour
 
 ### Findings (reproduced on `russia_v1`, catalogue `wd-20261025-r7.2`)

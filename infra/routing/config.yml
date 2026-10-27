@@ -11,7 +11,9 @@ graphhopper:
 
   ##### Profiles (ADR-0017 §3) #####
   # Two speed-mode (CH) profiles instead of one profile + per-request custom model:
-  # - `car`: the bundled car.json (car_access, car_average_speed; avoids private roads since 11.0).
+  # - `car`: custom_models/verst_car.json = the bundled car.json (car_access, car_average_speed; avoids private roads
+  #   since 11.0) plus one rule: a toll trunk (М-12, ЦКАД, М-11 parts) is driven at the motorway default of 100 km/h,
+  #   because `maxspeed=RU:rural` is not parsed and such roads otherwise fall back to the 70 km/h trunk default.
   # - `car_avoid_tolls`: the same plus custom_models/avoid_tolls.json (priority x0.01 on toll == ALL), i.e. a
   #   toll edge costs 100x its time, the same soft rule as FakeRouting.TOLL_AVOID_FACTOR. Toll roads stay usable
   #   when there is no other way.
@@ -22,9 +24,9 @@ graphhopper:
   # by metres. Revisit with ENG-04 (see infra/routing/README.md "Knobs").
   profiles:
     - name: car
-      custom_model_files: [car.json]
+      custom_model_files: [verst_car.json]
     - name: car_avoid_tolls
-      custom_model_files: [car.json, avoid_tolls.json]
+      custom_model_files: [verst_car.json, avoid_tolls.json]
   custom_models.directory: custom_models
 
   profiles_ch:
@@ -33,7 +35,8 @@ graphhopper:
   profiles_lm: []
 
   ##### Encoded values #####
-  # car.json needs car_access, car_average_speed, road_access (comment at the top of the bundled car.json).
+  # verst_car.json (like the bundled car.json) needs car_access, car_average_speed, road_access; its toll rule
+  # uses road_class, toll and max_speed.
   # Path details used by verst_planner.adapters.graphhopper: road_class, toll (encoded values) and street_ref,
   # distance, time, leg_distance (built in, PathDetailsBuilderFactory in graphhopper-web-11.0.jar).
   # road_class_link, road_environment, max_speed: kept for ENG-02 (toll segments on links) and diagnostics.
