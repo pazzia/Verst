@@ -567,6 +567,7 @@ def units_to_json(u: CostUnits) -> Json:
                 "rub": t.rub,
                 "night": t.night,
                 "asOf": t.as_of,
+                **({"weekend": True} if t.weekend else {}),
             }
             for t in u.tolls
         ],
@@ -656,7 +657,10 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
             trip_km=f.get("tripKm"),
         ),
         tolls=tuple(
-            TollUnit(t["segmentId"], t["roadRef"], t["rub"], t["night"], t["asOf"]) for t in d["tolls"]
+            TollUnit(
+                t["segmentId"], t["roadRef"], t["rub"], t["night"], t["asOf"], bool(t.get("weekend", False))
+            )
+            for t in d["tolls"]
         ),
         nights=tuple(
             NightUnit(

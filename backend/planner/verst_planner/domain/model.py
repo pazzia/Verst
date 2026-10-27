@@ -250,6 +250,8 @@ class TollSegment:
     night_from: time
     night_to: time
     as_of: date
+    tariff_weekend_rub: Decimal | None = None
+    """[ENG-02] Day tariff Friday to Sunday (Автодор category 1); None = the weekday tariff every day."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -431,6 +433,7 @@ class TollUnit:
     rub: int
     night: bool
     as_of: str
+    weekend: bool = False
 
 
 @dataclass(frozen=True, slots=True)

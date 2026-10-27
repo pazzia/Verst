@@ -1839,11 +1839,17 @@
       {
         "key": "tolls",
         "title": "Платные дороги",
-        "rub": 0,
-        "formula": "платных дорог нет",
-        "asOf": "2026-10",
+        "rub": 400,
+        "formula": "М-4: 400 ₽",
+        "asOf": "2026-03",
         "enabled": true,
-        "breakdown": []
+        "breakdown": [
+          {
+            "label": "М-4",
+            "formula": "М-4, в выходные",
+            "rub": 400
+          }
+        ]
       },
       {
         "key": "lodging",
@@ -1892,7 +1898,7 @@
       {
         "key": "reserve",
         "title": "Резерв 10%",
-        "rub": 1570,
+        "rub": 1610,
         "formula": "на пробки и «давай заедем»",
         "asOf": "2026-09",
         "enabled": true,
@@ -1900,11 +1906,11 @@
       }
     ],
     "reserveOn": true,
-    "subtotalRub": 15650,
-    "totalRub": 17200,
-    "perPersonRub": 5700,
+    "subtotalRub": 16050,
+    "totalRub": 17700,
+    "perPersonRub": 5900,
     "budgetRub": 60000,
-    "remainingRub": 42800,
+    "remainingRub": 42300,
     "overBudget": false,
     "hints": [],
     "hintKeys": [],
@@ -1960,7 +1966,16 @@
         "asOf": "2026-10",
         "tripKm": 991
       },
-      "tolls": [],
+      "tolls": [
+        {
+          "segmentId": "ts_m4_1",
+          "roadRef": "М-4",
+          "rub": 400,
+          "night": false,
+          "asOf": "2026-03",
+          "weekend": true
+        }
+      ],
       "nights": [
         {
           "stopId": "d1s07",
@@ -2038,7 +2053,7 @@
       "childFoodWeightUnder7": "0.50",
       "asOf": {
         "fuel": "2026-10",
-        "tolls": "2026-10",
+        "tolls": "2026-03",
         "lodging": "2026-09",
         "food": "2026-09",
         "tickets": "2026-10",

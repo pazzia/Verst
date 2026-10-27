@@ -100,6 +100,7 @@
   "cost.tolls.none": "платных дорог нет",
   "cost.tolls.day": "днём",
   "cost.tolls.night": "ночью",
+  "cost.tolls.weekend": "в выходные",
   "cost.tolls.row": "{road}, {when}",
   "cost.lodging.equal": "{towns}, {nights} × {price}",
   "cost.lodging.item": "{town} {price}",

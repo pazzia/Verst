@@ -75,7 +75,7 @@
       }
     },
     "costTotalRub": {
-      "value": 17200,
+      "value": 17700,
       "tolerancePct": 5
     },
     "costLinesRub": {
@@ -84,7 +84,7 @@
         "tolerancePct": 0
       },
       "tolls": {
-        "value": 0,
+        "value": 400,
         "tolerancePct": 0
       },
       "fuel": {
@@ -110,7 +110,8 @@
       "food: 2 adults + child of 5 (weight 0.5) = 2.5 people. Day 1 lunch Кафе «У дороги», Р-22 at km 445 (500, roadside check 500 + (k mod 4) · 100); dinner Тамбов median_low(650, 650, 850) = 650; Державинская has no confirmed breakfast (ADR-0019 E-3) → day 2 breakfast 0.6 × 650 = 390; day 2 lunch Кафе «Придорожное», Р-22 at km 745 → 700; finish 17:47 < 19:00 → no dinner. 2.5 × (500 + 650 + 390 + 700) = 5 600",
       "sights (DEV-113 T1): day 1 cap 2 reached at Скопинское озеро 5.23 > next in pool Городской парк Скопина 3.6 + 0.5·walk·dog + 0.5·playground·kids + 0.5·curated = 5.1 (fixture 3.7 → 3.6, margin was 0.033)",
       "tickets: Скопинское городище, Сад Мичурина, Набережная Тамбова are free → 0",
-      "subtotal 4 850 + 0 + 5 200 + 5 600 + 0 = 15 650; reserve 1 570 (1 565 half up); total round_to(17 220, 100) = 17 200"
+      "tolls (ENG-02): М-4 ПВП км 71 (km 21–93) on Saturday 24.10 → weekend tariff 400 (weekday 310)",
+      "subtotal 4 850 + 400 + 5 200 + 5 600 + 0 = 16 050; reserve 1 610 (1 605 half up); total round_to(17 660, 100) = 17 700"
     ]
   }
 }

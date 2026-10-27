@@ -639,7 +639,7 @@
    "speedKmh": 110,
    "roadClass": "motorway",
    "ref": "М-4",
-   "toll": false
+   "toll": true
   },
   {
    "from": "KSH",
@@ -10071,9 +10071,9 @@
    ],
    "fromKm": 0,
    "toKm": 182,
-   "tariffDayRub": "800",
-   "tariffNightRub": "560",
-   "asOf": "2026-10-01"
+   "tariffDayRub": "1737",
+   "tariffNightRub": "1737",
+   "asOf": "2026-03-02"
   },
   {
    "id": "ts_m12_2",
@@ -10085,9 +10085,9 @@
    ],
    "fromKm": 0,
    "toKm": 196,
-   "tariffDayRub": "1000",
-   "tariffNightRub": "700",
-   "asOf": "2026-10-01"
+   "tariffDayRub": "1713",
+   "tariffNightRub": "1713",
+   "asOf": "2026-03-02"
   },
   {
    "id": "ts_m12_3",
@@ -10099,9 +10099,9 @@
    ],
    "fromKm": 0,
    "toKm": 250,
-   "tariffDayRub": "1100",
-   "tariffNightRub": "770",
-   "asOf": "2026-10-01"
+   "tariffDayRub": "1521",
+   "tariffNightRub": "1521",
+   "asOf": "2026-03-02"
   },
   {
    "id": "ts_m12_4",
@@ -10113,9 +10113,24 @@
    ],
    "fromKm": 0,
    "toKm": 144,
-   "tariffDayRub": "600",
-   "tariffNightRub": "420",
-   "asOf": "2026-10-01"
+   "tariffDayRub": "876",
+   "tariffNightRub": "876",
+   "asOf": "2026-03-02"
+  },
+  {
+   "id": "ts_m4_1",
+   "roadRef": "М-4",
+   "nameRu": "М-4 Москва — Чекаевка (ПВП км 71)",
+   "edge": [
+    "DOM",
+    "KSH"
+   ],
+   "fromKm": 0,
+   "toKm": 56,
+   "tariffDayRub": "310",
+   "tariffNightRub": "310",
+   "tariffWeekendRub": "400",
+   "asOf": "2026-03-02"
   }
  ],
  "readyRoutes": [

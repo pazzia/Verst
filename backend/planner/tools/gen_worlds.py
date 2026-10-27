@@ -144,7 +144,7 @@ EDGES = [
     ("M12_CU", "KAZ", 144, 110, "motorway", "М-12", True),
     # М-4: Москва – Домодедово 37 – Кашира 108
     ("MSK", "DOM", 37, 70, "motorway", "М-4", False),
-    ("DOM", "KSH", 71, 110, "motorway", "М-4", False),
+    ("DOM", "KSH", 71, 110, "motorway", "М-4", True),
     # Р-22: Кашира – Михайлов 196 – Скопин 254 – Ряжск 291 – Чаплыгин 344 – Мичуринск 398 – Тамбов 467
     #       – Котовск 483 – Борисоглебск 629 – Новоаннинский 733 – Фролово 846 – Волгоград 980
     ("KSH", "MIH", 88, 90, "trunk", "Р-22", False),
@@ -3015,6 +3015,11 @@ for code, (p95, p92, pdt) in PRICES.items():
 # an older September row proves "latest as_of wins"
 region_prices.append({"region": "RU-YAR", "fuelType": "ai95", "priceRub": "60.70", "asOf": "2026-09-01"})
 
+# ENG-02: category-1 tariffs in force from 2026-03-02 (tools/tolls/tariffs-2026-draft.json; search snippets, NOT
+# verified on the operators' sites). М-12: Москва — Владимир 1 737 and Владимир — Арзамас 1 713 are published;
+# Арзамас — Казань 2 397 is split over the two fixture edges by length (250 : 144). No night or weekend tariff is
+# published for М-12, so night = day. М-4: the ПВП at km 71 charges 310 weekdays / 400 Fri–Sun for km 21–93.
+TOLL_AS_OF = "2026-03-02"
 TOLLS = [
     {
         "id": "ts_m12_1",
@@ -3023,9 +3028,9 @@ TOLLS = [
         "edge": ["M12_MKAD", "M12_BOG"],
         "fromKm": 0,
         "toKm": 182,
-        "tariffDayRub": "800",
-        "tariffNightRub": "560",
-        "asOf": AS_OF,
+        "tariffDayRub": "1737",
+        "tariffNightRub": "1737",
+        "asOf": TOLL_AS_OF,
     },
     {
         "id": "ts_m12_2",
@@ -3034,9 +3039,9 @@ TOLLS = [
         "edge": ["M12_BOG", "M12_DZE"],
         "fromKm": 0,
         "toKm": 196,
-        "tariffDayRub": "1000",
-        "tariffNightRub": "700",
-        "asOf": AS_OF,
+        "tariffDayRub": "1713",
+        "tariffNightRub": "1713",
+        "asOf": TOLL_AS_OF,
     },
     {
         "id": "ts_m12_3",
@@ -3045,9 +3050,9 @@ TOLLS = [
         "edge": ["M12_DZE", "M12_CU"],
         "fromKm": 0,
         "toKm": 250,
-        "tariffDayRub": "1100",
-        "tariffNightRub": "770",
-        "asOf": AS_OF,
+        "tariffDayRub": "1521",
+        "tariffNightRub": "1521",
+        "asOf": TOLL_AS_OF,
     },
     {
         "id": "ts_m12_4",
@@ -3056,9 +3061,21 @@ TOLLS = [
         "edge": ["M12_CU", "KAZ"],
         "fromKm": 0,
         "toKm": 144,
-        "tariffDayRub": "600",
-        "tariffNightRub": "420",
-        "asOf": AS_OF,
+        "tariffDayRub": "876",
+        "tariffNightRub": "876",
+        "asOf": TOLL_AS_OF,
+    },
+    {
+        "id": "ts_m4_1",
+        "roadRef": "М-4",
+        "nameRu": "М-4 Москва — Чекаевка (ПВП км 71)",
+        "edge": ["DOM", "KSH"],
+        "fromKm": 0,
+        "toKm": 56,
+        "tariffDayRub": "310",
+        "tariffNightRub": "310",
+        "tariffWeekendRub": "400",
+        "asOf": TOLL_AS_OF,
     },
 ]
 

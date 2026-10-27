@@ -465,6 +465,11 @@ class _Loader:
                 night_from=time.fromisoformat(str(s.get("nightFrom", "00:00"))),
                 night_to=time.fromisoformat(str(s.get("nightTo", "06:00"))),
                 as_of=self._date(self._req(s, "asOf", path), f"{path}.asOf"),
+                tariff_weekend_rub=(
+                    self._decimal(s["tariffWeekendRub"], f"{path}.tariffWeekendRub")
+                    if s.get("tariffWeekendRub") is not None
+                    else None
+                ),
             )
             out.append(TollDef(seg, edge, a, from_km, to_km))
         return out

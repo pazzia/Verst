@@ -200,6 +200,13 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 
 **Acceptance.** М-11, М-12, М-4 and М-1 toll segments with day/night tariffs, `asOf` dates, and the waybill line «Платные дороги» matching the operator's calculator within 5 %.
 
+**Status 27.10.2026 — data in, verification open.**
+- Category-1 tariffs in force from 02.03.2026 gathered for М-11, М-12, ЦКАД, М-4, М-3 and М-1 (`tools/tolls/tariffs-2026-draft.json`, 41 rows with source and confidence). The operators' sites were unreachable from the build sandbox, so every figure comes from search snippets and is marked `verified: false`.
+- In the app (catalogue world): М-12 Москва — Казань is now 1 737 + 1 713 + 1 521 + 876 = 5 847 ₽ (was 3 500 placeholder); М-4 ПВП км 71 is 310 ₽ weekdays and 400 ₽ Friday to Sunday. М-12 has no published night or weekend tariff, so night = day.
+- The engine knows weekend tariffs (Friday to Sunday; holidays not modelled) and shows «в выходные» in the waybill breakdown.
+- On real road geometry (GraphHopper on the server) every toll run of a road without an explicit segment is priced as km × the road's rate (`verst_planner/resources/toll_rates.json`); an unknown toll road is not costed.
+- **Open:** check the numbers on avtodor-tr.ru, m11-neva.ru and mos-spb.ru (the 5 % acceptance needs the operator's calculator); М-12 Москва — Казань 5 909 vs 5 250 conflict; М-11 km 15–58 is 22 ₽/km and is underpriced by the road average on short trips from Moscow; М-11 and М-1 have no explicit segments in the app world yet (no fixture road).
+
 ### ENG-03 — Real hotels and working booking links
 
 **Description.** Hotels come from a partner feed or search API through Travelpayouts. Ostrovok is the fallback if Yandex Travel terms or attribution are poor. Prices are labelled with their date. Synthetic hotels stay only in the demo flavour.
