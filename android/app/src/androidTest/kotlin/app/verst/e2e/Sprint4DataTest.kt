@@ -29,6 +29,13 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.junit.runner.RunWith
+import app.verst.nav.buildCustomWalk
+import app.verst.nav.closeCard
+import app.verst.nav.locate
+import app.verst.nav.openCard
+import app.verst.nav.pickCityDog
+import app.verst.nav.selectCityPreset
+import app.verst.nav.setCityDuration
 
 /**
  * Sprint 4 on the real catalogue (wd-20261025-r7.3, Architect M7): the journeys the Manager reviews —

@@ -172,7 +172,7 @@ def recompute(
     for toll in units.tolls:
         toll_exact += dec(toll.rub)
         per_road[toll.road_ref] = per_road.get(toll.road_ref, 0) + toll.rub
-        toll_rows.append(fm.toll_row(toll.road_ref, toll.night, toll.rub))
+        toll_rows.append(fm.toll_row(toll.road_ref, toll.night, toll.rub, toll.weekend))
     lines.append(
         CostLine(
             CostKey.TOLLS,

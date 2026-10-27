@@ -73,8 +73,8 @@ def tolls_formula(per_road: list[tuple[str, int]]) -> str:
     )
 
 
-def toll_row(road: str, night: bool, rub: int) -> CostBreakdownRow:
-    when = ru.text("cost.tolls.night" if night else "cost.tolls.day")
+def toll_row(road: str, night: bool, rub: int, weekend: bool = False) -> CostBreakdownRow:
+    when = ru.text("cost.tolls.night" if night else "cost.tolls.weekend" if weekend else "cost.tolls.day")
     return CostBreakdownRow(road, ru.text("cost.tolls.row", road=road, when=when), rub)
 
 

@@ -146,6 +146,10 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 
 ## Validation (demand)
 
+
+**Status 27.10.2026 — done, no behaviour change.**
+- `gen_worlds.py` 3 455 → 655 lines: the hand-made tables moved to `tools/worlds/` (`central_russia_geo`, `lodgings`, `sights`, `food`, `extras`); the generated worlds are byte for byte the same (`test_generator_matches_committed_json`).
+- `VerstFlow.kt` 2 965 → ~1 730 lines: hand-off, cards and report, budget, location and addresses, «По городу» and exit moved to `HandoffFlow.kt`, `CardsFlow.kt`, `BudgetFlow.kt`, `LocationFlow.kt`, `CityFlow.kt`, `ExitFlow.kt` as `VerstFlow` extensions. The state stays in the class; the private members those functions use became `internal` (module-only).
 ### VAL-01 — Customer interviews
 
 **Description.** Talk to 30–50 people who took a multi-day car trip in Russia in the last 12 months: families with children first, then dog owners and couples. Find them in VK groups, Drive2, Telegram travel channels and among friends of friends. Use a script about the past, not the future: "Tell me about your last trip. How did you plan it? What went wrong? What did it cost? What did you use?" Do not pitch Verst until the last 5 minutes.
@@ -199,6 +203,13 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 ### ENG-02 — Tolls
 
 **Acceptance.** М-11, М-12, М-4 and М-1 toll segments with day/night tariffs, `asOf` dates, and the waybill line «Платные дороги» matching the operator's calculator within 5 %.
+
+**Status 27.10.2026 — data in, verification open.**
+- Category-1 tariffs in force from 02.03.2026 gathered for М-11, М-12, ЦКАД, М-4, М-3 and М-1 (`tools/tolls/tariffs-2026-draft.json`, 41 rows with source and confidence). The operators' sites were unreachable from the build sandbox, so every figure comes from search snippets and is marked `verified: false`.
+- In the app (catalogue world): М-12 Москва — Казань is now 1 737 + 1 713 + 1 521 + 876 = 5 847 ₽ (was 3 500 placeholder); М-4 ПВП км 71 is 310 ₽ weekdays and 400 ₽ Friday to Sunday. М-12 has no published night or weekend tariff, so night = day.
+- The engine knows weekend tariffs (Friday to Sunday; holidays not modelled) and shows «в выходные» in the waybill breakdown.
+- On real road geometry (GraphHopper on the server) every toll run of a road without an explicit segment is priced as km × the road's rate (`verst_planner/resources/toll_rates.json`); an unknown toll road is not costed.
+- **Open:** check the numbers on avtodor-tr.ru, m11-neva.ru and mos-spb.ru (the 5 % acceptance needs the operator's calculator); М-12 Москва — Казань 5 909 vs 5 250 conflict; М-11 km 15–58 is 22 ₽/km and is underpriced by the road average on short trips from Moscow; М-11 and М-1 have no explicit segments in the app world yet (no fixture road).
 
 ### ENG-03 — Real hotels and working booking links
 
@@ -371,6 +382,8 @@ Compare it with cost per install and cost per planned trip from VAL-02. The revi
 ### SOC-01 — Demand check (now, no code)
 
 **Description.** Add one past-behaviour question to the VAL-01 interview kit, after Q6: «Вы когда-нибудь ехали по чужому маршруту — из блога, Telegram-канала, от друзей? А своим маршрутом после поездки с кем-нибудь делились? Как?». Q21 already asks whether people have paid for a ready route.
+
+**Status (2026-10-27).** Question 6а is in `docs/traction/interview-kit.md` together with its note field; the shares are counted once the interviews are done.
 
 **Acceptance.** `docs/traction/interviews.md` records three shares of interviewees: those who drove someone else's route in the last 2 years, those who shared their own, and those who paid for one. The go/no-go for SOC-03…05 is written next to these numbers.
 

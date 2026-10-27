@@ -318,11 +318,11 @@ private fun Input(caption: String, value: String, onChange: (String) -> Unit, ro
             .defaultMinSize(minHeight = 56.dp)
             .clip(shape)
             .background(C.navi.field)
-            .border(if (focused) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (focused) C.accent.yellow else C.navi.fieldBorder, shape)
+            .border(if (focused) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (focused) C.accent.yellowText else C.navi.fieldBorder, shape)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Marker(round, C.accent.yellow)
+        Marker(round, C.accent.yellowText)
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Txt(caption, T.caption.md, C.navi.labelSecondary)
@@ -331,7 +331,7 @@ private fun Input(caption: String, value: String, onChange: (String) -> Unit, ro
                 onValueChange = onChange,
                 singleLine = true,
                 textStyle = T.field.lg.copy(color = C.text.primary),
-                cursorBrush = SolidColor(C.accent.yellow),
+                cursorBrush = SolidColor(C.accent.yellowText),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { onSubmit() }),
                 modifier = Modifier.fillMaxWidth().focusRequester(fr).onFocusChanged { focused = it.isFocused; onFocus(it.isFocused) }.testTag(tag),
@@ -374,7 +374,7 @@ private fun ValueField(
             .padding(start = 12.dp, end = 8.dp, top = 3.dp, bottom = 3.dp), // D5: 50 high with the 44 dp «изменить»
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Marker(!square, if (square) C.accent.yellow else C.navi.label)
+        Marker(!square, if (square) C.accent.yellowText else C.navi.label)
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Txt(caption, T.caption.md, C.navi.labelSecondary, maxLines = 1)
@@ -445,7 +445,7 @@ private fun SuggestionRow(s: SuggestionDto, km: Int?, index: Int, tagPrefix: Str
             contentAlignment = Alignment.Center,
         ) {
             // 5.12 §2: address rows carry «У» (улица)
-            Txt(if (address) stringResource(R.string.navigator_type_address) else stringResource(if (city) R.string.navigator_type_city else R.string.navigator_type_place), T.badge, C.text.primary)
+            Txt(if (address) stringResource(R.string.navigator_type_address) else stringResource(if (city) R.string.navigator_type_city else R.string.navigator_type_place), T.badge, C.sign.white)
         }
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
@@ -525,7 +525,7 @@ private fun Caption(ui: NavigatorUi, onStart: () -> Unit) {
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.LocationSheet(windowH: androidx.compose.ui.unit.Dp, a: LocationActions) {
     BottomSheet(stringResource(R.string.loc_rationale_title), a::closeSheet, "location", windowH) {
-        app.verst.core.ui.components.LocateIcon(C.accent.yellow, 32.dp, Modifier.padding(bottom = 8.dp))
+        app.verst.core.ui.components.LocateIcon(C.accent.yellowText, 32.dp, Modifier.padding(bottom = 8.dp))
         Txt(stringResource(R.string.loc_rationale_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 16.dp))
         Box(
             Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.accent.yellow)
@@ -579,11 +579,11 @@ private fun AddressBlock(ui: NavigatorUi, q: String, onFind: () -> Unit, onPick:
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                app.verst.core.ui.components.GlyphIcon(app.verst.core.ui.components.Glyph.SEARCH, C.accent.yellow, 18.dp)
+                app.verst.core.ui.components.GlyphIcon(app.verst.core.ui.components.Glyph.SEARCH, C.accent.yellowText, 18.dp)
                 Spacer(Modifier.width(10.dp))
                 Txt(
                     if (searching) stringResource(R.string.addr_searching) else stringResource(R.string.addr_find_query, q),
-                    T.list.title, C.accent.yellow, Modifier.weight(1f), maxLines = 1,
+                    T.list.title, C.accent.yellowText, Modifier.weight(1f), maxLines = 1,
                 )
             }
             if (ui.addressState == AddressState.None) {

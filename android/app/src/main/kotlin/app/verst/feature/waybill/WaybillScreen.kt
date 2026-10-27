@@ -257,15 +257,15 @@ private fun TableRow(rule: Dp, sumWidth: Dp, modifier: Modifier = Modifier, left
 private fun TableHeader() {
     TableRow(1.5.dp, SumCol, left = {
         Txt(stringResource(R.string.waybill_table_item), T.paper.tableHead, C.paper.label, Modifier.padding(horizontal = 6.dp, vertical = 3.dp))
-    }, right = { Txt(stringResource(R.string.waybill_table_rub), T.paper.tableHead, C.paper.label) })
+    }, right = { Txt(app.verst.settings.AppPrefs.symbol(), T.paper.tableHead, C.paper.label) }) // D-IR-20: the column's currency
 }
 
 /** components §11 `CostLine`: name + chevron, the engine formula in hand, the sum; expands to the breakdown. */
 @Composable
 private fun CostLine(line: CostLineDto, expanded: Boolean, onClick: () -> Unit) {
-    val sum = RuFormat.thousands(line.rub)
+    val sum = app.verst.settings.AppPrefs.amount(line.rub)
     val state = stringResource(if (expanded) R.string.cd_waybill_collapse else R.string.cd_waybill_expand)
-    val cd = stringResource(R.string.cd_waybill_line, line.title, sum, line.formula, state)
+    val cd = stringResource(R.string.cd_waybill_line, line.title, app.verst.settings.AppPrefs.money(line.rub), line.formula, state)
     Column(
         Modifier.fillMaxWidth().animateContentSize()
             .clickable(enabled = line.breakdown.isNotEmpty(), role = Role.Button, onClick = onClick)
@@ -291,7 +291,7 @@ private fun CostLine(line: CostLineDto, expanded: Boolean, onClick: () -> Unit) 
                 val text = if (b.formula.isBlank()) b.label else b.label + sep + b.formula.substringBefore(" = ")
                 TableRow(if (i == line.breakdown.lastIndex) 1.dp else 0.dp, SumCol, Modifier.defaultMinSize(minHeight = 22.dp).testTag("waybill.breakdown.${line.key}.$i"), left = {
                     Txt(text, T.paper.label, C.paper.text, Modifier.padding(start = 18.dp, end = 6.dp, top = 2.dp, bottom = 2.dp))
-                }, right = { Txt(RuFormat.thousands(b.rub), T.hand.sm, C.paper.ink, align = TextAlign.End, maxLines = 1) })
+                }, right = { Txt(app.verst.settings.AppPrefs.amount(b.rub), T.hand.sm, C.paper.ink, align = TextAlign.End, maxLines = 1) })
             }
         }
     }
@@ -312,7 +312,7 @@ private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onC
     val unknown = unknownStops.size
     // S4-RELEASE: the same rule as the Road footer and day headers — no exact or zero sum while a stop is unknown.
     // The column is numeric (70 dp, like «Платные дороги 0»), so «бесплатно + ?» reads «0 + ?» here.
-    val sum = RuFormat.thousands(line.rub) + if (unknown > 0) " + ?" else ""
+    val sum = app.verst.settings.AppPrefs.amount(line.rub) + if (unknown > 0) " + ?" else ""
     val hoursOf = { s: app.verst.core.model.dto.StopDto -> kotlin.math.ceil(s.parking?.hours ?: (s.dwellMin / 60.0)).toInt().coerceAtLeast(1) }
     val formula = line.formula.replace(Regex("""\s*[+·]?\s*(\+\s*)?ещё \d+ без данных"""), "").trim().ifBlank {
         val h = paid.sumOf(hoursOf)
@@ -321,7 +321,7 @@ private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onC
     }
     val unknownLine = if (unknown > 0) stringResource(R.string.waybill_parking_unknown, unknown) else null
     val state = stringResource(if (expanded) R.string.cd_waybill_collapse else R.string.cd_waybill_expand)
-    val cd = stringResource(R.string.cd_waybill_line, line.title, sum, listOfNotNull(formula, unknownLine).joinToString(" "), state)
+    val cd = stringResource(R.string.cd_waybill_line, line.title, app.verst.settings.AppPrefs.money(line.rub) + if (unknown > 0) " + ?" else "", listOfNotNull(formula, unknownLine).joinToString(" "), state)
     Column(
         Modifier.fillMaxWidth().animateContentSize()
             .clickable(role = Role.Button, onClick = onClick)
@@ -343,13 +343,13 @@ private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onC
         if (expanded) {
             val rows = buildList<Pair<String, String>> {
                 if (line.breakdown.isNotEmpty()) {
-                    line.breakdown.forEach { b -> add((if (b.formula.isBlank()) b.label else b.label + ", " + b.formula.substringBefore(" = ")) to RuFormat.thousands(b.rub)) }
+                    line.breakdown.forEach { b -> add((if (b.formula.isBlank()) b.label else b.label + ", " + b.formula.substringBefore(" = ")) to app.verst.settings.AppPrefs.amount(b.rub)) }
                     // every unknown stop is listed (S4-QA P1-01), also when the engine's breakdown has only the known ones
                     val listed = line.breakdown.map { it.label }.toSet()
                     unknownStops.filter { it.name !in listed }.forEach { st -> add(st.name to "?") }
                 } else {
                     paid.forEach { s ->
-                        add(stringResource(R.string.waybill_parking_row, s.name, hoursOf(s), RuFormat.thousands(s.parking?.rubPerHour ?: 0)) to RuFormat.thousands(s.parking?.rub ?: 0))
+                        add(stringResource(R.string.waybill_parking_row, s.name, hoursOf(s), app.verst.settings.AppPrefs.amount(s.parking?.rubPerHour ?: 0)) to app.verst.settings.AppPrefs.amount(s.parking?.rub ?: 0))
                     }
                     if (free > 0) add("${stringResource(R.string.road_parking_inline_free).replaceFirstChar { it.uppercase() }} · $free" to "0")
                     unknownStops.forEach { s -> add(s.name to "?") }
@@ -370,8 +370,8 @@ private fun ParkingLine(line: CostLineDto, trip: TripDto, expanded: Boolean, onC
 /** components §11 `ReserveSwitch`: checkbox (hand check), «Резерв 10%», sub, sum or «—»; a Switch for TalkBack. */
 @Composable
 private fun ReserveRow(line: CostLineDto, on: Boolean, busy: Boolean, onToggle: () -> Unit) {
-    val sum = if (on) RuFormat.thousands(line.rub) else NONE
-    val cd = stringResource(R.string.cd_waybill_reserve, if (on) RuFormat.thousands(line.rub) else "0")
+    val sum = if (on) app.verst.settings.AppPrefs.amount(line.rub) else NONE
+    val cd = stringResource(R.string.cd_waybill_reserve, app.verst.settings.AppPrefs.money(if (on) line.rub else 0))
     TableRow(
         1.5.dp, SumCol,
         Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin)
@@ -396,8 +396,8 @@ private fun ReserveRow(line: CostLineDto, on: Boolean, busy: Boolean, onToggle: 
 
 @Composable
 private fun TotalRow(total: Int) {
-    val value = stringResource(R.string.common_estimate_rub, RuFormat.thousands(total))
-    val cd = stringResource(R.string.cd_waybill_total, RuFormat.thousands(total))
+    val value = stringResource(R.string.common_estimate_rub, app.verst.settings.AppPrefs.money(total))
+    val cd = stringResource(R.string.cd_waybill_total, app.verst.settings.AppPrefs.money(total))
     TableRow(0.dp, TotalCol, Modifier.semantics(mergeDescendants = true) { heading(); contentDescription = cd }, left = {
         Txt(stringResource(R.string.waybill_total), T.paper.total, C.paper.text, Modifier.padding(6.dp))
     }, right = { Fade(value) { Txt(it, T.hand.xl, C.paper.ink, Modifier.padding(vertical = 4.dp).testTag("waybill.total"), align = TextAlign.End, maxLines = 1) } })
@@ -410,7 +410,7 @@ private fun LeverLines(fit: BudgetFitDto) {
         fit.levers.forEach { l ->
             Row(Modifier.fillMaxWidth().defaultMinSize(minHeight = 22.dp), verticalAlignment = Alignment.CenterVertically) {
                 Txt(leverName(l.code), T.paper.label, C.paper.text, Modifier.weight(1f))
-                Txt("−" + RuFormat.thousands(l.savedRub) + " ₽", T.hand.sm, C.paper.ink, Modifier.width(TotalCol), align = TextAlign.End, maxLines = 1)
+                Txt("−" + app.verst.settings.AppPrefs.money(l.savedRub), T.hand.sm, C.paper.ink, Modifier.width(TotalCol), align = TextAlign.End, maxLines = 1)
             }
         }
     }
@@ -433,7 +433,7 @@ private fun IssuedLeft(budget: Int?, remaining: Int?, over: Boolean, tight: Bool
     Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
             Txt(stringResource(R.string.waybill_issued), T.paper.label, C.paper.label)
-            Txt(budget?.let { RuFormat.thousands(it) } ?: NONE, T.hand.md, C.paper.ink, Modifier.fillMaxWidth().underline(C.paper.lines).testTag("waybill.issued"))
+            Txt(budget?.let { app.verst.settings.AppPrefs.amount(it) } ?: NONE, T.hand.md, C.paper.ink, Modifier.fillMaxWidth().underline(C.paper.lines).testTag("waybill.issued"))
         }
         Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
             val isOver = over && budget != null
@@ -442,10 +442,10 @@ private fun IssuedLeft(budget: Int?, remaining: Int?, over: Boolean, tight: Bool
                 T.paper.label, C.paper.label,
             )
             val value = when {
-                tight && budget != null -> RuFormat.thousands(total - budget)
+                tight && budget != null -> app.verst.settings.AppPrefs.amount(total - budget)
                 budget == null || remaining == null -> NONE
-                isOver -> RuFormat.thousands(kotlin.math.abs(remaining))
-                else -> stringResource(R.string.common_estimate_rub, RuFormat.thousands(remaining))
+                isOver -> app.verst.settings.AppPrefs.amount(kotlin.math.abs(remaining))
+                else -> stringResource(R.string.common_estimate_rub, app.verst.settings.AppPrefs.money(remaining))
             }
             Fade(value) { Txt(it, T.hand.md, if (isOver) C.paper.inkRed else C.paper.ink, Modifier.fillMaxWidth().underline(C.paper.lines).testTag("waybill.left")) }
         }

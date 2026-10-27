@@ -52,7 +52,6 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.DayDto
 import app.verst.core.model.dto.ParkingDto
 import app.verst.core.model.dto.StopDto
@@ -126,8 +125,8 @@ internal fun parkingTotal(p: ParkingSum, rub: Int = p.rub): ParkingTotal = parki
 @Composable
 internal fun parkingTotalText(p: ParkingSum, rub: Int = p.rub): String = when (parkingTotal(p, rub)) {
     ParkingTotal.FREE -> stringResource(R.string.road_parking_inline_free) // not «≈ 0 ₽»
-    ParkingTotal.SUM -> stringResource(R.string.road_parking_day, RuFormat.thousands(rub))
-    ParkingTotal.SUM_PLUS_UNKNOWN -> stringResource(R.string.road_parking_day_unknown, RuFormat.thousands(rub))
+    ParkingTotal.SUM -> stringResource(R.string.road_parking_day, app.verst.settings.AppPrefs.money(rub))
+    ParkingTotal.SUM_PLUS_UNKNOWN -> stringResource(R.string.road_parking_day_unknown, app.verst.settings.AppPrefs.money(rub))
     ParkingTotal.FREE_PLUS_UNKNOWN -> stringResource(R.string.road_parking_free_unknown)
     ParkingTotal.UNKNOWN -> stringResource(R.string.road_parking_inline_unknown)
 }
@@ -172,12 +171,12 @@ internal fun DayGoButton(day: Int, onClick: () -> Unit, onLongClick: () -> Unit)
         contentAlignment = Alignment.Center,
     ) {
         Row(
-            Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.accent.yellow, RoundedCornerShape(18.dp)).padding(horizontal = 10.dp),
+            Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.accent.yellowText, RoundedCornerShape(18.dp)).padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp),
         ) {
-            GlyphIcon(Glyph.NAVIGATOR, C.accent.yellow, 12.dp, filled = true)
-            Txt(stringResource(R.string.road_handoff_day), T.body.smStrong, C.accent.yellow, maxLines = 1)
+            GlyphIcon(Glyph.NAVIGATOR, C.accent.yellowText, 12.dp, filled = true)
+            Txt(stringResource(R.string.road_handoff_day), T.body.smStrong, C.accent.yellowText, maxLines = 1)
         }
     }
 }
@@ -203,7 +202,7 @@ private val PLetter = TextStyle(fontWeight = FontWeight.W700, fontSize = 11.sp, 
 internal fun parkingInline(p: ParkingDto?): String = when {
     p == null || !p.known -> stringResource(R.string.road_parking_inline_unknown)
     p.free -> stringResource(R.string.road_parking_inline_free)
-    else -> stringResource(R.string.road_parking_inline_paid, RuFormat.thousands(p.rub ?: 0))
+    else -> stringResource(R.string.road_parking_inline_paid, app.verst.settings.AppPrefs.money(p.rub ?: 0))
 }
 
 @Composable
@@ -211,7 +210,7 @@ private fun parkingCd(p: ParkingDto?): String {
     val v = when {
         p == null || !p.known -> stringResource(R.string.road_parking_unknown)
         p.free -> stringResource(R.string.road_parking_inline_free)
-        else -> stringResource(R.string.road_parking_inline_paid, RuFormat.thousands(p.rub ?: 0))
+        else -> stringResource(R.string.road_parking_inline_paid, app.verst.settings.AppPrefs.money(p.rub ?: 0))
     }
     return stringResource(R.string.cd_road_parking_inline, v)
 }
@@ -246,7 +245,7 @@ internal fun CostsLine(price: String?, parking: ParkingDto?, showParking: Boolea
     Row(Modifier.fillMaxWidth().defaultMinSize(minHeight = 36.dp), verticalAlignment = Alignment.Top) {
         androidx.compose.ui.layout.Layout(
             content = {
-                Box(Modifier.height(36.dp), contentAlignment = Alignment.CenterStart) { if (price != null) Txt(price, T.body.mdStrong, C.accent.yellow, maxLines = 1) }
+                Box(Modifier.height(36.dp), contentAlignment = Alignment.CenterStart) { if (price != null) Txt(price, T.body.mdStrong, C.accent.yellowText, maxLines = 1) }
                 Box(Modifier.height(36.dp).padding(horizontal = 5.dp), contentAlignment = Alignment.Center) { Txt("·", T.body.mdStrong, C.interior.pole, maxLines = 1) }
                 Box(Modifier.height(36.dp), contentAlignment = Alignment.CenterStart) { if (showParking) pPart() }
             },
@@ -310,7 +309,7 @@ internal fun DayParking(day: DayDto) {
 @Composable
 internal fun dayParkingCd(day: DayDto): String {
     val p = parkingOf(day)
-    val base = stringResource(R.string.cd_road_parking_day, RuFormat.thousands(p.rub))
+    val base = stringResource(R.string.cd_road_parking_day, app.verst.settings.AppPrefs.money(p.rub))
     return if (p.unknown > 0) base + " " + stringResource(R.string.cd_road_parking_day_unknown, p.unknown) else base
 }
 
@@ -431,7 +430,7 @@ internal fun BoxScope.ParkingSheet(s: StopDto, windowH: Dp, onClose: () -> Unit)
         p!!.free -> p.freeRu ?: stringResource(R.string.road_parking_free)
         // M6: `zoneRu` is the engine's whole sentence («Москва: платная зона …, 380 ₽/ч с 08:00 до 21:00»)
         p.zoneRu != null -> p.zoneRu!!
-        else -> stringResource(R.string.road_parking_zone, stringResource(R.string.road_parking_zone_default), RuFormat.thousands(p.rubPerHour ?: 0), h)
+        else -> stringResource(R.string.road_parking_zone, stringResource(R.string.road_parking_zone_default), app.verst.settings.AppPrefs.money(p.rubPerHour ?: 0), h)
     }
     BottomSheet(s.name, onClose, "parking", windowH) {
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -456,7 +455,7 @@ internal fun BoxScope.ParkingSheet(s: StopDto, windowH: Dp, onClose: () -> Unit)
             add(stringResource(R.string.road_parking_row_rate) to when {
                 !known -> stringResource(R.string.road_parking_unknown)
                 p!!.free -> stringResource(R.string.road_parking_inline_free)
-                else -> stringResource(R.string.road_parking_paid, RuFormat.thousands(p.rubPerHour ?: 0), RuFormat.thousands(p.rub ?: 0))
+                else -> stringResource(R.string.road_parking_paid, app.verst.settings.AppPrefs.money(p.rubPerHour ?: 0), app.verst.settings.AppPrefs.money(p.rub ?: 0))
             })
             add(stringResource(R.string.road_parking_row_stay) to stringResource(R.string.common_hours_approx, h))
             p?.sundayRu?.let { add(stringResource(R.string.road_parking_row_sunday) to it) }

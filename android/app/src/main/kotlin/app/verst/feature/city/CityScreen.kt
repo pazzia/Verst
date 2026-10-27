@@ -50,7 +50,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.CityPresetDto
 import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
@@ -71,6 +70,7 @@ import app.verst.nav.WalkFew
 import app.verst.core.model.dto.WalkSuggestion
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
+import app.verst.nav.visibleCityPresets
 
 /** 5.10 state (stateless; `VerstRoot` maps `VerstFlow` into it). */
 data class CityUi(
@@ -200,12 +200,12 @@ private fun StartField(ui: CityUi, onClick: () -> Unit) {
     val cd = stringResource(R.string.cd_city_start, ui.startLabel)
     Row(
         Modifier.fillMaxWidth().defaultMinSize(minHeight = 60.dp).clip(shape).background(C.navi.field)
-            .border(2.dp, C.accent.yellow, shape).clickable(role = Role.Button, onClick = onClick)
+            .border(2.dp, C.accent.yellowText, shape).clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }.testTag("city.start")
             .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        GlyphIcon(Glyph.LOCATE, C.accent.yellow, 22.dp)
+        GlyphIcon(Glyph.LOCATE, C.accent.yellowText, 22.dp)
         Spacer(Modifier.width(10.dp))
         Column(Modifier.weight(1f)) {
             Txt(ui.startLabel, T.title.sm, C.text.primary, Modifier.testTag("city.start.label"), maxLines = 1)

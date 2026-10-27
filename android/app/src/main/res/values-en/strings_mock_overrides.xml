@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  English counterpart of values/strings_mock_overrides.xml: the mock build must not carry any real brand,
+  so the app overrides these keys with neutral text. Remove together with the Russian file.
+-->
+<resources>
+    <string name="stopmenu_yandex_navi">Navigator</string>
+    <string name="stopmenu_yandex_maps">Maps</string>
+    <string name="stopmenu_2gis">Maps</string>
+    <string name="stopmenu_install">Navigator not installed</string>
+    <string name="exit_book_partner">via a partner</string>
+    <string name="cd_exit_book">Book a night via a partner</string>
+</resources>

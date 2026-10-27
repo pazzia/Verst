@@ -27,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.HotelOptionDto
 import app.verst.core.model.dto.PoiDetailsDto
 import app.verst.core.ui.R
@@ -212,7 +211,7 @@ private fun FactChips(ui: CardUi) {
         // ADR-0019 E-2: an unknown price is not «вход свободный»
         chips += Triple(stringResource(R.string.card_ticket_unknown), C.text.secondary, C.dash.control)
     } else if (t != null && (t.adultRub ?: 0) > 0) {
-        var line = stringResource(R.string.card_ticket, RuFormat.thousands(t.adultRub ?: 0), RuFormat.thousands(t.childRub ?: 0))
+        var line = stringResource(R.string.card_ticket, app.verst.settings.AppPrefs.money(t.adultRub ?: 0), app.verst.settings.AppPrefs.money(t.childRub ?: 0))
         if (t.estimate) line += stringResource(R.string.common_join_dot) + stringResource(R.string.card_price_estimate)
         chips += Triple(line, C.text.secondary, C.dash.control)
     } else if (t != null && ui.kind == "sight") {
@@ -221,7 +220,7 @@ private fun FactChips(ui: CardUi) {
     d.dogsAllowed?.let { chips += Triple(stringResource(if (it) R.string.card_dogs_yes else R.string.card_dogs_no), C.text.secondary, C.dash.control) }
     val p = d.parking
     if (p != null && p.known) {
-        val text = if (p.free) stringResource(R.string.card_parking_free) else stringResource(R.string.card_parking_paid, RuFormat.thousands(p.rubPerHour ?: 0))
+        val text = if (p.free) stringResource(R.string.card_parking_free) else stringResource(R.string.card_parking_paid, app.verst.settings.AppPrefs.money(p.rubPerHour ?: 0))
         chips += Triple(text, C.navi.text, C.sign.blue.copy(alpha = 0.25f))
     }
     if (d.heritage) chips += Triple(stringResource(R.string.card_heritage), C.text.secondary, C.dash.control)
@@ -345,7 +344,7 @@ private fun facts(ui: CardUi): List<String> {
             val tags = tagLine(h)
             if (tags.isNotBlank()) out += tags
             out += if (ui.booked) stringResource(R.string.exit_booked_price)
-            else stringResource(R.string.common_estimate_rub, RuFormat.thousands(h.priceCrewRub.takeIf { it > 0 } ?: h.priceNightRub)) +
+            else stringResource(R.string.common_estimate_rub, app.verst.settings.AppPrefs.money(h.priceCrewRub.takeIf { it > 0 } ?: h.priceNightRub)) +
                 " " + stringResource(R.string.card_per_night)
         }
         return out
@@ -356,7 +355,7 @@ private fun facts(ui: CardUi): List<String> {
     if (t != null && !t.known) {
         out += stringResource(R.string.card_ticket_unknown)
     } else if (t != null && (t.adultRub ?: 0) > 0) {
-        var line = stringResource(R.string.card_ticket, RuFormat.thousands(t.adultRub ?: 0), RuFormat.thousands(t.childRub ?: 0))
+        var line = stringResource(R.string.card_ticket, app.verst.settings.AppPrefs.money(t.adultRub ?: 0), app.verst.settings.AppPrefs.money(t.childRub ?: 0))
         if (t.estimate) line += stringResource(R.string.common_join_dot) + stringResource(R.string.card_price_estimate)
         out += line
     } else if (t != null && ui.kind == "sight") {

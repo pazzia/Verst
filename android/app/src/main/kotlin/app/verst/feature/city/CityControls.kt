@@ -40,7 +40,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.CityPresetDto
 import app.verst.core.model.dto.WalkSuggestion
 import app.verst.core.ui.R
@@ -201,7 +200,7 @@ internal fun ParamChip(text: String, on: Boolean, tag: String, multi: Boolean = 
     val shape = RoundedCornerShape(22.dp)
     Box(
         Modifier.height(44.dp).clip(shape).background(if (on) C.accent.yellow else C.dash.control)
-            .border(DesignTokens.stroke.w1, if (on) C.accent.yellow else C.dash.outline, shape)
+            .border(DesignTokens.stroke.w1, if (on) C.accent.yellowText else C.dash.outline, shape)
             .then(if (multi) Modifier.toggleable(on, role = Role.Checkbox, onValueChange = { onClick() }) else Modifier.selectable(on, role = Role.RadioButton, onClick = onClick))
             .testTag(tag).padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,
@@ -231,7 +230,7 @@ private fun PresetPlate(p: CityPresetDto, selected: Boolean, modifier: Modifier,
     val shape = RoundedCornerShape(DesignTokens.radius.r5)
     Box(
         modifier.height(DesignTokens.size.presetH)
-            .then(if (selected) Modifier.border(2.dp, C.accent.yellow, RoundedCornerShape(DesignTokens.radius.r5 + 2.dp)).padding(2.dp) else Modifier)
+            .then(if (selected) Modifier.border(2.dp, C.accent.yellowText, RoundedCornerShape(DesignTokens.radius.r5 + 2.dp)).padding(2.dp) else Modifier)
             .clip(shape)
             .background(if (custom) Color.Transparent else C.sign.brown)
             .then(
@@ -262,7 +261,7 @@ private fun PresetPlate(p: CityPresetDto, selected: Boolean, modifier: Modifier,
         GlyphIcon(icon, C.sign.white, 24.dp, Modifier.align(Alignment.TopStart))
         Column(Modifier.align(Alignment.BottomStart)) {
             Txt(name, T.title.sm, C.sign.white, maxLines = 1)
-            Txt(sub, T.body.sm, C.mirror.label, maxLines = 1)
+            Txt(sub, T.body.sm, if (custom) C.mirror.label else C.sign.blueText, maxLines = 1)
         }
         Row(Modifier.align(Alignment.TopEnd), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
             if (p.adultOnly) {
@@ -270,7 +269,7 @@ private fun PresetPlate(p: CityPresetDto, selected: Boolean, modifier: Modifier,
                     Txt(stringResource(R.string.city_badge_18), T.caption.bold, C.text.onLight, maxLines = 1)
                 }
             }
-            if (selected) GlyphIcon(Glyph.CHECK, C.accent.yellow, 16.dp)
+            if (selected) GlyphIcon(Glyph.CHECK, C.accent.yellowText, 16.dp)
         }
     }
 }
@@ -278,7 +277,7 @@ private fun PresetPlate(p: CityPresetDto, selected: Boolean, modifier: Modifier,
 /** components §28 `WalkWarningPlate`: yellow outline, «!» disc, optional actions (informative: ПОШЛИ stays on). */
 @Composable
 internal fun WalkWarningPlate(text: String, tag: String, actions: List<Pair<String, () -> Unit>> = emptyList()) {
-    PlateFrame(C.accent.yellow, Color.Transparent, tag) {
+    PlateFrame(C.accent.yellowText, Color.Transparent, tag) {
         Box(Modifier.size(18.dp).clip(CircleShape).background(C.accent.yellow), contentAlignment = Alignment.Center) {
             Txt("!", T.caption.bold, C.text.onLight)
         }
@@ -394,7 +393,7 @@ internal fun BoxScope.CityPickerSheet(picker: CityPicker, ui: PickerUi, windowH:
 @Composable
 internal fun BudgetChips(budget: Int?, onPick: (Int?) -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        listOf(2_000, 5_000, 10_000).forEach { v -> ParamChip(stringResource(R.string.city_budget_value, RuFormat.thousands(v)), budget == v, "city.budget.$v") { onPick(v) } }
+        listOf(2_000, 5_000, 10_000).forEach { v -> ParamChip(stringResource(R.string.city_budget_value, app.verst.settings.AppPrefs.money(v)), budget == v, "city.budget.$v") { onPick(v) } }
         ParamChip(stringResource(R.string.instruments_budget_any), budget == null, "city.budget.any") { onPick(null) }
     }
 }
@@ -411,7 +410,7 @@ internal val Paces = listOf("slow" to R.string.city_pace_slow, "normal" to R.str
 
 @Composable
 internal fun budgetLabel(budget: Int?): String =
-    budget?.let { stringResource(R.string.city_budget_value, RuFormat.thousands(it)) } ?: stringResource(R.string.instruments_budget_any)
+    budget?.let { stringResource(R.string.city_budget_value, app.verst.settings.AppPrefs.money(it)) } ?: stringResource(R.string.instruments_budget_any)
 
 @Composable
 internal fun paceLabel(pace: String): String = stringResource(Paces.firstOrNull { it.first == pace }?.second ?: R.string.city_pace_normal)

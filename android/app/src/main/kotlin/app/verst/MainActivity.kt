@@ -61,6 +61,93 @@ import app.verst.feature.windshield.WindshieldUi
 import app.verst.nav.Route
 import app.verst.nav.VerstFlow
 import java.util.Locale
+import app.verst.nav.allowLocation
+import app.verst.nav.answerAge
+import app.verst.nav.answerBooked
+import app.verst.nav.applyBudgetOption
+import app.verst.nav.applyWalkSuggestion
+import app.verst.nav.askLocation
+import app.verst.nav.book
+import app.verst.nav.budgetEstimate
+import app.verst.nav.buildCustomWalk
+import app.verst.nav.buildWalk
+import app.verst.nav.canUndo
+import app.verst.nav.carTarget
+import app.verst.nav.cardPickHotel
+import app.verst.nav.cardRemoveWalkStop
+import app.verst.nav.cardReplace
+import app.verst.nav.cityChangeStart
+import app.verst.nav.closeAboutData
+import app.verst.nav.closeCard
+import app.verst.nav.closeCityCustom
+import app.verst.nav.closeDayMenu
+import app.verst.nav.closeHandoffSheet
+import app.verst.nav.closeParking
+import app.verst.nav.closePartner
+import app.verst.nav.closeReplace
+import app.verst.nav.closeReport
+import app.verst.nav.closeStopMenu
+import app.verst.nav.confirmReplace
+import app.verst.nav.dayMenuGo
+import app.verst.nav.denyLocation
+import app.verst.nav.handoff
+import app.verst.nav.handoffDay
+import app.verst.nav.handoffInstall
+import app.verst.nav.handoffPick
+import app.verst.nav.handoffScope
+import app.verst.nav.isBooked
+import app.verst.nav.looksLikeAddress
+import app.verst.nav.manualLocation
+import app.verst.nav.navigatorFromStop
+import app.verst.nav.navigatorInstalled
+import app.verst.nav.needInternet
+import app.verst.nav.onLocationPermission
+import app.verst.nav.openAboutData
+import app.verst.nav.openCard
+import app.verst.nav.openCity
+import app.verst.nav.openCityPicker
+import app.verst.nav.openDayMenu
+import app.verst.nav.openExit
+import app.verst.nav.openHandoffSheet
+import app.verst.nav.openNoFit
+import app.verst.nav.openParking
+import app.verst.nav.openReplace
+import app.verst.nav.openReport
+import app.verst.nav.openStopMenu
+import app.verst.nav.openWalkCard
+import app.verst.nav.otherWalk
+import app.verst.nav.pickAlternative
+import app.verst.nav.pickCityAdults
+import app.verst.nav.pickCityBudget
+import app.verst.nav.pickCityChildren
+import app.verst.nav.pickCityDog
+import app.verst.nav.pickCityPace
+import app.verst.nav.pickReportReason
+import app.verst.nav.preciseLocation
+import app.verst.nav.refit
+import app.verst.nav.reportFromCard
+import app.verst.nav.saveWalk
+import app.verst.nav.selectCityPreset
+import app.verst.nav.selectHotel
+import app.verst.nav.sendReport
+import app.verst.nav.setCityDuration
+import app.verst.nav.setReportCommentText
+import app.verst.nav.showMinimum
+import app.verst.nav.stopMenuReplace
+import app.verst.nav.submitAddress
+import app.verst.nav.tappable
+import app.verst.nav.toastAction
+import app.verst.nav.toggleCityInterest
+import app.verst.nav.toggleCityReturn
+import app.verst.nav.toggleHandoffRemember
+import app.verst.nav.undo
+import app.verst.nav.undoBooking
+import app.verst.nav.useMyLocation
+import app.verst.nav.visibleCityPresets
+import app.verst.nav.walkFocusShown
+import app.verst.nav.walkHandoffGo
+import app.verst.nav.walkShareText
+import app.verst.nav.walkTarget
 
 /** The single activity: Windshield → (Navigator) → Instruments → Drive → Road ahead (DEV-SLICE). */
 class MainActivity : ComponentActivity() {
@@ -74,11 +161,33 @@ class MainActivity : ComponentActivity() {
         flow.onLocationPermission(granted, blocked)
     }
 
-    /** The app is Russian-only: plurals and formats follow Russian rules whatever the phone's language is. */
+    /**
+     * The interface language comes from the settings (D-IR-20), not from the phone: Russian by default, so plurals and
+     * formats follow Russian rules whatever the phone's language is.
+     */
     override fun attachBaseContext(newBase: Context) {
-        val config = Configuration(newBase.resources.configuration).apply { setLocale(Locale.forLanguageTag("ru-RU")) }
+        val tag = app.verst.settings.AppPrefs.settings.language.tag
+        val config = Configuration(newBase.resources.configuration).apply { setLocale(Locale.forLanguageTag(tag)) }
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
+
+    /** D-IR-20 «Где хранить поездки → в папке»: the system folder picker (no storage permission needed). */
+    private val folderPicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri == null) return@registerForActivityResult
+        runCatching {
+            contentResolver.takePersistableUriPermission(
+                uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+        }
+        val name = app.verst.settings.FolderFiles.displayName(this, uri)
+        app.verst.settings.AppPrefs.update {
+            it.copy(storage = app.verst.core.model.TripStorage.FOLDER, folderUri = uri.toString(), folderName = name)
+        }
+        val app = application as VerstApp
+        Thread { app.tripStore.mirrorCurrent() }.start()
+    }
+
+    fun pickTripsFolder() = folderPicker.launch(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // S-02: transparent bars with light icons on the dark UI (the scene/dashboard draw behind them).
@@ -221,6 +330,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 override fun delete(id: String) = flow.askDelete(id)
             },
             onDebug = flow::openDebug,
+            onSettings = flow::openSettings,
             onCity = flow::openCity,
             onYouAre = flow::askLocation,
         )
@@ -402,6 +512,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
             }
         }
         Route.Debug -> DebugScreen(flow)
+        Route.Settings -> app.verst.feature.settings.SettingsRoute(flow)
         Route.Waybill -> {
             val r = flow.result
             if (r == null) {

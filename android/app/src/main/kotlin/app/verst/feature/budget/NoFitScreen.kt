@@ -41,7 +41,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.BudgetOptionDto
 import app.verst.core.model.dto.NoFitDto
 import app.verst.core.ui.R
@@ -71,7 +70,7 @@ interface NoFitActions {
 @Composable
 fun NoFitScreen(nf: NoFitDto, a: NoFitActions) {
     val min = nf.minimumTotalRub
-    val cd = stringResource(R.string.cd_budget_nofit, RuFormat.thousands(nf.budgetRub), RuFormat.thousands(min))
+    val cd = stringResource(R.string.cd_budget_nofit, app.verst.settings.AppPrefs.money(nf.budgetRub), app.verst.settings.AppPrefs.money(min))
     ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
         Column(Modifier.fillMaxSize().semantics { contentDescription = cd; liveRegion = LiveRegionMode.Polite }.testTag("nofit")) {
             Box(Modifier.fillMaxWidth().height(160.dp)) {
@@ -88,7 +87,7 @@ fun NoFitScreen(nf: NoFitDto, a: NoFitActions) {
                 Spacer(Modifier.height(8.dp))
                 Txt(stringResource(R.string.budget_nofit_title), T.display, C.text.primary, Modifier.semantics { heading() }, align = TextAlign.Center)
                 Spacer(Modifier.height(8.dp))
-                val text = nf.textRu ?: stringResource(R.string.budget_nofit_min, RuFormat.thousands(min))
+                val text = nf.textRu ?: stringResource(R.string.budget_nofit_min, app.verst.settings.AppPrefs.money(min))
                 Txt(text, T.body.md, C.text.secondary, Modifier.fillMaxWidth().testTag("nofit.text"), align = TextAlign.Center)
                 Spacer(Modifier.height(12.dp))
                 // BudgetOverPlate
@@ -98,7 +97,7 @@ fun NoFitScreen(nf: NoFitDto, a: NoFitActions) {
                         .testTag("nofit.minimum"),
                 ) {
                     Txt(stringResource(R.string.budget_nofit_min_label), T.label.md, C.accent.redText)
-                    Txt(stringResource(R.string.common_estimate_rub, RuFormat.thousands(min)), T.amount, C.text.primary)
+                    Txt(stringResource(R.string.common_estimate_rub, app.verst.settings.AppPrefs.money(min)), T.amount, C.text.primary)
                 }
                 Spacer(Modifier.height(20.dp))
                 Txt(stringResource(R.string.budget_nofit_options), T.label.md, C.text.muted, Modifier.fillMaxWidth())
@@ -125,7 +124,7 @@ private fun LimitSign(budget: Int, modifier: Modifier) {
     val reduced = LocalReducedMotion.current
     val k = remember { Animatable(if (reduced) 1f else 0f) }
     LaunchedEffect(Unit) { if (!reduced) k.animateTo(1f, tween(DesignTokens.motion.limitSignIn.durationMs, easing = DesignTokens.motion.limitSignIn.easing)) }
-    val text = stringResource(R.string.budget_nofit_sign, RuFormat.thousands(budget))
+    val text = stringResource(R.string.budget_nofit_sign, app.verst.settings.AppPrefs.money(budget))
     val style = if (text.length >= 9) T.sign.lgBold.copy(fontSize = 15.sp) else T.sign.lgBold
     Box(
         modifier.size(96.dp).graphicsLayer { scaleX = 0.8f + 0.2f * k.value; scaleY = 0.8f + 0.2f * k.value; alpha = k.value }
@@ -138,14 +137,14 @@ private fun LimitSign(budget: Int, modifier: Modifier) {
 /** components §20 `BudgetOption`. */
 @Composable
 private fun OptionRow(o: BudgetOptionDto, index: Int, budget: Int, onClick: () -> Unit) {
-    val total = o.totalRub?.let { RuFormat.thousands(it) } ?: ""
+    val total = o.totalRub?.let { app.verst.settings.AppPrefs.money(it) } ?: ""
     val (title, sub) = when (o.kind) {
         "shorten" -> stringResource(R.string.budget_option_shorten, o.days ?: 0, pluralStringResource(R.plurals.plural_day, o.days ?: 0)) to
             stringResource(R.string.budget_option_shorten_sub, o.titleRu ?: "", total)
         "cheaper_route" -> stringResource(R.string.budget_option_cheaper, o.titleRu ?: "") to
             // `fits = false` (ARCH-301): the cheapest candidate is still over the budget — never «помещается»
             (if (o.fits) stringResource(R.string.budget_option_cheaper_sub, total) else stringResource(R.string.budget_option_cheaper_sub_over, total))
-        else -> stringResource(R.string.budget_option_raise, RuFormat.thousands(o.budgetRub ?: budget)) to stringResource(R.string.budget_option_raise_sub)
+        else -> stringResource(R.string.budget_option_raise, app.verst.settings.AppPrefs.money(o.budgetRub ?: budget)) to stringResource(R.string.budget_option_raise_sub)
     }
     val cd = stringResource(R.string.cd_budget_option, title, sub)
     val shape = RoundedCornerShape(DesignTokens.radius.r10)

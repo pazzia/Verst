@@ -117,14 +117,14 @@ private fun ReasonRow(label: String, selected: Boolean, tag: String, onClick: ()
     val shape = RoundedCornerShape(DesignTokens.radius.r10)
     Row(
         Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp).clip(shape).background(C.dash.controlAlt)
-            .then(if (selected) Modifier.border(DesignTokens.stroke.w1, C.accent.yellow, shape) else Modifier)
+            .then(if (selected) Modifier.border(DesignTokens.stroke.w1, C.accent.yellowText, shape) else Modifier)
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .testTag(tag)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellow else C.text.secondary, RoundedCornerShape(9.dp)),
+            Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellowText else C.text.secondary, RoundedCornerShape(9.dp)),
             contentAlignment = Alignment.Center,
         ) {
             if (selected) Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(C.accent.yellow))
@@ -142,14 +142,14 @@ private fun CommentField(value: String, onChange: (String) -> Unit, onFocused: (
     val hint = stringResource(R.string.report_comment)
     Box(
         Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp).clip(shape).background(C.navi.field)
-            .border(if (focused) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (focused) C.accent.yellow else C.navi.fieldBorder, shape)
+            .border(if (focused) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (focused) C.accent.yellowText else C.navi.fieldBorder, shape)
             .padding(horizontal = 12.dp, vertical = 14.dp),
     ) {
         BasicTextField(
             value = value,
             onValueChange = { onChange(it.take(Reports.COMMENT_MAX)) },
             textStyle = T.body.md.copy(color = C.text.primary),
-            cursorBrush = SolidColor(C.accent.yellow),
+            cursorBrush = SolidColor(C.accent.yellowText),
             maxLines = 4,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default),
             modifier = Modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused; onFocused(it.isFocused) }

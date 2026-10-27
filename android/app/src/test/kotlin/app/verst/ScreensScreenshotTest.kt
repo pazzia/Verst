@@ -485,7 +485,7 @@ class ScreensScreenshotTest {
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         shot("road", "s4-parking-sum-unknown") { RoadScreen(RoadUi(trip, "NE"), noRoad) }
         compose.onNodeWithTag("road.total.parking.value", useUnmergedTree = true)
-            .assertTextEquals(ctx.getString(UiR.string.road_parking_day_unknown, app.verst.core.model.RuFormat.thousands(line)))
+            .assertTextEquals(ctx.getString(UiR.string.road_parking_day_unknown, app.verst.settings.AppPrefs.money(line)))
     }
 
     /** M6+ contract (a Moscow zone stop): the engine's P part, the sheet from `zoneRu` / `whereRu` / `sundayRu`. */
@@ -1442,5 +1442,75 @@ class ScreensScreenshotTest {
     @Test
     fun engineEnvelopeErrorsNeverThrow() {
         assertEquals("INTERNAL", (EngineJson.planResult("") as EngineResult.Err).error.code)
+    }
+
+    // ------------------------------------------------------------------ D-IR-20 personal cabinet
+
+    private val settingsUi = app.verst.feature.settings.SettingsUi(
+        app.verst.core.model.AppSettings(currency = "USD"),
+        app.verst.core.model.RatesDto("2026-10-27", "cbr", mapOf("USD" to 80.0)),
+        app.verst.feature.settings.BuildLines("0.1.147", 147, "eff752f1a2b3", "2026-10-27 09:00 UTC", "0.9.0", "3.11.9", "2026.10 · 2026-10-20"),
+        listOf(app.verst.settings.BuildSeen(147, "0.1.147", "eff752f1a2b3", "2026-10-27 09:00 UTC", 1_793_000_000_000L)),
+        null, themePending = false,
+    )
+
+    private class SettingsSpy : app.verst.feature.settings.SettingsActions {
+        val calls = mutableListOf<String>()
+        override fun back() { calls += "back" }
+        override fun language(l: app.verst.core.model.AppLanguage) { calls += "language:$l" }
+        override fun currency(code: String) { calls += "currency:$code" }
+        override fun theme(t: app.verst.core.model.AppTheme) { calls += "theme:$t" }
+        override fun restart() { calls += "restart" }
+        override fun storageDevice() { calls += "device" }
+        override fun pickFolder() { calls += "folder" }
+        override fun writeFolderNow() { calls += "now" }
+        override fun copyBuild() { calls += "copy" }
+        override fun developer() { calls += "dev" }
+    }
+
+    @Test
+    fun settingsDefault() {
+        val spy = SettingsSpy()
+        shot("settings", "default") { app.verst.feature.settings.SettingsScreen(settingsUi, spy) }
+        compose.onNodeWithTag("settings.currency.USD").assertIsSelected()
+        compose.onNodeWithTag("settings.currency.RUB").assertIsNotSelected()
+        compose.onNodeWithTag("settings.language.RU").assertIsSelected()
+        compose.onNodeWithTag("settings.storage.cloud").assertIsNotEnabled()
+        assertTrue(compose.onAllNodesWithText("0.1.147", substring = true).fetchSemanticsNodes().isNotEmpty())
+        compose.onNodeWithTag("settings.currency.EUR").performClick()
+        compose.onNodeWithTag("settings.theme.DAY").performClick()
+        assertEquals(listOf("currency:EUR", "theme:DAY"), spy.calls)
+        assertTrue(compose.onAllNodesWithTag("settings.restart").fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    fun settingsDayPaletteAndRestart() {
+        val day = app.verst.core.ui.theme.Palette.day
+        app.verst.core.ui.theme.Palette.day = true
+        try {
+            shot("settings", "day") { app.verst.feature.settings.SettingsScreen(settingsUi.copy(themePending = true), SettingsSpy()) }
+            compose.onNodeWithTag("settings.restart").assertIsDisplayed()
+        } finally {
+            app.verst.core.ui.theme.Palette.day = day
+        }
+    }
+
+    @Test
+    fun windshieldDayPalette() {
+        val day = app.verst.core.ui.theme.Palette.day
+        app.verst.core.ui.theme.Palette.day = true
+        try {
+            shot("windshield", "day") { WindshieldScreen(windshield(WindshieldData.Routes(routes)), {}, {}, {}, {}) }
+            compose.onNodeWithTag("windshield.settings").assertExists()
+        } finally {
+            app.verst.core.ui.theme.Palette.day = day
+        }
+    }
+
+    @Test
+    fun buildTextIsOneFactPerLine() {
+        val t = app.verst.feature.settings.buildText(settingsUi.build, app.verst.core.model.AppLanguage.EN, "USD", "2026-10-27")
+        assertTrue(t, t.startsWith("Verst 0.1.147 (build 147)\ncommit eff752f1a2b3\nbuilt 2026-10-27 09:00 UTC"))
+        assertTrue(t, t.contains("settings EN · USD · rates 2026-10-27"))
     }
 }

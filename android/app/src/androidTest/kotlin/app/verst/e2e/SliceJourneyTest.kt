@@ -37,6 +37,7 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.junit.runner.RunWith
+import app.verst.nav.isBooked
 
 /**
  * DEV-SLICE(-2) journey on the real engine: Windshield → (own route) Navigator → Instruments → Drive → Road ahead

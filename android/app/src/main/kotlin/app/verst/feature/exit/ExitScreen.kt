@@ -294,7 +294,7 @@ private fun Panel(ui: ExitUi, a: ExitActions, modifier: Modifier) {
 @Composable
 private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, index: Int, onClick: () -> Unit) {
     val tags = tagLine(o)
-    val price = RuFormat.thousands(o.priceCrewRub)
+    val price = app.verst.settings.AppPrefs.money(o.priceCrewRub)
     val cd = stringResource(R.string.cd_exit_option, o.name, tags, price)
     val shape = RoundedCornerShape(DesignTokens.radius.r10)
     Row(
@@ -303,7 +303,7 @@ private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, i
             .defaultMinSize(minHeight = DesignTokens.size.hotelRowMinH)
             .clip(shape)
             .background(if (selected) C.navi.field else C.navi.screen)
-            .border(DesignTokens.stroke.w1, if (selected) C.accent.yellow else C.navi.fieldBorder, shape)
+            .border(DesignTokens.stroke.w1, if (selected) C.accent.yellowText else C.navi.fieldBorder, shape)
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("exit.option.$index")
@@ -311,7 +311,7 @@ private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, i
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellow else C.navi.radio, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellowText else C.navi.radio, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) {
             if (selected) Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(C.accent.yellow))
         }
         Column(Modifier.weight(1f)) {
@@ -319,9 +319,9 @@ private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, i
             if (tags.isNotEmpty()) Txt(tags, T.body.sm, C.navi.labelSecondary, maxLines = 2)
         }
         if (booked) {
-            Txt(stringResource(R.string.exit_booked_badge), T.body.smStrong, C.accent.yellow, maxLines = 1)
+            Txt(stringResource(R.string.exit_booked_badge), T.body.smStrong, C.accent.yellowText, maxLines = 1)
         } else {
-            Txt(stringResource(R.string.common_estimate_rub, price), T.title.sm, C.accent.yellow, maxLines = 1)
+            Txt(stringResource(R.string.common_estimate_rub, price), T.title.sm, C.accent.yellowText, maxLines = 1)
         }
     }
 }
@@ -403,7 +403,7 @@ private fun BoxScope.MockPartnerSheet(ui: ExitUi, windowH: Dp, a: ExitActions) {
         if (crew.children > 0) add(stringResource(R.string.waybill_crew_children, crew.children))
         if (crew.dog) add(stringResource(R.string.waybill_crew_dog))
     }.joinToString(stringResource(R.string.common_join_comma))
-    val total = RuFormat.thousands(o.priceCrewRub * nights)
+    val total = app.verst.settings.AppPrefs.money(o.priceCrewRub * nights)
     val pane = stringResource(R.string.cd_mock_partner, o.name, inDate, outDate, total)
     BottomSheet(stringResource(R.string.mock_partner_title), a::closePartner, "partner", windowH, badge = stringResource(R.string.mock_partner_badge), pane = pane) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -412,7 +412,7 @@ private fun BoxScope.MockPartnerSheet(ui: ExitUi, windowH: Dp, a: ExitActions) {
                 Txt(stringResource(R.string.mock_partner_hotel, o.name, s.name), T.title.sm, C.text.primary)
                 Txt(stringResource(R.string.mock_partner_dates, inDate, outDate, nights, nightsWord), T.body.md, C.navi.text)
                 Txt(stringResource(R.string.mock_partner_guests, guests), T.body.md, C.navi.text)
-                Txt(stringResource(R.string.mock_partner_price, total, nights, nightsWord), T.title.sm, C.accent.yellow)
+                Txt(stringResource(R.string.mock_partner_price, total, nights, nightsWord), T.title.sm, C.accent.yellowText)
             }
             Txt(stringResource(R.string.mock_partner_note), T.body.md, C.text.secondary)
             Box(

@@ -74,6 +74,10 @@ class EngineHost(private val context: Context) {
     private val _catalogueMs = MutableStateFlow<Long?>(null)
     val catalogueMs: StateFlow<Long?> = _catalogueMs
 
+    /** D-IR-20 build details: «r7.5 · 2026-10-25» of the loaded catalogue (null while loading). */
+    private val _catalogueVersion = MutableStateFlow<String?>(null)
+    val catalogueVersion: StateFlow<String?> = _catalogueVersion
+
     fun start() {
         if (Build.FINGERPRINT == "robolectric") {
             _status.value = EngineStatus.Failed("NO_ENGINE", "Robolectric: no CPython in JVM unit tests")
@@ -116,9 +120,10 @@ class EngineHost(private val context: Context) {
             )
             // then the catalogue (composes `russia_v1`) and the self-check again for its time zones
             val c0 = SystemClock.elapsedRealtime()
-            expectOk(mobile.callAttr("load_catalogue").toString())
+            val cat = expectOk(mobile.callAttr("load_catalogue").toString())
             expectOk(mobile.callAttr("selfcheck").toString())
             val c1 = SystemClock.elapsedRealtime()
+            _catalogueVersion.value = listOf(cat.optString("version"), cat.optString("builtAt").take(10)).filter { it.isNotBlank() }.joinToString(" · ")
             Log.i(TAG, "catalogue ${c1 - c0} ms (ready + catalogue ${c1 - t0} ms)")
             _catalogueMs.value = c1 - c0
         } catch (e: EngineCallFailed) {

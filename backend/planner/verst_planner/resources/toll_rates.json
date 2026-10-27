@@ -1,0 +1,67 @@
+{
+  "_about": [
+    "ENG-02: toll rates per road for routes with real geometry (GraphHopper on the server), category 1 (car, height up to 2 m).",
+    "A toll run of the route whose road has no explicit segment in the world is priced as km x rate. Night tariffs are not known for these roads, so night = day.",
+    "NOT VERIFIED: every figure comes from search snippets of 27.10.2026 (tools/tolls/tariffs-2026-draft.json); the operators' sites were unreachable from the build sandbox. Re-check against avtodor-tr.ru/road/tariffs/, m11-neva.ru and mos-spb.ru before calling the waybill line exact.",
+    "weekend = Friday to Sunday (Автодор); public holidays are not modelled."
+  ],
+  "asOf": "2026-03-02",
+  "verified": false,
+  "vehicleClass": 1,
+  "roads": [
+    {
+      "ref": "М-11",
+      "aliases": ["M-11", "М11", "M11"],
+      "weekdayRubPerKm": "7.25",
+      "weekendRubPerKm": "8.21",
+      "confidence": "low",
+      "how": "whole toll road km 15-684: (950 km 15-58 + 3 900 km 58-684) / 669 km weekday; (1 295 + 4 200) / 669 weekend. Short trips from Moscow are underpriced: km 15-58 alone is 22 ₽/km.",
+      "sources": ["https://m11-podmoskovye.ru/", "https://onlinegibdd.ru/articles/view/m-11-neva/", "https://chehov-vid.ru/news/society/46872/sezonnoe-povyshenie-tsen-na-m-11/"]
+    },
+    {
+      "ref": "М-12",
+      "aliases": ["M-12", "М12", "M12"],
+      "weekdayRubPerKm": "7.30",
+      "weekendRubPerKm": null,
+      "confidence": "medium",
+      "how": "Москва — Казань (Шали) 5 909 ₽ / 810 km (sum of the published sections 3 450 + 2 397 + 62); another source gives 5 250 (6.5 ₽/km). Weekend and night variants not found.",
+      "sources": ["https://ufa1.ru/text/transport/2026/05/24/76400584/", "https://parkomatica.ru/blog/tpost/oplata-m12"]
+    },
+    {
+      "ref": "А-113",
+      "aliases": ["A-113", "ЦКАД", "А113", "A113"],
+      "weekdayRubPerKm": "8.90",
+      "weekendRubPerKm": null,
+      "confidence": "low",
+      "how": "ЦКАД sections 436 / 49.5 km, 941 / 105.3 km, 859 / 96.9 km; flat, no time-of-day discount since 2026-03-02. Section lengths not verified.",
+      "sources": ["https://t-j.ru/guide/tskad/", "https://ria.ru/avto/poezdka-po-ckad/"]
+    },
+    {
+      "ref": "М-4",
+      "aliases": ["M-4", "М4", "M4"],
+      "weekdayRubPerKm": "4.40",
+      "weekendRubPerKm": "5.40",
+      "confidence": "low",
+      "how": "mean of the sections with both price and length (21-93, 211-266, 401-464, Аксай, 1091-1119); weekend = weekday x 1.21 (Москва — Краснодар 6 090 / 5 040).",
+      "sources": ["https://avtocod.ru/trassa-m-4-don-karta-platnyh-uchastkov-ceny-i-sovety-puteshestvennikam", "https://onlinegibdd.ru/articles/view/platnye-trassy-na-skolko-vyrosli-tarify-i-shtrafy/"]
+    },
+    {
+      "ref": "М-3",
+      "aliases": ["M-3", "М3", "M3"],
+      "weekdayRubPerKm": "5.40",
+      "weekendRubPerKm": "6.00",
+      "confidence": "low",
+      "how": "km 124-194: (190 + 190) / 70 km weekday, (190 + 230) / 70 weekend.",
+      "sources": ["https://nikatv.ru/news/situaciya/proezd-po-trasse-m-3-v-kaluzhskoy-oblasti-rezko-podorozhal"]
+    },
+    {
+      "ref": "М-1",
+      "aliases": ["M-1", "М1", "M1"],
+      "weekdayRubPerKm": "7.00",
+      "weekendRubPerKm": null,
+      "confidence": "low",
+      "how": "km 33-66: 230 / 33 km, flat. The Северный обход Одинцова (concession, ~15 ₽/km) is not covered.",
+      "sources": ["https://avtodor-tr.ru/road/tariffs/"]
+    }
+  ]
+}

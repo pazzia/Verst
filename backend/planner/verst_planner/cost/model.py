@@ -108,9 +108,13 @@ def _in_window(t: time, lo: time, hi: time) -> bool:
 def toll_unit(t: TollInput, cfg: PlannerConfig) -> TollUnit:
     seg = t.hit.segment
     lo, hi = (seg.night_from, seg.night_to) if seg.night_from != seg.night_to else cfg.toll_night
-    night = _in_window(t.entry_local.time(), lo, hi)
-    rub = round_to(seg.tariff_night_rub if night else seg.tariff_day_rub, 1)
-    return TollUnit(seg.id, seg.road_ref, rub, night, ym(seg.as_of))
+    # a segment without a night discount is never «ночью» (and Friday nights still take the weekend tariff)
+    night = seg.tariff_night_rub != seg.tariff_day_rub and _in_window(t.entry_local.time(), lo, hi)
+    # [ENG-02] Автодор category 1: the weekend tariff is Friday to Sunday (holidays are not modelled)
+    weekend = not night and seg.tariff_weekend_rub is not None and t.entry_local.weekday() >= 4
+    tariff = seg.tariff_night_rub if night else seg.tariff_weekend_rub if weekend else seg.tariff_day_rub
+    assert tariff is not None
+    return TollUnit(seg.id, seg.road_ref, round_to(tariff, 1), night, ym(seg.as_of), weekend)
 
 
 def breakfast_check(base: int, cfg: PlannerConfig) -> int:
