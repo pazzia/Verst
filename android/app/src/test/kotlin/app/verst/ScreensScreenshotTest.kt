@@ -485,7 +485,7 @@ class ScreensScreenshotTest {
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         shot("road", "s4-parking-sum-unknown") { RoadScreen(RoadUi(trip, "NE"), noRoad) }
         compose.onNodeWithTag("road.total.parking.value", useUnmergedTree = true)
-            .assertTextEquals(ctx.getString(UiR.string.road_parking_day_unknown, app.verst.core.model.RuFormat.thousands(line)))
+            .assertTextEquals(ctx.getString(UiR.string.road_parking_day_unknown, app.verst.settings.AppPrefs.money(line)))
     }
 
     /** M6+ contract (a Moscow zone stop): the engine's P part, the sheet from `zoneRu` / `whereRu` / `sundayRu`. */
