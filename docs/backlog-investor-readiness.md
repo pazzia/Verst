@@ -146,6 +146,10 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 
 ## Validation (demand)
 
+
+**Status 27.10.2026 — done, no behaviour change.**
+- `gen_worlds.py` 3 455 → 655 lines: the hand-made tables moved to `tools/worlds/` (`central_russia_geo`, `lodgings`, `sights`, `food`, `extras`); the generated worlds are byte for byte the same (`test_generator_matches_committed_json`).
+- `VerstFlow.kt` 2 965 → ~1 730 lines: hand-off, cards and report, budget, location and addresses, «По городу» and exit moved to `HandoffFlow.kt`, `CardsFlow.kt`, `BudgetFlow.kt`, `LocationFlow.kt`, `CityFlow.kt`, `ExitFlow.kt` as `VerstFlow` extensions. The state stays in the class; the private members those functions use became `internal` (module-only).
 ### VAL-01 — Customer interviews
 
 **Description.** Talk to 30–50 people who took a multi-day car trip in Russia in the last 12 months: families with children first, then dog owners and couples. Find them in VK groups, Drive2, Telegram travel channels and among friends of friends. Use a script about the past, not the future: "Tell me about your last trip. How did you plan it? What went wrong? What did it cost? What did you use?" Do not pitch Verst until the last 5 minutes.

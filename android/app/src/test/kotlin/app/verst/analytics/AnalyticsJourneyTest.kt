@@ -35,6 +35,19 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import app.verst.nav.book
+import app.verst.nav.confirmReplace
+import app.verst.nav.dayMenuGo
+import app.verst.nav.openDayMenu
+import app.verst.nav.openExit
+import app.verst.nav.openReplace
+import app.verst.nav.openReport
+import app.verst.nav.pickAlternative
+import app.verst.nav.pickReportReason
+import app.verst.nav.refit
+import app.verst.nav.sendReport
+import app.verst.nav.setReportCommentText
+import app.verst.nav.showMinimum
 
 /**
  * ENG-05: the events [VerstFlow] sends on a fake engine (golden trip G01 Москва → Ярославль), recorded by

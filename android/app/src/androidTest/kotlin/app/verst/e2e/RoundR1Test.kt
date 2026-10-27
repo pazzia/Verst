@@ -31,6 +31,9 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.junit.runner.RunWith
+import app.verst.nav.closeHandoffSheet
+import app.verst.nav.isBooked
+import app.verst.nav.navigatorInstalled
 
 /**
  * Sprint 3 round R1 on the device: focus restore (CEO 2.1), the navigator hand-off links (CEO 4) and the GPS

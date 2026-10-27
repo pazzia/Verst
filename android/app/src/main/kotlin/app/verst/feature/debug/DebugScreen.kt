@@ -40,6 +40,9 @@ import app.verst.feature.common.ScreenRoot
 import app.verst.nav.VerstFlow
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
+import app.verst.nav.closeAboutData
+import app.verst.nav.locate
+import app.verst.nav.openAboutData
 
 /**
  * DEV-127 debug panel (architecture-android-mvp §9): a plain list, not part of visual QA. World, clock (system /

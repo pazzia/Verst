@@ -70,6 +70,7 @@ import app.verst.nav.WalkFew
 import app.verst.core.model.dto.WalkSuggestion
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
+import app.verst.nav.visibleCityPresets
 
 /** 5.10 state (stateless; `VerstRoot` maps `VerstFlow` into it). */
 data class CityUi(

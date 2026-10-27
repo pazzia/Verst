@@ -43,6 +43,8 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.junit.runner.RunWith
+import app.verst.nav.locate
+import app.verst.nav.selectCityPreset
 
 /**
  * Sprint 3 journeys S3-1…S3-6 (docs/backlog-sprint3.md DEV-309) on the real engine and `russia_v1`.

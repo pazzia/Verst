@@ -34,6 +34,11 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.junit.runner.RunWith
+import app.verst.nav.locate
+import app.verst.nav.pickCityDog
+import app.verst.nav.selectCityPreset
+import app.verst.nav.setCityDuration
+import app.verst.nav.visibleCityPresets
 
 /**
  * Sprint 4 journeys on the real engine: ADR-0016 OR-1…OR-8 (CEO: airplane mode, a slow network, HTTP 500 and
