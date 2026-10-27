@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import app.verst.core.model.RuFormat
 import app.verst.core.ui.R
 
 /**
@@ -47,7 +46,7 @@ fun crewShort(adults: Int, children: Int, dog: Boolean): String {
 }
 
 @Composable
-fun rub(n: Int): String = stringResource(R.string.common_estimate_rub, RuFormat.thousands(n))
+fun rub(n: Int): String = stringResource(R.string.common_estimate_rub, app.verst.settings.AppPrefs.money(n))
 
 @Composable
 fun days(n: Int): String = "$n ${pluralStringResource(R.plurals.plural_day, n)}"
@@ -55,7 +54,7 @@ fun days(n: Int): String = "$n ${pluralStringResource(R.plurals.plural_day, n)}"
 /** Copy of the plate toasts (5.5 §4 Saved, D-6, 5.6 §3). */
 @Composable
 fun toastText(t: app.verst.nav.Toast): String = when (t) {
-    is app.verst.nav.Toast.Replaced -> stringResource(R.string.road_replaced_toast, RuFormat.thousands(t.totalRub))
+    is app.verst.nav.Toast.Replaced -> stringResource(R.string.road_replaced_toast, app.verst.settings.AppPrefs.money(t.totalRub))
     app.verst.nav.Toast.Saved -> stringResource(R.string.common_saved_toast)
     is app.verst.nav.Toast.SavedNearLimit -> stringResource(R.string.common_saved_near_limit, t.count)
     app.verst.nav.Toast.StorageFull -> stringResource(R.string.common_storage_full_title) + ". " + stringResource(R.string.common_storage_full_body)

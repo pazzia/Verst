@@ -279,7 +279,7 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                     BackLink(back, C.mirror.label, stringResource(R.string.cd_back, back), a::back, Modifier.padding(start = 12.dp, top = 10.dp).testTag("road.back"))
                     Row(Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 12.dp)) {
                         IconButton44(
-                            Glyph.BOOKMARK, if (ui.saved) C.accent.yellow else C.mirror.label,
+                            Glyph.BOOKMARK, if (ui.saved) C.accent.yellowText else C.mirror.label,
                             stringResource(if (ui.saved) R.string.cd_road_saved else R.string.cd_road_save), "road.save", filled = ui.saved, onClick = a::save,
                         )
                         IconButton44(Glyph.SHARE, C.mirror.label, stringResource(R.string.cd_road_share), "road.share", onClick = a::share)
@@ -456,12 +456,12 @@ internal fun HandoffItem(title: String, target: HandoffTarget, truncated: Boolea
             .testTag(tag).padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        GlyphIcon(Glyph.NAVIGATOR, C.accent.yellow, 22.dp)
+        GlyphIcon(Glyph.NAVIGATOR, C.accent.yellowText, 22.dp)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Txt(title, T.list.title, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
             Txt(line, T.body.sm, C.text.muted, maxLines = 1, modifier = Modifier.testTag("$tag.target"))
-            if (truncated) Txt(stringResource(R.string.handoff_truncated), T.body.sm, C.accent.yellow, Modifier.testTag("$tag.truncated"))
+            if (truncated) Txt(stringResource(R.string.handoff_truncated), T.body.sm, C.accent.yellowText, Modifier.testTag("$tag.truncated"))
         }
         GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 16.dp)
     }
@@ -545,14 +545,14 @@ private fun OptionRow(kind: StopDto, name: String, sub: String?, delta: String, 
             .defaultMinSize(minHeight = 64.dp)
             .clip(shape)
             .background(C.dash.controlAlt)
-            .then(if (selected) Modifier.border(DesignTokens.stroke.w1, C.accent.yellow, shape) else Modifier)
+            .then(if (selected) Modifier.border(DesignTokens.stroke.w1, C.accent.yellowText, shape) else Modifier)
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .testTag(tag)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Box(Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellow else C.text.secondary, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellowText else C.text.secondary, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) {
             if (selected) Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(C.accent.yellow))
         }
         RoadSign(kind.sign, kind.name, app.verst.feature.common.signTags(kind.poiKind, kind.tags), Modifier.scaled(0.7f))
@@ -576,7 +576,7 @@ private fun OptionRow(kind: StopDto, name: String, sub: String?, delta: String, 
 private fun deltaText(alt: AlternativeDto): String {
     fun sign(n: Int) = if (n > 0) "+" else "−"
     val min = kotlin.math.abs(alt.deltaMin)
-    val rub = RuFormat.thousands(kotlin.math.abs(alt.deltaRub))
+    val rub = app.verst.settings.AppPrefs.money(kotlin.math.abs(alt.deltaRub))
     return when {
         alt.deltaMin != 0 && alt.deltaRub != 0 -> stringResource(R.string.replace_delta, sign(alt.deltaMin), min, sign(alt.deltaRub), rub)
         alt.deltaMin != 0 -> stringResource(R.string.replace_delta_min, sign(alt.deltaMin), min)
@@ -669,7 +669,7 @@ private fun Intro(trip: TripDto, handoffDay: Int, a: RoadActions) {
             } else null
             Row(
                 Modifier.fillMaxWidth().padding(top = 4.dp)
-                    .border(DesignTokens.stroke.w1, C.accent.yellow, RoundedCornerShape(DesignTokens.radius.r10))
+                    .border(DesignTokens.stroke.w1, C.accent.yellowText, RoundedCornerShape(DesignTokens.radius.r10))
                     .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -726,7 +726,7 @@ private fun DayHeader(day: DayDto, home: Boolean, first: Boolean, parkingOn: Boo
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Txt(stringResource(R.string.road_day, day.day), T.title.sm, C.accent.yellow, maxLines = 1)
+            Txt(stringResource(R.string.road_day, day.day), T.title.sm, C.accent.yellowText, maxLines = 1)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Txt(meta, T.body.sm, C.text.muted, maxLines = 1)
                 // 5.5 §10.6: the day's parking under the meta («≈ 500 ₽ + ?»)
@@ -769,7 +769,7 @@ private fun StopRow(
         // ADR-0019 E-2: 0 ₽ of an unknown price is not «вход свободный»
         "sight" -> if ("ticket" in s.unknownFacts) stringResource(R.string.road_ticket_unknown) else if (s.costRub == 0) stringResource(R.string.road_free) else rub(s.costRub)
         "food", "overnight" -> rub(s.costRub)
-        "rest" -> stringResource(R.string.common_rub, "0")
+        "rest" -> stringResource(R.string.common_rub, app.verst.settings.AppPrefs.money(0))
         "fuel" -> if (s.costRub > 0) rub(s.costRub) else null
         else -> null
     }
@@ -919,9 +919,9 @@ private fun HotelButton(booked: Boolean, cd: String, tag: String, onClick: () ->
             contentAlignment = Alignment.Center,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Txt(stringResource(if (booked) R.string.road_booked else R.string.road_pick_hotel), T.body.mdStrong, C.text.primary, maxLines = 1)
+                Txt(stringResource(if (booked) R.string.road_booked else R.string.road_pick_hotel), T.body.mdStrong, C.sign.white, maxLines = 1)
                 // N-09: the check is drawn (the font has no «✓»).
-                if (booked) GlyphIcon(Glyph.CHECK, C.text.primary, 16.dp, Modifier.padding(start = 6.dp))
+                if (booked) GlyphIcon(Glyph.CHECK, C.sign.white, 16.dp, Modifier.padding(start = 6.dp))
             }
         }
     }
@@ -947,15 +947,15 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
     val over = budget != null && (minimum || (c.overBudget && !tight))
     val fits = budget != null && !over && !tight
     val label = when {
-        over -> stringResource(R.string.road_waybill_over, RuFormat.thousands((c.totalRub - budget!!).coerceAtLeast(0)))
+        over -> stringResource(R.string.road_waybill_over, app.verst.settings.AppPrefs.money((c.totalRub - budget!!).coerceAtLeast(0)))
         else -> stringResource(R.string.road_waybill_label)
     }
     val total = rub(c.totalRub)
-    val perPerson = stringResource(R.string.road_waybill_per_person, RuFormat.thousands(c.perPersonRub))
+    val perPerson = stringResource(R.string.road_waybill_per_person, app.verst.settings.AppPrefs.money(c.perPersonRub))
     val parkingSum = parkingOf(trip)
     val parkingRub = if (parkingOn) c.lines.firstOrNull { it.key == "parking" }?.rub ?: parkingSum.rub else null
     val parkingText = parkingRub?.let { parkingTotalText(parkingSum, it) }
-    val cd = stringResource(R.string.cd_road_waybill, RuFormat.thousands(c.totalRub)) + ". " + perPerson +
+    val cd = stringResource(R.string.cd_road_waybill, app.verst.settings.AppPrefs.money(c.totalRub)) + ". " + perPerson +
         (parkingText?.let { ". " + stringResource(R.string.road_footer_parking) + " " + it } ?: "")
     Row(
         Modifier
@@ -981,7 +981,7 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
                         Txt(stringResource(R.string.budget_fit_badge), T.body.smStrong, C.text.onLightMuted, Modifier.testTag("road.fit"), maxLines = 1)
                     } else {
                         Box(Modifier.padding(end = 5.dp).size(8.dp).clip(RoundedCornerShape(4.dp)).background(C.budget.tight))
-                        Txt(stringResource(R.string.budget_tight_badge, RuFormat.thousands(c.totalRub - budget!!)), T.body.smStrong, C.text.onLightMuted, Modifier.testTag("road.tight"), maxLines = 1)
+                        Txt(stringResource(R.string.budget_tight_badge, app.verst.settings.AppPrefs.money(c.totalRub - budget!!)), T.body.smStrong, C.text.onLightMuted, Modifier.testTag("road.tight"), maxLines = 1)
                     }
                 } else {
                     Txt(label, T.body.smStrong, if (over) C.paper.inkRed else C.text.onLightMuted, Modifier.testTag(if (over) "road.over" else "road.label"), maxLines = 1)

@@ -121,7 +121,12 @@ jobs:
       - name: Prepare
         run: |
           mkdir -p "$LOGS" "$DIAG" "$VERST_SCREENSHOTS_DIR"
+          echo "VERST_BUILD_DATE=$(date -u +'%Y-%m-%d %H:%M UTC')" >> "$GITHUB_ENV"   # D-IR-20 build details
           { java -version; python3 --version; android/gradlew --version || echo "gradlew --version failed"; } 2>&1 | tee "$LOGS/toolchain.log"
+
+      - name: Currency rates (Банк России) into the APK
+        # D-IR-20 currency setting; on failure the placeholder stays and the app shows roubles only
+        run: python3 tools/ci/fetch_rates.py android/app/src/main/assets/rates.json
 
       - name: Assemble demo APK + androidTest APK
         id: assemble

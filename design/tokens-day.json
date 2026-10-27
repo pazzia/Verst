@@ -1,0 +1,752 @@
+{
+  "$schema": "verst-design-tokens/1",
+  "$meta": {
+    "name": "Verst «Дневная трасса» day palette",
+    "version": "1.0.0",
+    "date": "2026-10-27",
+    "scope": "All screens: Windshield, Navigator, Instruments, Drive, Road ahead, Waybill, Exit, cards with photos, city and walk screens, sheets and dialogs. Colour only: type, space, radius, stroke, shadow, size and motion are shared with design/tokens.json.",
+    "basis": "Approved day direction: variant B «Дневная трасса» (design/variants-ir/tokens-day.json, design/variants-ir/b/, README §2 B, §7). Night source: design/tokens.json.",
+    "structure": "\"color\" has exactly the group/leaf names of design/tokens.json \"color\" (129 leaves), so Kotlin switches palettes by token name (DesignTokens.color <-> DesignTokens.colorDay). \"alpha\" has the night semantics: value is opaque #RRGGBB, alpha 0..1 is applied on top. \"from\": variant-b = value taken from variant B (same name, or the B token named in \"use\"); derived = new day value; same-as-night = unchanged on purpose.",
+    "counts": {
+      "derived": 54,
+      "same-as-night": 30,
+      "variant-b": 45
+    },
+    "rules": [
+      "Light dashboard, dark text: text.primary >= 7:1 on dash.base and dash.raised; text.secondary, text.muted and text.note >= 4.5:1 (text.muted is allowed at >= 11 sp because it passes AA as normal text); text.disabled >= 3:1 (WCAG-exempt, kept legible).",
+      "Yellow: #FFD23F is a FILL on light surfaces (CTA plate, YellowButton, HandoffCta, BookCta, car marker, badges, return flash) and always carries dark text.onLight plus a 2 dp text.onLight inner border on light backgrounds (the border gives the 3:1 boundary). Yellow is used as text only on dark blue (selected overhead-sign row, 7.49:1).",
+      "Every token whose night role is yellow TEXT or a yellow THIN LINE becomes dark amber #805300 (>= 5:1 on dash.base) or sign blue: budget.tight and stretch.text -> #805300; stretch.border -> #A87400; overlay.focus -> #1E4FA3; crew.child -> #D99A00 (a fill). accent.yellow itself stays a fill: see usageConflicts[0] and proposedTokens.",
+      "Selection and focus on light are blue (B): overlay.focus, navi.label, navi.listSelected; selected rows/chips use sign-blue borders.",
+      "Road signs are signs in daylight too: sign.blue, sign.blueSelected, sign.bluePressed, sign.blueText, sign.brown, sign.white, sign.black, sign.plate* and accent.red keep the GOST night values; text on signs keeps its contrast. Any text on a blue or brown plate must use sign.white / sign.blueText, never text.primary (which is dark by day).",
+      "Same as night, and why: GOST sign colours (recognition); paper.* except the sheet (the Waybill is already a light printed form, its ink/label pairs already pass); photo.scrim and photo.credit (text on photos keeps its dark scrim whatever the theme); odometer.*, dash.odometerFrame (the mechanical odometer stays dark, B); Exit scene tokens sky.night, scene.moon/star/groundNight/roadNight/roadEdgeNight/headlight (arriving at the overnight stay stays an evening scene, README B §8); text.onLightMuted (it sits on the white plate, which does not change).",
+      "Illustration: sky, hills, sun, fields, road, liner, poles, mirror and crew take B daylight values; the city scene is derived in the same key (sky = sky.band1, sunlit plaster facades, sky-reflecting windows, lamps off, light concrete pavement).",
+      "Exit screen: night scene above a light dashboard and light navigator by day. If the CEO prefers, Exit may keep the whole night palette (README B §8)."
+    ],
+    "contrastMethod": "WCAG 2.2 relative luminance (sRGB, 0.04045 linear threshold) and ratio (L1 + 0.05) / (L2 + 0.05). Alpha colours are composited over the stated background before measuring (photo.credit over photo.scrim composited on pure white = worst case). Thresholds: text 4.5:1, text.primary on the dashboard 7:1, UI boundaries and graphics (1.4.11) 3:1, disabled 3:1. Script: python3 -I design/tools/check_day_contrast.py (reads design/tokens.json and design/tokens-day.json, also checks that the leaf sets are equal).",
+    "proposedTokens": {
+      "accent.yellowText": {
+        "night": "#FFD23F",
+        "day": "#805300",
+        "use": "Yellow as TEXT or thin line (prices, «вести», icons, radio, input focus border, cursor, progress fill, step check). Not in \"color\" because the leaf set must equal the night tree; add it to gen_tokens.py in both palettes and repoint the usages listed in usageConflicts[0]."
+      },
+      "dash.odometerDrum": {
+        "night": "#1C1C1F",
+        "day": "#1C1C1F",
+        "use": "Odometer drums 1-3 behind sign.white digits. The odometer keeps the night pair in both themes (usageConflicts: Odometer); dash.face turns light by day for its other uses."
+      }
+    },
+    "usageConflicts": [
+      "accent.yellow is a fill AND a text/line colour in components.md (StopRow cost, HotelOption price and border, «забронировано», CostsLine price, Day «вести», NaviField search icon, NaviInput focus border/marker/cursor, DashedButton primary text, ProgressBar fill, StepLine check, Radio selected, MoodCard crew line and border, HandoffItem icon and truncated line, WalkWarningPlate border and disc, StartField border/icon, PresetPlate selected outline, ReportSheet selected border, fuel-gauge needle). This palette keeps accent.yellow = #FFD23F for fills; those usages must read accent.yellowText (proposedTokens) or, for selection borders, overlay.focus.",
+      "accent.yellowPressed \"pressed yellow link\" (text) has no day value that is also a pressed CTA fill; links should use navi.label pressed -> sign.bluePressed.",
+      "text.primary used as light text on coloured plates: HotelButton text on sign.blue, SuggestionRow badge letters on sign.blue / navi.fieldBorder / sign.brown, CarMarker headlights. Use sign.white (identical value at night, so no night change). Badge «У» on navi.fieldBorder needs navi.label as fill to reach 4.5:1 with sign.white.",
+      "mirror.label used as text on sign.brown (PresetPlate sub): dark by day, fails. Use sign.blueText (#D6E0F5 on brown = 6.76:1) or sign.white.",
+      "Odometer: drums 1-3 use dash.face with text.primary digits. B keeps the odometer dark, so read the night pair (dash.face #1C1C1F + sign.white digits) for the Odometer in both themes; dash.face is light by day for its other uses (start-button face, MoodCard, filter chip).",
+      "HandoffAppCard tabs: selected fill text.primary + text.onLight text is dark-on-dark by day. Use sign.white fill + text.onLight in both themes, or a blue selected fill.",
+      "WaybillCta pressed fill text.secondary + text.onLight text: dark-on-dark by day. Use dash.pressed as the pressed fill.",
+      "FuelGauge track dash.controlAlt (white) on dash.well (white) is invisible by day; use navi.divider (#CDD2D8, = B well.gaugeTrack role) for the track.",
+      "Mirror bezel and stem use dash.controlAlt (white keys by day); B draws the mirror bezel dark #3A3F47 (= mirror.glass by day). Point the mirror bezel at mirror.glass, or accept a white bezel.",
+      "Keys/InfoChip (dash.controlAlt white on dash.raised) need a 1 dp dash.outline border by day (B key.border), WCAG 1.4.11."
+    ]
+  },
+  "color": {
+    "dash": {
+      "base": {
+        "value": "#E4E7EA",
+        "use": "App background (light dashboard plastic); root of Windshield, Navigator, Drive, Exit",
+        "from": "variant-b"
+      },
+      "raised": {
+        "value": "#EEF0F2",
+        "use": "Dashboard surface; root of Instruments, Road ahead, Waybill, bottom sheets",
+        "from": "variant-b"
+      },
+      "control": {
+        "value": "#BFC5CC",
+        "use": "Bezels, dashboard rim line, well border, secondary button fill (B: dash.rim)",
+        "from": "variant-b"
+      },
+      "controlAlt": {
+        "value": "#FFFFFF",
+        "use": "Keys (- / +), info chips; white keys need a 1 dp dash.outline border in day (B: key.fill + key.border)",
+        "from": "variant-b"
+      },
+      "well": {
+        "value": "#FFFFFF",
+        "use": "Instrument well face, crew cells, tab track (B: well.fill)",
+        "from": "variant-b"
+      },
+      "face": {
+        "value": "#F8F9FA",
+        "use": "Start-button face, MoodCard off fill, filter chip fill: near-white so text.primary reads on it (odometer drums: see $meta.usageConflicts)",
+        "from": "derived"
+      },
+      "keyShadow": {
+        "value": "#BFC5CC",
+        "use": "Inset bottom edge of keys 0 -3 dp (B: key.shadow)",
+        "from": "variant-b"
+      },
+      "pressed": {
+        "value": "#DDE2E7",
+        "use": "Pressed row on dashboard surfaces; darker than B key.pressed #E9EDF2 so it shows on dash.raised",
+        "from": "derived"
+      },
+      "outline": {
+        "value": "#7B838F",
+        "use": "Outline-button border (>= 3:1 on base/raised) and filled-seat background under dark text.primary (>= 4.5:1); B key.border #6F7A87 lightened to carry both",
+        "from": "derived"
+      },
+      "outlineDashed": {
+        "value": "#5E6874",
+        "use": "Empty-seat dashed border on the bench, off-chip border, disabled start ring (>= 3:1 on raised and bench)",
+        "from": "derived"
+      },
+      "bench": {
+        "value": "#C9CED5",
+        "use": "Back bench inside the large mirror (B: mirror.bench)",
+        "from": "variant-b"
+      },
+      "odometerFrame": {
+        "value": "#000000",
+        "use": "Odometer digit frame; the mechanical odometer stays dark in daylight (README B)",
+        "from": "same-as-night"
+      }
+    },
+    "interior": {
+      "liner": {
+        "value": "#B4BAC2",
+        "use": "Roof liner and A-pillars (grey plastic in daylight)",
+        "from": "variant-b"
+      },
+      "pole": {
+        "value": "#7D838C",
+        "use": "Gantry legs, roadside poles, itinerary connector stub",
+        "from": "variant-b"
+      }
+    },
+    "mirror": {
+      "glass": {
+        "value": "#3A3F47",
+        "use": "Mirror glass edge and crew silhouettes in the small mirror (B: --mirror-glass / mirror.bezel)",
+        "from": "variant-b"
+      },
+      "glare": {
+        "value": "#FFFFFF",
+        "alpha": 0.22,
+        "use": "Diagonal glare band on the small mirror; alpha raised so it shows over the light reflected sky",
+        "from": "derived"
+      },
+      "label": {
+        "value": "#15181C",
+        "use": "Mirror caption and back links on the day sky",
+        "from": "variant-b"
+      }
+    },
+    "text": {
+      "primary": {
+        "value": "#15181C",
+        "use": "Main text on light surfaces",
+        "from": "variant-b"
+      },
+      "secondary": {
+        "value": "#3D4550",
+        "use": "Secondary text on light surfaces",
+        "from": "variant-b"
+      },
+      "muted": {
+        "value": "#545D69",
+        "use": "Labels, captions, back links (>= 4.5:1 on base, raised, photo mats)",
+        "from": "variant-b"
+      },
+      "note": {
+        "value": "#2F3640",
+        "use": "Stop note line and card description (between primary and secondary, as at night)",
+        "from": "derived"
+      },
+      "seatEmpty": {
+        "value": "#48505B",
+        "use": "Empty-seat label «свободно» on the light bench",
+        "from": "derived"
+      },
+      "onLight": {
+        "value": "#15181C",
+        "use": "Text and pictograms on white or yellow (B: text.onCta)",
+        "from": "variant-b"
+      },
+      "onLightMuted": {
+        "value": "#55565C",
+        "use": "Small label on the white Waybill button; the white plate is the same in both themes",
+        "from": "same-as-night"
+      },
+      "disabled": {
+        "value": "#646C77",
+        "use": "Disabled glyphs and labels (WCAG-exempt, still >= 3:1 on base, raised, control and bench; B key.disabledText #8C949E darkened)",
+        "from": "derived"
+      }
+    },
+    "sign": {
+      "blue": {
+        "value": "#1E4FA3",
+        "use": "GOST blue, unchanged: overhead sign, service signs, exit sign, hotel button, city badge",
+        "from": "variant-b"
+      },
+      "blueSelected": {
+        "value": "#163B7A",
+        "use": "Selected overhead-sign row",
+        "from": "variant-b"
+      },
+      "bluePressed": {
+        "value": "#1A468F",
+        "use": "Pressed sign row and pressed blue button (sign colours do not change by day)",
+        "from": "same-as-night"
+      },
+      "blueText": {
+        "value": "#D6E0F5",
+        "use": "Small text on blue signs",
+        "from": "variant-b"
+      },
+      "plate": {
+        "value": "#FFFFFF",
+        "alpha": 0.1,
+        "use": "Loading placeholder plates on blue signs",
+        "from": "same-as-night"
+      },
+      "plateHighlight": {
+        "value": "#FFFFFF",
+        "alpha": 0.2,
+        "use": "Shimmer highlight on placeholder plates",
+        "from": "same-as-night"
+      },
+      "brown": {
+        "value": "#6B3E26",
+        "use": "GOST tourist brown, unchanged",
+        "from": "same-as-night"
+      },
+      "white": {
+        "value": "#F4F4F0",
+        "use": "City sign plate, sign borders, pictogram plates; also the light-text colour for any text on blue/brown plates",
+        "from": "variant-b"
+      },
+      "black": {
+        "value": "#141416",
+        "use": "City-sign border, pictogram strokes (GOST)",
+        "from": "same-as-night"
+      }
+    },
+    "accent": {
+      "yellow": {
+        "value": "#FFD23F",
+        "use": "FILL ONLY on light: CTA plate (with 2 dp text.onLight inner border), car marker, badges; yellow text only on dark blue (B: cta.fill / accent.yellowOnSign)",
+        "from": "variant-b"
+      },
+      "yellowPressed": {
+        "value": "#F2C21F",
+        "use": "Pressed yellow CTA plate (B: cta.pressed; darker, not lighter, on light)",
+        "from": "variant-b"
+      },
+      "red": {
+        "value": "#D8402B",
+        "use": "Start-button ring, gauge E arc, limit-sign ring: GOST red, >= 3:1 on light surfaces",
+        "from": "same-as-night"
+      },
+      "redPulse": {
+        "value": "#D8402B",
+        "alpha": 0.55,
+        "use": "Start-button pulse ring at t=0",
+        "from": "same-as-night"
+      },
+      "redText": {
+        "value": "#9A1F17",
+        "use": "Red text on light: gauge E, overspend, offline plate, «Нужен интернет»",
+        "from": "derived"
+      }
+    },
+    "signal": {
+      "green": {
+        "value": "#2E8A4A",
+        "use": "Turn signal only; darker green so the indicator keeps 3:1 on the light dash",
+        "from": "derived"
+      }
+    },
+    "navi": {
+      "screen": {
+        "value": "#F7F9FB",
+        "use": "Navigator display in day mode",
+        "from": "variant-b"
+      },
+      "field": {
+        "value": "#FFFFFF",
+        "use": "Inputs and chips on the navigator; selected hotel row",
+        "from": "variant-b"
+      },
+      "fieldBorder": {
+        "value": "#6E7A88",
+        "use": "Input border 1.5 dp, outline button border, street badge (WCAG 1.4.11)",
+        "from": "variant-b"
+      },
+      "label": {
+        "value": "#1E4FA3",
+        "use": "Navigator labels, secondary actions (sign blue as text)",
+        "from": "variant-b"
+      },
+      "labelSecondary": {
+        "value": "#46576A",
+        "use": "Field captions, sub-lines (blue-grey, >= 4.5:1 on field/screen/list)",
+        "from": "derived"
+      },
+      "text": {
+        "value": "#15181C",
+        "use": "Distances, reason sentence, chip text, field title",
+        "from": "variant-b"
+      },
+      "hint": {
+        "value": "#4F5B68",
+        "use": "Placeholder and section labels on the navigator",
+        "from": "variant-b"
+      },
+      "list": {
+        "value": "#FFFFFF",
+        "use": "Suggestion row background (white rows on the off-white screen)",
+        "from": "derived"
+      },
+      "listSelected": {
+        "value": "#DCE6F7",
+        "use": "Selected suggestion row, pressed rows (B: chip.selectedFill)",
+        "from": "variant-b"
+      },
+      "divider": {
+        "value": "#CDD2D8",
+        "use": "List dividers, progress-bar track (B: dash.divider)",
+        "from": "variant-b"
+      },
+      "dashed": {
+        "value": "#7A8899",
+        "use": "Dashed button borders (text identifies the control)",
+        "from": "derived"
+      },
+      "radio": {
+        "value": "#64707E",
+        "use": "Unselected radio ring (WCAG 1.4.11, >= 3:1 on screen and field)",
+        "from": "derived"
+      }
+    },
+    "sky": {
+      "band1": {
+        "value": "#86BCE3",
+        "use": "Top sky band (day); under the mirror caption and back links",
+        "from": "variant-b"
+      },
+      "band2": {
+        "value": "#A3CCEA",
+        "use": "Sky band 2; mirror sky",
+        "from": "variant-b"
+      },
+      "band3": {
+        "value": "#BFDCF0",
+        "use": "Sky band 3",
+        "from": "variant-b"
+      },
+      "band4": {
+        "value": "#D8E9F3",
+        "use": "Sky band 4",
+        "from": "variant-b"
+      },
+      "band5": {
+        "value": "#EAF2F2",
+        "use": "Horizon haze",
+        "from": "variant-b"
+      },
+      "night": {
+        "value": "#121130",
+        "use": "Night sky on Exit: arriving at the overnight stay stays an evening scene (README B §8)",
+        "from": "same-as-night"
+      },
+      "hills": {
+        "value": "#8FA79E",
+        "use": "Far hills silhouette",
+        "from": "variant-b"
+      }
+    },
+    "scene": {
+      "sun": {
+        "value": "#FFF3C9",
+        "use": "High day sun disc",
+        "from": "variant-b"
+      },
+      "moon": {
+        "value": "#F2E3B3",
+        "use": "Crescent moon on Exit (night scene kept)",
+        "from": "same-as-night"
+      },
+      "star": {
+        "value": "#F4F4F0",
+        "use": "Stars on Exit (night scene kept)",
+        "from": "same-as-night"
+      },
+      "groundDay": {
+        "value": "#86A96F",
+        "use": "Fields; mirror ground (B: scene.ground / mirror.groundReflect)",
+        "from": "variant-b"
+      },
+      "groundNight": {
+        "value": "#1A231F",
+        "use": "Fields at night (Exit)",
+        "from": "same-as-night"
+      },
+      "road": {
+        "value": "#62666D",
+        "use": "Asphalt; itinerary road column",
+        "from": "variant-b"
+      },
+      "roadNight": {
+        "value": "#2E2E33",
+        "use": "Asphalt at night (Exit)",
+        "from": "same-as-night"
+      },
+      "roadEdge": {
+        "value": "#FFFFFF",
+        "use": "Road edge lines, lane dashes, roadside posts",
+        "from": "variant-b"
+      },
+      "roadEdgeNight": {
+        "value": "#D9D9D2",
+        "use": "Road edge lines at night (Exit)",
+        "from": "same-as-night"
+      },
+      "headlight": {
+        "value": "#FFECAA",
+        "alpha": 0.1,
+        "use": "Headlight beam on Exit",
+        "from": "same-as-night"
+      }
+    },
+    "crew": {
+      "adult": {
+        "value": "#2E343C",
+        "use": "Adult silhouette (backlit, dark in daylight)",
+        "from": "variant-b"
+      },
+      "child": {
+        "value": "#D99A00",
+        "use": "Child silhouette (darker yellow; a fill, never a line)",
+        "from": "variant-b"
+      },
+      "dog": {
+        "value": "#A8743A",
+        "use": "Dog silhouette",
+        "from": "variant-b"
+      }
+    },
+    "paper": {
+      "sheet": {
+        "value": "#FAFBFC",
+        "use": "Waybill paper: night paper #EEF2F4 brightened so the sheet separates from the light dash.raised",
+        "from": "derived"
+      },
+      "lines": {
+        "value": "#9FB0BE",
+        "use": "Form lines, row dividers",
+        "from": "same-as-night"
+      },
+      "text": {
+        "value": "#22313D",
+        "use": "Printed text, table rules",
+        "from": "same-as-night"
+      },
+      "label": {
+        "value": "#53687C",
+        "use": "Printed small labels",
+        "from": "same-as-night"
+      },
+      "ink": {
+        "value": "#1B3FA0",
+        "use": "Handwriting ink",
+        "from": "same-as-night"
+      },
+      "inkRed": {
+        "value": "#B3261E",
+        "use": "Handwritten overspend",
+        "from": "same-as-night"
+      },
+      "stamp": {
+        "value": "#5B3FA0",
+        "use": "Stamp (drawn at 0.85 alpha)",
+        "from": "same-as-night"
+      },
+      "clip": {
+        "value": "#8C8C93",
+        "use": "Clipboard clip",
+        "from": "same-as-night"
+      },
+      "clipShadow": {
+        "value": "#5D5D63",
+        "use": "Clip inset bottom edge",
+        "from": "same-as-night"
+      }
+    },
+    "city": {
+      "sky": {
+        "value": "#86BCE3",
+        "use": "City-walk scene: day sky behind the facades (= sky.band1)",
+        "from": "variant-b"
+      },
+      "facadeA": {
+        "value": "#C2A88F",
+        "use": "City scene: near facades (warm plaster in sun)",
+        "from": "derived"
+      },
+      "facadeB": {
+        "value": "#D3C3B3",
+        "use": "City scene: middle facades",
+        "from": "derived"
+      },
+      "facadeC": {
+        "value": "#B6C3CF",
+        "use": "City scene: far facades and roof line (blue haze, like sky.hills)",
+        "from": "derived"
+      },
+      "window": {
+        "value": "#E6F0F7",
+        "use": "Windows and shop fronts reflecting the day sky",
+        "from": "derived"
+      },
+      "windowOff": {
+        "value": "#5E6A78",
+        "use": "Shaded windows",
+        "from": "derived"
+      },
+      "lamp": {
+        "value": "#E9ECEF",
+        "use": "Street-lamp heads (switched off by day)",
+        "from": "derived"
+      },
+      "lampGlow": {
+        "value": "#FFFFFF",
+        "alpha": 0.12,
+        "use": "Street-lamp glow disc: a faint daylight sheen only",
+        "from": "derived"
+      },
+      "sidewalk": {
+        "value": "#B9BEC4",
+        "use": "Pavement of the walk column and the city scene (light concrete)",
+        "from": "derived"
+      },
+      "joint": {
+        "value": "#A0A6AE",
+        "use": "Pavement tile joints",
+        "from": "derived"
+      },
+      "curb": {
+        "value": "#7D838C",
+        "use": "Kerb line beside the pavement (= interior.pole)",
+        "from": "derived"
+      },
+      "footprint": {
+        "value": "#3A3F47",
+        "alpha": 0.45,
+        "use": "Moving footprints in the walk column (dark prints on light concrete)",
+        "from": "derived"
+      }
+    },
+    "photo": {
+      "mat": {
+        "value": "#DFE3E7",
+        "use": "Photo frame background: placeholder, letterbox mat, loading base",
+        "from": "derived"
+      },
+      "matHighlight": {
+        "value": "#EDF0F3",
+        "use": "Placeholder pattern and shimmer highlight",
+        "from": "derived"
+      },
+      "scrim": {
+        "value": "#000000",
+        "alpha": 0.62,
+        "use": "Bottom gradient behind the photo credit (text on photos keeps its dark scrim)",
+        "from": "same-as-night"
+      },
+      "credit": {
+        "value": "#F4F4F0",
+        "use": "Photo credit text on the scrim",
+        "from": "same-as-night"
+      },
+      "border": {
+        "value": "#A9B0B9",
+        "use": "1 dp inner border of the photo frame; darker by day so white photos do not bleed into the light page",
+        "from": "derived"
+      },
+      "ink": {
+        "value": "#78808B",
+        "use": "Placeholder illustration lines",
+        "from": "derived"
+      },
+      "accent": {
+        "value": "#B3BAC3",
+        "use": "Placeholder illustration fills (dome, trees, glass)",
+        "from": "derived"
+      },
+      "phMuseum": {
+        "value": "#E0E1E5",
+        "use": "Placeholder mat: museum",
+        "from": "derived"
+      },
+      "phChurch": {
+        "value": "#E4DFE8",
+        "use": "Placeholder mat: church, monastery, kremlin",
+        "from": "derived"
+      },
+      "phPark": {
+        "value": "#DCE5DD",
+        "use": "Placeholder mat: park, garden",
+        "from": "derived"
+      },
+      "phMonument": {
+        "value": "#E1E1E3",
+        "use": "Placeholder mat: monument, memorial, square",
+        "from": "derived"
+      },
+      "phView": {
+        "value": "#DBE2E9",
+        "use": "Placeholder mat: viewpoint, embankment",
+        "from": "derived"
+      },
+      "phBar": {
+        "value": "#E7E0DA",
+        "use": "Placeholder mat: bar, рюмочная, pub, craft",
+        "from": "derived"
+      },
+      "phCity": {
+        "value": "#E0DFE6",
+        "use": "Placeholder mat: town, hotel area, other",
+        "from": "derived"
+      }
+    },
+    "budget": {
+      "overFill": {
+        "value": "#FBE6E2",
+        "use": "«Не помещается в бюджет» plate fill (pale red, dark text on it)",
+        "from": "derived"
+      },
+      "overBorder": {
+        "value": "#D8402B",
+        "use": "«Не помещается» plate border (= accent.red)",
+        "from": "same-as-night"
+      },
+      "tight": {
+        "value": "#805300",
+        "use": "«Впритык» text and dot: dark amber, yellow text fails on light",
+        "from": "derived"
+      }
+    },
+    "kind": {
+      "fill": {
+        "value": "#F3E7DD",
+        "use": "Category tag fill (pale tourist tan)",
+        "from": "derived"
+      },
+      "border": {
+        "value": "#6B3E26",
+        "use": "Category tag border (= tourist brown)",
+        "from": "same-as-night"
+      },
+      "text": {
+        "value": "#6B3E26",
+        "use": "Category tag text (= tourist brown, AA on fill)",
+        "from": "derived"
+      }
+    },
+    "stretch": {
+      "fill": {
+        "value": "#FFF4CC",
+        "use": "«РАЗМИНКА N МИН» tag fill (pale yellow)",
+        "from": "derived"
+      },
+      "border": {
+        "value": "#A87400",
+        "use": "«РАЗМИНКА» tag border (amber, >= 3:1 on raised)",
+        "from": "derived"
+      },
+      "text": {
+        "value": "#805300",
+        "use": "«РАЗМИНКА» tag text: dark amber (night = accent.yellow)",
+        "from": "derived"
+      }
+    },
+    "hours": {
+      "open": {
+        "value": "#1B6B34",
+        "use": "Opening hours «открыто» text / dot",
+        "from": "derived"
+      },
+      "openFill": {
+        "value": "#1B6B34",
+        "alpha": 0.12,
+        "use": "«открыто» pill fill",
+        "from": "derived"
+      },
+      "closed": {
+        "value": "#9A1F17",
+        "use": "«сегодня закрыто» text (= accent.redText)",
+        "from": "derived"
+      },
+      "closedFill": {
+        "value": "#9A1F17",
+        "alpha": 0.1,
+        "use": "«закрыто» pill fill",
+        "from": "derived"
+      },
+      "unknown": {
+        "value": "#3D4550",
+        "use": "«часы не указаны» (= text.secondary)",
+        "from": "variant-b"
+      }
+    },
+    "info": {
+      "fill": {
+        "value": "#E2F0E4",
+        "use": "Green info plate fill",
+        "from": "derived"
+      },
+      "border": {
+        "value": "#8DB796",
+        "use": "Green info plate border",
+        "from": "derived"
+      },
+      "mark": {
+        "value": "#1B6B34",
+        "use": "Green info plate check disc (= hours.open)",
+        "from": "derived"
+      }
+    },
+    "odometer": {
+      "fill": {
+        "value": "#000000",
+        "use": "Odometer tag / drums frame: the odometer stays dark (B)",
+        "from": "same-as-night"
+      },
+      "border": {
+        "value": "#3A3A42",
+        "use": "Odometer tag border (night dash.outline; part of the dark odometer)",
+        "from": "same-as-night"
+      }
+    },
+    "overlay": {
+      "scrim": {
+        "value": "#15181C",
+        "alpha": 0.45,
+        "use": "Scrim behind bottom sheets and dialogs (lighter dim by day)",
+        "from": "derived"
+      },
+      "focus": {
+        "value": "#1E4FA3",
+        "use": "Keyboard focus ring 2 dp, offset 2 dp (B: focus; yellow fails on light)",
+        "from": "variant-b"
+      },
+      "returnFlash": {
+        "value": "#FFD23F",
+        "alpha": 0.3,
+        "use": "Returned-row highlight: yellow fill, alpha raised to show on light rows",
+        "from": "derived"
+      }
+    }
+  }
+}

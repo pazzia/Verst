@@ -140,6 +140,8 @@ fun WindshieldScreen(
     onRetry: () -> Unit,
     trips: TripsActions = NoTrips,
     onDebug: () -> Unit = {},
+    /** D-IR-20 personal cabinet: the profile button in the top-left corner of the windshield. */
+    onSettings: () -> Unit = {},
     /** 5.10 «По городу · пешком» plate; 5.12 a tap on «ВЫ: …» (locate). */
     onCity: () -> Unit = {},
     onYouAre: () -> Unit = {},
@@ -152,6 +154,7 @@ fun WindshieldScreen(
             val sceneH = maxHeight - dashH + 20.dp
             WindshieldScene(sceneH, gantry = true, gantryTop = minOf(286f, signBottom - 4f), overlay = ui.tripsSheet)
             Mirror(crewShort(ui.adults, ui.children, ui.dog), ui.adults, ui.children, ui.dog, Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
+            ProfileButton(onSettings, Modifier.align(Alignment.TopStart).padding(start = 8.dp, top = 8.dp))
             val density = androidx.compose.ui.platform.LocalDensity.current
             Sign(
                 ui, onSelect, onRetry,
@@ -189,7 +192,7 @@ private fun TripRow(t: SavedTripDto, index: Int, onDelete: () -> Unit, onClick: 
     val walk = t.kind == "walk"
     val meta = if (walk) listOf(stringResource(R.string.walk_saved_kind), tripDates(t.startAt, 1)).filter { it.isNotBlank() }.joinToString(stringResource(R.string.common_join_dot))
     else stringResource(R.string.trips_row_meta, date, t.days, daysWord, crewShort(t.adults, t.children, t.dog))
-    val total = RuFormat.thousands(t.totalRub)
+    val total = app.verst.settings.AppPrefs.money(t.totalRub)
     val cd = stringResource(R.string.cd_trips_row, t.title, date, t.days, daysWord, total)
     Row(
         Modifier
@@ -222,7 +225,7 @@ private fun TripRow(t: SavedTripDto, index: Int, onDelete: () -> Unit, onClick: 
                     else -> null
                 }
                 if (dot != null) Box(Modifier.padding(start = 8.dp).size(6.dp).clip(RoundedCornerShape(3.dp)).background(dot))
-                Txt(stringResource(R.string.common_estimate_rub, total), T.body.mdStrong, C.accent.yellow, Modifier.padding(start = 8.dp), maxLines = 1)
+                Txt(stringResource(R.string.common_estimate_rub, total), T.body.mdStrong, C.accent.yellowText, Modifier.padding(start = 8.dp), maxLines = 1)
             }
             Txt(meta, T.body.sm, C.text.secondary, maxLines = 1)
         }
@@ -547,7 +550,7 @@ private fun NaviEntry(origin: String, highlight: Boolean, onClick: () -> Unit, o
                 // 5.1 §4.7 (S-09): no routes nearby → the field is the way on, yellow 2 dp border (static frame).
                 .border(
                     if (highlight) DesignTokens.stroke.w2 else DesignTokens.stroke.w1,
-                    if (highlight) C.accent.yellow else C.navi.fieldBorder,
+                    if (highlight) C.accent.yellowText else C.navi.fieldBorder,
                     RoundedCornerShape(DesignTokens.radius.r10),
                 )
                 .padding(horizontal = 12.dp),
@@ -571,8 +574,8 @@ fun SearchGlyph(modifier: Modifier = Modifier) {
             val sw = DesignTokens.stroke.icon.ui.toPx()
             val r = size.width * 0.32f
             val c = Offset(size.width * 0.42f, size.height * 0.42f)
-            drawCircle(C.accent.yellow, r, c, style = Stroke(sw))
-            drawLine(C.accent.yellow, Offset(c.x + r * 0.75f, c.y + r * 0.75f), Offset(size.width * 0.92f, size.height * 0.92f), sw)
+            drawCircle(C.accent.yellowText, r, c, style = Stroke(sw))
+            drawLine(C.accent.yellowText, Offset(c.x + r * 0.75f, c.y + r * 0.75f), Offset(size.width * 0.92f, size.height * 0.92f), sw)
         },
     )
 }
@@ -616,3 +619,28 @@ private fun monthGen(m: Int): String = stringResource(
 @Composable
 private fun readyMeta(r: ReadyRouteDto): String =
     if (r.roundTrip && !r.subtitle.contains("по кругу")) "${r.subtitle} · ${stringResource(R.string.windshield_meta_round_trip)}" else r.subtitle
+
+
+/** D-IR-20: a round button with a person glyph that opens «Профиль и настройки» (48 dp touch target). */
+@Composable
+private fun ProfileButton(onClick: () -> Unit, modifier: Modifier) {
+    val cd = stringResource(R.string.settings_entry_cd)
+    val glyph = C.mirror.label
+    val plate = C.mirror.glass
+    androidx.compose.foundation.Canvas(
+        modifier.size(48.dp).clip(androidx.compose.foundation.shape.CircleShape)
+            .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+            .semantics { contentDescription = cd }
+            .testTag("windshield.settings"),
+    ) {
+        val r = size.minDimension / 2f
+        drawCircle(plate.copy(alpha = 0.72f), r * 0.8f)
+        drawCircle(glyph, r * 0.2f, center = androidx.compose.ui.geometry.Offset(center.x, center.y - r * 0.18f))
+        drawArc(
+            glyph, startAngle = 200f, sweepAngle = 140f, useCenter = false,
+            topLeft = androidx.compose.ui.geometry.Offset(center.x - r * 0.38f, center.y + r * 0.08f),
+            size = androidx.compose.ui.geometry.Size(r * 0.76f, r * 0.6f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = r * 0.12f),
+        )
+    }
+}

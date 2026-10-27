@@ -204,8 +204,8 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                         total == null -> null
                         // an engine without the fitter (API v2 M1) answers `plan` even over budget: say nothing then
                         ui.budgetStatus == null && total > (ui.budgetCustom ?: BudgetPresets[ui.budgetIndex] ?: Int.MAX_VALUE) -> null
-                        ui.budgetStatus == null -> stringResource(R.string.budget_instruments_fits, RuFormat.thousands(total))
-                        else -> stringResource(R.string.budget_instruments_fitted, RuFormat.thousands(total))
+                        ui.budgetStatus == null -> stringResource(R.string.budget_instruments_fits, app.verst.settings.AppPrefs.money(total))
+                        else -> stringResource(R.string.budget_instruments_fitted, app.verst.settings.AppPrefs.money(total))
                     }
                     // 5.3 §9: the meta ends with the preset name in lower case («… · весело и познавательно»)
                     val moodWord = ui.mood?.let { moodTitle(it).lowercase() }
@@ -260,7 +260,7 @@ private fun MoodCard(m: Mood, selected: Boolean, crewLine: String?, a: Instrumen
         Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp).clip(shape)
             // the on fill #1F1F17 has no token yet (dev-notes S4): dash.face + the 2 dp yellow border
             .background(C.dash.face)
-            .border(if (selected) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (selected) C.accent.yellow else C.dash.controlAlt, shape)
+            .border(if (selected) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (selected) C.accent.yellowText else C.dash.controlAlt, shape)
             .selectable(selected, role = Role.RadioButton, onClick = { a.mood(m) })
             .testTag("instruments.mood.${m.wire}")
             .padding(horizontal = 12.dp, vertical = 10.dp),
@@ -272,7 +272,7 @@ private fun MoodCard(m: Mood, selected: Boolean, crewLine: String?, a: Instrumen
                 val r = size.minDimension / 2
                 if (selected) {
                     val w = 6.dp.toPx()
-                    drawCircle(C.accent.yellow, r - w / 2, style = Stroke(w))
+                    drawCircle(C.accent.yellowText, r - w / 2, style = Stroke(w))
                 } else {
                     val w = 2.dp.toPx()
                     drawCircle(C.dash.outlineDashed, r - w / 2, style = Stroke(w))
@@ -283,7 +283,7 @@ private fun MoodCard(m: Mood, selected: Boolean, crewLine: String?, a: Instrumen
             Txt(moodTitle(m), MoodTitle, C.text.primary, maxLines = 1)
             Txt(sub, T.body.smRelaxed, C.text.secondary, Modifier.padding(top = 2.dp))
             if (selected && crewLine != null) {
-                Txt(crewLine, T.body.smStrong, C.accent.yellow, Modifier.padding(top = 4.dp).testTag("instruments.mood.crew"))
+                Txt(crewLine, T.body.smStrong, C.accent.yellowText, Modifier.padding(top = 4.dp).testTag("instruments.mood.crew"))
             }
         }
     }
@@ -469,7 +469,7 @@ private fun KmWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier)
                 val last = i == digits.lastIndex
                 Box(
                     Modifier.size(DesignTokens.size.drumW, DesignTokens.size.drumH).clip(RoundedCornerShape(DesignTokens.radius.r3))
-                        .background(if (last) C.sign.white else C.dash.face),
+                        .background(if (last) C.sign.white else C.dash.odometerDrum),
                     contentAlignment = Alignment.Center,
                 ) {
                     // motion.odometerRoll: only changed drums roll (300 ms decelerate); instant under reduced motion.
@@ -484,7 +484,7 @@ private fun KmWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modifier)
                             }
                         },
                         label = "drum$i",
-                    ) { digit -> Txt(digit.toString(), T.odometer, if (last) C.text.onLight else C.text.primary) }
+                    ) { digit -> Txt(digit.toString(), T.odometer, if (last) C.text.onLight else C.sign.white) }
                 }
             }
         }
@@ -536,7 +536,7 @@ private fun BudgetWell(ui: InstrumentsUi, a: InstrumentsActions, modifier: Modif
         }
         val shown = ui.budgetCustom ?: preset
         Txt(
-            if (shown == null) stringResource(R.string.instruments_budget_any) else stringResource(R.string.instruments_budget_value, RuFormat.thousands(shown)),
+            if (shown == null) stringResource(R.string.instruments_budget_any) else stringResource(R.string.instruments_budget_value, app.verst.settings.AppPrefs.money(shown)),
             T.title.lgNum, C.text.primary, Modifier.testTag("instruments.budget.value"), maxLines = 1,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -561,7 +561,7 @@ private fun Gauge(angle: Float, modifier: Modifier) {
         drawArc(C.dash.controlAlt, 180f, 180f, false, tl, box, style = Stroke(8 * d, cap = StrokeCap.Butt))
         drawArc(C.accent.red, 180f, 48.8f, false, tl, box, style = Stroke(8 * d, cap = StrokeCap.Butt))
         rotate(angle, c) {
-            drawRoundRect(C.accent.yellow, Offset(c.x - 2 * d, c.y - 48 * d), Size(4 * d, 48 * d), CornerRadius(2 * d))
+            drawRoundRect(C.accent.yellowText, Offset(c.x - 2 * d, c.y - 48 * d), Size(4 * d, 48 * d), CornerRadius(2 * d))
         }
         drawCircle(C.sign.white, 8 * d, Offset(65 * d, 60 * d))
     }

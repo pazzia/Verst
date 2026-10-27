@@ -137,10 +137,10 @@ fun BoxScope.BottomSheet(
             if (badge != null) {
                 // D-13 «ДЕМО» badge: h 20, padding 0 6, radius 4, yellow outline and text.
                 Box(
-                    Modifier.padding(start = 8.dp).height(20.dp).border(DesignTokens.stroke.w1, C.accent.yellow, RoundedCornerShape(DesignTokens.radius.r4))
+                    Modifier.padding(start = 8.dp).height(20.dp).border(DesignTokens.stroke.w1, C.accent.yellowText, RoundedCornerShape(DesignTokens.radius.r4))
                         .padding(horizontal = 6.dp).testTag("$tag.badge"),
                     contentAlignment = Alignment.Center,
-                ) { Txt(badge, T.label.md, C.accent.yellow, maxLines = 1) }
+                ) { Txt(badge, T.label.md, C.accent.yellowText, maxLines = 1) }
                 Spacer(Modifier.weight(1f))
             }
             Box(
@@ -188,7 +188,7 @@ fun BoxScope.PlateToast(text: String, bottom: Dp, action: String? = null, onActi
             Box(
                 Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onAction).testTag("toast.action"),
                 contentAlignment = Alignment.Center,
-            ) { Txt(action, T.body.mdStrong, C.accent.yellow, maxLines = 1) }
+            ) { Txt(action, T.body.mdStrong, C.accent.yellowText, maxLines = 1) }
         }
     }
 }

@@ -15,12 +15,15 @@ class VerstApp : Application(), coil.ImageLoaderFactory {
     lateinit var engine: EngineHost
         private set
 
+    /** D-IR-20: saved trips in the app, mirrored into the folder the user picked (settings «Где хранить поездки»). */
+    val tripStore: app.verst.settings.MirroringTripStore by lazy { app.verst.settings.MirroringTripStore(FileTripStore(this), this) }
+
     /** App-scoped (survives activity recreation); created on first use from the main thread. */
     val flow: VerstFlow by lazy {
         VerstFlow(
             ChaquopyPlannerGateway(engine),
             CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
-            FileTripStore(this),
+            tripStore,
         ) { engine.restart() }.also { it.locator = AndroidLocator(this) }
     }
 
@@ -29,6 +32,9 @@ class VerstApp : Application(), coil.ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        // D-IR-20: settings first — the activity reads the language, the tokens read the theme
+        app.verst.settings.AppPrefs.init(this)
+        app.verst.core.ui.theme.Palette.day = app.verst.settings.Themes.isDay(this, app.verst.settings.AppPrefs.settings.theme)
         engine = EngineHost(this)
         engine.start()
     }

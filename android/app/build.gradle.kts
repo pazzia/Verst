@@ -38,6 +38,8 @@ android {
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") } // M§3.3; Compose ships libandroidx.graphics.path.so
         buildConfigField("int", "BUILD_NUMBER", "$buildNumber")
         buildConfigField("String", "GIT_SHA", "\"${(System.getenv("VERST_GIT_SHA") ?: "local").take(12)}\"")
+        // D-IR-20 build details: the UTC time CI built the APK (local builds say "local")
+        buildConfigField("String", "BUILD_DATE", "\"${System.getenv("VERST_BUILD_DATE") ?: "local"}\"")
     }
     signingConfigs {
         create("demo") {

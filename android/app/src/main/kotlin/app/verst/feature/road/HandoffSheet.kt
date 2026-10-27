@@ -167,7 +167,7 @@ fun BoxScope.HandoffSheetView(trip: TripDto, ui: HandoffSheetUi, windowH: Dp, a:
 private fun Tab(text: String, cd: String?, selected: Boolean, tag: String, width: Modifier, onClick: () -> Unit) {
     Box(
         width.defaultMinSize(minWidth = 64.dp, minHeight = 40.dp).clip(RoundedCornerShape(9.dp))
-            .background(if (selected) C.text.primary else C.dash.well)
+            .background(if (selected) C.sign.white else C.dash.well)
             .selectable(selected, role = Role.Tab, onClick = onClick)
             .then(if (cd != null) Modifier.semantics { contentDescription = cd } else Modifier)
             .testTag(tag).padding(horizontal = 10.dp),
@@ -188,7 +188,7 @@ private fun AppCard(
         Modifier.fillMaxWidth().defaultMinSize(minHeight = 72.dp).clip(shape)
             // recommended fill #1F2A14 has no token: `dash.face` + the 2 dp yellow border (dev-notes S4)
             .background(C.dash.face)
-            .border(if (recommended) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (recommended) C.accent.yellow else C.dash.controlAlt, shape)
+            .border(if (recommended) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (recommended) C.accent.yellowText else C.dash.controlAlt, shape)
             .clickable(role = Role.Button) { if (install) a.install(app) else a.pick(app) }
             .semantics(mergeDescendants = true) {}
             .testTag(tag)
@@ -216,7 +216,7 @@ private fun AppCard(
             if (note != null) Txt(note, T.body.sm, C.navi.labelSecondary, Modifier.padding(top = 2.dp).testTag("$tag.note"))
           }
             // S4-QA P2-05 / components §30: «Установить…» is the yellow note line, not a right column
-            if (install) Txt(stringResource(R.string.handoff_install), T.body.sm, C.accent.yellow, Modifier.padding(top = 2.dp).testTag("$tag.install"))
+            if (install) Txt(stringResource(R.string.handoff_install), T.body.sm, C.accent.yellowText, Modifier.padding(top = 2.dp).testTag("$tag.install"))
         }
         if (!install) GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 16.dp)
     }

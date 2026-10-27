@@ -174,7 +174,7 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
                     BackLink(back, C.mirror.label, stringResource(R.string.cd_back, back), a::back, Modifier.padding(start = 12.dp, top = 10.dp).testTag("walk.back"))
                     Row(Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 12.dp)) {
                         IconButton44(
-                            Glyph.BOOKMARK, if (ui.saved) C.accent.yellow else C.mirror.label,
+                            Glyph.BOOKMARK, if (ui.saved) C.accent.yellowText else C.mirror.label,
                             stringResource(if (ui.saved) R.string.cd_road_saved else R.string.cd_road_save), "walk.save", filled = ui.saved, onClick = a::save,
                         )
                         IconButton44(Glyph.SHARE, C.mirror.label, stringResource(R.string.cd_road_share), "walk.share", onClick = a::share)
@@ -205,7 +205,7 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
                                             w.startsTomorrow() -> stringResource(R.string.walk_header_tomorrow, start, finish)
                                             else -> stringResource(R.string.walk_header, start, finish)
                                         },
-                                        T.title.sm, C.accent.yellow,
+                                        T.title.sm, C.accent.yellowText,
                                         Modifier.padding(start = 72.dp, end = 16.dp, bottom = 10.dp).semantics { heading() }.testTag("walk.header"),
                                     )
                                     EndRow(stringResource(R.string.walk_start_row), w.start.label ?: w.townName ?: "", if (w.untimed) "" else start)
@@ -314,7 +314,7 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
             if (w.returnToStart) InfoChip(stringResource(R.string.walk_chip_back))
             if (w.adultOnly) {
                 Box(
-                    Modifier.clip(RoundedCornerShape(DesignTokens.radius.r12)).border(DesignTokens.stroke.w1, C.accent.yellow, RoundedCornerShape(DesignTokens.radius.r12))
+                    Modifier.clip(RoundedCornerShape(DesignTokens.radius.r12)).border(DesignTokens.stroke.w1, C.accent.yellowText, RoundedCornerShape(DesignTokens.radius.r12))
                         .padding(horizontal = 10.dp, vertical = 4.dp),
                 ) { Txt(stringResource(R.string.city_badge_18), T.body.smStrong, C.text.primary) }
             }
@@ -346,7 +346,7 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         if (note != null) {
             // L4: the responsible plate, first and not dismissible (fixed copy)
             Row(
-                Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.accent.yellow, RoundedCornerShape(DesignTokens.radius.r10))
+                Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.accent.yellowText, RoundedCornerShape(DesignTokens.radius.r10))
                     .padding(horizontal = 12.dp, vertical = 10.dp).testTag("walk.responsible"),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -450,7 +450,7 @@ private fun WideButton(text: String, tag: String, walker: Boolean = false, enabl
         horizontalArrangement = Arrangement.Center,
     ) {
         if (walker) {
-            WalkerIcon(C.accent.yellow, 18.dp)
+            WalkerIcon(C.accent.yellowText, 18.dp)
             Spacer(Modifier.width(8.dp))
         }
         if (sub == null) {
@@ -519,7 +519,7 @@ private fun WalkStopRow(
 ) {
     val line = stringResource(R.string.walk_next, distance(s.walkKmFromPrev), s.walkMinFromPrev)
     val time = if (untimed) "" else RuFormat.clock(s.arriveAt) ?: ""
-    val cost = if (s.costRub > 0) stringResource(R.string.walk_footer_total, RuFormat.thousands(s.costRub)) else null
+    val cost = if (s.costRub > 0) stringResource(R.string.walk_footer_total, app.verst.settings.AppPrefs.money(s.costRub)) else null
     val cd = listOfNotNull(line, time, s.nameRu, s.noteRu, cost).joinToString(", ")
     val tap by rememberUpdatedState(onTap)
     val reduced = LocalReducedMotion.current
@@ -567,7 +567,7 @@ private fun WalkStopRow(
             val dogNo = if (dog && s.indoor && parts.none { it.contains("собак", ignoreCase = true) }) stringResource(R.string.walk_stop_dog_no).trimEnd('.') else null
             (parts + listOfNotNull(dogNo)).takeIf { it.isNotEmpty() }?.joinToString(". ", postfix = ".")
                 ?.let { Txt(it, T.body.md, C.text.note, Modifier.testTag("walk.stop.note")) }
-            if (cost != null) Txt(cost, T.body.mdStrong, C.accent.yellow)
+            if (cost != null) Txt(cost, T.body.mdStrong, C.accent.yellowText)
         }
     }
 }
@@ -629,9 +629,9 @@ private fun Footer(w: WalkRouteDto) {
                     Spacer(Modifier.weight(1f))
                     Txt(stringResource(R.string.walk_footer_free_sub), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
                 } else {
-                    Txt(stringResource(R.string.walk_footer_total, RuFormat.thousands(total)), T.amount, C.text.onLight, maxLines = 1)
+                    Txt(stringResource(R.string.walk_footer_total, app.verst.settings.AppPrefs.money(total)), T.amount, C.text.onLight, maxLines = 1)
                     Spacer(Modifier.weight(1f))
-                    Txt(stringResource(R.string.walk_footer_per_person, RuFormat.thousands(per)), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                    Txt(stringResource(R.string.walk_footer_per_person, app.verst.settings.AppPrefs.money(per)), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
                 }
             }
         }

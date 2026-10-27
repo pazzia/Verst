@@ -74,11 +74,33 @@ class MainActivity : ComponentActivity() {
         flow.onLocationPermission(granted, blocked)
     }
 
-    /** The app is Russian-only: plurals and formats follow Russian rules whatever the phone's language is. */
+    /**
+     * The interface language comes from the settings (D-IR-20), not from the phone: Russian by default, so plurals and
+     * formats follow Russian rules whatever the phone's language is.
+     */
     override fun attachBaseContext(newBase: Context) {
-        val config = Configuration(newBase.resources.configuration).apply { setLocale(Locale.forLanguageTag("ru-RU")) }
+        val tag = app.verst.settings.AppPrefs.settings.language.tag
+        val config = Configuration(newBase.resources.configuration).apply { setLocale(Locale.forLanguageTag(tag)) }
         super.attachBaseContext(newBase.createConfigurationContext(config))
     }
+
+    /** D-IR-20 «Где хранить поездки → в папке»: the system folder picker (no storage permission needed). */
+    private val folderPicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri == null) return@registerForActivityResult
+        runCatching {
+            contentResolver.takePersistableUriPermission(
+                uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+        }
+        val name = app.verst.settings.FolderFiles.displayName(this, uri)
+        app.verst.settings.AppPrefs.update {
+            it.copy(storage = app.verst.core.model.TripStorage.FOLDER, folderUri = uri.toString(), folderName = name)
+        }
+        val app = application as VerstApp
+        Thread { app.tripStore.mirrorCurrent() }.start()
+    }
+
+    fun pickTripsFolder() = folderPicker.launch(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // S-02: transparent bars with light icons on the dark UI (the scene/dashboard draw behind them).
@@ -221,6 +243,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 override fun delete(id: String) = flow.askDelete(id)
             },
             onDebug = flow::openDebug,
+            onSettings = flow::openSettings,
             onCity = flow::openCity,
             onYouAre = flow::askLocation,
         )
@@ -402,6 +425,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
             }
         }
         Route.Debug -> DebugScreen(flow)
+        Route.Settings -> app.verst.feature.settings.SettingsRoute(flow)
         Route.Waybill -> {
             val r = flow.result
             if (r == null) {

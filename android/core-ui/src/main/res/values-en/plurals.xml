@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English counterpart of values/plurals.xml (generated from design/copy-ru.md). Keep keys in sync with the Russian source. -->
+<resources>
+    <plurals name="plural_day">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="plural_day_gen">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="plural_day_upper">
+        <item quantity="one">DAY</item>
+        <item quantity="other">DAYS</item>
+    </plurals>
+    <plurals name="plural_night">
+        <item quantity="one">night</item>
+        <item quantity="other">nights</item>
+    </plurals>
+    <plurals name="plural_route">
+        <item quantity="one">route</item>
+        <item quantity="other">routes</item>
+    </plurals>
+    <plurals name="plural_variant">
+        <item quantity="one">option</item>
+        <item quantity="other">options</item>
+    </plurals>
+    <plurals name="plural_saved">
+        <item quantity="one">saved trip</item>
+        <item quantity="other">saved trips</item>
+    </plurals>
+    <plurals name="plural_adult">
+        <item quantity="one">adult</item>
+        <item quantity="other">adults</item>
+    </plurals>
+    <plurals name="plural_child">
+        <item quantity="one">child</item>
+        <item quantity="other">children</item>
+    </plurals>
+    <plurals name="plural_via">
+        <item quantity="one">stop</item>
+        <item quantity="other">stops</item>
+    </plurals>
+    <plurals name="plural_stage">
+        <item quantity="one">step</item>
+        <item quantity="other">steps</item>
+    </plurals>
+    <plurals name="plural_place">
+        <item quantity="one">place</item>
+        <item quantity="other">places</item>
+    </plurals>
+    <plurals name="plural_point">
+        <item quantity="one">point</item>
+        <item quantity="other">points</item>
+    </plurals>
+    <plurals name="plural_person">
+        <item quantity="one">person</item>
+        <item quantity="other">people</item>
+    </plurals>
+    <plurals name="plural_hour">
+        <item quantity="one">hour</item>
+        <item quantity="other">hours</item>
+    </plurals>
+    <plurals name="plural_minute">
+        <item quantity="one">minute</item>
+        <item quantity="other">minutes</item>
+    </plurals>
+    <plurals name="plural_km_spoken">
+        <item quantity="one">kilometer</item>
+        <item quantity="other">kilometers</item>
+    </plurals>
+    <plurals name="plural_rub_spoken">
+        <item quantity="one">ruble</item>
+        <item quantity="other">rubles</item>
+    </plurals>
+    <plurals name="plural_town">
+        <item quantity="one">town</item>
+        <item quantity="other">towns</item>
+    </plurals>
+</resources>

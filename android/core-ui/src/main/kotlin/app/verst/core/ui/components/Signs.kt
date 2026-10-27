@@ -216,7 +216,7 @@ fun StartButton(size: StartSize, label: String, enabled: Boolean, cd: String, on
                 .drawBehind {
                     if (loading) {
                         val w = DesignTokens.size.startRing.toPx()
-                        drawArc(C.accent.yellow, -90f, 100f, false, topLeft = Offset(w / 2, w / 2), size = Size(this.size.width - w, this.size.height - w), style = Stroke(w, cap = StrokeCap.Round))
+                        drawArc(C.accent.yellowText, -90f, 100f, false, topLeft = Offset(w / 2, w / 2), size = Size(this.size.width - w, this.size.height - w), style = Stroke(w, cap = StrokeCap.Round))
                     }
                 },
             contentAlignment = Alignment.Center,
@@ -250,8 +250,8 @@ fun StepLine(text: String, done: Boolean, modifier: Modifier = Modifier) {
         Canvas(Modifier.padding(top = 4.dp).size(10.dp)) {
             val sw = 2.dp.toPx()
             if (done) {
-                drawLine(C.accent.yellow, Offset(size.width * 0.1f, size.height * 0.55f), Offset(size.width * 0.4f, size.height * 0.85f), sw, StrokeCap.Round)
-                drawLine(C.accent.yellow, Offset(size.width * 0.4f, size.height * 0.85f), Offset(size.width * 0.95f, size.height * 0.15f), sw, StrokeCap.Round)
+                drawLine(C.accent.yellowText, Offset(size.width * 0.1f, size.height * 0.55f), Offset(size.width * 0.4f, size.height * 0.85f), sw, StrokeCap.Round)
+                drawLine(C.accent.yellowText, Offset(size.width * 0.4f, size.height * 0.85f), Offset(size.width * 0.95f, size.height * 0.15f), sw, StrokeCap.Round)
             } else {
                 drawCircle(C.navi.label, radius = size.minDimension / 2 - sw / 2, style = Stroke(sw))
             }
@@ -267,7 +267,7 @@ fun ProgressBar(fraction: Float, modifier: Modifier = Modifier) {
         modifier.drawBehind {
             val r = androidx.compose.ui.geometry.CornerRadius(size.height / 2)
             drawRoundRect(C.navi.divider, cornerRadius = r)
-            drawRoundRect(C.accent.yellow, size = Size(size.width * fraction.coerceIn(0f, 1f), size.height), cornerRadius = r)
+            drawRoundRect(C.accent.yellowText, size = Size(size.width * fraction.coerceIn(0f, 1f), size.height), cornerRadius = r)
         },
     )
 }

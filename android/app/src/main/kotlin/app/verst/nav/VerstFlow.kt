@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** The routes of the slice (M§7 subset). */
-enum class Route { Windshield, Navigator, Instruments, Drive, Road, Waybill, Exit, Debug, NoFit, City, Walk }
+enum class Route { Windshield, Navigator, Instruments, Drive, Road, Waybill, Exit, Debug, NoFit, City, Walk, Settings }
 
 sealed interface WindshieldData {
     data object Loading : WindshieldData
@@ -531,6 +531,9 @@ class VerstFlow(
     }
 
     fun openDebug() = push(Route.Debug)
+
+    /** D-IR-20 personal cabinet (the profile button on the Windshield). */
+    fun openSettings() = push(Route.Settings)
 
     /** e2e: the location question counts as answered («Выберу сам»), so no rationale sheet covers the screens. */
     fun debugLocationAnswered() {
@@ -2336,7 +2339,7 @@ class VerstFlow(
         val w = walk ?: return ""
         val lines = mutableListOf(w.titleRu)
         w.stops.forEachIndexed { i, s -> lines += "${i + 1}. ${s.nameRu}" + (s.arriveAt?.let { " · " + (RuFormat.clock(it) ?: "") } ?: "") }
-        lines += "≈ ${RuFormat.thousands(w.cost.totalRub)} ₽ на всех · ≈ ${w.walkKm} км пешком"
+        lines += "≈ ${app.verst.settings.AppPrefs.money(w.cost.totalRub)} на всех · ≈ ${w.walkKm} км пешком"
         w.responsibleNoteRu?.let { lines += it }
         return lines.joinToString("\n")
     }
