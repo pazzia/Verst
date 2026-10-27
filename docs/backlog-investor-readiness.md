@@ -65,6 +65,7 @@ W5–W8   ENG-05 analytics · ENG-06 web planner (MVP) · DES-01 usability test
 W8–W12  VAL-04 closed beta · VAL-05 field trips · BIZ-02…05 revenue pilots · BIZ-06 Pro waitlist pricing test
 W12–W13 INV-01 data room · INV-02 deck
 W1–W4   SOC-01 demand check for community routes (inside VAL-01 interviews)
+Now     SPIKE-01 dynamic planning prototype (research, allowed under the freeze) ──▶ after M2: ARCH-01 · DATA-05 · ENG-10 · DES-03 ──▶ ENG-09 / LEG-03 · BIZ-07
 After   SOC-02 saved routes (after M2) ──▶ SOC-03 public routes + ratings (after VAL-04) ──▶ SOC-04 paid routes · SOC-05 contests
 ```
 
@@ -102,6 +103,15 @@ Priority: **P0**: without it the investor says no. **P1**: makes the case strong
 | BIZ-06 | Trip Pro waitlist with a price test (3 price points) | P1 | Growth Marketer + Developer | ENG-05 | 2 d |
 | DES-01 | Usability test of the «За рулём» UI on 10 people | P1 | UX Specialist + Designer | — | 3 d |
 | DES-02 | Seasonality plan: winter ready routes (New Year, Карелия, Казань) | P2 | Designer + Growth Marketer | DATA-02 | 2 d |
+| SPIKE-01 | Prototype of dynamic planning on provider-agnostic sources (ADR-0021 §5): Москва → Казань and Денпасар → Убуд → Ловина; quality, time, cost per plan | P1 | Architect + Developer + Data Curator (rating) | ENG-01 | 1–2 wk |
+| ARCH-01 | Capability ports, provider manifest and `ProviderSelector` with fallback to open data (ADR-0021 §2.1–2.3) | P1 | Architect | SPIKE-01 | 3 d |
+| DATA-05 | Server-side open place index (OSM + Wikidata) with corridor search, beyond Russia; the packaged catalogue becomes the offline cache | P1 | Architect + Data Curator | SPIKE-01, LEG-01 | 5–7 d |
+| ENG-08 | Routing graphs per country (Russia whole, then the countries chosen after SPIKE-01) | P2 | Architect | ENG-01 | 3 d |
+| ENG-09 | Commercial place search / enrichment adapters with licence-driven storage, attribution and cost guard (ADR-0021 §2.4–2.6) | P2 | Developer + Legal & Compliance | ARCH-01, LEG-03 | 5 d |
+| ENG-10 | `POST /v2/plan` on the server with the preference profile; the app plans online through it and falls back to the on-device engine offline | P1 | Architect + Developer | ARCH-01, ENG-04 | 3–5 d |
+| DES-03 | Questionnaire 2.0 (level, density, interests, free text) and vendor-map display where a licence requires it | P1 | Designer + UX Specialist | SPIKE-01 | 3 d |
+| LEG-03 | Terms review of each candidate provider (storage, display, attribution) and the foreign-entity question for providers abroad | P1 | Legal & Compliance (lawyer) | LEG-02 | 1 wk |
+| BIZ-07 | Cost per plan of commercial providers in the BIZ-01 model; budget per plan and per month | P1 | Business Analyst | SPIKE-01 | 1 d |
 | SOC-01 | Demand check for user and author routes: past-behaviour question in the VAL-01 interviews | P1 | UX Specialist (CEO asks) | — | 0.5 d |
 | SOC-02 | Save a planned or driven trip as a personal route and replan it later as a ready route | P2 | Architect + Developer + Designer | M2 (feature freeze), SOC-01 | 3 d |
 | SOC-03 | Public user and author routes, rated only by people who drove them | P2 | Architect + Developer + Designer + Data Curator (moderation) | SOC-02, VAL-04, DATA-03, LEG-02 | 5 d |
@@ -411,6 +421,35 @@ Compare it with cost per install and cost per planned trip from VAL-02. The revi
 - Legal approves the rules.
 - Anti-fraud review is done before the payout.
 - The effect is measured against the month before: new routes published and trips planned during the contest.
+
+---
+
+## Dynamic planning without vendor lock-in (CEO concept, Oct 27, 2026; ADR-0021)
+
+**Concept.**
+- The user gives any two points in any country, plus wishes and constraints. The engine builds the road skeleton, searches places along it in live data, scores them against the questionnaire and re-routes through the best ones.
+- Good trips are saved, and an owner can publish one for others to repeat exactly (SOC-02/03).
+- **No binding to a vendor.** Each capability (routing, place search, enrichment, lodging, map display, hand-off) is served by a provider chosen per request: coverage, licence, budget and health decide. The chain always ends in open data and our own facts.
+
+**Why not one vendor.**
+- Google or Яндекс costs ≈ $1–2 per plan against ≈ 3 ₽ of revenue per trip.
+- Their terms forbid storing place data, so saved and shared trips would break.
+- Google billing is closed to Russian companies.
+- It means lock-in to the main platform competitor.
+
+**Order.**
+1. SPIKE-01 measures quality, time and cost per plan on Москва → Казань and a Bali corridor.
+2. Then ARCH-01, DATA-05 and ENG-10, after M2 under the feature freeze unless the CEO moves it.
+3. ENG-09 and LEG-03 for the commercial providers.
+4. DES-03 for the questionnaire and vendor maps.
+5. BIZ-07 for the money.
+
+**Acceptance (SPIKE-01).** The report gives:
+- the share of stops worth stopping at, against the current catalogue;
+- the share of stops with known hours;
+- server plan time p95 ≤ 5 s;
+- the commercial cost per plan in ₽;
+- a go / no-go.
 
 ---
 
