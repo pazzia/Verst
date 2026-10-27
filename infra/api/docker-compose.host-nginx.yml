@@ -1,0 +1,21 @@
+# Test VM that already runs nginx on 80/443 (the CEO's VM in the Netherlands, tests only: ADR-0020 §11, 152-FZ —
+# the beta with real users moves to a VM in Russia). Caddy is not started; the host nginx terminates TLS and
+# proxies to verst-api on 127.0.0.1:8000 (nginx-verst.conf.example). Smaller memory settings for a 6 GB VM.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml up -d api postgres backup
+#
+# Starting the three services by name leaves `proxy` (Caddy) and `graphhopper` down.
+services:
+  api:
+    ports:
+      - "127.0.0.1:8000:8000"     # loopback only: nginx is the only peer (entrypoint trusts X-Forwarded-For)
+
+  postgres:
+    command:
+      - postgres
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - log_min_duration_statement=1000
+      - -c
+      - log_parameter_max_length=0

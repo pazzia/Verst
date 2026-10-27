@@ -48,6 +48,21 @@ GraphHopper needs a graph in `/srv/verst/routing/current` first: follow `infra/r
 rebuild). Until it serves, set `VERST_ROUTING=road_model` (plans carry `approxDistances`, `POST /v1/route`
 answers 503 and the phone applies its offline rule, ADR-0017 §5).
 
+## Test VM with its own nginx (the Netherlands VM, tests only)
+
+The CEO's test VM already serves other sites with nginx on 80/443 and has ~3 GB free memory. Caddy is not
+started; the host nginx proxies `212-108-82-26.sslip.io` (sslip.io resolves the name to the IP, so Let's
+Encrypt works without a domain) to verst-api on `127.0.0.1:8000`; routing stays on the road model until a
+graph fits (`VERST_ROUTING=road_model`). Trips and feedback stored here are friends-and-team test data only:
+the beta with real users runs in Russia (152-FZ).
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml build api
+docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml up -d api postgres backup
+curl -fsS http://127.0.0.1:8000/healthz                 # {"status":"ok"}
+# nginx: nginx-verst.conf.example (sed the domain in), then certbot --nginx -d <domain>
+```
+
 ## Release (update)
 
 ```sh
