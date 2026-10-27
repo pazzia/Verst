@@ -66,7 +66,7 @@ def test_request_validation_errors(
 
 @pytest.mark.parametrize("mood", ["calm", "fun", "more_stops", "just_drive"])
 def test_every_mood_the_phone_sends_is_accepted(client: TestClient, auth: dict[str, str], mood: str) -> None:
-    """SRV-01 regression: the phone sends the v3 `fun` («Весело и познавательно»); the schema once knew only v2."""
+    """SRV-01 regression: the phone sends the v3 `fun`; the schema once knew only the v2 names."""
     body = trip(mood=mood, crew={"adults": 2, "children": 0, "dog": False}, budget=None)
     r = client.post("/v1/trips/plan", json=body, headers=auth)
     assert r.status_code == 200, r.text
