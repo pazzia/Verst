@@ -60,7 +60,8 @@ the beta with real users runs in Russia (152-FZ).
 docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml build api
 docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml up -d api postgres backup
 curl -fsS http://127.0.0.1:8000/healthz                 # {"status":"ok"}
-# nginx: nginx-verst.conf.example (sed the domain in), then certbot --nginx -d <domain>
+# nginx on the host: nginx-verst.conf.example (sed the domain in), then certbot --nginx -d <domain>
+# nginx in the jonasal/nginx-certbot container: nginx-verst-certbot.conf.example into its user_conf.d, restart it
 ```
 
 ## Release (update)
