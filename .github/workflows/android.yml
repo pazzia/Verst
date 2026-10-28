@@ -187,6 +187,8 @@ jobs:
           printf '%s\n' android.permission.ACCESS_COARSE_LOCATION android.permission.ACCESS_FINE_LOCATION android.permission.ACCESS_NETWORK_STATE android.permission.INTERNET > /tmp/expected-permissions.txt
           if ! diff -u /tmp/expected-permissions.txt "$DIAG/permissions.txt"; then echo "::error::merged manifest permissions differ from ADR-0012 §7"; exit 1; fi
           if grep -n 'usesCleartextTraffic' "$M"; then echo "::error::usesCleartextTraffic in the merged manifest"; exit 1; fi
+          # D-IR-22: the launcher icon is wired (until 29.10 it was drawn but not referenced: the system icon showed)
+          grep -q 'android:icon="@mipmap/ic_launcher"' "$M" || { echo "::error::the merged manifest has no android:icon=@mipmap/ic_launcher"; exit 1; }
       - name: Diagnose assemble
         if: ${{ !cancelled() && steps.assemble.outcome == 'failure' }}
         run: python3 tools/ci/diagnose.py --out "$DIAG" gradle --log "$LOGS/assemble.log" --step assemble
