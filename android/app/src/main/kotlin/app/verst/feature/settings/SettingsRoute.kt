@@ -37,6 +37,8 @@ fun SettingsRoute(flow: VerstFlow) {
     var copied by remember { mutableStateOf(false) }
     var serverChecking by remember { mutableStateOf(false) }
     var serverCheck by remember { mutableStateOf<app.verst.data.net.ServerCheck?>(null) }
+    var consentAsk by remember { mutableStateOf(false) }
+    var forgotten by remember { mutableStateOf<Boolean?>(null) }
     val scope = rememberCoroutineScope()
     val s = AppPrefs.settings
     val ready = status as? EngineStatus.Ready
@@ -48,6 +50,7 @@ fun SettingsRoute(flow: VerstFlow) {
         s, AppPrefs.rates, build, AppPrefs.builds, AppPrefs.folderStatus,
         themePending = Themes.isDay(ctx, s.theme) != Palette.day, copied = copied,
         serverUrl = AppPrefs.serverUrl, serverChecking = serverChecking, serverCheck = serverCheck, lastPlan = app.gateway.lastPlan,
+        serverConsentAsk = consentAsk, serverForgotten = forgotten,
     )
     SettingsScreen(
         ui,
@@ -96,7 +99,50 @@ fun SettingsRoute(flow: VerstFlow) {
             override fun developer() = flow.openDebug()
 
             override fun planOnServer(on: Boolean) {
-                AppPrefs.update { it.copy(planOnServer = on) }
+                // security review В-1: the first «На сервере» asks for consent; «На телефоне» never asks
+                if (on && !AppPrefs.settings.serverConsent) consentAsk = true
+                else AppPrefs.update { it.copy(planOnServer = on) }
+            }
+
+            override fun serverConsent(agree: Boolean) {
+                consentAsk = false
+                if (agree) {
+                    forgotten = null
+                    AppPrefs.update { it.copy(serverConsent = true, planOnServer = true) }
+                }
+            }
+
+            override fun openPrivacy() {
+                val base = AppPrefs.serverUrl ?: return
+                runCatching {
+                    ctx.startActivity(
+                        android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(base.trimEnd('/') + "/privacy"))
+                            .addCategory(android.content.Intent.CATEGORY_BROWSABLE)
+                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+                    )
+                }
+            }
+
+            override fun forgetServer() {
+                // the phone plans from now on, whatever the server answers
+                AppPrefs.update { it.copy(planOnServer = false, serverConsent = false) }
+                scope.launch { forgotten = app.server.forget() }
+            }
+
+            override fun consumption(steps: Int) {
+                AppPrefs.update { it.copy(consumption = it.consumption + steps * app.verst.core.model.Car.CONSUMPTION_STEP) }
+            }
+
+            override fun tank(steps: Int) {
+                AppPrefs.update { it.copy(tankL = it.tankL + steps * app.verst.core.model.Car.TANK_STEP) }
+            }
+
+            override fun fuel(type: String) {
+                AppPrefs.update { it.copy(fuelType = type) }
+            }
+
+            override fun avoidTolls(on: Boolean) {
+                AppPrefs.update { it.copy(avoidTolls = on) }
             }
 
             override fun checkServer() {

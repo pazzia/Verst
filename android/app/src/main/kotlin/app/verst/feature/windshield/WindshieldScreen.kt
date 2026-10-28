@@ -621,26 +621,21 @@ private fun readyMeta(r: ReadyRouteDto): String =
     if (r.roundTrip && !r.subtitle.contains("по кругу")) "${r.subtitle} · ${stringResource(R.string.windshield_meta_round_trip)}" else r.subtitle
 
 
-/** D-IR-20: a round button with a person glyph that opens «Профиль и настройки» (48 dp touch target). */
+/** D-IR-20: a round button with the gear glyph that opens «Настройки» (48 dp touch target). */
 @Composable
 private fun ProfileButton(onClick: () -> Unit, modifier: Modifier) {
+    // designer К-3 / М-2: settings, not a profile — there are no accounts; the gear of components §17.4
     val cd = stringResource(R.string.settings_entry_cd)
-    val glyph = C.mirror.label
-    val plate = C.mirror.glass
-    androidx.compose.foundation.Canvas(
+    androidx.compose.foundation.layout.Box(
         modifier.size(48.dp).clip(androidx.compose.foundation.shape.CircleShape)
             .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
             .semantics { contentDescription = cd }
             .testTag("windshield.settings"),
+        contentAlignment = Alignment.Center,
     ) {
-        val r = size.minDimension / 2f
-        drawCircle(plate.copy(alpha = 0.72f), r * 0.8f)
-        drawCircle(glyph, r * 0.2f, center = androidx.compose.ui.geometry.Offset(center.x, center.y - r * 0.18f))
-        drawArc(
-            glyph, startAngle = 200f, sweepAngle = 140f, useCenter = false,
-            topLeft = androidx.compose.ui.geometry.Offset(center.x - r * 0.38f, center.y + r * 0.08f),
-            size = androidx.compose.ui.geometry.Size(r * 0.76f, r * 0.6f),
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = r * 0.12f),
-        )
+        androidx.compose.foundation.layout.Box(
+            Modifier.size(38.dp).clip(androidx.compose.foundation.shape.CircleShape).background(C.mirror.glass.copy(alpha = 0.72f)),
+            contentAlignment = Alignment.Center,
+        ) { app.verst.core.ui.components.GlyphIcon(app.verst.core.ui.components.Glyph.GEAR, C.mirror.label, 22.dp) }
     }
 }

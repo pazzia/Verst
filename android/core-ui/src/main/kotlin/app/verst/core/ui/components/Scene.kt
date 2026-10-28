@@ -23,26 +23,29 @@ import androidx.compose.ui.unit.dp
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.core.ui.theme.DesignTokens.color as C
 
-/** Sky bands as (top dp, height dp, colour) in the 390-wide reference frame. */
+/**
+ * Sky bands as (top dp, height dp, colour) in the 390-wide reference frame. The skies below are getters, not
+ * stored lists: the colours come from the current palette, so a day/night switch repaints them (designer К-2).
+ */
 data class Band(val top: Float, val height: Float, val color: Color)
 
 /** Sky of 5.1 (S1–S5). */
-val FullSky = listOf(
+val FullSky: List<Band> get() = listOf(
     Band(0f, 110f, C.sky.band1), Band(110f, 70f, C.sky.band2), Band(180f, 55f, C.sky.band3),
     Band(235f, 40f, C.sky.band4), Band(275f, 25f, C.sky.band5),
 )
 
 /** Sky of 5.4 Drive (S1–S5, S-17): 0–120, 120–190, 190–240, 240–276, 276–300. */
-val DriveSky = listOf(
+val DriveSky: List<Band> get() = listOf(
     Band(0f, 120f, C.sky.band1), Band(120f, 70f, C.sky.band2), Band(190f, 50f, C.sky.band3),
     Band(240f, 36f, C.sky.band4), Band(276f, 24f, C.sky.band5),
 )
 
 /** Sky of the 5.5 strip (S1–S4, S-19): 0–50, 50–84, 84–110, 110–132 (band 2 skipped). */
-val RoadSky = listOf(Band(0f, 50f, C.sky.band1), Band(50f, 34f, C.sky.band3), Band(84f, 26f, C.sky.band4), Band(110f, 22f, C.sky.band5))
+val RoadSky: List<Band> get() = listOf(Band(0f, 50f, C.sky.band1), Band(50f, 34f, C.sky.band3), Band(84f, 26f, C.sky.band4), Band(110f, 22f, C.sky.band5))
 
 /** Sky of the 5.2 strip (S1–S4): 0–46, 46–76, 76–94, 94–104; ground from 104. */
-val NavigatorSky = listOf(Band(0f, 46f, C.sky.band1), Band(46f, 30f, C.sky.band3), Band(76f, 18f, C.sky.band4), Band(94f, 10f, C.sky.band5))
+val NavigatorSky: List<Band> get() = listOf(Band(0f, 46f, C.sky.band1), Band(46f, 30f, C.sky.band3), Band(76f, 18f, C.sky.band4), Band(94f, 10f, C.sky.band5))
 
 /**
  * One row of components §9.1: the road plane (W wide, L long) rotated θ about its near edge, seen with

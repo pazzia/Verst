@@ -139,7 +139,7 @@ private fun LimitSign(budget: Int, modifier: Modifier) {
 private fun OptionRow(o: BudgetOptionDto, index: Int, budget: Int, onClick: () -> Unit) {
     val total = o.totalRub?.let { app.verst.settings.AppPrefs.money(it) } ?: ""
     val (title, sub) = when (o.kind) {
-        "shorten" -> stringResource(R.string.budget_option_shorten, o.days ?: 0, pluralStringResource(R.plurals.plural_day, o.days ?: 0)) to
+        "shorten" -> stringResource(R.string.budget_option_shorten, o.days ?: 0, pluralStringResource(R.plurals.plural_day_until, o.days ?: 0)) to // «до 2 дней»
             stringResource(R.string.budget_option_shorten_sub, o.titleRu ?: "", total)
         "cheaper_route" -> stringResource(R.string.budget_option_cheaper, o.titleRu ?: "") to
             // `fits = false` (ARCH-301): the cheapest candidate is still over the budget — never «помещается»

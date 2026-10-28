@@ -35,6 +35,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import app.verst.core.model.DefaultOrigin
 import app.verst.core.model.EngineJson
 import app.verst.core.model.EngineResult
@@ -1468,6 +1469,13 @@ class ScreensScreenshotTest {
         override fun developer() { calls += "dev" }
         override fun planOnServer(on: Boolean) { calls += "server:$on" }
         override fun checkServer() { calls += "check" }
+        override fun serverConsent(agree: Boolean) { calls += "consent:$agree" }
+        override fun openPrivacy() { calls += "privacy" }
+        override fun forgetServer() { calls += "forget" }
+        override fun consumption(steps: Int) { calls += "consumption:$steps" }
+        override fun tank(steps: Int) { calls += "tank:$steps" }
+        override fun fuel(type: String) { calls += "fuel:$type" }
+        override fun avoidTolls(on: Boolean) { calls += "tolls:$on" }
     }
 
     @Test
@@ -1479,10 +1487,30 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("settings.language.RU").assertIsSelected()
         compose.onNodeWithTag("settings.storage.cloud").assertIsNotEnabled()
         assertTrue(compose.onAllNodesWithText("0.1.147", substring = true).fetchSemanticsNodes().isNotEmpty())
-        compose.onNodeWithTag("settings.currency.EUR").performClick()
-        compose.onNodeWithTag("settings.theme.DAY").performClick()
+        compose.onNodeWithTag("settings.currency.EUR").performScrollTo().performClick()
+        compose.onNodeWithTag("settings.theme.DAY").performScrollTo().performClick()
         assertEquals(listOf("currency:EUR", "theme:DAY"), spy.calls)
         assertTrue(compose.onAllNodesWithTag("settings.restart").fetchSemanticsNodes().isEmpty())
+        // acceptance 28.10: the screen is «Настройки», the car is set here (traveller К4)
+        compose.onNodeWithText("Настройки").assertExists()
+        compose.onNodeWithTag("settings.consumption.value", useUnmergedTree = true).assertTextEquals("8 л на 100 км")
+        compose.onNodeWithTag("settings.fuel.ai95").assertIsSelected()
+        compose.onNodeWithTag("settings.tolls.false").assertIsSelected()
+        compose.onNodeWithTag("settings.consumption.more").performScrollTo().performClick()
+        compose.onNodeWithTag("settings.tolls.true").performScrollTo().performClick()
+        assertEquals(listOf("consumption:1", "tolls:true"), spy.calls.drop(2))
+    }
+
+    @Test
+    fun settingsServerConsentAndForget() {
+        val spy = SettingsSpy()
+        val withServer = settingsUi.copy(serverUrl = "https://212-108-82-26.sslip.io", serverConsentAsk = true)
+        shot("settings", "server-consent") { app.verst.feature.settings.SettingsScreen(withServer, spy) }
+        compose.onNodeWithTag("settings.server.consent").assertIsDisplayed()
+        compose.onNodeWithText("Нидерландах", substring = true).assertExists()
+        compose.onNodeWithTag("settings.server.consent.yes").performClick()
+        assertEquals(listOf("consent:true"), spy.calls)
+        assertTrue(compose.onAllNodesWithTag("settings.server.forget").fetchSemanticsNodes().isEmpty()) // no consent yet
     }
 
     @Test

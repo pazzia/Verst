@@ -118,3 +118,30 @@ def test_readyz_and_metrics(client: TestClient) -> None:
     m = client.get("/metrics")
     assert m.status_code == 200 and "verst_http_requests_total" in m.text
     assert 'route="/readyz"' in m.text
+
+
+def test_save_rejects_implausible_numbers_and_recomputes_the_cost(
+    client: TestClient, auth: dict[str, str]
+) -> None:
+    """Acceptance 28.10, QA B-2: nothing no plan can produce is stored, and the cost is the server's own."""
+    body = json.loads((CONTRACTS / "plan-synthetic.json").read_text("utf-8"))["request"]["args"]["input_json"]
+    trip = client.post("/v1/trips/plan", json=body, headers=auth).json()["trip"]
+    units = trip["cost"]["units"]
+    fuel = {**units["fuel"], "regions": [{**r, "priceRub": "999999999"} for r in units["fuel"]["regions"]]}
+    cases = [
+        ({**trip, "km": -5}, "trip.km"),
+        ({**trip, "daysList": [], "days": 0}, "trip.daysList"),
+        (
+            {**trip, "cost": {**trip["cost"], "units": {**units, "fuel": fuel}}},
+            "trip.cost.units.fuel.regions[0].priceRub",
+        ),
+    ]
+    for forged, field in cases:
+        r = client.post("/v1/trips", json={"trip": forged}, headers=auth)
+        assert r.status_code == 400, (field, r.text)
+        assert r.json()["error"]["details"]["field"] == field
+    # forged totals are replaced by the engine's own, recomputed from the units
+    forged_total = {**trip, "cost": {**trip["cost"], "totalRub": -5}}
+    saved = client.post("/v1/trips", json={"trip": forged_total}, headers=auth).json()
+    shared = client.get(f"/v1/shared/{saved['shareSlug']}").json()
+    assert shared["trip"]["cost"]["totalRub"] == trip["cost"]["totalRub"]

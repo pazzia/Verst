@@ -280,12 +280,12 @@ dependencies {
 
 ### 3.4 Signing and versioning
 
-- **`android/app/demo.keystore` is committed.** It is a PKCS12 file generated once in the sandbox (DEV-100):
-  ```
-  keytool -genkeypair -keystore android/app/demo.keystore -storetype PKCS12 -storepass verstdemo -keypass verstdemo \
-          -alias verst-demo -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Verst Demo,O=Verst,C=RU"
-  ```
-  Same key on every CI run, so each new APK installs **over** the previous one and saved trips survive. It is a demo key with no store identity, so committing it is safe. The RuStore upload key will be a GitHub secret (A§12.4) and is never this one.
+- **Superseded 28.10.2026 (security review К-1):** the demo key is no longer committed. The old
+  `demo.keystore` (and its passwords, which stayed in git history) is treated as compromised. The new demo key lives
+  in GitHub Secrets (`VERST_SIGNING_KEYSTORE_B64`, `VERST_SIGNING_STORE_PASSWORD`, `VERST_SIGNING_KEY_ALIAS`,
+  `VERST_SIGNING_KEY_PASSWORD`); CI decodes it into `$RUNNER_TEMP` and Gradle reads `VERST_SIGNING_KEYSTORE`. Without
+  the secret the demo APK gets the throwaway debug key (a CI warning says so) and does not install over earlier
+  builds. Same key on every CI run, so each new APK installs over the previous one and saved trips survive.
 - `versionCode = github.run_number` (monotonic), `versionName = 0.2.<n>-mock`, `BuildConfig.GIT_SHA`.
 - The settings sheet footer (D-4) reads «Сборка <n> · <sha7> · демо-данные». Exact copy: DES-104.
 

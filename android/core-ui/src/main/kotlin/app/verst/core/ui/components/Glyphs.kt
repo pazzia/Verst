@@ -38,6 +38,8 @@ enum class Glyph(val path: String, val strokeWidth: Float = 2f, val filled: Bool
     LOCATE_DOT("M14 12a2 2 0 1 1-4 0a2 2 0 1 1 4 0z", filled = true),
     INFO("M21 12a9 9 0 1 1-18 0a9 9 0 1 1 18 0zM12 11v6M12 7.5h.01"),
     GEAR("M12 8.5a3.5 3.5 0 1 1 0 7a3.5 3.5 0 1 1 0-7zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"),
+    /** Designer В-6: the stop row «⋯» (the stop menu without a long press). */
+    MORE("M7.8 12a1.8 1.8 0 1 1-3.6 0a1.8 1.8 0 1 1 3.6 0zM13.8 12a1.8 1.8 0 1 1-3.6 0a1.8 1.8 0 1 1 3.6 0zM19.8 12a1.8 1.8 0 1 1-3.6 0a1.8 1.8 0 1 1 3.6 0z", filled = true),
     UP_RIGHT("M7 17L17 7M9 7h8v8"),
     RIGHT("M9 6l6 6-6 6", 2.5f),
     SEARCH("M17 10.5a6.5 6.5 0 1 1-13 0a6.5 6.5 0 1 1 13 0zM15.5 15.5L20 20", 2.4f),

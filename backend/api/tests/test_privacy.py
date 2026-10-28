@@ -111,6 +111,24 @@ def test_share_page_and_shared_json_show_the_town_only(client: TestClient, auth:
     assert body["startTown"] == "Москва" and body["shareText"].startswith("Москва → Ярославль")
     for s in SECRETS:
         assert s not in shared.text, s
+    # security B-3: the plan and the cost, not who travels, with what budget, when, or the engine state
+    public = body["trip"]
+    assert "engineState" not in public and "units" not in public["cost"] and "budgetRub" not in public["cost"]
+    assert set(public["input"]) <= {"origin", "destination"} and "crew" not in shared.text
+    assert "2026-" not in json.dumps(public["daysList"])  # times of day only, not the date of the trip
+
+
+def test_privacy_page_and_forgetting_the_device(client: TestClient, auth: dict[str, str]) -> None:
+    page = client.get("/privacy")
+    assert page.status_code == 200 and page.headers["content-type"].startswith("text/html")
+    assert "Что уходит на сервер" in page.text and "Нидерландах" in page.text
+    trip = plan(client, auth, PLAN_INPUT)["trip"]
+    saved = client.post("/v1/trips", json={"trip": trip}, headers=auth).json()
+    assert client.delete("/v1/devices/me", headers=auth).status_code == 204
+    assert client.get(f"/v1/shared/{saved['shareSlug']}").status_code == 404  # the trips went with the device
+    assert (
+        client.post("/v1/trips/plan", json=PLAN_INPUT, headers=auth).status_code == 401
+    )  # the token is dead
 
 
 def test_saving_twice_returns_the_same_link_and_delete_unshares(

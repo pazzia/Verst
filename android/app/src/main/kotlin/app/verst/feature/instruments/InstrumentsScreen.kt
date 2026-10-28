@@ -568,4 +568,4 @@ private fun Gauge(angle: Float, modifier: Modifier) {
 }
 
 /** Sky of the 5.3 strip (S1–S3): band 1 0–60, band 3 60–90, band 4 90–120. */
-private val InstrumentsSky = listOf(Band(0f, 60f, C.sky.band1), Band(60f, 30f, C.sky.band3), Band(90f, 30f, C.sky.band4))
+private val InstrumentsSky: List<Band> get() = listOf(Band(0f, 60f, C.sky.band1), Band(60f, 30f, C.sky.band3), Band(90f, 30f, C.sky.band4))

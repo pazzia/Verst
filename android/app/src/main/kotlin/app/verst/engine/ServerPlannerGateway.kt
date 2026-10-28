@@ -9,9 +9,10 @@ import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlanOutcome
 import app.verst.data.net.ServerClient
 import app.verst.data.net.ServerUnavailable
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 /** Where the last plan was built, for the settings screen. */
@@ -19,8 +20,8 @@ data class PlanSource(val server: Boolean, val ms: Long, val fallbackReason: Str
 
 /**
  * SRV-01: the plan goes to the server when the setting says so and the phone is online; everything else, and
- * the plan whenever the server cannot be reached, is the phone engine ([phone]). The engine's own answers
- * (errors included) are final: only transport trouble falls back.
+ * the plan whenever the server cannot give one, is the phone engine ([phone]). Only the engine's verdict about the
+ * trip itself (`ServerClient.FINAL`: unreachable, too short) is final; any other server failure falls back.
  */
 class ServerPlannerGateway(
     private val phone: PlannerGateway,
@@ -43,9 +44,8 @@ class ServerPlannerGateway(
                 r
             }
         } catch (e: ServerUnavailable) {
+            currentCoroutineContext().ensureActive() // a cancelled plan is not retried on the phone
             fallback(requestId, request, onEvent, e.message ?: "unavailable")
-        } catch (e: CancellationException) {
-            throw e
         }
     }
 

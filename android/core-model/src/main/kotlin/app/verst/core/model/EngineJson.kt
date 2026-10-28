@@ -228,6 +228,9 @@ enum class Mood(val wire: String) {
 val BudgetPresets: List<Int?> = listOf(20_000, 30_000, 40_000, 60_000, 80_000, null)
 
 /** What the user asked for; `toInputJson()` is the `TripInputDTO` body of `mobile.plan`. */
+/** The engine's `vehicle` input (codec `_VEHICLE_KEYS`). */
+data class VehicleInput(val consumption: Double, val fuelType: String, val tankL: Int)
+
 data class PlanRequest(
     val origin: GeoPoint,
     val destination: GeoPoint? = null,
@@ -238,6 +241,9 @@ data class PlanRequest(
     val dailyKm: Int = 300,
     val budgetRub: Int? = null,
     val mood: Mood? = null,
+    /** The car from the settings; null = the engine's default (8 l/100 km, АИ-95, 50 l), not sent. */
+    val vehicle: VehicleInput? = null,
+    val avoidTolls: Boolean = false,
 ) {
     fun toInputJson(): String {
         fun point(p: GeoPoint): JsonElement = buildJsonObject {
@@ -257,6 +263,14 @@ data class PlanRequest(
             put("dailyKm", dailyKm)
             put("budget", budgetRub?.let { JsonPrimitive(it) } ?: JsonNull)
             if (mood != null) put("mood", mood.wire)
+            if (vehicle != null) {
+                put("vehicle", buildJsonObject {
+                    put("consumption", vehicle.consumption)
+                    put("fuelType", vehicle.fuelType)
+                    put("tankL", vehicle.tankL)
+                })
+            }
+            if (avoidTolls) put("avoidTolls", true)
         }
         return body.toString()
     }

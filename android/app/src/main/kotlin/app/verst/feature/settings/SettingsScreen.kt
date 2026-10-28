@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import app.verst.core.model.AppLanguage
 import app.verst.core.model.AppSettings
 import app.verst.core.model.AppTheme
+import app.verst.core.model.Car
 import app.verst.core.model.Money
 import app.verst.core.model.RatesDto
 import app.verst.core.model.TripStorage
@@ -36,11 +38,13 @@ import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
+import app.verst.feature.common.NaviDialog
 import app.verst.feature.common.ScreenRoot
 import app.verst.data.net.ServerCheck
 import app.verst.engine.PlanSource
 import app.verst.settings.BuildSeen
 import app.verst.settings.FolderStatus
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -73,6 +77,10 @@ data class SettingsUi(
     val serverChecking: Boolean = false,
     val serverCheck: ServerCheck? = null,
     val lastPlan: PlanSource? = null,
+    /** Security review В-1: the consent dialog before the first «На сервере». */
+    val serverConsentAsk: Boolean = false,
+    /** «Отвязать от сервера»: null = not tried, true = done, false = the server did not answer. */
+    val serverForgotten: Boolean? = null,
 )
 
 interface SettingsActions {
@@ -88,6 +96,13 @@ interface SettingsActions {
     fun developer()
     fun planOnServer(on: Boolean)
     fun checkServer()
+    fun serverConsent(agree: Boolean)
+    fun openPrivacy()
+    fun forgetServer()
+    fun consumption(steps: Int)
+    fun tank(steps: Int)
+    fun fuel(type: String)
+    fun avoidTolls(on: Boolean)
 }
 
 @Composable
@@ -99,8 +114,37 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
         ) {
             val back = stringResource(R.string.common_back_to_windshield)
             BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), a::back)
-            Txt(stringResource(R.string.settings_title), T.title.xl, C.text.primary)
+            Txt(stringResource(R.string.settings_screen_title), T.title.xl, C.text.primary)
             Txt(stringResource(R.string.settings_subtitle), T.body.sm, C.text.secondary)
+
+            // traveller К4: the car of the cost and «avoid toll roads» of the route
+            val st = ui.settings
+            Section(stringResource(R.string.settings_car))
+            Stepper(
+                stringResource(R.string.settings_consumption), stringResource(R.string.settings_consumption_value, litres(st.consumption, ui.settings.language)),
+                "settings.consumption", stringResource(R.string.cd_settings_consumption_less), stringResource(R.string.cd_settings_consumption_more),
+                st.consumption > Car.CONSUMPTION_MIN, st.consumption < Car.CONSUMPTION_MAX, { a.consumption(-1) }, { a.consumption(1) },
+            )
+            Section(stringResource(R.string.settings_fuel))
+            Choices(
+                listOf(
+                    "ai92" to stringResource(R.string.settings_fuel_92),
+                    "ai95" to stringResource(R.string.settings_fuel_95),
+                    "dt" to stringResource(R.string.settings_fuel_dt),
+                ),
+                st.fuelType, "settings.fuel", a::fuel,
+            )
+            Stepper(
+                stringResource(R.string.settings_tank), stringResource(R.string.settings_tank_value, st.tankL),
+                "settings.tank", stringResource(R.string.cd_settings_tank_less), stringResource(R.string.cd_settings_tank_more),
+                st.tankL > Car.TANK_MIN, st.tankL < Car.TANK_MAX, { a.tank(-1) }, { a.tank(1) },
+            )
+            Section(stringResource(R.string.settings_tolls))
+            Choices(
+                listOf(false to stringResource(R.string.settings_tolls_allow), true to stringResource(R.string.settings_tolls_avoid)),
+                st.avoidTolls, "settings.tolls", a::avoidTolls,
+            )
+            Note(stringResource(R.string.settings_car_note))
 
             Section(stringResource(R.string.settings_language))
             Choices(
@@ -112,7 +156,8 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
             Section(stringResource(R.string.settings_currency))
             Choices(Money.SUPPORTED.map { it to "${Money.symbol(it)} $it" }, ui.settings.currency, "settings.currency", a::currency)
             Note(
-                ui.rates.asOf?.let { stringResource(R.string.settings_currency_rate, it) } ?: stringResource(R.string.settings_currency_no_rate),
+                ui.rates.asOf?.let { stringResource(R.string.settings_currency_rate, isoDate(it, ui.settings.language)) }
+                    ?: stringResource(R.string.settings_currency_no_rate),
                 Modifier.testTag("settings.rate"),
             )
 
@@ -148,7 +193,7 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
                     Button(stringResource(R.string.settings_storage_folder_now), "settings.folder.now", C.dash.control, C.text.primary, a::writeFolderNow)
                 }
                 when (val s = ui.folderStatus) {
-                    is FolderStatus.Written -> Note(stringResource(R.string.settings_storage_folder_written, time(s.at), s.trips), Modifier.testTag("settings.folder.status"))
+                    is FolderStatus.Written -> Note(stringResource(R.string.settings_storage_folder_written, time(s.at, ui.settings.language), s.trips), Modifier.testTag("settings.folder.status"))
                     is FolderStatus.Failed -> Txt(stringResource(R.string.settings_storage_folder_failed, s.reason), T.body.sm, C.accent.redText, Modifier.testTag("settings.folder.status"))
                     null -> Unit
                 }
@@ -168,6 +213,7 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
                     ui.settings.planOnServer, "settings.server.plan", a::planOnServer,
                 )
                 Note(stringResource(R.string.settings_server_note))
+                Button(stringResource(R.string.settings_server_privacy), "settings.server.privacy", C.dash.control, C.text.primary, a::openPrivacy)
                 Button(stringResource(R.string.settings_server_check), "settings.server.check", C.dash.control, C.text.primary, a::checkServer)
                 val status = when {
                     ui.serverChecking -> stringResource(R.string.settings_server_checking)
@@ -186,6 +232,14 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
                         else stringResource(R.string.settings_server_last_phone, p.fallbackReason ?: "—"),
                         Modifier.testTag("settings.server.last"),
                     )
+                }
+                if (st.serverConsent) {
+                    Button(stringResource(R.string.settings_server_forget), "settings.server.forget", C.dash.control, C.accent.redText, a::forgetServer)
+                }
+                when (ui.serverForgotten) {
+                    true -> Note(stringResource(R.string.settings_server_forgotten), Modifier.testTag("settings.server.forgotten"))
+                    false -> Txt(stringResource(R.string.settings_server_forget_failed), T.body.sm, C.accent.redText, Modifier.testTag("settings.server.forgotten"))
+                    null -> Unit
                 }
             }
 
@@ -208,19 +262,38 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
             if (ui.builds.isNotEmpty()) {
                 Section(stringResource(R.string.settings_builds_seen))
                 ui.builds.take(10).forEach { s ->
-                    Txt(stringResource(R.string.settings_builds_row, s.number, s.gitSha.take(7), date(s.firstRunAt)), T.body.sm, C.text.secondary)
+                    Txt(stringResource(R.string.settings_builds_row, s.number, s.gitSha.take(7), date(s.firstRunAt, ui.settings.language)), T.body.sm, C.text.secondary)
                 }
             }
             Button(stringResource(R.string.settings_dev), "settings.dev", C.dash.control, C.text.muted, a::developer)
+        }
+        if (ui.serverConsentAsk) {
+            NaviDialog(
+                stringResource(R.string.settings_server_consent_title), stringResource(R.string.settings_server_consent_body),
+                stringResource(R.string.settings_server_consent_yes), stringResource(R.string.settings_server_consent_no),
+                "settings.server.consent", { a.serverConsent(true) }, { a.serverConsent(false) },
+            )
         }
     }
 }
 
 private const val FILE = app.verst.settings.MirroringTripStore.FILE
 
-private fun time(ms: Long): String = SimpleDateFormat("dd.MM HH:mm", Locale.ROOT).format(Date(ms))
+// Designer В-9: one date style in the app's language («27 окт. 2026 г.» / «Oct 27, 2026»), not ISO.
+private fun locale(l: AppLanguage): Locale = Locale.forLanguageTag(l.tag)
 
-private fun date(ms: Long): String = SimpleDateFormat("dd.MM.yyyy", Locale.ROOT).format(Date(ms))
+private fun time(ms: Long, l: AppLanguage = AppLanguage.RU): String =
+    DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, locale(l)).format(Date(ms))
+
+private fun date(ms: Long, l: AppLanguage = AppLanguage.RU): String = DateFormat.getDateInstance(DateFormat.MEDIUM, locale(l)).format(Date(ms))
+
+/** `2026-10-27` (the Bank of Russia date) in the app's date style; unparseable stays as is. */
+private fun isoDate(iso: String, l: AppLanguage): String =
+    runCatching { SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).parse(iso)?.let { date(it.time, l) } }.getOrNull() ?: iso
+
+/** «8,5» / «8.5» in the app's language. */
+private fun litres(v: Double, l: AppLanguage): String =
+    java.text.NumberFormat.getNumberInstance(locale(l)).apply { maximumFractionDigits = 1; minimumFractionDigits = 0 }.format(v)
 
 @Composable
 private fun Section(text: String) = Txt(text, T.label.md, C.text.muted, Modifier.padding(top = 8.dp))
@@ -235,22 +308,23 @@ private fun <K> Choices(options: List<Pair<K, String>>, current: K, tag: String,
             val on = key == current
             Box(
                 Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin)
-                    .background(if (on) C.sign.white else C.dash.control, RoundedCornerShape(10.dp))
+                    // designer К-1: the inverse of the screen (light on night, dark by day) — visible in both palettes
+                    .background(if (on) C.text.primary else C.dash.control, RoundedCornerShape(10.dp))
                     .clickable(role = Role.RadioButton) { onPick(key) }
                     .semantics { selected = on }
                     .testTag("$tag.$key").padding(horizontal = 12.dp),
                 contentAlignment = Alignment.Center,
-            ) { Txt(label, T.body.mdStrong, if (on) C.text.onLight else C.text.secondary, maxLines = 1) }
+            ) { Txt(label, T.body.mdStrong, if (on) C.dash.raised else C.text.secondary, maxLines = 1) }
         }
     }
 }
 
 @Composable
 private fun StorageRow(title: String, sub: String, selected: Boolean, enabled: Boolean, tag: String, onClick: () -> Unit) {
-    val border = if (selected) C.sign.white else C.dash.outline
+    val border = if (selected) C.text.primary else C.dash.outline
     Column(
         Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp)
-            .border(DesignTokens.stroke.w1, border, RoundedCornerShape(12.dp))
+            .border(if (selected) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, border, RoundedCornerShape(12.dp))
             .clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick)
             .semantics { this.selected = selected }
             .testTag(tag).padding(12.dp),
@@ -271,4 +345,31 @@ private fun Button(label: String, tag: String, fill: Color, text: Color, onClick
             .testTag(tag).padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center,
     ) { Txt(label, T.button.md, text) }
+}
+
+/** A value with − / + (the car's consumption and tank). */
+@Composable
+private fun Stepper(
+    label: String, value: String, tag: String, cdLess: String, cdMore: String,
+    lessEnabled: Boolean, moreEnabled: Boolean, onLess: () -> Unit, onMore: () -> Unit,
+) {
+    Row(Modifier.fillMaxWidth().testTag(tag), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.weight(1f)) {
+            Txt(label, T.label.md, C.text.muted)
+            Txt(value, T.body.mdStrong, C.text.primary, Modifier.testTag("$tag.value"))
+        }
+        StepKey("−", cdLess, "$tag.less", lessEnabled, onLess)
+        StepKey("+", cdMore, "$tag.more", moreEnabled, onMore)
+    }
+}
+
+@Composable
+private fun StepKey(glyph: String, cd: String, tag: String, enabled: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier.size(DesignTokens.size.touchMin).background(C.dash.control, RoundedCornerShape(10.dp))
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = cd }
+            .testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) { Txt(glyph, T.title.lg, if (enabled) C.text.primary else C.text.disabled) }
 }

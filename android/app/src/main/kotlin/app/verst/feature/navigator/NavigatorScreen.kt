@@ -571,6 +571,13 @@ private fun AddressBlock(ui: NavigatorUi, q: String, onFind: () -> Unit, onPick:
             Txt(stringResource(R.string.addr_attribution), T.caption.md, C.navi.hint, Modifier.fillMaxWidth().height(24.dp).testTag("address.attribution"), align = TextAlign.End)
         }
         else -> {
+            // designer В-2: the error right under the field, above the action, in the error colour
+            if (ui.addressState == AddressState.None) {
+                Txt(stringResource(R.string.addr_none), T.body.sm, C.accent.redText, Modifier.testTag("address.none"))
+            }
+            if (ui.addressState == AddressState.Failed) {
+                Txt(stringResource(R.string.addr_failed), T.body.sm, C.accent.redText, Modifier.testTag("address.failed"))
+            }
             val searching = ui.addressState == AddressState.Searching
             Row(
                 Modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.suggestionRowMinH)
@@ -585,12 +592,6 @@ private fun AddressBlock(ui: NavigatorUi, q: String, onFind: () -> Unit, onPick:
                     if (searching) stringResource(R.string.addr_searching) else stringResource(R.string.addr_find_query, q),
                     T.list.title, C.accent.yellowText, Modifier.weight(1f), maxLines = 1,
                 )
-            }
-            if (ui.addressState == AddressState.None) {
-                Txt(stringResource(R.string.addr_none), T.body.sm, C.navi.labelSecondary, Modifier.testTag("address.none"))
-            }
-            if (ui.addressState == AddressState.Failed) {
-                Txt(stringResource(R.string.addr_failed), T.body.sm, C.text.muted, Modifier.testTag("address.failed"))
             }
         }
     }

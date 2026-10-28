@@ -131,7 +131,11 @@ internal fun parkingTotalText(p: ParkingSum, rub: Int = p.rub): String = when (p
     ParkingTotal.UNKNOWN -> stringResource(R.string.road_parking_inline_unknown)
 }
 
-/** components §26 `HandoffCta`: yellow, full width, min-h 60: navigator arrow 26, title 18/700, sub 12/600, chevron. */
+/**
+ * components §26 `HandoffCta`: full width, min-h 60: navigator arrow 26, title 18/700, sub 12/600, chevron. Designer
+ * В-5 (28.10): an outline, not the filled yellow — the plan is read and edited first, leaving for the navigator is
+ * the second step.
+ */
 @Composable
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 internal fun HandoffCta(day: Int, onClick: () -> Unit, onLongClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -141,8 +145,8 @@ internal fun HandoffCta(day: Int, onClick: () -> Unit, onLongClick: () -> Unit, 
     val cd = stringResource(R.string.road_handoff_cta) + ". " + stringResource(R.string.road_handoff_cta_sub, day)
     Row(
         modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.handoffCtaH).clip(shape)
-            // pressed #E6BD38 has no token: the yellow at 90 % over the dashboard reads the same (dev-notes S4)
-            .background(if (pressed) C.accent.yellow.copy(alpha = 0.9f) else C.accent.yellow)
+            .background(if (pressed) C.accent.yellow.copy(alpha = 0.12f) else androidx.compose.ui.graphics.Color.Transparent)
+            .border(DesignTokens.stroke.w2, C.accent.yellowText, shape)
             .combinedClickable(source, indication = null, role = Role.Button, onLongClick = onLongClick, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("road.handoff")
@@ -150,12 +154,12 @@ internal fun HandoffCta(day: Int, onClick: () -> Unit, onLongClick: () -> Unit, 
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        GlyphIcon(Glyph.NAVIGATOR, C.text.onLight, 26.dp, filled = true)
+        GlyphIcon(Glyph.NAVIGATOR, C.accent.yellowText, 26.dp, filled = true)
         Column(Modifier.weight(1f)) {
-            Txt(stringResource(R.string.road_handoff_cta), T.cta.lg, C.text.onLight, maxLines = 1)
-            Txt(stringResource(R.string.road_handoff_cta_sub, day), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+            Txt(stringResource(R.string.road_handoff_cta), T.cta.lg, C.accent.yellowText, maxLines = 1)
+            Txt(stringResource(R.string.road_handoff_cta_sub, day), T.body.smStrong, C.text.secondary, maxLines = 1)
         }
-        GlyphIcon(Glyph.RIGHT, C.text.onLight, 18.dp)
+        GlyphIcon(Glyph.RIGHT, C.accent.yellowText, 18.dp)
     }
 }
 
@@ -275,10 +279,13 @@ internal fun CostsLine(price: String?, parking: ParkingDto?, showParking: Boolea
 }
 
 /** A 44 dp touch box that lays out 36 high (the costs line is min-h 36; the touch target keeps 44). */
-internal fun Modifier.touch36(): Modifier = this.layout { m, c ->
+internal fun Modifier.touch36(): Modifier = touchAt(36.dp)
+
+/** A 44 dp touch box that lays out [height] high. */
+internal fun Modifier.touchAt(height: Dp): Modifier = this.layout { m, c ->
     val t = DesignTokens.size.touchMin.roundToPx()
     val p = m.measure(c.copy(minHeight = t, maxHeight = if (c.hasBoundedHeight) maxOf(t, c.maxHeight) else t))
-    val h = 36.dp.roundToPx()
+    val h = height.roundToPx()
     layout(p.width, h) { p.place(0, (h - p.height) / 2) }
 }
 

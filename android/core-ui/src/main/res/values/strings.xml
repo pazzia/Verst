@@ -243,7 +243,7 @@
     <string name="road_title">Дорога впереди</string>
     <string name="road_chip_days">%1$d %2$s · %3$d %4$s</string>
     <string name="road_chip_pace">до %1$s км в день</string>
-    <string name="road_intro">Знаки по пути — как увидите их на трассе. Любой можно заменить.</string>
+    <string name="road_intro">Знаки по пути — как увидите их на трассе. Любой можно заменить, а «⋯» у знака — открыть в навигаторе или сообщить об ошибке.</string>
     <string name="road_day">День %1$d</string>
     <string name="road_day_meta">%1$s км · ≈ %2$d ч за рулём</string>
     <string name="road_day_meta_home">%1$s км · домой</string>
@@ -280,6 +280,7 @@
     <string name="cd_road_kind_rest">Отдых: %1$s</string>
     <string name="cd_road_kind_night">Ночёвка: %1$s</string>
     <string name="cd_road_warning">Внимание: %1$s</string>
+    <string name="cd_road_stop_more">Действия: %1$s</string>
     <string name="cd_road_swap">Заменить: %1$s</string>
     <string name="cd_road_hotel">Выбрать отель в %1$s</string>
     <string name="cd_road_action_navigator">Открыть в навигаторе отсюда</string>
@@ -853,7 +854,7 @@
     <string name="walk_few_clear_sub">вы убрали %1$s — вернём их в подбор</string>
     <string name="online_later">уточним при интернете</string>
     <string name="online_failed">Не получилось загрузить — попробуйте ещё раз</string>
-    <string name="addr_failed">Не получилось найти адрес — попробуйте ещё раз</string>
+    <string name="addr_failed">Сервис адресов сейчас не отвечает — попробуйте через минуту</string>
     <string name="road_parking_note_unknown">Тариф неизвестен — в путевом листе это место «без данных», в сумму не входит.</string>
     <string name="cd_parking_loading">Парковка: загружаем</string>
     <!-- S4 dev: units the deck spells inline (5.5 §10.8 km post «км», ParkingSheet «Стоим ≈ 2 ч») -->
@@ -867,7 +868,7 @@
     <string name="road_amenity_ev">зарядка для электромобиля</string>
     <string name="road_amenity_24h">круглосуточно</string>
     <!-- D-IR-20 personal cabinet -->
-    <string name="settings_entry_cd">Профиль и настройки</string>
+    <string name="settings_entry_cd">Настройки</string>
     <string name="settings_subtitle">Без регистрации: всё хранится на этом телефоне</string>
     <string name="settings_language">ЯЗЫК</string>
     <string name="settings_language_ru">Русский</string>
@@ -919,4 +920,25 @@
     <string name="settings_server_failed">Нет связи: %1$s</string>
     <string name="settings_server_last_server">Последний маршрут построен на сервере за %1$d мс</string>
     <string name="settings_server_last_phone">Последний маршрут построен на телефоне (%1$s)</string>
+    <!-- Acceptance 28.10: the settings screen, the car (traveller К4), server consent (security В-1) -->
+    <string name="settings_screen_title">Настройки</string>
+    <string name="settings_car">МАШИНА</string>
+    <string name="settings_car_note">Расход и топливо считаются в смете, «объезжать платные» меняет маршрут.</string>
+    <string name="settings_consumption_value">%1$s л на 100 км</string>
+    <string name="settings_tank_value">%1$d л</string>
+    <string name="cd_settings_consumption_less">Уменьшить расход</string>
+    <string name="cd_settings_consumption_more">Увеличить расход</string>
+    <string name="cd_settings_tank_less">Уменьшить бак</string>
+    <string name="cd_settings_tank_more">Увеличить бак</string>
+    <string name="settings_tolls">ПЛАТНЫЕ ДОРОГИ</string>
+    <string name="settings_tolls_allow">Можно по платным</string>
+    <string name="settings_tolls_avoid">Объезжать платные</string>
+    <string name="settings_server_consent_title">Строить маршрут на сервере?</string>
+    <string name="settings_server_consent_body">На тестовый сервер в Нидерландах уйдут точки маршрута, состав экипажа, бюджет и машина. Маршрут там не хранится. Без связи маршрут строится на телефоне.</string>
+    <string name="settings_server_consent_yes">Согласен</string>
+    <string name="settings_server_consent_no">Не сейчас</string>
+    <string name="settings_server_privacy">Какие данные уходят на сервер ↗</string>
+    <string name="settings_server_forget">Отвязать от сервера</string>
+    <string name="settings_server_forgotten">Отвязано: устройство и его данные на сервере удалены</string>
+    <string name="settings_server_forget_failed">Сервер не ответил. Маршрут уже строится на телефоне; повторите, когда будет связь</string>
 </resources>

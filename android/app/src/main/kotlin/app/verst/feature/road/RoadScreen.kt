@@ -807,7 +807,7 @@ private fun StopRow(
                     },
                 )
             }
-            .padding(top = 8.dp, bottom = 12.dp, end = 16.dp)
+            .padding(top = 8.dp, bottom = 12.dp, end = 4.dp)
             .semantics(mergeDescendants = true) {
                 contentDescription = cd
                 if (onTap != null) onClick(openLabel) { onTap(); true }
@@ -833,6 +833,7 @@ private fun StopRow(
             Row(Modifier.fillMaxWidth()) {
                 Txt(line1, T.body.sm, C.text.muted, Modifier.weight(1f), maxLines = 1)
                 Txt(time, T.body.sm, C.text.muted, align = TextAlign.End)
+                MoreButton(stringResource(R.string.cd_road_stop_more, s.name), "road.stop.${s.id}.more", onLongPress)
             }
             Txt(name, T.title.md, C.text.primary, maxLines = 2)
             // 5.5 §10.7 part 3: one tag row (StretchTag before the KindTag, then the open-data ring); sights only
@@ -850,7 +851,8 @@ private fun StopRow(
             if (cost != null || canReplace || hotel || showParking) {
                 CostsLine(cost, s.parking, showParking, "road.stop.${s.id}", onParking) {
                     if (hotel) HotelAction(booked, if (booked) stringResource(R.string.cd_road_booked) else stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
-                    else if (canReplace) QuietAction(stringResource(R.string.road_swap), stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onClick = onReplace)
+                    // designer В-5: «заменить» is a visible outline button (components §2.6), not quiet text
+                    else if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
                 }
             }
         }
@@ -891,19 +893,29 @@ private fun HotelAction(booked: Boolean, cd: String, tag: String, onClick: () ->
     ) { if (booked) GlyphIcon(Glyph.CHECK, C.navi.label, 14.dp, Modifier.padding(start = 4.dp)) }
 }
 
-/** components §2.6 `SwapButton` «заменить»: h 36 (touch 44), outline, `type.body.smStrong`. */
+/** components §2.6 `SwapButton` «заменить»: h 32 in the 36 costs line (touch 44), outline, `type.body.smStrong`. */
 @Composable
 private fun SwapButton(cd: String, tag: String, onClick: () -> Unit) {
     Box(
-        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onClick)
-            .semantics { contentDescription = cd }.testTag(tag),
+        Modifier.touch36().clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = cd }.testTag(tag).padding(start = 6.dp),
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 10.dp),
+            Modifier.height(32.dp).border(DesignTokens.stroke.w1, C.text.secondary, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 10.dp),
             contentAlignment = Alignment.Center,
-        ) { Txt(stringResource(R.string.road_swap), T.body.smStrong, C.text.secondary, maxLines = 1) }
+        ) { Txt(stringResource(R.string.road_swap), T.body.smStrong, C.text.primary, maxLines = 1) }
     }
+}
+
+/** Designer В-6: «⋯» opens the stop menu (navigator from here, swap, report) — the long press stays as a shortcut. */
+@Composable
+private fun MoreButton(cd: String, tag: String, onClick: () -> Unit) {
+    Box(
+        Modifier.width(DesignTokens.size.touchMin).touchAt(18.dp).clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = cd }.testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) { GlyphIcon(Glyph.MORE, C.text.secondary, 20.dp) }
 }
 
 /** components §2.6 `HotelButton` «Выбрать отель →» (blue), booked «Забронировано ✓». */

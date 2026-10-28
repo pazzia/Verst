@@ -132,6 +132,7 @@ def test_openapi_lists_the_beta_endpoints(client: TestClient) -> None:
     paths = client.get("/openapi.json").json()["paths"]
     assert set(paths) == {
         "/v1/devices",
+        "/v1/devices/me",
         "/v1/trips/plan",
         "/v1/route",
         "/v1/ready-routes",

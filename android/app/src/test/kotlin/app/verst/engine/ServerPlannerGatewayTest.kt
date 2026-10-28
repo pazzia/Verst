@@ -112,10 +112,19 @@ class ServerPlannerGatewayTest {
     }
 
     @Test
-    fun theEnginesAnswerFromTheServerIsFinal() = runBlocking {
-        server.enqueue(MockResponse().setHeader("Content-Type", "text/event-stream").setBody("event: error\ndata: {\"code\":\"NO_ROUTE\",\"message\":\"\"}\n\n"))
-        assertEquals("NO_ROUTE", (gateway.planOutcome("r1", request) {} as EngineResult.Err).error.code)
+    fun theEnginesVerdictAboutTheTripIsFinal() = runBlocking {
+        server.enqueue(MockResponse().setHeader("Content-Type", "text/event-stream").setBody("event: error\ndata: {\"code\":\"UNREACHABLE\",\"message\":\"\",\"details\":{\"pointIndex\":1}}\n\n"))
+        assertEquals("UNREACHABLE", (gateway.planOutcome("r1", request) {} as EngineResult.Err).error.code)
         assertEquals(0, phone.plans)
         assertTrue(gateway.lastPlan!!.server)
+    }
+
+    @Test
+    fun aServerSideRejectionFallsBackToThePhone() = runBlocking {
+        // QA B-3 / the «Весело и познавательно» case of 28.10: the server's schema rejected what the phone sends
+        server.enqueue(MockResponse().setResponseCode(400).setBody("""{"error":{"code":"INVALID_INPUT","message":"","details":{"field":"mood"}}}"""))
+        assertEquals("PHONE", (gateway.planOutcome("r1", request) {} as EngineResult.Err).error.code)
+        assertEquals(1, phone.plans)
+        assertEquals("INVALID_INPUT (HTTP 400)", gateway.lastPlan!!.fallbackReason)
     }
 }

@@ -213,6 +213,12 @@ class Engine:
             return ru.text("label.map_point")
         return str(town["name"])
 
+    def recompute_cost(self, trip: dict[str, Any]) -> dict[str, Any]:
+        """The trip's cost recomputed by the engine from its units (`patch_cost` with no change)."""
+        out: dict[str, Any] = _unwrap(mobile.patch_cost(WORLD, json.dumps(trip, ensure_ascii=False), "{}"))
+        cost: dict[str, Any] = out["trip"]["cost"]
+        return cost
+
     def share_text(self, trip: dict[str, Any]) -> str:
         """The share text of a private trip; validates it (engine version, shape) on the way."""
         return str(_unwrap(mobile.share_text(json.dumps(trip, ensure_ascii=False))))

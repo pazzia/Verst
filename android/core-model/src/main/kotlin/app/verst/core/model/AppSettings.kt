@@ -28,6 +28,13 @@ data class AppSettings(
     val folderName: String? = null,
     /** SRV-01: build the trip on the server (`POST /v1/trips/plan`) when online; the phone engine otherwise. */
     val planOnServer: Boolean = false,
+    /** Security review 28.10 (В-1): the user read what goes to the server and agreed; asked once, before the switch. */
+    val serverConsent: Boolean = false,
+    /** The car (traveller К4): litres per 100 km (engine range 4–20), fuel `ai92` / `ai95` / `dt`, tank 20–150 l. */
+    val consumption: Double = Car.DEFAULT_CONSUMPTION,
+    val fuelType: String = Car.DEFAULT_FUEL,
+    val tankL: Int = Car.DEFAULT_TANK,
+    val avoidTolls: Boolean = false,
 ) {
     /** A setting that only takes effect after the app restarts (the palette is read once per process). */
     fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme
@@ -45,9 +52,27 @@ data class AppSettings(
     /** An unknown currency (an older build's list) falls back to roubles; a folder without a URI to the device. */
     fun sanitized(): AppSettings = copy(
         currency = currency.takeIf { it in Money.SUPPORTED } ?: Money.RUB,
+        consumption = consumption.coerceIn(Car.CONSUMPTION_MIN, Car.CONSUMPTION_MAX),
+        fuelType = fuelType.takeIf { it in Car.FUELS } ?: Car.DEFAULT_FUEL,
+        tankL = tankL.coerceIn(Car.TANK_MIN, Car.TANK_MAX),
+        planOnServer = planOnServer && serverConsent,
         storage = if (storage == TripStorage.FOLDER && folderUri == null) TripStorage.DEVICE
         else if (storage == TripStorage.CLOUD) TripStorage.DEVICE else storage,
     )
+}
+
+/** The car of the cost (engine `Vehicle`: consumption 4–20 l/100 km, tank 20–150 l). */
+object Car {
+    const val DEFAULT_CONSUMPTION = 8.0
+    const val DEFAULT_FUEL = "ai95"
+    const val DEFAULT_TANK = 50
+    const val CONSUMPTION_MIN = 4.0
+    const val CONSUMPTION_MAX = 20.0
+    const val CONSUMPTION_STEP = 0.5
+    const val TANK_MIN = 20
+    const val TANK_MAX = 150
+    const val TANK_STEP = 5
+    val FUELS = listOf("ai92", "ai95", "dt")
 }
 
 /** Central Bank of Russia rates, fetched at build time (tools/ci/fetch_rates.py → assets/rates.json). */

@@ -130,9 +130,27 @@ jobs:
         # D-IR-20 currency setting; on failure the placeholder stays and the app shows roubles only
         run: python3 tools/ci/fetch_rates.py android/app/src/main/assets/rates.json
 
+      - name: Signing key (GitHub Secrets)
+        # Security review 28.10 (К-1): the key is never in the repository. Without the secret the APK is signed
+        # with a throwaway debug key: it builds and tests, but does not install over an earlier CI build.
+        env:
+          KEYSTORE_B64: ${{ secrets.VERST_SIGNING_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::warning title=signing::VERST_SIGNING_KEYSTORE_B64 is not set: throwaway debug signature (will not install over earlier builds)"
+            exit 0
+          fi
+          umask 077
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/verst-demo.jks"
+          echo "VERST_SIGNING_KEYSTORE=$RUNNER_TEMP/verst-demo.jks" >> "$GITHUB_ENV"
+
       - name: Assemble demo APK + androidTest APK
         id: assemble
         working-directory: android
+        env:
+          VERST_SIGNING_STORE_PASSWORD: ${{ secrets.VERST_SIGNING_STORE_PASSWORD }}
+          VERST_SIGNING_KEY_ALIAS: ${{ secrets.VERST_SIGNING_KEY_ALIAS }}
+          VERST_SIGNING_KEY_PASSWORD: ${{ secrets.VERST_SIGNING_KEY_PASSWORD }}
         run: ./gradlew :app:assembleDemo :app:assembleDemoAndroidTest --console=plain --stacktrace 2>&1 | tee "$LOGS/assemble.log"
 
       - name: Demo manifest has no test activity (release review P2-4)

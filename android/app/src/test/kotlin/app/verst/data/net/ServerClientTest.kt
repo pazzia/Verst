@@ -4,6 +4,7 @@ import app.verst.core.model.EngineResult
 import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlanOutcome
 import java.io.File
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -90,9 +91,45 @@ class ServerClientTest {
         server.enqueue(sse("event: error\ndata: {\"code\":\"UNREACHABLE\",\"message\":\"…\",\"details\":{\"pointIndex\":1}}"))
         val r = client.plan(input) {}
         assertEquals("UNREACHABLE", (r as EngineResult.Err).error.code)
-        // a 4xx before the stream is the same
-        server.enqueue(MockResponse().setResponseCode(422).setBody("""{"error":{"code":"INVALID_INPUT","message":"…","details":{"field":"dailyKm"}}}"""))
-        assertEquals("INVALID_INPUT", (client.plan(input) {} as EngineResult.Err).error.code)
+        assertEquals(1, r.error.pointIndex) // `details` are flattened like the phone engine's error
+        // a 4xx with an engine verdict before the stream is the same
+        server.enqueue(MockResponse().setResponseCode(422).setBody("""{"error":{"code":"TOO_SHORT","message":"…","details":{"roadKm":3.2}}}"""))
+        assertEquals("TOO_SHORT", (client.plan(input) {} as EngineResult.Err).error.code)
+    }
+
+    @Test
+    fun everyOtherServerAnswerIsUnavailableSoThePhonePlans() = runBlocking {
+        store.auth = ServerAuth(server.url("/").toString().trimEnd('/'), "d1", "x".repeat(43))
+        val answers = listOf(
+            MockResponse().setResponseCode(400).setBody("""{"error":{"code":"INVALID_INPUT","message":"","details":{"field":"mood"}}}"""),
+            MockResponse().setResponseCode(429).setHeader("Retry-After", "60").setBody("""{"error":{"code":"RATE_LIMITED","message":"","details":{}}}"""),
+            MockResponse().setResponseCode(413).setBody("too large"),
+            sse("event: error\ndata: {\"code\":\"UPSTREAM\",\"message\":\"\",\"details\":{\"service\":\"routing\"}}"),
+            sse("event: done\ndata: {\"outcome\":\"plan\",\"trip\":"),
+        )
+        for (a in answers) {
+            server.enqueue(a)
+            val e = runCatching { client.plan(input) {} }.exceptionOrNull()
+            assertTrue("$a → $e", e is ServerUnavailable)
+        }
+    }
+
+    @Test
+    fun cancellingThePlanCancelsTheHttpCall() = runBlocking {
+        store.auth = ServerAuth(server.url("/").toString().trimEnd('/'), "d1", "x".repeat(43))
+        // the stream sends one stage and then nothing for 30 s
+        server.enqueue(
+            MockResponse().setHeader("Content-Type", "text/event-stream")
+                .setBody("event: stage\ndata: {\"event\":\"stage\",\"key\":\"route\",\"text\":\"…\",\"progress\":0.1}\n\n: ping\n\n")
+                .throttleBody(64, 30, java.util.concurrent.TimeUnit.SECONDS),
+        )
+        val t0 = System.nanoTime()
+        val job = launch(kotlinx.coroutines.Dispatchers.IO) { runCatching { client.plan(input) {} } }
+        kotlinx.coroutines.delay(500)
+        job.cancel()
+        job.join()
+        val ms = (System.nanoTime() - t0) / 1_000_000
+        assertTrue("cancelled after $ms ms", ms < 5_000)
     }
 
     @Test

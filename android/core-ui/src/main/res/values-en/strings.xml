@@ -243,7 +243,7 @@
     <string name="road_title">Road ahead</string>
     <string name="road_chip_days">%1$d %2$s · %3$d %4$s</string>
     <string name="road_chip_pace">up to %1$s km a day</string>
-    <string name="road_intro">Signs along the way — as you\'ll see them on the highway. You can swap any of them.</string>
+    <string name="road_intro">Signs along the way — as you\'ll see them on the highway. You can swap any of them; «⋯» by a sign opens it in the navigator or reports a mistake.</string>
     <string name="road_day">Day %1$d</string>
     <string name="road_day_meta">%1$s km · ≈ %2$d h behind the wheel</string>
     <string name="road_day_meta_home">%1$s km · home</string>
@@ -280,6 +280,7 @@
     <string name="cd_road_kind_rest">Rest: %1$s</string>
     <string name="cd_road_kind_night">Overnight: %1$s</string>
     <string name="cd_road_warning">Note: %1$s</string>
+    <string name="cd_road_stop_more">Actions: %1$s</string>
     <string name="cd_road_swap">Swap: %1$s</string>
     <string name="cd_road_hotel">Choose a hotel in %1$s</string>
     <string name="cd_road_action_navigator">Open in the navigator from here</string>
@@ -853,7 +854,7 @@
     <string name="walk_few_clear_sub">you removed %1$s — we\'ll add them back to the mix</string>
     <string name="online_later">we\'ll update this when you\'re online</string>
     <string name="online_failed">Couldn\'t load — please try again</string>
-    <string name="addr_failed">Couldn\'t find the address — please try again</string>
+    <string name="addr_failed">The address service isn\'t answering — try again in a minute</string>
     <string name="road_parking_note_unknown">Rate unknown — the waybill lists this place as “no data” and leaves it out of the total.</string>
     <string name="cd_parking_loading">Parking: loading</string>
     <!-- S4 dev: units the deck spells inline (5.5 §10.8 km post «км», ParkingSheet «Стоим ≈ 2 ч») -->
@@ -867,7 +868,7 @@
     <string name="road_amenity_ev">EV charging</string>
     <string name="road_amenity_24h">open 24 hours</string>
     <!-- D-IR-20 personal cabinet -->
-    <string name="settings_entry_cd">Profile and settings</string>
+    <string name="settings_entry_cd">Settings</string>
     <string name="settings_subtitle">No sign-up: everything is stored on this phone</string>
     <string name="settings_language">LANGUAGE</string>
     <string name="settings_language_ru">Русский</string>
@@ -919,4 +920,25 @@
     <string name="settings_server_failed">No connection: %1$s</string>
     <string name="settings_server_last_server">The last trip was planned on the server in %1$d ms</string>
     <string name="settings_server_last_phone">The last trip was planned on the phone (%1$s)</string>
+    <!-- Acceptance 28.10: the settings screen, the car (traveller К4), server consent (security В-1) -->
+    <string name="settings_screen_title">Settings</string>
+    <string name="settings_car">CAR</string>
+    <string name="settings_car_note">Consumption and fuel go into the cost; «avoid toll roads» changes the route.</string>
+    <string name="settings_consumption_value">%1$s l per 100 km</string>
+    <string name="settings_tank_value">%1$d l</string>
+    <string name="cd_settings_consumption_less">Lower the consumption</string>
+    <string name="cd_settings_consumption_more">Raise the consumption</string>
+    <string name="cd_settings_tank_less">Smaller tank</string>
+    <string name="cd_settings_tank_more">Bigger tank</string>
+    <string name="settings_tolls">TOLL ROADS</string>
+    <string name="settings_tolls_allow">Toll roads are fine</string>
+    <string name="settings_tolls_avoid">Avoid toll roads</string>
+    <string name="settings_server_consent_title">Plan trips on the server?</string>
+    <string name="settings_server_consent_body">The route points, the crew, the budget and the car go to a test server in the Netherlands. The trip is not stored there. Offline, the trip is planned on the phone.</string>
+    <string name="settings_server_consent_yes">I agree</string>
+    <string name="settings_server_consent_no">Not now</string>
+    <string name="settings_server_privacy">What goes to the server ↗</string>
+    <string name="settings_server_forget">Unlink from the server</string>
+    <string name="settings_server_forgotten">Unlinked: the device and its data on the server are deleted</string>
+    <string name="settings_server_forget_failed">The server did not answer. Trips are already planned on the phone; try again when online</string>
 </resources>

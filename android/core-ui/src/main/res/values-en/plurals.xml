@@ -77,4 +77,8 @@
         <item quantity="one">town</item>
         <item quantity="other">towns</item>
     </plurals>
+    <plurals name="plural_day_until">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
 </resources>

@@ -1094,7 +1094,19 @@ class VerstFlow(
         dailyKm = dailyKm,
         budgetRub = budgetCustom ?: BudgetPresets[budgetIndex],
         mood = mood,
+        vehicle = carVehicle(),
+        avoidTolls = app.verst.settings.AppPrefs.settings.avoidTolls,
     )
+
+    /** The car from the settings (traveller К4), or null while it is the engine's default car. */
+    private fun carVehicle(): app.verst.core.model.VehicleInput? {
+        val s = app.verst.settings.AppPrefs.settings
+        val car = app.verst.core.model.VehicleInput(s.consumption, s.fuelType, s.tankL)
+        val default = app.verst.core.model.VehicleInput(
+            app.verst.core.model.Car.DEFAULT_CONSUMPTION, app.verst.core.model.Car.DEFAULT_FUEL, app.verst.core.model.Car.DEFAULT_TANK,
+        )
+        return car.takeIf { it != default }
+    }
 
     /** The budget the gauge shows: a no-fit «Поднять бюджет до …» value, else the preset. */
     val budgetRub: Int? get() = budgetCustom ?: BudgetPresets[budgetIndex]

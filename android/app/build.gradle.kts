@@ -43,12 +43,18 @@ android {
         // SRV-01: the test backend (ADR-0020); empty = no server, the phone engine only
         buildConfigField("String", "SERVER_URL", "\"${System.getenv("VERST_SERVER_URL") ?: ""}\"")
     }
+    // Security review 28.10 (К-1): the demo signing key is a CI secret, never in the repository. CI decodes
+    // VERST_SIGNING_KEYSTORE_B64 to a file and passes its path and passwords; without it (local builds, a missing
+    // secret) the demo APK gets the throwaway debug key and will not install over a CI build.
+    val demoKeystore = System.getenv("VERST_SIGNING_KEYSTORE")?.let { file(it) }?.takeIf { it.isFile }
     signingConfigs {
-        create("demo") {
-            storeFile = file("demo.keystore")
-            storePassword = "verstdemo"
-            keyAlias = "verst-demo"
-            keyPassword = "verstdemo"
+        if (demoKeystore != null) {
+            create("demo") {
+                storeFile = demoKeystore
+                storePassword = System.getenv("VERST_SIGNING_STORE_PASSWORD")
+                keyAlias = System.getenv("VERST_SIGNING_KEY_ALIAS")
+                keyPassword = System.getenv("VERST_SIGNING_KEY_PASSWORD")
+            }
         }
     }
     buildTypes {
@@ -57,13 +63,12 @@ android {
             isDebuggable = false
             isMinifyEnabled = false
             applicationIdSuffix = ".demo"
-            signingConfig = signingConfigs.getByName("demo")
+            signingConfig = signingConfigs.getByName(if (demoKeystore != null) "demo" else "debug")
             matchingFallbacks += listOf("release")
             buildConfigField("String", "APPMETRICA_API_KEY", "\"$appMetricaTestKey\"")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
-            signingConfig = signingConfigs.getByName("demo")
             buildConfigField("String", "APPMETRICA_API_KEY", "\"$appMetricaTestKey\"")
         }
         // After `demo` on purpose: `initWith(release)` above must not copy the release key into the demo APK.

@@ -295,7 +295,7 @@ internal fun hoursRu(text: String): String? {
  * Иваново») — hidden; others start with a capital letter and end with a full stop.
  */
 internal fun cleanDescription(text: String, kindLine: String, town: String?): String? {
-    val t = text.trim()
+    val t = wholeText(text.replace(STRESS_MARKS, "").trim())
     if (t.isEmpty()) return null
     val filler = setOf("в", "г", "г.", "городе", "города", "на", "у", "близ", "·", "-", "—", ",")
     val known = (kindLine.lowercase().split(' ', '·', ',') + (town ?: "").lowercase().split(' ', '-'))
@@ -304,6 +304,38 @@ internal fun cleanDescription(text: String, kindLine: String, town: String?): St
     if (words.isNotEmpty() && words.all { w -> known.any { k -> w == k || (k.length >= 4 && w.startsWith(k.dropLast(1))) } }) return null
     val cap = t.replaceFirstChar { it.uppercase() }
     return if (cap.last() in ".!?…»)") cap else "$cap."
+}
+
+/** Wikipedia's stress marks (combining acute and grave): «Вы́ставка» reads as broken text (designer В-1). */
+private val STRESS_MARKS = Regex("[\u0300\u0301]")
+
+/**
+ * Designer В-1: a description cut by its source («… выставочный комплекс в…») ends at its last whole sentence,
+ * or, with none, at its last whole word; a bracket left without its pair is dropped.
+ */
+internal fun wholeText(text: String): String {
+    var t = text
+    val cut = t.endsWith("…") || t.endsWith("...")
+    if (cut) {
+        t = t.trimEnd('…', '.', ' ')
+        val end = Regex("""[.!?»](?=\s)""").findAll(t).lastOrNull()?.range?.last
+        t = if (end != null && end >= 20) {
+            t.substring(0, end + 1)
+        } else {
+            val words = t.split(' ').toMutableList()
+            if (words.size > 1) words.removeAt(words.lastIndex) // the word the source cut
+            while (words.size > 1 && words.last().trimEnd(',', '—', '-').length <= 2) words.removeAt(words.lastIndex)
+            words.joinToString(" ").trimEnd(',', ' ', '—', '-') + "…"
+        }
+    }
+    val open = ArrayDeque<Int>()
+    val drop = mutableSetOf<Int>()
+    t.forEachIndexed { i, c ->
+        if (c == '(') open.addLast(i)
+        if (c == ')') { if (open.isEmpty()) drop += i else open.removeLast() }
+    }
+    if (open.isNotEmpty()) t = t.substring(0, open.first()).trimEnd(',', ' ', '—', '-').let { if (cut) "$it…" else it }
+    return t.filterIndexed { i, _ -> i !in drop }.replace(Regex(" {2,}"), " ").replace(" )", ")").trim()
 }
 
 @Composable

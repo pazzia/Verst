@@ -78,4 +78,11 @@ class NominatimClientTest {
         server.enqueue(MockResponse().setResponseCode(503))
         assertTrue(client.search("Советская 1") is AddressResult.Failed)
     }
+
+    /** Designer В-2: nothing to connect to (airplane mode the system has not noticed yet) is offline, not «try again». */
+    @Test
+    fun noConnectionIsOffline() = runBlocking {
+        server.shutdown()
+        assertEquals(AddressResult.Offline, client.search("Советская 1"))
+    }
 }

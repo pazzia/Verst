@@ -9,6 +9,9 @@ import app.verst.core.model.dto.PlanOutcome
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -17,10 +20,12 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
+import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 
 /** The device's registration on one server (ADR-0007): the bearer token is shown once, the app keeps it here. */
 @Serializable
@@ -39,8 +44,7 @@ class ServerUnavailable(message: String) : IOException(message)
  * SRV-01: the verst-api client (ADR-0020). Device registration (`POST /v1/devices`, the token kept by [store]),
  * the health check and the server plan: `POST /v1/trips/plan` with `Accept: text/event-stream`, whose `stage` /
  * `stop` events are the same JSON the phone engine emits (ADR-0006) and whose `done` body is the engine's result.
- * Transport trouble (no server, 5xx, timeout, bad stream) is a [ServerUnavailable] so the caller can fall back to
- * the phone; an `error` event or a 4xx is the engine's answer and comes back as an [EngineResult.Err].
+ * Anything but the engine's verdict about the trip is a [ServerUnavailable] so the caller falls back to the phone.
  */
 class ServerClient(
     private val baseUrl: () -> String?,
@@ -77,37 +81,82 @@ class ServerClient(
         }
     }
 
-    /** The plan on the server; [onEvent] gets the progress events on the calling dispatcher's thread. */
-    suspend fun plan(inputJson: String, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome> = withContext(Dispatchers.IO) {
+    /**
+     * «Отвязать от сервера» (security review М-2): `DELETE /v1/devices/me` deletes the device, its saved trips and
+     * feedback on the server, then the token is forgotten here. False (token kept, to repeat) when the server did not
+     * confirm.
+     */
+    suspend fun forget(): Boolean = withContext(Dispatchers.IO) {
+        val auth = store.load() ?: return@withContext true
+        val base = baseUrl()?.trimEnd('/')
+        if (base == null || auth.baseUrl != base) {
+            store.save(null) // a token of another server: nothing to delete here
+            return@withContext true
+        }
+        val req = Request.Builder().url("$base/v1/devices/me").header("Authorization", "Bearer ${auth.token}").delete().build()
+        val done = try {
+            http().newCall(req).execute().use { it.code == 204 || it.code == 401 } // 401: already gone
+        } catch (e: IOException) {
+            Log.w(TAG, "forget failed: ${e.message}")
+            false
+        }
+        if (done) store.save(null) // kept on failure, so «Отвязать» can be repeated online
+        done
+    }
+
+    /**
+     * The plan on the server; [onEvent] gets the progress events on the reading thread. Only the engine's own verdict
+     * about the trip ([FINAL]) comes back as an [EngineResult.Err]; every other failure — transport, 5xx, 429, 413,
+     * a request the server's schema rejects, `UPSTREAM` in the stream — is a [ServerUnavailable], so the phone engine
+     * plans instead (acceptance 28.10, QA B-3). Cancelling the caller cancels the HTTP call.
+     */
+    suspend fun plan(inputJson: String, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome> {
         val base = baseUrl()?.trimEnd('/') ?: throw ServerUnavailable("no server in this build")
-        var token = token(base)
+        var token = withContext(Dispatchers.IO) { token(base) }
         repeat(2) { attempt ->
             val req = Request.Builder().url("$base/v1/trips/plan")
                 .header("Authorization", "Bearer $token")
                 .header("Accept", "text/event-stream")
                 .post(inputJson.toRequestBody(JSON))
                 .build()
-            val response = try {
-                http().newCall(req).execute()
-            } catch (e: IOException) {
-                throw ServerUnavailable(e.message ?: e.javaClass.simpleName)
-            }
-            response.use { r ->
+            val answer = execute(http().newCall(req)) { r ->
                 when {
-                    r.code == 401 && attempt == 0 -> {
-                        store.save(null) // the server forgot us (a restore, a wipe): register again once
-                        token = token(base)
-                    }
-                    r.code >= 500 -> throw ServerUnavailable("HTTP ${r.code}")
-                    r.code != 200 -> return@withContext engineError(r.body?.string())
+                    r.code == 401 && attempt == 0 -> null
+                    r.code != 200 -> final(engineError(r.peekBody(MAX_BODY).string()), "HTTP ${r.code}")
                     !(r.header("Content-Type") ?: "").startsWith("text/event-stream") ->
                         // a plain JSON answer: the proxy or the server did not stream
-                        return@withContext EngineJson.planOutcome(wrapOk(r.body?.string() ?: ""))
-                    else -> return@withContext readStream(r.body!!.source(), onEvent)
+                        decoded(EngineJson.planOutcome(wrapOk(r.peekBody(MAX_BODY).string())))
+                    else -> readStream(r.body!!.source(), onEvent)
                 }
             }
+            if (answer != null) return answer
+            store.save(null) // the server forgot us (a restore, a wipe): register again once
+            token = withContext(Dispatchers.IO) { token(base) }
         }
         throw ServerUnavailable("unauthorised after a new registration")
+    }
+
+    /** Runs [call] on the IO pool; cancelling the caller cancels the call, so a blocked read ends at once. */
+    private suspend fun <T> execute(call: Call, read: (Response) -> T): T = coroutineScope {
+        val watcher = launch {
+            try {
+                awaitCancellation()
+            } finally {
+                call.cancel()
+            }
+        }
+        try {
+            withContext(Dispatchers.IO) {
+                val response = try {
+                    call.execute()
+                } catch (e: IOException) {
+                    throw ServerUnavailable(e.message ?: e.javaClass.simpleName)
+                }
+                response.use(read)
+            }
+        } finally {
+            watcher.cancel()
+        }
     }
 
     private fun readStream(source: okio.BufferedSource, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome> {
@@ -115,18 +164,20 @@ class ServerClient(
         val data = StringBuilder()
         while (true) {
             val line = try {
-                source.readUtf8Line()
+                source.readUtf8LineStrict(MAX_BODY)
+            } catch (e: java.io.EOFException) {
+                throw ServerUnavailable("stream ended without done")
             } catch (e: IOException) {
                 throw ServerUnavailable("stream: ${e.message}")
-            } ?: throw ServerUnavailable("stream ended without done")
+            }
             when {
                 line.isEmpty() -> {
                     val payload = data.toString()
                     data.setLength(0)
                     when (event) {
                         "stage", "stop" -> EngineJson.event(payload)?.let(onEvent)
-                        "done" -> return EngineJson.planOutcome(wrapOk(payload))
-                        "error" -> return engineError("""{"error":$payload}""")
+                        "done" -> return decoded(EngineJson.planOutcome(wrapOk(payload)))
+                        "error" -> return final(engineError("""{"error":$payload}"""), "stream error")
                     }
                     event = null
                 }
@@ -134,8 +185,17 @@ class ServerClient(
                 line.startsWith("event:") -> event = line.substring(6).trim()
                 line.startsWith("data:") -> data.append(line.substring(5).trimStart())
             }
+            if (data.length > MAX_BODY) throw ServerUnavailable("stream: event too large")
         }
     }
+
+    /** The engine's verdict is final only for [FINAL] codes; the phone engine retries the rest. */
+    private fun final(r: EngineResult.Err, context: String): EngineResult<PlanOutcome> =
+        if (r.error.code in FINAL) r else throw ServerUnavailable("${r.error.code} ($context)")
+
+    /** A `done` the app cannot decode (a newer server) is the server's problem, not the trip's. */
+    private fun decoded(r: EngineResult<PlanOutcome>): EngineResult<PlanOutcome> =
+        if (r is EngineResult.Err && r.error.code == "INTERNAL") throw ServerUnavailable("undecodable plan") else r
 
     /** The stored token for [base], or a fresh registration (`POST /v1/devices`). */
     private fun token(base: String): String {
@@ -160,10 +220,13 @@ class ServerClient(
         }
     }
 
-    private fun engineError(body: String?): EngineResult<PlanOutcome> {
+    /** `{"error": {code, message, details: {…}}}` (verst-api) → the engine's flat error object. */
+    private fun engineError(body: String?): EngineResult.Err {
         val err = try {
-            (EngineJson.json.parseToJsonElement(body ?: "").jsonObject["error"] as? JsonObject)
-                ?.let { EngineJson.json.decodeFromJsonElement(EngineErrorDto.serializer(), it) }
+            (EngineJson.json.parseToJsonElement(body ?: "").jsonObject["error"] as? JsonObject)?.let { e ->
+                val flat = JsonObject(e.filterKeys { it != "details" } + ((e["details"] as? JsonObject) ?: emptyMap()))
+                EngineJson.json.decodeFromJsonElement(EngineErrorDto.serializer(), flat)
+            }
         } catch (_: Exception) {
             null
         }
@@ -172,6 +235,12 @@ class ServerClient(
 
     companion object {
         private const val TAG = "VerstServer"
+
+        /** Engine answers about the trip itself: the phone engine would say the same, so they are not retried. */
+        val FINAL = setOf("UNREACHABLE", "TOO_SHORT")
+
+        /** Security review М-3: a line of the stream or a JSON body above this is a broken server, not a plan. */
+        const val MAX_BODY = 4L * 1024 * 1024
         private val JSON = "application/json; charset=utf-8".toMediaType()
 
         /** A plan streams up to `plan_timeout_s` (25 s) with a heartbeat every 5 s: a long read timeout, no retry. */

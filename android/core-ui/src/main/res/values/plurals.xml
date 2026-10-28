@@ -116,4 +116,11 @@
         <item quantity="many">городов</item>
         <item quantity="other">города</item>
     </plurals>
+    <!-- «Сократить до N дней»: genitive after «до» (designer В-3, traveller М1) -->
+    <plurals name="plural_day_until">
+        <item quantity="one">дня</item>
+        <item quantity="few">дней</item>
+        <item quantity="many">дней</item>
+        <item quantity="other">дня</item>
+    </plurals>
 </resources>

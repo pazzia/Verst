@@ -107,6 +107,10 @@ class NominatimClient(
                 AddressResult.Ok(v)
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
+            } catch (e: java.net.UnknownHostException) {
+                AddressResult.Offline // designer В-2: airplane mode before the system notices is offline, not «try again»
+            } catch (e: java.net.ConnectException) {
+                AddressResult.Offline
             } catch (e: Exception) {
                 AddressResult.Failed(e.toString())
             }
