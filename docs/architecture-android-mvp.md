@@ -638,12 +638,12 @@ The engine finishes in ~0.2–0.6 s, but the Drive screen follows the 5.4 §6 ti
 | --- | --- | --- | --- |
 | `build` | push to main and PRs (path filter), `workflow_dispatch` | toolchain probe → `:app:assembleDemo :app:assembleDemoAndroidTest` → `:core-model:test :core-ui:testDebugUnitTest :app:testDemoUnitTest` (screenshots inside) → `:app:lintDemo :core-ui:lintDebug` → APK budget → upload `apks` → diagnostics → upload `diag-build` | 7 / 18 min |
 | `e2e` | `build` green (dispatch input `run_e2e`) | KVM, cached AVD (API 34 google_apis x86_64), `tools/ci/run_e2e.sh` (install, `am start -W` cold start, `am instrument -e package app.verst.e2e`, pull `files/e2e`, logcat) → diagnostics → `diag-e2e` | 10 / 15 min |
-| `release` | main, push or dispatch `release`, and `e2e` green (or dispatch `force_release`) | pre-release **`mvp-mock-<run_number>`** with `verst-mvp-mock-<n>.apk` + `.sha256` + Russian notes; then recreate **`mvp-mock-latest`** with `verst-mock-latest.apk`; prune to the 10 newest numbered | 1 min |
+| `release` | main, push or dispatch `release`, and `e2e` green (or dispatch `force_release`) | pre-release **`verst-<run_number>`** «Верста 0.3.<n>» with `Verst-0.3.<n>.apk` + `.sha256` + Russian notes; then recreate **`verst-latest`** with `Verst-latest.apk`; prune to the 10 newest numbered (0.2 builds: `mvp-mock-*`, old key) | 1 min |
 | `ci-logs` | always | merge `diag-*` artifacts → `tools/ci/combine_run.py` → `tools/ci/publish_ci_logs.sh` | 1 min |
 
 - Caching: `gradle/actions/setup-gradle` (Gradle user home, dependencies, Robolectric android-all jars, Chaquopy's Maven artifacts; read-only off main) and `actions/cache` for the AVD.
 - Concurrency: one run per ref, and a newer push cancels the older run (saves billed minutes).
-- The CEO's stable link is `https://github.com/pazzia/Verst/releases/download/mvp-mock-latest/verst-mock-latest.apk`. The repo is private, so it needs the CEO logged in to GitHub in the phone browser.
+- The CEO's stable link is `https://github.com/pazzia/Verst/releases/download/verst-latest/Verst-latest.apk`. The repo is private, so it needs the CEO logged in to GitHub in the phone browser.
 
 ### 12.2 Diagnosability without job logs
 

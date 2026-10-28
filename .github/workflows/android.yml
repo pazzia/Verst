@@ -3,6 +3,8 @@
 #   * check-run annotations  GET /repos/pazzia/Verst/check-runs/{job_id}/annotations
 #   * branch ci-logs         git fetch origin +ci-logs:refs/remotes/origin/ci-logs --depth=1
 name: android
+# The run's title in the Actions list: the version of its APK (keep «0.3» equal to VERST_VERSION below)
+run-name: "Верста 0.3.${{ github.run_number }}${{ github.ref_name != 'main' && ' · тест ветки' || '' }}"
 
 on:
   push:
@@ -28,7 +30,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: "Publish the GitHub pre-release mvp-mock-<run number> (main only)"
+        description: "Publish the GitHub pre-release verst-<run number> (main only)"
         type: boolean
         default: true
       run_e2e:
@@ -49,6 +51,9 @@ concurrency:
 
 env:
   VERST_BUILD_NUMBER: ${{ github.run_number }}
+  # versionName of the APK and the name of its file and artifact: «Верста 0.3.162», Verst-0.3.162.apk.
+  # 0.3 from 28.10.2026: the new signing key (a fresh install line after the 0.2 demo builds).
+  VERST_VERSION: 0.3.${{ github.run_number }}
   VERST_GIT_SHA: ${{ github.sha }}
   # SRV-01: the CEO's test VM in the Netherlands (tests only, 152-FZ: the beta backend moves to Russia)
   VERST_SERVER_URL: https://212-108-82-26.sslip.io
@@ -247,6 +252,20 @@ jobs:
             echo "::error title=signing::the signing secrets are set, but the APK is signed with the debug key"; exit 1
           fi
 
+      - name: Upload Verst-${{ env.VERST_VERSION }}.apk
+        # the file to install, named by its version (the «apks» artifact below is for the emulator and release jobs)
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/demo/app-demo.apk "dist/Verst-$VERST_VERSION.apk"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        with:
+          name: Verst-${{ env.VERST_VERSION }}
+          path: dist/Verst-${{ env.VERST_VERSION }}.apk
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Upload APKs
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
         uses: actions/upload-artifact@v4
@@ -375,7 +394,7 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
-      TAG: mvp-mock-${{ github.run_number }}
+      TAG: verst-${{ github.run_number }}
       OUT: ${{ github.workspace }}/ci-out/release
     steps:
       - uses: actions/checkout@v4
@@ -394,17 +413,18 @@ jobs:
         run: |
           mkdir -p "$OUT" dist
           APK=$(find apks -name app-demo.apk | head -1)
-          cp "$APK" "dist/verst-$TAG.apk"
-          cp "$APK" "dist/verst-mock-latest.apk"
-          (cd dist && sha256sum "verst-$TAG.apk" > "verst-$TAG.apk.sha256")
-          SIZE=$(du -m "dist/verst-$TAG.apk" | cut -f1)
+          F="Verst-$VERST_VERSION.apk"
+          cp "$APK" "dist/$F"
+          cp "$APK" "dist/Verst-latest.apk"
+          (cd dist && sha256sum "$F" > "$F.sha256")
+          SIZE=$(du -m "dist/$F" | cut -f1)
           {
-            echo "Демо-сборка Версты №${{ github.run_number }} — всё работает на телефоне без интернета, на тестовых данных (города центральной России)."
+            echo "Верста $VERST_VERSION — демо-сборка: всё работает на телефоне без интернета, на тестовых данных (города центральной России)."
             echo
             echo "**Как поставить:** откройте этот файл на телефоне → «Установить». Если Android спросит — разрешите установку из этого источника. Старую демо-сборку удалять не нужно: новая ставится поверх, сохранённые поездки остаются."
             echo
-            echo "- Файл: \`verst-$TAG.apk\` (≈ ${SIZE} МБ), sha256 в \`verst-$TAG.apk.sha256\`"
-            echo "- Постоянная ссылка на последнюю сборку: https://github.com/${{ github.repository }}/releases/download/mvp-mock-latest/verst-mock-latest.apk"
+            echo "- Файл: \`$F\` (≈ ${SIZE} МБ), sha256 в \`$F.sha256\`"
+            echo "- Постоянная ссылка на последнюю сборку: https://github.com/${{ github.repository }}/releases/download/verst-latest/Verst-latest.apk"
             echo "- Проверка на эмуляторе: ${E2E_RESULT}"
             echo "- Коммит: ${{ github.sha }}"
             echo "- Данные: каталог мест — производная база данных OpenStreetMap (© участники OpenStreetMap), лицензия ODbL 1.0. Бесплатная копия каталога этой сборки, лицензии и описание сборки: https://github.com/${{ github.repository }}/tree/${{ github.sha }}/data/catalogue"
@@ -416,22 +436,23 @@ jobs:
       - name: Create pre-release ${{ env.TAG }}
         id: create
         run: |
-          gh release create "$TAG" "dist/verst-$TAG.apk" "dist/verst-$TAG.apk.sha256" \
+          gh release create "$TAG" "dist/Verst-$VERST_VERSION.apk" "dist/Verst-$VERST_VERSION.apk.sha256" \
             --repo "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
-            --title "Верста · демо-сборка ${{ github.run_number }}" --notes-file dist/notes.md 2>&1 | tee "$OUT/create.log"
+            --title "Верста $VERST_VERSION" --notes-file dist/notes.md 2>&1 | tee "$OUT/create.log"
 
-      - name: Move mvp-mock-latest
+      - name: Move verst-latest
         id: latest
         run: |
-          gh release delete mvp-mock-latest --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
-          gh release create mvp-mock-latest dist/verst-mock-latest.apk \
+          # mvp-mock-latest: the 0.2 builds' link, signed with the old key — removed so nobody installs it
+          for t in verst-latest mvp-mock-latest; do gh release delete "$t" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true; done
+          gh release create verst-latest dist/Verst-latest.apk \
             --repo "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
-            --title "Верста · последняя демо-сборка (№${{ github.run_number }})" --notes-file dist/notes.md 2>&1 | tee "$OUT/latest.log"
+            --title "Верста $VERST_VERSION · последняя сборка" --notes-file dist/notes.md 2>&1 | tee "$OUT/latest.log"
 
       - name: Keep the newest 10 numbered pre-releases
         run: |
           gh release list --repo "${{ github.repository }}" --limit 200 --json tagName,createdAt \
-            --jq '[.[] | select(.tagName | test("^mvp-mock-[0-9]+$"))] | sort_by(.createdAt) | reverse | .[10:] | .[].tagName' \
+            --jq '[.[] | select(.tagName | test("^(verst|mvp-mock)-[0-9]+$"))] | sort_by(.createdAt) | reverse | .[10:] | .[].tagName' \
           | while read -r t; do gh release delete "$t" --repo "${{ github.repository }}" --yes --cleanup-tag; done
 
       - name: Record release

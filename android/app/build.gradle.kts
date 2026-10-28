@@ -33,7 +33,8 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = buildNumber
-        versionName = "0.2.$buildNumber-mock"
+        // «0.3.162» from CI (VERST_VERSION, android.yml); a local build says so
+        versionName = System.getenv("VERST_VERSION") ?: "0.3.$buildNumber-local"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") } // M§3.3; Compose ships libandroidx.graphics.path.so
         buildConfigField("int", "BUILD_NUMBER", "$buildNumber")
