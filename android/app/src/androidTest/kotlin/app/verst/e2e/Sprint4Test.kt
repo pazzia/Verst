@@ -187,6 +187,8 @@ class Sprint4Test {
             while (flow.back()) Unit
             Net.breaker.reset()
             (flow.address as NominatimClient).baseUrl = base
+            // these journeys test the Nominatim replies; the phone's geocoder (CEO 29.10 fallback) would answer instead
+            flow.addressFallback = null
         }
         waitTag("windshield.navi")
         compose.onNodeWithTag("windshield.navi").performClick()
