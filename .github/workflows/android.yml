@@ -218,6 +218,18 @@ jobs:
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
         run: python3 tools/ci/diagnose.py --out "$DIAG" apk --apk android/app/build/outputs/apk/demo/app-demo.apk --warn-mb 45 --fail-mb 60
 
+      - name: APK signer
+        # Security review 28.10 (К-1): which key signed the APK. Its SHA-256 matches
+        # `keytool -list -v -keystore verst-demo.jks` on the key owner's machine; the debug key with the secret set fails.
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          SIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$SIGNER" verify --print-certs android/app/build/outputs/apk/demo/app-demo.apk | tee "$DIAG/apk-signer.txt"
+          { echo "### APK signer"; echo '```'; cat "$DIAG/apk-signer.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "${VERST_SIGNING_KEYSTORE:-}" ] && grep -q 'CN=Android Debug' "$DIAG/apk-signer.txt"; then
+            echo "::error title=signing::the signing secrets are set, but the APK is signed with the debug key"; exit 1
+          fi
+
       - name: Upload APKs
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
         uses: actions/upload-artifact@v4
