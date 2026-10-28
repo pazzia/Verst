@@ -24,6 +24,7 @@ import app.verst.nav.HandoffTarget
 import app.verst.nav.HandoffApp
 import app.verst.nav.Locator
 import kotlin.coroutines.resume
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -63,7 +64,7 @@ class AndroidLocator(private val context: Context) : Locator {
         if (known != null && System.currentTimeMillis() - known.time < FRESH_MS) return known.toPoint()
         // all providers at once (they used to take turns, 10 s each: indoors GPS alone ate the time), the first wins
         val fix = withTimeoutOrNull(FIX_TIMEOUT_MS) {
-            kotlinx.coroutines.channelFlow {
+            channelFlow<Location> {
                 for (p in providers) launch { single(m, p)?.let { send(it) } }
             }.firstOrNull()
         }
