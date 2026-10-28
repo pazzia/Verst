@@ -146,6 +146,8 @@ jobs:
           umask 077
           K="$RUNNER_TEMP/verst-demo.jks"
           printf '%s' "$KEYSTORE_B64" | tr -d ' \r\n' | base64 -d > "$K"
+          # the file's own hash (not secret): compare with `sha256sum verst-demo.jks` where the key was made
+          echo "keystore file: $(stat -c %s "$K") bytes, sha256 $(sha256sum "$K" | cut -d' ' -f1)"
           # name the secret that is wrong instead of Gradle's «Failed to read key … null»
           export STOREPASS="${STOREPASS%$'\n'}" KEYPASS="${KEYPASS%$'\n'}" ALIAS="${ALIAS%$'\n'}"
           if ! keytool -list -keystore "$K" -storetype PKCS12 -storepass:env STOREPASS >/dev/null 2>&1; then
