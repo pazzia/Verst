@@ -6,6 +6,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -40,11 +41,22 @@ class NominatimClientTest {
         val url = rq.requestUrl!!
         assertEquals("ru", url.queryParameter("countrycodes"))
         assertEquals("ru", url.queryParameter("accept-language"))
-        assertEquals("5", url.queryParameter("limit"))
+        assertEquals("10", url.queryParameter("limit"))
         assertEquals("Ярославль Советская 1", url.queryParameter("q"))
+        assertNull("no place, no box", url.queryParameter("viewbox"))
         // the 24 h cache: the same query sends nothing
         client.search("Ярославль Советская 1")
         assertEquals(1, server.requestCount)
+    }
+
+    /** CEO 29.10: «Ленина 5» near Фрязино ranks Фрязино's street first (a preferred box, not a limit). */
+    @Test
+    fun theUsersPlaceBiasesTheSearch() = runBlocking {
+        server.enqueue(MockResponse().setBody(body))
+        client.search("Ленина 5", app.verst.core.model.GeoPoint("Фрязино", 55.96, 38.05))
+        val url = server.takeRequest().requestUrl!!
+        assertEquals("37.6500,56.3600,38.4500,55.5600", url.queryParameter("viewbox"))
+        assertEquals("0", url.queryParameter("bounded"))
     }
 
     @Test
