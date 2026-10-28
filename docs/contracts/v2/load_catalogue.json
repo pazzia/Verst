@@ -6,12 +6,12 @@
  "response": {
   "ok": true,
   "result": {
-   "version": "wd-20261025-r7.6",
+   "version": "wd-20261028-osm1",
    "builtAt": "2026-10-28",
    "towns": 1114,
    "pois": 10921,
-   "bars": 4249,
-   "food": 0,
+   "bars": 5625,
+   "food": 29906,
    "world": "russia_v1",
    "places": 16692,
    "ms": 0

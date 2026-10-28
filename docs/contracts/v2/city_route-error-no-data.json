@@ -21,7 +21,7 @@
    "code": "NOT_ENOUGH_POIS",
    "message": "not enough places for preset 'beer'",
    "field": "preset",
-   "reason": "no_data",
+   "reason": "few_places",
    "pointIndex": null,
    "roadKm": null,
    "detail": null,
@@ -38,10 +38,8 @@
     }
    ],
    "requestKey": "c07d9eed228e6cbf",
-   "noData": [
-    "beer"
-   ],
-   "messageRu": "У нас пока нет данных о пивных барах в этом городе — это пробел нашей базы, а не города."
+   "noData": [],
+   "messageRu": null
   },
   "ms": 0
  }

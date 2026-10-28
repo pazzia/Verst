@@ -532,6 +532,19 @@ def bar_cap(population: int) -> int:
     return max(BAR_CAP_MIN, min(BAR_CAP_MAX, population // BAR_CAP_PEOPLE))
 
 
+def _take_by_kind(ranked: list[dict[str, Any]], cap: int) -> list[dict[str, Any]]:
+    """Up to [cap] places taking the kinds in turn (restaurant, café, fast food, food court), each in its
+    own rank order: a capped big city keeps its cafés too (CEO 29.10: the first build took 600 restaurants
+    and no café in Москва and СПб)."""
+    queues = {k: [f for f in ranked if f["_kind"] == k] for k in sorted(FOOD_ORDER, key=FOOD_ORDER.__getitem__)}
+    picked: list[dict[str, Any]] = []
+    while len(picked) < cap and any(queues.values()):
+        for q in queues.values():
+            if q and len(picked) < cap:
+                picked.append(q.pop(0))
+    return picked
+
+
 def food_cap(population: int) -> int:
     return max(FOOD_CAP_MIN, min(FOOD_CAP_MAX, population // FOOD_CAP_PEOPLE))
 
@@ -573,17 +586,16 @@ def food_rows(
         grouped.setdefault(f["townQid"], []).append(f)
     rows = []
     for qid in sorted(grouped, key=lambda q: town_pos[q]):
-        lst = sorted(
+        ranked = sorted(
             grouped[qid],
             key=lambda f: (
                 f["_chain"] and f["_kind"] == "fast_food",
                 f["_chain"],
                 f["_hours"] is None,
-                FOOD_ORDER[f["_kind"]],
                 f["osm"],
             ),
         )
-        for f in lst[: food_cap(int(towns[town_pos[qid]].get("population") or 0))]:
+        for f in _take_by_kind(ranked, food_cap(int(towns[town_pos[qid]].get("population") or 0))):
             rows.append(
                 {
                     "id": f["osm"],

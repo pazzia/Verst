@@ -3,20 +3,20 @@
   "function": "poi_details",
   "args": {
    "world": "russia_v1",
-   "place_id": "n4173420817"
+   "place_id": "n9669873617"
   }
  },
  "response": {
   "ok": true,
   "result": {
-   "id": "n4173420817",
+   "id": "n9669873617",
    "kind": "bar",
    "poiKind": "bar",
-   "nameRu": "Rocks",
+   "nameRu": "ШКАФ",
    "descriptionRu": null,
    "townName": "Ярославль",
-   "lat": 57.62637,
-   "lon": 39.88885,
+   "lat": 57.62552,
+   "lon": 39.88296,
    "image": null,
    "hours": {
     "textRu": "Часы работы уточняйте",

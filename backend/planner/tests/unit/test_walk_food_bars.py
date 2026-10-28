@@ -98,25 +98,49 @@ class WalkFoodAndBarsTest(unittest.TestCase):
         self.assertLessEqual(len(kinds), 3)  # FOOD_STOPS_MAX
         self.assertFalse(r["result"]["interestsWidened"])
 
+    def _bare_town(self) -> dict[str, Any]:
+        """A catalogue town with no food, рюмочные or beer rows at all (the CEO 2026-10-29 build has them for
+        Фрязино): there the walk must say «нет данных», never «мест мало»."""
+        cat = mobile._CATALOGUE[0]
+        drinks = ("ryumochnaya", "pub", "craft")
+        have = {f.town for f in cat.food} | {b.town for b in cat.bars if b.kind in drinks}
+        t = next(t for t in sorted(cat.towns, key=lambda t: t.id) if t.id not in have)
+        return {"lat": t.point.lat, "lon": t.point.lon, "label": t.name}
+
     def test_no_food_data_is_said_as_such(self) -> None:
-        """Фрязино has no food rows in this catalogue: «нет данных», not «мест мало»."""
+        bare = self._bare_town()
+        r = city_route({"start": bare, "preset": "custom", "interests": ["food"]})
+        # a town with nothing else to walk to: the error says it; otherwise the walk's note does
+        said = r["error"]["messageRu"] if not r["ok"] else " ".join(r["result"]["crewNotesRu"])
+        if not r["ok"]:
+            self.assertEqual((r["error"]["reason"], r["error"]["noData"]), ("no_data", ["food"]))
+        self.assertIn("нет данных о ресторанах и кафе", said)
+        self.assertNotIn("мест мало", said)
+        both = city_route({"start": bare, "preset": "custom", "interests": ["food", "history"]})
+        if both["ok"]:
+            self.assertIn("нет данных о ресторанах и кафе", " ".join(both["result"]["crewNotesRu"]))
+
+    def test_fryazino_food_walk_uses_its_real_places(self) -> None:
+        """CEO 2026-10-29: «Фрязино, Еда» built a walk without one restaurant and blamed the town."""
+        cat = mobile._CATALOGUE[0]
+        fry = next(t.id for t in cat.towns if t.name == "Фрязино")
+        if not any(f.town == fry for f in cat.food):
+            self.skipTest("catalogue without OSM food places")
         r = city_route({"start": FRYAZINO, "preset": "custom", "interests": ["food"]})
         self.assertTrue(r["ok"], r)
-        notes = " ".join(r["result"]["crewNotesRu"])
-        self.assertIn("нет данных о ресторанах и кафе", notes)
-        self.assertNotIn("мест мало", notes)
-        both = city_route({"start": FRYAZINO, "preset": "custom", "interests": ["food", "history"]})
-        self.assertIn("нет данных о ресторанах и кафе", " ".join(both["result"]["crewNotesRu"]))
+        stops = r["result"]["stops"]
+        seen = [(s["kind"], s["nameRu"]) for s in stops]
+        self.assertTrue(stops and {s["kind"] for s in stops} <= EAT, seen)
+        self.assertFalse(any("нет данных" in n or "мест мало" in n for n in r["result"]["crewNotesRu"]))
 
     def test_no_bar_data_error_and_presets(self) -> None:
-        r = city_route({"start": FRYAZINO, "preset": "beer", "adultConfirmed": True})
+        bare = self._bare_town()
+        r = city_route({"start": bare, "preset": "beer", "adultConfirmed": True})
         self.assertFalse(r["ok"])
         e = r["error"]
         self.assertEqual((e["code"], e["reason"], e["noData"]), ("NOT_ENOUGH_POIS", "no_data", ["beer"]))
         self.assertIn("нет данных о пивных барах", e["messageRu"])
-        presets = {
-            p["preset"]: p for p in call(mobile.city_presets(R, FRYAZINO["lat"], FRYAZINO["lon"]))["presets"]
-        }
+        presets = {p["preset"]: p for p in call(mobile.city_presets(R, bare["lat"], bare["lon"]))["presets"]}
         self.assertTrue(presets["ryumochnye"]["noData"])
         self.assertIn("нет данных о рюмочных", presets["ryumochnye"]["noDataRu"])
         self.assertFalse(presets["overview"]["noData"])

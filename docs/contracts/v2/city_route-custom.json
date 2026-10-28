@@ -35,18 +35,21 @@
    "startAt": "2026-10-23T09:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T12:59",
+   "endAt": "2026-10-23T12:16",
    "unlimited": false,
    "tz": "Europe/Moscow",
-   "walkKm": 4.8,
-   "walkMin": 83,
-   "durationMin": 240,
+   "walkKm": 4.5,
+   "walkMin": 77,
+   "durationMin": 196,
    "requestedDurationMin": 240,
-   "crewNotesRu": [
-    "У нас пока нет данных о ресторанах и кафе в этом городе — это пробел нашей базы, а не города."
-   ],
+   "crewNotesRu": [],
    "interestsWidened": false,
-   "shorter": null,
+   "shorter": {
+    "reason": "places",
+    "requestedMin": 240,
+    "actualMin": 196,
+    "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — больше открытых мест рядом нет"
+   },
    "returnToStart": true,
    "start": {
     "lat": 57.6261,
@@ -61,44 +64,47 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "Q19908952",
-     "kind": "park",
-     "nameRu": "Демидовский сад",
-     "lat": 57.62504,
-     "lon": 39.89724,
-     "arriveAt": "2026-10-23T09:17",
-     "departAt": "2026-10-23T10:01",
-     "dwellMin": 44,
-     "walkKmFromPrev": 1.0,
-     "walkMinFromPrev": 17,
+     "poiId": "n12059168165",
+     "kind": "cafe",
+     "nameRu": "Surf Coffee",
+     "lat": 57.62596,
+     "lon": 39.88981,
+     "arriveAt": "2026-10-23T09:07",
+     "departAt": "2026-10-23T09:57",
+     "dwellMin": 50,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 7,
      "costRub": 0,
-     "hoursVerified": false,
+     "hoursVerified": true,
      "hours": {
-      "todayRu": null,
-      "openNow": null,
-      "source": "default"
+      "todayRu": "08:00–23:00",
+      "openNow": true,
+      "source": "osm"
      },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
+     "noteRu": null,
+     "hasPhoto": false,
      "tappable": true,
-     "unknownFacts": [],
-     "poiKind": "park",
-     "poiKindRu": "Парк",
-     "placeSource": "wikidata",
-     "placeAttributionRu": null
+     "unknownFacts": [
+      "price"
+     ],
+     "poiKind": "cafe",
+     "poiKindRu": "Кафе",
+     "cuisine": "coffee_shop",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
      "id": "w02",
-     "poiId": "pl_yar_embankment",
+     "poiId": "pl_yar_strelka",
      "kind": "viewpoint",
-     "nameRu": "Волжская набережная",
-     "lat": 57.627909,
-     "lon": 39.899599,
-     "arriveAt": "2026-10-23T10:08",
-     "departAt": "2026-10-23T10:27",
+     "nameRu": "Стрелка и Волжская набережная",
+     "lat": 57.633335,
+     "lon": 39.909665,
+     "arriveAt": "2026-10-23T10:29",
+     "departAt": "2026-10-23T10:48",
      "dwellMin": 19,
-     "walkKmFromPrev": 0.5,
-     "walkMinFromPrev": 8,
+     "walkKmFromPrev": 1.9,
+     "walkMinFromPrev": 32,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -117,93 +123,42 @@
     },
     {
      "id": "w03",
-     "poiId": "pl_yar_strelka",
-     "kind": "viewpoint",
-     "nameRu": "Стрелка и Волжская набережная",
-     "lat": 57.633335,
-     "lon": 39.909665,
-     "arriveAt": "2026-10-23T10:46",
-     "departAt": "2026-10-23T11:05",
-     "dwellMin": 19,
-     "walkKmFromPrev": 1.1,
-     "walkMinFromPrev": 19,
+     "poiId": "n5618684621",
+     "kind": "cafe",
+     "nameRu": "Сладости & радости",
+     "lat": 57.62835,
+     "lon": 39.89314,
+     "arriveAt": "2026-10-23T11:13",
+     "departAt": "2026-10-23T12:03",
+     "dwellMin": 50,
+     "walkKmFromPrev": 1.5,
+     "walkMinFromPrev": 25,
      "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": null,
-      "openNow": null,
-      "source": "default"
-     },
-     "noteRu": null,
-     "hasPhoto": false,
-     "tappable": true,
-     "unknownFacts": [],
-     "poiKind": "embankment",
-     "poiKindRu": "Набережная",
-     "placeSource": "curated",
-     "placeAttributionRu": null
-    },
-    {
-     "id": "w04",
-     "poiId": null,
-     "kind": "meal",
-     "nameRu": "Обед — кафе рядом",
-     "lat": 57.633335,
-     "lon": 39.909665,
-     "arriveAt": "2026-10-23T11:05",
-     "departAt": "2026-10-23T12:01",
-     "dwellMin": 56,
-     "walkKmFromPrev": 0.0,
-     "walkMinFromPrev": 0,
-     "costRub": 600,
      "hoursVerified": true,
-     "hours": null,
-     "noteRu": null,
-     "hasPhoto": false,
-     "tappable": false,
-     "unknownFacts": [],
-     "placeSource": "wikidata",
-     "placeAttributionRu": null
-    },
-    {
-     "id": "w05",
-     "poiId": "pl_yar_tower",
-     "kind": "viewpoint",
-     "nameRu": "Власьевская башня",
-     "lat": 57.628813,
-     "lon": 39.887855,
-     "arriveAt": "2026-10-23T12:32",
-     "departAt": "2026-10-23T12:51",
-     "dwellMin": 19,
-     "walkKmFromPrev": 1.8,
-     "walkMinFromPrev": 31,
-     "costRub": 0,
-     "hoursVerified": false,
      "hours": {
-      "todayRu": null,
-      "openNow": null,
-      "source": "default"
+      "todayRu": "08:00–22:00",
+      "openNow": true,
+      "source": "osm"
      },
      "noteRu": null,
-     "hasPhoto": true,
+     "hasPhoto": false,
      "tappable": true,
-     "unknownFacts": [],
-     "poiKind": "viewpoint",
-     "poiKindRu": "Вид",
-     "placeSource": "curated",
-     "placeAttributionRu": null
+     "unknownFacts": [
+      "price"
+     ],
+     "poiKind": "cafe",
+     "poiKindRu": "Кафе",
+     "cuisine": "cake;coffee_shop",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     }
    ],
    "cost": {
-    "totalRub": 600,
+    "totalRub": 0,
     "lines": [
      {
       "key": "tickets",
       "rub": 0
-     },
-     {
-      "key": "food",
-      "rub": 600
      }
     ],
     "budgetRub": null
@@ -212,6 +167,14 @@
     {
      "code": "HOURS_UNVERIFIED",
      "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    },
+    {
+     "code": "PRICE_UNKNOWN",
+     "messageRu": "Цены в кафе и ресторанах в открытых данных не указаны — в сумму они не входят."
+    },
+    {
+     "code": "SHORTER_THAN_ASKED",
+     "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — больше открытых мест рядом нет"
     }
    ],
    "responsibleNoteRu": null,
@@ -221,20 +184,16 @@
      39.8845
     ],
     [
-     57.62504,
-     39.89724
-    ],
-    [
-     57.627909,
-     39.899599
+     57.62596,
+     39.88981
     ],
     [
      57.633335,
      39.909665
     ],
     [
-     57.628813,
-     39.887855
+     57.62835,
+     39.89314
     ],
     [
      57.6261,

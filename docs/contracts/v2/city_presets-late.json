@@ -65,7 +65,7 @@
     {
      "preset": "ryumochnye",
      "available": false,
-     "count": 1,
+     "count": 2,
      "startAt": "2026-10-24T18:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
@@ -78,7 +78,7 @@
     {
      "preset": "beer",
      "available": true,
-     "count": 5,
+     "count": 14,
      "startAt": "2026-10-24T18:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
