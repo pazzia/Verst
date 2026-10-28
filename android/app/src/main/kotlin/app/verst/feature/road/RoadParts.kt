@@ -1,11 +1,5 @@
 package app.verst.feature.road
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,7 +53,6 @@ import app.verst.core.model.dto.TripDto
 import app.verst.core.ui.R
 import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.GlyphIcon
-import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.SecondaryButton
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
@@ -384,19 +377,14 @@ internal fun Legends(openData: Boolean, posts: Boolean, onAbout: () -> Unit, abo
 
 /**
  * components §26.3 `CarMarker`: an 18 × 32 top-down car, front at the bottom (it drives down the list), in the car
- * lane x 13–31, looping over the visible road at `motion.carMarker` speed; parked at the top with reduced motion.
+ * lane x 13–31. CEO 29.10: it does not drive by itself — it stands still and moves only with the scroll, at
+ * [progress] (0 = the list top, 1 = its end) of the visible road, so it is where the reader is in the trip.
  */
 @Composable
-internal fun BoxScope.CarMarker(top: Float, bottom: Float) {
+internal fun BoxScope.CarMarker(top: Float, bottom: Float, progress: Float) {
     val len = bottom - top - DesignTokens.size.carMarkerH.value
     if (len <= 0f) return
-    val reduced = LocalReducedMotion.current
-    val y = if (reduced) 0f else {
-        val ms = (len / DesignTokens.motion.carMarker.speedDpPerS * 1000).toInt().coerceAtLeast(1000)
-        val t = rememberInfiniteTransition(label = "car")
-        val v by t.animateFloat(0f, 1f, infiniteRepeatable(tween(ms, easing = LinearEasing), RepeatMode.Restart), label = "carY")
-        v * len
-    }
+    val y = progress.coerceIn(0f, 1f) * len
     Canvas(
         Modifier.offset(x = 13.dp, y = (top + y).dp).size(DesignTokens.size.carMarkerW, DesignTokens.size.carMarkerH)
             .testTag("road.car").clearAndSetSemantics {},

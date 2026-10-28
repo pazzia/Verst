@@ -180,6 +180,9 @@ class VerstFlow(
         internal set
     /** The phone's position; set by the app (LocationManager), null in tests without one. */
     var locator: Locator? = null
+
+    /** CEO 29.10: the phone's geocoder, asked when Nominatim fails or finds nothing (search and «where am I»). */
+    var addressFallback: app.verst.data.net.AddressSearch? = null
     /** Shows the system permission dialog (coarse, or fine for «Точнее»); the activity answers through [onLocationPermission]. */
     var askLocationPermission: ((precise: Boolean) -> Unit)? = null
     /** Opens the app's system settings (blocked permission) / the location settings (location off). */

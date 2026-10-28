@@ -320,12 +320,12 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                             Spacer(Modifier.height(24.dp))
                         }
                     }
-                    // components §26.3: the car loops over the visible part of the road (z above the km posts)
+                    // components §26.3: the car rides the visible part of the road with the scroll (z above the km posts)
                     val (secY, secH) = section
                     if (secH > 0 && viewportH > 0) {
                         val top = with(density) { (secY - scroll.value).coerceAtLeast(0).toDp().value }
                         val bottom = with(density) { (secY + secH - scroll.value).coerceAtMost(viewportH).toDp().value }
-                        CarMarker(top, bottom)
+                        CarMarker(top, bottom, if (scroll.maxValue > 0) scroll.value.toFloat() / scroll.maxValue else 0f)
                     }
                     Box(
                         Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(24.dp)

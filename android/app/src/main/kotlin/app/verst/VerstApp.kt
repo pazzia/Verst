@@ -39,7 +39,10 @@ class VerstApp : Application(), coil.ImageLoaderFactory {
             gateway,
             CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
             tripStore,
-        ) { engine.restart() }.also { it.locator = AndroidLocator(this) }
+        ) { engine.restart() }.also {
+            it.locator = AndroidLocator(this)
+            it.addressFallback = app.verst.platform.AndroidGeocoder(this)
+        }
     }
 
     /** DEV-300: Coil with the app's OkHttp (User-Agent) and the 64 MB `cacheDir/images` disk cache. */

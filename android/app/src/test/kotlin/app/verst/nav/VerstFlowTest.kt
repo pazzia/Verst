@@ -586,8 +586,10 @@ class VerstFlowTest {
     /** DEV-302 fake: no network in unit tests. */
     private class FakeAddress : app.verst.data.net.AddressSearch {
         var searches = 0
-        override suspend fun search(query: String): app.verst.data.net.AddressResult<List<SuggestionDto>> {
+        var near: app.verst.core.model.GeoPoint? = null
+        override suspend fun search(query: String, near: app.verst.core.model.GeoPoint?): app.verst.data.net.AddressResult<List<SuggestionDto>> {
             searches++
+            this.near = near
             return app.verst.data.net.AddressResult.Ok(listOf(SuggestionDto("address", "ул. Советская, 1", "Ярославль", 57.6266, 39.8938)))
         }
         override suspend fun reverse(lat: Double, lon: Double) = app.verst.data.net.AddressResult.Ok<String?>("ул. Советская, 1")
@@ -609,6 +611,13 @@ class VerstFlowTest {
         assertEquals(1, address.searches)
         assertEquals(AddressState.Done, flow.addressState)
         assertEquals("ул. Советская, 1", flow.addressResults.single().name)
+        assertEquals("the user's place biases the search", flow.origin, address.near)
+        // CEO 29.10: a bare street is searchable too
+        assertTrue(flow.looksLikeAddress("улица Мира"))
+        assertTrue(flow.looksLikeAddress("проспект Мира"))
+        assertFalse(flow.looksLikeAddress("Ленина"))
+        assertTrue(flow.addressOffered("Ленина"))
+        assertFalse(flow.addressOffered("Ле"))
         flow.pick(flow.addressResults.single())
         assertEquals("ул. Советская, 1", flow.destination!!.name)
         flow.setOffline(true)

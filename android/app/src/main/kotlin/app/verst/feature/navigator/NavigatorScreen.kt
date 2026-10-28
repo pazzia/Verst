@@ -97,6 +97,8 @@ data class NavigatorUi(
     /** 5.12 §2: the address search under the field. */
     val online: Boolean = true,
     val addressQuery: Boolean = false,
+    /** The address row above the town / place rows (an address-looking query, or nothing else matched). */
+    val addressFirst: Boolean = true,
     val addressState: AddressState = AddressState.Idle,
     val addressResults: List<SuggestionDto> = emptyList(),
     /** 5.12 §5: КУДА autofocuses (false after a GPS fix set ОТКУДА). */
@@ -275,7 +277,7 @@ private fun Panel(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (ui.editingFrom && typing) MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
-            if (!picked && ui.addressQuery) AddressBlock(ui, q, location::findAddress, onPick)
+            if (!picked && ui.addressQuery && ui.addressFirst) AddressBlock(ui, q, location::findAddress, onPick)
             when {
                 picked -> Unit
                 q.length < 2 -> if (ui.popular.isNotEmpty()) {
@@ -291,6 +293,8 @@ private fun Panel(
                 )
                 else -> Rows(ui.suggestions, ui.rowKm, onPick)
             }
+            // a street that also matched towns («Мира» → «Мирный»): the address row after them
+            if (!picked && ui.addressQuery && !ui.addressFirst) AddressBlock(ui, q, location::findAddress, onPick)
         }
     }
 }

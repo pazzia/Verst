@@ -24,6 +24,8 @@ import app.verst.nav.HandoffTarget
 import app.verst.nav.HandoffApp
 import app.verst.nav.Locator
 import kotlin.coroutines.resume
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -56,11 +58,16 @@ class AndroidLocator(private val context: Context) : Locator {
             add(LocationManager.GPS_PROVIDER)
             add(LocationManager.NETWORK_PROVIDER)
         }.filter { it in all && runCatching { m.isProviderEnabled(it) }.getOrDefault(false) }
-        for (p in providers) {
-            val fix = withTimeoutOrNull(FIX_TIMEOUT_MS) { single(m, p) }
-            if (fix != null) return fix.toPoint()
+        val known = providers.mapNotNull { runCatching { m.getLastKnownLocation(it) }.getOrNull() }.maxByOrNull { it.time }
+        // CEO 29.10: a fix from the last two minutes is where the phone is — no wait
+        if (known != null && System.currentTimeMillis() - known.time < FRESH_MS) return known.toPoint()
+        // all providers at once (they used to take turns, 10 s each: indoors GPS alone ate the time), the first wins
+        val fix = withTimeoutOrNull(FIX_TIMEOUT_MS) {
+            kotlinx.coroutines.channelFlow {
+                for (p in providers) launch { single(m, p)?.let { send(it) } }
+            }.firstOrNull()
         }
-        return providers.mapNotNull { runCatching { m.getLastKnownLocation(it) }.getOrNull() }.maxByOrNull { it.time }?.toPoint()
+        return (fix ?: known)?.toPoint()
     }
 
     @SuppressLint("MissingPermission")
@@ -88,7 +95,8 @@ class AndroidLocator(private val context: Context) : Locator {
     private fun Location.toPoint() = GeoPoint("GPS", latitude, longitude)
 
     companion object {
-        const val FIX_TIMEOUT_MS = 10_000L
+        const val FIX_TIMEOUT_MS = 20_000L
+        const val FRESH_MS = 2 * 60_000L
     }
 }
 
@@ -164,5 +172,90 @@ fun openLocationSettings(activity: Activity) {
 fun openAppSettings(activity: Activity) {
     runCatching {
         activity.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", activity.packageName, null)))
+    }
+}
+
+/**
+ * CEO 29.10: the phone's own geocoder ([android.location.Geocoder]: Google's on most phones, the vendor's
+ * elsewhere, absent on some) as the fallback of the address search and of «where am I» when Nominatim fails or
+ * does not know the street / house. Not a primary source: its data are not open, so it only fills a gap.
+ */
+class AndroidGeocoder(private val context: Context) : app.verst.data.net.AddressSearch {
+    private fun geocoder(): android.location.Geocoder? =
+        if (android.location.Geocoder.isPresent()) android.location.Geocoder(context, java.util.Locale("ru", "RU")) else null
+
+    override suspend fun search(query: String, near: GeoPoint?): app.verst.data.net.AddressResult<List<app.verst.core.model.dto.SuggestionDto>> {
+        val g = geocoder() ?: return app.verst.data.net.AddressResult.Failed("no geocoder")
+        return try {
+            val d = app.verst.data.net.NominatimClient.NEAR_DEG
+            // the user's area first; then anywhere (the box is a filter for the platform geocoder)
+            val found = near?.let { byName(g, query, doubleArrayOf(it.lat - d, it.lon - d, it.lat + d, it.lon + d)) }.orEmpty()
+                .ifEmpty { byName(g, query, null) }
+            app.verst.data.net.AddressResult.Ok(
+                found.mapNotNull { a -> label(a)?.let { app.verst.core.model.dto.SuggestionDto("address", it, town(a) ?: "", a.latitude, a.longitude) } }
+                    .distinctBy { it.name + it.subtitle }.take(8),
+            )
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            app.verst.data.net.AddressResult.Failed(e.toString())
+        }
+    }
+
+    override suspend fun reverse(lat: Double, lon: Double): app.verst.data.net.AddressResult<String?> {
+        val g = geocoder() ?: return app.verst.data.net.AddressResult.Failed("no geocoder")
+        return try {
+            val a = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                suspendCancellableCoroutine { cont ->
+                    g.getFromLocation(lat, lon, 1, object : android.location.Geocoder.GeocodeListener {
+                        override fun onGeocode(addresses: MutableList<android.location.Address>) = cont.resume(addresses.firstOrNull())
+                        override fun onError(errorMessage: String?) = cont.resume(null)
+                    })
+                }
+            } else {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    @Suppress("DEPRECATION")
+                    g.getFromLocation(lat, lon, 1)?.firstOrNull()
+                }
+            }
+            app.verst.data.net.AddressResult.Ok(a?.let { label(it) })
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            app.verst.data.net.AddressResult.Failed(e.toString())
+        }
+    }
+
+    /** [box]: south, west, north, east. */
+    private suspend fun byName(g: android.location.Geocoder, q: String, box: DoubleArray?): List<android.location.Address> =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            suspendCancellableCoroutine { cont ->
+                val l = object : android.location.Geocoder.GeocodeListener {
+                    override fun onGeocode(addresses: MutableList<android.location.Address>) = cont.resume(addresses.toList())
+                    override fun onError(errorMessage: String?) = cont.resume(emptyList())
+                }
+                if (box == null) g.getFromLocationName(q, MAX, l) else g.getFromLocationName(q, MAX, box[0], box[1], box[2], box[3], l)
+            }
+        } else {
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                @Suppress("DEPRECATION")
+                (if (box == null) g.getFromLocationName(q, MAX) else g.getFromLocationName(q, MAX, box[0], box[1], box[2], box[3])).orEmpty()
+            }
+        }
+
+    private fun label(a: android.location.Address): String? {
+        val road = a.thoroughfare
+        val house = a.subThoroughfare
+        return when {
+            road != null && house != null -> "$road, $house"
+            road != null -> road
+            else -> a.featureName?.takeIf { it != a.locality }
+        }
+    }
+
+    private fun town(a: android.location.Address): String? = a.locality ?: a.subAdminArea ?: a.adminArea
+
+    private companion object {
+        const val MAX = 10
     }
 }

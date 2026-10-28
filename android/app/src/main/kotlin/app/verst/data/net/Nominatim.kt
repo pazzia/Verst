@@ -24,7 +24,8 @@ sealed interface AddressResult<out T> {
 
 /** The address search the app uses (Nominatim in the app; a fake in unit tests). */
 interface AddressSearch {
-    suspend fun search(query: String): AddressResult<List<SuggestionDto>>
+    /** [near]: where the user is (the GPS fix or the chosen town) — its streets rank first (CEO 29.10). */
+    suspend fun search(query: String, near: app.verst.core.model.GeoPoint? = null): AddressResult<List<SuggestionDto>>
     suspend fun reverse(lat: Double, lon: Double): AddressResult<String?>
 }
 
@@ -49,7 +50,7 @@ class NominatimClient(
     @Volatile var requests = 0
         private set
 
-    override suspend fun search(query: String): AddressResult<List<SuggestionDto>> {
+    override suspend fun search(query: String, near: app.verst.core.model.GeoPoint?): AddressResult<List<SuggestionDto>> {
         val q = query.trim()
         if (q.isEmpty()) return AddressResult.Ok(emptyList())
         val url = baseUrl.trimEnd('/').plus("/search").toHttpUrl().newBuilder()
@@ -58,7 +59,15 @@ class NominatimClient(
             .addQueryParameter("addressdetails", "1")
             .addQueryParameter("countrycodes", "ru")
             .addQueryParameter("accept-language", "ru")
-            .addQueryParameter("limit", "5")
+            .addQueryParameter("limit", "10")
+            .apply {
+                // «Ленина 5» means the user's own town first: a ±0.4° box around them, preferred but not a limit
+                if (near != null) {
+                    val f = { v: Double -> "%.4f".format(java.util.Locale.US, v) }
+                    addQueryParameter("viewbox", "${f(near.lon - NEAR_DEG)},${f(near.lat + NEAR_DEG)},${f(near.lon + NEAR_DEG)},${f(near.lat - NEAR_DEG)}")
+                    addQueryParameter("bounded", "0")
+                }
+            }
             .build().toString()
         return get(url) { body -> parseSearch(body) }
     }
@@ -118,6 +127,8 @@ class NominatimClient(
     }
 
     companion object {
+        /** Half the side of the «near» box (≈ 45 km north–south). */
+        const val NEAR_DEG = 0.4
         const val DEFAULT_BASE = "https://nominatim.openstreetmap.org"
         const val CACHE_MS = 24L * 60 * 60 * 1000
         private val json = Json { ignoreUnknownKeys = true }
@@ -150,7 +161,7 @@ class NominatimClient(
                 val lon = o.str("lon")?.toDoubleOrNull() ?: return@mapNotNull null
                 val name = streetLabel(o) ?: return@mapNotNull null
                 SuggestionDto("address", name, city(o) ?: "", lat, lon, id = o.str("place_id")?.let { "osm_$it" })
-            }.distinctBy { it.name + it.subtitle }.take(5)
+            }.distinctBy { it.name + it.subtitle }.take(8)
         }
     }
 }

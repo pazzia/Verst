@@ -96,6 +96,7 @@ import app.verst.nav.handoffInstall
 import app.verst.nav.handoffPick
 import app.verst.nav.handoffScope
 import app.verst.nav.isBooked
+import app.verst.nav.addressOffered
 import app.verst.nav.looksLikeAddress
 import app.verst.nav.manualLocation
 import app.verst.nav.navigatorFromStop
@@ -348,7 +349,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 originAddress = flow.originAddress,
                 outsideRussia = flow.outsideRussia,
                 online = flow.connectivity.online,
-                addressQuery = flow.looksLikeAddress(flow.query),
+                addressQuery = flow.addressOffered(flow.query),
+                addressFirst = flow.looksLikeAddress(flow.query) || (!flow.searching && flow.suggestions.isEmpty()),
                 addressState = flow.addressState,
                 focusTo = flow.focusToField,
                 addressResults = flow.addressResults,
