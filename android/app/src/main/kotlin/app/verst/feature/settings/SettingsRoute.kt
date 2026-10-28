@@ -18,6 +18,7 @@ import app.verst.MainActivity
 import app.verst.VerstApp
 import app.verst.core.model.AppLanguage
 import app.verst.core.model.AppTheme
+import app.verst.core.model.Car
 import app.verst.core.model.TripStorage
 import app.verst.core.ui.theme.Palette
 import app.verst.engine.EngineStatus
@@ -130,11 +131,11 @@ fun SettingsRoute(flow: VerstFlow) {
             }
 
             override fun consumption(steps: Int) {
-                AppPrefs.update { it.copy(consumption = it.consumption + steps * app.verst.core.model.Car.CONSUMPTION_STEP) }
+                AppPrefs.update { it.copy(consumption = it.consumption + steps * Car.CONSUMPTION_STEP) }
             }
 
             override fun tank(steps: Int) {
-                AppPrefs.update { it.copy(tankL = it.tankL + steps * app.verst.core.model.Car.TANK_STEP) }
+                AppPrefs.update { it.copy(tankL = it.tankL + steps * Car.TANK_STEP) }
             }
 
             override fun fuel(type: String) {
