@@ -117,11 +117,12 @@ class ServerClientTest {
     @Test
     fun cancellingThePlanCancelsTheHttpCall() = runBlocking {
         store.auth = ServerAuth(server.url("/").toString().trimEnd('/'), "d1", "x".repeat(43))
-        // the stream sends one stage and then nothing for 30 s
+        // the stream sends a stage, then a ping every second for a minute and never `done`; after the cancel the
+        // server's next write fails, so the mock server shuts down in time
         server.enqueue(
             MockResponse().setHeader("Content-Type", "text/event-stream")
-                .setBody("event: stage\ndata: {\"event\":\"stage\",\"key\":\"route\",\"text\":\"…\",\"progress\":0.1}\n\n: ping\n\n")
-                .throttleBody(64, 30, java.util.concurrent.TimeUnit.SECONDS),
+                .setBody("event: stage\ndata: {\"event\":\"stage\",\"key\":\"route\",\"text\":\"…\",\"progress\":0.1}\n\n" + ": ping\n\n".repeat(60))
+                .throttleBody(8, 1, java.util.concurrent.TimeUnit.SECONDS),
         )
         val t0 = System.nanoTime()
         val job = launch(kotlinx.coroutines.Dispatchers.IO) { runCatching { client.plan(input) {} } }

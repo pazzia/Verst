@@ -191,7 +191,7 @@ class ServerClient(
 
     /** The engine's verdict is final only for [FINAL] codes; the phone engine retries the rest. */
     private fun final(r: EngineResult.Err, context: String): EngineResult<PlanOutcome> =
-        if (r.error.code in FINAL) r else throw ServerUnavailable("${r.error.code} ($context)")
+        if (r.error.code in FINAL) r else throw ServerUnavailable(if (r.error.code == "INTERNAL") context else "${r.error.code} ($context)")
 
     /** A `done` the app cannot decode (a newer server) is the server's problem, not the trip's. */
     private fun decoded(r: EngineResult<PlanOutcome>): EngineResult<PlanOutcome> =

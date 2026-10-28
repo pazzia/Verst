@@ -1519,7 +1519,7 @@ class ScreensScreenshotTest {
         app.verst.core.ui.theme.Palette.day = true
         try {
             shot("settings", "day") { app.verst.feature.settings.SettingsScreen(settingsUi.copy(themePending = true), SettingsSpy()) }
-            compose.onNodeWithTag("settings.restart").assertIsDisplayed()
+            compose.onNodeWithTag("settings.restart").performScrollTo().assertIsDisplayed()
         } finally {
             app.verst.core.ui.theme.Palette.day = day
         }
