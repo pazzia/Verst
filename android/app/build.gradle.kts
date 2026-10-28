@@ -46,14 +46,16 @@ android {
     // Security review 28.10 (К-1): the demo signing key is a CI secret, never in the repository. CI decodes
     // VERST_SIGNING_KEYSTORE_B64 to a file and passes its path and passwords; without it (local builds, a missing
     // secret) the demo APK gets the throwaway debug key and will not install over a CI build.
+    // a secret pasted with a trailing line break is still the same password
+    fun signingEnv(name: String): String? = System.getenv(name)?.trimEnd('\r', '\n')
     val demoKeystore = System.getenv("VERST_SIGNING_KEYSTORE")?.let { file(it) }?.takeIf { it.isFile }
     signingConfigs {
         if (demoKeystore != null) {
             create("demo") {
                 storeFile = demoKeystore
-                storePassword = System.getenv("VERST_SIGNING_STORE_PASSWORD")
-                keyAlias = System.getenv("VERST_SIGNING_KEY_ALIAS")
-                keyPassword = System.getenv("VERST_SIGNING_KEY_PASSWORD")
+                storePassword = signingEnv("VERST_SIGNING_STORE_PASSWORD")
+                keyAlias = signingEnv("VERST_SIGNING_KEY_ALIAS")
+                keyPassword = signingEnv("VERST_SIGNING_KEY_PASSWORD")
             }
         }
     }

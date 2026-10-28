@@ -135,14 +135,29 @@ jobs:
         # with a throwaway debug key: it builds and tests, but does not install over an earlier CI build.
         env:
           KEYSTORE_B64: ${{ secrets.VERST_SIGNING_KEYSTORE_B64 }}
+          STOREPASS: ${{ secrets.VERST_SIGNING_STORE_PASSWORD }}
+          KEYPASS: ${{ secrets.VERST_SIGNING_KEY_PASSWORD }}
+          ALIAS: ${{ secrets.VERST_SIGNING_KEY_ALIAS }}
         run: |
           if [ -z "$KEYSTORE_B64" ]; then
             echo "::warning title=signing::VERST_SIGNING_KEYSTORE_B64 is not set: throwaway debug signature (will not install over earlier builds)"
             exit 0
           fi
           umask 077
-          printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/verst-demo.jks"
-          echo "VERST_SIGNING_KEYSTORE=$RUNNER_TEMP/verst-demo.jks" >> "$GITHUB_ENV"
+          K="$RUNNER_TEMP/verst-demo.jks"
+          printf '%s' "$KEYSTORE_B64" | tr -d ' \r\n' | base64 -d > "$K"
+          # name the secret that is wrong instead of Gradle's «Failed to read key … null»
+          export STOREPASS="${STOREPASS%$'\n'}" KEYPASS="${KEYPASS%$'\n'}" ALIAS="${ALIAS%$'\n'}"
+          if ! keytool -list -keystore "$K" -storetype PKCS12 -storepass:env STOREPASS >/dev/null 2>&1; then
+            echo "::error title=signing::VERST_SIGNING_STORE_PASSWORD does not open the keystore (or VERST_SIGNING_KEYSTORE_B64 is not the whole base64 line)"; exit 1
+          fi
+          if ! keytool -list -keystore "$K" -storetype PKCS12 -storepass:env STOREPASS -alias "$ALIAS" >/dev/null 2>&1; then
+            echo "::error title=signing::VERST_SIGNING_KEY_ALIAS is not in the keystore (expected verst-demo)"; exit 1
+          fi
+          if [ "$KEYPASS" != "$STOREPASS" ]; then
+            echo "::error title=signing::VERST_SIGNING_KEY_PASSWORD differs from VERST_SIGNING_STORE_PASSWORD (a PKCS12 key has one password)"; exit 1
+          fi
+          echo "VERST_SIGNING_KEYSTORE=$K" >> "$GITHUB_ENV"
 
       - name: Assemble demo APK + androidTest APK
         id: assemble
