@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""DES-103: adaptive launcher icon (vector) from the overhead-sign motif.
+"""DES-103 → BRAND-01 (CEO 28.10.2026, concept «В»): the launcher icon «Солнце над трассой».
 
-Writes into android/app/src/main/res/:
+The main screen of the app reduced to a sign: the dusk sky of «Поехали», the yellow sun on the horizon and the
+road running to it with a yellow centre line. Writes into android/app/src/main/res/:
   mipmap-anydpi-v26/ic_launcher.xml, mipmap-anydpi-v26/ic_launcher_round.xml
-  drawable/ic_launcher_foreground.xml   blue GOST plate + white inner border + yellow ↗ + two gantry poles
-  drawable/ic_launcher_monochrome.xml   themed-icon layer (Android 13+): the same shapes in one colour
-  values/ic_launcher_colors.xml         background = color.sky.band1 (#2B2850, the dusk sky)
+  drawable/ic_launcher_background.xml   full-bleed scene: sky bands, ground, road, edges, centre dashes
+  drawable/ic_launcher_foreground.xml   the sun (half disc on the horizon), inside the 66 dp safe zone
+  drawable/ic_launcher_monochrome.xml   themed-icon layer (Android 13+): sun + road silhouette, one colour
+and design/brand/verst-icon.svg (the same composition as a plain SVG: store art, the landing, documents).
 
-Geometry (108 x 108 dp viewport, safe zone = centred circle of 66 dp, radius 33 around (54, 54)):
-  plate 56 x 40 at (26, 34), radius 7; inner border inset 3, width 2.5, radius 4.5
-  arrow = design/icons/arrow-up-right.svg at 24 dp, origin (28, 42); name bar 15 x 5 at x 51; km bar 5 x 5 at x 68.5
-  poles 3 x 9 at x 39.5 and 65.5 from the plate bottom (y 74 .. 83)
-Colours are tokens: color.sign.blue, color.sign.white, color.accent.yellow, color.sky.band1.
-Checked by design/tools/check_icon.py.
+Geometry (108 x 108 dp viewport; launchers show about the centred 72 dp; safe zone = circle r 33 at 54, 54):
+  horizon y 60; sun r 19 centred on the horizon; road 10 wide at the horizon, 76 at the bottom edge.
+Colours are tokens: color.sky.band1…band4 (night), color.scene.groundNight, color.scene.road,
+color.sign.white, color.accent.yellow. Checked by design/tools/check_icon.py (foreground + monochrome).
 
 Usage: python3 design/tools/gen_launcher.py [--check]
 """
@@ -20,14 +20,14 @@ from __future__ import annotations
 
 import difflib
 import os
-import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 RES = os.path.join(ROOT, 'android', 'app', 'src', 'main', 'res')
-ICON = os.path.join(ROOT, 'design', 'icons', 'arrow-up-right.svg')
+BRAND = os.path.join(ROOT, 'design', 'brand')
 
-BLUE, WHITE, YELLOW, SKY = '#FF1E4FA3', '#FFF4F4F0', '#FFFFD23F', '#2B2850'
+SKY = ('#FF2B2850', '#FF4E3768', '#FF8E4A6B', '#FFD9655A')   # color.sky.band1..band4 (night)
+GROUND, ROAD, WHITE, YELLOW = '#FF1A231F', '#FF3A3A3F', '#FFF4F4F0', '#FFFFD23F'
 
 
 def f(v: float) -> str:
@@ -35,56 +35,56 @@ def f(v: float) -> str:
     return '0' if s in ('-0', '') else s
 
 
-def rrect(x: float, y: float, w: float, h: float, r: float, clockwise: bool = True) -> str:
-    if clockwise:
-        return ('M%s %sH%sA%s %s 0 0 1 %s %sV%sA%s %s 0 0 1 %s %sH%sA%s %s 0 0 1 %s %sV%sA%s %s 0 0 1 %s %sZ'
-                % (f(x + r), f(y), f(x + w - r), f(r), f(r), f(x + w), f(y + r), f(y + h - r), f(r), f(r), f(x + w - r), f(y + h),
-                   f(x + r), f(r), f(r), f(x), f(y + h - r), f(y + r), f(r), f(r), f(x + r), f(y)))
-    # counter-clockwise: top-left arc start -> left side -> bottom -> right side -> top
-    return ('M%s %sA%s %s 0 0 0 %s %sV%sA%s %s 0 0 0 %s %sH%sA%s %s 0 0 0 %s %sV%sA%s %s 0 0 0 %s %sZ'
-            % (f(x + r), f(y), f(r), f(r), f(x), f(y + r), f(y + h - r), f(r), f(r), f(x + r), f(y + h),
-               f(x + w - r), f(r), f(r), f(x + w), f(y + h - r), f(y + r), f(r), f(r), f(x + w - r), f(y)))
+HORIZON = 60.0
+SUN_R = 19.0
+ROAD_TOP = (49.0, 59.0)        # x of the road edges at the horizon
+ROAD_BOTTOM = (16.0, 92.0)     # x at y = 108
+EDGE_W = 2.2
+DASHES = ((53.2, 64, 1.6, 6), (52.6, 76, 2.8, 9), (51.8, 92, 4.4, 16))
+MONO_BOTTOM = 80.0             # the themed layer must stay in the safe circle: the road is cut here
 
 
-def scaled_icon(path_d: str, scale: float, dx: float, dy: float) -> str:
-    """Absolute-coordinate icon path (as written by gen_icons.py) scaled and translated."""
-    toks = re.findall(r'[MLAZ]|-?\d+(?:\.\d+)?', path_d)
-    out, i = [], 0
-    while i < len(toks):
-        c = toks[i]; i += 1
-        if c in 'ML':
-            out.append('%s%s %s' % (c, f(float(toks[i]) * scale + dx), f(float(toks[i + 1]) * scale + dy))); i += 2
-        elif c == 'A':
-            rx, ry, rot, la, sw, x, y = toks[i:i + 7]; i += 7
-            out.append('A%s %s %s %s %s %s %s' % (f(float(rx) * scale), f(float(ry) * scale), rot, la, sw, f(float(x) * scale + dx), f(float(y) * scale + dy)))
-        elif c == 'Z':
-            out.append('Z')
-        else:
-            raise ValueError('unexpected token %r (gen_icons writes absolute M/L/A/Z only)' % c)
-    return ''.join(out)
+def rect(x: float, y: float, w: float, h: float) -> str:
+    return 'M%s %sH%sV%sH%sZ' % (f(x), f(y), f(x + w), f(y + h), f(x))
 
 
-PLATE = (26, 34, 56, 40, 7)
-BORDER_OUT = (29, 37, 50, 34, 4.5)
-BORDER_IN = (31.5, 39.5, 45, 29, 2)
-ARROW = (1.0, 28, 42)
-NAME_BAR = (51, 51.5, 15, 5, 2.5)
-KM_BAR = (68.5, 51.5, 5, 5, 2.5)
-POLES = ((39.5, 74, 3, 9), (65.5, 74, 3, 9))
+def quad(*pts: tuple[float, float]) -> str:
+    return 'M' + 'L'.join('%s %s' % (f(x), f(y)) for x, y in pts) + 'Z'
 
 
-def shapes():
-    d_icon = re.search(r' d="([^"]+)"', open(ICON, encoding='utf-8').read()).group(1)
-    plate = rrect(*PLATE)
-    border = rrect(*BORDER_OUT) + rrect(*BORDER_IN, clockwise=False)  # ring: inner contour reversed (nonZero)
-    arrow = scaled_icon(d_icon, *ARROW)
-    bars = rrect(*NAME_BAR) + rrect(*KM_BAR)
-    poles = ''.join(rrect(x, y, w, h, 0.0001) for x, y, w, h in POLES)
-    return plate, border, arrow, bars, poles
+def edge_x(side: int, y: float) -> float:
+    """x of the left (0) or right (1) road edge at height y."""
+    t = (y - HORIZON) / (108 - HORIZON)
+    return ROAD_TOP[side] + (ROAD_BOTTOM[side] - ROAD_TOP[side]) * t
+
+
+def edge(side: int, y1: float = 108.0) -> str:
+    h = EDGE_W / 2
+    return quad((edge_x(side, HORIZON) - h, HORIZON), (edge_x(side, HORIZON) + h, HORIZON),
+                (edge_x(side, y1) + h, y1), (edge_x(side, y1) - h, y1))
+
+
+def sun() -> str:
+    """Half disc above the horizon (the ground hides the lower half in the scene)."""
+    x0, x1 = 54 - SUN_R, 54 + SUN_R
+    return 'M%s %sA%s %s 0 0 1 %s %sZ' % (f(x0), f(HORIZON), f(SUN_R), f(SUN_R), f(x1), f(HORIZON))
+
+
+def layers() -> dict[str, list[tuple[str, str]]]:
+    bands = [(SKY[0], rect(0, 0, 108, 34)), (SKY[1], rect(0, 34, 108, 12)),
+             (SKY[2], rect(0, 46, 108, 8)), (SKY[3], rect(0, 54, 108, 6))]
+    road = quad((ROAD_TOP[0], HORIZON), (ROAD_TOP[1], HORIZON), (ROAD_BOTTOM[1], 108), (ROAD_BOTTOM[0], 108))
+    background = bands + [(GROUND, rect(0, HORIZON, 108, 108 - HORIZON)), (ROAD, road),
+                          (WHITE, edge(0) + edge(1)), (YELLOW, ''.join(rect(*d) for d in DASHES))]
+    foreground = [(YELLOW, sun())]
+    # themed icon: one colour; road edges and the dashes that fit above MONO_BOTTOM
+    dashes = ''.join(rect(x, y, w, min(h, MONO_BOTTOM - y)) for x, y, w, h in DASHES if y < MONO_BOTTOM)
+    monochrome = [('#FFFFFFFF', sun() + edge(0, MONO_BOTTOM) + edge(1, MONO_BOTTOM) + dashes)]
+    return {'background': background, 'foreground': foreground, 'monochrome': monochrome}
 
 
 VEC_HEAD = ('<?xml version="1.0" encoding="utf-8"?>\n'
-            '<!-- GENERATED by design/tools/gen_launcher.py (DES-103). Do not edit. -->\n'
+            '<!-- GENERATED by design/tools/gen_launcher.py (BRAND-01). Do not edit. -->\n'
             '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
             '    android:width="108dp"\n    android:height="108dp"\n'
             '    android:viewportWidth="108"\n    android:viewportHeight="108">\n')
@@ -94,28 +94,36 @@ def path(color: str, d: str) -> str:
     return '    <path\n        android:fillColor="%s"\n        android:fillType="nonZero"\n        android:pathData="%s" />\n' % (color, d)
 
 
+def vector(items: list[tuple[str, str]]) -> str:
+    return VEC_HEAD + ''.join(path(c, d) for c, d in items) + '</vector>\n'
+
+
+def svg() -> str:
+    """The composed icon as a plain SVG (background then foreground), colours as #RRGGBB."""
+    items = layers()['background'] + layers()['foreground']
+    body = ''.join('  <path fill="#%s" d="%s"/>\n' % (c[3:], d) for c, d in items)
+    return ('<?xml version="1.0" encoding="utf-8"?>\n'
+            '<!-- GENERATED by design/tools/gen_launcher.py (BRAND-01). «Верста»: солнце над трассой. -->\n'
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="1080" height="1080">\n'
+            + body + '</svg>\n')
+
+
 def outputs() -> dict[str, str]:
-    plate, border, arrow, bars, poles = shapes()
-    fg = VEC_HEAD + path(WHITE, poles) + path(BLUE, plate) + path(WHITE, border) + path(YELLOW, arrow) + path(WHITE, bars) + '</vector>\n'
-    # monochrome: one colour; the plate becomes an outline ring so the arrow and bars read inside it
-    ring = rrect(*PLATE) + rrect(*BORDER_IN, clockwise=False)
-    mono = VEC_HEAD + path('#FFFFFFFF', poles + ring + arrow + bars) + '</vector>\n'
+    lay = layers()
     adaptive = ('<?xml version="1.0" encoding="utf-8"?>\n'
-                '<!-- GENERATED by design/tools/gen_launcher.py (DES-103). Do not edit. -->\n'
+                '<!-- GENERATED by design/tools/gen_launcher.py (BRAND-01). Do not edit. -->\n'
                 '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
-                '    <background android:drawable="@color/ic_launcher_background" />\n'
+                '    <background android:drawable="@drawable/ic_launcher_background" />\n'
                 '    <foreground android:drawable="@drawable/ic_launcher_foreground" />\n'
                 '    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />\n'
                 '</adaptive-icon>\n')
-    colors = ('<?xml version="1.0" encoding="utf-8"?>\n'
-              '<!-- GENERATED by design/tools/gen_launcher.py (DES-103): color.sky.band1 -->\n'
-              '<resources>\n    <color name="ic_launcher_background">%s</color>\n</resources>\n' % SKY)
     return {
         'mipmap-anydpi-v26/ic_launcher.xml': adaptive,
         'mipmap-anydpi-v26/ic_launcher_round.xml': adaptive,
-        'drawable/ic_launcher_foreground.xml': fg,
-        'drawable/ic_launcher_monochrome.xml': mono,
-        'values/ic_launcher_colors.xml': colors,
+        'drawable/ic_launcher_background.xml': vector(lay['background']),
+        'drawable/ic_launcher_foreground.xml': vector(lay['foreground']),
+        'drawable/ic_launcher_monochrome.xml': vector(lay['monochrome']),
+        os.path.join('..', '..', '..', '..', '..', 'design', 'brand', 'verst-icon.svg'): svg(),
     }
 
 
