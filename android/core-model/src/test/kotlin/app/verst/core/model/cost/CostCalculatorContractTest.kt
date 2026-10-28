@@ -72,7 +72,7 @@ class LocalCostBundleTest {
             assertCost("${b.case} $sid/$aid", item.getValue("afterCost").jsonObject, local)
             n++
         }
-        assertEquals(143, n) // G01–G13 (G13 = ARCH-301 CEO case)
+        assertEquals(139, n) // G01–G13 (G13 = ARCH-301 CEO case); block 1 (28.10): the dog filter took 4 alternatives
     }
 
     @Test
