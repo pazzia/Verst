@@ -563,111 +563,6 @@
           "replaceable": true,
           "alternatives": [
             {
-              "id": "alt_d1s04_pl_mch_michurin",
-              "placeId": "pl_mch_michurin",
-              "name": "Дом-музей Мичурина",
-              "deltaMin": -1,
-              "deltaRub": 370,
-              "shiftMin": -1,
-              "units": {
-                "deltaKm": -1.044,
-                "regionCode": "RU-TAM",
-                "checkRub": null,
-                "adultRub": 150,
-                "childRub": 80,
-                "name": "Дом-музей Мичурина",
-                "placeId": "pl_mch_michurin",
-                "priceRub": "60.50",
-                "regionName": "Тамбовская область",
-                "tripKmDelta": -1
-              },
-              "stop": {
-                "id": "d1s04",
-                "seq": 4,
-                "day": 1,
-                "kind": "sight",
-                "sign": "tourist",
-                "placeId": "pl_mch_michurin",
-                "townId": "t_michurinsk",
-                "name": "Дом-музей Мичурина",
-                "note": null,
-                "lat": 52.89731311519887,
-                "lon": 40.49675614955718,
-                "arriveAt": "2026-10-24T12:53",
-                "departAt": "2026-10-24T13:38",
-                "tz": "Europe/Moscow",
-                "kmFromPrev": 145,
-                "kmAt": 398,
-                "dwellMin": 45,
-                "tags": [
-                  "museum"
-                ],
-                "costRub": 380,
-                "reason": "45 мин на осмотр.",
-                "verified": true,
-                "replaceable": true,
-                "alternatives": [],
-                "alternativesNote": null,
-                "hotelOptions": [],
-                "selectedHotelId": null,
-                "unknownFacts": [
-                  "dogs"
-                ],
-                "unknownRu": "Пускают ли с собакой — не проверено"
-              },
-              "dayPatch": [
-                {
-                  "stopId": "d1s01",
-                  "seq": 1,
-                  "arriveAt": null,
-                  "departAt": "2026-10-24T07:00",
-                  "kmFromPrev": 0
-                },
-                {
-                  "stopId": "d1s02",
-                  "seq": 2,
-                  "arriveAt": "2026-10-24T08:31",
-                  "departAt": "2026-10-24T08:51",
-                  "kmFromPrev": 125
-                },
-                {
-                  "stopId": "d1s03",
-                  "seq": 3,
-                  "arriveAt": "2026-10-24T10:30",
-                  "departAt": "2026-10-24T11:00",
-                  "kmFromPrev": 131
-                },
-                {
-                  "stopId": "d1s04",
-                  "seq": 4,
-                  "arriveAt": "2026-10-24T12:53",
-                  "departAt": "2026-10-24T13:38",
-                  "kmFromPrev": 145
-                },
-                {
-                  "stopId": "d1s05",
-                  "seq": 5,
-                  "arriveAt": "2026-10-24T14:20",
-                  "departAt": "2026-10-24T15:20",
-                  "kmFromPrev": 48
-                },
-                {
-                  "stopId": "d1s06",
-                  "seq": 6,
-                  "arriveAt": "2026-10-24T15:33",
-                  "departAt": "2026-10-24T15:43",
-                  "kmFromPrev": 13
-                },
-                {
-                  "stopId": "d1s07",
-                  "seq": 7,
-                  "arriveAt": "2026-10-24T15:54",
-                  "departAt": null,
-                  "kmFromPrev": 11
-                }
-              ]
-            },
-            {
               "id": "alt_d1s04_pl_mch_station",
               "placeId": "pl_mch_station",
               "name": "Вокзал Мичуринска",
@@ -1328,7 +1223,7 @@
           "lon": 42.77542167927936,
           "arriveAt": "2026-10-25T13:34",
           "departAt": "2026-10-25T14:34",
-          "tz": "Europe/Volgograd",
+          "tz": "Europe/Moscow",
           "kmFromPrev": 131,
           "kmAt": 745,
           "dwellMin": 60,
@@ -1374,7 +1269,7 @@
                 "lon": 42.459364162681815,
                 "arriveAt": "2026-10-25T12:59",
                 "departAt": "2026-10-25T13:59",
-                "tz": "Europe/Volgograd",
+                "tz": "Europe/Moscow",
                 "kmFromPrev": 81,
                 "kmAt": 695,
                 "dwellMin": 60,
@@ -1468,7 +1363,7 @@
                 "lon": 43.21542167927936,
                 "arriveAt": "2026-10-25T14:13",
                 "departAt": "2026-10-25T15:13",
-                "tz": "Europe/Volgograd",
+                "tz": "Europe/Moscow",
                 "kmFromPrev": 181,
                 "kmAt": 795,
                 "dwellMin": 60,
@@ -1548,7 +1443,7 @@
           "lon": 43.97630873159323,
           "arriveAt": "2026-10-25T16:24",
           "departAt": "2026-10-25T16:44",
-          "tz": "Europe/Volgograd",
+          "tz": "Europe/Moscow",
           "kmFromPrev": 151,
           "kmAt": 895,
           "dwellMin": 20,
@@ -1595,7 +1490,7 @@
                 "lon": 44.19163082064558,
                 "arriveAt": "2026-10-25T16:50",
                 "departAt": "2026-10-25T17:10",
-                "tz": "Europe/Volgograd",
+                "tz": "Europe/Moscow",
                 "kmFromPrev": 186,
                 "kmAt": 930,
                 "dwellMin": 20,
@@ -1691,7 +1586,7 @@
                 "lon": 43.746399477362,
                 "arriveAt": "2026-10-25T15:59",
                 "departAt": "2026-10-25T16:19",
-                "tz": "Europe/Volgograd",
+                "tz": "Europe/Moscow",
                 "kmFromPrev": 116,
                 "kmAt": 860,
                 "dwellMin": 20,
@@ -1772,7 +1667,7 @@
           "lon": 44.5133,
           "arriveAt": "2026-10-25T17:47",
           "departAt": null,
-          "tz": "Europe/Volgograd",
+          "tz": "Europe/Moscow",
           "kmFromPrev": 85,
           "kmAt": 980,
           "dwellMin": 0,
@@ -1882,7 +1777,7 @@
           {
             "label": "День 2",
             "formula": "завтрак 390 + обед 700",
-            "rub": 2730
+            "rub": 2720
           }
         ]
       },

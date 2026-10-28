@@ -41,6 +41,10 @@ class CorridorKm:
     rest_motorway: float
     town: float
     lodging_from_town: float
+    town_big: float
+    """Acceptance 2026-10-28 (K2): the overnight-town search radius for an anchor town (population ≥
+    `overnight_score.big_town_population`) when `overnight_score.anchors` is on: Нижний Новгород lies 30 km
+    off the M-12 and Чебоксары 33 km, outside the plain `town` radius."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,6 +81,13 @@ class OvernightScoreCfg:
     h_cap: int
     h_no_parking_weight: float
     family_room_min_people: int
+    anchors: int = 0
+    """Acceptance 2026-10-28 (K2, V1): «anchor towns» (1 = on: the open-data world). A town of at least
+    `big_town_population` is searched within `corridor_km.town_big`, may end a day anywhere from the window's
+    start up to `split.hard_cap x dailyKm`, and scores `w_big_town` more — so the M-12 sleeps in
+    Нижний Новгород, not in Кстово. Off for the fixture worlds (G01-G13 keep their bytes)."""
+    big_town_population: int = 200_000
+    w_big_town: float = 6.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,6 +133,31 @@ class SightsCfg:
     diversity: int = 0
     """ADR-0015 §2 diversity rules (1 = on): on for the open-data world `russia_v1`, off for the curated
     fixture worlds (their sights were picked by hand; G01-G13 keep their bytes)."""
+    home_zone_km: float = 30.0
+    """Acceptance 2026-10-28 (K1): no added sight this close to the trip's start (home) — and, for open-data
+    sights, to the day's start or overnight town — unless it is near the destination or a via."""
+    short_dwell_max_min: int = 15
+    """K1: an open-data sight of at most this dwell (a monument, a theatre building, a square) is a
+    «15-minute» stop: worth its detour only at `short_min_quality`."""
+    short_min_quality: float = 0.70
+    kid_bonus: float = 0.15
+    """K1 (d): with a child, a zoo, playground, interactive museum or park ranks this much higher (open data
+    quality scale 0..1) — the kinds the «Весело и познавательно» copy promises."""
+
+
+@dataclass(frozen=True, slots=True)
+class TownVisitCfg:
+    """Acceptance 2026-10-28 (V1): an evening (or a morning) in the overnight town.
+
+    A day that reaches its overnight town before `arrive_before` gets up to `evening_max` of the town's own
+    sights (within `radius_km` of its centre) before the hotel; a later arrival gets up to `morning_max` the
+    next morning. `on` = 1 in the open-data world only (the fixture worlds keep their bytes)."""
+
+    on: int
+    arrive_before: time
+    evening_max: int
+    morning_max: int
+    radius_km: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -163,6 +199,7 @@ class PlannerConfig:
     lunch_window: tuple[time, time]
     lunch_sweet_spot: tuple[time, time]
     sights: SightsCfg
+    town_visit: TownVisitCfg
     alternatives: AlternativesCfg
     cost: CostCfg
     toll_night: tuple[time, time]

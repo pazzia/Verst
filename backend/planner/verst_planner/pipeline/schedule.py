@@ -12,7 +12,14 @@ from verst_planner.pipeline import rest as rest_stage
 from verst_planner.pipeline import sights as sights_stage
 from verst_planner.pipeline.checks import closed_sights, lunch_out_of_window, over_budget
 from verst_planner.pipeline.rest import RestPool, remove_rests
-from verst_planner.pipeline.timeline import Profile, Slot, day_duration_min, refresh_day_starts, schedule_day
+from verst_planner.pipeline.timeline import (
+    Profile,
+    Slot,
+    day_duration_min,
+    detour_km_halves,
+    refresh_day_starts,
+    schedule_day,
+)
 
 REPAIR_GUARD = 100
 
@@ -145,9 +152,11 @@ def stop_km_from_prev(days: list[DayPlan]) -> list[list[int]]:
     """
     out: list[list[int]] = []
     for d in days:
+        halves = detour_km_halves(d.stops)
         row = [0]
-        for prev, s in zip(d.stops, d.stops[1:], strict=False):
-            row.append(round_half_up(s.km_at - prev.km_at + (prev.detour_km + s.detour_km) / 2))
+        for i in range(1, len(d.stops)):
+            prev, s = d.stops[i - 1], d.stops[i]
+            row.append(round_half_up(s.km_at - prev.km_at + halves[i - 1][1] + halves[i][0]))
         out.append(row)
     return out
 

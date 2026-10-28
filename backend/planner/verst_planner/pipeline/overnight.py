@@ -86,6 +86,15 @@ def day_start_estimate(d: int, inp: NormalizedInput, ctx: PlanContext) -> dateti
     return day
 
 
+def anchor(tc: TownCandidate, ctx: PlanContext) -> bool:
+    """Acceptance 2026-10-28 (K2): an «anchor town» of the open-data world — a city of at least
+    `big_town_population` (Владимир, Нижний Новгород, Чебоксары, Тверь, Великий Новгород). It is searched
+    within `corridor_km.town_big`, may end a day farther than the even split wants (up to the daily cap)
+    and scores `w_big_town` more: a family should not sleep in Кстово, 20 km from Нижний."""
+    s = ctx.cfg.overnight_score
+    return bool(s.anchors) and tc.town.population >= s.big_town_population
+
+
 @dataclass(slots=True)
 class _Scorer:
     corridor: Corridor
@@ -126,6 +135,8 @@ class _Scorer:
         )
         if self.ctx.knobs.lodging_cheap and passing:
             total -= W_PRICE * min(night_cost(x, self.inp, self.ctx) for x in passing) / 1000
+        if anchor(tc, self.ctx):
+            total += s.w_big_town
         return ScoredTown(tc.town, tc.km_at, total, h, q, e, det)
 
 
@@ -221,7 +232,18 @@ def _try_split(
         target, lo, hi, lo2, hi2 = windows(prev, total, n_days, d, inp.daily_km, ctx)
         assert lo <= hi + 1e-6, f"split window empty: day {d} [{lo}, {hi}]"
         towns = [t for t in corridor.towns if t.km_at > prev + EPS]
-        f1 = [t for t in towns if lo - EPS <= t.km_at <= hi + EPS and scorer.passing(t)]
+        # K2: an anchor town may end the day later than the even split wants, up to the daily cap with the
+        # drive into town (never earlier: an early big town would only push the km into the next days)
+        cap_hi = prev + ctx.cfg.split.hard_cap * inp.daily_km
+        f1 = [
+            t
+            for t in towns
+            if (
+                lo - EPS <= t.km_at <= hi + EPS
+                or (anchor(t, ctx) and lo - EPS <= t.km_at and _into_town_km(t, ctx) <= cap_hi + EPS)
+            )
+            and scorer.passing(t)
+        ]
         if f1:
             scored = [(t, scorer.score(t, target, prev, d)) for t in f1]
             tc, st = max(
@@ -273,6 +295,11 @@ def _try_split(
         choices.append(choice)
         prev = choice.km_at
     return choices, warnings
+
+
+def _into_town_km(t: TownCandidate, ctx: PlanContext) -> float:
+    """Route km at the town plus the drive into it (one way: the way back to the road is the next morning)."""
+    return t.km_at + t.lateral_km * ctx.cfg.detour.winding
 
 
 def _neg(s: str) -> tuple[int, ...]:

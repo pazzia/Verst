@@ -210,7 +210,7 @@ class _BadInput(Exception):
 def _decode(text: Any, what: str) -> Any:
     try:
         return json.loads(text)
-    except (TypeError, ValueError) as e:
+    except (TypeError, ValueError, RecursionError) as e:  # QA B-8: «[» x 100 000 is not JSON for us either
         raise _BadInput(f"{what}: not JSON") from e
 
 
@@ -219,7 +219,7 @@ def _parse(what: str, fn: Callable[[], Any]) -> Any:
         return fn()
     except PlannerError:
         raise
-    except (KeyError, TypeError, ValueError, AttributeError) as e:
+    except (KeyError, TypeError, ValueError, AttributeError, OverflowError, RecursionError) as e:
         raise _BadInput(f"{what}: {e!r}") from e
 
 
@@ -265,8 +265,14 @@ def _num(v: Any, what: str) -> float:
 # ---------------------------------------------------------------------------------------------- planners
 
 
-# ADR-0015 §2 rules and the M9 ready-route template rule for russia_v1
-OPEN_DATA_CONFIG: dict[str, Any] = {"sights": {"diversity": 1}, "split": {"honour_template": 1}}
+# ADR-0015 §2 rules, the M9 ready-route template rule and the acceptance 2026-10-28 anchor towns and evening
+# in the overnight town (K2, V1) for russia_v1
+OPEN_DATA_CONFIG: dict[str, Any] = {
+    "sights": {"diversity": 1},
+    "split": {"honour_template": 1},
+    "overnight_score": {"anchors": 1},
+    "town_visit": {"on": 1},
+}
 
 
 def _planner(fakes: FakePorts | CataloguePorts, clock: Any, config: dict[str, Any] | None = None) -> Planner:
@@ -761,7 +767,7 @@ def _no_fit_result(nf: NoFit, w: _World) -> dict[str, Any]:
         "allowedRub": nf.allowed,
         "minimum": {
             "totalRub": nf.minimum.cost.total_rub,
-            "levers": [{"code": x.code, "savedRub": x.saved_rub} for x in nf.levers],
+            "levers": [codec.lever_to_json(x) for x in nf.levers],
             **_trip_result(nf.minimum, w),
         },
         "options": options,

@@ -29,7 +29,14 @@ from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.polyline import interpolate
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.checks import day_valid, lunch_out_of_window, over_budget, sights_still_open
-from verst_planner.pipeline.timeline import Profile, eta_if_inserted, insert_stop, local, schedule_day
+from verst_planner.pipeline.timeline import (
+    Profile,
+    detour_halves,
+    eta_if_inserted,
+    insert_stop,
+    local,
+    schedule_day,
+)
 
 MAX_REST_SIGHT_DWELL = 30
 # ADR-0015 §5 «Весело и познавательно»: interesting stops in the rest slots, within a 15-min detour,
@@ -39,11 +46,15 @@ FUN_DETOUR_FALLBACK_MIN = 30  # M8: when nothing interesting is within 15 min of
 FUN_DWELL = (30, 45)
 FUN_BONUS = 5.0  # above a rest area with a playground, WC and a walk (5.5) for a fitting stop
 FUN_PREFER: dict[str, frozenset[str]] = {
-    "child": frozenset({"playground", "interactive", "zoo", "park", "nature", "museum"}),
+    # acceptance 2026-10-28 (K1 d): the copy promises a child «площадки, зоопарки и интерактивные музеи»;
+    # an art museum is no longer a child's fun stop by default (it still fits the adults)
+    "child": frozenset({"playground", "interactive", "zoo", "park", "nature"}),
     "dog": frozenset({"park", "nature", "embankment", "viewpoint"}),
     "adults": frozenset({"museum", "viewpoint", "kremlin", "nature", "square", "park", "embankment"}),
 }
 INDOOR = frozenset({"museum", "theatre", "interactive"})
+KID_FUN_KINDS = frozenset({"zoo", "playground", "interactive", "park"})  # = sights.KID_KINDS
+KID_FUN_EXTRA = 0.5
 EXTENDED_MIN_DRIVE = 45  # A§16.11.1 step 3: driving since b0 in [max(45, R - 60), R + 30]
 EXTENDED_AFTER = 30
 ROUND_DRIVE_MIN = 15
@@ -67,12 +78,13 @@ class DriveClock:
     def of(cls, day: DayPlan, profile: Profile) -> DriveClock:
         kms, arr, dep = [], [], []
         t = 0.0
+        halves = detour_halves(day.stops)
         for i, s in enumerate(day.stops):
             if i > 0:
-                t += profile.drive(day.stops[i - 1].km_at, s.km_at) + s.detour_min / 2
+                t += profile.drive(day.stops[i - 1].km_at, s.km_at) + halves[i][0]
             kms.append(s.km_at)
             arr.append(t)
-            t += s.detour_min / 2 if i > 0 else 0.0
+            t += halves[i][1] if i > 0 else 0.0
             dep.append(t)
         return cls(kms, arr, dep, profile)
 
@@ -114,6 +126,8 @@ def fun_affinity(c: Candidate, inp: NormalizedInput) -> float:
     if cat == "playground" and inp.crew.children == 0:
         return -1.0  # a playground is for a child (and dogs are not let in)
     score = 0.5 + (1.0 if cat in FUN_PREFER[fun_group(inp)] else 0.0)
+    if inp.crew.children > 0 and cat in KID_FUN_KINDS:
+        score += KID_FUN_EXTRA  # K1 d: a playground, zoo or science centre before a lake or a viewpoint
     if inp.crew.children > 0 and cat in ("temple", "monastery", "church"):
         score -= 0.5
     return score
@@ -393,6 +407,8 @@ def plan_rests_day(
             """Driving since b0 at arrival for an unused candidate inside the day, else None."""
             if c.place.id in taken or not (day.km_start < c.km_at < day.km_end):
                 return None
+            if c.place.type is PlaceType.SIGHT and not sight_break_ok(c.place, day, inp, ctx):
+                return None
             return clock.at(c.km_at) + c.detour_min / 2 - gap.t0
 
         def admissible(
@@ -536,6 +552,17 @@ def _road_ref_at(route: Route, km: float) -> str | None:
         if d.from_idx <= i <= d.to_idx and d.road_ref:
             return d.road_ref
     return None
+
+
+def sight_break_ok(p: Place, day: DayPlan, inp: NormalizedInput, ctx: PlanContext) -> bool:
+    """A sight as a break follows the stage-9 day rules (acceptance 2026-10-28 K1): not an open-data sight
+    on the way out of or into the overnight town, and under the `sights_free` lever only a curated free
+    place or an open public space."""
+    from verst_planner.pipeline.sights import lever_free_ok, near_day_ends
+
+    if near_day_ends(p, day, inp, ctx.cfg):
+        return False
+    return not (ctx.knobs.sights_free and not lever_free_ok(p, inp))
 
 
 def plan_rests(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:

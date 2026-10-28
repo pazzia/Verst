@@ -32,12 +32,12 @@
    "startAt": "2026-10-23T09:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T10:58",
+   "endAt": "2026-10-23T10:46",
    "unlimited": false,
    "tz": "Europe/Moscow",
-   "walkKm": 4.4,
-   "walkMin": 59,
-   "durationMin": 119,
+   "walkKm": 4.3,
+   "walkMin": 57,
+   "durationMin": 107,
    "requestedDurationMin": 120,
    "crewNotesRu": [
     "С собакой: вода, пакеты и поводок; маршрут без закрытых мест."
@@ -75,7 +75,7 @@
       "openNow": null,
       "source": "default"
      },
-     "noteRu": "Часы работы уточняйте",
+     "noteRu": null,
      "hasPhoto": true,
      "tappable": true,
      "poiKind": "embankment",
@@ -109,33 +109,6 @@
      "poiKindRu": "Парк",
      "placeSource": "wikidata",
      "placeAttributionRu": null
-    },
-    {
-     "id": "w03",
-     "poiId": "Q55655321",
-     "kind": "monument",
-     "nameRu": "Памятник Ленину",
-     "lat": 55.79654,
-     "lon": 49.12505,
-     "arriveAt": "2026-10-23T10:31",
-     "departAt": "2026-10-23T10:41",
-     "dwellMin": 10,
-     "walkKmFromPrev": 0.6,
-     "walkMinFromPrev": 8,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": null,
-      "openNow": null,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true,
-     "poiKind": "monument",
-     "poiKindRu": "Памятник",
-     "placeSource": "wikidata",
-     "placeAttributionRu": null
     }
    ],
    "cost": {
@@ -167,10 +140,6 @@
     [
      55.79973,
      49.12991
-    ],
-    [
-     55.79654,
-     49.12505
     ],
     [
      55.7963,

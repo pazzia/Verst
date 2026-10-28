@@ -34,6 +34,7 @@ from verst_planner.domain.model import (
     TollUnit,
 )
 from verst_planner.domain.rooms import room_plan
+from verst_planner.explain import ru
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +92,7 @@ class CostInput:
     trip_km: int | None = None  # `TripPlan.km`, shown in the fuel formula (A§16.7)
     parking: tuple[ParkingUnit, ...] = ()  # ADR-0015 §4 (empty without parking data)
     parking_as_of: str | None = None
+    tolls_unknown: bool = False  # QA B-1: an approximate route along no known toll corridor
 
 
 def ym(d: date) -> str:
@@ -114,7 +116,8 @@ def toll_unit(t: TollInput, cfg: PlannerConfig) -> TollUnit:
     weekend = not night and seg.tariff_weekend_rub is not None and t.entry_local.weekday() >= 4
     tariff = seg.tariff_night_rub if night else seg.tariff_weekend_rub if weekend else seg.tariff_day_rub
     assert tariff is not None
-    return TollUnit(seg.id, seg.road_ref, round_to(tariff, 1), night, ym(seg.as_of), weekend)
+    road = ru.text("cost.tolls.approx_road", road=seg.road_ref) if seg.approx else seg.road_ref
+    return TollUnit(seg.id, road, round_to(tariff, 1), night, ym(seg.as_of), weekend)
 
 
 def breakfast_check(base: int, cfg: PlannerConfig) -> int:
@@ -229,6 +232,7 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
         as_of=as_of,
         mood_just_drive=inp.mood is Mood.JUST_DRIVE,
         parking=ci.parking,
+        tolls_unknown=ci.tolls_unknown,
     )
 
 

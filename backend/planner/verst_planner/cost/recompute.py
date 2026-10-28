@@ -15,7 +15,6 @@ from verst_planner.cost.money import ZERO, dec, round_to
 from verst_planner.domain.enums import CostKey, Meal
 from verst_planner.domain.model import (
     AltUnits,
-    CostBreakdownRow,
     CostLine,
     CostOverrides,
     CostResult,
@@ -29,6 +28,17 @@ from verst_planner.domain.model import (
 
 HINT_ORDER = ("cheaper_overnight", "fewer_sights", "just_drive")
 CHILD_AGE_LIMIT = 7
+
+
+def split_rounded(exact: list[Decimal], step: int, total: int) -> list[int]:
+    """QA B-6: rows rounded to `step` that add up to `total` (the line, rounded from the exact sum): each
+    row is rounded down, then the rows with the largest remainders (ties: the earlier row) get one more
+    step. Every row is within one step of its exact value; Σ rows = the line, as the waybill shows them."""
+    floors = [int(e // step) * step for e in exact]
+    extra = (total - sum(floors)) // step
+    order = sorted(range(len(exact)), key=lambda i: (-(exact[i] - floors[i]), i))
+    bump = set(order[: max(0, extra)])
+    return [f + step if i in bump else f for i, f in enumerate(floors)]
 
 
 def rooms_for(crew: Crew) -> int:
@@ -136,17 +146,18 @@ def recompute(
     cons = dec(units.fuel.consumption_l_per_100km)
     fuel_exact = ZERO
     litres = ZERO
-    fuel_rows: list[CostBreakdownRow] = []
+    region_cost: list[tuple[FuelRegionUnit, Decimal, Decimal]] = []
     for r in regions:
         km = max(ZERO, km_by_region[r.region_code])
         cost = km * cons / 100 * r.price_rub
         fuel_exact += cost
         litres += km * cons / 100
-        fuel_rows.append(
-            fm.fuel_row(
-                r.region_name_ru, km, units.fuel.consumption_l_per_100km, r.price_rub, round_to(cost, step)
-            )
-        )
+        region_cost.append((r, km, cost))
+    row_rub = split_rounded([c for _r, _k, c in region_cost], step, round_to(fuel_exact, step))
+    fuel_rows = [
+        fm.fuel_row(r.region_name_ru, km, units.fuel.consumption_l_per_100km, r.price_rub, rub)
+        for (r, km, _c), rub in zip(region_cost, row_rub, strict=True)
+    ]
     total_km = sum((max(ZERO, k) for k in km_by_region.values()), ZERO)
     shown_km = total_km  # rule 2: the formula shows TripPlan.km (A§16.7) when the units carry it
     if units.fuel.trip_km is not None:
@@ -178,7 +189,7 @@ def recompute(
             CostKey.TOLLS,
             fm.title(CostKey.TOLLS, fuel_t, units.reserve_frac),
             round_to(toll_exact, step),
-            fm.tolls_formula(list(per_road.items())),
+            fm.tolls_formula(list(per_road.items()), units.tolls_unknown),
             _as_of(units, CostKey.TOLLS, units.fuel.as_of),
             tuple(toll_rows),
         )
@@ -233,14 +244,17 @@ def recompute(
         per_day.setdefault(m.day, []).append((m.meal, check))
     order = {Meal.BREAKFAST: 0, Meal.LUNCH: 1, Meal.DINNER: 2}
     checks: list[int] = []
-    food_rows = []
     food_exact = ZERO
+    day_meals: list[tuple[int, list[tuple[Meal, int]], Decimal]] = []
     for d in sorted(per_day):
         meals = sorted(per_day[d], key=lambda mc: order[mc[0]])
         day_exact = people * sum((dec(c) for _m, c in meals), ZERO)
         food_exact += day_exact
         checks.extend(c for _m, c in meals)
-        food_rows.append(fm.food_row(d, meals, round_to(day_exact, step)))
+        day_meals.append((d, meals, day_exact))
+    # QA B-6: the day rows add up to the line (a child's 0.5 makes the day sums fractional)
+    day_rub = split_rounded([e for _d, _m, e in day_meals], step, round_to(food_exact, step))
+    food_rows = [fm.food_row(d, meals, rub) for (d, meals, _e), rub in zip(day_meals, day_rub, strict=True)]
     lines.append(
         CostLine(
             CostKey.FOOD,

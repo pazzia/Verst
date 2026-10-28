@@ -10,7 +10,8 @@
     "fuel_motorway": 5,
     "rest_motorway": 5,
     "town": 25,
-    "lodging_from_town": 10
+    "lodging_from_town": 10,
+    "town_big": 50
   },
   "detour": {
     "winding": 1.3,
@@ -41,7 +42,10 @@
     "w_detour": 1.0,
     "h_cap": 5,
     "h_no_parking_weight": 0.5,
-    "family_room_min_people": 3
+    "family_room_min_people": 3,
+    "anchors": 0,
+    "big_town_population": 200000,
+    "w_big_town": 6.0
   },
   "overnight_eta_allowance_min": {"calm": 120, "more_stops": 150, "just_drive": 30, "fun": 150},
   "fuel": {
@@ -80,7 +84,18 @@
   "sights": {
     "max_per_day": {"calm": 2, "more_stops": 4, "just_drive": 0, "fun": 4},
     "min_score": 2.0,
-    "diversity": 0
+    "diversity": 0,
+    "home_zone_km": 30,
+    "short_dwell_max_min": 15,
+    "short_min_quality": 0.70,
+    "kid_bonus": 0.15
+  },
+  "town_visit": {
+    "on": 0,
+    "arrive_before": "16:00",
+    "evening_max": 2,
+    "morning_max": 1,
+    "radius_km": 4.0
   },
   "alternatives": {"window_min": 45, "max": 3, "cluster_km": 2.0},
   "cost": {

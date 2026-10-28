@@ -111,14 +111,16 @@ from verst_planner.pipeline.overnight import choose_overnights
 from verst_planner.pipeline.resolve import normalize_input, resolve_points
 from verst_planner.pipeline.rest import plan_rests
 from verst_planner.pipeline.schedule import ScheduledDay, assign_ids, schedule_with_rerun
-from verst_planner.pipeline.sights import plan_lunch_after_sights, plan_lunches, plan_sights
+from verst_planner.pipeline.sights import admit_sights, plan_lunch_after_sights, plan_lunches, plan_sights
 from verst_planner.pipeline.timeline import (
     Profile,
     build_day_plans,
     day_duration_min,
+    detour_halves,
     local,
     local_minute,
 )
+from verst_planner.pipeline.town_visit import plan_town_visits
 from verst_planner.ports import (
     Clock,
     GeocodingPort,
@@ -269,6 +271,7 @@ class Planner:
         warnings: list[PlanWarning] = list(toll_warnings(route, inp, ctx))
         cancel.check()  # before stage 3
         corridor = build_corridor(route, inp, ctx)
+        admit_sights(corridor, inp, ctx)
         ctx.corridor_towns = corridor.towns
         split = split_days(route, corridor, inp, pts.template, ctx)
         ring = pts.template is not None and inp.round_trip
@@ -317,6 +320,7 @@ class Planner:
         cancel.check()  # before stage 9
         plan_sights(days, corridor, inp, ctx)
         plan_lunch_after_sights(days, corridor, inp, ctx)
+        plan_town_visits(days, corridor, inp, ctx)
         plan_rests(days, corridor, inp, ctx)
         cancel.check()  # before stage 10
         sched, sched_warnings = schedule_with_rerun(days, corridor, inp, ctx)
@@ -324,12 +328,19 @@ class Planner:
         build_alternatives(sched, corridor, inp, ctx)
         sink.emit(StageEvent(StageKey.COST, t.render("stage.cost"), 0.90))
         cancel.check()  # before stage 12
-        toll_hits = self.ports.tolls.segments_on_route(route)
+        # QA B-1: an approximate route has no road refs; its toll corridor (if any) is priced by the tolls
+        # port. «Избегать платных» there means the free parallel roads (M-10, M-7, the old M-4): no tolls.
+        avoid_approx = route.synthetic and inp.avoid_tolls
+        toll_hits = [] if avoid_approx else self.ports.tolls.segments_on_route(route)
+        tolls_unknown = route.synthetic and not avoid_approx and not toll_hits
         all_stops = [s for sd in sched for s in sd.plan.stops]
         region_kms = region_km(route, all_stops, ctx)
         views = [_sched_view(sd) for sd in sched]
         cost = compute_cost(
-            _cost_input(views, nights.choices, corridor, region_kms, toll_hits, inp, ctx, profile),
+            dataclasses.replace(
+                _cost_input(views, nights.choices, corridor, region_kms, toll_hits, inp, ctx, profile),
+                tolls_unknown=tolls_unknown,
+            ),
             inp,
             self.cfg,
         )
@@ -386,7 +397,9 @@ class Planner:
                 day_km = round_half_up(
                     sd.plan.km_end - sd.plan.km_start + sum(s.detour_km for s in sd.plan.stops)
                 )
-                text = overnight_reason(c, day_km, inp, self.cfg, self.templates, template_title)
+                text = overnight_reason(
+                    c, day_km, inp, self.cfg, self.templates, template_title, ctx.knobs.norm_from_km
+                )
                 note = None
                 if c.nearest is not None:
                     note = ru.text(
@@ -432,6 +445,9 @@ class Planner:
             )
         if any(s.place is not None and s.place.source is Source.OSM for sd in sched for s in sd.plan.stops):
             warnings = [*warnings, ctx.warning(WarningCode.UNVERIFIED_PLACES, None, "osm_places")]
+        crossing = next((d.day for d in days if any(s.local_tz is not None for s in d.stops)), None)
+        if crossing is not None:  # QA B-4: say once that a day's clock is the one it started with
+            warnings = [*warnings, ctx.warning(WarningCode.TIME_ZONE, crossing, "tz_change", day=crossing)]
         return TripPlan(
             title_ru=title(labels, inp, template_title),
             km=sum(d.km for d in days),
@@ -929,9 +945,9 @@ def _time_at(km: float, d: Sched, profile: Profile) -> datetime:
     base = d.slots[0].depart
     pos = d.stops[0].km_at
     assert base is not None
-    for s, slot in zip(d.stops, d.slots, strict=True):
+    for s, slot, (_in, out) in zip(d.stops, d.slots, detour_halves(d.stops), strict=True):
         if s.km_at <= km and slot.depart is not None:
-            base, pos = slot.depart + timedelta(minutes=s.detour_min / 2), s.km_at
+            base, pos = slot.depart + timedelta(minutes=out), s.km_at
     return base + timedelta(minutes=profile.drive(pos, km))
 
 

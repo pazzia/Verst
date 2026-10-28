@@ -65,9 +65,10 @@ def fuel_row(name: str, km: Decimal, cons: float, price: Decimal, rub: int) -> C
 # ------------------------------------------------------------------ tolls
 
 
-def tolls_formula(per_road: list[tuple[str, int]]) -> str:
+def tolls_formula(per_road: list[tuple[str, int]], unknown: bool = False) -> str:
+    """`unknown` (QA B-1): an approximate route along no known toll corridor — «не учтены», never «нет»."""
     if not per_road:
-        return ru.text("cost.tolls.none")
+        return ru.text("cost.tolls.unknown" if unknown else "cost.tolls.none")
     return ru.text("cost.tolls.join").join(
         ru.text("cost.tolls.item", road=road, rub=ru.fmt_rub(rub)) for road, rub in per_road
     )

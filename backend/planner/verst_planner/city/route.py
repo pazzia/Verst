@@ -245,9 +245,14 @@ def _stop_note(c: Candidate, inp: WalkInput) -> str | None:
         notes.append(ru.text("walk.note.dog_indoor"))
     if c.long_visit:
         notes.append(ru.text("walk.note.long_visit", time=ru.fmt_duration(c.dwell_min)))
-    if not c.hours_verified:
+    if not c.hours_verified and not (c.hours is None and c.kind in OPEN_AIR_KINDS):
         notes.append(ru.text("walk.note.hours"))
     return " · ".join(notes) or None
+
+
+OPEN_AIR_KINDS = frozenset({"monument", "square", "embankment", "viewpoint", "nature"})
+"""Acceptance 2026-10-28 (traveller V3): a monument, square, embankment or viewpoint without opening hours
+has none to check; «Часы работы уточняйте» stays for every place that can be closed (a park can)."""
 
 
 def _quarter(minutes: int) -> int:

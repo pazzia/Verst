@@ -1235,8 +1235,8 @@
         },
         {
          "label": "Тульская область",
-         "formula": "55 км × 8 л/100 × 61,70 ₽ = 270 ₽",
-         "rub": 270
+         "formula": "55 км × 8 л/100 × 61,70 ₽ = 280 ₽",
+         "rub": 280
         }
        ]
       },
@@ -1981,330 +1981,6 @@
      ],
      "candidates": [
       {
-       "placeId": "Q855493",
-       "kmAt": 0.0,
-       "lateralKm": 8.22733384453034,
-       "detourKm": 21.391067995778887,
-       "detourMin": 34,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q1140429",
-       "kmAt": 0.09048613994441902,
-       "lateralKm": 0.058433461836208976,
-       "detourKm": 0.15192700077414334,
-       "detourMin": 0,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q1889165",
-       "kmAt": 0.34360292841225887,
-       "lateralKm": 0.2831075998683669,
-       "detourKm": 0.7360797596577541,
-       "detourMin": 0,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q2416732",
-       "kmAt": 0.3649096695144776,
-       "lateralKm": 0.301267974371819,
-       "detourKm": 0.7832967333667294,
-       "detourMin": 3,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q1472498",
-       "kmAt": 0.44355030889147296,
-       "lateralKm": 0.16844883252483725,
-       "detourKm": 0.43796696456457684,
-       "detourMin": 0,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q19908773",
-       "kmAt": 0.4750949905650895,
-       "lateralKm": 1.4099414651983806,
-       "detourKm": 3.66584780951579,
-       "detourMin": 7,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q133274",
-       "kmAt": 0.4969152907164561,
-       "lateralKm": 0.08673858798666342,
-       "detourKm": 0.2255203287653249,
-       "detourMin": 0,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q1304121",
-       "kmAt": 0.7882749197958384,
-       "lateralKm": 0.15727903025181517,
-       "detourKm": 0.40892547865471945,
-       "detourMin": 0,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q29587",
-       "kmAt": 0.844644253149211,
-       "lateralKm": 12.15333940614076,
-       "detourKm": 31.598682455965974,
-       "detourMin": 49,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q4872",
-       "kmAt": 1.1614749418207602,
-       "lateralKm": 0.582840017253024,
-       "detourKm": 1.5153840448578626,
-       "detourMin": 4,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q183334",
-       "kmAt": 1.7174850571565834,
-       "lateralKm": 0.4203055595556124,
-       "detourKm": 1.0927944548445923,
-       "detourMin": 4,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q19911795",
-       "kmAt": 1.7872628470847989,
-       "lateralKm": 1.0704324303207393,
-       "detourKm": 2.7831243188339223,
-       "detourMin": 6,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q1242146",
-       "kmAt": 5.149572290762584,
-       "lateralKm": 0.3813265241290841,
-       "detourKm": 0.9914489627356187,
-       "detourMin": 3,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q658262",
-       "kmAt": 5.3412455053927355,
-       "lateralKm": 1.4458676533561736,
-       "detourKm": 3.7592558987260514,
-       "detourMin": 8,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q652464",
-       "kmAt": 10.266145318645151,
-       "lateralKm": 4.286779984778136,
-       "detourKm": 11.145627960423154,
-       "detourMin": 19,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q4500922",
-       "kmAt": 12.627230211839734,
-       "lateralKm": 12.49512254976973,
-       "detourKm": 32.4873186294013,
-       "detourMin": 51,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q108186300",
-       "kmAt": 12.765353686018067,
-       "lateralKm": 12.778932937114849,
-       "detourKm": 33.22522563649861,
-       "detourMin": 52,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q131358122",
-       "kmAt": 13.800135506240611,
-       "lateralKm": 12.505682051782784,
-       "detourKm": 32.514773334635244,
-       "detourMin": 51,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q16709937",
-       "kmAt": 17.812331637794625,
-       "lateralKm": 14.698034603529722,
-       "detourKm": 38.21488996917728,
-       "detourMin": 59,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q4087179",
-       "kmAt": 18.736059808149832,
-       "lateralKm": 6.062457052146855,
-       "detourKm": 15.762388335581823,
-       "detourMin": 26,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q4087180",
-       "kmAt": 18.853637079473472,
-       "lateralKm": 6.9392131753253805,
-       "detourKm": 18.04195425584599,
-       "detourMin": 29,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q4504819",
-       "kmAt": 19.830861585231315,
-       "lateralKm": 4.4222495295191555,
-       "detourKm": 11.497848776749805,
-       "detourMin": 19,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q4504941",
-       "kmAt": 23.047453460628347,
-       "lateralKm": 6.812199000351305,
-       "detourKm": 17.711717400913393,
-       "detourMin": 29,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q54624300",
-       "kmAt": 23.862869689123762,
-       "lateralKm": 11.394829631356783,
-       "detourKm": 29.626557041527636,
-       "detourMin": 46,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q16629040",
-       "kmAt": 24.36554844482634,
-       "lateralKm": 13.92374258707738,
-       "detourKm": 36.20173072640119,
-       "detourMin": 56,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "Q131373094",
-       "kmAt": 24.519002190962848,
-       "lateralKm": 7.842383916727628,
-       "detourKm": 20.390198183491833,
-       "detourMin": 33,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q131360768",
-       "kmAt": 25.202813395428663,
-       "lateralKm": 6.286830462514422,
-       "detourKm": 16.345759202537497,
-       "detourMin": 27,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q122998834",
-       "kmAt": 27.608668204017917,
-       "lateralKm": 5.963548223244113,
-       "detourKm": 15.505225380434695,
-       "detourMin": 25,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q122998823",
-       "kmAt": 27.615908011356787,
-       "lateralKm": 6.133631829811938,
-       "detourKm": 15.94744275751104,
-       "detourMin": 26,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q122998835",
-       "kmAt": 27.651151203207796,
-       "lateralKm": 6.039364090190901,
-       "detourKm": 15.702346634496344,
-       "detourMin": 26,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q122998825",
-       "kmAt": 27.65229769236842,
-       "lateralKm": 6.11112974772373,
-       "detourKm": 15.888937344081699,
-       "detourMin": 26,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q122998826",
-       "kmAt": 27.716413901943593,
-       "lateralKm": 6.075287009569755,
-       "detourKm": 15.795746224881364,
-       "detourMin": 26,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q122998830",
-       "kmAt": 27.720866636628365,
-       "lateralKm": 5.883072423466498,
-       "detourKm": 15.295988301012894,
-       "detourMin": 25,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q122998821",
-       "kmAt": 27.742366353187165,
-       "lateralKm": 5.9146701714360805,
-       "detourKm": 15.37814244573381,
-       "detourMin": 25,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q122998832",
-       "kmAt": 27.849254617332214,
-       "lateralKm": 6.0592769147797325,
-       "detourKm": 15.754119978427305,
-       "detourMin": 26,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q16705843",
-       "kmAt": 27.926476709812093,
-       "lateralKm": 6.097822933134453,
-       "detourKm": 15.854339626149578,
-       "detourMin": 26,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOS"
-      },
-      {
        "placeId": "Q108370176",
        "kmAt": 34.97754670321444,
        "lateralKm": 9.397744705262769,
@@ -2494,15 +2170,6 @@
        "regionCode": "RU-MOS"
       },
       {
-       "placeId": "Q108124806",
-       "kmAt": 41.17884738295119,
-       "lateralKm": 1.5971334934704897,
-       "detourKm": 4.152547083023274,
-       "detourMin": 13,
-       "roadClass": "motorway",
-       "regionCode": "RU-MOS"
-      },
-      {
        "placeId": "Q122789963",
        "kmAt": 42.96649986006641,
        "lateralKm": 13.541571627625482,
@@ -2517,15 +2184,6 @@
        "lateralKm": 12.972105023875244,
        "detourKm": 33.72747306207564,
        "detourMin": 58,
-       "roadClass": "motorway",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q128644636",
-       "kmAt": 43.36065465924432,
-       "lateralKm": 4.344270215454008,
-       "detourKm": 11.295102560180421,
-       "detourMin": 24,
        "roadClass": "motorway",
        "regionCode": "RU-MOS"
       },
@@ -2589,15 +2247,6 @@
        "lateralKm": 0.4612943003057528,
        "detourKm": 1.1993651807949572,
        "detourMin": 9,
-       "roadClass": "motorway",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q108133371",
-       "kmAt": 73.84796248779504,
-       "lateralKm": 1.0447620965444357,
-       "detourKm": 2.716381451015533,
-       "detourMin": 11,
        "roadClass": "motorway",
        "regionCode": "RU-MOS"
       },
@@ -2818,15 +2467,6 @@
        "regionCode": "RU-MOS"
       },
       {
-       "placeId": "Q4365637",
-       "kmAt": 100.30819392380248,
-       "lateralKm": 0.33210191581184495,
-       "detourKm": 0.863464981110797,
-       "detourMin": 8,
-       "roadClass": "motorway",
-       "regionCode": "RU-MOS"
-      },
-      {
        "placeId": "Q108045239",
        "kmAt": 100.36620717015792,
        "lateralKm": 0.0327378989329127,
@@ -2867,15 +2507,6 @@
        "kmAt": 100.52143315505074,
        "lateralKm": 0.5962124702834957,
        "detourKm": 1.5501524227370889,
-       "detourMin": 9,
-       "roadClass": "motorway",
-       "regionCode": "RU-MOS"
-      },
-      {
-       "placeId": "Q4417807",
-       "kmAt": 100.70610807838503,
-       "lateralKm": 0.6044573136628335,
-       "detourKm": 1.5715890155233672,
        "detourMin": 9,
        "roadClass": "motorway",
        "regionCode": "RU-MOS"

@@ -108,6 +108,7 @@ class WarningCode(StrEnum):
     TOLLS_UNAVOIDABLE = "TOLLS_UNAVOIDABLE"
     UNVERIFIED_PLACES = "UNVERIFIED_PLACES"
     STOP_CLOSED = "STOP_CLOSED"
+    TIME_ZONE = "TIME_ZONE"  # acceptance 2026-10-28 (QA B-4): a day crosses a time-zone border
 
 
 class StageKey(StrEnum):

@@ -13,7 +13,7 @@ from verst_planner.adapters.catalogue.repos import (
     RegionByNearestTown,
 )
 from verst_planner.adapters.catalogue.routing import HybridRouting
-from verst_planner.adapters.catalogue.tolls import RoadRateTolls, TollRates
+from verst_planner.adapters.catalogue.tolls import CorridorTolls, RoadRateTolls, TollCorridors, TollRates
 from verst_planner.adapters.catalogue.world import WORLD_ID, CatalogueWorld, compose
 from verst_planner.adapters.fake import GOLDEN_CLOCK, FakePriceRepository, FakeTollRepository, FixedClock
 from verst_planner.geo.grid import GridIndex
@@ -37,7 +37,7 @@ class CataloguePorts(NamedTuple):
     geocoding: CatalogueGeocoding
     places: IndexedPlaceRepository
     prices: FakePriceRepository
-    tolls: RoadRateTolls  # ENG-02: the world's segments, then km x the road's rate on real geometry
+    tolls: CorridorTolls  # ENG-02 rates on real geometry; B-1 corridors on the road model
     regions: RegionByNearestTown
     clock: FixedClock
     world: CatalogueWorld
@@ -65,7 +65,10 @@ def build_catalogue_ports(cw: CatalogueWorld, now: datetime = GOLDEN_CLOCK) -> C
         geocoding=CatalogueGeocoding(world, popularity, places.town_index),
         places=places,
         prices=FakePriceRepository(world),
-        tolls=RoadRateTolls(FakeTollRepository(world), TollRates.from_resources()),
+        tolls=CorridorTolls(
+            RoadRateTolls(FakeTollRepository(world), TollRates.from_resources()),
+            TollCorridors.from_resources(),
+        ),
         regions=regions,
         clock=FixedClock(now),
         world=cw,

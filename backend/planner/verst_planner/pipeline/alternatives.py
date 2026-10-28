@@ -189,8 +189,8 @@ def day_patch(trial: Trial, ids: list[str], i: int, seq0: int, ctx: PlanContext)
     order.insert(trial.index, ids[i])
     row = km_from_prev_row(trial.plan.stops)
     out = []
-    for k, (s, slot, sid) in enumerate(zip(trial.plan.stops, trial.slots, order, strict=True)):
-        tz = ctx.tz_of(s.region_code, s.point)
+    tz = trial.plan.tz  # QA B-4: the day's clock, as the rendered day
+    for k, (slot, sid) in enumerate(zip(trial.slots, order, strict=True)):
         out.append(
             StopTime(
                 sid,
@@ -407,6 +407,7 @@ def alternatives_for_day(
                 inp,
                 ctx,
                 sid=ids[i],
+                day_tz=day.tz,
             )
             park = _parking_at(t.stop, t.slots[t.index], ids[i], day, ctx)
             units = dataclasses.replace(

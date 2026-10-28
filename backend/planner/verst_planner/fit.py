@@ -128,13 +128,24 @@ def _over_budget_days(p: TripPlan) -> int:
 
 
 def _savings(steps: list[Step], upto: int) -> tuple[BudgetLever, ...]:
-    """The levers applied up to step `upto` with what each saved; a lever that saved nothing is omitted."""
+    """The levers applied up to step `upto` with what each saved; a lever that saved nothing is omitted.
+    `fewer_nights` carries the raised daily km (V2)."""
     out = []
     for k in range(1, upto + 1):
         saved = steps[k - 1].total - steps[k].total
         if saved > 0:
-            out.append(BudgetLever(steps[k].levers[-1], saved))
+            code = steps[k].levers[-1]
+            raised = steps[k].raw.daily_km if code == "fewer_nights" else None
+            out.append(BudgetLever(code, saved, raised))
     return tuple(out)
+
+
+def _lever_text(x: BudgetLever, user_daily_km: int, env: FitEnv) -> str:
+    """The lever's words in the fit text. `fewer_nights` says the norm it raised (acceptance 2026-10-28,
+    traveller V2: «300 км в день» must not silently become 350)."""
+    if x.code == "fewer_nights" and x.daily_km is not None and x.daily_km != user_daily_km:
+        return env.text("fit.lever.fewer_nights_raised", daily_from=user_daily_km, daily_to=x.daily_km)
+    return env.text(f"fit.lever.{x.code}")
 
 
 def _fewer_nights_raw(raw: TripInput, plan: TripPlan, factor: float, cap: int) -> TripInput | None:
@@ -175,7 +186,11 @@ def fit(raw: TripInput, s0: TripPlan, env: FitEnv) -> TripPlan:
     last = steps[-1]
     fewer = _fewer_nights_raw(raw, last.plan, FEWER_NIGHTS_FACTOR, DAILY_KM_MAX)
     if fewer is not None:
-        p = _try(env, fewer, FRUGAL)
+        # ADR-0011 defines this lever as a higher daily km (≤ 1.3x, never a new DAY_OVER_BUDGET), so it stays;
+        # the raise is said, not hidden (acceptance 2026-10-28, traveller V2): the fit text names the new
+        # norm, the lever carries it (`dailyKm`), `input.dailyKm` echoes the norm the trip is planned with
+        # (the days and the chips agree) and the overnight reasons say the norm was raised (`norm_from_km`)
+        p = _try(env, fewer, dataclasses.replace(FRUGAL, norm_from_km=raw.daily_km))
         if p is not None and p.days < last.plan.days and _over_budget_days(p) <= _over_budget_days(last.plan):
             steps.append(Step(p, (*last.levers, "fewer_nights"), fewer))
             if p.cost.total_rub <= budget:
@@ -199,7 +214,7 @@ def fit(raw: TripInput, s0: TripPlan, env: FitEnv) -> TripPlan:
 def _fitted(steps: list[Step], k: int, status: str, budget: int, allowed: int, env: FitEnv) -> TripPlan:
     s = steps[k]
     levers = _savings(steps, k)
-    names = ", ".join(env.text(f"fit.lever.{x.code}") for x in levers)
+    names = ", ".join(_lever_text(x, steps[0].raw.daily_km, env) for x in levers)
     text = env.text(f"fit.{status}", levers=names, budget=_rub(budget), total=_rub(s.total))
     bf = BudgetFit(status, budget, allowed, steps[0].total, s.total, levers, text, s.variant_of)
     plan = dataclasses.replace(s.plan, budget_fit=bf)

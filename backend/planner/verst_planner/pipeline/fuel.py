@@ -147,6 +147,8 @@ def plan_fuel(
         remaining = full
     if inserted and inp.round_trip:
         last = max(inserted, key=lambda s: s.km_at)
-        if last.reason_key == "fuel.range":
+        # acceptance 2026-10-28 (traveller M2): «Последняя заправка до дома» only on the way home, i.e. on
+        # the last day; a last fill on day 2 of 3 still has a night and a day's drive before home
+        if last.reason_key == "fuel.range" and day_for_km(days, last.km_at) is days[-1]:
             last.reason_key, last.reason_params = "fuel.last", {}
     return warnings

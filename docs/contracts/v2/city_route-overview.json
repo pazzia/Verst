@@ -73,7 +73,7 @@
       "openNow": null,
       "source": "default"
      },
-     "noteRu": "Часы работы уточняйте",
+     "noteRu": null,
      "hasPhoto": true,
      "tappable": true,
      "poiKind": "attraction",
@@ -100,7 +100,7 @@
       "openNow": null,
       "source": "default"
      },
-     "noteRu": "Часы работы уточняйте",
+     "noteRu": null,
      "hasPhoto": false,
      "tappable": true,
      "poiKind": "embankment",
@@ -127,7 +127,7 @@
       "openNow": null,
       "source": "default"
      },
-     "noteRu": "Часы работы уточняйте",
+     "noteRu": null,
      "hasPhoto": false,
      "tappable": true,
      "poiKind": "embankment",

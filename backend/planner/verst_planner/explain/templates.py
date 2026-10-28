@@ -21,6 +21,7 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "overnight.shift.evening",
     "overnight.on_target",
     "overnight.cap_ok",
+    "overnight.cap_raised",
     "overnight.shift.later",
     "overnight.shift.earlier",
     "overnight.shift.limit",
@@ -45,6 +46,8 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "sight.dog_ok",
     "sight.osm",
     "sight.detour",
+    "town.evening",
+    "town.morning",
     "start.default",
     "finish.home",
     "finish.default",
@@ -71,6 +74,8 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "warning.TOLLS_UNAVOIDABLE",
     "warning.UNVERIFIED_PLACES",
     "warning.STOP_CLOSED",
+    "warning.TIME_ZONE",
+    "tz.local",
 )
 """Every key of A§8.1, all required."""
 

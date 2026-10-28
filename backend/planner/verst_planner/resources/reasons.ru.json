@@ -4,6 +4,7 @@
   "overnight.shift.evening": "{shift}: вечером можно прогуляться по центру.",
   "overnight.on_target": "Как раз на вашей дневной норме.",
   "overnight.cap_ok": " Ваши {daily_km} км в день не превышены.",
+  "overnight.cap_raised": " Норму подняли до {daily_km} км в день, чтобы уложиться в бюджет.",
   "overnight.shift.later": "Не в {other_prep}, а на {dkm} км дальше",
   "overnight.shift.earlier": "Не в {other_prep}, а на {dkm} км раньше",
   "overnight.shift.limit": "На {dkm} км раньше вашего предела",
@@ -32,6 +33,9 @@
   "sight.dog_ok": "{dwell} на осмотр, с собакой можно.",
   "sight.osm": "По открытым данным.",
   "sight.detour": "Крюк ≈ {minutes} мин.",
+  "tz.local": "По местному времени — {time} ({shift} ч).",
+  "town.evening": "Вечер в городе ночёвки: {dwell} на осмотр.",
+  "town.morning": "Утро в городе ночёвки: {dwell} на осмотр перед выездом.",
   "start.default": "Выезд в {time}.",
   "finish.home": "Дома к {part_of_day}.",
   "finish.default": "Финиш.",
@@ -57,5 +61,6 @@
   "warning.TOLLS_UNAVOIDABLE": "Без платных дорог не проехать — платный участок учтён в расчёте",
   "warning.UNVERIFIED_PLACES": "Места — из открытых данных: часы и цены уточняйте",
   "warning.STOP_CLOSED": "«{name}» в этот день закрыт — убрали из маршрута",
+  "warning.TIME_ZONE": "В день {day} меняется часовой пояс: время в плане дня — по часам места, откуда выехали утром",
   "stage.budget": "Подбираем поездку под бюджет"
 }

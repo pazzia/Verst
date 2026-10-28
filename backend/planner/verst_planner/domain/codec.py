@@ -7,6 +7,7 @@ Conventions: datetimes are local wall-time strings ``YYYY-MM-DDTHH:MM`` (no offs
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from datetime import date, datetime, time
 from decimal import ROUND_HALF_UP, Decimal
@@ -130,6 +131,39 @@ _CREW_KEYS = frozenset({"adults", "children", "dog", "childAges"})
 _VEHICLE_KEYS = frozenset({"consumption", "fuelType", "tankL"})
 
 
+# QA B-8 (acceptance 2026-10-28): the input is decoded strictly, as the server's pydantic `Strict*` model
+# does, so the phone and the server reject the same inputs: «"roundTrip": "false"» was read as true, «"300"»
+# and 300.5 as a daily km, `true` as one adult. A wrong type is INVALID_INPUT `wrong_type`; null keeps the
+# default of an optional field.
+
+
+def _int_field(v: Any, path: str) -> int:
+    if isinstance(v, bool) or not isinstance(v, int):
+        raise InvalidInput(path, "wrong_type")
+    return v
+
+
+def _num_field(v: Any, path: str) -> float:
+    if isinstance(v, bool) or not isinstance(v, int | float) or not math.isfinite(v):
+        raise InvalidInput(path, "wrong_type")
+    return float(v)
+
+
+def _bool_field(d: Mapping[str, Any], key: str, default: bool, path: str = "") -> bool:
+    v = d.get(key)
+    if v is None:
+        return default
+    if not isinstance(v, bool):
+        raise InvalidInput(f"{path}{key}", "wrong_type")
+    return v
+
+
+def _str_field(v: Any, path: str) -> str | None:
+    if v is not None and not isinstance(v, str):
+        raise InvalidInput(path, "wrong_type")
+    return v
+
+
 def _check_keys(d: Mapping[str, Any], allowed: frozenset[str], path: str) -> None:
     for k in d:
         if k not in allowed:
@@ -141,10 +175,15 @@ def _point_input_from_json(d: Any, path: str) -> PointInput:
         raise InvalidInput(path, "not_an_object")
     _check_keys(d, _POINT_KEYS, path + ".")
     try:
-        point = LatLon(float(d["lat"]), float(d["lon"]))
+        point = LatLon(_num_field(d["lat"], f"{path}.lat"), _num_field(d["lon"], f"{path}.lon"))
     except KeyError as e:
         raise InvalidInput(f"{path}.{e.args[0]}", "required") from None
-    return PointInput(point=point, label=d.get("label"), place_id=d.get("placeId"), town_id=d.get("townId"))
+    return PointInput(
+        point=point,
+        label=_str_field(d.get("label"), f"{path}.label"),
+        place_id=_str_field(d.get("placeId"), f"{path}.placeId"),
+        town_id=_str_field(d.get("townId"), f"{path}.townId"),
+    )
 
 
 def _point_input_to_json(p: PointInput) -> Json:
@@ -162,11 +201,13 @@ def _crew_from_json(d: Any) -> Crew:
         raise InvalidInput("crew", "not_an_object")
     _check_keys(d, _CREW_KEYS, "crew.")
     ages = d.get("childAges")
+    if ages is not None and not isinstance(ages, list | tuple):
+        raise InvalidInput("crew.childAges", "wrong_type")
     return Crew(
-        adults=int(d.get("adults", 0)),
-        children=int(d.get("children", 0)),
-        dog=bool(d.get("dog", False)),
-        child_ages=None if ages is None else tuple(int(a) for a in ages),
+        adults=_int_field(d.get("adults", 0), "crew.adults"),
+        children=_int_field(d.get("children", 0), "crew.children"),
+        dog=_bool_field(d, "dog", False, "crew."),
+        child_ages=None if ages is None else tuple(_int_field(a, "crew.childAges") for a in ages),
     )
 
 
@@ -195,9 +236,9 @@ def _vehicle_from_json(d: Any) -> Vehicle:
     except ValueError:
         raise InvalidInput("vehicle.fuelType", "unknown_value") from None
     return Vehicle(
-        consumption_l_per_100km=float(d.get("consumption", 8.0)),
+        consumption_l_per_100km=_num_field(d.get("consumption", 8.0), "vehicle.consumption"),
         fuel_type=fuel_type,
-        tank_l=float(d.get("tankL", 50.0)),
+        tank_l=_num_field(d.get("tankL", 50.0), "vehicle.tankL"),
     )
 
 
@@ -230,21 +271,27 @@ def input_from_json(d: Mapping[str, Any]) -> TripInput:
     except ValueError:
         raise InvalidInput("mood", "unknown_value") from None
     budget = d.get("budget")
+    vias = d.get("vias")
+    if vias is not None and not isinstance(vias, list | tuple):
+        raise InvalidInput("vias", "wrong_type")
+    round_trip = d.get("roundTrip")
+    if round_trip is not None and not isinstance(round_trip, bool):
+        raise InvalidInput("roundTrip", "wrong_type")
     return TripInput(
         origin=_point_input_from_json(d["origin"], "origin"),
         destination=None if dest is None else _point_input_from_json(dest, "destination"),
-        vias=tuple(_point_input_from_json(v, f"vias[{i}]") for i, v in enumerate(d.get("vias") or ())),
-        ready_route_id=d.get("readyRouteId"),
-        round_trip=d.get("roundTrip"),
+        vias=tuple(_point_input_from_json(v, f"vias[{i}]") for i, v in enumerate(vias or ())),
+        ready_route_id=_str_field(d.get("readyRouteId"), "readyRouteId"),
+        round_trip=round_trip,
         crew=_crew_from_json(d["crew"]),
-        daily_km=int(d["dailyKm"]),
-        budget_rub=None if budget is None else int(budget),
+        daily_km=_int_field(d["dailyKm"], "dailyKm"),
+        budget_rub=None if budget is None else _int_field(budget, "budget"),
         vehicle=_vehicle_from_json(d.get("vehicle")),
         start_at=start_at,
         mood=mood,
-        avoid_tolls=bool(d.get("avoidTolls", False)),
-        reserve_on=bool(d.get("reserveOn", True)),
-        simplify=bool(d.get("simplify", False)),
+        avoid_tolls=_bool_field(d, "avoidTolls", False),
+        reserve_on=_bool_field(d, "reserveOn", True),
+        simplify=_bool_field(d, "simplify", False),
     )
 
 
@@ -475,6 +522,8 @@ def stop_to_json(s: ScheduledStop) -> Json:
     } | ({"funFor": list(s.fun_for)} if s.fun_for else {})  # only on fun stops: G01-G13 keep their bytes
     if s.unknown_facts:  # ADR-0019: only on stops with an unknown fact (the other stops keep their bytes)
         out |= {"unknownFacts": list(s.unknown_facts), "unknownRu": s.unknown_ru}
+    if s.local_tz is not None:  # QA B-4: only on stops in another zone than their day's clock
+        out |= {"localTz": s.local_tz, "localTimeRu": s.local_time_ru}
     return out
 
 
@@ -508,6 +557,8 @@ def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
         alternatives_note_ru=d.get("alternativesNote"),
         unknown_facts=tuple(d.get("unknownFacts", ())),
         unknown_ru=d.get("unknownRu"),
+        local_tz=d.get("localTz"),
+        local_time_ru=d.get("localTimeRu"),
     )
 
 
@@ -571,6 +622,7 @@ def units_to_json(u: CostUnits) -> Json:
             }
             for t in u.tolls
         ],
+        **({"tollsUnknown": True} if u.tolls_unknown else {}),
         "nights": [
             {
                 "stopId": n.stop_id,
@@ -696,6 +748,7 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
             ParkingUnit(x["stopId"], x["name"], x["rubPerHour"], x["hours"], x["rub"], x["source"])
             for x in d.get("parking", [])
         ),
+        tolls_unknown=bool(d.get("tollsUnknown", False)),
     )
 
 
@@ -772,6 +825,7 @@ def _segment_to_json(s: TollSegment) -> Json:
         "nightFrom": _time_to_str(s.night_from),
         "nightTo": _time_to_str(s.night_to),
         "asOf": s.as_of.isoformat(),
+        **({"approx": True} if s.approx else {}),
     }
 
 
@@ -786,6 +840,7 @@ def _segment_from_json(d: Mapping[str, Any]) -> TollSegment:
         night_from=time.fromisoformat(d["nightFrom"]),
         night_to=time.fromisoformat(d["nightTo"]),
         as_of=date.fromisoformat(d["asOf"]),
+        approx=bool(d.get("approx", False)),
     )
 
 
@@ -921,7 +976,7 @@ def budget_fit_to_json(f: BudgetFit) -> Json:
         "allowedRub": f.allowed_rub,
         "initialTotalRub": f.initial_total_rub,
         "totalRub": f.total_rub,
-        "levers": [{"code": x.code, "savedRub": x.saved_rub} for x in f.levers],
+        "levers": [lever_to_json(x) for x in f.levers],
         "textRu": f.text_ru,
         "variantOf": f.variant_of,
     }
@@ -934,10 +989,18 @@ def budget_fit_from_json(d: Mapping[str, Any]) -> BudgetFit:
         allowed_rub=d["allowedRub"],
         initial_total_rub=d["initialTotalRub"],
         total_rub=d["totalRub"],
-        levers=tuple(BudgetLever(x["code"], x["savedRub"]) for x in d["levers"]),
+        levers=tuple(BudgetLever(x["code"], x["savedRub"], x.get("dailyKm")) for x in d["levers"]),
         text_ru=d["textRu"],
         variant_of=d.get("variantOf"),
     )
+
+
+def lever_to_json(x: BudgetLever) -> Json:
+    """`dailyKm` only on a `fewer_nights` lever (acceptance 2026-10-28 V2): other levers keep their bytes."""
+    out: Json = {"code": x.code, "savedRub": x.saved_rub}
+    if x.daily_km is not None:
+        out["dailyKm"] = x.daily_km
+    return out
 
 
 # S3-FINAL P1-2 (5.5 §9): notices about the data, not about this trip, are an info line, not a yellow plate.

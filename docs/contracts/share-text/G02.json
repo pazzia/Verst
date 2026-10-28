@@ -2,7 +2,7 @@
   "plan": {
     "id": "trp_golden",
     "title": "Золотое кольцо",
-    "km": 761,
+    "km": 760,
     "days": 3,
     "nights": 2,
     "roundTrip": true,
@@ -296,23 +296,23 @@
                 ]
               },
               {
-                "id": "alt_d1s03_pl_prs_goritsky",
-                "placeId": "pl_prs_goritsky",
-                "name": "Горицкий монастырь",
-                "deltaMin": 29,
-                "deltaRub": 750,
-                "shiftMin": 29,
+                "id": "alt_d1s03_pl_prs_blue_stone",
+                "placeId": "pl_prs_blue_stone",
+                "name": "Синий камень",
+                "deltaMin": 2,
+                "deltaRub": 0,
+                "shiftMin": 2,
                 "units": {
-                  "deltaKm": -0.541,
+                  "deltaKm": 0.997,
                   "regionCode": "RU-YAR",
                   "checkRub": null,
-                  "adultRub": 300,
-                  "childRub": 150,
-                  "name": "Горицкий монастырь",
-                  "placeId": "pl_prs_goritsky",
+                  "adultRub": 0,
+                  "childRub": 0,
+                  "name": "Синий камень",
+                  "placeId": "pl_prs_blue_stone",
                   "priceRub": "61.90",
                   "regionName": "Ярославская область",
-                  "tripKmDelta": -1
+                  "tripKmDelta": 1
                 },
                 "stop": {
                   "id": "d1s03",
@@ -320,24 +320,25 @@
                   "day": 1,
                   "kind": "sight",
                   "sign": "tourist",
-                  "placeId": "pl_prs_goritsky",
+                  "placeId": "pl_prs_blue_stone",
                   "townId": "t_pereslavl",
-                  "name": "Горицкий монастырь",
+                  "name": "Синий камень",
                   "note": null,
-                  "lat": 56.72796065440339,
-                  "lon": 38.870677713165705,
+                  "lat": 56.74423934559661,
+                  "lon": 38.82482011630174,
                   "arriveAt": "2026-11-07T11:35",
-                  "departAt": "2026-11-07T12:35",
+                  "departAt": "2026-11-07T12:05",
                   "tz": "Europe/Moscow",
                   "kmFromPrev": 70,
-                  "kmAt": 140,
-                  "dwellMin": 60,
+                  "kmAt": 139,
+                  "dwellMin": 30,
                   "tags": [
-                    "museum",
-                    "monastery"
+                    "view",
+                    "walk",
+                    "free_entry"
                   ],
-                  "costRub": 750,
-                  "reason": "Час на осмотр.",
+                  "costRub": 0,
+                  "reason": "Полчаса на осмотр.",
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
@@ -345,9 +346,10 @@
                   "hotelOptions": [],
                   "selectedHotelId": null,
                   "unknownFacts": [
+                    "hours",
                     "dogs"
                   ],
-                  "unknownRu": "Пускают ли с собакой — не проверено"
+                  "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
                 },
                 "dayPatch": [
                   {
@@ -368,20 +370,20 @@
                     "stopId": "d1s03",
                     "seq": 3,
                     "arriveAt": "2026-11-07T11:35",
-                    "departAt": "2026-11-07T12:35",
+                    "departAt": "2026-11-07T12:05",
                     "kmFromPrev": 70
                   },
                   {
                     "stopId": "d1s04",
                     "seq": 4,
-                    "arriveAt": "2026-11-07T13:31",
-                    "departAt": "2026-11-07T14:31",
-                    "kmFromPrev": 66
+                    "arriveAt": "2026-11-07T13:04",
+                    "departAt": "2026-11-07T14:04",
+                    "kmFromPrev": 68
                   },
                   {
                     "stopId": "d1s05",
                     "seq": 5,
-                    "arriveAt": "2026-11-07T15:19",
+                    "arriveAt": "2026-11-07T14:52",
                     "departAt": null,
                     "kmFromPrev": 59
                   }
@@ -756,11 +758,11 @@
       },
       {
         "day": 2,
-        "km": 266,
-        "driveMin": 260,
+        "km": 265,
+        "driveMin": 258,
         "tz": "Europe/Moscow",
         "startAt": "2026-11-08T09:00",
-        "endAt": "2026-11-08T17:00",
+        "endAt": "2026-11-08T16:43",
         "overBudget": false,
         "stops": [
           {
@@ -797,35 +799,239 @@
             "day": 2,
             "kind": "sight",
             "sign": "tourist",
-            "placeId": "pl_kos_sloboda",
-            "townId": "t_kostroma",
-            "name": "Костромская слобода",
+            "placeId": "pl_yar_strelka",
+            "townId": "t_yaroslavl",
+            "name": "Стрелка и Волжская набережная",
             "note": null,
-            "lat": 57.77131748693183,
-            "lon": 40.88597750479202,
-            "arriveAt": "2026-11-08T10:15",
-            "departAt": "2026-11-08T11:15",
+            "lat": 57.63333497386366,
+            "lon": 39.90966549795677,
+            "arriveAt": "2026-11-08T09:04",
+            "departAt": "2026-11-08T09:49",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 78,
-            "kmAt": 339,
-            "dwellMin": 60,
+            "kmFromPrev": 3,
+            "kmAt": 265,
+            "dwellMin": 45,
             "tags": [
-              "playground",
+              "view",
               "walk",
-              "museum"
+              "evening",
+              "free_entry"
             ],
-            "costRub": 750,
-            "reason": "Час на осмотр.",
+            "costRub": 0,
+            "reason": "45 мин на осмотр.",
             "verified": true,
             "replaceable": true,
-            "alternatives": [],
-            "alternativesNote": "Других вариантов в это время поблизости нет.",
+            "alternatives": [
+              {
+                "id": "alt_d2s02_pl_yar_embankment",
+                "placeId": "pl_yar_embankment",
+                "name": "Волжская набережная",
+                "deltaMin": -4,
+                "deltaRub": 0,
+                "shiftMin": -4,
+                "units": {
+                  "deltaKm": -0.996,
+                  "regionCode": "RU-YAR",
+                  "checkRub": null,
+                  "adultRub": 0,
+                  "childRub": 0,
+                  "name": "Волжская набережная",
+                  "placeId": "pl_yar_embankment",
+                  "priceRub": "61.90",
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -1
+                },
+                "stop": {
+                  "id": "d2s02",
+                  "seq": 7,
+                  "day": 2,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_yar_embankment",
+                  "townId": "t_yaroslavl",
+                  "name": "Волжская набережная",
+                  "note": null,
+                  "lat": 57.627908743465916,
+                  "lon": 39.89959929877406,
+                  "arriveAt": "2026-11-08T09:01",
+                  "departAt": "2026-11-08T09:46",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 1,
+                  "kmAt": 264,
+                  "dwellMin": 45,
+                  "tags": [
+                    "view",
+                    "walk",
+                    "free_entry"
+                  ],
+                  "costRub": 0,
+                  "reason": "45 мин на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours",
+                    "dogs"
+                  ],
+                  "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-11-08T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-11-08T09:01",
+                    "departAt": "2026-11-08T09:46",
+                    "kmFromPrev": 1
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-11-08T10:57",
+                    "departAt": "2026-11-08T12:27",
+                    "kmFromPrev": 76
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-11-08T13:47",
+                    "departAt": "2026-11-08T14:47",
+                    "kmFromPrev": 84
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-11-08T16:18",
+                    "departAt": "2026-11-08T16:28",
+                    "kmFromPrev": 94
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 11,
+                    "arriveAt": "2026-11-08T16:39",
+                    "departAt": null,
+                    "kmFromPrev": 8
+                  }
+                ]
+              },
+              {
+                "id": "alt_d2s02_pl_yar_tower",
+                "placeId": "pl_yar_tower",
+                "name": "Власьевская башня",
+                "deltaMin": -19,
+                "deltaRub": 0,
+                "shiftMin": -19,
+                "units": {
+                  "deltaKm": -0.434,
+                  "regionCode": "RU-YAR",
+                  "checkRub": null,
+                  "adultRub": 0,
+                  "childRub": 0,
+                  "name": "Власьевская башня",
+                  "placeId": "pl_yar_tower",
+                  "priceRub": "61.90",
+                  "regionName": "Ярославская область",
+                  "tripKmDelta": -1
+                },
+                "stop": {
+                  "id": "d2s02",
+                  "seq": 7,
+                  "day": 2,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_yar_tower",
+                  "townId": "t_yaroslavl",
+                  "name": "Власьевская башня",
+                  "note": null,
+                  "lat": 57.628813115198874,
+                  "lon": 39.88785539972757,
+                  "arriveAt": "2026-11-08T09:00",
+                  "departAt": "2026-11-08T09:30",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 1,
+                  "kmAt": 263,
+                  "dwellMin": 30,
+                  "tags": [
+                    "view",
+                    "free_entry"
+                  ],
+                  "costRub": 0,
+                  "reason": "Полчаса на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours",
+                    "dogs"
+                  ],
+                  "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-11-08T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-11-08T09:00",
+                    "departAt": "2026-11-08T09:30",
+                    "kmFromPrev": 1
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-11-08T10:42",
+                    "departAt": "2026-11-08T12:12",
+                    "kmFromPrev": 77
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-11-08T13:32",
+                    "departAt": "2026-11-08T14:32",
+                    "kmFromPrev": 84
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-11-08T16:03",
+                    "departAt": "2026-11-08T16:13",
+                    "kmFromPrev": 94
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 11,
+                    "arriveAt": "2026-11-08T16:24",
+                    "departAt": null,
+                    "kmFromPrev": 8
+                  }
+                ]
+              }
+            ],
+            "alternativesNote": null,
             "hotelOptions": [],
             "selectedHotelId": null,
             "unknownFacts": [
+              "hours",
               "dogs"
             ],
-            "unknownRu": "Пускают ли с собакой — не проверено"
+            "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
           },
           {
             "id": "d2s03",
@@ -839,10 +1045,10 @@
             "note": null,
             "lat": 57.764986884801125,
             "lon": 40.89271458732668,
-            "arriveAt": "2026-11-08T11:18",
-            "departAt": "2026-11-08T12:48",
+            "arriveAt": "2026-11-08T11:01",
+            "departAt": "2026-11-08T12:31",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 2,
+            "kmFromPrev": 75,
             "kmAt": 340,
             "dwellMin": 90,
             "tags": [
@@ -874,8 +1080,8 @@
             "note": null,
             "lat": 57.17018243494638,
             "lon": 40.96839220129516,
-            "arriveAt": "2026-11-08T14:08",
-            "departAt": "2026-11-08T15:08",
+            "arriveAt": "2026-11-08T13:51",
+            "departAt": "2026-11-08T14:51",
             "tz": "Europe/Moscow",
             "kmFromPrev": 84,
             "kmAt": 423,
@@ -920,8 +1126,8 @@
                   "note": null,
                   "lat": 57.00401748693183,
                   "lon": 40.97884816258732,
-                  "arriveAt": "2026-11-08T14:30",
-                  "departAt": "2026-11-08T15:30",
+                  "arriveAt": "2026-11-08T14:13",
+                  "departAt": "2026-11-08T15:13",
                   "tz": "Europe/Moscow",
                   "kmFromPrev": 107,
                   "kmAt": 446,
@@ -950,35 +1156,35 @@
                   {
                     "stopId": "d2s02",
                     "seq": 7,
-                    "arriveAt": "2026-11-08T10:15",
-                    "departAt": "2026-11-08T11:15",
-                    "kmFromPrev": 78
+                    "arriveAt": "2026-11-08T09:04",
+                    "departAt": "2026-11-08T09:49",
+                    "kmFromPrev": 3
                   },
                   {
                     "stopId": "d2s03",
                     "seq": 8,
-                    "arriveAt": "2026-11-08T11:18",
-                    "departAt": "2026-11-08T12:48",
-                    "kmFromPrev": 2
+                    "arriveAt": "2026-11-08T11:01",
+                    "departAt": "2026-11-08T12:31",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d2s04",
                     "seq": 9,
-                    "arriveAt": "2026-11-08T14:30",
-                    "departAt": "2026-11-08T15:30",
+                    "arriveAt": "2026-11-08T14:13",
+                    "departAt": "2026-11-08T15:13",
                     "kmFromPrev": 107
                   },
                   {
                     "stopId": "d2s05",
                     "seq": 10,
-                    "arriveAt": "2026-11-08T16:39",
-                    "departAt": "2026-11-08T16:49",
+                    "arriveAt": "2026-11-08T16:22",
+                    "departAt": "2026-11-08T16:32",
                     "kmFromPrev": 71
                   },
                   {
                     "stopId": "d2s06",
                     "seq": 11,
-                    "arriveAt": "2026-11-08T17:00",
+                    "arriveAt": "2026-11-08T16:43",
                     "departAt": null,
                     "kmFromPrev": 8
                   }
@@ -1015,8 +1221,8 @@
                   "note": null,
                   "lat": 57.00130437173296,
                   "lon": 40.97719877505821,
-                  "arriveAt": "2026-11-08T14:28",
-                  "departAt": "2026-11-08T15:28",
+                  "arriveAt": "2026-11-08T14:11",
+                  "departAt": "2026-11-08T15:11",
                   "tz": "Europe/Moscow",
                   "kmFromPrev": 107,
                   "kmAt": 446,
@@ -1044,35 +1250,129 @@
                   {
                     "stopId": "d2s02",
                     "seq": 7,
-                    "arriveAt": "2026-11-08T10:15",
-                    "departAt": "2026-11-08T11:15",
-                    "kmFromPrev": 78
+                    "arriveAt": "2026-11-08T09:04",
+                    "departAt": "2026-11-08T09:49",
+                    "kmFromPrev": 3
                   },
                   {
                     "stopId": "d2s03",
                     "seq": 8,
-                    "arriveAt": "2026-11-08T11:18",
-                    "departAt": "2026-11-08T12:48",
-                    "kmFromPrev": 2
+                    "arriveAt": "2026-11-08T11:01",
+                    "departAt": "2026-11-08T12:31",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d2s04",
                     "seq": 9,
-                    "arriveAt": "2026-11-08T14:28",
-                    "departAt": "2026-11-08T15:28",
+                    "arriveAt": "2026-11-08T14:11",
+                    "departAt": "2026-11-08T15:11",
                     "kmFromPrev": 107
                   },
                   {
                     "stopId": "d2s05",
                     "seq": 10,
-                    "arriveAt": "2026-11-08T16:36",
-                    "departAt": "2026-11-08T16:46",
+                    "arriveAt": "2026-11-08T16:19",
+                    "departAt": "2026-11-08T16:29",
                     "kmFromPrev": 71
                   },
                   {
                     "stopId": "d2s06",
                     "seq": 11,
-                    "arriveAt": "2026-11-08T16:57",
+                    "arriveAt": "2026-11-08T16:40",
+                    "departAt": null,
+                    "kmFromPrev": 8
+                  }
+                ]
+              },
+              {
+                "id": "alt_d2s04_pl_iva_cafe_station",
+                "placeId": "pl_iva_cafe_station",
+                "name": "Столовая «Текстиль»",
+                "deltaMin": 1,
+                "deltaRub": -600,
+                "shiftMin": 1,
+                "units": {
+                  "deltaKm": 0.231,
+                  "regionCode": "RU-IVA",
+                  "checkRub": 500,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Столовая «Текстиль»",
+                  "placeId": "pl_iva_cafe_station",
+                  "priceRub": "61.60",
+                  "regionName": "Ивановская область",
+                  "tripKmDelta": 0
+                },
+                "stop": {
+                  "id": "d2s04",
+                  "seq": 9,
+                  "day": 2,
+                  "kind": "food",
+                  "sign": "food",
+                  "placeId": "pl_iva_cafe_station",
+                  "townId": "t_ivanovo",
+                  "name": "Столовая «Текстиль»",
+                  "note": null,
+                  "lat": 57.002208743465914,
+                  "lon": 40.967302449883576,
+                  "arriveAt": "2026-11-08T14:13",
+                  "departAt": "2026-11-08T15:13",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 107,
+                  "kmAt": 446,
+                  "dwellMin": 60,
+                  "tags": [
+                    "parking"
+                  ],
+                  "costRub": 1500,
+                  "reason": "Обед, парковка у входа.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-11-08T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-11-08T09:04",
+                    "departAt": "2026-11-08T09:49",
+                    "kmFromPrev": 3
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-11-08T11:01",
+                    "departAt": "2026-11-08T12:31",
+                    "kmFromPrev": 75
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-11-08T14:13",
+                    "departAt": "2026-11-08T15:13",
+                    "kmFromPrev": 107
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-11-08T16:23",
+                    "departAt": "2026-11-08T16:33",
+                    "kmFromPrev": 71
+                  },
+                  {
+                    "stopId": "d2s06",
+                    "seq": 11,
+                    "arriveAt": "2026-11-08T16:44",
                     "departAt": null,
                     "kmFromPrev": 8
                   }
@@ -1095,8 +1395,8 @@
             "note": null,
             "lat": 56.471268255723594,
             "lon": 40.49601036512244,
-            "arriveAt": "2026-11-08T16:39",
-            "departAt": "2026-11-08T16:49",
+            "arriveAt": "2026-11-08T16:22",
+            "departAt": "2026-11-08T16:32",
             "tz": "Europe/Moscow",
             "kmFromPrev": 94,
             "kmAt": 516,
@@ -1105,7 +1405,7 @@
               "24h"
             ],
             "costRub": 2540,
-            "reason": "Последняя заправка до дома.",
+            "reason": "Через 500 км в баке останется меньше 20% — заправимся здесь.",
             "verified": true,
             "replaceable": true,
             "alternatives": [
@@ -1140,8 +1440,8 @@
                   "note": null,
                   "lat": 56.76029278323744,
                   "lon": 40.749049375137304,
-                  "arriveAt": "2026-11-08T16:02",
-                  "departAt": "2026-11-08T16:12",
+                  "arriveAt": "2026-11-08T15:45",
+                  "departAt": "2026-11-08T15:55",
                   "tz": "Europe/Moscow",
                   "kmFromPrev": 56,
                   "kmAt": 478,
@@ -1150,7 +1450,7 @@
                     "wc"
                   ],
                   "costRub": 2360,
-                  "reason": "Последняя заправка до дома.",
+                  "reason": "Через 500 км в баке останется меньше 20% — заправимся здесь.",
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
@@ -1174,35 +1474,35 @@
                   {
                     "stopId": "d2s02",
                     "seq": 7,
-                    "arriveAt": "2026-11-08T10:15",
-                    "departAt": "2026-11-08T11:15",
-                    "kmFromPrev": 78
+                    "arriveAt": "2026-11-08T09:04",
+                    "departAt": "2026-11-08T09:49",
+                    "kmFromPrev": 3
                   },
                   {
                     "stopId": "d2s03",
                     "seq": 8,
-                    "arriveAt": "2026-11-08T11:18",
-                    "departAt": "2026-11-08T12:48",
-                    "kmFromPrev": 2
+                    "arriveAt": "2026-11-08T11:01",
+                    "departAt": "2026-11-08T12:31",
+                    "kmFromPrev": 75
                   },
                   {
                     "stopId": "d2s04",
                     "seq": 9,
-                    "arriveAt": "2026-11-08T14:08",
-                    "departAt": "2026-11-08T15:08",
+                    "arriveAt": "2026-11-08T13:51",
+                    "departAt": "2026-11-08T14:51",
                     "kmFromPrev": 84
                   },
                   {
                     "stopId": "d2s05",
                     "seq": 10,
-                    "arriveAt": "2026-11-08T16:02",
-                    "departAt": "2026-11-08T16:12",
+                    "arriveAt": "2026-11-08T15:45",
+                    "departAt": "2026-11-08T15:55",
                     "kmFromPrev": 56
                   },
                   {
                     "stopId": "d2s06",
                     "seq": 11,
-                    "arriveAt": "2026-11-08T16:57",
+                    "arriveAt": "2026-11-08T16:40",
                     "departAt": null,
                     "kmFromPrev": 46
                   }
@@ -1229,7 +1529,7 @@
             "note": null,
             "lat": 56.41246502613634,
             "lon": 40.45314474240977,
-            "arriveAt": "2026-11-08T17:00",
+            "arriveAt": "2026-11-08T16:43",
             "departAt": null,
             "tz": "Europe/Moscow",
             "kmFromPrev": 8,
@@ -1269,10 +1569,10 @@
       {
         "day": 3,
         "km": 226,
-        "driveMin": 194,
+        "driveMin": 198,
         "tz": "Europe/Moscow",
         "startAt": "2026-11-09T09:00",
-        "endAt": "2026-11-09T14:59",
+        "endAt": "2026-11-09T14:18",
         "overBudget": false,
         "stops": [
           {
@@ -1309,130 +1609,37 @@
             "day": 3,
             "kind": "sight",
             "sign": "tourist",
-            "placeId": "pl_suz_wooden",
-            "townId": "t_suzdal",
-            "name": "Музей деревянного зодчества",
+            "placeId": "pl_vla_view",
+            "townId": "t_vladimir",
+            "name": "Смотровая у Успенского собора",
             "note": null,
-            "lat": 56.41517814133521,
-            "lon": 40.46288948481954,
-            "arriveAt": "2026-11-09T09:04",
-            "departAt": "2026-11-09T10:04",
+            "lat": 56.12447814133521,
+            "lon": 40.41143547994549,
+            "arriveAt": "2026-11-09T09:35",
+            "departAt": "2026-11-09T10:05",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 2,
-            "kmAt": 523,
-            "dwellMin": 60,
+            "kmFromPrev": 36,
+            "kmAt": 558,
+            "dwellMin": 30,
             "tags": [
+              "view",
               "walk",
-              "museum"
+              "free_entry"
             ],
-            "costRub": 750,
-            "reason": "Час на осмотр.",
+            "costRub": 0,
+            "reason": "Полчаса на осмотр.",
             "verified": true,
             "replaceable": true,
             "alternatives": [
               {
-                "id": "alt_d3s02_pl_vla_view",
-                "placeId": "pl_vla_view",
-                "name": "Смотровая у Успенского собора",
-                "deltaMin": -33,
-                "deltaRub": -760,
-                "shiftMin": -33,
-                "units": {
-                  "deltaKm": -1.701,
-                  "regionCode": "RU-VLA",
-                  "checkRub": null,
-                  "adultRub": 0,
-                  "childRub": 0,
-                  "name": "Смотровая у Успенского собора",
-                  "placeId": "pl_vla_view",
-                  "priceRub": "61.40",
-                  "regionName": "Владимирская область",
-                  "tripKmDelta": -2
-                },
-                "stop": {
-                  "id": "d3s02",
-                  "seq": 13,
-                  "day": 3,
-                  "kind": "sight",
-                  "sign": "tourist",
-                  "placeId": "pl_vla_view",
-                  "townId": "t_vladimir",
-                  "name": "Смотровая у Успенского собора",
-                  "note": null,
-                  "lat": 56.12447814133521,
-                  "lon": 40.41143547994549,
-                  "arriveAt": "2026-11-09T09:35",
-                  "departAt": "2026-11-09T10:05",
-                  "tz": "Europe/Moscow",
-                  "kmFromPrev": 36,
-                  "kmAt": 558,
-                  "dwellMin": 30,
-                  "tags": [
-                    "view",
-                    "walk",
-                    "free_entry"
-                  ],
-                  "costRub": 0,
-                  "reason": "Полчаса на осмотр.",
-                  "verified": true,
-                  "replaceable": true,
-                  "alternatives": [],
-                  "alternativesNote": null,
-                  "hotelOptions": [],
-                  "selectedHotelId": null,
-                  "unknownFacts": [
-                    "hours",
-                    "dogs"
-                  ],
-                  "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
-                },
-                "dayPatch": [
-                  {
-                    "stopId": "d3s01",
-                    "seq": 12,
-                    "arriveAt": null,
-                    "departAt": "2026-11-09T09:00",
-                    "kmFromPrev": 0
-                  },
-                  {
-                    "stopId": "d3s02",
-                    "seq": 13,
-                    "arriveAt": "2026-11-09T09:35",
-                    "departAt": "2026-11-09T10:05",
-                    "kmFromPrev": 36
-                  },
-                  {
-                    "stopId": "d3s03",
-                    "seq": 14,
-                    "arriveAt": "2026-11-09T11:15",
-                    "departAt": "2026-11-09T12:00",
-                    "kmFromPrev": 86
-                  },
-                  {
-                    "stopId": "d3s04",
-                    "seq": 15,
-                    "arriveAt": "2026-11-09T12:00",
-                    "departAt": "2026-11-09T13:00",
-                    "kmFromPrev": 1
-                  },
-                  {
-                    "stopId": "d3s05",
-                    "seq": 16,
-                    "arriveAt": "2026-11-09T14:26",
-                    "departAt": null,
-                    "kmFromPrev": 102
-                  }
-                ]
-              },
-              {
                 "id": "alt_d3s02_pl_suz_rizopolozhensky",
                 "placeId": "pl_suz_rizopolozhensky",
                 "name": "Ризоположенский монастырь",
-                "deltaMin": -18,
-                "deltaRub": -760,
-                "shiftMin": -18,
+                "deltaMin": 15,
+                "deltaRub": 0,
+                "shiftMin": 15,
                 "units": {
-                  "deltaKm": -1.804,
+                  "deltaKm": -0.103,
                   "regionCode": "RU-VLA",
                   "checkRub": null,
                   "adultRub": 0,
@@ -1441,7 +1648,7 @@
                   "placeId": "pl_suz_rizopolozhensky",
                   "priceRub": "61.40",
                   "regionName": "Владимирская область",
-                  "tripKmDelta": -2
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d3s02",
@@ -1496,23 +1703,23 @@
                   {
                     "stopId": "d3s03",
                     "seq": 14,
-                    "arriveAt": "2026-11-09T11:30",
-                    "departAt": "2026-11-09T12:15",
+                    "arriveAt": "2026-11-09T11:32",
+                    "departAt": "2026-11-09T12:02",
                     "kmFromPrev": 120
                   },
                   {
                     "stopId": "d3s04",
                     "seq": 15,
-                    "arriveAt": "2026-11-09T12:15",
-                    "departAt": "2026-11-09T13:15",
-                    "kmFromPrev": 1
+                    "arriveAt": "2026-11-09T12:37",
+                    "departAt": "2026-11-09T13:37",
+                    "kmFromPrev": 43
                   },
                   {
                     "stopId": "d3s05",
                     "seq": 16,
-                    "arriveAt": "2026-11-09T14:41",
+                    "arriveAt": "2026-11-09T14:33",
                     "departAt": null,
-                    "kmFromPrev": 102
+                    "kmFromPrev": 60
                   }
                 ]
               },
@@ -1520,11 +1727,11 @@
                 "id": "alt_d3s02_pl_vla_cathedral_square",
                 "placeId": "pl_vla_cathedral_square",
                 "name": "Соборная площадь Владимира",
-                "deltaMin": -33,
-                "deltaRub": -760,
-                "shiftMin": -33,
+                "deltaMin": 0,
+                "deltaRub": 0,
+                "shiftMin": 0,
                 "units": {
-                  "deltaKm": -1.748,
+                  "deltaKm": -0.047,
                   "regionCode": "RU-VLA",
                   "checkRub": null,
                   "adultRub": 0,
@@ -1533,7 +1740,7 @@
                   "placeId": "pl_vla_cathedral_square",
                   "priceRub": "61.40",
                   "regionName": "Владимирская область",
-                  "tripKmDelta": -2
+                  "tripKmDelta": 0
                 },
                 "stop": {
                   "id": "d3s02",
@@ -1589,106 +1796,70 @@
                   {
                     "stopId": "d3s03",
                     "seq": 14,
-                    "arriveAt": "2026-11-09T11:15",
-                    "departAt": "2026-11-09T12:00",
+                    "arriveAt": "2026-11-09T11:17",
+                    "departAt": "2026-11-09T11:47",
                     "kmFromPrev": 86
                   },
                   {
                     "stopId": "d3s04",
                     "seq": 15,
-                    "arriveAt": "2026-11-09T12:00",
-                    "departAt": "2026-11-09T13:00",
-                    "kmFromPrev": 1
+                    "arriveAt": "2026-11-09T12:22",
+                    "departAt": "2026-11-09T13:22",
+                    "kmFromPrev": 43
                   },
                   {
                     "stopId": "d3s05",
                     "seq": 16,
-                    "arriveAt": "2026-11-09T14:26",
+                    "arriveAt": "2026-11-09T14:18",
                     "departAt": null,
-                    "kmFromPrev": 102
+                    "kmFromPrev": 60
                   }
                 ]
-              }
-            ],
-            "alternativesNote": null,
-            "hotelOptions": [],
-            "selectedHotelId": null,
-            "unknownFacts": [
-              "dogs"
-            ],
-            "unknownRu": "Пускают ли с собакой — не проверено"
-          },
-          {
-            "id": "d3s03",
-            "seq": 14,
-            "day": 3,
-            "kind": "sight",
-            "sign": "tourist",
-            "placeId": "pl_pok_chocolate",
-            "townId": "t_pokrov",
-            "name": "Музей шоколада",
-            "note": null,
-            "lat": 55.92051311519887,
-            "lon": 39.181912137660355,
-            "arriveAt": "2026-11-09T11:48",
-            "departAt": "2026-11-09T12:33",
-            "tz": "Europe/Moscow",
-            "kmFromPrev": 121,
-            "kmAt": 643,
-            "dwellMin": 45,
-            "tags": [
-              "playground",
-              "museum"
-            ],
-            "costRub": 950,
-            "reason": "45 мин на осмотр.",
-            "verified": true,
-            "replaceable": true,
-            "alternatives": [
+              },
               {
-                "id": "alt_d3s03_pl_pok_park",
-                "placeId": "pl_pok_park",
-                "name": "Покровский парк",
-                "deltaMin": -11,
-                "deltaRub": -950,
-                "shiftMin": -11,
+                "id": "alt_d3s02_pl_vla_nerl",
+                "placeId": "pl_vla_nerl",
+                "name": "Церковь Покрова на Нерли",
+                "deltaMin": 64,
+                "deltaRub": 110,
+                "shiftMin": 64,
                 "units": {
-                  "deltaKm": 0.674,
+                  "deltaKm": 22.755,
                   "regionCode": "RU-VLA",
                   "checkRub": null,
                   "adultRub": 0,
                   "childRub": 0,
-                  "name": "Покровский парк",
-                  "placeId": "pl_pok_park",
+                  "name": "Церковь Покрова на Нерли",
+                  "placeId": "pl_vla_nerl",
                   "priceRub": "61.40",
                   "regionName": "Владимирская область",
-                  "tripKmDelta": 1
+                  "tripKmDelta": 22
                 },
                 "stop": {
-                  "id": "d3s03",
-                  "seq": 14,
+                  "id": "d3s02",
+                  "seq": 13,
                   "day": 3,
                   "kind": "sight",
                   "sign": "tourist",
-                  "placeId": "pl_pok_park",
-                  "townId": "t_pokrov",
-                  "name": "Покровский парк",
+                  "placeId": "pl_vla_nerl",
+                  "townId": null,
+                  "name": "Церковь Покрова на Нерли",
                   "note": null,
-                  "lat": 55.91327814133521,
-                  "lon": 39.181912137660355,
-                  "arriveAt": "2026-11-09T11:50",
-                  "departAt": "2026-11-09T12:20",
+                  "lat": 56.142565575994354,
+                  "lon": 40.559723531607304,
+                  "arriveAt": "2026-11-09T09:50",
+                  "departAt": "2026-11-09T10:50",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 121,
-                  "kmAt": 643,
-                  "dwellMin": 30,
+                  "kmFromPrev": 45,
+                  "kmAt": 556,
+                  "dwellMin": 60,
                   "tags": [
-                    "playground",
+                    "view",
                     "walk",
                     "free_entry"
                   ],
                   "costRub": 0,
-                  "reason": "Полчаса на осмотр.",
+                  "reason": "Час на осмотр.",
                   "verified": true,
                   "replaceable": true,
                   "alternatives": [],
@@ -1712,42 +1883,80 @@
                   {
                     "stopId": "d3s02",
                     "seq": 13,
-                    "arriveAt": "2026-11-09T09:04",
-                    "departAt": "2026-11-09T10:04",
-                    "kmFromPrev": 2
+                    "arriveAt": "2026-11-09T09:50",
+                    "departAt": "2026-11-09T10:50",
+                    "kmFromPrev": 45
                   },
                   {
                     "stopId": "d3s03",
                     "seq": 14,
-                    "arriveAt": "2026-11-09T11:50",
-                    "departAt": "2026-11-09T12:20",
-                    "kmFromPrev": 121
+                    "arriveAt": "2026-11-09T12:21",
+                    "departAt": "2026-11-09T12:51",
+                    "kmFromPrev": 100
                   },
                   {
                     "stopId": "d3s04",
                     "seq": 15,
-                    "arriveAt": "2026-11-09T12:22",
-                    "departAt": "2026-11-09T13:22",
-                    "kmFromPrev": 1
+                    "arriveAt": "2026-11-09T13:26",
+                    "departAt": "2026-11-09T14:26",
+                    "kmFromPrev": 43
                   },
                   {
                     "stopId": "d3s05",
                     "seq": 16,
-                    "arriveAt": "2026-11-09T14:48",
+                    "arriveAt": "2026-11-09T15:22",
                     "departAt": null,
-                    "kmFromPrev": 102
+                    "kmFromPrev": 60
                   }
                 ]
-              },
+              }
+            ],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null,
+            "unknownFacts": [
+              "hours",
+              "dogs"
+            ],
+            "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
+          },
+          {
+            "id": "d3s03",
+            "seq": 14,
+            "day": 3,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_pok_park",
+            "townId": "t_pokrov",
+            "name": "Покровский парк",
+            "note": null,
+            "lat": 55.91327814133521,
+            "lon": 39.181912137660355,
+            "arriveAt": "2026-11-09T11:17",
+            "departAt": "2026-11-09T11:47",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 86,
+            "kmAt": 643,
+            "dwellMin": 30,
+            "tags": [
+              "playground",
+              "walk",
+              "free_entry"
+            ],
+            "costRub": 0,
+            "reason": "Полчаса на осмотр.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
               {
                 "id": "alt_d3s03_pl_pok_monastery",
                 "placeId": "pl_pok_monastery",
                 "name": "Свято-Введенский монастырь",
-                "deltaMin": 7,
-                "deltaRub": -940,
-                "shiftMin": 7,
+                "deltaMin": 18,
+                "deltaRub": 10,
+                "shiftMin": 18,
                 "units": {
-                  "deltaKm": 2.787,
+                  "deltaKm": 2.113,
                   "regionCode": "RU-VLA",
                   "checkRub": null,
                   "adultRub": 0,
@@ -1756,7 +1965,7 @@
                   "placeId": "pl_pok_monastery",
                   "priceRub": "61.40",
                   "regionName": "Владимирская область",
-                  "tripKmDelta": 3
+                  "tripKmDelta": 2
                 },
                 "stop": {
                   "id": "d3s03",
@@ -1770,11 +1979,11 @@
                   "note": null,
                   "lat": 55.92865246079548,
                   "lon": 39.15946965584911,
-                  "arriveAt": "2026-11-09T11:52",
-                  "departAt": "2026-11-09T12:37",
+                  "arriveAt": "2026-11-09T11:20",
+                  "departAt": "2026-11-09T12:05",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 123,
-                  "kmAt": 643,
+                  "kmFromPrev": 88,
+                  "kmAt": 644,
                   "dwellMin": 45,
                   "tags": [
                     "monastery",
@@ -1804,41 +2013,42 @@
                   {
                     "stopId": "d3s02",
                     "seq": 13,
-                    "arriveAt": "2026-11-09T09:04",
-                    "departAt": "2026-11-09T10:04",
-                    "kmFromPrev": 2
+                    "arriveAt": "2026-11-09T09:35",
+                    "departAt": "2026-11-09T10:05",
+                    "kmFromPrev": 36
                   },
                   {
                     "stopId": "d3s03",
                     "seq": 14,
-                    "arriveAt": "2026-11-09T11:52",
-                    "departAt": "2026-11-09T12:37",
-                    "kmFromPrev": 123
+                    "arriveAt": "2026-11-09T11:20",
+                    "departAt": "2026-11-09T12:05",
+                    "kmFromPrev": 88
                   },
                   {
                     "stopId": "d3s04",
                     "seq": 15,
                     "arriveAt": "2026-11-09T12:40",
                     "departAt": "2026-11-09T13:40",
-                    "kmFromPrev": 2
+                    "kmFromPrev": 43
                   },
                   {
                     "stopId": "d3s05",
                     "seq": 16,
-                    "arriveAt": "2026-11-09T15:06",
+                    "arriveAt": "2026-11-09T14:36",
                     "departAt": null,
-                    "kmFromPrev": 102
+                    "kmFromPrev": 60
                   }
                 ]
               }
             ],
-            "alternativesNote": null,
+            "alternativesNote": "Нашли только один вариант в это время.",
             "hotelOptions": [],
             "selectedHotelId": null,
             "unknownFacts": [
+              "hours",
               "dogs"
             ],
-            "unknownRu": "Пускают ли с собакой — не проверено"
+            "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
           },
           {
             "id": "d3s04",
@@ -1846,133 +2056,45 @@
             "day": 3,
             "kind": "food",
             "sign": "food",
-            "placeId": "pl_pok_cafe",
-            "townId": "t_pokrov",
-            "name": "Кафе «Покровское»",
+            "placeId": "pl_m7w_cafe_060",
+            "townId": null,
+            "name": "Кафе «Придорожное», М-7",
             "note": null,
-            "lat": 55.91870437173296,
-            "lon": 39.180309103245264,
-            "arriveAt": "2026-11-09T12:33",
-            "departAt": "2026-11-09T13:33",
+            "lat": 55.864251439771344,
+            "lon": 38.54312310544528,
+            "arriveAt": "2026-11-09T12:22",
+            "departAt": "2026-11-09T13:22",
             "tz": "Europe/Moscow",
-            "kmFromPrev": 1,
-            "kmAt": 643,
+            "kmFromPrev": 43,
+            "kmAt": 685,
             "dwellMin": 60,
             "tags": [
               "kids_menu",
               "parking"
             ],
-            "costRub": 1950,
+            "costRub": 1500,
             "reason": "Обед, есть детское меню.",
             "verified": true,
             "replaceable": true,
             "alternatives": [
               {
-                "id": "alt_d3s04_pl_pok_cafe_park",
-                "placeId": "pl_pok_cafe_park",
-                "name": "Кафе «Покровское подворье»",
-                "deltaMin": 3,
-                "deltaRub": -150,
-                "shiftMin": 3,
+                "id": "alt_d3s04_pl_m12_cafe_055",
+                "placeId": "pl_m12_cafe_055",
+                "name": "Кафе «Придорожное», М-12",
+                "deltaMin": 15,
+                "deltaRub": 50,
+                "shiftMin": 15,
                 "units": {
-                  "deltaKm": 0.635,
-                  "regionCode": "RU-VLA",
-                  "checkRub": 600,
-                  "adultRub": null,
-                  "childRub": null,
-                  "name": "Кафе «Покровское подворье»",
-                  "placeId": "pl_pok_cafe_park",
-                  "priceRub": "61.40",
-                  "regionName": "Владимирская область",
-                  "tripKmDelta": 1
-                },
-                "stop": {
-                  "id": "d3s04",
-                  "seq": 15,
-                  "day": 3,
-                  "kind": "food",
-                  "sign": "food",
-                  "placeId": "pl_pok_cafe_park",
-                  "townId": "t_pokrov",
-                  "name": "Кафе «Покровское подворье»",
-                  "note": null,
-                  "lat": 55.91508688480113,
-                  "lon": 39.180309103245264,
-                  "arriveAt": "2026-11-09T12:35",
-                  "departAt": "2026-11-09T13:35",
-                  "tz": "Europe/Moscow",
-                  "kmFromPrev": 1,
-                  "kmAt": 643,
-                  "dwellMin": 60,
-                  "tags": [
-                    "kids_menu",
-                    "parking"
-                  ],
-                  "costRub": 1800,
-                  "reason": "Обед, есть детское меню.",
-                  "verified": true,
-                  "replaceable": true,
-                  "alternatives": [],
-                  "alternativesNote": null,
-                  "hotelOptions": [],
-                  "selectedHotelId": null
-                },
-                "dayPatch": [
-                  {
-                    "stopId": "d3s01",
-                    "seq": 12,
-                    "arriveAt": null,
-                    "departAt": "2026-11-09T09:00",
-                    "kmFromPrev": 0
-                  },
-                  {
-                    "stopId": "d3s02",
-                    "seq": 13,
-                    "arriveAt": "2026-11-09T09:04",
-                    "departAt": "2026-11-09T10:04",
-                    "kmFromPrev": 2
-                  },
-                  {
-                    "stopId": "d3s03",
-                    "seq": 14,
-                    "arriveAt": "2026-11-09T11:48",
-                    "departAt": "2026-11-09T12:33",
-                    "kmFromPrev": 121
-                  },
-                  {
-                    "stopId": "d3s04",
-                    "seq": 15,
-                    "arriveAt": "2026-11-09T12:35",
-                    "departAt": "2026-11-09T13:35",
-                    "kmFromPrev": 1
-                  },
-                  {
-                    "stopId": "d3s05",
-                    "seq": 16,
-                    "arriveAt": "2026-11-09T15:02",
-                    "departAt": null,
-                    "kmFromPrev": 103
-                  }
-                ]
-              },
-              {
-                "id": "alt_d3s04_pl_m7w_cafe_060",
-                "placeId": "pl_m7w_cafe_060",
-                "name": "Кафе «Придорожное», М-7",
-                "deltaMin": 3,
-                "deltaRub": -450,
-                "shiftMin": 3,
-                "units": {
-                  "deltaKm": 0.579,
+                  "deltaKm": 9.767,
                   "regionCode": "RU-MOS",
                   "checkRub": 500,
                   "adultRub": null,
                   "childRub": null,
-                  "name": "Кафе «Придорожное», М-7",
-                  "placeId": "pl_m7w_cafe_060",
+                  "name": "Кафе «Придорожное», М-12",
+                  "placeId": "pl_m12_cafe_055",
                   "priceRub": "61.80",
                   "regionName": "Московская область",
-                  "tripKmDelta": 1
+                  "tripKmDelta": 9
                 },
                 "stop": {
                   "id": "d3s04",
@@ -1980,17 +2102,17 @@
                   "day": 3,
                   "kind": "food",
                   "sign": "food",
-                  "placeId": "pl_m7w_cafe_060",
+                  "placeId": "pl_m12_cafe_055",
                   "townId": null,
-                  "name": "Кафе «Придорожное», М-7",
+                  "name": "Кафе «Придорожное», М-12",
                   "note": null,
-                  "lat": 55.864251439771344,
-                  "lon": 38.54312310544528,
-                  "arriveAt": "2026-11-09T13:06",
-                  "departAt": "2026-11-09T14:06",
+                  "lat": 55.884817061865235,
+                  "lon": 38.397265790682184,
+                  "arriveAt": "2026-11-09T12:36",
+                  "departAt": "2026-11-09T13:36",
                   "tz": "Europe/Moscow",
-                  "kmFromPrev": 43,
-                  "kmAt": 685,
+                  "kmFromPrev": 57,
+                  "kmAt": 694,
                   "dwellMin": 60,
                   "tags": [
                     "kids_menu",
@@ -2016,122 +2138,35 @@
                   {
                     "stopId": "d3s02",
                     "seq": 13,
-                    "arriveAt": "2026-11-09T09:04",
-                    "departAt": "2026-11-09T10:04",
-                    "kmFromPrev": 2
+                    "arriveAt": "2026-11-09T09:35",
+                    "departAt": "2026-11-09T10:05",
+                    "kmFromPrev": 36
                   },
                   {
                     "stopId": "d3s03",
                     "seq": 14,
-                    "arriveAt": "2026-11-09T11:48",
-                    "departAt": "2026-11-09T12:33",
-                    "kmFromPrev": 121
+                    "arriveAt": "2026-11-09T11:17",
+                    "departAt": "2026-11-09T11:47",
+                    "kmFromPrev": 86
                   },
                   {
                     "stopId": "d3s04",
                     "seq": 15,
-                    "arriveAt": "2026-11-09T13:06",
-                    "departAt": "2026-11-09T14:06",
-                    "kmFromPrev": 43
+                    "arriveAt": "2026-11-09T12:36",
+                    "departAt": "2026-11-09T13:36",
+                    "kmFromPrev": 57
                   },
                   {
                     "stopId": "d3s05",
                     "seq": 16,
-                    "arriveAt": "2026-11-09T15:02",
+                    "arriveAt": "2026-11-09T14:33",
                     "departAt": null,
-                    "kmFromPrev": 60
-                  }
-                ]
-              },
-              {
-                "id": "alt_d3s04_pl_m12_cafe_115",
-                "placeId": "pl_m12_cafe_115",
-                "name": "Кафе «У дороги», М-12",
-                "deltaMin": 42,
-                "deltaRub": -20,
-                "shiftMin": 102,
-                "units": {
-                  "deltaKm": 26.792,
-                  "regionCode": "RU-VLA",
-                  "checkRub": 600,
-                  "adultRub": null,
-                  "childRub": null,
-                  "name": "Кафе «У дороги», М-12",
-                  "placeId": "pl_m12_cafe_115",
-                  "priceRub": "61.40",
-                  "regionName": "Владимирская область",
-                  "tripKmDelta": 27
-                },
-                "stop": {
-                  "id": "d3s04",
-                  "seq": 14,
-                  "day": 3,
-                  "kind": "food",
-                  "sign": "food",
-                  "placeId": "pl_m12_cafe_115",
-                  "townId": null,
-                  "name": "Кафе «У дороги», М-12",
-                  "note": null,
-                  "lat": 56.016685193733366,
-                  "lon": 39.287375680792074,
-                  "arriveAt": "2026-11-09T12:03",
-                  "departAt": "2026-11-09T13:03",
-                  "tz": "Europe/Moscow",
-                  "kmFromPrev": 126,
-                  "kmAt": 635,
-                  "dwellMin": 60,
-                  "tags": [
-                    "parking"
-                  ],
-                  "costRub": 1800,
-                  "reason": "Обед, парковка у входа.",
-                  "verified": true,
-                  "replaceable": true,
-                  "alternatives": [],
-                  "alternativesNote": null,
-                  "hotelOptions": [],
-                  "selectedHotelId": null
-                },
-                "dayPatch": [
-                  {
-                    "stopId": "d3s01",
-                    "seq": 12,
-                    "arriveAt": null,
-                    "departAt": "2026-11-09T09:00",
-                    "kmFromPrev": 0
-                  },
-                  {
-                    "stopId": "d3s02",
-                    "seq": 13,
-                    "arriveAt": "2026-11-09T09:04",
-                    "departAt": "2026-11-09T10:04",
-                    "kmFromPrev": 2
-                  },
-                  {
-                    "stopId": "d3s04",
-                    "seq": 14,
-                    "arriveAt": "2026-11-09T12:03",
-                    "departAt": "2026-11-09T13:03",
-                    "kmFromPrev": 126
-                  },
-                  {
-                    "stopId": "d3s03",
-                    "seq": 15,
-                    "arriveAt": "2026-11-09T13:30",
-                    "departAt": "2026-11-09T14:15",
-                    "kmFromPrev": 22
-                  },
-                  {
-                    "stopId": "d3s05",
-                    "seq": 16,
-                    "arriveAt": "2026-11-09T15:41",
-                    "departAt": null,
-                    "kmFromPrev": 103
+                    "kmFromPrev": 56
                   }
                 ]
               }
             ],
-            "alternativesNote": null,
+            "alternativesNote": "Нашли только один вариант в это время.",
             "hotelOptions": [],
             "selectedHotelId": null
           },
@@ -2147,10 +2182,10 @@
             "note": null,
             "lat": 55.7558,
             "lon": 37.6173,
-            "arriveAt": "2026-11-09T14:59",
+            "arriveAt": "2026-11-09T14:18",
             "departAt": null,
             "tz": "Europe/Moscow",
-            "kmFromPrev": 102,
+            "kmFromPrev": 60,
             "kmAt": 745,
             "dwellMin": 0,
             "tags": [],
@@ -2171,30 +2206,30 @@
         {
           "key": "fuel",
           "title": "Бензин АИ-95",
-          "rub": 3760,
-          "formula": "761 км × 8 л/100 × ≈ 61,80 ₽ (средняя по 6 регионам)",
+          "rub": 3750,
+          "formula": "760 км × 8 л/100 × ≈ 61,80 ₽ (средняя по 6 регионам)",
           "asOf": "2026-10",
           "enabled": true,
           "breakdown": [
             {
               "label": "Москва",
-              "formula": "15 км × 8 л/100 × 62,50 ₽ = 80 ₽",
-              "rub": 80
+              "formula": "15 км × 8 л/100 × 62,50 ₽ = 70 ₽",
+              "rub": 70
             },
             {
               "label": "Московская область",
-              "formula": "171 км × 8 л/100 × 61,80 ₽ = 840 ₽",
-              "rub": 840
+              "formula": "171 км × 8 л/100 × 61,80 ₽ = 850 ₽",
+              "rub": 850
             },
             {
               "label": "Ярославская область",
-              "formula": "195 км × 8 л/100 × 61,90 ₽ = 970 ₽",
+              "formula": "196 км × 8 л/100 × 61,90 ₽ = 970 ₽",
               "rub": 970
             },
             {
               "label": "Костромская область",
-              "formula": "93 км × 8 л/100 × 62,20 ₽ = 460 ₽",
-              "rub": 460
+              "formula": "91 км × 8 л/100 × 62,20 ₽ = 450 ₽",
+              "rub": 450
             },
             {
               "label": "Ивановская область",
@@ -2203,8 +2238,8 @@
             },
             {
               "label": "Владимирская область",
-              "formula": "197 км × 8 л/100 × 61,40 ₽ = 970 ₽",
-              "rub": 970
+              "formula": "195 км × 8 л/100 × 61,40 ₽ = 960 ₽",
+              "rub": 960
             }
           ]
         },
@@ -2240,8 +2275,8 @@
         {
           "key": "food",
           "title": "Питание",
-          "rub": 14310,
-          "formula": "3 чел. × 7 приёмов × ≈ 680 (в среднем)",
+          "rub": 13860,
+          "formula": "3 чел. × 7 приёмов × ≈ 660 (в среднем)",
           "asOf": "2026-09",
           "enabled": true,
           "breakdown": [
@@ -2257,45 +2292,30 @@
             },
             {
               "label": "День 3",
-              "formula": "завтрак 480 + обед 650",
-              "rub": 3390
+              "formula": "завтрак 480 + обед 500",
+              "rub": 2940
             }
           ]
         },
         {
           "key": "tickets",
           "title": "Билеты",
-          "rub": 3700,
-          "formula": "4 места × (2 взр. + 1 реб.)",
+          "rub": 1250,
+          "formula": "1 место × (2 взр. + 1 реб.)",
           "asOf": "2026-09",
           "enabled": true,
           "breakdown": [
             {
-              "label": "Костромская слобода",
-              "formula": "2 × 300 + 1 × 150",
-              "rub": 750
-            },
-            {
               "label": "Ипатьевский монастырь",
               "formula": "2 × 500 + 1 × 250",
               "rub": 1250
-            },
-            {
-              "label": "Музей деревянного зодчества",
-              "formula": "2 × 300 + 1 × 150",
-              "rub": 750
-            },
-            {
-              "label": "Музей шоколада",
-              "formula": "2 × 350 + 1 × 250",
-              "rub": 950
             }
           ]
         },
         {
           "key": "reserve",
           "title": "Резерв 10%",
-          "rub": 3380,
+          "rub": 3090,
           "formula": "на пробки и «давай заедем»",
           "asOf": "2026-09",
           "enabled": true,
@@ -2303,11 +2323,11 @@
         }
       ],
       "reserveOn": true,
-      "subtotalRub": 33770,
-      "totalRub": 37200,
-      "perPersonRub": 12400,
+      "subtotalRub": 30860,
+      "totalRub": 34000,
+      "perPersonRub": 11300,
       "budgetRub": 40000,
-      "remainingRub": 2800,
+      "remainingRub": 6000,
       "overBudget": false,
       "hints": [],
       "hintKeys": [],
@@ -2326,19 +2346,19 @@
             {
               "regionCode": "RU-MOS",
               "regionName": "Московская область",
-              "km": 170.58,
+              "km": 171.36,
               "priceRub": "61.80"
             },
             {
               "regionCode": "RU-YAR",
               "regionName": "Ярославская область",
-              "km": 195.319,
+              "km": 196.382,
               "priceRub": "61.90"
             },
             {
               "regionCode": "RU-KOS",
               "regionName": "Костромская область",
-              "km": 93.059,
+              "km": 90.52,
               "priceRub": "62.20"
             },
             {
@@ -2350,12 +2370,12 @@
             {
               "regionCode": "RU-VLA",
               "regionName": "Владимирская область",
-              "km": 196.606,
+              "km": 195.378,
               "priceRub": "61.40"
             }
           ],
           "asOf": "2026-10",
-          "tripKm": 761
+          "tripKm": 760
         },
         "tolls": [],
         "nights": [
@@ -2428,7 +2448,7 @@
             "day": 3,
             "meal": "lunch",
             "stopId": "d3s04",
-            "checkRub": 650
+            "checkRub": 500
           }
         ],
         "tickets": [
@@ -2448,10 +2468,10 @@
           },
           {
             "stopId": "d2s02",
-            "placeId": "pl_kos_sloboda",
-            "name": "Костромская слобода",
-            "adultRub": 300,
-            "childRub": 150
+            "placeId": "pl_yar_strelka",
+            "name": "Стрелка и Волжская набережная",
+            "adultRub": 0,
+            "childRub": 0
           },
           {
             "stopId": "d2s03",
@@ -2462,17 +2482,17 @@
           },
           {
             "stopId": "d3s02",
-            "placeId": "pl_suz_wooden",
-            "name": "Музей деревянного зодчества",
-            "adultRub": 300,
-            "childRub": 150
+            "placeId": "pl_vla_view",
+            "name": "Смотровая у Успенского собора",
+            "adultRub": 0,
+            "childRub": 0
           },
           {
             "stopId": "d3s03",
-            "placeId": "pl_pok_chocolate",
-            "name": "Музей шоколада",
-            "adultRub": 350,
-            "childRub": 250
+            "placeId": "pl_pok_park",
+            "name": "Покровский парк",
+            "adultRub": 0,
+            "childRub": 0
           }
         ],
         "reserveFrac": "0.10",
@@ -2551,5 +2571,5 @@
     },
     "engineVersion": "0.1.0"
   },
-  "text": "Золотое кольцо · 761 км · 3 дня\nДень 1 · 269 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Трапезная у кремля\n14:50 Ярославль\nДень 2 · 266 км\n09:00 Ярославль\n10:15 Костромская слобода\n11:18 Ипатьевский монастырь\n14:08 Кафе «Привал», Р-600\n16:39 АЗС, Р-132, 253 км\n17:00 Суздаль\nДень 3 · 226 км\n09:00 Суздаль\n09:04 Музей деревянного зодчества\n11:48 Музей шоколада\n12:33 Кафе «Покровское»\n14:59 Москва\nИтого ≈ 37 200 ₽ на 3 чел."
+  "text": "Золотое кольцо · 760 км · 3 дня\nДень 1 · 269 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Трапезная у кремля\n14:50 Ярославль\nДень 2 · 265 км\n09:00 Ярославль\n09:04 Стрелка и Волжская набережная\n11:01 Ипатьевский монастырь\n13:51 Кафе «Привал», Р-600\n16:22 АЗС, Р-132, 253 км\n16:43 Суздаль\nДень 3 · 226 км\n09:00 Суздаль\n09:35 Смотровая у Успенского собора\n11:17 Покровский парк\n12:22 Кафе «Придорожное», М-7\n14:18 Москва\nИтого ≈ 34 000 ₽ на 3 чел."
 }

@@ -78,7 +78,7 @@ def test_saved_trip_limit(make_client: Callable[..., TestClient], db: psycopg.Co
         "details": {"limit": 1},
     }
     row = db.execute("SELECT km, days, synthetic, start_town FROM api.trip").fetchone()
-    assert row == (393, 1, True, "Екатеринбург")
+    assert row == (382, 1, True, "Екатеринбург")  # block 1: no sight in the start city
 
 
 def test_save_rejects_foreign_or_broken_trips(client: TestClient, auth: dict[str, str]) -> None:

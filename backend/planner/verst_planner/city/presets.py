@@ -129,7 +129,9 @@ PRESET_TABLE: dict[str, Preset] = {
         {"museum": 2},
         museum_dwell_cap=45,
     ),
-    # ADR-0015 §6 dog_walk: outdoor places only
+    # ADR-0015 §6 dog_walk: outdoor places only. Acceptance 2026-10-28 (traveller K3, V3): only the open
+    # spaces a dog walks through — parks, nature, embankments, viewpoints, squares. A kremlin (Царь-пушка is
+    # inside the ticketed Кремль), a monument (the Мавзолей) and an «attraction» (ГУМ) are not a dog walk.
     "dog_walk": Preset(
         "dog_walk",
         {
@@ -138,9 +140,6 @@ PRESET_TABLE: dict[str, Preset] = {
             "embankment": 1.0,
             "viewpoint": 0.8,
             "square": 0.6,
-            "kremlin": 0.4,
-            "monument": 0.3,
-            "attraction": 0.3,
         },
         frozenset({"park", "nature", "embankment", "viewpoint", "square"}),
         2,
