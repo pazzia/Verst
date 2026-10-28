@@ -1,19 +1,19 @@
 {
- "version": "wd-20261025-r7.6",
+ "version": "wd-20261028-osm1",
  "builtAt": "2026-10-28",
  "counts": {
   "towns": 1114,
   "pois": 10921,
-  "bars": 4249,
-  "food": 0,
+  "bars": 5625,
+  "food": 29906,
   "links": 79,
   "credits": 3632
  },
- "totalBytes": 871878,
+ "totalBytes": 1494355,
  "files": {
   "catalogue_meta.json.gz": {
-   "bytes": 98509,
-   "sha256": "ac344a3c26e23093f2d7466b7578e5a277deab33523593b2cc911dd292d0a221"
+   "bytes": 98445,
+   "sha256": "07ddd3b344828fad44a1a03910b6b36ad850c2d8815069520b424f38d7d78665"
   },
   "catalogue_towns.json.gz": {
    "bytes": 52995,
@@ -24,21 +24,23 @@
    "sha256": "2c546bc5a88f52cb8a7b9e0b1e32c01f81a66cf837b45666726987258c45ddc6"
   },
   "catalogue_bars.json.gz": {
-   "bytes": 90924,
-   "sha256": "3ff597aeef541b3daa57cbcd872c14721a6ca4fa593b1e9941e5ee37f7b77e19"
+   "bytes": 119763,
+   "sha256": "f2518894be3ec2ad55a4210c724f73db5f88991318d8f9ebcf7fdebe8073dcc9"
   },
   "catalogue_food.json.gz": {
-   "bytes": 90,
-   "sha256": "c847c3aba1a5c075da47666a2d480b43fc66b1a6294b4e9e961ccdea809675b8"
+   "bytes": 593792,
+   "sha256": "4bf81bae90e2a330cfec5dd58dd2faac8f7877d7b2d7867c89891fd01f6ce790"
   }
  },
  "sources": {
   "wikidata": "query.wikidata.org",
-  "osm": "download.geofabrik.de/russia-latest.osm.pbf (Overpass fallback)",
+  "osm": "download.geofabrik.de/russia-latest.osm.pbf",
   "commons": "commons.wikimedia.org",
   "fetchedAt": "2026-10-25T02:46:58+00:00",
   "run": "40151703225",
-  "rebuilt": "sandbox, from bot/raw-7 + bot/extras-1 + bot/photos-1 with the builder of CEO 2026-10-29 (bar kinds by name and tags, per-town bar cap by population; catalogue_food empty until data-osm.yml runs)"
+  "rebuilt": "data-osm.yml: bars and food from the Geofabrik extract of osmFetchedAt; towns and POIs from bot/raw-7, extras from bot/extras-1, photo meta from bot/photos-1",
+  "osmFetchedAt": "2026-10-28T23:27:34+00:00",
+  "osmRun": "40786699105"
  },
  "classCheck": {
   "labels": {
