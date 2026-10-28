@@ -35,6 +35,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
@@ -250,15 +251,7 @@ private fun PresetPlate(p: CityPresetDto, selected: Boolean, modifier: Modifier,
             .testTag("city.preset.${p.preset}")
             .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
-        val icon = when (p.preset) {
-            DOG_WALK -> Glyph.PAW
-            "overview" -> Glyph.BINOCULARS
-            "museums" -> Glyph.MUSEUM
-            "ryumochnye" -> Glyph.GLASS
-            "beer" -> Glyph.MUG
-            else -> Glyph.GEAR
-        }
-        GlyphIcon(icon, C.sign.white, 24.dp, Modifier.align(Alignment.TopStart))
+        GlyphIcon(presetGlyph(p.preset), C.sign.white, 24.dp, Modifier.align(Alignment.TopStart))
         Column(Modifier.align(Alignment.BottomStart)) {
             Txt(name, T.title.sm, C.sign.white, maxLines = 1)
             Txt(sub, T.body.sm, if (custom) C.mirror.label else C.sign.blueText, maxLines = 1)
@@ -270,6 +263,45 @@ private fun PresetPlate(p: CityPresetDto, selected: Boolean, modifier: Modifier,
                 }
             }
             if (selected) GlyphIcon(Glyph.CHECK, C.accent.yellowText, 16.dp)
+        }
+    }
+}
+
+private fun presetGlyph(preset: String): Glyph = when (preset) {
+    DOG_WALK -> Glyph.PAW
+    "overview" -> Glyph.BINOCULARS
+    "museums" -> Glyph.MUSEUM
+    "ryumochnye" -> Glyph.GLASS
+    "beer" -> Glyph.MUG
+    else -> Glyph.GEAR
+}
+
+/**
+ * CEO 29.10: a preset the engine could not offer because our catalogue has no such places in this town
+ * (`noData`): shown disabled under the plates with the engine's reason (`noDataRu`) — a gap of our base, not of
+ * the town. Other unavailable presets stay hidden.
+ */
+@Composable
+internal fun NoDataPresets(presets: List<CityPresetDto>) {
+    Column(Modifier.fillMaxWidth().padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        presets.forEach { p ->
+            val name = presetName(p.preset, p.titleRu)
+            val title = name + stringResource(R.string.common_join_dot) + stringResource(R.string.city_preset_nodata)
+            val reason = p.noDataRu ?: stringResource(R.string.walk_few_no_data_fallback)
+            val cd = stringResource(R.string.cd_city_preset_nodata, name, reason)
+            val shape = RoundedCornerShape(DesignTokens.radius.r10)
+            Row(
+                Modifier.fillMaxWidth().clip(shape).border(DesignTokens.stroke.w1, C.dash.outline, shape)
+                    .semantics(mergeDescendants = true) { contentDescription = cd; disabled() }
+                    .testTag("city.preset.nodata.${p.preset}").padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                GlyphIcon(presetGlyph(p.preset), C.text.muted, 20.dp)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Txt(title, T.title.sm, C.text.muted, maxLines = 1)
+                    Txt(reason, T.body.sm, C.text.muted, Modifier.testTag("city.preset.nodata.${p.preset}.reason"))
+                }
+            }
         }
     }
 }
@@ -331,10 +363,16 @@ internal fun FewPlate(few: WalkFew, preset: String, excludedCount: Int, onSugges
         Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.dash.outline, shape).padding(12.dp).testTag("walk.few"),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        val what = if (few.unlimited) presetName(preset, preset) else durationLabel(few.durationMin)
-        Txt(stringResource(R.string.walk_few_title, what), T.title.sm, C.text.primary)
-        if (few.suggestions.isEmpty()) {
-            Txt(stringResource(R.string.walk_other_none_note), T.body.md, C.text.secondary)
+        if (few.noData) {
+            // CEO 29.10: no data of this kind here is a gap of our base — the engine's sentence, not «мало мест»
+            Txt(few.messageRu ?: stringResource(R.string.walk_few_no_data_fallback), T.title.sm, C.text.primary, Modifier.testTag("walk.few.nodata"))
+            if (few.suggestions.isEmpty()) Txt(stringResource(R.string.walk_few_no_data_none), T.body.md, C.text.secondary)
+        } else {
+            val what = if (few.unlimited) presetName(preset, preset) else durationLabel(few.durationMin)
+            Txt(stringResource(R.string.walk_few_title, what), T.title.sm, C.text.primary)
+            if (few.suggestions.isEmpty()) {
+                Txt(stringResource(R.string.walk_other_none_note), T.body.md, C.text.secondary)
+            }
         }
         few.suggestions.forEachIndexed { i, sg ->
             val places = sg.count?.let { "$it ${pluralStringResource(R.plurals.plural_place, it)}" }

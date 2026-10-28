@@ -993,4 +993,67 @@ class VerstFlowTest {
         assertEquals(360, requests.last().durationMin)
         assertNull(flow.walkFew)
     }
+
+    /**
+     * CEO 29.10: `NOT_ENOUGH_POIS` with `reason: "no_data"` (`city_route-error-no-data.json`, «Пивной» in Фрязино):
+     * the plate carries the engine's `messageRu` («у нас пока нет данных … это пробел нашей базы»), not «мало мест»,
+     * and offers only other walks — never a longer walk, as if the town were small. An unavailable preset with
+     * `noData` is listed with its reason; one that is merely unavailable stays hidden.
+     */
+    @Test
+    fun notEnoughNoDataCarriesTheEnginesMessage() = runTest {
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val p0 = (EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        val presets = p0.copy(
+            presets = p0.presets.map {
+                if (it.preset == "beer") it.copy(available = false, noData = true, noDataRu = "У нас пока нет данных о пивных барах в этом городе — это пробел нашей базы, а не города.") else it
+            },
+        )
+        val err = EngineJson.walkRoute(resp("city_route-error-no-data.json")) as EngineResult.Err
+        assertEquals("no_data", err.error.reason)
+        assertEquals(listOf("beer"), err.error.noData)
+        assertTrue(err.error.isNoData)
+        val message = err.error.messageRu!!
+        assertTrue(message, message.startsWith("У нас пока нет данных о пивных барах"))
+        // the engine's suggestions plus a duration one: a longer walk must not be offered for missing data
+        val withDuration = err.copy(
+            error = err.error.copy(
+                suggestions = kotlinx.serialization.json.buildJsonArray {
+                    add(kotlinx.serialization.json.buildJsonObject { put("durationMin", kotlinx.serialization.json.JsonPrimitive(480)); put("count", kotlinx.serialization.json.JsonPrimitive(3)) })
+                    err.error.suggestions.orEmpty().forEach { add(it) }
+                },
+            ),
+        )
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                return withDuration
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        // «Пивной» has no data here: listed with the engine's reason, not selectable; «По рюмочным» (unavailable,
+        // data present) stays hidden
+        assertFalse(flow.visibleCityPresets().any { it.preset == "beer" })
+        assertEquals(listOf("beer"), flow.noDataCityPresets().map { it.preset })
+        assertEquals(presets.presets.first { it.preset == "beer" }.noDataRu, flow.noDataCityPresets().single().noDataRu)
+        assertFalse(flow.noDataCityPresets().any { it.preset == "ryumochnye" })
+        flow.buildWalk()
+        settle()
+        assertEquals(1, requests.size)
+        assertEquals(Route.City, flow.top)
+        assertEquals("NOT_ENOUGH_POIS", flow.cityError)
+        val few = flow.walkFew!!
+        assertTrue(few.noData)
+        assertEquals(message, few.messageRu)
+        // only the engine's other walks («Обзорная прогулка», «Свой маршрут»), no «Гулять 8 ч»
+        assertEquals(listOf("overview", "custom"), few.suggestions.map { it.preset })
+        assertTrue(few.suggestions.none { it.durationMin != null || it.unlimited || it.clearExclude })
+    }
 }

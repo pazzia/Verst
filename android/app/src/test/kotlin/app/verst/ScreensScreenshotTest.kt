@@ -1047,6 +1047,32 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("Гулять", substring = true).assertDoesNotExist()
     }
 
+    @Test
+    fun cityNotEnoughNoData() {
+        // CEO 29.10: `reason: "no_data"` — the engine's sentence (a gap of our base), not «мало мест»; other walks only
+        val err = (EngineJson.walkRoute(root.resolve("docs/contracts/v2/city_route-error-no-data.json").readText().let {
+            Json.parseToJsonElement(it).jsonObject["response"].toString()
+        }) as EngineResult.Err).error
+        val few = app.verst.nav.WalkFew.of(480, false, err)
+        shot("city", "not-enough-no-data") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS", duration = 480, few = few), noCity) }
+        compose.onNodeWithText(err.messageRu!!).assertExists()
+        compose.onNodeWithText("мало мест", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Гулять", substring = true).assertDoesNotExist()
+        compose.onNodeWithTag("walk.few.0", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun cityPresetWithoutData() {
+        // CEO 29.10: a preset our catalogue has no places for here is listed, disabled, with the engine's reason
+        val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets)
+        val reason = "У нас пока нет данных о рюмочных в этом городе — это пробел нашей базы, а не города."
+        val noData = presets.presets.filter { it.preset == "ryumochnye" }.map { it.copy(available = false, noData = true, noDataRu = reason) }
+        shot("city", "preset-no-data") { app.verst.feature.city.CityScreen(cityUi().copy(noDataPresets = noData), noCity) }
+        compose.onNodeWithTag("city.preset.nodata.ryumochnye", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText(reason).assertExists()
+        compose.onNodeWithTag("city.preset.ryumochnye", useUnmergedTree = true).assertDoesNotExist()
+    }
+
     private val noWalk = object : app.verst.feature.city.WalkActions {
         override fun back() = Unit
         override fun save() = Unit
@@ -1136,6 +1162,38 @@ class ScreensScreenshotTest {
         shot("walk", "free") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(free, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
         compose.onNodeWithTag("walk.free", useUnmergedTree = true).assertExists()
         compose.onNodeWithText("вход везде свободный").assertExists()
+    }
+
+    @Test
+    fun walkFoodStopsWithUnknownPrices() {
+        // CEO 29.10: OSM restaurants and cafés — their own kind and sign, the cuisine in words (never the raw tag),
+        // «цена не указана» instead of 0 ₽, our PRICE_UNKNOWN plate, and never «Бесплатно» in the footer
+        val w0 = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        val food = listOf(
+            Triple("restaurant", "Ресторан", "georgian;pizza;fusion"),
+            Triple("cafe", "Кафе", "coffee_shop"),
+            Triple("fast_food", "Фастфуд", "unknown_tag"),
+        )
+        val w = w0.copy(
+            stops = w0.stops.mapIndexed { i, st ->
+                val f = food.getOrNull(i) ?: return@mapIndexed st.copy(costRub = 0) // a free walk but for the cafés
+                st.copy(kind = f.first, poiKind = f.first, poiKindRu = f.second, cuisine = f.third, costRub = 0, unknownFacts = listOf("price"), placeSource = "osm")
+            },
+            cost = w0.cost.copy(totalRub = 0),
+            warnings = w0.warnings + app.verst.core.model.dto.WalkWarningDto("PRICE_UNKNOWN", "Цены в кафе и ресторанах в открытых данных не указаны — в сумму они не входят."),
+        )
+        shot("walk", "food") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        compose.onAllNodesWithText("цена не указана", useUnmergedTree = true).assertCountEquals(food.size)
+        compose.onNodeWithText("грузинская кухня, пицца", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("кофейня", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("unknown_tag", substring = true, useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithText("georgian", substring = true, useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("walk.warn.price", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Цены в кафе и ресторанах не указаны — уточняйте на месте.", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("walk.free", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("walk.price.unknown", useUnmergedTree = true).assertExists()
+        assertEquals(listOf(app.verst.core.ui.components.Glyph.CUTLERY, app.verst.core.ui.components.Glyph.CUP, app.verst.core.ui.components.Glyph.CUTLERY, app.verst.core.ui.components.Glyph.MUG, app.verst.core.ui.components.Glyph.GLASS),
+            listOf("restaurant", "cafe", "food_court", "pub", "ryumochnaya").map { app.verst.feature.city.walkSignGlyph(it) })
     }
 
     @Test

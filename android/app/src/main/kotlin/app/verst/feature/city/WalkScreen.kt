@@ -60,6 +60,7 @@ import app.verst.feature.common.HoursPill
 import app.verst.feature.common.HoursState
 import app.verst.feature.common.KindTag
 import app.verst.feature.common.kindWord
+import app.verst.feature.common.cuisineWords
 import app.verst.feature.common.crewShort
 import app.verst.nav.CityPicker
 import app.verst.nav.DOG_WALK
@@ -360,6 +361,11 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         }
         CrewPlates(ui, a)
         for (warn in w.warnings) {
+            if (warn.code == "PRICE_UNKNOWN") {
+                // CEO 29.10: OSM gives no prices for cafés and restaurants — our copy (RU / EN), the same plate
+                WarningBox(stringResource(R.string.walk_warn_price_unknown), "walk.warn.price")
+                continue
+            }
             val m = warn.messageRu ?: continue
             if (warn.code in CrewWarningCodes) continue // the crew plates above
             if (warn.code == "SHORTER_THAN_ASKED") continue // said once, by the note under the ±15 % line (5.11 §9)
@@ -368,10 +374,19 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
                 if (w.stops.any { !it.hoursVerified && it.poiId != null }) Txt(m, T.body.sm, C.text.muted, Modifier.testTag("walk.hours"))
                 continue
             }
-            Box(Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r10)).padding(horizontal = 12.dp, vertical = 10.dp)) {
-                Txt(m, T.body.md, C.text.secondary)
-            }
+            WarningBox(m)
         }
+    }
+}
+
+/** An engine walk warning: an outlined plate with the sentence. */
+@Composable
+private fun WarningBox(text: String, tag: String? = null) {
+    Box(
+        Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r10))
+            .then(if (tag != null) Modifier.testTag(tag) else Modifier).padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Txt(text, T.body.md, C.text.secondary)
     }
 }
 
@@ -519,8 +534,12 @@ private fun WalkStopRow(
 ) {
     val line = stringResource(R.string.walk_next, distance(s.walkKmFromPrev), s.walkMinFromPrev)
     val time = if (untimed) "" else RuFormat.clock(s.arriveAt) ?: ""
-    val cost = if (s.costRub > 0) stringResource(R.string.walk_footer_total, app.verst.settings.AppPrefs.money(s.costRub)) else null
-    val cd = listOfNotNull(line, time, s.nameRu, s.noteRu, cost).joinToString(", ")
+    // CEO 29.10: an unknown price (OSM cafés, restaurants) is «цена не указана» — never 0 ₽ or nothing at all
+    val cost = if (s.costRub > 0 && !s.priceUnknown) stringResource(R.string.walk_footer_total, app.verst.settings.AppPrefs.money(s.costRub)) else null
+    val priceUnknown = if (s.priceUnknown) stringResource(R.string.walk_stop_price_unknown) else null
+    val kindText = s.poiKindRu?.uppercase() ?: kindWord(s.poiKind ?: s.kind)
+    val cuisine = if (s.isFood) cuisineWords(s.cuisine) else null
+    val cd = listOfNotNull(line, time, s.nameRu, cuisine, s.noteRu, cost, priceUnknown).joinToString(", ")
     val tap by rememberUpdatedState(onTap)
     val reduced = LocalReducedMotion.current
     val m = DesignTokens.motion.returnToItem
@@ -544,7 +563,7 @@ private fun WalkStopRow(
             .testTag("walk.stop.${s.id}"),
     ) {
         Box(Modifier.padding(start = 72.dp).widthIn(min = 68.dp), contentAlignment = Alignment.TopCenter) {
-            if (s.isBar) BarSign(s.kind) else RoadSign("tourist", s.nameRu, app.verst.feature.common.signTags(s.poiKind ?: s.kind, listOf(s.kind)))
+            if (s.isBar || s.isFood) BarSign(s.kind) else RoadSign("tourist", s.nameRu, app.verst.feature.common.signTags(s.poiKind ?: s.kind, listOf(s.kind)))
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(Modifier.fillMaxWidth()) {
@@ -555,7 +574,9 @@ private fun WalkStopRow(
             // S4 5.11 §10.3: the category tag; timed rows «открыто до 20:00», untimed rows the hours pill
             val hours = s.hours
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                (s.poiKindRu?.uppercase() ?: kindWord(s.poiKind ?: s.kind))?.let { KindTag(it) }
+                kindText?.let { KindTag(it) }
+                // CEO 29.10: «КАФЕ · грузинская кухня» — the cuisine words beside the tag while there is room
+                if (cuisine != null) Txt(cuisine, T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("walk.stop.cuisine"), maxLines = 1)
                 if (!untimed && hours != null && hours.source != "default") TimedHours(hours)
             }
             if (untimed) UntimedHours(hours)
@@ -568,6 +589,7 @@ private fun WalkStopRow(
             (parts + listOfNotNull(dogNo)).takeIf { it.isNotEmpty() }?.joinToString(". ", postfix = ".")
                 ?.let { Txt(it, T.body.md, C.text.note, Modifier.testTag("walk.stop.note")) }
             if (cost != null) Txt(cost, T.body.mdStrong, C.accent.yellowText)
+            if (priceUnknown != null) Txt(priceUnknown, T.body.sm, C.text.muted, Modifier.testTag("walk.stop.price.unknown"))
         }
     }
 }
@@ -597,7 +619,10 @@ private fun UntimedHours(h: app.verst.core.model.dto.WalkHoursDto?) {
     }
 }
 
-/** components §21 bar sign: the `service` look with `glass` (bar, рюмочная) or `mug` (pub, craft). */
+/**
+ * components §21 bar sign: the `service` look with `glass` (bar, рюмочная) or `mug` (pub, craft); CEO 29.10: the
+ * walk food places in the same look — `cup` (café), `cutlery` (restaurant, fast food, food court).
+ */
 @Composable
 internal fun BarSign(kind: String) {
     Box(
@@ -605,8 +630,16 @@ internal fun BarSign(kind: String) {
             .clip(RoundedCornerShape(3.dp)).background(C.sign.white),
         contentAlignment = Alignment.Center,
     ) {
-        app.verst.core.ui.components.GlyphIcon(if (kind == "pub" || kind == "craft" || kind == "beer") Glyph.MUG else Glyph.GLASS, C.text.onLight, 22.dp)
+        app.verst.core.ui.components.GlyphIcon(walkSignGlyph(kind), C.text.onLight, 22.dp)
     }
+}
+
+/** The §21 bar-sign pictogram of a walk stop kind. */
+internal fun walkSignGlyph(kind: String): Glyph = when (kind) {
+    "pub", "craft", "beer" -> Glyph.MUG
+    "cafe" -> Glyph.CUP
+    "restaurant", "fast_food", "food_court" -> Glyph.CUTLERY
+    else -> Glyph.GLASS
 }
 
 /** 5.11 footer: a summary plate (not a button) «СКОЛЬКО СТОИТ ПРОГУЛКА · ≈ 2 400 ₽ на всех». */
@@ -623,7 +656,12 @@ private fun Footer(w: WalkRouteDto) {
         Column(Modifier.weight(1f)) {
             Txt(stringResource(R.string.walk_footer_label), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (total <= 0) {
+                if (total <= 0 && w.priceUnknown) {
+                    // CEO 29.10: the prices of the cafés are unknown — never «Бесплатно» for them
+                    Txt(stringResource(R.string.walk_footer_price_unknown), T.amount, C.text.onLight, Modifier.testTag("walk.price.unknown"), maxLines = 1)
+                    Spacer(Modifier.weight(1f))
+                    Txt(stringResource(R.string.walk_footer_price_unknown_sub), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                } else if (total <= 0) {
                     // 5.11 §9 (S3-QA P1-03): never «≈ 0 ₽»; no per-person line
                     Txt(stringResource(R.string.walk_footer_free), T.amount, C.text.onLight, Modifier.testTag("walk.free"), maxLines = 1)
                     Spacer(Modifier.weight(1f))
@@ -631,7 +669,10 @@ private fun Footer(w: WalkRouteDto) {
                 } else {
                     Txt(stringResource(R.string.walk_footer_total, app.verst.settings.AppPrefs.money(total)), T.amount, C.text.onLight, maxLines = 1)
                     Spacer(Modifier.weight(1f))
-                    Txt(stringResource(R.string.walk_footer_per_person, app.verst.settings.AppPrefs.money(per)), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                    // CEO 29.10: with unknown café prices the sum leaves them out — say so instead of a per-person sum
+                    val sub = if (w.priceUnknown) stringResource(R.string.walk_footer_without_food)
+                    else stringResource(R.string.walk_footer_per_person, app.verst.settings.AppPrefs.money(per))
+                    Txt(sub, T.body.smStrong, C.text.onLightMuted, maxLines = 1)
                 }
             }
         }

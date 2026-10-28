@@ -119,9 +119,52 @@ class V2ContractsTest {
         val ry = ok(EngineJson.walkRoute(envelope("city_route-ryumochnye.json")))
         assertTrue(ry.adultOnly)
         assertTrue(ry.stops.all { it.isBar })
+        // CEO 29.10: «По рюмочным» is strict (рюмочные only); the contract walk is in Санкт-Петербург now
+        assertTrue(ry.stops.all { it.kind == "ryumochnaya" && it.poiKindRu == "Рюмочная" })
+        assertEquals("Санкт-Петербург", ry.townName)
+        assertTrue(ry.stops.none { it.priceUnknown })
         assertEquals("NOT_ENOUGH_POIS", (EngineJson.walkRoute(envelope("city_route-error-not-enough.json")) as EngineResult.Err).error.code)
         assertEquals("NO_CITY", (EngineJson.walkRoute(envelope("city_route-error-no-city.json")) as EngineResult.Err).error.code)
         assertEquals("adultConfirmed", (EngineJson.walkRoute(envelope("city_route-error-adult.json")) as EngineResult.Err).error.field)
+    }
+
+    /**
+     * CEO 29.10: `NOT_ENOUGH_POIS` says why — `reason: "no_data"` with the kinds and the engine's sentence, or
+     * «few_places»; presets carry `noData` / `noDataRu`; a food stop has no price (`unknownFacts`) and a cuisine.
+     */
+    @Test
+    fun noDataPricesAndFoodStopsDecode() {
+        for (f in listOf("city_route-error-no-data.json", "city_route-error-not-enough.json", "city_route-error-suggestions.json")) {
+            val e = (EngineJson.walkRoute(envelope(f)) as EngineResult.Err).error
+            assertEquals(f, "NOT_ENOUGH_POIS", e.code)
+            assertEquals(f, "no_data", e.reason)
+            assertTrue(f, e.isNoData)
+            assertEquals(f, listOf("beer"), e.noData)
+            assertTrue(f, e.messageRu!!.contains("это пробел нашей базы, а не города"))
+        }
+        val few = (EngineJson.walkRoute("""{"ok": false, "error": {"code": "NOT_ENOUGH_POIS", "reason": "few_places", "noData": [], "messageRu": null}}""") as EngineResult.Err).error
+        assertFalse(few.isNoData)
+        assertNull(few.messageRu)
+        val presets = ok(EngineJson.cityPresets(envelope("city_presets.json")))
+        assertTrue(presets.presets.none { it.noData })
+        assertTrue(presets.presets.all { it.noDataRu == null })
+        val stop = EngineJson.json.decodeFromString(
+            app.verst.core.model.dto.WalkStopDto.serializer(),
+            """{"id": "w01", "poiId": "n1", "kind": "restaurant", "nameRu": "Хинкальная", "lat": 57.6, "lon": 39.8, "costRub": 0,
+              "unknownFacts": ["price"], "poiKind": "restaurant", "poiKindRu": "Ресторан", "cuisine": "georgian;Pizza; steak house;foo"}""",
+        )
+        assertTrue(stop.isFood)
+        assertFalse(stop.isBar)
+        assertTrue(stop.priceUnknown)
+        assertTrue(stop.indoor)
+        assertEquals(listOf("georgian", "pizza", "steak_house", "foo"), app.verst.core.model.dto.cuisineTags(stop.cuisine))
+        assertFalse(stop.copy(kind = "fast_food", poiKind = "fast_food").indoor)
+        assertTrue(stop.copy(kind = "food_court", poiKind = "food_court").indoor)
+        assertTrue(stop.copy(kind = "cafe", poiKind = "cafe").indoor)
+        // an older walk without the fields: the price is known, no cuisine
+        val old = EngineJson.json.decodeFromString(app.verst.core.model.dto.WalkStopDto.serializer(), """{"id": "w01", "kind": "museum", "nameRu": "Музей", "lat": 1.0, "lon": 2.0}""")
+        assertFalse(old.priceUnknown)
+        assertTrue(app.verst.core.model.dto.cuisineTags(old.cuisine).isEmpty())
     }
 
     @Test

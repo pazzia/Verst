@@ -33,6 +33,10 @@ enum class Glyph(val path: String, val strokeWidth: Float = 2f, val filled: Bool
     MUSEUM("M3 9l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"),
     GLASS("M7 4h10l-1.2 9.5a3.8 3.8 0 0 1-7.6 0zM12 17v3M8.5 20h7"),
     MUG("M6 7h9v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zM15 10h2.5a2 2 0 0 1 0 4H15M8 4c.5 1 1.5 1 2 0s1.5-1 2 0"),
+    /** CEO 29.10: walk food stops (§21 bar-sign look): fork and knife — restaurant, fast food, food court. */
+    CUTLERY("M5 3v5a2 2 0 0 0 4 0V3M7 3v18M17 21V3c-2.2 1.6-3 4.4-3 8h3"),
+    /** CEO 29.10: a café stop: a cup with steam on a saucer. */
+    CUP("M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 10.5h1.5a2.25 2.25 0 0 1 0 4.5H16M4 21h14M9 3.5c-.6.9.6 1.6 0 2.5M12.5 3.5c-.6.9.6 1.6 0 2.5"),
     BINOCULARS("M10.5 15a3.5 3.5 0 1 1-7 0a3.5 3.5 0 1 1 7 0zM20.5 15a3.5 3.5 0 1 1-7 0a3.5 3.5 0 1 1 7 0zM9 7l-2 4.5M15 7l2 4.5M10.5 14h3"),
     LOCATE("M19 12a7 7 0 1 1-14 0a7 7 0 1 1 14 0zM12 2v3M12 19v3M2 12h3M19 12h3"),
     LOCATE_DOT("M14 12a2 2 0 1 1-4 0a2 2 0 1 1 4 0z", filled = true),

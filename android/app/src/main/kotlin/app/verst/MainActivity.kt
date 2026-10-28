@@ -145,6 +145,7 @@ import app.verst.nav.undo
 import app.verst.nav.undoBooking
 import app.verst.nav.useMyLocation
 import app.verst.nav.visibleCityPresets
+import app.verst.nav.noDataCityPresets
 import app.verst.nav.walkFocusShown
 import app.verst.nav.walkHandoffGo
 import app.verst.nav.walkShareText
@@ -583,6 +584,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 startTomorrow = walkStart(flow).tomorrow,
                 few = flow.walkFew,
                 picker = flow.cityPicker,
+                noDataPresets = flow.noDataCityPresets(),
             ),
             object : app.verst.feature.city.CityActions {
                 override fun back() {

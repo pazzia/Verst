@@ -46,7 +46,7 @@ data class CardUi(
     /** RoadSign kind of the mini sign (tourist / hotel / service). */
     val sign: String,
     val tags: List<String> = emptyList(),
-    val kind: String, // sight | hotel | bar
+    val kind: String, // sight | hotel | bar | food (CEO 29.10: an OSM restaurant / café of a walk)
     val details: PoiDetailsDto? = null,
     val loading: Boolean = false,
     val offline: Boolean = false,
@@ -249,7 +249,7 @@ private fun FactChips(ui: CardUi) {
 /** 5.9 C2: the row's RoadSign at 0.7 (tourist 39 × 39, hotel service 35 × 43); bars get the §21 bar sign. */
 @Composable
 private fun CardMiniSign(ui: CardUi) {
-    if (ui.kind == "bar") BarSign(ui.tags.firstOrNull() ?: "bar")
+    if (ui.kind == "bar" || ui.kind == "food") BarSign(ui.tags.firstOrNull() ?: ui.kind)
     else Box(Modifier.scaled(0.7f)) { RoadSign(ui.sign, ui.name, app.verst.feature.common.signTags(ui.details?.poiKind, ui.tags)) }
 }
 
@@ -269,7 +269,7 @@ private fun SecondaryButton(text: String, tag: String, onClick: () -> Unit) {
  */
 internal fun osmData(ui: CardUi): Boolean {
     val d = ui.details
-    return ui.kind == "bar" || d?.osmSource == true || d?.placeSource == "osm" || d?.placeAttributionRu != null || d?.attributionRu?.any { it.contains("OpenStreetMap") } == true || d?.textSource == "osm" ||
+    return ui.kind == "bar" || ui.kind == "food" || d?.osmSource == true || d?.placeSource == "osm" || d?.placeAttributionRu != null || d?.attributionRu?.any { it.contains("OpenStreetMap") } == true || d?.textSource == "osm" ||
         d?.image?.source == "osm" || (ui.kind == "sight" && d != null && d.wikidataId == null && !d.id.startsWith("pl_"))
 }
 
@@ -346,7 +346,8 @@ private fun kindLine(ui: CardUi): String {
     // M9: the engine's label as given for sights («музей · Коломна»); the local words for bars and old data
     val label = d?.poiKindRu?.takeIf { ui.kind == "sight" }?.lowercase()
     if (label != null) return if (town.isNullOrBlank()) label else stringResource(R.string.card_kind_line, label, town)
-    val word = when (d?.poiKind) {
+    // CEO 29.10: a food place has no engine card yet — its kind comes from the walk stop
+    val word = when (d?.poiKind ?: ui.tags.firstOrNull()?.takeIf { ui.kind == "food" }) {
         "museum" -> stringResource(R.string.card_kind_museum)
         "church" -> stringResource(R.string.card_kind_church)
         "monastery" -> stringResource(R.string.card_kind_monastery)
@@ -360,6 +361,10 @@ private fun kindLine(ui: CardUi): String {
         "pub" -> stringResource(R.string.card_kind_pub)
         "craft" -> stringResource(R.string.card_kind_craft)
         "bar", "beer" -> stringResource(R.string.card_kind_bar)
+        "restaurant" -> stringResource(R.string.card_kind_restaurant)
+        "cafe" -> stringResource(R.string.card_kind_cafe)
+        "fast_food" -> stringResource(R.string.card_kind_fast_food)
+        "food_court" -> stringResource(R.string.card_kind_food_court)
         // S4 kinds without a card word (playground, zoo, interactive, nature, theatre, temple…): the tag word
         else -> if (ui.kind == "bar") stringResource(R.string.card_kind_bar)
         else app.verst.feature.common.kindWord(d?.poiKind)?.lowercase() ?: stringResource(R.string.card_kind_sight)

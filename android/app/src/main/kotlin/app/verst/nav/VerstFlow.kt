@@ -282,7 +282,10 @@ class VerstFlow(
     /** S4 5.11 §10.2: «Другой вариант» found nothing new — the button is disabled until the input changes. */
     var walkOtherNone by mutableStateOf(false)
         internal set
-    /** S4 5.11 §10.5 / 5.10: `NOT_ENOUGH_POIS` with the engine's verified suggestions (never guessed here). */
+    /**
+     * S4 5.11 §10.5 / 5.10: `NOT_ENOUGH_POIS` with the engine's verified suggestions (never guessed here); CEO 29.10:
+     * with `reason: "no_data"` it carries the engine's `messageRu` instead of «мало мест».
+     */
     var walkFew: WalkFew? by mutableStateOf(null)
         internal set
     /** M6: request input → the engine's `requestKey` (stale answers and same-request rebuilds). */
@@ -1712,13 +1715,29 @@ val CityPresetOrder = listOf(DOG_WALK, "overview", "museums", "ryumochnye", "bee
 /** How a walk is requested (5.11 §10.2): it decides what a `NOT_ENOUGH_POIS` does. */
 enum class WalkBuild { GO, FILTER, OTHER, REMOVE }
 
-/** `NOT_ENOUGH_POIS` for the request ([durationMin], [unlimited]) with the engine's verified suggestions. */
+/**
+ * `NOT_ENOUGH_POIS` for the request ([durationMin], [unlimited]) with the engine's verified suggestions. CEO 29.10:
+ * [noData] — the engine's `reason: "no_data"`: our catalogue has no such places in this town (a gap of our base, not
+ * a small town); the plate then says the engine's [messageRu] and offers other walks only.
+ */
 data class WalkFew(
     val durationMin: Int?,
     val unlimited: Boolean,
     val suggestions: List<app.verst.core.model.dto.WalkSuggestion>,
     val count: Int?,
-)
+    val noData: Boolean = false,
+    val messageRu: String? = null,
+) {
+    companion object {
+        /** The plate state of a `NOT_ENOUGH_POIS` [e] answering a request for [durationMin] / [unlimited]. */
+        fun of(durationMin: Int?, unlimited: Boolean, e: app.verst.core.model.dto.EngineErrorDto): WalkFew = if (e.isNoData) {
+            // a longer walk or the removed places back would not find what we never loaded: other walks only
+            WalkFew(durationMin, unlimited, e.walkSuggestions.filter { it.preset != null }, e.count, noData = true, messageRu = e.messageRu)
+        } else {
+            WalkFew(durationMin, unlimited, e.walkSuggestions, e.count)
+        }
+    }
+}
 
 /** The picker sheets of 5.10 (prefs) and 5.11 (filter bar). */
 enum class CityPicker { DURATION, PRESET, CREW, BUDGET, PACE }

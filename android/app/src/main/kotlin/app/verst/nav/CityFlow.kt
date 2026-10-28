@@ -65,6 +65,14 @@ fun VerstFlow.visibleCityPresets(): List<app.verst.core.model.dto.CityPresetDto>
     return all.sortedBy { CityPresetOrder.indexOf(it.preset).let { i -> if (i < 0) 90 else i } }
 }
 
+/**
+ * CEO 29.10: the presets the engine could not offer because our catalogue has no such places in this town
+ * (`noData`) — 5.10 shows them disabled with the engine's reason; other unavailable presets stay hidden.
+ */
+fun VerstFlow.noDataCityPresets(): List<app.verst.core.model.dto.CityPresetDto> =
+    cityPresets?.presets.orEmpty().filter { !it.available && it.noData && (it.preset != DOG_WALK || cityDog) }
+        .sortedBy { CityPresetOrder.indexOf(it.preset).let { i -> if (i < 0) 90 else i } }
+
 /** A preset's defaults fill only what the user has not chosen (S4: custom values persist). */
 internal fun VerstFlow.selectDefaults(p: app.verst.core.model.dto.CityPresetDto) {
     cityPreset = p.preset
@@ -302,7 +310,8 @@ fun VerstFlow.buildWalk(mode: WalkBuild = WalkBuild.GO) {
                         walkOtherNone = true
                     }
                     else -> {
-                        walkFew = WalkFew(req.durationMin, req.unlimited, r.error.walkSuggestions, r.error.count)
+                        // CEO 29.10: `reason: "no_data"` → the engine's sentence, no «longer walk» suggestions
+                        walkFew = WalkFew.of(req.durationMin, req.unlimited, r.error)
                         if (!onWalk) cityError = r.error.code
                     }
                 }
@@ -389,7 +398,13 @@ fun VerstFlow.walkShareText(): String {
     val w = walk ?: return ""
     val lines = mutableListOf(w.titleRu)
     w.stops.forEachIndexed { i, s -> lines += "${i + 1}. ${s.nameRu}" + (s.arriveAt?.let { " · " + (RuFormat.clock(it) ?: "") } ?: "") }
-    lines += "≈ ${app.verst.settings.AppPrefs.money(w.cost.totalRub)} на всех · ≈ ${w.walkKm} км пешком"
+    // CEO 29.10: unknown café prices are never «≈ 0 ₽»; a sum without them says so
+    val money = when {
+        w.priceUnknown && w.cost.totalRub <= 0 -> "цены в кафе не указаны"
+        w.priceUnknown -> "≈ ${app.verst.settings.AppPrefs.money(w.cost.totalRub)} на всех без кафе"
+        else -> "≈ ${app.verst.settings.AppPrefs.money(w.cost.totalRub)} на всех"
+    }
+    lines += "$money · ≈ ${w.walkKm} км пешком"
     w.responsibleNoteRu?.let { lines += it }
     return lines.joinToString("\n")
 }

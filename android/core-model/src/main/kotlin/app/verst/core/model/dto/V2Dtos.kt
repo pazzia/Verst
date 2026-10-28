@@ -224,6 +224,10 @@ data class CityPresetDto(
     val defaultPace: String? = null,
     val adultOnly: Boolean = false,
     val titleRu: String = "",
+    /** CEO 29.10: not available because our catalogue has no such places in this town (a gap of our base). */
+    val noData: Boolean = false,
+    /** CEO 29.10: the engine's reason for [noData] («У нас пока нет данных о рюмочных в этом городе — …»). */
+    val noDataRu: String? = null,
 )
 
 @Serializable
@@ -259,8 +263,16 @@ data class WalkStopDto(
     /** M9: the category label to show as given, and where the place comes from. */
     val poiKindRu: String? = null,
     val placeSource: String? = null,
+    /** CEO 29.10: facts open data does not give («price» for OSM restaurants and cafés: `costRub` 0 is not «free»). */
+    val unknownFacts: List<String> = emptyList(),
+    /** CEO 29.10: the OSM `cuisine` tag of a food place as given («georgian;pizza»); shown only through [cuisineTags] words. */
+    val cuisine: String? = null,
 ) {
     val isBar: Boolean get() = kind in BarKinds
+    /** CEO 29.10: a restaurant, café, fast food or food court from OSM (`catalogue_food`). */
+    val isFood: Boolean get() = kind in FoodKinds
+    /** CEO 29.10: the engine does not know the price — never show 0 ₽ or «бесплатно» for it. */
+    val priceUnknown: Boolean get() = "price" in unknownFacts
     /** Indoor places a dog usually may not enter (5.11 §10.4 `walk_stop_dog_no`). */
     val indoor: Boolean get() = isBar || (poiKind ?: kind) in IndoorKinds
 }
@@ -269,7 +281,18 @@ data class WalkStopDto(
 @Serializable
 data class WalkHoursDto(val todayRu: String? = null, val openNow: Boolean? = null, val source: String? = null, val closedDayRu: String? = null, val allDay: Boolean = false)
 
-val IndoorKinds = setOf("museum", "theatre", "interactive", "gallery", "cafe")
+/** ADR-0015 §6 (engine `INDOOR_KINDS`); CEO 29.10: restaurants, cafés and food courts are indoor too (fast food is often a kiosk). */
+val IndoorKinds = setOf("museum", "theatre", "interactive", "gallery", "cafe", "restaurant", "food_court")
+
+/** CEO 29.10: the engine's food kinds (`FOOD_KINDS`). */
+val FoodKinds = setOf("restaurant", "cafe", "fast_food", "food_court")
+
+/**
+ * CEO 29.10: the OSM `cuisine` tags of a food place («georgian;pizza» → georgian, pizza), in tag order. The app shows
+ * only the ones it has words for (`feature.common.cuisineWords`) — never a raw English tag.
+ */
+fun cuisineTags(cuisine: String?): List<String> =
+    cuisine.orEmpty().split(';', ',').map { it.trim().lowercase().replace(' ', '_') }.filter { it.isNotEmpty() }.distinct()
 
 val BarKinds = setOf("bar", "ryumochnaya", "pub", "craft", "beer")
 
@@ -326,6 +349,8 @@ data class WalkRouteDto(
     @Transient val json: String = "",
 ) {
     val adultOnly: Boolean get() = responsibleNoteRu != null
+    /** CEO 29.10: a stop whose price open data does not give (OSM restaurants, cafés) — the total leaves it out. */
+    val priceUnknown: Boolean get() = stops.any { it.priceUnknown }
 
     /** «без ограничения» (v3 `durationMin: null`): no times, the hours of each place instead. */
     val untimed: Boolean get() = unlimited || input?.get("durationMin") is kotlinx.serialization.json.JsonNull ||

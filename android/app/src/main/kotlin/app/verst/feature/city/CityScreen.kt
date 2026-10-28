@@ -102,6 +102,8 @@ data class CityUi(
     val few: WalkFew? = null,
     val picker: CityPicker? = null,
     val excludedCount: Int = 0,
+    /** CEO 29.10: presets our catalogue has no places for here (`noData`), shown disabled with `noDataRu`. */
+    val noDataPresets: List<CityPresetDto> = emptyList(),
 ) {
     val pickerUi: PickerUi get() = PickerUi(durationMin, presets, selected, adults, children, dog, pace, budget)
 }
@@ -158,7 +160,10 @@ fun CityScreen(ui: CityUi, a: CityActions) {
                             PlaceholderPlate(170.dp, DesignTokens.size.presetH, C.dash.controlAlt)
                             PlaceholderPlate(170.dp, DesignTokens.size.presetH, C.dash.controlAlt)
                         }
-                        else -> PresetGrid(ui.presets, ui.selected, a::preset)
+                        else -> {
+                            PresetGrid(ui.presets, ui.selected, a::preset)
+                            if (ui.noDataPresets.isNotEmpty()) NoDataPresets(ui.noDataPresets)
+                        }
                     }
                     // 5. warnings (informative: ПОШЛИ stays on)
                     CityWarnings(ui, a)

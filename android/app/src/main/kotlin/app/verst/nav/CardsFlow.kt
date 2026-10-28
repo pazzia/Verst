@@ -29,11 +29,19 @@ fun VerstFlow.openCard(stop: StopDto) {
     loadCard(placeId, stop.id)
 }
 
-/** A walk stop → its card (sights / museums: sight card; bars: bar card with the ODbL line). */
+/**
+ * A walk stop → its card (sights / museums: sight card; bars: bar card with the ODbL line; CEO 29.10: OSM
+ * restaurants and cafés: a food card, OSM too).
+ */
 fun VerstFlow.openWalkCard(ws: app.verst.core.model.dto.WalkStopDto) {
     if (!ws.tappable) return
+    val kind = when {
+        ws.isBar -> "bar"
+        ws.isFood -> "food"
+        else -> "sight"
+    }
     val base = app.verst.feature.card.CardUi(
-        name = ws.nameRu, sign = if (ws.isBar) "service" else "tourist", tags = listOf(ws.kind), kind = if (ws.isBar) "bar" else "sight",
+        name = ws.nameRu, sign = if (ws.isBar || ws.isFood) "service" else "tourist", tags = listOf(ws.kind), kind = kind,
         loading = ws.poiId != null, offline = !connectivity.online, walkStop = true,
     )
     card = CardState(CardSource.WALK, ws.id, ws.poiId, base)

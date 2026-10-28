@@ -269,7 +269,17 @@ data class EngineErrorDto(
     val count: Int? = null,
     /** M6: the key of the request this error answers (NOT_ENOUGH_POIS). */
     val requestKey: String? = null,
+    /**
+     * CEO 29.10 (`NOT_ENOUGH_POIS`, `reason: "no_data"`): the interests or the preset our catalogue has no data for
+     * in this town («beer», «food») — a gap in our base, not a small town.
+     */
+    val noData: List<String> = emptyList(),
+    /** CEO 29.10: the engine's sentence for [noData] («У нас пока нет данных о пивных барах в этом городе — …»). */
+    val messageRu: String? = null,
 ) {
+    /** CEO 29.10: `NOT_ENOUGH_POIS` because we have no data of the kind here (not «мало мест»). */
+    val isNoData: Boolean get() = reason == "no_data" || noData.isNotEmpty()
+
     /** The engine's verified suggestions, decoded defensively (unknown shapes are skipped). */
     val walkSuggestions: List<WalkSuggestion>
         get() = suggestions.orEmpty().mapNotNull { WalkSuggestion.from(it) }
