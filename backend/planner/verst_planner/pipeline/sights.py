@@ -13,7 +13,7 @@ import math
 import re
 from datetime import timedelta
 
-from verst_planner.config import PlannerConfig
+from verst_planner.config import FunSightsCfg, PlannerConfig
 from verst_planner.domain.enums import Meal, Mood, Source, StopKind, Tag
 from verst_planner.domain.facts import Known, confirmed_free, rank_rating, tag_state
 from verst_planner.domain.model import (
@@ -30,7 +30,7 @@ from verst_planner.explain.reasons import sight_reason
 from verst_planner.geo.distance import haversine_km
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.meals import best_lunch, lunch_candidates, needs_lunch, plan_meals
-from verst_planner.pipeline.rest import RestPool, day_ok
+from verst_planner.pipeline.rest import FUN_FIT, RestPool, day_ok, fun_affinity
 from verst_planner.pipeline.timeline import Profile, insert_stop, local, schedule_day
 
 NOTABLE = frozenset({Tag.KREMLIN, Tag.MONASTERY, Tag.MUSEUM, Tag.VIEW})
@@ -255,12 +255,15 @@ def effective_quality(p: Place) -> float:
     return max(0.0, min(1.0, (rank_rating(p) - 3.6) / 1.3))
 
 
-def detour_ok(c: Candidate) -> bool:
+def detour_ok(c: Candidate, fun: FunSightsCfg | None = None) -> bool:
     """The tiered detour budget (open-data world): q ≥ 0.70 up to 45 min, q ≥ 0.55 up to 25 min, else
-    the plain rule (`quality_ok`: a detour of at most FAR_DETOUR_KM)."""
+    the plain rule (`quality_ok`: a detour of at most FAR_DETOUR_KM). `fun` («Весело и познавательно», CEO
+    2026-10-29): any sight of quality ≥ `fun.min_quality` may also take up to `fun.detour_min`."""
     if c.place.quality is not None and c.place.quality < MIN_QUALITY:
         return False
     q = effective_quality(c.place)
+    if fun is not None and q >= fun.min_quality and c.detour_min <= fun.detour_min:
+        return True
     if q >= TOP_QUALITY:
         return c.detour_min <= TOP_DETOUR_MIN
     if q >= MID_QUALITY:
@@ -437,11 +440,17 @@ def plan_sights(
         return
     profile = ctx.profile_for(corridor.route)
     max_n = ctx.cfg.sights.max_per_day.of(inp.mood)
+    if max_n <= 0:
+        return
     used = _used(days)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
+    rests = RestPool.for_trip(corridor, inp, ctx)
     centres = big_city_centres(corridor)
     own = own_big_cities(inp, corridor, days)
     open_data = bool(ctx.cfg.sights.diversity)
+    # CEO 2026-10-29: «Весело и познавательно» admits more sights (open data: a longer detour, a lower score)
+    fun = ctx.cfg.sights.fun if open_data and inp.mood is Mood.FUN else None
+    min_score = fun.min_score if fun is not None else ctx.cfg.sights.min_score
+    long_per_day = fun.long_per_day if fun is not None else TOP_PER_DAY
     # open data: secular sights first over the whole trip, then the religious ones while the trip share
     # stays ≤ RELIGIOUS_SHARE (a lone church on a sparse road would only be dropped by the repair)
     for religious in (False, True) if open_data else (None,):
@@ -452,10 +461,10 @@ def plan_sights(
                 for c in corridor.sights
                 if day.km_start < c.km_at < day.km_end
                 and c.place.id not in used
-                and sight_score(c, inp) >= ctx.cfg.sights.min_score
+                and sight_score(c, inp) >= min_score
                 and not (ctx.knobs.sights_free and not lever_free_ok(c.place, inp))
                 and not near_day_ends(c.place, day, inp, ctx.cfg)
-                and (detour_ok(c) and not not_a_sight(c.place) if open_data else quality_ok(c))
+                and (detour_ok(c, fun) and not not_a_sight(c.place) if open_data else quality_ok(c))
                 and not in_foreign_centre(c, centres, own, open_data)
                 and (
                     religious is None
@@ -473,7 +482,9 @@ def plan_sights(
                     break
                 if c.place.id in used or not diversity_ok(day, c, open_data):
                     continue
-                if open_data and long_detour(c) and _long_today(day) >= TOP_PER_DAY:
+                if open_data and long_detour(c) and (
+                    _long_today(day) >= long_per_day or _detour_town_seen(day, c)
+                ):
                     continue
                 if religious and not _religious_room(days):
                     break
@@ -628,7 +639,18 @@ def open_score(c: Candidate, inp: NormalizedInput, cfg: PlannerConfig) -> float:
     crew = 0.05 * (Tag.WALK in t and inp.crew.dog) + 0.05 * (Tag.PLAYGROUND in t and inp.crew.children > 0)
     if inp.crew.children > 0 and category_of(c.place) in KID_KINDS:
         crew += cfg.sights.kid_bonus
+    if inp.mood is Mood.FUN and fun_affinity(c, inp) >= FUN_FIT:
+        crew += cfg.sights.fun.kind_bonus  # CEO 2026-10-29: the kinds the «Весело» copy promises this crew
     return round(effective_quality(c.place) - c.detour_min / 300 + crew, 9)
+
+
+SAME_DETOUR_KM = 3.0
+"""Two long-detour sights this close are one off-route town: one detour, one stop (a second stop in Дмитров
+would be costed as a second 35-minute drive in and out)."""
+
+
+def _detour_town_seen(day: DayPlan, c: Candidate) -> bool:
+    return any(haversine_km(s.point, c.place.point) <= SAME_DETOUR_KM for s in _day_sights(day))
 
 
 def _long_today(day: DayPlan) -> int:
@@ -650,7 +672,7 @@ def lowest_sight(day: DayPlan) -> int:
 def plan_lunches(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
     """Stage 8 with the lunch probes checked by `day_ok` (rests reserved)."""
     profile = ctx.profile_for(corridor.route)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
+    rests = RestPool.for_trip(corridor, inp, ctx)
     used = _used(days)
     plan_meals(days, corridor, inp, ctx, ok=lambda d: day_ok(d, inp, ctx, profile, rests, used))
 
@@ -702,6 +724,6 @@ def plan_lunch_after_sights(
     """Stage 8b over every day still without a lunch that now overlaps the lunch window."""
     profile = ctx.profile_for(corridor.route)
     used = _used(days)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
+    rests = RestPool.for_trip(corridor, inp, ctx)
     for day in days:
         lunch_after_sights_day(day, corridor, inp, ctx, profile, used, rests)

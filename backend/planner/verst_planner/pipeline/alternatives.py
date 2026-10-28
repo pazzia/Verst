@@ -16,7 +16,7 @@ import itertools
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 
-from verst_planner.domain.enums import Meal, StopKind, Tag, WarningCode
+from verst_planner.domain.enums import Meal, Mood, PlaceType, StopKind, Tag, WarningCode
 from verst_planner.domain.facts import ticket_known, ticket_prices
 from verst_planner.domain.model import (
     Alternative,
@@ -360,6 +360,8 @@ def alternatives_for_day(
                 continue
             if fam == "sight" and sight_score(c, inp) < ctx.cfg.sights.min_score:
                 continue
+            if fam == "rest" and inp.mood is Mood.JUST_DRIVE and c.place.type is PlaceType.SIGHT:
+                continue  # CEO 2026-10-29: «Только доехать» — a break is a break, never a sight
             trial = trial_day(day, i, c, inp, ctx, profile, towns or [])
             new = trial.stop
             arrive = trial.slots[trial.index].arrive

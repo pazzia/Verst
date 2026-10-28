@@ -21,7 +21,7 @@ def lock(raw: Path, out: Path) -> dict[str, object]:
         data = (out / name).read_bytes()
         files[name] = {"bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
     meta = load_gz((out / FILES["meta"]).read_bytes(), "meta")
-    counts = {k: load_gz((out / FILES[k]).read_bytes(), k)["n"] for k in ("towns", "pois", "bars")}
+    counts = {k: load_gz((out / FILES[k]).read_bytes(), k)["n"] for k in ("towns", "pois", "bars", "food")}
 
     def opt(name: str) -> object:
         p = raw / name

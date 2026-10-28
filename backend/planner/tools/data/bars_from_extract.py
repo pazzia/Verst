@@ -5,8 +5,10 @@
     python3 tools/data/bars_from_extract.py RAW_DIR bars.geojsonseq      # writes RAW_DIR/bars.json
 
 Runs 1 and 2 lost 90+ min to Overpass (502/504 on the country-wide query on three mirrors, read timeouts per
-town), so the extract is the primary source and `fetch_overpass.py` the fallback. Same output and the same
-town assignment (`fetch_overpass.assign`); `elements_from_features` is pure and tested in the sandbox.
+town), so the extract is the primary source and `fetch_overpass.py` the fallback. Same output; the town
+assignment is `fetch_overpass.assign` over every catalogue town (`all_towns`, `radius_all_m`, CEO 2026-10-29 —
+the Overpass fallback keeps the bigger and touristic towns only). `elements_from_features` is pure and tested
+in the sandbox; `food_from_extract.py` uses it too.
 """
 
 from __future__ import annotations
@@ -19,7 +21,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fetch_overpass import assign, towns_to_query
+from fetch_overpass import all_towns, assign, radius_all_m
 
 KINDS = {"n": "node", "w": "way", "r": "relation"}
 
@@ -63,11 +65,10 @@ def elements_from_features(lines: Iterable[str], require_name: bool = True) -> l
 def main(argv: list[str]) -> int:
     raw, seq = Path(argv[0]), Path(argv[1])
     towns = json.loads((raw / "towns.json").read_text("utf-8"))
-    pois = json.loads((raw / "pois.json").read_text("utf-8"))
-    pick = towns_to_query(towns, pois)
+    pick = all_towns(towns)
     with seq.open(encoding="utf-8") as fh:
         elements = elements_from_features(fh)
-    bars = assign(elements, pick)
+    bars = assign(elements, pick, radius_all_m)
     (raw / "bars.json").write_text(json.dumps(bars, ensure_ascii=False), "utf-8")
     (raw / "bars_failed.json").write_text("[]", "utf-8")
     print(f"bars: {len(bars)} rows from {len(elements)} named features, {len(pick)} towns (extract)")

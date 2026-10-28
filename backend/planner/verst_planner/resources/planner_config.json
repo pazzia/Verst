@@ -23,7 +23,7 @@
   "drive_time_factor": 1.10,
   "day_start_first": "08:00",
   "day_start_next": "09:00",
-  "day_budget_min": {"calm": 540, "more_stops": 600, "just_drive": 600, "fun": 600},
+  "day_budget_min": {"calm": 540, "more_stops": 600, "just_drive": 720, "fun": 660},
   "split": {
     "window_lo": 0.70,
     "window_hi": 1.05,
@@ -43,6 +43,7 @@
     "h_cap": 5,
     "h_no_parking_weight": 0.5,
     "family_room_min_people": 3,
+    "town_interest": {"calm": 1, "more_stops": 1, "just_drive": 0, "fun": 1},
     "anchors": 0,
     "big_town_population": 200000,
     "w_big_town": 6.0
@@ -60,6 +61,7 @@
     "coffee_after_drive_min": 60
   },
   "rest_interval_min": {"calm": 120, "more_stops": 90, "just_drive": 180, "fun": 90},
+  "rest_dwell_min": {"calm": 30, "more_stops": 20, "just_drive": 20, "fun": 20},
   "rest": {
     "window_before_min": 30,
     "widen_before_min": 60,
@@ -74,7 +76,6 @@
     "coffee": 15,
     "fuel": 10,
     "fuel_coffee": 15,
-    "rest": 20,
     "lunch": 60,
     "sight_default": 60,
     "via": 30
@@ -82,8 +83,9 @@
   "lunch_window": ["12:00", "14:30"],
   "lunch_sweet_spot": ["12:30", "13:30"],
   "sights": {
-    "max_per_day": {"calm": 2, "more_stops": 4, "just_drive": 0, "fun": 4},
+    "max_per_day": {"calm": 2, "more_stops": 4, "just_drive": 0, "fun": 5},
     "min_score": 2.0,
+    "fun": {"detour_min": 45, "min_quality": 0.40, "min_score": 1.0, "long_per_day": 3, "kind_bonus": 0.15},
     "diversity": 0,
     "home_zone_km": 30,
     "short_dwell_max_min": 15,
@@ -93,8 +95,9 @@
   "town_visit": {
     "on": 0,
     "arrive_before": "16:00",
-    "evening_max": 2,
-    "morning_max": 1,
+    "evening_late_min": {"calm": 0, "more_stops": 0, "just_drive": 0, "fun": 90},
+    "evening_max": {"calm": 0, "more_stops": 2, "just_drive": 0, "fun": 3},
+    "morning_max": {"calm": 1, "more_stops": 1, "just_drive": 0, "fun": 1},
     "radius_km": 4.0
   },
   "alternatives": {"window_min": 45, "max": 3, "cluster_km": 2.0},

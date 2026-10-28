@@ -8,6 +8,7 @@
   "city_route-dog-walk.json",
   "city_route-error-adult.json",
   "city_route-error-no-city.json",
+  "city_route-error-no-data.json",
   "city_route-error-not-enough.json",
   "city_route-error-suggestions.json",
   "city_route-museums-spb.json",

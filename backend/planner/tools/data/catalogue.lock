@@ -1,18 +1,19 @@
 {
- "version": "wd-20261025-r7.5",
- "builtAt": "2026-10-25",
+ "version": "wd-20261025-r7.6",
+ "builtAt": "2026-10-28",
  "counts": {
   "towns": 1114,
   "pois": 10921,
-  "bars": 3284,
+  "bars": 4249,
+  "food": 0,
   "links": 79,
   "credits": 3632
  },
- "totalBytes": 853619,
+ "totalBytes": 871878,
  "files": {
   "catalogue_meta.json.gz": {
-   "bytes": 98377,
-   "sha256": "9ca90322a51f2c1b7236bb0dc49a2bf9f35d91bbb30e0bc11d5b1cfc118e01db"
+   "bytes": 98509,
+   "sha256": "ac344a3c26e23093f2d7466b7578e5a277deab33523593b2cc911dd292d0a221"
   },
   "catalogue_towns.json.gz": {
    "bytes": 52995,
@@ -23,8 +24,12 @@
    "sha256": "2c546bc5a88f52cb8a7b9e0b1e32c01f81a66cf837b45666726987258c45ddc6"
   },
   "catalogue_bars.json.gz": {
-   "bytes": 72887,
-   "sha256": "6484b405b9edbe3c353244957f3711df7dcef4ca11298e52cf9c78fb48c484f0"
+   "bytes": 90924,
+   "sha256": "3ff597aeef541b3daa57cbcd872c14721a6ca4fa593b1e9941e5ee37f7b77e19"
+  },
+  "catalogue_food.json.gz": {
+   "bytes": 90,
+   "sha256": "c847c3aba1a5c075da47666a2d480b43fc66b1a6294b4e9e961ccdea809675b8"
   }
  },
  "sources": {
@@ -33,7 +38,7 @@
   "commons": "commons.wikimedia.org",
   "fetchedAt": "2026-10-25T02:46:58+00:00",
   "run": "40151703225",
-  "rebuilt": "sandbox, from bot/raw-7 + bot/extras-1 + bot/photos-1 with the builder of the ODbL package (meta.licence, no GFDL-only photos)"
+  "rebuilt": "sandbox, from bot/raw-7 + bot/extras-1 + bot/photos-1 with the builder of CEO 2026-10-29 (bar kinds by name and tags, per-town bar cap by population; catalogue_food empty until data-osm.yml runs)"
  },
  "classCheck": {
   "labels": {

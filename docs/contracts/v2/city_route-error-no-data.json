@@ -1,0 +1,48 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-15",
+   "input_json": {
+    "start": {
+     "lat": 55.9606,
+     "lon": 38.0456,
+     "label": "Фрязино"
+    },
+    "preset": "beer",
+    "adultConfirmed": true
+   }
+  }
+ },
+ "response": {
+  "ok": false,
+  "error": {
+   "code": "NOT_ENOUGH_POIS",
+   "message": "not enough places for preset 'beer'",
+   "field": "preset",
+   "reason": "no_data",
+   "pointIndex": null,
+   "roadKm": null,
+   "detail": null,
+   "suggestions": [
+    {
+     "preset": "overview",
+     "stops": 8,
+     "titleRu": "Обзорная прогулка"
+    },
+    {
+     "preset": "custom",
+     "stops": 8,
+     "titleRu": "История, архитектура, парки и виды"
+    }
+   ],
+   "requestKey": "c07d9eed228e6cbf",
+   "noData": [
+    "beer"
+   ],
+   "messageRu": "У нас пока нет данных о пивных барах в этом городе — это пробел нашей базы, а не города."
+  },
+  "ms": 0
+ }
+}

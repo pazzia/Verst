@@ -8,6 +8,7 @@ insertions, until a full pass changes nothing or `MAX_MOVES` moves were made. Ti
 
 from __future__ import annotations
 
+import itertools
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -24,6 +25,7 @@ from verst_planner.city.presets import (
     DRINK_RUB,
     DURATIONS,
     DWELL,
+    EAT_KINDS,
     HERITAGE_BONUS,
     INTERESTS,
     MAX_LEG_KM,
@@ -44,6 +46,14 @@ from verst_planner.hours import OpeningHours
 from verst_planner.hours import parse as parse_hours
 
 MAX_MOVES = 200
+FOOD_STOPS_MAX = 3  # CEO 2026-10-29: a walk with «Еда» eats at most three times …
+FOOD_STOP_EVERY_MIN = 120  # … and with other interests at most once per two hours of walk
+
+
+def food_stops_max(inp: WalkInput) -> int:
+    if inp.interests == ("food",) or inp.duration_min is None:
+        return FOOD_STOPS_MAX
+    return max(1, min(FOOD_STOPS_MAX, inp.duration_min // FOOD_STOP_EVERY_MIN))
 MAX_WAIT_MIN = 60
 PAIR_POOL = 25  # pair insertion considers the 25 best candidates
 WAIT_STEP_MIN = 5
@@ -73,6 +83,7 @@ class WalkInput:
     exclude: frozenset[str]
     dog: bool = False
     widened: bool = False  # the interests gave < 2 places: other sights joined at 0.15
+    no_data_ru: str | None = None  # CEO 2026-10-29: why — no catalogue data for an interest here (not «few»)
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +102,7 @@ class Candidate:
     weight: float
     long_visit: bool = False  # a big museum seen in ≤ 2 h: the stop says «только главное»
     hours_source: str = "default"  # "osm" | "curated" | "default" (ADR-0015 §6)
+    price_known: bool = True  # False: a food place — OSM has no prices, the stop says so (ADR-0019 E-2)
 
     @property
     def base_score(self) -> float:
@@ -218,7 +230,11 @@ def weights_for(inp: WalkInput) -> dict[str, float]:
 
 
 def caps_for(inp: WalkInput) -> dict[str, int]:
-    caps = {"museum": 4, "drinks": 5} if inp.preset == "custom" else dict(PRESET_TABLE[inp.preset].caps)
+    caps = (
+        {"museum": 4, "drinks": 5, "food": food_stops_max(inp)}
+        if inp.preset == "custom"
+        else dict(PRESET_TABLE[inp.preset].caps)
+    )
     if inp.duration_min is None:
         caps["stops"] = UNLIMITED_MAX_STOPS
     return caps
@@ -275,6 +291,7 @@ class Solver:
         self.budget = budget_rub
         self.caps = caps
         self.cancel = cancel
+        self.mixed = any(c.kind not in EAT_KINDS and c.weight > 0 for c in self.c)
         self._open_cache: dict[tuple[int, int], float | None] = {}
         n = len(self.c)
         self.d_start = [haversine_km(start, x.point) * WALK_FACTOR for x in self.c]
@@ -286,14 +303,23 @@ class Solver:
     def minutes(self, km: float) -> float:
         return km / self.speed * 60.0
 
+    def caps_ok(self, seq: Sequence[int]) -> bool:
+        return self._caps_ok(seq)
+
     def _caps_ok(self, seq: Sequence[int]) -> bool:
         museums = sum(1 for i in seq if self.c[i].kind == "museum")
         drinks = sum(1 for i in seq if self.c[i].kind in DRINK_KINDS)
-        others = len(seq) - museums - drinks
+        eats = sum(1 for i in seq if self.c[i].kind in EAT_KINDS)
+        others = len(seq) - museums - drinks - eats
+        if eats > 1 and self.mixed and any(
+            self.c[a].kind in EAT_KINDS and self.c[b].kind in EAT_KINDS for a, b in itertools.pairwise(seq)
+        ):
+            return False  # CEO 2026-10-29: a walk with sights does not go from one café straight to the next
         return (
             len(seq) <= self.caps.get("stops", 99)
             and museums <= self.caps.get("museum", 99)
             and drinks <= self.caps.get("drinks", 99)
+            and eats <= self.caps.get("food", 99)
             and others <= self.caps.get("others", 99)
         )
 

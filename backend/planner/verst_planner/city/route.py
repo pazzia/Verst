@@ -13,6 +13,7 @@ from verst_planner.city.presets import (
     ADULT_PRESETS,
     DRINK_KINDS,
     DWELL,
+    EAT_KINDS,
     INDOOR_KINDS,
     MEAL_RUB,
     PACES,
@@ -37,6 +38,10 @@ class NotEnoughPois(PlannerError):
         self.field = "preset"
         self.suggestions: list[dict[str, Any]] = []  # set by the bridge: checked, never the current values
         self.request_key: str | None = None  # set by the bridge: `request_key` of the failed request
+        # CEO 2026-10-29, set by the bridge: the interests / preset the catalogue has no data for near the
+        # start («no_data»: we never loaded them — not «the town has few places») and the sentence to show
+        self.no_data: list[str] = []
+        self.message_ru: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,11 +52,14 @@ class WalkTown:
     tz: str
 
 
-def _meal(inp: WalkInput) -> bool:
+def _meal(inp: WalkInput, cands: Sequence[Candidate]) -> bool:
+    """The generic «Обед — кафе рядом» stop: «Еда» chosen for a long walk and no real food place to visit
+    (CEO 2026-10-29: with catalogue restaurants and cafés the walk stops at those instead)."""
     return (
         inp.preset == "custom"
         and "food" in inp.interests
         and (inp.duration_min is None or inp.duration_min >= MEAL_MIN_DURATION)
+        and not any(c.kind in EAT_KINDS and c.weight > 0 for c in cands)
     )
 
 
@@ -87,7 +95,7 @@ def build_walk(
     starts_tomorrow: bool = False,
 ) -> dict[str, Any]:
     speed = PACES[inp.pace][0]
-    meal = _meal(inp)
+    meal = _meal(inp, cands)
     meal_min = round(DWELL["meal"] * PACES[inp.pace][1]) if meal else 0
     meal_rub = MEAL_RUB * (inp.adults + inp.children) if meal else 0
     finish = inp.start if inp.return_to_start else None
@@ -117,7 +125,8 @@ def build_walk(
             drinks += c.cost_rub
         else:
             tickets += c.cost_rub
-        verified_all = verified_all and c.hours_verified
+        # a food place without OSM hours has none at all («часы не указаны»), not default ones
+        verified_all = verified_all and (c.hours_verified or (c.hours is None and c.kind in EAT_KINDS))
         stops.append(
             {
                 "id": f"w{len(stops) + 1:02d}",
@@ -137,6 +146,7 @@ def build_walk(
                 "noteRu": _stop_note(c, inp),
                 "hasPhoto": c.has_photo,
                 "tappable": True,
+                "unknownFacts": [] if c.price_known else ["price"],
             }
         )
         if meal_after == k:
@@ -161,6 +171,7 @@ def build_walk(
                     "noteRu": None,
                     "hasPhoto": False,
                     "tappable": False,
+                    "unknownFacts": [],
                 }
             )
     end = start_dt + timedelta(minutes=ev.total_min + shift)
@@ -173,10 +184,16 @@ def build_walk(
     warnings = []
     if not verified_all:
         warnings.append({"code": "HOURS_UNVERIFIED", "messageRu": ru.text("walk.warning.hours")})
+    if any(not cands[ci].price_known for ci in order):  # CEO 2026-10-29: never an invented price
+        warnings.append({"code": "PRICE_UNKNOWN", "messageRu": ru.text("walk.warning.price_unknown")})
     alcohol = inp.preset in ADULT_PRESETS or any(cands[ci].kind in DRINK_KINDS for ci in order)
     duration = round(ev.total_min + shift)
     total_rub = tickets + drinks + meal_rub
-    unused = sum(1 for i, c in enumerate(cands) if i not in set(order) and c.weight > 0)
+    used = set(order)
+    # a place the preset caps keep out (a fourth café) is not «too far»: only the ones that could still join
+    unused = sum(
+        1 for i, c in enumerate(cands) if i not in used and c.weight > 0 and solver.caps_ok([*order, i])
+    )
     shorter = None if unlimited else _shorter(inp, duration, total_rub, unused)
     if shorter is not None:
         warnings.append({"code": "SHORTER_THAN_ASKED", "messageRu": shorter["messageRu"]})
@@ -234,8 +251,12 @@ def _crew_notes(inp: WalkInput, indoor: bool) -> list[str]:
         out.append(ru.text("walk.crew.child"))
     if inp.dog:
         out.append(ru.text("walk.crew.dog_indoor" if indoor else "walk.crew.dog"))
-    if inp.widened:
+    if inp.widened and inp.no_data_ru:  # CEO 2026-10-29: no data for an interest here, not «few places»
+        out.append(ru.text("walk.crew.no_data", message=inp.no_data_ru))
+    elif inp.widened:
         out.append(ru.text("walk.crew.widened"))
+    elif inp.no_data_ru:
+        out.append(inp.no_data_ru)
     return out
 
 

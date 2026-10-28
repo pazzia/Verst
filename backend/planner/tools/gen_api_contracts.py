@@ -197,8 +197,9 @@ call(
     "city_route",
     world=R,
     request_id="c-walk-3",
+    # CEO 2026-10-29: «По рюмочным» walks рюмочные only — СПб has them (Ярославль one: NOT_ENOUGH_POIS)
     input_json=json.dumps(
-        {"start": YAR, "preset": "ryumochnye", "adultConfirmed": True, "crew": {"adults": 2}}
+        {"start": SPB, "preset": "ryumochnye", "adultConfirmed": True, "crew": {"adults": 2}}
     ),
 )
 call(
@@ -252,6 +253,17 @@ call(
             "preset": "beer",
             "adultConfirmed": True,
         }
+    ),
+)
+# CEO 2026-10-29: the catalogue has no bar data for Фрязино — `reason: no_data`, `noData`, `messageRu` (never «мало
+# мест»: we did not load them)
+call(
+    "city_route-error-no-data",
+    "city_route",
+    world=R,
+    request_id="c-walk-15",
+    input_json=json.dumps(
+        {"start": {"lat": 55.9606, "lon": 38.0456, "label": "Фрязино"}, "preset": "beer", "adultConfirmed": True}
     ),
 )
 call(

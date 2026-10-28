@@ -123,12 +123,13 @@ class _Scorer:
         s = self.ctx.cfg.overnight_score
         passing = self.passing(tc)
         h = h_fit(passing, self.ctx) if with_h else 0.0
-        q = tc.town.quality
+        interest = self.ctx.cfg.overnight_score.town_interest.of(self.inp.mood)
+        q = tc.town.quality if interest else 0  # «Только доехать»: a town is not chosen for its interest
         eta = day_start_estimate(day, self.inp, self.ctx) + timedelta(
             minutes=self.profile.drive(prev_km, tc.km_at)
             + self.ctx.cfg.overnight_eta_allowance_min.of(self.inp.mood)
         )
-        e = self.evening(tc, eta)
+        e = self.evening(tc, eta) if interest else 0
         det = min(x.detour_min for x in passing) if passing else tc.detour_min
         total = (
             s.w_h * h + s.w_q * q + s.w_e * e - s.w_km * abs(tc.km_at - target) / 100 - s.w_detour * det / 15

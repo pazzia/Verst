@@ -32,7 +32,9 @@
      "defaultDurationMin": 240,
      "defaultPace": "normal",
      "adultOnly": false,
-     "titleRu": "Обзорный"
+     "titleRu": "Обзорный",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "museums",
@@ -43,7 +45,9 @@
      "defaultDurationMin": 360,
      "defaultPace": "slow",
      "adultOnly": false,
-     "titleRu": "Музейный"
+     "titleRu": "Музейный",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "dog_walk",
@@ -54,7 +58,9 @@
      "defaultDurationMin": 120,
      "defaultPace": "normal",
      "adultOnly": false,
-     "titleRu": "Прогулка с собакой"
+     "titleRu": "Прогулка с собакой",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "ryumochnye",
@@ -65,18 +71,22 @@
      "defaultDurationMin": 240,
      "defaultPace": "normal",
      "adultOnly": true,
-     "titleRu": "По рюмочным"
+     "titleRu": "По рюмочным",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "beer",
      "available": true,
-     "count": 3,
+     "count": 5,
      "startAt": "2026-10-24T18:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
      "defaultPace": "normal",
      "adultOnly": true,
-     "titleRu": "Пивной"
+     "titleRu": "Пивной",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "custom",
@@ -87,7 +97,9 @@
      "defaultDurationMin": 240,
      "defaultPace": "normal",
      "adultOnly": false,
-     "titleRu": "Свой маршрут"
+     "titleRu": "Свой маршрут",
+     "noData": false,
+     "noDataRu": null
     }
    ]
   },

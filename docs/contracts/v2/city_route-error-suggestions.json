@@ -22,7 +22,7 @@
    "code": "NOT_ENOUGH_POIS",
    "message": "not enough places for preset 'beer'",
    "field": "preset",
-   "reason": null,
+   "reason": "no_data",
    "pointIndex": null,
    "roadKm": null,
    "detail": null,
@@ -38,7 +38,11 @@
      "titleRu": "История, архитектура, парки и виды"
     }
    ],
-   "requestKey": "a4431880440691f2"
+   "requestKey": "a4431880440691f2",
+   "noData": [
+    "beer"
+   ],
+   "messageRu": "У нас пока нет данных о пивных барах в этом городе — это пробел нашей базы, а не города."
   },
   "ms": 0
  }

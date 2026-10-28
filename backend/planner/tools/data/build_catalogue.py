@@ -5,7 +5,9 @@ A pure function of its inputs (stdlib only), so the sandbox tests it on recorded
 
 - ``towns.json``  ``[{qid, name, lat, lon, population, regionIso, regionName, image}]`` (fetch_wikidata towns)
 - ``pois.json``   ``[{qid, name, desc, lat, lon, roots: [class qid…], sitelinks, heritage, image, townQid}]``
-- ``bars.json``   ``[{osm: "n123", name, lat, lon, tags: {…}, townQid}]`` (fetch_overpass)
+- ``bars.json``   ``[{osm: "n123", name, lat, lon, tags: {…}, townQid}]`` (bars_from_extract / fetch_overpass)
+- ``food.json``   ``[{osm: "n123", name, lat, lon, tags: {…}, townQid}]`` (food_from_extract; optional — without it
+  `catalogue_food` has no rows and the walk says there is no food data yet)
 - ``credits.json`` ``{file name: {author, licence, url, free}}`` (fetch_commons_meta; optional)
 - ``forms.json``  ``{qid: {gen, prep}}`` (inflect.py with pymorphy3; optional)
 - ``sources.json`` free-form provenance written by the fetchers (optional)
@@ -14,7 +16,7 @@ plus the hand-maintained `region_tz.tsv` and `name_overrides.tsv` next to this f
 (name forms and Wikidata links win) and `tests/brand_denylist.txt`.
 
 Usage (from `backend/planner`): ``python3 tools/data/build_catalogue.py RAW_DIR [--out DIR] [--version V]``.
-Writes ``catalogue_{meta,towns,pois,bars}.json.gz`` (default: `verst_planner/resources/`) and prints a
+Writes ``catalogue_{meta,towns,pois,bars,food}.json.gz`` (default: `verst_planner/resources/`) and prints a
 summary. `build(...)` returns the documents for tests. `meta.licence` carries the ODbL 1.0 notice of the
 whole catalogue (`licence_block`); Commons files that are GFDL-only are not used (`gfdl_only`).
 """
@@ -61,6 +63,8 @@ from verst_planner.catalogue import (  # noqa: E402
     BAR_KINDS,
     COORD_SCALE,
     FILES,
+    FOOD_COLS,
+    FOOD_KINDS,
     FORMAT_VERSION,
     POI_COLS,
     POI_KINDS,
@@ -101,13 +105,35 @@ CLASS_IDS = tuple(q for q, _k in CLASS_KIND)
 POI_CAP = ((1_000_000, 120), (100_000, 50))
 POI_CAP_TOURIST = 40
 POI_CAP_OTHER = 12
-BAR_CAP = 60
+# CEO 2026-10-29: a per-town bar cap that grows with the town (СПб and Москва have hundreds of bars; 60 left
+# 4 рюмочные and no beer bar in СПб) — the specialised kinds are kept first, generic bars fill the rest
+BAR_CAP_MIN, BAR_CAP_MAX, BAR_CAP_PEOPLE = 60, 400, 12_500
+# CEO 2026-10-29: restaurants, cafés and fast food (OSM), capped per town by population (APK size: ~1 MB)
+FOOD_CAP_MIN, FOOD_CAP_MAX, FOOD_CAP_PEOPLE = 15, 600, 2_500
+CUISINE_MAX = 40
 TOURIST_TOP = 60
 TOWN_MATCH_KM = 15.0
 PLACE_MATCH_KM = 1.5
 DESC_MAX = 120
 BRANDED_TAGS = ("brand", "brand:wikidata", "brand:ru")
-RYUMKA = re.compile(r"рюмочн", re.IGNORECASE)
+# CEO 2026-10-29: «По рюмочным» = places for strong spirits and shots, «Пивной» = beer places. A name word
+# beginning (not preceded by a letter) decides; OSM tags too where they exist. Run 7 (5 382 bars) has no
+# drink:vodka / bar=* values beyond «bar=yes»; it has craft_beer=yes (91), craft=brewery (56), brewery=* (90),
+# microbrewery=yes (52), drink:beer (22).
+_WORD = r"(?<![^\W\d_])"
+RYUMKA = re.compile(
+    _WORD + r"(?:рюмоч|рюмк|стопк|стопоч|налив(?:оч|к|айк)|настоеч|настойк|водоч|водк|самогон|чарк"
+    r"|шот(?:-|\s)?бар|шоты\b|shots?\b|shot\s?bar)",
+    re.IGNORECASE,
+)
+CRAFT_NAME = re.compile(
+    _WORD + r"(?:крафт|craft|brew|пивовар|пивоварн|tap(?:room|house|\b)|тап(?:рум|хаус)\b)", re.IGNORECASE
+)
+BEER_NAME = re.compile(
+    _WORD + r"(?:пив|beer|bier|эль\b|ale\b|ales\b|паб\b|pub\b|пинт|pint|хмел|солод|ipa\b)", re.IGNORECASE
+)
+YES = ("yes", "only", "draught")
+CRAFT_YES = (*YES, "served")
 
 
 # ------------------------------------------------------------------------------------------- licence
@@ -140,7 +166,8 @@ def licence_block(version: str) -> dict[str, Any]:
             "licence": "ODbL-1.0",
             "name": "Open Database License (ODbL) 1.0",
             "uri": ODBL_URI,
-            "scope": "the catalogue as a whole: catalogue_meta, catalogue_towns, catalogue_pois, catalogue_bars",
+            "scope": "the catalogue as a whole: catalogue_meta, catalogue_towns, catalogue_pois, catalogue_bars, "
+            "catalogue_food",
             "derivativeOf": "OpenStreetMap",
         },
         "notice": LICENCE_NOTICE,
@@ -153,6 +180,7 @@ def licence_block(version: str) -> dict[str, Any]:
                 "uri": OSM_COPYRIGHT_URI,
                 "parts": [
                     "bars",
+                    "food (restaurants, cafés, fast food, food courts)",
                     "pois with an osm_* id",
                     "pois.hours, pois.fee, pois.website",
                     "pois.extract where extractSrc = osm",
@@ -475,13 +503,100 @@ def poi_kind(roots: Iterable[str]) -> str | None:
 
 
 def bar_kind(name: str, tags: dict[str, str]) -> str:
-    if RYUMKA.search(name):
+    """ryumochnaya (strong spirits, shots) > craft (brewery, craft beer, tap room) > pub (beer) > bar."""
+    if (
+        RYUMKA.search(name)
+        or tags.get("bar") in ("ryumochnaya", "shot_bar", "shots")
+        or tags.get("drink:vodka") == "only"
+    ):
         return "ryumochnaya"
-    if tags.get("craft") == "brewery" or tags.get("microbrewery") == "yes":
+    if (
+        tags.get("craft") == "brewery"
+        or tags.get("microbrewery") == "yes"
+        or tags.get("craft_beer") in CRAFT_YES
+        or tags.get("drink:craft_beer") in CRAFT_YES
+        or CRAFT_NAME.search(name)
+    ):
         return "craft"
-    if tags.get("amenity") in ("pub", "biergarten"):
+    if (
+        tags.get("amenity") in ("pub", "biergarten")
+        or tags.get("drink:beer") in YES
+        or tags.get("brewery", "no") != "no"  # the breweries whose beer is on tap («various»)
+        or BEER_NAME.search(name)
+    ):
         return "pub"
     return "bar"
+
+
+def bar_cap(population: int) -> int:
+    return max(BAR_CAP_MIN, min(BAR_CAP_MAX, population // BAR_CAP_PEOPLE))
+
+
+def food_cap(population: int) -> int:
+    return max(FOOD_CAP_MIN, min(FOOD_CAP_MAX, population // FOOD_CAP_PEOPLE))
+
+
+FOOD_ORDER = {k: i for i, k in enumerate(("restaurant", "cafe", "food_court", "fast_food"))}
+
+
+def cuisine(tags: dict[str, str]) -> str | None:
+    """OSM `cuisine` («russian;georgian»): lower case, at most CUISINE_MAX characters, whole values only."""
+    out: list[str] = []
+    for v in str(tags.get("cuisine") or "").lower().split(";"):
+        v = v.strip()
+        if v and v not in out and len(";".join([*out, v])) <= CUISINE_MAX:
+            out.append(v)
+    return ";".join(out) or None
+
+
+def food_rows(
+    raw_food: list[dict[str, Any]], town_pos: dict[str, int], towns: list[dict[str, Any]], deny: list[str],
+    hours_ok: Any,
+) -> list[dict[str, Any]]:
+    """Restaurants, cafés, fast food, food courts (CEO 2026-10-29): named, not deny-listed, one row per OSM
+    object, capped per town by population. Over the cap, chain fast food goes first, then other chains
+    (`brand*` tags), then places without opening hours."""
+    by_id: dict[str, dict[str, Any]] = {}
+    for f in raw_food:
+        tags = f.get("tags") or {}
+        name = str(f.get("name") or tags.get("name") or "").strip()
+        kind = tags.get("amenity")
+        if not name or kind not in FOOD_KINDS or denied(name, deny) or f.get("townQid") not in town_pos:
+            continue
+        hours = tags.get("opening_hours")
+        if hours and hours_ok is not None and not hours_ok(hours):
+            hours = None
+        chain = any(k in tags for k in BRANDED_TAGS)
+        by_id.setdefault(f["osm"], {**f, "name": name, "_kind": kind, "_hours": hours, "_chain": chain})
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for f in by_id.values():
+        grouped.setdefault(f["townQid"], []).append(f)
+    rows = []
+    for qid in sorted(grouped, key=lambda q: town_pos[q]):
+        lst = sorted(
+            grouped[qid],
+            key=lambda f: (
+                f["_chain"] and f["_kind"] == "fast_food",
+                f["_chain"],
+                f["_hours"] is None,
+                FOOD_ORDER[f["_kind"]],
+                f["osm"],
+            ),
+        )
+        for f in lst[: food_cap(int(towns[town_pos[qid]].get("population") or 0))]:
+            rows.append(
+                {
+                    "id": f["osm"],
+                    "name": tidy(f["name"]) or f["name"],
+                    "kind": FOOD_KINDS.index(f["_kind"]),
+                    "lat": to_coord(f["lat"]),
+                    "lon": to_coord(f["lon"]),
+                    "town": town_pos[qid],
+                    "hours": f["_hours"],
+                    "cuisine": cuisine(f.get("tags") or {}),
+                }
+            )
+    return rows
 
 
 def poi_cap(population: int, tourist: bool) -> int:
@@ -494,13 +609,14 @@ def poi_cap(population: int, tourist: bool) -> int:
 def build(
     raw_dir: Path, version: str = "dev", built_at: str = "", hours_ok: Any = None
 ) -> dict[str, dict[str, Any]]:
-    """The four documents (`meta`, `towns`, `pois`, `bars`) from the raw directory."""
+    """The documents (`meta`, `towns`, `pois`, `bars`, `food`) from the raw directory."""
     deny = denylist()
     tz = {code: zone for code, zone in read_tsv(HERE / "region_tz.tsv")}
     overrides = {qid_or_name: (gen, prep) for qid_or_name, gen, prep in read_tsv(HERE / "name_overrides.tsv")}
     raw_towns = load_json(raw_dir / "towns.json", [])
     raw_pois = load_json(raw_dir / "pois.json", [])
     raw_bars = load_json(raw_dir / "bars.json", [])
+    raw_food = load_json(raw_dir / "food.json", [])
     credits_in = load_json(raw_dir / "credits.json", {})
     forms = load_json(raw_dir / "forms.json", {})
     sources = load_json(raw_dir / "sources.json", {})
@@ -739,9 +855,9 @@ def build(
     bar_rows = []
     for qid in sorted(bars_grouped, key=lambda q: town_pos[q]):
         lst = sorted(
-            bars_grouped[qid], key=lambda b: (b["_hours"] is None, b["_kind"] != "ryumochnaya", b["osm"])
+            bars_grouped[qid], key=lambda b: (b["_kind"] == "bar", b["_hours"] is None, b["_kind"], b["osm"])
         )
-        for b in lst[:BAR_CAP]:
+        for b in lst[: bar_cap(int(towns[town_pos[qid]].get("population") or 0))]:
             bar_rows.append(
                 {
                     "id": b["osm"],
@@ -773,6 +889,7 @@ def build(
         "regions": [{"code": c, "nameRu": region_names[c], "tz": tz[c]} for c in regions_sorted],
         "poiKinds": list(POI_KINDS),
         "barKinds": list(BAR_KINDS),
+        "foodKinds": list(FOOD_KINDS),
         "credits": credit_list,
         "links": meta_links,
         "areaBlock": area_block,
@@ -786,6 +903,7 @@ def build(
         "towns": encode_table(town_rows, TOWN_COLS),
         "pois": encode_table(poi_rows, POI_COLS + POI_OPT_COLS),
         "bars": encode_table(bar_rows, BAR_COLS),
+        "food": encode_table(food_rows(raw_food, town_pos, towns, deny, hours_ok), FOOD_COLS),
     }
 
 
@@ -952,6 +1070,7 @@ def main(argv: list[str] | None = None) -> int:
         "towns": docs["towns"]["n"],
         "pois": docs["pois"]["n"],
         "bars": docs["bars"]["n"],
+        "food": docs["food"]["n"],
         "links": len(docs["meta"]["links"]),
         "credits": len(docs["meta"]["credits"]),
         "bytes": sizes,

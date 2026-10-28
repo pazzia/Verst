@@ -130,6 +130,7 @@ class _World:
     planner: Planner
     catalogue: CatalogueWorld | None = None
     bars: GridIndex[str] | None = None
+    food: GridIndex[str] | None = None
 
 
 _WORLDS: dict[str, _World] = {}
@@ -186,7 +187,14 @@ def _envelope(fn: Callable[[], Any]) -> str:
             body = {
                 "ok": False,
                 "error": _error(
-                    e.code, str(e), field=e.field, suggestions=e.suggestions, requestKey=e.request_key
+                    e.code,
+                    str(e),
+                    field=e.field,
+                    reason="no_data" if e.no_data else "few_places",
+                    suggestions=e.suggestions,
+                    requestKey=e.request_key,
+                    noData=e.no_data,
+                    messageRu=e.message_ru,
                 ),
             }
         except PlannerError as e:
@@ -554,7 +562,9 @@ def place_source(w: _World, place_id: str) -> dict[str, Any]:
     p = w.world.places.get(place_id)
     if p is not None and p.source is Source.CURATED:
         return {"placeSource": "curated", "placeAttributionRu": None}
-    osm = place_id.startswith("osm_") or (bool(_CATALOGUE) and place_id in _CATALOGUE[0].bar_by_id)
+    osm = place_id.startswith("osm_") or (
+        bool(_CATALOGUE) and (place_id in _CATALOGUE[0].bar_by_id or place_id in _CATALOGUE[0].food_by_id)
+    )
     if osm:
         return {"placeSource": "osm", "placeAttributionRu": ru.text(OSM_PLACE_ATTRIBUTION)}
     return {"placeSource": "wikidata", "placeAttributionRu": None}
@@ -1003,11 +1013,16 @@ def _load_catalogue() -> dict[str, Any]:
         bars: GridIndex[str] = GridIndex(0.05)
         for b in cat.bars:
             bars.add(b.point, b.id)
+        food: GridIndex[str] = GridIndex(0.05)
+        for f in cat.food:
+            food.add(f.point, f.id)
     finally:
         if was_enabled:
             gc.enable()
     gc.freeze()
-    _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, _planner(ports, _CLOCK, OPEN_DATA_CONFIG), cw, bars)
+    _WORLDS[CATALOGUE_WORLD] = _World(
+        cw.world, ports, _planner(ports, _CLOCK, OPEN_DATA_CONFIG), cw, bars, food
+    )
     _CATALOGUE[:] = [cat]
     return {
         **cat.info(),
@@ -1248,8 +1263,80 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                     weight=weight,
                 )
             )
+    if w.food is not None and _CATALOGUE and any(weights.get(k, 0.0) > 0 for k in city_presets_mod.EAT_KINDS):
+        cat = _CATALOGUE[0]
+        for _d, fid in w.food.within(inp.start, radius):
+            f = cat.food_by_id[fid]
+            weight = weights.get(f.kind, 0.0)
+            if fid in inp.exclude or weight <= 0:
+                continue
+            hours = _safe_hours(f.hours)
+            out.append(
+                Candidate(
+                    id=f.id,
+                    name=f.name,
+                    kind=f.kind,
+                    point=f.point,
+                    popularity=0.5 + (0.2 if hours is not None else 0.0) + (0.1 if f.cuisine else 0.0),
+                    heritage=False,
+                    hours=hours,  # None = unknown («часы не указаны»), never a made-up default
+                    hours_verified=hours is not None,
+                    hours_source="osm" if hours is not None else "default",
+                    cost_rub=0,  # OSM has no prices: the stop says «цена не указана» (ADR-0019 E-2)
+                    dwell_min=dwell_for(f.kind, 0, inp),
+                    has_photo=False,
+                    weight=weight,
+                    price_known=False,
+                )
+            )
     out.sort(key=lambda c: (-round(c.base_score, 9), c.id))
     return out[: city_presets_mod.POOL_MAX]
+
+
+def _kinds_near(w: _World, start: LatLon, kinds: frozenset[str], town_id: str | None) -> bool:
+    """Has the catalogue any place of these kinds for the walk's town (bars and food: the town the data build
+    assigned them to; sights: within NO_CITY_KM of the start)? CEO 2026-10-29: «no data» is not «few»."""
+    km = city_presets_mod.NO_CITY_KM
+    data_kinds = kinds & (city_presets_mod.DRINK_KINDS | city_presets_mod.EAT_KINDS)
+    if data_kinds and _CATALOGUE:
+        cat = _CATALOGUE[0]
+        if town_id is not None and w.catalogue is not None:
+            qid = w.catalogue.qid_of_place.get(town_id, town_id)
+            if data_kinds & cat.kinds_by_town.get(qid, frozenset()):
+                return True
+        else:
+            near = {cat.bar_by_id[b].kind for _d, b in w.bars.within(start, km)} if w.bars else set()
+            near |= {cat.food_by_id[f].kind for _d, f in w.food.within(start, km)} if w.food else set()
+            if data_kinds & near:
+                return True
+    if kinds & frozenset(city_presets_mod.SIGHT_KINDS):
+        for p in w.fakes.places.places_near(start, km, frozenset({PlaceType.SIGHT})):
+            if _poi_kind(w, p) in kinds:
+                return True
+    return False
+
+
+def _no_data(w: _World, inp: WalkInput, town_id: str | None) -> list[str]:
+    """CEO 2026-10-29: the interests (custom walk) or the preset whose kinds the catalogue has no place of for
+    this town — we never loaded them, so the walk must not say the town has few such places."""
+    if inp.preset == "custom":
+        kinds = city_presets_mod.INTEREST_KINDS
+
+        def missing(i: str) -> bool:
+            return bool(kinds[i]) and not _kinds_near(w, inp.start, frozenset(kinds[i]), town_id)
+
+        return [i for i in inp.interests if missing(i)]
+    preset = city_presets_mod.PRESET_TABLE.get(inp.preset)
+    if preset is None or _kinds_near(w, inp.start, preset.gate_kinds, town_id):
+        return []
+    return [inp.preset]
+
+
+def _no_data_ru(keys: list[str]) -> str | None:
+    if not keys:
+        return None
+    what = ru.join_and([ru.text(f"walk.no_data.what.{k}") for k in keys])
+    return ru.text("walk.no_data", what=what)
 
 
 DEFAULT_TZ = "Europe/Moscow"
@@ -1291,6 +1378,8 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
         except NotEnoughPois as e:
             e.suggestions = _walk_suggestions(w, inp, wt, now_local, token)
             e.request_key = key
+            e.no_data = _no_data(w, inp, wt.id)
+            e.message_ru = _no_data_ru(e.no_data)
             raise
     finally:
         with _LOCK:
@@ -1301,12 +1390,19 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
 def _walk_details(w: _World, result: dict[str, Any]) -> dict[str, Any]:
     """M9: walk stops carry the same `poiKind` / `poiKindRu` and place source as trip stops (`kind` stays
     the walk solver's kind)."""
+    cat = _CATALOGUE[0] if _CATALOGUE else None
     for s in result.get("stops", []):
         pid = s.get("poiId") or ""
         p = w.world.places.get(pid)
         if p is not None:
             s["poiKind"] = card_kind(w, p)
             s["poiKindRu"] = ru.kind_label(s["poiKind"])
+        elif cat is not None and (pid in cat.bar_by_id or pid in cat.food_by_id):
+            s["poiKind"] = s["kind"]  # CEO 2026-10-29: a bar or food place carries its own category label
+            s["poiKindRu"] = ru.kind_label(s["kind"])
+            food = cat.food_by_id.get(pid)
+            if food is not None:
+                s["cuisine"] = food.cuisine
         s.update(place_source(w, pid))
     return result
 
@@ -1327,6 +1423,8 @@ def _solve_walk(
     w: _World, inp: WalkInput, wt: WalkTown, now_local: datetime, route_id: str, token: CancelToken
 ) -> dict[str, Any]:
     inp, cands = _walk_candidates(w, inp)
+    if inp.preset == "custom":
+        inp = dataclasses.replace(inp, no_data_ru=_no_data_ru(_no_data(w, inp, wt.id)))
     if inp.start_at is not None:
         start_dt, tomorrow = inp.start_at, inp.start_at.date() > now_local.date()
     else:
@@ -1424,9 +1522,11 @@ def _city_presets(world: Any, lat: Any, lon: Any) -> dict[str, Any]:
             exclude=frozenset(),
         )
         cands = _candidates(w, probe, city_presets_mod.radius_km(duration, city_presets_mod.PACES[pace][0]))
+        no_data = False
         if preset is not None:
             count = sum(1 for c in cands if c.kind in preset.gate_kinds)
             available = count >= preset.gate_min
+            no_data = count == 0 and not _kinds_near(w, p, preset.gate_kinds, town.id)
         else:
             count = len(cands)
             available = count >= 2
@@ -1442,6 +1542,9 @@ def _city_presets(world: Any, lat: Any, lon: Any) -> dict[str, Any]:
                 "defaultPace": pace,
                 "adultOnly": key in city_presets_mod.ADULT_PRESETS,
                 "titleRu": ru.text(f"walk.preset.{key}"),
+                # CEO 2026-10-29: not available because our catalogue has no such places here (not the town)
+                "noData": no_data,
+                "noDataRu": _no_data_ru([key]) if no_data else None,
             }
         )
     return {"town": _town_json(w, town), "now": now_local.strftime("%Y-%m-%dT%H:%M"), "presets": out}

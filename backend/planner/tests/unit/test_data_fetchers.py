@@ -211,6 +211,70 @@ class ExtractTest(unittest.TestCase):
         self.assertEqual(els[0]["tags"], {"name": "Бар", "amenity": "bar"})
 
 
+class FoodExtractTest(unittest.TestCase):
+    """CEO 2026-10-29: food places from the same Geofabrik extract as the bars, for every catalogue town."""
+
+    fe = load("food_from_extract")
+    op = load("fetch_overpass")
+
+    def test_food_features(self) -> None:
+        def f(fid: str, lon: float, lat: float, **tags: Any) -> str:
+            geom = {"type": "Point", "coordinates": [lon, lat]}
+            return "\x1e" + json.dumps({"type": "Feature", "id": fid, "geometry": geom, "properties": tags})
+
+        lines = [
+            f("n1", 38.05, 55.96, name="Кафе", amenity="cafe", cuisine="russian", website="https://x"),
+            f("n2", 38.05, 55.96, name="Бургерная", amenity="fast_food", brand="Пример", phone="1"),
+            f("n3", 38.05, 55.96, amenity="restaurant"),  # no name
+            f("n4", 38.05, 55.96, name="Бар", amenity="bar"),  # not food
+        ]
+        els = self.fe.food_from_features(lines)
+        self.assertEqual([e["id"] for e in els], [1, 2])
+        self.assertEqual(els[0]["tags"], {"amenity": "cafe", "name": "Кафе", "cuisine": "russian"})
+        self.assertEqual(els[1]["tags"]["brand"], "Пример")
+
+    def test_every_town_is_assigned(self) -> None:
+        """Фрязино (60 000 people) gets its own places; the big-town Overpass pick would have skipped it."""
+        towns = [
+            {"qid": "FRY", "name": "Фрязино", "population": 60_000, "lat": 55.9606, "lon": 38.0456},
+            {"qid": "SHL", "name": "Щёлково", "population": 130_000, "lat": 55.9233, "lon": 37.9786},
+            {"qid": "V", "name": "деревня", "population": 300, "lat": 55.99, "lon": 38.10},
+        ]
+        pick = self.op.all_towns(towns)
+        self.assertEqual([t["qid"] for t in pick], ["SHL", "FRY"])
+        self.assertEqual(self.op.radius_all_m({"population": 900}), 2500)
+        self.assertEqual(self.op.radius_all_m({"population": 60_000}), 4000)
+        els = [
+            {"type": "node", "id": 1, "lat": 55.962, "lon": 38.047, "tags": {"name": "a"}},  # Фрязино
+            {"type": "node", "id": 2, "lat": 55.924, "lon": 37.980, "tags": {"name": "b"}},  # Щёлково
+            {"type": "node", "id": 3, "lat": 55.99, "lon": 38.10, "tags": {"name": "c"}},  # nobody's
+        ]
+        got = [(b["osm"], b["townQid"]) for b in self.op.assign(els, pick, self.op.radius_all_m)]
+        self.assertEqual(got, [("n1", "FRY"), ("n2", "SHL")])
+
+    def test_main_writes_food_json(self) -> None:
+        line = json.dumps(
+            {
+                "type": "Feature",
+                "id": "n7",
+                "geometry": {"type": "Point", "coordinates": [38.047, 55.962]},
+                "properties": {"name": "Кафе", "amenity": "cafe"},
+            }
+        )
+        towns = [{"qid": "FRY", "name": "Фрязино", "population": 60_000, "lat": 55.9606, "lon": 38.0456}]
+        with tempfile.TemporaryDirectory() as tmp:
+            raw = Path(tmp)
+            (raw / "towns.json").write_text(json.dumps(towns), "utf-8")
+            (raw / "f.geojsonseq").write_text("\x1e" + line + "\n", "utf-8")
+            import contextlib
+            import io
+
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(self.fe.main([str(raw), str(raw / "f.geojsonseq")]), 0)
+            food = json.loads((raw / "food.json").read_text("utf-8"))
+        self.assertEqual([(f["osm"], f["townQid"], f["name"]) for f in food], [("n7", "FRY", "Кафе")])
+
+
 class CommonsTest(unittest.TestCase):
     cm = load("fetch_commons_meta")
 
@@ -338,7 +402,8 @@ class LockTest(unittest.TestCase):
             doc = wl.lock(SAMPLES, Path(tmp))
         self.assertEqual(doc["version"], "s")
         self.assertGreater(doc["counts"]["towns"], 10)
-        self.assertEqual(len(doc["files"]), 4)
+        self.assertEqual(len(doc["files"]), 5)  # + catalogue_food (CEO 2026-10-29)
+        self.assertGreater(doc["counts"]["food"], 3)
         self.assertIsNone(doc["classCheck"])
         json.dumps(doc)
 

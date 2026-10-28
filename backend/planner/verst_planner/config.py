@@ -81,6 +81,9 @@ class OvernightScoreCfg:
     h_cap: int
     h_no_parking_weight: float
     family_room_min_people: int
+    town_interest: MoodInts = MoodInts(1, 1, 1, 1)
+    """CEO 2026-10-29: 1 = the town terms (`w_q` quality, `w_e` evening) count for this mood. «Только доехать»
+    (0) does not stop earlier for a more interesting town or its evening: hotels and the day's km decide."""
     anchors: int = 0
     """Acceptance 2026-10-28 (K2, V1): «anchor towns» (1 = on: the open-data world). A town of at least
     `big_town_population` is searched within `corridor_km.town_big`, may end a day anywhere from the window's
@@ -120,16 +123,32 @@ class DwellCfg:
     coffee: int
     fuel: int
     fuel_coffee: int
-    rest: int
     lunch: int
     sight_default: int
     via: int
 
 
 @dataclass(frozen=True, slots=True)
+class FunSightsCfg:
+    """CEO 2026-10-29 «Как едем»: «Весело и познавательно» admits more stage-9 sights than the other moods.
+
+    In the open-data world a sight of quality ≥ `min_quality` may take a detour of up to `detour_min` (the
+    other moods: the tiered 45 / 25 min / 10 km budget), `long_per_day` such long detours a day (others: 1),
+    with a stage-9 score of at least `min_score` (others: `sights.min_score`); the kinds the crew's «Весело»
+    copy promises (`rest.FUN_PREFER`) rank `kind_bonus` higher on the 0..1 quality scale."""
+
+    detour_min: int
+    min_quality: float
+    min_score: float
+    long_per_day: int
+    kind_bonus: float
+
+
+@dataclass(frozen=True, slots=True)
 class SightsCfg:
     max_per_day: MoodInts
     min_score: float
+    fun: FunSightsCfg
     diversity: int = 0
     """ADR-0015 §2 diversity rules (1 = on): on for the open-data world `russia_v1`, off for the curated
     fixture worlds (their sights were picked by hand; G01-G13 keep their bytes)."""
@@ -155,8 +174,11 @@ class TownVisitCfg:
 
     on: int
     arrive_before: time
-    evening_max: int
-    morning_max: int
+    evening_late_min: MoodInts
+    """CEO 2026-10-29: minutes after `arrive_before` a mood may still start its evening («Весело»: 90)."""
+    evening_max: MoodInts
+    """CEO 2026-10-29: per mood — «Только доехать» and «Спокойно» have no evening sightseeing run."""
+    morning_max: MoodInts
     radius_km: float
 
 
@@ -194,6 +216,8 @@ class PlannerConfig:
     overnight_eta_allowance_min: MoodInts
     fuel: FuelCfg
     rest_interval_min: MoodInts
+    rest_dwell_min: MoodInts
+    """CEO 2026-10-29: the dwell of a rest-area break per mood («Спокойно»: long, «Только доехать»: short)."""
     rest: RestCfg
     dwell_min: DwellCfg
     lunch_window: tuple[time, time]

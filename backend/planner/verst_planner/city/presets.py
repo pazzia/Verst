@@ -24,9 +24,15 @@ SIGHT_KINDS = (
 )
 BAR_KINDS = ("ryumochnaya", "pub", "craft", "bar")
 DRINK_KINDS = frozenset(BAR_KINDS)
+# CEO 2026-10-29: «Еда» — OSM restaurants, cafés, fast food, food courts (`catalogue_food`)
+FOOD_KINDS = ("restaurant", "cafe", "fast_food", "food_court")
+EAT_KINDS = frozenset(FOOD_KINDS)
 PRESETS = ("overview", "museums", "dog_walk", "ryumochnye", "beer", "custom")
 # ADR-0015 §6: places a dog usually may not enter (a warning per stop, never a block)
-INDOOR_KINDS = frozenset({"museum", "theatre", "interactive", "ryumochnaya", "pub", "craft", "bar"})
+INDOOR_KINDS = frozenset(
+    {"museum", "theatre", "interactive", "ryumochnaya", "pub", "craft", "bar"}
+    | {"restaurant", "cafe", "food_court"}
+)
 UNLIMITED_MIN = 480  # «без ограничения»: the solver's budget; the result has no timetable
 UNLIMITED_RADIUS_KM = 6.0
 UNLIMITED_MAX_STOPS = 12
@@ -63,6 +69,11 @@ DWELL = {
     "craft": 40,
     "ryumochnaya": 25,
     "meal": 45,
+    # CEO 2026-10-29: a sit-down meal, a coffee and a cake, a quick bite
+    "restaurant": 60,
+    "cafe": 40,
+    "fast_food": 20,
+    "food_court": 30,
 }
 BIG_MUSEUM_SITELINKS = 40
 BIG_MUSEUM_DWELL = 90
@@ -73,6 +84,8 @@ MUSEUM_WALK_DWELL = 50
 MUSEUM_DWELL_CAP_MIN = 120
 DRINK_RUB = {"ryumochnaya": 300, "pub": 600, "craft": 600, "bar": 500}
 MEAL_RUB = 600
+# CEO 2026-10-29: OSM gives no prices for restaurants and cafés — a food stop's price is unknown (null), never
+# an estimate (ADR-0019 E-2); the generic «Обед» stop keeps MEAL_RUB, it is not a real place.
 TICKETS = {"museum": (400, 200), "kremlin": (300, 150), "monastery": (300, 150)}
 DEFAULT_HOURS = {"museum": "Tu-Su 10:00-18:00", "church": "Mo-Su 08:00-20:00"}
 BAR_DEFAULT_HOURS = "Mo-Su 16:00-02:00"
@@ -91,7 +104,7 @@ INTEREST_KINDS: dict[str, dict[str, float]] = {
     "parks": {"park": 1.0, "embankment": 0.9, "nature": 1.0, "zoo": 0.6, "playground": 0.4},
     "views": {"viewpoint": 1.0, "embankment": 0.9, "park": 0.5, "nature": 0.7},
     "bars": {"bar": 1.0, "pub": 1.0, "craft": 1.0, "ryumochnaya": 1.0},
-    "food": {},
+    "food": {"restaurant": 1.0, "cafe": 1.0, "food_court": 0.6, "fast_food": 0.5},
 }
 
 
@@ -156,9 +169,11 @@ PRESET_TABLE: dict[str, Preset] = {
         "slow",
         {"museum": 5, "others": 2},
     ),
+    # CEO 2026-10-29: strict — «По рюмочным» only рюмочные, «Пивной» only beer places; never padded with
+    # generic bars (a town with few of them gets a shorter walk and says so)
     "ryumochnye": Preset(
         "ryumochnye",
-        {"ryumochnaya": 1.0, "bar": 0.5, "pub": 0.3},
+        {"ryumochnaya": 1.0},
         frozenset({"ryumochnaya"}),
         3,
         240,
@@ -167,7 +182,7 @@ PRESET_TABLE: dict[str, Preset] = {
     ),
     "beer": Preset(
         "beer",
-        {"craft": 1.0, "pub": 0.9, "bar": 0.5},
+        {"craft": 1.0, "pub": 0.9},
         frozenset({"pub", "craft"}),
         3,
         240,
@@ -181,12 +196,17 @@ HERITAGE_BONUS = 10.0
 def custom_weights(interests: tuple[str, ...], widened: bool = False) -> dict[str, float]:
     """Max over the chosen interests. The interests filter (S4 bug b3: they were weights, so «парки» in a
     town without parks gave the same monuments): other sights get 0, or 0.15 when `widened` (the fallback
-    when the chosen kinds give fewer than two places); bars only when «бары» is chosen."""
+    when the chosen kinds give fewer than two places); bars only when «бары» is chosen, food places only when
+    «еда» is chosen."""
     chosen: dict[str, float] = {}
     for i in interests:
         for k, v in INTEREST_KINDS[i].items():
             chosen[k] = max(chosen.get(k, 0.0), v)
-    base = {k: (0.15 if widened else 0.0) for k in SIGHT_KINDS} | {k: 0.0 for k in BAR_KINDS}
+    base = (
+        {k: (0.15 if widened else 0.0) for k in SIGHT_KINDS}
+        | {k: 0.0 for k in BAR_KINDS}
+        | {k: 0.0 for k in FOOD_KINDS}
+    )
     return {k: chosen.get(k, v) for k, v in base.items()}
 
 

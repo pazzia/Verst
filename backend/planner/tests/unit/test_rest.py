@@ -73,7 +73,10 @@ class RestTest(unittest.TestCase):
                 d = day(360)  # six hours of driving
                 plan_rests([d], corridor(rests_every(2, 360)), inp, ctx)
                 self.assertEqual(rest_kms(d), kms)
-                self.assertTrue(all(s.kind is StopKind.REST and s.dwell_min == 20 for s in d.stops if s.auto))
+                dwell = ctx.cfg.rest_dwell_min.of(mood)  # CEO 2026-10-29: «Спокойно» rests 30 min
+                self.assertEqual(dwell, 30 if mood is Mood.CALM else 20)
+                rests = [s for s in d.stops if s.auto]
+                self.assertTrue(all(s.kind is StopKind.REST and s.dwell_min == dwell for s in rests))
 
     def test_existing_stop_counts_as_break(self) -> None:
         ctx, inp = setup(mood=Mood.CALM)
@@ -295,7 +298,7 @@ class BreaksTest(unittest.TestCase):
         self.assertEqual(rest.reason_params["drive"], ru.duration_genitive(120))  # not 220 since the start
         self.assertEqual(
             ctx.templates.render(rest.reason_key, **rest.reason_params),
-            "Разминка 20 минут после двух часов за рулём.",
+            "Разминка 30 минут после двух часов за рулём.",  # «Спокойно»: long breaks (CEO 2026-10-29)
         )
 
     def test_sights_reserve_rest_time(self) -> None:

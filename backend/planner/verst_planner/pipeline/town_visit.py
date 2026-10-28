@@ -9,12 +9,13 @@ The town's sights are its own catalogue places within `town_visit.radius_km` of 
 town (an anchor town 30 km off the motorway is outside the road corridor). They pass the same admission
 rules as every added sight (a dog crew, the «15-minute» rule, the `sights_free` lever). Each visit is costed
 as a detour from the hotel, not from the motorway: the overnight stop already carries the drive into town.
-Runs only with `town_visit.on` (the open-data world).
+Runs only with `town_visit.on` (the open-data world). The limits are per mood (CEO 2026-10-29): «Весело и
+познавательно» gets the evening, «Спокойно» only an unhurried morning stop, «Только доехать» neither.
 """
 
 from __future__ import annotations
 
-from datetime import time
+from datetime import date, datetime, time, timedelta
 
 from verst_planner.domain.enums import PlaceType, RoadClass, StopKind
 from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, Place, PlannedStop
@@ -23,6 +24,7 @@ from verst_planner.geo.distance import haversine_km
 from verst_planner.pipeline import Corridor, PlanContext, detour
 from verst_planner.pipeline.rest import RestPool, day_ok
 from verst_planner.pipeline.sights import (
+    category_of,
     diversity_ok,
     dog_closed,
     lever_free_ok,
@@ -43,6 +45,8 @@ def _admitted(p: Place, inp: NormalizedInput, ctx: PlanContext) -> bool:
         return False
     if minor_open_data(p, ctx.cfg) or not_a_sight(p):
         return False
+    if inp.crew.children == 0 and category_of(p) == "playground":
+        return False  # a playground is for a child (as a break, M9) — not an evening for two adults
     return not (ctx.knobs.sights_free and not lever_free_ok(p, inp))
 
 
@@ -75,6 +79,13 @@ def _arrival_local_time(day: DayPlan, profile: Profile, ctx: PlanContext) -> tim
     return local(arrive, ctx.tz_of(end.region_code, end.point)).time()
 
 
+def _in_town(day: DayPlan) -> DayPlan:
+    """The day as the town visit sees it for the kind rules: its own town stops only (an evening walk is a
+    separate outing — a transit sight of the same kind 300 km back is not «two in a row»)."""
+    town = [s for s in day.stops if s.pool == TOWN_POOL]
+    return DayPlan(day.day, day.km_start, day.km_end, day.start_at, town, day.tz)
+
+
 def _visit_stop(c: Candidate, key: str, inp: NormalizedInput, ctx: PlanContext) -> PlannedStop:
     stop = make_sight_stop(c, inp, ctx)
     stop.pool = TOWN_POOL
@@ -89,9 +100,9 @@ def _evening(
     end = day.stops[-1]
     added = 0
     for c in town_candidates(end, end.km_at, inp, ctx, used):
-        if added >= ctx.cfg.town_visit.evening_max:
+        if added >= ctx.cfg.town_visit.evening_max.of(inp.mood):
             break
-        if not diversity_ok(day, c, bool(ctx.cfg.sights.diversity)):
+        if not diversity_ok(_in_town(day), c, bool(ctx.cfg.sights.diversity)):
             continue
         stop = _visit_stop(c, "town.evening", inp, ctx)
         i = insert_stop(day, stop)
@@ -109,9 +120,9 @@ def _morning(
     start = day.stops[0]
     added = 0
     for c in town_candidates(start, start.km_at, inp, ctx, used):
-        if added >= ctx.cfg.town_visit.morning_max:
+        if added >= ctx.cfg.town_visit.morning_max.of(inp.mood):
             break
-        if not diversity_ok(day, c, bool(ctx.cfg.sights.diversity)):
+        if not diversity_ok(_in_town(day), c, bool(ctx.cfg.sights.diversity)):
             continue
         stop = _visit_stop(c, "town.morning", inp, ctx)
         i = insert_stop(day, stop)
@@ -130,14 +141,18 @@ def plan_town_visits(days: list[DayPlan], corridor: Corridor, inp: NormalizedInp
     tv = ctx.cfg.town_visit
     if not tv.on or inp.simplify or len(days) < 2:
         return
+    if tv.evening_max.of(inp.mood) <= 0 and tv.morning_max.of(inp.mood) <= 0:
+        return  # «Только доехать» (CEO 2026-10-29): no town visits at all
     profile = ctx.profile_for(corridor.route)
     rests = RestPool.of(corridor, False, bool(ctx.cfg.sights.diversity))
+    late = datetime.combine(date.min, tv.arrive_before) + timedelta(minutes=tv.evening_late_min.of(inp.mood))
+    latest = late.time() if late.date() == date.min else time.max
     used = {s.place.id for d in days for s in d.stops if s.place is not None}
     for k, day in enumerate(days[:-1]):
         end = day.stops[-1]
         if end.kind is not StopKind.OVERNIGHT or end.town is None:
             continue
         arrive = _arrival_local_time(day, profile, ctx)
-        if arrive is not None and arrive < tv.arrive_before and _evening(day, inp, ctx, profile, rests, used):
+        if arrive is not None and arrive < latest and _evening(day, inp, ctx, profile, rests, used):
             continue
         _morning(days[k + 1], inp, ctx, profile, rests, used)

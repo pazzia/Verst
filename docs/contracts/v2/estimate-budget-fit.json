@@ -24,10 +24,10 @@
  "response": {
   "ok": true,
   "result": {
-   "km": 556,
+   "km": 544,
    "days": 2,
    "outcome": "plan",
-   "totalRub": 28400,
+   "totalRub": 28300,
    "budgetStatus": "fits"
   },
   "ms": 0

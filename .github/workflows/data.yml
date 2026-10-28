@@ -1,5 +1,7 @@
-# Sprint 3 (ADR-0012 §1): build the offline catalogue of Russian towns, POIs and bars from Wikidata, OSM
-# Overpass and Wikimedia Commons. The sandbox has no internet, so this runs on Actions and pushes the result to
+# Sprint 3 (ADR-0012 §1): build the offline catalogue of Russian towns, POIs, bars and (CEO 2026-10-29) food
+# places from Wikidata, OSM (Geofabrik extract; Overpass fallback for bars only) and Wikimedia Commons.
+# The whole pipeline: re-fetches everything. To refresh only bars and food on top of the published raw
+# responses, run data-osm.yml instead. The sandbox has no internet, so this runs on Actions and pushes the result to
 # branch bot/data-<run_number> (also when a check fails, so the report can be read from the sandbox). The
 # Manager (or the Architect on arch/** for development) merges the bot branch.
 name: data
@@ -46,7 +48,7 @@ jobs:
       - name: Bars (Geofabrik extract + osmium)
         id: extract
         continue-on-error: true
-        timeout-minutes: 40
+        timeout-minutes: 60
         run: |
           sudo apt-get install -y -qq osmium-tool >/dev/null
           curl -fsSL --retry 3 -o "$RUNNER_TEMP/ru.osm.pbf" https://download.geofabrik.de/russia-latest.osm.pbf
@@ -56,6 +58,13 @@ jobs:
           osmium export "$RUNNER_TEMP/bars.osm.pbf" -f geojsonseq --add-unique-id=type_id \
             -o "$RUNNER_TEMP/bars.geojsonseq" --overwrite
           python3 backend/planner/tools/data/bars_from_extract.py "$RAW" "$RUNNER_TEMP/bars.geojsonseq" 2>&1 \
+            | tee -a "$RAW/log.txt"
+          # CEO 2026-10-29: restaurants, cafés, fast food, food courts (catalogue_food) from the same extract
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/amenity=restaurant,cafe,fast_food,food_court \
+            -o "$RUNNER_TEMP/food.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/food.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/food.geojsonseq" --overwrite
+          python3 backend/planner/tools/data/food_from_extract.py "$RAW" "$RUNNER_TEMP/food.geojsonseq" 2>&1 \
             | tee -a "$RAW/log.txt"
       - name: Bars (OSM Overpass, fallback)
         if: ${{ steps.extract.outcome == 'failure' }}
