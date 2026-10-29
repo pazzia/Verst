@@ -255,15 +255,15 @@ call(
         }
     ),
 )
-# CEO 2026-10-29: the catalogue has no bar data for Фрязино — `reason: no_data`, `noData`, `messageRu` (never «мало
-# мест»: we did not load them)
+# CEO 2026-10-29: a town the catalogue has no beer places for (Гороховец; Фрязино has some since the OSM rebuild) —
+# `reason: no_data`, `noData`, `messageRu` (never «мало мест»: we did not load them)
 call(
     "city_route-error-no-data",
     "city_route",
     world=R,
     request_id="c-walk-15",
     input_json=json.dumps(
-        {"start": {"lat": 55.9606, "lon": 38.0456, "label": "Фрязино"}, "preset": "beer", "adultConfirmed": True}
+        {"start": {"lat": 56.20278, "lon": 42.6925, "label": "Гороховец"}, "preset": "beer", "adultConfirmed": True}
     ),
 )
 call(

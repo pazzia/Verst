@@ -995,7 +995,7 @@ class VerstFlowTest {
     }
 
     /**
-     * CEO 29.10: `NOT_ENOUGH_POIS` with `reason: "no_data"` (`city_route-error-no-data.json`, «Пивной» in Фрязино):
+     * CEO 29.10: `NOT_ENOUGH_POIS` with `reason: "no_data"` (`city_route-error-no-data.json`, «Пивной» in Гороховец):
      * the plate carries the engine's `messageRu` («у нас пока нет данных … это пробел нашей базы»), not «мало мест»,
      * and offers only other walks — never a longer walk, as if the town were small. An unavailable preset with
      * `noData` is listed with its reason; one that is merely unavailable stays hidden.
