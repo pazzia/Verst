@@ -417,11 +417,101 @@ def country_report(country: Country, head: list[dict[str, Any]], regions: list[d
     }
 
 
-def sparql(query: str, pacer: Any) -> list[dict[str, Any]]:
+def sparql(query: str, pacer: Any, retries: int | None = None) -> list[dict[str, Any]]:
+    kw = {} if retries is None else {"retries": retries}
     doc = request(
-        WDQS, pacer, data={"query": query, "format": "json"}, accept="application/sparql-results+json"
+        WDQS, pacer, data={"query": query, "format": "json"}, accept="application/sparql-results+json", **kw
     )
     return list(doc["results"]["bindings"])
+
+
+# ------------------------------------------------------------------------------------- towns abroad (run 2)
+# data-abroad.yml run 1 (29.10): the one towns query (547 classes × P17 × the P131* region path) timed out on
+# WDQS for KZ, UZ, KG, AZ and AB (504 four times; KZ also 429). Abroad it is split: the towns per chunk of
+# classes without the region path, then the regions of the towns found, per batch of town ids. A chunk that
+# still fails is halved, down to one class. Russia keeps the single query of runs 1-7.
+TOWN_CLASS_CHUNK = 60
+REGION_BATCH = 150
+CHUNK_RETRIES = 2
+
+Q_TOWNS_CHUNK = """SELECT ?town ?townLabel ?coord ?pop ?popDate ?image{country_var} WHERE {{
+  VALUES ?cls {{ {classes} }}{country_values}
+  ?town wdt:P31 ?cls; wdt:P17 {country}; wdt:P625 ?coord .
+  FILTER NOT EXISTS {{ ?town wdt:P576 [] }}
+  OPTIONAL {{ ?town p:P1082 ?ps . ?ps ps:P1082 ?pop . OPTIONAL {{ ?ps pq:P585 ?popDate }} }}
+  OPTIONAL {{ ?town wdt:P18 ?image }}
+  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "{langs}" . }}
+}}"""
+
+Q_TOWN_REGIONS = """SELECT ?town ?iso ?regionLabel WHERE {{
+  VALUES ?town {{ {towns} }}
+  ?town wdt:P131* ?region . ?region wdt:P300 ?iso . FILTER(STRSTARTS(?iso, "{prefix}"))
+  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "{langs}" . }}
+}}"""
+
+
+def towns_chunk_query(country: Country, classes: list[str]) -> str:
+    multi = len(country.qids) > 1
+    return Q_TOWNS_CHUNK.format(
+        classes=" ".join(f"wd:{c}" for c in classes if c),
+        country="?country" if multi else f"wd:{country.qids[0]}",
+        country_var=" ?country" if multi else "",
+        country_values=(
+            "\n  VALUES ?country {{ {} }}".format(" ".join(f"wd:{q}" for q in country.qids)) if multi else ""
+        ),
+        langs=country.label_langs,
+    )
+
+
+def with_regions(rows: list[dict[str, Any]], regions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Region rows (town, iso, regionLabel) as town rows: the town's label, point and P17 from its first row,
+    no population or image (so `towns_from_bindings` aggregates them like the rows of the single query)."""
+    first: dict[str, dict[str, Any]] = {}
+    for b in rows:
+        first.setdefault(val(b, "town") or "", b)
+    out = []
+    for r in regions:
+        b = first.get(val(r, "town") or "")
+        if b is None:
+            continue
+        base = {k: v for k, v in b.items() if k in ("town", "townLabel", "coord", "country")}
+        out.append({**base, "iso": r["iso"], **({"regionLabel": r["regionLabel"]} if "regionLabel" in r else {})})
+    return out
+
+
+def split_query(items: list[str], run: Any, min_size: int = 1) -> list[dict[str, Any]]:
+    """`run(items) -> bindings`; on a failure (timeout, 5xx, 429 after the retries) the list is halved and
+    each half retried, down to `min_size` items (then the error is raised)."""
+    try:
+        return list(run(items))
+    except Exception as e:
+        if len(items) <= min_size:
+            raise
+        half = len(items) // 2
+        print(f"query of {len(items)} items failed ({e!r:.120}); halving", flush=True)
+        return split_query(items[:half], run, min_size) + split_query(items[half:], run, min_size)
+
+
+def fetch_towns_abroad(country: Country, classes: list[str], query: Any) -> list[dict[str, Any]]:
+    """The towns of a wave-1 country; `query(sparql) -> bindings` (the network, or a stub in tests)."""
+    rows: list[dict[str, Any]] = []
+    for i in range(0, len(classes), TOWN_CLASS_CHUNK):
+        chunk = classes[i : i + TOWN_CLASS_CHUNK]
+        rows += split_query(chunk, lambda c: query(towns_chunk_query(country, c)))
+    ids = sorted({qid(val(b, "town") or "") for b in rows} - {""})
+    print(f"towns: {len(ids)} candidates from {len(classes)} classes", flush=True)
+    regions: list[dict[str, Any]] = []
+    for i in range(0, len(ids), REGION_BATCH):
+        batch = ids[i : i + REGION_BATCH]
+        regions += split_query(
+            batch,
+            lambda t: query(
+                Q_TOWN_REGIONS.format(
+                    towns=" ".join(f"wd:{q}" for q in t), prefix=country.iso_prefix, langs=country.label_langs
+                )
+            ),
+        )
+    return towns_from_bindings(rows + with_regions(rows, regions), country)
 
 
 def parse_args(argv: list[str]) -> tuple[str, Path, Country]:
@@ -467,7 +557,10 @@ def main(argv: list[str]) -> int:
         subs = sparql(Q_SUBCLASSES.format(roots=" ".join(f"wd:{c}" for c in roots)), pacer)
         classes = sorted({qid(val(b, "c") or "") for b in subs} | set(roots))
         print(f"town classes: {len(classes)}", flush=True)
-        towns = towns_from_bindings(sparql(towns_query(country, classes), pacer), country)
+        if country.abroad:
+            towns = fetch_towns_abroad(country, classes, lambda q: sparql(q, pacer, CHUNK_RETRIES))
+        else:
+            towns = towns_from_bindings(sparql(towns_query(country, classes), pacer), country)
         (out / "towns.json").write_text(json.dumps(towns, ensure_ascii=False), "utf-8")
         must_have = MUST_HAVE
         if country.abroad:  # the capital(s) Wikidata names (P36), when the country step ran

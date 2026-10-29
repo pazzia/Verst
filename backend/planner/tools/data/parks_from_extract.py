@@ -1,6 +1,6 @@
 """Parks and gardens from a Geofabrik OSM extract (CEO 29.10: Фрязино has no park in the catalogue). CI only:
 
-    osmium tags-filter X-latest.osm.pbf wa/leisure=park,garden -o parks.osm.pbf
+    osmium tags-filter X-latest.osm.pbf wr/leisure=park,garden -o parks.osm.pbf
     osmium export parks.osm.pbf -f geojsonseq --add-unique-id=type_id -o parks.geojsonseq
     python3 tools/data/parks_from_extract.py RAW_DIR parks.geojsonseq [--catalogue DIR]  # writes RAW_DIR/parks.json
 
@@ -90,6 +90,19 @@ def area_and_centre(geom: dict[str, Any]) -> tuple[float, float, float] | None:
     return total, sy / total, sx / total
 
 
+def osm_object(fid: str) -> tuple[str, int] | None:
+    """The OSM object of an `osmium export --add-unique-id=type_id` feature id: `n1`/`w2`/`r3` as they are, and
+    an area `a<id>` back to its way (`a246` → way 123: area id = 2 × way id) or relation (`a91` → relation 45:
+    2 × relation id + 1). Run 1 of data-abroad.yml (29.10) found no park at all: osmium writes every park
+    polygon with an `a…` id (the `w…` feature of a closed way is its LineString, which has no area)."""
+    if len(fid) < 2 or not fid[1:].isdigit():
+        return None
+    n = int(fid[1:])
+    if fid[0] == "a":
+        return ("relation", (n - 1) // 2) if n % 2 else ("way", n // 2)
+    return (KINDS[fid[0]], n) if fid[0] in KINDS else None
+
+
 def parks_from_features(lines: Iterable[str], min_area: float = MIN_AREA_M2) -> list[dict[str, Any]]:
     """Named public parks and gardens with an area (Overpass-shaped elements + `area`), the `KEEP` tags only."""
     out = []
@@ -98,8 +111,8 @@ def parks_from_features(lines: Iterable[str], min_area: float = MIN_AREA_M2) -> 
         if not line:
             continue
         f = json.loads(line)
-        fid = str(f.get("id", ""))
-        if not fid or fid[0] not in KINDS:
+        obj = osm_object(str(f.get("id", "")))
+        if obj is None:
             continue
         tags = {k: v for k, v in (f.get("properties") or {}).items() if isinstance(v, str)}
         if (
@@ -115,15 +128,21 @@ def parks_from_features(lines: Iterable[str], min_area: float = MIN_AREA_M2) -> 
         area, lat, lon = got
         out.append(
             {
-                "type": KINDS[fid[0]],
-                "id": int(fid[1:]),
+                "type": obj[0],
+                "id": obj[1],
                 "lat": lat,
                 "lon": lon,
                 "area": round(area),
                 "tags": {k: tags[k] for k in KEEP if k in tags},
             }
         )
-    return out
+    seen: set[tuple[str, int]] = set()
+    unique = []
+    for e in out:
+        if (e["type"], e["id"]) not in seen:
+            seen.add((e["type"], e["id"]))
+            unique.append(e)
+    return unique
 
 
 def assign_parks(elements: list[dict[str, Any]], towns: list[dict[str, Any]]) -> list[dict[str, Any]]:

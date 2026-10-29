@@ -9,7 +9,7 @@
 #
 # One job per country (Wikidata: towns, POIs, classes, country/regions/time zones; ru Wikipedia and Wikivoyage;
 # the country's Geofabrik extract: bars, food, parks, OSM POIs, paid parking; Commons credits and photo sizes),
-# at most 3 at a time (one Wikidata client each, 1 request/s, the User-Agent of http_util.py). Then one job
+# at most 2 at a time (one Wikidata client each, 1 request/s, the User-Agent of http_util.py). Then one job
 # publishes everything.
 #
 # Trigger from a working branch (ccr-*): edit backend/planner/tools/data/data-abroad.request and push. Optional
@@ -96,7 +96,7 @@ jobs:
     timeout-minutes: 340
     strategy:
       fail-fast: false
-      max-parallel: 3   # Wikidata Query Service: a few polite clients, never a burst
+      max-parallel: 2   # Wikidata Query Service: run 1 with 3 at a time got 429 (KZ); two polite clients
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     env:
       CC: ${{ matrix.cc }}
@@ -160,7 +160,9 @@ jobs:
           export_seq food nwr/amenity=restaurant,cafe,fast_food,food_court
           python3 $T/food_from_extract.py "$RAW" "$RUNNER_TEMP/food.geojsonseq" --abroad 2>&1 | tee -a "$RAW/log.txt"
           export_seq parks wr/leisure=park,garden
-          python3 $T/parks_from_extract.py "$RAW" "$RUNNER_TEMP/parks.geojsonseq" 2>&1 | tee -a "$RAW/log.txt"
+          # parks are their own file: a country without parks still gets its catalogue (build_parks writes 0 rows)
+          python3 $T/parks_from_extract.py "$RAW" "$RUNNER_TEMP/parks.geojsonseq" 2>&1 | tee -a "$RAW/log.txt" \
+            || echo "::warning::$CC: no parks from the extract"
           export_seq x \
             nwr/tourism=attraction,museum,viewpoint,zoo,theme_park,gallery,aquarium \
             nwr/leisure=park,water_park,nature_reserve,playground \

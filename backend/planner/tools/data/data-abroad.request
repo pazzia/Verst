@@ -1,4 +1,5 @@
 2026-10-29 CEO: trips abroad, wave 1 — catalogues of BY KZ GE AB AM AZ UZ KG TR (server only) + Russian parks
+2026-10-29 run 2: parks from osmium area ids (a…), towns abroad in class chunks + regions apart (WDQS 504)
 # Optional lines read by .github/workflows/data-abroad.yml (edit this file and push a ccr-* branch to run it):
 countries: BY KZ GE AB AM AZ UZ KG TR
 ru-parks: yes

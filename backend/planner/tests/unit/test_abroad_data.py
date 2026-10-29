@@ -225,6 +225,51 @@ class TownsAbroadTest(unittest.TestCase):
         self.assertEqual(self.wd.missing_towns(towns, ("Q12",)), [])
         self.assertEqual(self.wd.missing_towns(towns, ("Q99",)), ["Q99"])
 
+    def test_towns_abroad_are_fetched_in_chunks_with_regions_apart(self) -> None:
+        """Run 1 (29.10): the single towns query timed out for KZ, UZ, KG, AZ, AB. Abroad: class chunks
+        without the region path, then the regions per batch of towns; a failing chunk is halved."""
+        ab = self.c.get("AB")
+        classes = [f"Q{i}" for i in range(1, 131)]  # 3 chunks of ≤ 60
+        asked: list[str] = []
+
+        def query(q: str) -> list[dict[str, Any]]:
+            asked.append(q)
+            if "VALUES ?cls" in q:
+                self.assertNotIn("P131", q)  # no region path in the towns chunks
+                self.assertRegex(q, r"VALUES \?country \{ wd:Q2(30|3334) wd:Q2(30|3334) \}")
+                n = q.split("VALUES ?cls {")[1].split("}")[0].count("wd:")
+                if n > 40:  # WDQS gives up on big chunks: they must be halved
+                    raise TimeoutError("The read operation timed out")
+                if "wd:Q1 " not in q:
+                    return []
+                return [
+                    town_row("Q10", "Сухум", "ru", None, "Q230"),
+                    town_row("Q10", "Сухум", "ru", None, "Q23334"),
+                    town_row("Q12", "Тбилиси", "ru", None, "Q230"),
+                ]
+            self.assertIn("wdt:P131*", q)
+            self.assertIn("wd:Q10 wd:Q12", q)
+            return [
+                {"town": lit(E + "Q10"), "iso": lit("GE-AB"), "regionLabel": label("Абхазия (регион)", "ru")},
+                {"town": lit(E + "Q12"), "iso": lit("GE-TB"), "regionLabel": label("Тбилиси", "ru")},
+                {"town": lit(E + "Q99"), "iso": lit("GE-TB")},  # not a town of the chunks: ignored
+            ]
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            ab_towns = self.wd.fetch_towns_abroad(ab, classes, query)
+            ge_towns = self.wd.fetch_towns_abroad(self.c.get("GE"), classes, query)
+        self.assertEqual(
+            [(t["qid"], t["regionIso"], t["regionName"]) for t in ab_towns], [("Q10", "GE-AB", "Абхазия")]
+        )
+        self.assertEqual([(t["qid"], t["regionIso"]) for t in ge_towns], [("Q12", "GE-TB")])
+        self.assertEqual(ab_towns[0]["population"], 10000)
+        self.assertEqual(ab_towns[0]["countries"], ["Q230", "Q23334"])
+        chunks = [q for q in asked if "VALUES ?cls" in q]
+        self.assertGreater(len(chunks), 3)  # the failing chunks of 60 were halved
+        with self.assertRaises(TimeoutError):  # one class that still fails: the error stays visible
+            self.wd.split_query(["Q1"], lambda c: (_ for _ in ()).throw(TimeoutError("x")))
+        self.assertEqual(self.wd.with_regions([], [{"town": lit(E + "Q1"), "iso": lit("GE-TB")}]), [])
+
     def test_country_report(self) -> None:
         kz = self.c.get("KZ")
         head = [
@@ -468,6 +513,34 @@ class ParksExtractTest(unittest.TestCase):
         self.assertEqual(got[0]["qid"], "Q649")
         self.assertAlmostEqual(got[0]["lat"], 55.7558, places=4)
         self.assertGreater(got[0]["population"], 10_000_000)
+
+    def test_osmium_area_ids(self) -> None:
+        """Run 1 (29.10): «parks: 0 rows from 0 named parks» in Russia, Belarus and Georgia — osmium writes a
+        park polygon as `a<area id>` (2 × way id, 2 × relation id + 1); the `w…` feature of a closed way is
+        its LineString. The osmium-shaped fixture has both."""
+        self.assertEqual(self.px.osm_object("a246"), ("way", 123))
+        self.assertEqual(self.px.osm_object("a91"), ("relation", 45))
+        self.assertEqual(self.px.osm_object("w7"), ("way", 7))
+        self.assertEqual(self.px.osm_object("r8"), ("relation", 8))
+        for bad in ("", "a", "x1", "a1b"):
+            self.assertIsNone(self.px.osm_object(bad))
+        seq = ABROAD_SAMPLES / "parks.geojsonseq"
+        with seq.open(encoding="utf-8") as fh:
+            got = self.px.parks_from_features(fh)
+        self.assertEqual([(p["type"], p["id"]) for p in got], [("way", 7201), ("relation", 7203)])
+        self.assertEqual(got[0]["tags"]["wikidata"], "Q900304")
+        self.assertGreater(got[0]["area"], 200_000)  # 0.005° × 0.005° at 41.7° N ≈ 230 000 m²
+        self.assertLess(got[1]["area"], 37_000)  # the hole of the relation is subtracted
+        with tempfile.TemporaryDirectory() as tmp:
+            raw = Path(tmp)
+            (raw / "towns.json").write_text((ABROAD_SAMPLES / "towns.json").read_text("utf-8"), "utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                rc = self.px.main([str(raw), str(seq)])
+            parks = json.loads((raw / "parks.json").read_text("utf-8"))
+        self.assertEqual(rc, 0)
+        self.assertEqual(
+            {(p["osm"], p["townQid"]) for p in parks}, {("w7201", "Q900201"), ("r7203", "Q900202")}
+        )
 
 
 class BuildParksTest(unittest.TestCase):
