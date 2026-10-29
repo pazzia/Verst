@@ -141,6 +141,8 @@
     <string name="navigator_outside_text">Можно доехать до границы: выберите город в России, например %1$s</string>
     <string name="navigator_outside_row">не по России</string>
     <string name="navigator_outside_meta">выберите город или место в России</string>
+    <string name="navigator_abroad_title">Маршруты за границу Верста пока не строит</string>
+    <string name="navigator_abroad_body">Остановки, ночёвки и смету мы считаем только по России. Можно открыть дорогу до точки «%1$s» в картах.</string>
     <string name="navigator_found_cd">Найдено %1$d %2$s</string>
     <string name="cd_navigator_clear">Очистить</string>
     <string name="cd_navigator_via_remove">Удалить заезд %1$d</string>
@@ -535,6 +537,10 @@
     <string name="card_pick_hotel">Выбрать отель</string>
     <string name="card_osm">Данные о месте: © участники OpenStreetMap</string>
     <string name="cd_card">Карточка: %1$s</string>
+    <string name="cd_card_with_address">Карточка: %1$s, адрес: %2$s</string>
+    <string name="card_address_loading">Адрес уточняется…</string>
+    <string name="card_address_copied">Адрес скопирован</string>
+    <string name="cd_card_address_copy">скопировать адрес</string>
     <string name="cd_card_photo">Фото: %1$s</string>
     <string name="cd_card_photo_area">Фото района: %1$s. Это не фото гостиницы</string>
     <string name="cd_card_credit">Автор фото: %1$s, %2$s. Открыть страницу фото</string>

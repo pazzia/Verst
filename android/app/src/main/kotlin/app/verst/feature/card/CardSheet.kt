@@ -3,6 +3,7 @@ package app.verst.feature.card
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -55,7 +56,26 @@ data class CardUi(
     val booked: Boolean = false,
     val canReplace: Boolean = false,
     val walkStop: Boolean = false,
+    /** CEO 29.10: the town the row knows (a walk's town, a night's town) until `poi_details` names one. */
+    val town: String? = null,
+    /**
+     * CEO 29.10: the place's street address («ул. Ленина, 5»), reverse-geocoded from its coordinates when the card
+     * opened online (Nominatim, else the phone's geocoder); null = not known (offline, not found).
+     */
+    val address: String? = null,
+    /** The address lookup runs: «Адрес уточняется…». */
+    val addressLoading: Boolean = false,
 )
+
+/**
+ * CEO 29.10: the card's address line — the street address, and « · <town>» when it does not name the town itself
+ * («ул. Ленина, 5 · Фрязино»).
+ */
+internal fun cardAddressLine(address: String, town: String?): String {
+    val a = address.trim()
+    val t = town?.trim()?.takeIf { it.isNotEmpty() } ?: return a
+    return if (a.contains(t, ignoreCase = true)) a else "$a · $t"
+}
 
 interface CardActions {
     fun close()
@@ -72,12 +92,20 @@ interface CardActions {
 fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
     val d = ui.details
     val name = d?.nameRu ?: ui.name
-    BottomSheet(name, a::close, "card", windowH, pane = stringResource(R.string.cd_card, name), leading = { CardMiniSign(ui) }) {
+    // CEO 29.10: the address under the kind line, and in the card's TalkBack title
+    val addressLine = ui.address?.let { cardAddressLine(it, d?.townName ?: ui.town) }
+    val pane = if (addressLine != null) stringResource(R.string.cd_card_with_address, name, addressLine) else stringResource(R.string.cd_card, name)
+    BottomSheet(name, a::close, "card", windowH, pane = pane, leading = { CardMiniSign(ui) }) {
         // 5.9 §9: the KindTag + the kind/place line; «Почему здесь: …» when the engine says why
         val tagWord = if (ui.kind == "sight") d?.poiKindRu?.uppercase() ?: app.verst.feature.common.kindWord(d?.poiKind) else null
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (tagWord != null) app.verst.feature.common.KindTag(tagWord)
             Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("card.kind"), maxLines = 1)
+        }
+        if (addressLine != null) {
+            AddressLine(addressLine)
+        } else if (ui.addressLoading) {
+            Txt(stringResource(R.string.card_address_loading), T.body.sm, C.text.muted, Modifier.padding(top = 2.dp).testTag("card.address.loading"), maxLines = 1)
         }
         d?.whyRu?.takeIf { it.isNotBlank() }?.let {
             // «Почему здесь: объект культурного наследия · …» (the engine starts each part with a capital)
@@ -184,6 +212,30 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             Txt(d?.placeAttributionRu ?: stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
         }
     }
+}
+
+/**
+ * CEO 29.10: the address line under the kind line; a tap or a long press copies it to the clipboard with the toast
+ * «Адрес скопирован» (a system toast: it shows above the sheet).
+ */
+@Composable
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+private fun AddressLine(text: String) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val copied = stringResource(R.string.card_address_copied)
+    val copyLabel = stringResource(R.string.cd_card_address_copy)
+    val copy = {
+        (ctx.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager)
+            ?.setPrimaryClip(android.content.ClipData.newPlainText("Verst address", text))
+        android.widget.Toast.makeText(ctx, copied, android.widget.Toast.LENGTH_SHORT).show()
+    }
+    Txt(
+        text, T.body.sm, C.text.secondary,
+        Modifier.padding(top = 2.dp).fillMaxWidth().defaultMinSize(minHeight = 24.dp)
+            .combinedClickable(onClickLabel = copyLabel, onLongClickLabel = copyLabel, onLongClick = copy, onClick = copy)
+            .testTag("card.address"),
+        maxLines = 2,
+    )
 }
 
 /**

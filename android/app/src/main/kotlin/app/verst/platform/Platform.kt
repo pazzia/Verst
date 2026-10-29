@@ -222,7 +222,16 @@ class AndroidGeocoder(private val context: Context) : app.verst.data.net.Address
             val found = near?.let { byName(g, query, doubleArrayOf(it.lat - d, it.lon - d, it.lat + d, it.lon + d)) }.orEmpty()
                 .ifEmpty { byName(g, query, null) }
             app.verst.data.net.AddressResult.Ok(
-                found.mapNotNull { a -> label(a)?.let { app.verst.core.model.dto.SuggestionDto("address", it, town(a) ?: "", a.latitude, a.longitude) } }
+                found.mapNotNull { a ->
+                    // CEO 29.10: abroad the row names its country («Прага · Чехия») and carries its code
+                    val code = app.verst.data.net.NominatimClient.planCountry(a.countryCode?.lowercase(), a.latitude, a.longitude)
+                    label(a)?.let {
+                        app.verst.core.model.dto.SuggestionDto(
+                            "address", it, app.verst.data.net.NominatimClient.subtitle(town(a), a.countryName, code), a.latitude, a.longitude,
+                            countryCode = code,
+                        )
+                    }
+                }
                     .distinctBy { it.name + it.subtitle }.take(8),
             )
         } catch (e: kotlinx.coroutines.CancellationException) {

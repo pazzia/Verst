@@ -235,6 +235,9 @@ class VerstFlow(
     // ---- 5.9 cards
     var card: CardState? by mutableStateOf(null)
 
+    /** CEO 29.10: the cards' reverse-geocoded street addresses for this session, per place id (else row id). */
+    internal val cardAddresses = HashMap<String, String>()
+
     /** D-7 report sheet: the place, the reason (one of [app.verst.core.model.Reports.REASONS]), the comment. */
     var report: ReportTarget? by mutableStateOf(null)
     var reportReason: String? by mutableStateOf(null)
@@ -584,6 +587,7 @@ class VerstFlow(
         originGen = origin.label
         known.clear()
         rowKm.clear()
+        cardAddresses.clear() // another world's place ids
         popular = emptyList()
         destination = null
         loadRoutes()
@@ -949,7 +953,8 @@ class VerstFlow(
     }
 
     internal fun fetchRowKm(rows: List<SuggestionDto>) {
-        val missing = rows.filter { it.pointKey !in rowKm }
+        // CEO 29.10: no engine km for an address abroad (the engine does not route outside Russia)
+        val missing = rows.filter { it.pointKey !in rowKm && !it.abroad }
         if (missing.isEmpty()) return
         val from = origin
         scope.launch {
@@ -1005,9 +1010,17 @@ class VerstFlow(
 
     val destinationPoint: GeoPoint? get() = destination?.let { GeoPoint(it.name, it.lat, it.lon) }
 
+    /**
+     * CEO 29.10: the picked КУДА is an address abroad. The engine plans only in Russia (`INVALID_INPUT`
+     * outside_russia), so no estimate and no plan are sent: the Navigator shows the plate and hands the road to the
+     * maps app instead ([abroadHandoff]).
+     */
+    val destinationAbroad: Boolean get() = readyRoute == null && destination?.abroad == true
+
     /** ПОЕХАЛИ on 5.2 → Instruments with A → B. */
     fun openInstrumentsFree() {
         val d = destination ?: return
+        if (d.abroad) return // CEO 29.10: never a doomed plan abroad (the plate says why)
         readyRoute = null
         if (!dailyKmTouched) dailyKm = TripMath.defaultDailyKm(rowKm[d.pointKey] ?: 0)
         push(Route.Instruments)
@@ -1019,7 +1032,8 @@ class VerstFlow(
     fun draft(): PlanRequest? = if (readyRoute != null || destinationPoint != null) request() else null
 
     private fun estimateTarget(): PlanRequest? =
-        if ((top == Route.Navigator && !editingFrom) || top == Route.Instruments) draft() else null
+        if (destinationAbroad) null // CEO 29.10: the engine rejects a destination abroad — nothing to estimate
+        else if ((top == Route.Navigator && !editingFrom) || top == Route.Instruments) draft() else null
 
     /** The engine's km/days of the draft: exact for this request, stale while a newer estimate runs, or null. */
     val figures: TripFiguresPick.Picked?
@@ -1131,6 +1145,7 @@ class VerstFlow(
 
     /** ПОЕХАЛИ on 5.3 → Drive; the plan runs on `verst-python`, the steps are paced ≥ 400 ms (5.4 §6). */
     fun go() {
+        if (destinationAbroad) return // CEO 29.10: a plan abroad would only fail (`INVALID_INPUT` outside_russia)
         if (top != Route.Drive) push(Route.Drive)
         val r = request()
         track {

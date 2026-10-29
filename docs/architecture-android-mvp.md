@@ -756,7 +756,7 @@ Engine-ready budget: ≤ 5 s on the emulator (was 4 s).
 | Use | Endpoint | Rules |
 | --- | --- | --- |
 | Photos | `commons.wikimedia.org/wiki/Special:FilePath/<file>?width=800\|400` → redirect to `upload.wikimedia.org` | Coil with the UA, cached 64 MB; the placeholder when offline or failed; attribution line |
-| Addresses | `nominatim.openstreetmap.org/search`, `/reverse` | Explicit submit only (the Nominatim policy forbids autocomplete), ≤ 1 req/s, `countrycodes=ru`, `accept-language=ru`, UA, «© OpenStreetMap», 24 h cache. CI tests use MockWebServer, never the real service |
+| Addresses | `nominatim.openstreetmap.org/search`, `/reverse` | Explicit submit only (the Nominatim policy forbids autocomplete), ≤ 1 req/s, no country filter since CEO 29.10 (a `viewbox` near the user ranks local streets first; a row abroad names its country and is never planned — the Navigator hands it to the maps app), `accept-language=ru`, UA, «© OpenStreetMap», 24 h cache. CI tests use MockWebServer, never the real service |
 
 ### 15.4 Road ahead focus (requirement 2.1)
 

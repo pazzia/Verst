@@ -37,9 +37,17 @@ data class SuggestionDto(
     val regionRu: String? = null,
     val poiKind: String? = null,
     val hasPhoto: Boolean = false,
+    /**
+     * CEO 29.10: the ISO country of an address row (Nominatim `address.country_code`, the phone geocoder's
+     * `countryCode`), lower case; null for the engine's rows (always Russia) and when unknown.
+     */
+    val countryCode: String? = null,
 ) {
     /** Key of the row's engine road km («lat,lon»). */
     val pointKey: String get() = "$lat,$lon"
+
+    /** CEO 29.10: an address outside Russia — the engine does not plan there (`INVALID_INPUT` outside_russia). */
+    val abroad: Boolean get() = countryCode != null && !countryCode.equals("ru", ignoreCase = true)
 }
 
 @Serializable

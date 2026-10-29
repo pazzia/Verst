@@ -80,7 +80,10 @@ class VerstFlowTest {
             val rr = routes.firstOrNull { it.id == request.readyRouteId }
             return EngineResult.Ok(EstimateDto(rr?.let { it.kmTotal + 10 * request.adults + request.children } ?: estimateKm, 2))
         }
+        /** Plans asked (CEO 29.10: never one for a destination abroad). */
+        var plans = 0
         override suspend fun plan(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanResultDto> {
+            plans++
             onEvent(PlanEventDto("stage", text = "Прокладываем дорогу", progress = 0.1))
             return EngineResult.Ok(planned)
         }
@@ -656,12 +659,23 @@ class VerstFlowTest {
     private class FakeAddress : app.verst.data.net.AddressSearch {
         var searches = 0
         var near: app.verst.core.model.GeoPoint? = null
+        /** CEO 29.10: what `search` answers (a foreign row for the abroad tests). */
+        var rows = listOf(SuggestionDto("address", "ул. Советская, 1", "Ярославль", 57.6266, 39.8938))
+        /** CEO 29.10: the reverse lookups asked, and how long each answer takes / what it is (by the point). */
+        val reverses = mutableListOf<Pair<Double, Double>>()
+        var reverseDelayMs: (Double, Double) -> Long = { _, _ -> 0L }
+        var reverseAnswer: (Double, Double) -> String? = { _, _ -> "ул. Советская, 1" }
         override suspend fun search(query: String, near: app.verst.core.model.GeoPoint?): app.verst.data.net.AddressResult<List<SuggestionDto>> {
             searches++
             this.near = near
-            return app.verst.data.net.AddressResult.Ok(listOf(SuggestionDto("address", "ул. Советская, 1", "Ярославль", 57.6266, 39.8938)))
+            return app.verst.data.net.AddressResult.Ok(rows)
         }
-        override suspend fun reverse(lat: Double, lon: Double) = app.verst.data.net.AddressResult.Ok<String?>("ул. Советская, 1")
+        override suspend fun reverse(lat: Double, lon: Double): app.verst.data.net.AddressResult<String?> {
+            reverses += lat to lon
+            val wait = reverseDelayMs(lat, lon)
+            if (wait > 0) kotlinx.coroutines.delay(wait)
+            return app.verst.data.net.AddressResult.Ok(reverseAnswer(lat, lon))
+        }
     }
 
     @Test
@@ -698,7 +712,7 @@ class VerstFlowTest {
 
     @Test
     fun cardsOnlyForSightsAndHotelsAndFocusComesBack() = runTest {
-        val flow = VerstFlow(FakeGateway(), backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        val flow = VerstFlow(FakeGateway(), backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, addressSearch = FakeAddress()) {}
         settle()
         flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
         settle(10_000)
@@ -721,6 +735,138 @@ class VerstFlowTest {
         flow.cardPickHotel()
         assertEquals(Route.Exit, flow.top)
         assertEquals(night.id, flow.exitStopId)
+    }
+
+    /**
+     * CEO 29.10: a card asks its street address online (Nominatim, else the phone's geocoder) and keeps it per place
+     * for the session; a late answer for a card that is no longer open never lands on the open one; offline: nothing.
+     */
+    @Test
+    fun cardAddressIsReverseGeocodedAndALateAnswerIsDropped() = runTest {
+        val address = FakeAddress()
+        val flow = VerstFlow(FakeGateway(), backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, addressSearch = address) {}
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        val sights = flow.result!!.trip.daysList.flatMap { it.stops }.filter { it.kind == "sight" && it.lat != null }
+        val first = sights[0]
+        val second = sights[1]
+        // opening a card fills the address (the loading line meanwhile)
+        flow.openCard(first)
+        assertTrue(flow.card!!.ui.addressLoading)
+        assertNull(flow.card!!.ui.address)
+        settle()
+        assertEquals("ул. Советская, 1", flow.card!!.ui.address)
+        assertFalse(flow.card!!.ui.addressLoading)
+        assertEquals(listOf(first.lat!! to first.lon!!), address.reverses)
+        flow.closeCard()
+        // the first place answers slowly, the second at once: the first's late answer must not land on the second
+        address.reverseDelayMs = { lat, _ -> if (lat == sights[2].lat) 5_000L else 0L }
+        address.reverseAnswer = { lat, _ -> if (lat == sights[2].lat) "ул. Поздняя, 9" else "ул. Ленина, 5" }
+        val slow = sights[2]
+        flow.openCard(slow)
+        settle(100)
+        assertTrue(flow.card!!.ui.addressLoading)
+        flow.closeCard()
+        flow.openCard(second)
+        settle(100)
+        assertEquals("ул. Ленина, 5", flow.card!!.ui.address)
+        settle(10_000) // the slow answer arrives now
+        assertEquals(second.id, flow.card!!.rowId)
+        assertEquals("ул. Ленина, 5", flow.card!!.ui.address)
+        // the session cache: reopening the first card asks nothing
+        flow.closeCard()
+        val asked = address.reverses.size
+        flow.openCard(first)
+        assertEquals("ул. Советская, 1", flow.card!!.ui.address)
+        assertFalse(flow.card!!.ui.addressLoading)
+        assertEquals(asked, address.reverses.size)
+        // Nominatim knows nothing → the phone's geocoder answers
+        flow.closeCard()
+        address.reverseAnswer = { _, _ -> null }
+        flow.addressFallback = object : app.verst.data.net.AddressSearch {
+            override suspend fun search(query: String, near: GeoPoint?) = app.verst.data.net.AddressResult.Ok(emptyList<SuggestionDto>())
+            override suspend fun reverse(lat: Double, lon: Double) = app.verst.data.net.AddressResult.Ok<String?>("Соборная площадь, 1")
+        }
+        val third = sights.getOrNull(3) ?: sights.last()
+        flow.openCard(third)
+        settle()
+        assertEquals("Соборная площадь, 1", flow.card!!.ui.address)
+        // offline: no lookup, no loading line, no address
+        flow.closeCard()
+        flow.setOffline(true)
+        val before = address.reverses.size
+        val fresh = flow.result!!.trip.daysList.flatMap { it.stops }.last { it.kind == "sight" && it.lat != null && it.id !in setOf(first.id, second.id, slow.id, third.id) }
+        flow.openCard(fresh)
+        settle()
+        assertNull(flow.card!!.ui.address)
+        assertFalse(flow.card!!.ui.addressLoading)
+        assertEquals(before, address.reverses.size)
+        flow.setOffline(false)
+    }
+
+    /**
+     * CEO 29.10: an address abroad («Прага») is found, but the engine plans only in Russia: no estimate, no plan —
+     * the Navigator's plate, and its button opens the road in the preferred maps app with ОТКУДА and КУДА.
+     */
+    @Test
+    fun aForeignAddressIsNotPlannedAndHandsOffToTheMaps() = runTest {
+        val gw = FakeGateway()
+        val address = FakeAddress()
+        val prague = SuggestionDto("address", "Прага", "Прага · Чехия", 50.0874, 14.4213, countryCode = "cz")
+        address.rows = listOf(prague)
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, addressSearch = address) {}
+        flow.mapsChoiceRead = { MapsChoice.AUTO }
+        flow.countrySource = CountrySource { "ru" }
+        val opened = mutableListOf<Triple<HandoffApp, String?, String?>>()
+        flow.handoffLauncher = object : HandoffLauncher {
+            override fun navigatorInstalled() = true
+            override fun mapsInstalled() = true
+            override fun open(links: HandoffLinksDto, walk: Boolean) = HandoffTarget.None
+            override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
+                opened += Triple(app, uri, web)
+                return HandoffTarget.Maps
+            }
+        }
+        settle()
+        flow.openNavigator()
+        settle()
+        val estimatesBefore = gw.estimates.size
+        flow.updateQuery("Прага")
+        flow.submitAddress()
+        settle()
+        assertEquals(listOf(prague), flow.addressResults)
+        assertFalse("no engine km for a row abroad", prague.pointKey in flow.rowKm)
+        flow.pick(flow.addressResults.single())
+        settle()
+        assertTrue(flow.destinationAbroad)
+        assertEquals(estimatesBefore, gw.estimates.size) // no doomed estimate
+        // ПОЕХАЛИ cannot plan: the Navigator stays, nothing goes to the engine
+        flow.openInstrumentsFree()
+        assertEquals(Route.Navigator, flow.top)
+        flow.go()
+        settle(10_000)
+        assertEquals(0, gw.plans)
+        assertEquals(Route.Navigator, flow.top)
+        assertNull(flow.result)
+        // the plate's button: Яндекс Карты (Russia) with two points, ОТКУДА → Прага
+        val points = listOf(LatLon(flow.origin.lat, flow.origin.lon), LatLon(prague.lat, prague.lon))
+        assertEquals(HandoffTarget.Maps, flow.abroadHandoff())
+        assertEquals(Triple(HandoffApp.MAPS, NaviLinks.mapsAppRoute(points), NaviLinks.webRoute(points)), opened.single())
+        // with Google Карты chosen: the Google directions link with the same two points
+        flow.mapsChoiceRead = { MapsChoice.GOOGLE }
+        flow.abroadHandoff()
+        val google = NaviLinks.googleRoute(points)
+        assertEquals(Triple(HandoffApp.GOOGLE, google, google), opened.last())
+        assertTrue(google.contains("origin=") && google.contains("destination=50.087400,14.421300"))
+        // a Russian destination plans again as before
+        flow.pick(yar)
+        assertFalse(flow.destinationAbroad)
+        assertNull(flow.abroadHandoff())
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        assertEquals(1, gw.plans)
     }
 
     @Test

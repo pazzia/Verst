@@ -363,7 +363,7 @@ class Sprint3Test {
             val rq = server.takeRequest()
             Log.i("VerstE2e", "S3-6 ${rq.path} UA=${rq.getHeader("User-Agent")}")
             assertTrue(rq.getHeader("User-Agent")!!.startsWith("Verst/0.3"))
-            assertTrue(rq.path!!.contains("countrycodes=ru"))
+            assertTrue("CEO 29.10: no country filter", !rq.path!!.contains("countrycodes"))
             compose.onNodeWithTag("address.row.0").performClick()
             compose.waitUntil(5_000) { flow.destination?.kind == "address" }
             assertEquals("Советская улица, 1", flow.destination!!.name)

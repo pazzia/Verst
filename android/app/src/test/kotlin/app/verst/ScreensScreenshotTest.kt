@@ -206,6 +206,23 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("≈", substring = true, useUnmergedTree = true).assertDoesNotExist()
     }
 
+    /** CEO 29.10: КУДА abroad — the honest plate instead of a plan, its button opens the road in the maps app. */
+    @Test
+    fun navigatorAbroadPlate() {
+        val prague = SuggestionDto("address", "Прага", "Прага · Чехия", 50.0874, 14.4213, countryCode = "cz")
+        var maps = 0
+        shot("navigator", "abroad") {
+            NavigatorScreen(navigator("Прага", emptyList(), prague).copy(abroad = true), {}, {}, {}, {}, {}, onAbroadMaps = { maps++ })
+        }
+        compose.onNodeWithTag("navigator.abroad", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Маршруты за границу Верста пока не строит", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("смету мы считаем только по России", substring = true, useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("«Прага»", substring = true, useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("navigator.abroad.maps").performScrollTo().performClick()
+        compose.waitForIdle()
+        assertEquals(1, maps)
+    }
+
     @Test
     fun navigatorTooShort() = shot("navigator", "error-too-short") {
         NavigatorScreen(navigator("Химки", emptyList(), yaroslavl.copy(name = "Химки")).copy(tripErrorCode = "TOO_SHORT"), {}, {}, {}, {}, {})
@@ -815,6 +832,27 @@ class ScreensScreenshotTest {
         assertTrue(source.fetchSemanticsNode().config.contains(SemanticsActions.OnClick))
     }
 
+    /**
+     * CEO 29.10: the address under the kind line, with the town the address does not name («ул. Ленина, 5 · Фрязино»);
+     * a tap copies it with «Адрес скопирован»; TalkBack reads it with the card's title.
+     */
+    @Test
+    fun cardAddressLineCopiesTheAddress() {
+        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails).copy(townName = "Фрязино")
+        shot("card", "address") { CardOverRoad(card(d.nameRu, "sight", "tourist", d).copy(address = "ул. Ленина, 5")) }
+        val line = compose.onNodeWithTag("card.address", useUnmergedTree = true)
+        line.assertTextEquals("ул. Ленина, 5 · Фрязино")
+        compose.onNodeWithTag("card.address.loading", useUnmergedTree = true).assertDoesNotExist()
+        line.performClick()
+        compose.waitForIdle()
+        val clipboard = compose.activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        assertEquals("ул. Ленина, 5 · Фрязино", clipboard.primaryClip!!.getItemAt(0).text.toString())
+        assertEquals("Адрес скопирован", org.robolectric.shadows.ShadowToast.getTextOfLatestToast())
+        assertEquals("ул. Ленина, 5 · Фрязино", app.verst.feature.card.cardAddressLine("ул. Ленина, 5", "Фрязино"))
+        assertEquals("Фрязино, ул. Ленина, 5", app.verst.feature.card.cardAddressLine("Фрязино, ул. Ленина, 5", "Фрязино"))
+        assertEquals("ул. Ленина, 5", app.verst.feature.card.cardAddressLine("ул. Ленина, 5", null))
+    }
+
     /** «О данных» (ODbL package, CEO D-IR-07): sources and licences, the three links, the APK's full notice in place. */
     @Test
     @Config(qualifiers = "ru-rRU-w390dp-h1000dp-port-xxhdpi")
@@ -1154,6 +1192,21 @@ class ScreensScreenshotTest {
 
     @Test
     fun walkOverview() = walkShot("city_route-overview.json", "overview")
+
+    /** CEO 29.10: a walker rides the walk column like the car on Road ahead — with the scroll, no TalkBack node. */
+    @Test
+    fun walkWalkerRidesTheColumn() {
+        val w = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        assertTrue("a walk with stops", w.stops.isNotEmpty())
+        shot("walk", "walker") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        compose.onNodeWithTag("walk.stop.${w.stops.first().id}").performScrollTo()
+        compose.waitForIdle()
+        compose.onNodeWithTag("walk.walker", useUnmergedTree = true).assertExists()
+        // decorative: cleared semantics (no text, no description for TalkBack)
+        val node = compose.onNodeWithTag("walk.walker", useUnmergedTree = true).fetchSemanticsNode()
+        assertTrue(node.children.isEmpty())
+        assertFalse(node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription))
+    }
 
     private fun walkFilters(dog: Boolean = false, children: Int = 0, duration: Int? = 240) = app.verst.feature.city.PickerUi(
         duration, v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets).presets.filter { it.available },

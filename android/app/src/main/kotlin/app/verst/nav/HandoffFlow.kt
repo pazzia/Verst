@@ -200,6 +200,52 @@ internal fun VerstFlow.launchApp(app: HandoffApp, h: HandoffDto, next: Boolean, 
     }
 }
 
+/**
+ * CEO 29.10: the road to an address abroad, which the engine does not plan — the preferred maps app ([preferredMaps])
+ * with two points, ОТКУДА and the foreign КУДА (Яндекс Карты: the app link, the browser without it; Google Карты:
+ * the https link either way). Offline without the app: «нужен интернет». Returns where it went (tests).
+ */
+fun VerstFlow.abroadHandoff(): HandoffTarget? {
+    val d = destination?.takeIf { destinationAbroad } ?: return null
+    val from = runCatching { LatLon(origin.lat, origin.lon) }.getOrNull() ?: return null
+    val to = runCatching { LatLon(d.lat, d.lon) }.getOrNull() ?: return null
+    val app = preferredMaps
+    val points = listOf(from, to)
+    val uri: String
+    val web: String?
+    when (app) {
+        HandoffApp.MAPS -> {
+            uri = NaviLinks.mapsAppRoute(points, RouteMode.DRIVE)
+            web = NaviLinks.webRoute(points, RouteMode.DRIVE)
+        }
+        HandoffApp.GOOGLE -> {
+            uri = NaviLinks.googleRoute(points, RouteMode.DRIVE)
+            web = uri
+        }
+        HandoffApp.NAVI -> {
+            uri = NaviLinks.naviRoute(from, to, emptyList())
+            web = null
+        }
+    }
+    val installed = when (app) {
+        HandoffApp.NAVI -> navigatorInstalled
+        HandoffApp.MAPS -> handoffLauncher?.mapsInstalled() == true
+        HandoffApp.GOOGLE -> handoffLauncher?.googleInstalled() == true
+    }
+    if (app != HandoffApp.NAVI && !installed && !connectivity.online) {
+        showToast(Toast.HandoffOffline)
+        return null
+    }
+    val target = handoffLauncher?.openIn(app, uri, web) ?: HandoffTarget.None
+    lastHandoff = HandoffLinksDto(navigator = if (app == HandoffApp.NAVI) uri else null, maps = if (app != HandoffApp.NAVI) uri else null, web = web) to target
+    when (target) {
+        HandoffTarget.Browser, HandoffTarget.BrowserDryRun -> showToast(Toast.HandoffWeb(walk = false, google = app == HandoffApp.GOOGLE))
+        HandoffTarget.None -> showToast(Toast.HandoffFailed)
+        else -> showToast(Toast.HandoffOpen(app))
+    }
+    return target
+}
+
 /** D-5 stop menu on a long-press of a row. */
 fun VerstFlow.openStopMenu(stop: StopDto) {
     val r = result ?: return

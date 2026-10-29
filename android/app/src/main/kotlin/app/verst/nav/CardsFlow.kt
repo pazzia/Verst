@@ -24,9 +24,19 @@ fun VerstFlow.openCard(stop: StopDto) {
         name = stop.name, sign = stop.sign, tags = stop.tags, kind = if (hotel) "hotel" else "sight",
         loading = placeId != null, offline = !connectivity.online, hotel = option, booked = isBooked(stop.id),
         canReplace = stop.replaceable && stop.alternatives.isNotEmpty(),
+        town = if (hotel) stop.name else null, // a night's row is named by its town
     )
     card = CardState(CardSource.ROAD, stop.id, placeId, base)
-    loadCard(placeId, stop.id)
+    val lat = stop.lat
+    val lon = stop.lon
+    val point = if (lat != null && lon != null) lat to lon else null
+    if (hotel && placeId != null) {
+        // the night's point is the town's: the hotel's own coordinates come with its `poi_details`
+        loadCard(placeId, stop.id, addressPoint = point)
+    } else {
+        loadCard(placeId, stop.id)
+        loadCardAddress(placeId ?: stop.id, point)
+    }
 }
 
 /**
@@ -42,15 +52,23 @@ fun VerstFlow.openWalkCard(ws: app.verst.core.model.dto.WalkStopDto) {
     }
     val base = app.verst.feature.card.CardUi(
         name = ws.nameRu, sign = if (ws.isBar || ws.isFood) "service" else "tourist", tags = listOf(ws.kind), kind = kind,
-        loading = ws.poiId != null, offline = !connectivity.online, walkStop = true,
+        loading = ws.poiId != null, offline = !connectivity.online, walkStop = true, town = walk?.townName,
     )
     card = CardState(CardSource.WALK, ws.id, ws.poiId, base)
     walkFocusId = ws.id
     loadCard(ws.poiId, ws.id)
+    loadCardAddress(ws.poiId ?: ws.id, ws.lat to ws.lon)
 }
 
-internal fun VerstFlow.loadCard(placeId: String?, rowId: String) {
+/**
+ * [addressPoint]: a hotel card asks its address after `poi_details` (the hotel's coordinates), with this point (the
+ * night's) when the details give none.
+ */
+internal fun VerstFlow.loadCard(placeId: String?, rowId: String, addressPoint: Pair<Double, Double>? = null) {
     if (placeId == null) return
+    if (addressPoint != null && connectivity.online && placeId !in cardAddresses) {
+        card?.let { c -> card = c.copy(ui = c.ui.copy(addressLoading = true)) } // «Адрес уточняется…» meanwhile
+    }
     scope.launch {
         val r = gateway.poiDetails(placeId)
         val c = card ?: return@launch
@@ -62,6 +80,41 @@ internal fun VerstFlow.loadCard(placeId: String?, rowId: String) {
             d = d.copy(image = app.verst.core.model.CommonsPhotos.debugImage(d.image, files[debugPhotoIndex++ % files.size]))
         }
         card = c.copy(ui = c.ui.copy(loading = false, details = d, offline = !connectivity.online))
+        if (addressPoint != null) {
+            val lat = d?.lat
+            val lon = d?.lon
+            loadCardAddress(placeId, if (lat != null && lon != null) lat to lon else addressPoint)
+        }
+    }
+}
+
+/**
+ * CEO 29.10: the card's street address. The catalogue has none, so online the place's coordinates are reverse
+ * geocoded — Nominatim (`streetLabel`: «улица, дом»), else the phone's geocoder, as `locate()` does — and kept per
+ * place ([key]: the place id, else the row id) for the session. An answer that comes back after another card
+ * opened is dropped. Offline, or with no coordinates, nothing is asked and nothing is shown.
+ */
+internal fun VerstFlow.loadCardAddress(key: String, point: Pair<Double, Double>?) {
+    val c = card ?: return
+    if ((c.poiId ?: c.rowId) != key) return
+    val known = cardAddresses[key]
+    if (known != null) {
+        card = c.copy(ui = c.ui.copy(address = known, addressLoading = false))
+        return
+    }
+    if (point == null || !connectivity.online) {
+        card = c.copy(ui = c.ui.copy(addressLoading = false))
+        return
+    }
+    card = c.copy(ui = c.ui.copy(addressLoading = true))
+    val (lat, lon) = point
+    scope.launch {
+        val street = (address.reverse(lat, lon) as? app.verst.data.net.AddressResult.Ok)?.value?.takeIf { it.isNotBlank() }
+            ?: (addressFallback?.reverse(lat, lon) as? app.verst.data.net.AddressResult.Ok)?.value?.takeIf { it.isNotBlank() }
+        if (street != null) cardAddresses[key] = street
+        val cur = card ?: return@launch
+        if ((cur.poiId ?: cur.rowId) != key) return@launch // another card is open now: not its address
+        card = cur.copy(ui = cur.ui.copy(address = street, addressLoading = false))
     }
 }
 

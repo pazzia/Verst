@@ -6,6 +6,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -39,7 +40,8 @@ class NominatimClientTest {
         val rq = server.takeRequest()
         assertEquals(Net.USER_AGENT, rq.getHeader("User-Agent"))
         val url = rq.requestUrl!!
-        assertEquals("ru", url.queryParameter("countrycodes"))
+        // CEO 29.10: the whole world — no country filter (the viewbox near the user still ranks local streets first)
+        assertNull("no country restriction", url.queryParameter("countrycodes"))
         assertEquals("ru", url.queryParameter("accept-language"))
         assertEquals("10", url.queryParameter("limit"))
         assertEquals("Ярославль Советская 1", url.queryParameter("q"))
@@ -57,6 +59,26 @@ class NominatimClientTest {
         val url = server.takeRequest().requestUrl!!
         assertEquals("37.6500,56.3600,38.4500,55.5600", url.queryParameter("viewbox"))
         assertEquals("0", url.queryParameter("bounded"))
+    }
+
+    /** CEO 29.10: a foreign row names its country and carries the code; a Russian row stays the city alone. */
+    @Test
+    fun aForeignRowCarriesItsCountry() {
+        val rows = NominatimClient.parseSearch(
+            """[{"place_id": 9, "lat": "50.0874", "lon": "14.4213", "name": "Прага", "display_name": "Прага, Чехия",
+                "address": {"city": "Прага", "country": "Чехия", "country_code": "cz"}},
+               {"place_id": 10, "lat": "50.0870", "lon": "14.4200", "display_name": "5, Карлова, Прага, Чехия",
+                "address": {"road": "Карлова", "house_number": "5", "city": "Прага", "country": "Чехия", "country_code": "cz"}},
+               {"place_id": 7, "lat": "57.6266", "lon": "39.8938", "display_name": "1, Советская улица, Ярославль, Россия",
+                "address": {"house_number": "1", "road": "Советская улица", "city": "Ярославль", "country": "Россия", "country_code": "ru"}}]""",
+        )
+        assertEquals(listOf("Прага", "Карлова, 5", "Советская улица, 1"), rows.map { it.name })
+        assertEquals(listOf("Прага · Чехия", "Прага · Чехия", "Ярославль"), rows.map { it.subtitle })
+        assertEquals(listOf("cz", "cz", "ru"), rows.map { it.countryCode })
+        assertEquals(listOf(true, true, false), rows.map { it.abroad })
+        // an old row without a country code is Russia (the engine's rows never carry one)
+        assertFalse(NominatimClient.parseSearch(body).single().abroad)
+        assertEquals("Чехия", NominatimClient.subtitle(null, "Чехия", "cz"))
     }
 
     @Test

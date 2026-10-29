@@ -141,6 +141,8 @@
     <string name="navigator_outside_text">You can drive up to the border: choose a city in Russia, for example %1$s</string>
     <string name="navigator_outside_row">outside Russia</string>
     <string name="navigator_outside_meta">choose a city or place in Russia</string>
+    <string name="navigator_abroad_title">Verst doesn\'t plan trips abroad yet</string>
+    <string name="navigator_abroad_body">We work out stops, overnights and the budget only within Russia. You can open the road to “%1$s” in your maps app.</string>
     <string name="navigator_found_cd">%1$d %2$s found</string>
     <string name="cd_navigator_clear">Clear</string>
     <string name="cd_navigator_via_remove">Remove stop %1$d</string>
@@ -535,6 +537,10 @@
     <string name="card_pick_hotel">Choose a hotel</string>
     <string name="card_osm">Place data: © OpenStreetMap contributors</string>
     <string name="cd_card">Card: %1$s</string>
+    <string name="cd_card_with_address">Card: %1$s, address: %2$s</string>
+    <string name="card_address_loading">Finding the address…</string>
+    <string name="card_address_copied">Address copied</string>
+    <string name="cd_card_address_copy">copy the address</string>
     <string name="cd_card_photo">Photo: %1$s</string>
     <string name="cd_card_photo_area">Photo of the area: %1$s. This is not a photo of the hotel</string>
     <string name="cd_card_credit">Photo by %1$s, %2$s. Open the photo page</string>

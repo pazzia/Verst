@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,6 +42,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -150,6 +154,10 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
     val scroll = rememberScrollState()
     val rows = remember(w.id) { mutableStateMapOf<String, Int>() }
     var content by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    // CEO 29.10: the walker rides the walk column like the car on Road ahead — the column's place in the list
+    var viewportH by remember { mutableStateOf(0) }
+    var section by remember { mutableStateOf(0 to 0) }
+    val density = LocalDensity.current
     val requesters = remember(w.id) { mutableMapOf<String, FocusRequester>() }
     var highlight by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(ui.focusSeq) {
@@ -184,56 +192,68 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
                     }
                     WalkTitleSign(w, Modifier.padding(start = 20.dp, end = 20.dp, top = 56.dp).fillMaxWidth())
                 }
-                Column(
-                    Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).testTag("walk.list").onGloballyPositioned { content = it },
-                ) {
-                    // S3-FINAL P2-02: every stop has default hours → the top line says it once, rows stay quiet
-                    val allDefaultHours = w.stops.filter { it.poiId != null }.let { st -> st.isNotEmpty() && st.all { !it.hoursVerified } }
-                    Intro(ui, a)
-                    val few = ui.few
-                    if (few != null) {
-                        // 5.11 §10.5: the plate replaces the column; no cost footer, no «Другой вариант»
-                        Box(Modifier.padding(horizontal = 20.dp)) { FewPlate(few, ui.filters?.selected ?: w.preset, ui.excludedCount, a::suggestion) }
-                        Spacer(Modifier.height(24.dp))
-                    } else {
-                        Box {
-                            // 5.11 §10.2: while rebuilding the previous walk stays, dimmed to 35 %, under the pill
-                            Column(Modifier.fillMaxWidth().dimmed(ui.building)) {
-                                Column(Modifier.fillMaxWidth().walkColumn()) {
-                                    val start = RuFormat.clock(w.startAt) ?: ""
-                                    val finish = RuFormat.clock(w.endAt) ?: ""
-                                    Txt(
-                                        when {
-                                            w.untimed -> stringResource(R.string.walk_untimed_header)
-                                            w.startsTomorrow() -> stringResource(R.string.walk_header_tomorrow, start, finish)
-                                            else -> stringResource(R.string.walk_header, start, finish)
-                                        },
-                                        T.title.sm, C.accent.yellowText,
-                                        Modifier.padding(start = 72.dp, end = 16.dp, bottom = 10.dp).semantics { heading() }.testTag("walk.header"),
-                                    )
-                                    EndRow(stringResource(R.string.walk_start_row), w.start.label ?: w.townName ?: "", if (w.untimed) "" else start)
-                                    val dog = ui.filters?.dog == true
-                                    w.stops.forEach { s ->
-                                        WalkStopRow(
-                                            s, w.people, s.id == highlight, allDefaultHours, w.untimed, dog,
-                                            requesters.getOrPut(s.id) { FocusRequester() }, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y },
-                                        ) { a.stop(s) }
+                Box(Modifier.weight(1f).fillMaxWidth().onSizeChanged { viewportH = it.height }) {
+                    Column(
+                        Modifier.fillMaxSize().verticalScroll(scroll).testTag("walk.list").onGloballyPositioned { content = it },
+                    ) {
+                        // S3-FINAL P2-02: every stop has default hours → the top line says it once, rows stay quiet
+                        val allDefaultHours = w.stops.filter { it.poiId != null }.let { st -> st.isNotEmpty() && st.all { !it.hoursVerified } }
+                        Intro(ui, a)
+                        val few = ui.few
+                        if (few != null) {
+                            // 5.11 §10.5: the plate replaces the column; no cost footer, no «Другой вариант»
+                            Box(Modifier.padding(horizontal = 20.dp)) { FewPlate(few, ui.filters?.selected ?: w.preset, ui.excludedCount, a::suggestion) }
+                            Spacer(Modifier.height(24.dp))
+                        } else {
+                            Box {
+                                // 5.11 §10.2: while rebuilding the previous walk stays, dimmed to 35 %, under the pill
+                                Column(Modifier.fillMaxWidth().dimmed(ui.building)) {
+                                    Column(
+                                        Modifier.fillMaxWidth().walkColumn()
+                                            .onGloballyPositioned { c -> content?.let { root -> if (root.isAttached && c.isAttached) section = root.localPositionOf(c, Offset.Zero).y.roundToInt() to c.size.height } },
+                                    ) {
+                                        val start = RuFormat.clock(w.startAt) ?: ""
+                                        val finish = RuFormat.clock(w.endAt) ?: ""
+                                        Txt(
+                                            when {
+                                                w.untimed -> stringResource(R.string.walk_untimed_header)
+                                                w.startsTomorrow() -> stringResource(R.string.walk_header_tomorrow, start, finish)
+                                                else -> stringResource(R.string.walk_header, start, finish)
+                                            },
+                                            T.title.sm, C.accent.yellowText,
+                                            Modifier.padding(start = 72.dp, end = 16.dp, bottom = 10.dp).semantics { heading() }.testTag("walk.header"),
+                                        )
+                                        EndRow(stringResource(R.string.walk_start_row), w.start.label ?: w.townName ?: "", if (w.untimed) "" else start)
+                                        val dog = ui.filters?.dog == true
+                                        w.stops.forEach { s ->
+                                            WalkStopRow(
+                                                s, w.people, s.id == highlight, allDefaultHours, w.untimed, dog,
+                                                requesters.getOrPut(s.id) { FocusRequester() }, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y },
+                                            ) { a.stop(s) }
+                                        }
+                                        val fin = w.finish
+                                        if (fin != null) EndRow(stringResource(R.string.walk_finish_row), fin.label ?: "", if (w.untimed) "" else finish)
+                                        Spacer(Modifier.height(16.dp))
                                     }
-                                    val fin = w.finish
-                                    if (fin != null) EndRow(stringResource(R.string.walk_finish_row), fin.label ?: "", if (w.untimed) "" else finish)
-                                    Spacer(Modifier.height(16.dp))
-                                }
-                                Box(Modifier.padding(horizontal = 20.dp)) {
-                                    if (ui.otherNone) {
-                                        OtherNone()
-                                    } else {
-                                        WideButton(stringResource(R.string.walk_other), "walk.other", enabled = !ui.building, onClick = a::other, height = 56.dp)
+                                    Box(Modifier.padding(horizontal = 20.dp)) {
+                                        if (ui.otherNone) {
+                                            OtherNone()
+                                        } else {
+                                            WideButton(stringResource(R.string.walk_other), "walk.other", enabled = !ui.building, onClick = a::other, height = 56.dp)
+                                        }
                                     }
+                                    Spacer(Modifier.height(24.dp))
                                 }
-                                Spacer(Modifier.height(24.dp))
+                                if (ui.building) RebuildPill(Modifier.align(Alignment.TopStart).padding(start = 72.dp, end = 16.dp, top = 30.dp))
                             }
-                            if (ui.building) RebuildPill(Modifier.align(Alignment.TopStart).padding(start = 72.dp, end = 16.dp, top = 30.dp))
                         }
+                    }
+                    // CEO 29.10: the walker rides the visible part of the pavement with the scroll (as the car does)
+                    val (secY, secH) = section
+                    if (ui.few == null && secH > 0 && viewportH > 0) {
+                        val top = with(density) { (secY - scroll.value).coerceAtLeast(0).toDp().value }
+                        val bottom = with(density) { (secY + secH - scroll.value).coerceAtMost(viewportH).toDp().value }
+                        WalkerMarker(top, bottom, if (scroll.maxValue > 0) scroll.value.toFloat() / scroll.maxValue else 0f)
                     }
                 }
                 if (ui.few == null) Footer(w)
@@ -503,6 +523,35 @@ private fun WalkTitleSign(w: WalkRouteDto, modifier: Modifier) {
         Txt(w.titleRu, T.sign.xlTight, C.sign.white, Modifier.weight(1f).testTag("walk.title"), maxLines = 2)
         Txt(kmText, T.sign.xlTight, C.sign.white, Modifier.padding(start = 8.dp), maxLines = 1)
     }
+}
+
+/** The walker disc (no generated token yet; the car's is `size.carMarkerW/H`). */
+private val WalkerSize = 26.dp
+
+/**
+ * CEO 29.10: the walker on the walk column, as the car on Road ahead (components §26.3 `CarMarker`): a 26 dp disc
+ * with the pedestrian glyph (`walker`, §17.5) centred on the pavement (x 14–60). It does not walk by itself — it
+ * stands still and moves only with the scroll, at [progress] (0 = the list top, 1 = its end) of the visible
+ * pavement between [top] and [bottom] (dp in the list's viewport), so it is where the reader is in the walk. No
+ * time animation, so nothing changes with reduced motion.
+ */
+@Composable
+private fun WalkerMarker(top: Float, bottom: Float, progress: Float) {
+    val len = bottom - top - WalkerSize.value
+    if (len <= 0f) return
+    val y = progress.coerceIn(0f, 1f) * len
+    Box(
+        Modifier.offset(x = 37.dp - WalkerSize / 2, y = (top + y).dp).size(WalkerSize)
+            .drawBehind {
+                val r = size.minDimension / 2
+                // a soft shadow on the pavement, the yellow disc (the «you are here» colour of the car), its outline
+                drawCircle(C.city.footprint, r, center + Offset(0f, 1.5f * density))
+                drawCircle(C.accent.yellow, r)
+                drawCircle(C.text.onLight, r - 0.75f * density, style = androidx.compose.ui.graphics.drawscope.Stroke(1.5f * density))
+            }
+            .testTag("walk.walker").clearAndSetSemantics {},
+        contentAlignment = Alignment.Center,
+    ) { WalkerIcon(C.text.onLight, 18.dp) }
 }
 
 /** components §21 `WalkColumn`: pavement x 14–60, kerbs, joints every 24 dp, a centre joint. */

@@ -75,6 +75,7 @@ import app.verst.nav.canUndo
 import app.verst.nav.carTarget
 import app.verst.nav.mapsChosen
 import app.verst.nav.preferredMaps
+import app.verst.nav.abroadHandoff
 import app.verst.nav.cardPickHotel
 import app.verst.nav.cardRemoveWalkStop
 import app.verst.nav.cardReplace
@@ -357,6 +358,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 addressState = flow.addressState,
                 focusTo = flow.focusToField,
                 addressResults = flow.addressResults,
+                abroad = flow.destinationAbroad,
+                abroadMaps = flow.preferredMaps,
             ),
             onBack = { flow.back() },
             onQuery = flow::updateQuery,
@@ -374,6 +377,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                     flow.back()
                 }
             },
+            onAbroadMaps = { flow.abroadHandoff() },
         )
         Route.Instruments -> InstrumentsScreen(
             InstrumentsUi(
