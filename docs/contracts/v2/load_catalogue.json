@@ -6,8 +6,8 @@
  "response": {
   "ok": true,
   "result": {
-   "version": "wd-20261028-osm1",
-   "builtAt": "2026-10-28",
+   "version": "wd-20261029-osm2",
+   "builtAt": "2026-10-29",
    "towns": 1114,
    "pois": 10921,
    "bars": 5625,
