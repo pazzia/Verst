@@ -74,7 +74,8 @@ class WikidataTest(unittest.TestCase):
             asked, ["набережная", "кремль"]
         )  # sorted ids: Q1851368 < Q263274  # Q999 has no ru label
         self.assertIsNone(self.wd.pick_resolved([{"c": lit(e + "Q1"), "n": lit("0")}]))
-        self.assertIn("wdt:P17 wd:Q159", self.wd.Q_RESOLVE)
+        # the default country is Russia (CEO 29.10: the template takes the country of the run)
+        self.assertIn("wdt:P17 wd:Q159", self.wd.Q_RESOLVE.format(label="кремль", country=self.wd.COUNTRY))
 
     def test_towns_aggregate(self) -> None:
         e = "http://www.wikidata.org/entity/"

@@ -1,14 +1,17 @@
 """Sprint 4 extra sources for the catalogue (ADR-0015 §2–§4). CI only (`.github/workflows/data-extras.yml`):
 
-    python3 tools/data/fetch_extras.py classes   RAW        # class_tree.json: kind/exclude roots → subclasses
+    python3 tools/data/fetch_extras.py classes   RAW [CC]   # class_tree.json: kind/exclude roots → subclasses
     python3 tools/data/fetch_extras.py wikidata  RAW        # wd_extra.json: P31, P1435 labels, ru wiki/voyage titles
     python3 tools/data/fetch_extras.py wikipedia RAW        # wiki.json: ru intro extract + page image per POI
     python3 tools/data/fetch_extras.py voyage    RAW DUMP   # voyage.json: Q-ids named in ru Wikivoyage listings
-    python3 tools/data/fetch_extras.py osm       RAW SEQ    # osm_pois.json, parking.json from an osmium export
-    python3 tools/data/fetch_extras.py geosearch RAW        # geosearch.json: Commons files near POIs without a photo
+    python3 tools/data/fetch_extras.py osm       RAW SEQ [--abroad]  # osm_pois.json, parking.json (osmium export)
+    python3 tools/data/fetch_extras.py geosearch RAW [MAX]  # geosearch.json: Commons files near POIs without a photo
 
 Every step reads the run-7 raw files (`towns.json`, `pois.json`) and adds one file. The parsing helpers are pure
-and tested in the sandbox (`tests/unit/test_data_extras.py`).
+and tested in the sandbox (`tests/unit/test_data_extras.py`). Abroad (CEO 29.10, `data-abroad.yml`): `classes CC`
+re-resolves a wrong class id among the instances in that country, `osm … --abroad` also keeps `name:ru` and
+`name:en` (the builder names an OSM place in Russian first), `geosearch RAW MAX` caps the Commons queries.
+Without these arguments every step is the Russian one.
 """
 
 from __future__ import annotations
@@ -25,6 +28,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from countries import get
 from fetch_wikidata import pick_resolved, qid, sparql, val
 from http_util import Pacer, request
 
@@ -77,7 +81,7 @@ def batches(items: list[str], n: int) -> Iterator[list[str]]:
 
 Q_LABELS = """SELECT ?c ?label WHERE {{ VALUES ?c {{ {ids} }} ?c rdfs:label ?label . FILTER(LANG(?label) = "en") }}"""
 Q_RESOLVE = """SELECT ?c (COUNT(DISTINCT ?i) AS ?n) WHERE {{
-  ?c rdfs:label "{label}"@ru . ?i wdt:P31 ?c ; wdt:P17 wd:Q159 . }} GROUP BY ?c ORDER BY DESC(?n) LIMIT 5"""
+  ?c rdfs:label "{label}"@ru . ?i wdt:P31 ?c ; wdt:P17 wd:{country} . }} GROUP BY ?c ORDER BY DESC(?n) LIMIT 5"""
 Q_SUB = """SELECT DISTINCT ?c WHERE {{ ?c wdt:P279* wd:{root} . }}"""
 
 
@@ -101,12 +105,12 @@ def tree_doc(resolved: dict[str, str], subclasses: dict[str, list[str]]) -> dict
     return {"resolved": resolved, "groups": {g: sorted(v) for g, v in sorted(groups.items())}}
 
 
-def cmd_classes(raw: Path) -> int:
+def cmd_classes(raw: Path, country_qid: str = "Q159") -> int:
     pacer = Pacer(1.0)
     report = check_roots(sparql(Q_LABELS.format(ids=" ".join(f"wd:{q}" for q in ROOTS)), pacer))
     resolved: dict[str, str] = {}
     for q in sorted(report["mismatches"]):
-        got = pick_resolved(sparql(Q_RESOLVE.format(label=ROOTS[q][1]), pacer))
+        got = pick_resolved(sparql(Q_RESOLVE.format(label=ROOTS[q][1], country=country_qid), pacer))
         if got and got != q:
             resolved[q] = got
     subs: dict[str, list[str]] = {}
@@ -311,12 +315,16 @@ OSM_KEEP = (
     "capacity",
     "access",
 )
+OSM_KEEP_ABROAD = ("name:ru", "name:en")
 
 
-def osm_from_features(lines: Iterable[str]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def osm_from_features(
+    lines: Iterable[str], abroad: bool = False
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """GeoJSON-seq features → (POI candidates, paid parking points)."""
     from bars_from_extract import elements_from_features
 
+    keep = OSM_KEEP + OSM_KEEP_ABROAD if abroad else OSM_KEEP
     pois, parking = [], []
     for e in elements_from_features(lines, require_name=False):
         t = e["tags"]
@@ -329,13 +337,13 @@ def osm_from_features(lines: Iterable[str]) -> tuple[list[dict[str, Any]], list[
             continue
         if not t.get("name") and t.get("leisure") != "playground":
             continue
-        pois.append({**rec, "tags": {k: v for k, v in t.items() if k in OSM_KEEP}})
+        pois.append({**rec, "tags": {k: v for k, v in t.items() if k in keep}})
     return pois, parking
 
 
-def cmd_osm(raw: Path, seq: Path) -> int:
+def cmd_osm(raw: Path, seq: Path, abroad: bool = False) -> int:
     with seq.open(encoding="utf-8") as fh:
-        pois, parking = osm_from_features(fh)
+        pois, parking = osm_from_features(fh, abroad)
     (raw / "osm_pois.json").write_text(json.dumps(pois, ensure_ascii=False), "utf-8")
     (raw / "parking.json").write_text(json.dumps(parking, ensure_ascii=False), "utf-8")
     print(f"osm: {len(pois)} POI candidates, {len(parking)} paid parking places")
@@ -366,10 +374,10 @@ def geo_targets(pois: list[dict[str, Any]], osm: list[dict[str, Any]], limit: in
     return out[:limit]
 
 
-def cmd_geosearch(raw: Path) -> int:
+def cmd_geosearch(raw: Path, limit: int = GEO_MAX) -> int:
     pois = json.loads((raw / "pois.json").read_text("utf-8"))
     osm = json.loads((raw / "osm_pois.json").read_text("utf-8")) if (raw / "osm_pois.json").exists() else []
-    targets = geo_targets(pois, osm, GEO_MAX)
+    targets = geo_targets(pois, osm, limit)
     pacer = Pacer(0.3)
     out: dict[str, list[str]] = {}
     for i, t in enumerate(targets):
@@ -448,7 +456,7 @@ def cmd_candidates(raw: Path) -> int:
 def main(argv: list[str]) -> int:
     cmd, raw = argv[0], Path(argv[1])
     if cmd == "classes":
-        return cmd_classes(raw)
+        return cmd_classes(raw, get(argv[2] if len(argv) > 2 else None).qids[0])
     if cmd == "wikidata":
         return cmd_wikidata(raw)
     if cmd == "wikipedia":
@@ -456,9 +464,9 @@ def main(argv: list[str]) -> int:
     if cmd == "voyage":
         return cmd_voyage(raw, Path(argv[2]))
     if cmd == "osm":
-        return cmd_osm(raw, Path(argv[2]))
+        return cmd_osm(raw, Path(argv[2]), "--abroad" in argv[3:])
     if cmd == "geosearch":
-        return cmd_geosearch(raw)
+        return cmd_geosearch(raw, int(argv[2]) if len(argv) > 2 else GEO_MAX)
     if cmd == "candidates":
         return cmd_candidates(raw)
     raise SystemExit(f"unknown command {cmd}")

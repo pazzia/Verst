@@ -1,0 +1,4 @@
+2026-10-29 CEO: trips abroad, wave 1 — catalogues of BY KZ GE AB AM AZ UZ KG TR (server only) + Russian parks
+# Optional lines read by .github/workflows/data-abroad.yml (edit this file and push a ccr-* branch to run it):
+countries: BY KZ GE AB AM AZ UZ KG TR
+ru-parks: yes

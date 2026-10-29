@@ -237,7 +237,7 @@ jobs:
               print(f"- `{r['artifact']}` {r['source']}: {r.get('licence') or r.get('firstLine')} {r.get('url', '')}")
           EOF
 
-      - name: APK size budget (warn 45 MB, fail 60 MB)
+      - name: APK size budget (warn 45 MB, fail 60 MB) and content (no server-only catalogue abroad)
         id: apk
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
         run: python3 tools/ci/diagnose.py --out "$DIAG" apk --apk android/app/build/outputs/apk/demo/app-demo.apk --warn-mb 45 --fail-mb 60

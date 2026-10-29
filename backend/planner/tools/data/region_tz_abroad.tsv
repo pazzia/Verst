@@ -1,0 +1,21 @@
+# Trips abroad, wave 1 (CEO 29.10): catalogue country, ISO 3166-2 region code («*» = every region of the country
+# without its own row), IANA time zone, UTC offset on 2026-10-29, source. Hand-written from the IANA tz database
+# (zone1970.tab and the zone rules, tzdata 2026e) — not from memory; `build_catalogue.py --country` checks every
+# region against Wikidata P421 (`country_check.json`) and writes the result to catalogue_meta.tzCheck. None of
+# these countries observes DST in 2026.
+# Kazakhstan: zone1970.tab still lists seven KZ zones (Asia/Almaty «most of Kazakhstan», Asia/Qyzylorda,
+# Asia/Qostanay, Asia/Aqtobe, Asia/Aqtau, Asia/Atyrau, Asia/Oral), but since 2024-03-01 all of them are UTC+5:
+# the country has ONE offset, not two. A region row may still name its own zone once the CI report lists the
+# region codes Wikidata uses (the old letter codes or the new numeric ones of ISO 3166-2:KZ).
+# Uzbekistan: Asia/Tashkent (east) and Asia/Samarkand (west) are both UTC+5.
+# Abkhazia: the tz database has no zone of its own (it files Abkhazia under GE, Asia/Tbilisi, UTC+4); Abkhazia
+# keeps Moscow time de facto. Europe/Moscow here; the tzCheck of the AB build compares it with Wikidata P421.
+BY	*	Europe/Minsk	+03:00	zone1970.tab BY
+KZ	*	Asia/Almaty	+05:00	zone1970.tab KZ «most of Kazakhstan»; every KZ zone is +05:00 since 2024-03-01
+GE	*	Asia/Tbilisi	+04:00	zone1970.tab GE
+AB	*	Europe/Moscow	+03:00	de facto Moscow time; no IANA zone of its own (checked against Wikidata P421 in CI)
+AM	*	Asia/Yerevan	+04:00	zone1970.tab AM
+AZ	*	Asia/Baku	+04:00	zone1970.tab AZ
+UZ	*	Asia/Tashkent	+05:00	zone1970.tab UZ (Asia/Samarkand, the west, is +05:00 too)
+KG	*	Asia/Bishkek	+06:00	zone1970.tab KG
+TR	*	Europe/Istanbul	+03:00	zone1970.tab TR

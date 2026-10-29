@@ -15,10 +15,17 @@ A pure function of its inputs (stdlib only), so the sandbox tests it on recorded
 plus the hand-maintained `region_tz.tsv` and `name_overrides.tsv` next to this file, the fixture worlds
 (name forms and Wikidata links win) and `tests/brand_denylist.txt`.
 
-Usage (from `backend/planner`): ``python3 tools/data/build_catalogue.py RAW_DIR [--out DIR] [--version V]``.
-Writes ``catalogue_{meta,towns,pois,bars,food}.json.gz`` (default: `verst_planner/resources/`) and prints a
-summary. `build(...)` returns the documents for tests. `meta.licence` carries the ODbL 1.0 notice of the
-whole catalogue (`licence_block`); Commons files that are GFDL-only are not used (`gfdl_only`).
+Usage (from `backend/planner`): ``python3 tools/data/build_catalogue.py RAW_DIR [--out DIR] [--version V]
+[--country CC]``. Writes ``catalogue_{meta,towns,pois,bars,food}.json.gz`` (default: `verst_planner/resources/`)
+and prints a summary. `build(...)` returns the documents for tests. `meta.licence` carries the ODbL 1.0 notice
+of the whole catalogue (`licence_block`); Commons files that are GFDL-only are not used (`gfdl_only`).
+
+`--country` (CEO 29.10, trips abroad; `countries.py`): a wave-1 country is built by the same rules from its own
+raw directory, with these differences — regions are the country's ISO 3166-2 codes with the zones of
+`region_tz_abroad.tsv` (checked against Wikidata P421: `meta.tzCheck`), no fixture links, no Russian name
+tables, the extra classes of `ABROAD_CLASS_KIND`, OSM names in Russian first (`name:ru`, then a Latin/Cyrillic
+`name`, then `name:en`), a `nameLang` column, `meta.country` (code, Wikidata ids, nameRu, currency), and paid
+parking without a ₽ rate unless the currency is the rouble. Russia without `--country` is unchanged.
 """
 
 from __future__ import annotations
@@ -37,6 +44,7 @@ PLANNER = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PLANNER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # enrich, fetch_extras
 
+from countries import RU, Country  # noqa: E402
 from enrich import (  # noqa: E402
     OSM_PER_TOWN,
     OSM_RADIUS_KM,
@@ -101,6 +109,14 @@ CLASS_KIND: tuple[tuple[str, str], ...] = (
     ("Q570116", "attraction"),  # tourist attraction
 )
 CLASS_IDS = tuple(q for q, _k in CLASS_KIND)
+# Abroad only (CEO 29.10): mosques (kind «church», shown as «Храм»), mausoleums, madrasas, archaeological sites
+# (the classes step of fetch_wikidata.py checks the ids: EXPECT_ABROAD). After CLASS_KIND in priority.
+ABROAD_CLASS_KIND: tuple[tuple[str, str], ...] = (
+    ("Q32815", "church"),  # mosque
+    ("Q162875", "monument"),  # mausoleum
+    ("Q132834", "attraction"),  # madrasa
+    ("Q839954", "attraction"),  # archaeological site
+)
 
 POI_CAP = ((1_000_000, 120), (100_000, 50))
 POI_CAP_TOURIST = 40
@@ -158,16 +174,20 @@ LICENCE_NOTICE = (
 )
 
 
-def licence_block(version: str) -> dict[str, Any]:
+ABROAD_COPY_URI = "https://github.com/pazzia/Verst/tree/main/backend/planner/abroad"
+
+
+def licence_block(version: str, country: Country = RU) -> dict[str, Any]:
     """`meta.licence`: ODbL 1.0 for the database as a whole, the attributions per source (which parts of the
-    catalogue each one fed), the source and licence URIs, the free copy and the build id (= `meta.version`)."""
-    return {
+    catalogue each one fed), the source and licence URIs, the free copy and the build id (= `meta.version`).
+    Abroad the scope also names catalogue_parks and the free copy is `ABROAD_COPY_URI`."""
+    scope = "the catalogue as a whole: catalogue_meta, catalogue_towns, catalogue_pois, catalogue_bars, catalogue_food"
+    block = {
         "database": {
             "licence": "ODbL-1.0",
             "name": "Open Database License (ODbL) 1.0",
             "uri": ODBL_URI,
-            "scope": "the catalogue as a whole: catalogue_meta, catalogue_towns, catalogue_pois, catalogue_bars, "
-            "catalogue_food",
+            "scope": scope + (", catalogue_parks" if country.abroad else ""),
             "derivativeOf": "OpenStreetMap",
         },
         "notice": LICENCE_NOTICE,
@@ -231,6 +251,13 @@ def licence_block(version: str) -> dict[str, Any]:
         "copy": CATALOGUE_COPY_URI,
         "build": version,
     }
+    if country.abroad:
+        osm_parts = block["attribution"][0]["parts"]
+        osm_parts.insert(2, "parks (catalogue_parks)")
+        block["notice"] = LICENCE_NOTICE.replace(CATALOGUE_COPY_URI, ABROAD_COPY_URI)
+        block["copy"] = ABROAD_COPY_URI
+        block["country"] = country.code
+    return block
 
 
 GFDL = re.compile(r"(?:gfdl|gnu free documentation licen[cs]e)\b", re.I)
@@ -494,12 +521,93 @@ def poi_name(name: str, town: str) -> str:
     return name
 
 
-def poi_kind(roots: Iterable[str]) -> str | None:
+def poi_kind(roots: Iterable[str], extra: tuple[tuple[str, str], ...] = ()) -> str | None:
     have = set(roots)
-    for q, kind in CLASS_KIND:
+    for q, kind in CLASS_KIND + extra:
         if q in have:
             return kind
     return None
+
+
+# ------------------------------------------------------------------------------------------- abroad
+
+LATIN_CYRILLIC = ("LATIN", "CYRILLIC")
+
+
+def readable(name: str) -> bool:
+    """Every letter of the name is Latin or Cyrillic (a Russian reader can read it out)."""
+    return all(unicodedata.name(ch, "").startswith(LATIN_CYRILLIC) for ch in name if ch.isalpha())
+
+
+def osm_name(tags: dict[str, str], fallback: str | None = None) -> tuple[str | None, str | None]:
+    """Abroad (CEO 29.10): an OSM object's name for a Russian reader and its source — `name:ru` («ru»), else
+    a Latin/Cyrillic `name` («local»), else `name:en` («en»), else the `name` as tagged («local»)."""
+    name = str(tags.get("name") or fallback or "").strip()
+    ru = str(tags.get("name:ru") or "").strip()
+    en = str(tags.get("name:en") or "").strip()
+    if ru:
+        return ru, "ru"
+    if name and readable(name):
+        return name, "local"
+    if en:
+        return en, "en"
+    return (name, "local") if name else (None, None)
+
+
+def read_tz_abroad(path: Path | None = None) -> dict[tuple[str, str], str]:
+    """`region_tz_abroad.tsv`: {(country, region code or "*"): IANA zone}."""
+    rows = read_tsv(path or HERE / "region_tz_abroad.tsv")
+    return {(r[0], r[1]): r[2] for r in rows}
+
+
+def zone_for(country: Country, code: str, table: dict[tuple[str, str], str]) -> str | None:
+    """The IANA zone of a region: its own row, else the country's «*» row."""
+    return table.get((country.code, code)) or table.get((country.code, "*"))
+
+
+UTC_LABEL = re.compile(r"UTC\s*([+\u2212\u2013-])\s*(\d{1,2})(?::?(\d{2}))?")
+
+
+def utc_minutes(label: str) -> int | None:
+    """«UTC+04:00» / «UTC−5» → minutes east of UTC; «UTC» alone → 0; None when there is no offset."""
+    m = UTC_LABEL.search(label)
+    if m is None:
+        return 0 if re.fullmatch(r"\s*(?:UTC|GMT)(?:±00:00)?\s*", label) else None
+    sign = -1 if m.group(1) != "+" else 1
+    return sign * (int(m.group(2)) * 60 + int(m.group(3) or 0))
+
+
+def zone_minutes(zone: str, on: str) -> int | None:
+    """The UTC offset of an IANA zone at noon UTC of the date `on` (YYYY-MM-DD; empty = 2026-10-29)."""
+    import datetime as dt
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+    try:
+        z = ZoneInfo(zone)
+    except (ZoneInfoNotFoundError, ValueError):
+        return None
+    day = dt.date.fromisoformat(on or "2026-10-29")
+    off = dt.datetime(day.year, day.month, day.day, 12, tzinfo=dt.UTC).astimezone(z).utcoffset()
+    return None if off is None else int(off.total_seconds() // 60)
+
+
+def tz_check(regions: dict[str, str], check: dict[str, Any], on: str) -> dict[str, Any]:
+    """The catalogue's region zones vs Wikidata P421 (`country_check.json`): a region whose Wikidata zones
+    carry UTC offsets none of which is the IANA zone's offset is a mismatch (the run report shows it; the
+    zone table is then corrected by hand). Regions without a Wikidata zone fall back to the country's."""
+    wd = check.get("regions") or {}
+    country_tz = list(check.get("tz") or [])
+    out: dict[str, Any] = {}
+    bad = []
+    for code, zone in sorted(regions.items()):
+        labels = list((wd.get(code) or {}).get("tz") or []) or country_tz
+        offs = sorted({m for m in (utc_minutes(x) for x in labels) if m is not None})
+        mine = zone_minutes(zone, on)
+        ok = (not offs) or mine in offs
+        out[code] = {"zone": zone, "minutes": mine, "wikidata": labels, "ok": ok}
+        if not ok:
+            bad.append(code)
+    return {"checked": bool(check), "mismatches": bad, "ok": not bad, "regions": out}
 
 
 def bar_kind(name: str, tags: dict[str, str]) -> str:
@@ -564,7 +672,7 @@ def cuisine(tags: dict[str, str]) -> str | None:
 
 def food_rows(
     raw_food: list[dict[str, Any]], town_pos: dict[str, int], towns: list[dict[str, Any]], deny: list[str],
-    hours_ok: Any,
+    hours_ok: Any, abroad: bool = False,
 ) -> list[dict[str, Any]]:
     """Restaurants, cafés, fast food, food courts (CEO 2026-10-29): named, not deny-listed, one row per OSM
     object, capped per town by population. Over the cap, chain fast food goes first, then other chains
@@ -573,6 +681,10 @@ def food_rows(
     for f in raw_food:
         tags = f.get("tags") or {}
         name = str(f.get("name") or tags.get("name") or "").strip()
+        lang = None
+        if abroad:
+            got, lang = osm_name(tags, name)
+            name = got or ""
         kind = tags.get("amenity")
         if not name or kind not in FOOD_KINDS or denied(name, deny) or f.get("townQid") not in town_pos:
             continue
@@ -580,7 +692,9 @@ def food_rows(
         if hours and hours_ok is not None and not hours_ok(hours):
             hours = None
         chain = any(k in tags for k in BRANDED_TAGS)
-        by_id.setdefault(f["osm"], {**f, "name": name, "_kind": kind, "_hours": hours, "_chain": chain})
+        by_id.setdefault(
+            f["osm"], {**f, "name": name, "_kind": kind, "_hours": hours, "_chain": chain, "_lang": lang}
+        )
     grouped: dict[str, list[dict[str, Any]]] = {}
     for f in by_id.values():
         grouped.setdefault(f["townQid"], []).append(f)
@@ -606,6 +720,7 @@ def food_rows(
                     "town": town_pos[qid],
                     "hours": f["_hours"],
                     "cuisine": cuisine(f.get("tags") or {}),
+                    **({"nameLang": f["_lang"]} if abroad else {}),
                 }
             )
     return rows
@@ -619,13 +734,20 @@ def poi_cap(population: int, tourist: bool) -> int:
 
 
 def build(
-    raw_dir: Path, version: str = "dev", built_at: str = "", hours_ok: Any = None
+    raw_dir: Path, version: str = "dev", built_at: str = "", hours_ok: Any = None, country: Country = RU
 ) -> dict[str, dict[str, Any]]:
     """The documents (`meta`, `towns`, `pois`, `bars`, `food`) from the raw directory."""
+    abroad = country.abroad
     deny = denylist()
-    tz = {code: zone for code, zone in read_tsv(HERE / "region_tz.tsv")}
-    overrides = {qid_or_name: (gen, prep) for qid_or_name, gen, prep in read_tsv(HERE / "name_overrides.tsv")}
     raw_towns = load_json(raw_dir / "towns.json", [])
+    if abroad:
+        table = read_tz_abroad()
+        codes = {str(t.get("regionIso")) for t in raw_towns if str(t.get("regionIso") or "").startswith(country.iso_prefix)}
+        tz = {c: z for c in sorted(codes) if (z := zone_for(country, c, table))}
+        overrides: dict[str, tuple[str, str]] = {}
+    else:
+        tz = {code: zone for code, zone in read_tsv(HERE / "region_tz.tsv")}
+        overrides = {qid_or_name: (gen, prep) for qid_or_name, gen, prep in read_tsv(HERE / "name_overrides.tsv")}
     raw_pois = load_json(raw_dir / "pois.json", [])
     raw_bars = load_json(raw_dir / "bars.json", [])
     raw_food = load_json(raw_dir / "food.json", [])
@@ -636,7 +758,7 @@ def build(
     credits_in = {**credits_in, **ex.credits}
 
     # ---- towns: dedupe by qid (largest population wins), ISO 3166-2:RU regions only, real towns only
-    region_fix = {name: code for name, code in read_tsv(HERE / "region_overrides.tsv")}
+    region_fix = {} if abroad else {name: code for name, code in read_tsv(HERE / "region_overrides.tsv")}
     by_qid: dict[str, dict[str, Any]] = {}
     region_names: dict[str, str] = {}
     for t in raw_towns:
@@ -644,7 +766,7 @@ def build(
         if code not in tz or not t.get("name") or not is_town(t):
             continue
         t = {**t, "regionIso": code}
-        region_names.setdefault(code, t.get("regionName") or code)
+        region_names.setdefault(code, country.region_names.get(code) or t.get("regionName") or code)
         old = by_qid.get(t["qid"])
         if old is None or (t.get("population") or 0) > (old.get("population") or 0):
             by_qid[t["qid"]] = t
@@ -653,7 +775,7 @@ def build(
     # ---- fixture links and fixture name forms (they win over pymorphy3 and the override table)
     links: dict[str, dict[str, Any]] = {}
     fixture_forms: dict[str, tuple[str | None, str | None]] = {}
-    for world in fixture_worlds():
+    for world in [] if abroad else fixture_worlds():
         town_pts, sight_pts = fixture_points(world)
         for ft in world["towns"]:
             p = town_pts[ft["id"]]
@@ -717,20 +839,21 @@ def build(
         gen = gen or (o[0] if o else None) or f.get("gen")
         prep = prep or (o[1] if o else None) or f.get("prep")
         image, credit = image_and_credit(t.get("image"))
-        town_rows.append(
-            {
-                "id": t["qid"],
-                "name": t["name"],
-                "gen": gen,
-                "prep": prep,
-                "lat": to_coord(t["lat"]),
-                "lon": to_coord(t["lon"]),
-                "pop": int(t.get("population") or 0),
-                "region": region_index[t["regionIso"]],
-                "image": image,
-                "credit": credit,
-            }
-        )
+        row = {
+            "id": t["qid"],
+            "name": t["name"],
+            "gen": gen,
+            "prep": prep,
+            "lat": to_coord(t["lat"]),
+            "lon": to_coord(t["lon"]),
+            "pop": int(t.get("population") or 0),
+            "region": region_index[t["regionIso"]],
+            "image": image,
+            "credit": credit,
+        }
+        if abroad:
+            row["nameLang"] = t.get("nameLang")
+        town_rows.append(row)
     town_pos = {t["qid"]: i for i, t in enumerate(towns)}
 
     # ---- POIs: kind, nearest town among the towns that found it, deny-list, ADR-0015 §2 excludes, caps
@@ -742,8 +865,9 @@ def build(
     all_meta = {**load_json(raw_dir / "photo_meta.json", {}), **ex.photo_meta}
     stats: dict[str, int] = {}
     pois_by_qid: dict[str, dict[str, Any]] = {}
+    extra_kinds = ABROAD_CLASS_KIND if abroad else ()
     for r in raw_pois:
-        kind = poi_kind(r.get("roots", []))
+        kind = poi_kind(r.get("roots", []), extra_kinds)
         if kind is None or not r.get("name") or denied(r["name"], deny) or r.get("townQid") not in town_pos:
             continue
         kind = refine_kind(kind, r, ex)
@@ -801,6 +925,7 @@ def build(
         )
         desc = r.get("desc")
         return {
+            **({"nameLang": r.get("nameLang")} if abroad else {}),
             "id": r["qid"],
             "name": tidy(poi_name(r["name"], town["name"])),
             "desc": tidy(desc[:DESC_MAX]) if desc else None,
@@ -841,6 +966,7 @@ def build(
             all_meta,
             hours_ok,
             deny,
+            abroad,
         )
     )
     stats["shipped"] = len(poi_rows)
@@ -850,6 +976,8 @@ def build(
     for b in raw_bars:
         tags = b.get("tags") or {}
         name = b.get("name") or tags.get("name")
+        if abroad:
+            name, b = osm_name(tags, name)[0], {**b, "_lang": osm_name(tags, name)[1]}
         if (
             not name
             or any(k in tags for k in BRANDED_TAGS)
@@ -879,6 +1007,7 @@ def build(
                     "lon": to_coord(b["lon"]),
                     "town": town_pos[qid],
                     "hours": b["_hours"],
+                    **({"nameLang": b.get("_lang")} if abroad else {}),
                 }
             )
 
@@ -897,7 +1026,20 @@ def build(
         "v": FORMAT_VERSION,
         "version": version,
         "builtAt": built_at,
-        "licence": licence_block(version),
+        "licence": licence_block(version, country),
+        **(
+            {
+                "country": {
+                    "code": country.code,
+                    "wikidata": list(country.qids),
+                    "nameRu": country.name_ru,
+                    "currency": country.currency,
+                    "labelLangs": country.label_langs.split(","),
+                }
+            }
+            if abroad
+            else {}
+        ),
         "regions": [{"code": c, "nameRu": region_names[c], "tz": tz[c]} for c in regions_sorted],
         "poiKinds": list(POI_KINDS),
         "barKinds": list(BAR_KINDS),
@@ -907,15 +1049,19 @@ def build(
         "areaBlock": area_block,
         "areaChecked": bool(photo_meta),
         "sources": sources,
-        "parking": parking_meta(ex.parking, poi_rows),
+        "parking": parking_meta(ex.parking, poi_rows, rub=country.currency == "RUB"),
         "buildStats": stats,
     }
+    if abroad:
+        check = load_json(raw_dir / "country_check.json", {})
+        meta["tzCheck"] = tz_check({c: tz[c] for c in regions_sorted}, check, built_at)
+    extra = ("nameLang",) if abroad else ()
     return {
         "meta": meta,
-        "towns": encode_table(town_rows, TOWN_COLS),
-        "pois": encode_table(poi_rows, POI_COLS + POI_OPT_COLS),
-        "bars": encode_table(bar_rows, BAR_COLS),
-        "food": encode_table(food_rows(raw_food, town_pos, towns, deny, hours_ok), FOOD_COLS),
+        "towns": encode_table(town_rows, TOWN_COLS + extra),
+        "pois": encode_table(poi_rows, POI_COLS + POI_OPT_COLS + extra),
+        "bars": encode_table(bar_rows, BAR_COLS + extra),
+        "food": encode_table(food_rows(raw_food, town_pos, towns, deny, hours_ok, abroad), FOOD_COLS + extra),
     }
 
 
@@ -942,6 +1088,7 @@ def osm_rows(
     meta: dict[str, dict[str, Any]],
     hours_ok: Any,
     deny: list[str],
+    abroad: bool = False,
 ) -> list[dict[str, Any]]:
     """OSM-only POIs (ADR-0015 §2 kinds: nature, parks, zoos, theatres, interactive, playgrounds, viewpoints,
     attractions): the nearest town within OSM_RADIUS_KM (playgrounds within PLAYGROUND_KM), capped per town."""
@@ -957,6 +1104,9 @@ def osm_rows(
         if kind is None:
             continue
         name = tags.get("name") or ("Детская площадка" if kind == "playground" else None)
+        lang = None
+        if abroad and tags.get("name"):
+            name, lang = osm_name(tags)
         if not name or denied(name, deny) or not osm_name_ok(name, kind, tags):
             continue
         reach = PLAYGROUND_KM if kind == "playground" else OSM_RADIUS_KM
@@ -970,7 +1120,9 @@ def osm_rows(
                         best = (d, t)
         if best is None:
             continue
-        per_town.setdefault(best[1]["qid"], []).append({**o, "_kind": kind, "_name": name, "_d": best[0]})
+        per_town.setdefault(best[1]["qid"], []).append(
+            {**o, "_kind": kind, "_name": name, "_d": best[0], "_lang": lang}
+        )
     out = []
     for qid in sorted(per_town, key=lambda q: town_pos[q]):
         lst = per_town[qid]
@@ -1002,6 +1154,7 @@ def osm_rows(
             )
             rows.append(
                 {
+                    **({"nameLang": x["_lang"] or "ru"} if abroad else {}),
                     "id": f"osm_{x['osm']}",
                     "name": playground_name(tidy(x["_name"]) or "", towns[town_pos[qid]]),
                     "desc": None,
@@ -1033,20 +1186,25 @@ def osm_rows(
     return out
 
 
-def parking_meta(parking: list[dict[str, Any]], pois: list[dict[str, Any]]) -> dict[str, list[Any]]:
-    """Paid OSM parking within PARKING_NEAR_KM of a shipped POI (ADR-0015 §4), with ₽/h from `charge`."""
+def parking_meta(
+    parking: list[dict[str, Any]], pois: list[dict[str, Any]], rub: bool = True
+) -> dict[str, list[Any]]:
+    """Paid OSM parking within PARKING_NEAR_KM of a shipped POI (ADR-0015 §4), with ₽/h from `charge`. Abroad
+    in another currency (`rub=False`: «2 р/ч» in Minsk is Belarusian roubles) `rph` stays null and `charge`
+    keeps the OSM text for the engine to read in the country's currency."""
     from verst_planner.parking import charge_per_hour
 
     cells = {(int(p["lat"] / COORD_SCALE // 0.02), int(p["lon"] / COORD_SCALE // 0.02)) for p in pois}
-    lat, lon, rph = [], [], []
+    lat, lon, rph, charge = [], [], [], []
     for x in sorted(parking, key=lambda x: x["osm"]):
         c = (int(x["lat"] // 0.02), int(x["lon"] // 0.02))
         if not any((c[0] + a, c[1] + b) in cells for a in (-1, 0, 1) for b in (-1, 0, 1)):
             continue
         lat.append(to_coord(x["lat"]))
         lon.append(to_coord(x["lon"]))
-        rph.append(charge_per_hour(x.get("charge")))
-    return {"lat": lat, "lon": lon, "rph": rph}
+        rph.append(charge_per_hour(x.get("charge")) if rub else None)
+        charge.append(x.get("charge"))
+    return {"lat": lat, "lon": lon, "rph": rph} if rub else {"lat": lat, "lon": lon, "rph": rph, "charge": charge}
 
 
 def write(docs: dict[str, dict[str, Any]], out: Path) -> dict[str, int]:
@@ -1065,7 +1223,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, default=RESOURCES)
     ap.add_argument("--version", default="dev")
     ap.add_argument("--built-at", default="")
+    ap.add_argument("--country", default=None, help="catalogue country (countries.py); default: Russia")
     args = ap.parse_args(argv)
+    from countries import get
+
     from verst_planner.domain.errors import OpeningHoursParseError
     from verst_planner.hours import parse
 
@@ -1076,7 +1237,7 @@ def main(argv: list[str] | None = None) -> int:
             return False
         return True
 
-    docs = build(args.raw, args.version, args.built_at, hours_ok)
+    docs = build(args.raw, args.version, args.built_at, hours_ok, get(args.country))
     sizes = write(docs, args.out)
     summary = {
         "towns": docs["towns"]["n"],

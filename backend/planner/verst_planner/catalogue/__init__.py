@@ -63,6 +63,14 @@ FILES = {
 OPTIONAL_FILES = frozenset({"food"})
 """Files an older catalogue does not have (read as empty: the walk then says there is no such data yet)."""
 
+# CEO 29.10: named OSM parks and gardens with their area, for the walk «парки» (`tools/data/build_parks.py`).
+# A separate file, not in FILES: it ships on its own and `load_packaged` does not read it yet. `town` indexes
+# `catalogue_towns` of the build whose sha256 the document names (`townsSha256`); `area` is in m²; `poi` is
+# the `catalogue_pois` id of the same park or null.
+PARKS_FILE = "catalogue_parks.json.gz"
+PARK_KINDS = ("park", "garden")
+PARK_COLS = ("id", "name", "kind", "lat", "lon", "town", "area", "poi", "hours")
+
 
 class CatalogueError(Exception):
     """Missing or malformed catalogue resources (`NO_CATALOGUE` at the bridge)."""
@@ -401,6 +409,9 @@ __all__ = [
     "FILES",
     "FOOD_COLS",
     "FOOD_KINDS",
+    "PARKS_FILE",
+    "PARK_COLS",
+    "PARK_KINDS",
     "POI_COLS",
     "POI_KINDS",
     "TOWN_COLS",

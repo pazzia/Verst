@@ -1,0 +1,330 @@
+# CEO 29.10 (trips abroad, wave 1): the place catalogues of the neighbour countries Russians drive to — Belarus,
+# Kazakhstan, Georgia, Abkhazia, Armenia, Azerbaijan, Uzbekistan, Kyrgyzstan, Turkey — built by the Russian
+# pipeline with `--country` (backend/planner/tools/data/countries.py), plus the parks of the Russian catalogue
+# (catalogue_parks.json.gz, a separate file that ships on its own).
+#
+# The abroad catalogues are planned on the server only: they go to backend/planner/abroad/<cc>/, outside the
+# `verst_planner` package that the APK packs (android/app/build.gradle.kts stages verst_planner/** only;
+# tools/ci/diagnose.py `apk` fails the Android build if an `abroad/` entry ever reaches the APK).
+#
+# One job per country (Wikidata: towns, POIs, classes, country/regions/time zones; ru Wikipedia and Wikivoyage;
+# the country's Geofabrik extract: bars, food, parks, OSM POIs, paid parking; Commons credits and photo sizes),
+# at most 3 at a time (one Wikidata client each, 1 request/s, the User-Agent of http_util.py). Then one job
+# publishes everything.
+#
+# Trigger from a working branch (ccr-*): edit backend/planner/tools/data/data-abroad.request and push. Optional
+# lines in that file: `countries: BY KZ` (default: all nine) and `ru-parks: no` (default: yes).
+# Once this file is on the default branch also: Actions → data-abroad → Run workflow, or
+#   gh workflow run data-abroad.yml --ref main -f countries="GE AB"
+# Result: bot/data-abroad-<run_number> (backend/planner/abroad/**, abroad.lock, the Russian catalogue_parks and
+# its lock, report-abroad/) to merge, and bot/raw-abroad-<run_number> (the raw responses per country, ODbL 1.0)
+# to rebuild the same catalogues anywhere (build_catalogue.py RAW --country CC; see docs/plan/abroad-wave1-data.md).
+name: data-abroad
+on:
+  push:
+    branches: ["ccr-*", data-abroad-request]
+    paths: [backend/planner/tools/data/data-abroad.request]
+  workflow_dispatch:
+    inputs:
+      countries:
+        description: "Catalogue countries (countries.py codes, space-separated)"
+        default: "BY KZ GE AB AM AZ UZ KG TR"
+        required: true
+      ru_parks:
+        description: "Also build catalogue_parks.json.gz for the Russian catalogue (yes/no)"
+        default: "yes"
+        required: true
+      version:
+        description: "Catalogue version (empty: wd-<UTC date>-abroad<run number>)"
+        default: ""
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-abroad
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash   # -eo pipefail, so `| tee` keeps the exit code
+
+env:
+  T: backend/planner/tools/data
+  UA: "VerstDataBot/0.3 (+https://github.com/pazzia/Verst; data pipeline)"   # = http_util.USER_AGENT
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+      ru_parks: ${{ steps.m.outputs.ru_parks }}
+      version: ${{ steps.m.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: m
+        env:
+          IN_COUNTRIES: ${{ inputs.countries }}
+          IN_RU_PARKS: ${{ inputs.ru_parks }}
+          IN_VERSION: ${{ inputs.version }}
+        run: |
+          REQ=$T/data-abroad.request
+          COUNTRIES="${IN_COUNTRIES:-$(sed -n 's/^countries:[[:space:]]*//p' "$REQ" | head -1)}"
+          COUNTRIES="${COUNTRIES:-BY KZ GE AB AM AZ UZ KG TR}"
+          RU_PARKS="${IN_RU_PARKS:-$(sed -n 's/^ru-parks:[[:space:]]*//p' "$REQ" | head -1)}"
+          VERSION="${IN_VERSION:-wd-$(date -u +%Y%m%d)-abroad${{ github.run_number }}}"
+          # every code must be one of countries.py (a typo fails here, not after an hour of fetching)
+          python3 - "$COUNTRIES" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          sys.path.insert(0, "backend/planner/tools/data")
+          from countries import WAVE1
+          known = {c.code for c in WAVE1}
+          codes = sys.argv[1].upper().split()
+          bad = [c for c in codes if c not in known]
+          assert codes and not bad, f"unknown countries {bad}; known: {sorted(known)}"
+          print("matrix=" + json.dumps({"cc": codes}))
+          PY
+          [ "${RU_PARKS:-yes}" = "no" ] && echo "ru_parks=no" >> "$GITHUB_OUTPUT" || echo "ru_parks=yes" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+  country:
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 3   # Wikidata Query Service: a few polite clients, never a burst
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      CC: ${{ matrix.cc }}
+      RAW: ${{ github.workspace }}/data-raw
+      FIRST: ${{ github.workspace }}/data-first
+      VERSION: ${{ needs.plan.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install "pymorphy3==2.0.2" "pymorphy3-dicts-ru==2.4.417150.4580142"
+          sudo apt-get install -y -qq osmium-tool >/dev/null
+          CCL=$(echo "$CC" | tr '[:upper:]' '[:lower:]')
+          echo "CCL=$CCL" >> "$GITHUB_ENV"
+          echo "OUT=$GITHUB_WORKSPACE/out/$CCL" >> "$GITHUB_ENV"
+          mkdir -p "$RAW" "$FIRST" "$GITHUB_WORKSPACE/out/$CCL" "$GITHUB_WORKSPACE/out/report/$CCL"
+      - name: Country, regions and time zones (Wikidata; fails on a wrong country id)
+        run: python3 $T/fetch_wikidata.py country "$RAW" --country "$CC" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Wikidata class ids (ADR-0012 §1 check + the abroad classes)
+        id: classes
+        continue-on-error: true
+        run: python3 $T/fetch_wikidata.py classes "$RAW" --country "$CC" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Towns (Wikidata; the capital must be there)
+        run: python3 $T/fetch_wikidata.py towns "$RAW" --country "$CC" 2>&1 | tee -a "$RAW/log.txt"
+      - name: POIs (Wikidata, one around-query per town)
+        run: python3 $T/fetch_wikidata.py pois "$RAW" --country "$CC" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Name forms (pymorphy3; Russian labels only)
+        run: python3 $T/inflect.py "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Class trees (kinds, excludes)
+        run: python3 $T/fetch_extras.py classes "$RAW" "$CC" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Wikidata P31, heritage labels, ru wiki/voyage titles
+        run: python3 $T/fetch_extras.py wikidata "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: ru Wikipedia extracts and page images
+        run: python3 $T/fetch_extras.py wikipedia "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: ru Wikivoyage listings (dump)
+        continue-on-error: true
+        run: |
+          curl -fsSL --retry 3 -A "$UA" -o "$RUNNER_TEMP/voy.xml.bz2" \
+            https://dumps.wikimedia.org/ruwikivoyage/latest/ruwikivoyage-latest-pages-articles.xml.bz2
+          python3 $T/fetch_extras.py voyage "$RAW" "$RUNNER_TEMP/voy.xml.bz2" 2>&1 | tee -a "$RAW/log.txt"
+      - name: OSM bars, food, parks, POIs and paid parking (the country's Geofabrik extract + osmium)
+        timeout-minutes: 90
+        run: |
+          curl -fsSL --retry 3 -A "$UA" -o "$RUNNER_TEMP/index.json" https://download.geofabrik.de/index-v1-nogeom.json
+          GEO=$(python3 -c "import sys; sys.path.insert(0, '$T'); from countries import get; print(get('$CC').geofabrik_iso)")
+          URL=$(python3 $T/geofabrik_url.py "$RUNNER_TEMP/index.json" "$GEO")
+          echo "extract: $URL" | tee -a "$RAW/log.txt"
+          echo "$URL" > "$RAW/osm_extract.txt"
+          curl -fsSL --retry 3 -A "$UA" -o "$RUNNER_TEMP/c.osm.pbf" "$URL"
+          ls -l "$RUNNER_TEMP/c.osm.pbf" | tee -a "$RAW/log.txt"
+          export_seq() {  # NAME FILTER… → $RUNNER_TEMP/NAME.geojsonseq
+            local name=$1; shift
+            osmium tags-filter "$RUNNER_TEMP/c.osm.pbf" "$@" -o "$RUNNER_TEMP/$name.osm.pbf" --overwrite
+            osmium export "$RUNNER_TEMP/$name.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+              -o "$RUNNER_TEMP/$name.geojsonseq" --overwrite
+          }
+          export_seq bars nwr/amenity=bar,pub,biergarten nwr/craft=brewery
+          python3 $T/bars_from_extract.py "$RAW" "$RUNNER_TEMP/bars.geojsonseq" 2>&1 | tee -a "$RAW/log.txt"
+          export_seq food nwr/amenity=restaurant,cafe,fast_food,food_court
+          python3 $T/food_from_extract.py "$RAW" "$RUNNER_TEMP/food.geojsonseq" --abroad 2>&1 | tee -a "$RAW/log.txt"
+          export_seq parks wr/leisure=park,garden
+          python3 $T/parks_from_extract.py "$RAW" "$RUNNER_TEMP/parks.geojsonseq" 2>&1 | tee -a "$RAW/log.txt"
+          export_seq x \
+            nwr/tourism=attraction,museum,viewpoint,zoo,theme_park,gallery,aquarium \
+            nwr/leisure=park,water_park,nature_reserve,playground \
+            nwr/amenity=theatre,parking \
+            nwr/natural=waterfall,peak,cave_entrance,rock,spring,beach \
+            nwr/historic=castle,fort,monument,memorial,manor,ruins,archaeological_site
+          python3 $T/fetch_extras.py osm "$RAW" "$RUNNER_TEMP/x.geojsonseq" --abroad 2>&1 | tee -a "$RAW/log.txt"
+          rm -f "$RUNNER_TEMP"/*.osm.pbf "$RUNNER_TEMP"/*.geojsonseq
+      - name: Commons geosearch near POIs without a photo (at most 1500 per country)
+        timeout-minutes: 40
+        continue-on-error: true  # geosearch.json is written every 500 POIs; a timeout keeps the part found
+        run: python3 $T/fetch_extras.py geosearch "$RAW" 1500 2>&1 | tee -a "$RAW/log.txt"
+      - name: Candidate photos — credits, size and categories
+        timeout-minutes: 60
+        run: |
+          python3 $T/fetch_extras.py candidates "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+          mkdir -p "$RUNNER_TEMP/c"
+          python3 $T/fetch_commons_meta.py "$RUNNER_TEMP/c" "$RAW/candidates.json" 2>&1 | tee -a "$RAW/log.txt"
+          python3 $T/fetch_photo_meta.py "$RUNNER_TEMP/c" "$RAW/candidates.json" 2>&1 | tee -a "$RAW/log.txt"
+          mv "$RUNNER_TEMP/c/credits.json" "$RAW/credits_extra.json"
+          mv "$RUNNER_TEMP/c/photo_meta.json" "$RAW/photo_meta_extra.json"
+      - name: Provenance and first build (to select the photos)
+        run: |
+          python3 - <<'PY'
+          import datetime, json, os
+          json.dump({"wikidata": "query.wikidata.org", "osm": open(os.environ["RAW"] + "/osm_extract.txt").read().strip(),
+                     "commons": "commons.wikimedia.org", "wikipedia": "ru.wikipedia.org", "wikivoyage": "ru.wikivoyage.org",
+                     "fetchedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+                     "run": os.environ["GITHUB_RUN_ID"], "country": os.environ["CC"], "workflow": "data-abroad.yml"},
+                    open(os.environ["RAW"] + "/sources.json", "w"), ensure_ascii=False)
+          PY
+          python3 $T/build_catalogue.py "$RAW" --out "$FIRST" --country "$CC"
+      - name: Photo credits, size and categories of the first build (Commons)
+        run: |
+          python3 $T/fetch_commons_meta.py "$RAW" "$FIRST" 2>&1 | tee -a "$RAW/log.txt"
+          python3 $T/fetch_photo_meta.py "$RAW" "$FIRST" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Final build, parks and the country's lock
+        run: |
+          python3 $T/build_catalogue.py "$RAW" --out "$OUT" --country "$CC" \
+            --version "$VERSION" --built-at "$(date -u +%Y-%m-%d)" 2>&1 | tee -a "$RAW/log.txt"
+          python3 $T/build_parks.py "$RAW" "$OUT" --country "$CC" --lock "$OUT/parks.lock.json" 2>&1 | tee -a "$RAW/log.txt"
+          python3 $T/write_lock.py "$RAW" "$OUT" "$OUT/lock.json"
+          python3 - <<'PY' | tee -a "$RAW/log.txt"
+          import gzip, json, os
+          meta = json.load(gzip.open(os.environ["OUT"] + "/catalogue_meta.json.gz"))
+          print("tzCheck:", json.dumps({k: meta["tzCheck"][k] for k in ("checked", "ok", "mismatches")}))
+          print("regions:", json.dumps(meta["regions"], ensure_ascii=False))
+          if not meta["tzCheck"]["ok"]:
+              print(f"::warning::{os.environ['CC']}: region zones disagree with Wikidata P421: {meta['tzCheck']['mismatches']}")
+          PY
+      - name: Report and raw responses
+        if: ${{ !cancelled() }}
+        run: |
+          cp -f "$RAW"/class_check.json "$RAW"/country_check.json "$RAW"/forms_report.json "$RAW"/pois_failed.json \
+            "$RAW"/log.txt "$GITHUB_WORKSPACE/out/report/$CCL/" 2>/dev/null || true
+          tar -C "$RAW" -czf "$GITHUB_WORKSPACE/raw-$CCL.tar.gz" --exclude log.txt .
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: abroad-${{ matrix.cc }}
+          path: |
+            out/
+            raw-*.tar.gz
+          retention-days: 30
+      - name: Fail when the class check failed
+        if: ${{ steps.classes.outcome == 'failure' }}
+        run: |
+          cat "$RAW/class_check.json"
+          exit 1
+
+  ru-parks:
+    needs: plan
+    if: ${{ needs.plan.outputs.ru_parks == 'yes' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      RAW: ${{ github.workspace }}/data-raw
+      RES: backend/planner/verst_planner/resources
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Parks of the shipped Russian catalogue (Geofabrik russia-latest + osmium)
+        timeout-minutes: 75
+        run: |
+          sudo apt-get install -y -qq osmium-tool >/dev/null
+          mkdir -p "$RAW" ru-parks
+          curl -fsSL --retry 3 -A "$UA" -o "$RUNNER_TEMP/ru.osm.pbf" https://download.geofabrik.de/russia-latest.osm.pbf
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" wr/leisure=park,garden -o "$RUNNER_TEMP/parks.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/parks.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/parks.geojsonseq" --overwrite
+          python3 $T/parks_from_extract.py "$RAW" "$RUNNER_TEMP/parks.geojsonseq" --catalogue "$RES" 2>&1 | tee "$RAW/log.txt"
+          python3 $T/build_parks.py "$RAW" "$RES" --lock "$T/catalogue_parks.lock" 2>&1 | tee -a "$RAW/log.txt"
+          cp "$RES/catalogue_parks.json.gz" "$T/catalogue_parks.lock" ru-parks/
+          gzip -9n -c "$RAW/parks.json" > ru-parks/parks.json.gz
+          cp "$RAW/log.txt" ru-parks/
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: ru-parks
+          path: ru-parks/
+          retention-days: 30
+
+  publish:
+    needs: [plan, country, ru-parks]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      ABROAD: backend/planner/abroad
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: abroad-*
+          merge-multiple: true
+          path: dl
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: ru-parks
+          path: dl/ru-parks
+      - name: Assemble the catalogues and the lock
+        run: |
+          ls -R dl | head -100
+          mkdir -p "$ABROAD" "$T/report-abroad"
+          for d in dl/out/*/; do
+            cc=$(basename "$d")
+            [ "$cc" = report ] && continue
+            mkdir -p "$ABROAD/$cc"
+            cp -f "$d"/catalogue_*.json.gz "$d"/lock.json "$d"/parks.lock.json "$ABROAD/$cc/" 2>/dev/null || true
+          done
+          python3 $T/write_lock.py abroad "$ABROAD" "$ABROAD/abroad.lock"
+          rm -f "$ABROAD"/*/lock.json "$ABROAD"/*/parks.lock.json
+          cp -rf dl/out/report/. "$T/report-abroad/" 2>/dev/null || true
+          if [ -f dl/ru-parks/catalogue_parks.json.gz ]; then
+            cp -f dl/ru-parks/catalogue_parks.json.gz backend/planner/verst_planner/resources/
+            cp -f dl/ru-parks/catalogue_parks.lock "$T/"
+            mkdir -p "$T/report-abroad/ru-parks" && cp -f dl/ru-parks/log.txt "$T/report-abroad/ru-parks/"
+          fi
+          du -ab "$ABROAD" | sort -n | tail -40 | tee "$T/report-abroad/sizes.txt"
+          {
+            echo "### data-abroad ${{ needs.plan.outputs.version }}"
+            echo '```'
+            python3 -c "import json; d=json.load(open('$ABROAD/abroad.lock')); print(json.dumps({c: {'counts': v['counts'], 'bytes': v['totalBytes'], 'parks': (v.get('parks') or {}).get('count')} for c, v in d['countries'].items()}, indent=1)); print('total bytes', d['totalBytes'])"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Push to bot/data-abroad-${{ github.run_number }} and bot/raw-abroad-${{ github.run_number }}
+        run: |
+          git config user.name "verst-ci"
+          git config user.email "verst-ci@users.noreply.github.com"
+          git checkout -b "bot/data-abroad-${{ github.run_number }}"
+          git add -f "$ABROAD" "$T/report-abroad"
+          git add -f backend/planner/verst_planner/resources/catalogue_parks.json.gz "$T/catalogue_parks.lock" 2>/dev/null || true
+          git commit -m "data: catalogues abroad (wave 1) and Russian parks, run ${{ github.run_id }}" \
+                     -m "Generated by .github/workflows/data-abroad.yml; see backend/planner/abroad/abroad.lock." || true
+          git push origin "bot/data-abroad-${{ github.run_number }}"
+          # The raw responses per country (OpenStreetMap parts: ODbL 1.0), to rebuild the same catalogues anywhere.
+          git checkout -q --orphan "bot/raw-abroad-${{ github.run_number }}"
+          git rm -rq --cached . && git clean -fdq -e dl
+          mkdir -p raw
+          cp dl/raw-*.tar.gz raw/ 2>/dev/null || true
+          cp dl/ru-parks/parks.json.gz raw/ru-parks.json.gz 2>/dev/null || true
+          git add -f raw
+          git commit -qm "data: raw responses of the catalogues abroad, run ${{ github.run_id }} (ODbL 1.0 for the OSM parts)"
+          git push origin "bot/raw-abroad-${{ github.run_number }}"

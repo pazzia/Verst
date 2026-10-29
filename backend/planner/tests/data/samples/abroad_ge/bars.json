@@ -1,0 +1,48 @@
+[
+ {
+  "osm": "n7001",
+  "name": "Пивной тест",
+  "lat": 41.7001,
+  "lon": 44.8001,
+  "tags": {
+   "name": "Пивной тест",
+   "amenity": "pub"
+  },
+  "townQid": "Q900201"
+ },
+ {
+  "osm": "n7002",
+  "name": "ლუდის ბარი",
+  "lat": 41.7002,
+  "lon": 44.8002,
+  "tags": {
+   "name": "ლუდის ბარი",
+   "name:en": "Beer Test Bar",
+   "amenity": "bar"
+  },
+  "townQid": "Q900201"
+ },
+ {
+  "osm": "n7003",
+  "name": "ბარი",
+  "lat": 41.7003,
+  "lon": 44.8003,
+  "tags": {
+   "name": "ბარი",
+   "name:ru": "Тест-бар",
+   "amenity": "bar"
+  },
+  "townQid": "Q900201"
+ },
+ {
+  "osm": "n7004",
+  "name": "ღვინო",
+  "lat": 41.7004,
+  "lon": 44.8004,
+  "tags": {
+   "name": "ღვინო",
+   "amenity": "bar"
+  },
+  "townQid": "Q900201"
+ }
+]
