@@ -36,6 +36,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import app.verst.core.model.DefaultOrigin
 import app.verst.core.model.EngineJson
 import app.verst.core.model.EngineResult
@@ -1637,8 +1638,9 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("settings.language.RU").assertIsSelected()
         compose.onNodeWithTag("settings.storage.cloud").assertIsNotEnabled()
         assertTrue(compose.onAllNodesWithText("0.1.147", substring = true).fetchSemanticsNodes().isNotEmpty())
-        compose.onNodeWithTag("settings.currency.EUR").performScrollTo().performClick()
-        compose.onNodeWithTag("settings.theme.DAY").performScrollTo().performClick()
+        // the «Навигация» section pushed these below the fold: a click by semantics, not by the touch position
+        compose.onNodeWithTag("settings.currency.EUR").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        compose.onNodeWithTag("settings.theme.DAY").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         assertEquals(listOf("currency:EUR", "theme:DAY"), spy.calls)
         assertTrue(compose.onAllNodesWithTag("settings.restart").fetchSemanticsNodes().isEmpty())
         // acceptance 28.10: the screen is «Настройки», the car is set here (traveller К4)

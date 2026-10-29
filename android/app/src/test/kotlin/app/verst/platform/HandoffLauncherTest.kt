@@ -63,9 +63,9 @@ class HandoffLauncherTest {
         assertEquals(links.web, i.dataString)
         assertEquals(true, i.categories?.contains(Intent.CATEGORY_BROWSABLE))
     }
-    /** CEO 29.10: Google Карты get the https link in their own app; without it the same link goes to the browser. */
+    /** CEO 29.10: Google Карты get the https link in their own app. */
     @Test
-    fun googleMapsAppElseTheBrowser() {
+    fun googleMapsApp() {
         val url = NaviLinks.googleRoute(listOf(app.verst.core.model.LatLon(55.7558, 37.6173), app.verst.core.model.LatLon(57.6261, 39.8845)))
         val a = activity(NaviLinks.GOOGLE_MAPS_PACKAGE)
         val launcher = IntentHandoffLauncher(a)
@@ -74,6 +74,12 @@ class HandoffLauncherTest {
         val i = shadowOf(a).nextStartedActivity
         assertEquals(NaviLinks.GOOGLE_MAPS_PACKAGE, i.`package`)
         assertEquals(url, i.dataString)
+    }
+
+    /** Without Google Карты the same link goes to the browser (one test per package set: the package manager is app-wide). */
+    @Test
+    fun googleMapsElseTheBrowser() {
+        val url = NaviLinks.googleRoute(listOf(app.verst.core.model.LatLon(55.7558, 37.6173), app.verst.core.model.LatLon(57.6261, 39.8845)))
         val b = activity()
         assertEquals(false, IntentHandoffLauncher(b).googleInstalled())
         assertEquals(HandoffTarget.Browser, IntentHandoffLauncher(b).openIn(HandoffApp.GOOGLE, url, url))
@@ -83,12 +89,17 @@ class HandoffLauncherTest {
         assertEquals(true, w.categories?.contains(Intent.CATEGORY_BROWSABLE))
     }
 
-    /** Яндекс Карты chosen in the sheet: the app with its link, else the web route. */
+    /** Яндекс Карты chosen in the sheet: the app with its link. */
     @Test
-    fun yandexMapsAppElseTheWebRoute() {
+    fun yandexMapsApp() {
         val a = activity(NaviLinks.MAPS_PACKAGE)
         assertEquals(HandoffTarget.Maps, IntentHandoffLauncher(a).openIn(HandoffApp.MAPS, links.maps, links.web))
         assertEquals(links.maps, shadowOf(a).nextStartedActivity.dataString)
+    }
+
+    /** No Яндекс Карты (only the navigator): the web route. */
+    @Test
+    fun yandexMapsElseTheWebRoute() {
         val b = activity(NaviLinks.NAVI_PACKAGE)
         assertEquals(HandoffTarget.Browser, IntentHandoffLauncher(b).openIn(HandoffApp.MAPS, links.maps, links.web))
         assertEquals(links.web, shadowOf(b).nextStartedActivity.dataString)
