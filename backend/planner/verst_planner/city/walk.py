@@ -225,8 +225,13 @@ def parse_input(d: dict[str, Any], tz_now_local: datetime) -> WalkInput:
 
 def weights_for(inp: WalkInput) -> dict[str, float]:
     if inp.preset == "custom":
-        return custom_weights(inp.interests, inp.widened)
-    return dict(PRESET_TABLE[inp.preset].weights)
+        w = custom_weights(inp.interests, inp.widened)
+    else:
+        w = dict(PRESET_TABLE[inp.preset].weights)
+    if not inp.children and "playground" in w:
+        # CEO 29.10: «парки» for two adults in Фрязино gave three children's playgrounds
+        w["playground"] = 0.0
+    return w
 
 
 def caps_for(inp: WalkInput) -> dict[str, int]:

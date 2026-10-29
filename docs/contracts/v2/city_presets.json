@@ -91,7 +91,7 @@
     {
      "preset": "custom",
      "available": true,
-     "count": 54,
+     "count": 51,
      "startAt": "2026-10-23T09:00",
      "startsTomorrow": false,
      "defaultDurationMin": 240,
