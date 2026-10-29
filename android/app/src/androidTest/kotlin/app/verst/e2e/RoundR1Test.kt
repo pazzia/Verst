@@ -34,6 +34,8 @@ import org.junit.runner.RunWith
 import app.verst.nav.closeHandoffSheet
 import app.verst.nav.isBooked
 import app.verst.nav.navigatorInstalled
+import app.verst.nav.preferredMaps
+import app.verst.nav.HandoffApp
 
 /**
  * Sprint 3 round R1 on the device: focus restore (CEO 2.1), the navigator hand-off links (CEO 4) and the GPS
@@ -166,8 +168,11 @@ class RoundR1Test {
         assertTrue(dayLinks.maps!!.startsWith("yandexmaps://maps.yandex.ru/?rtext="))
         assertTrue(dayLinks.navigatorNext!!.startsWith("yandexnavi://build_route_on_map?lat_to="))
         assertTrue(dayLinks.web!!.startsWith("https://yandex.ru/maps/?rtext="))
-        // unsigned: Карты first with the whole day («весь день»)
-        compose.onNodeWithTag("handoff.maps.badge", useUnmergedTree = true).assertExists()
+        // CEO 29.10: the preferred maps app first with its badge (Яндекс Карты in Russia, Google Карты abroad — the
+        // emulator's network may report another country), the Навигатор last; Яндекс Карты get the whole day
+        val google = flow.preferredMaps == HandoffApp.GOOGLE
+        compose.onNodeWithTag(if (google) "handoff.google.badge" else "handoff.maps.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.google", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("handoff.maps", useUnmergedTree = true).performClick()
         compose.waitUntil(5_000) { flow.lastHandoff != null }
         val (links, target) = flow.lastHandoff!!
@@ -176,8 +181,23 @@ class RoundR1Test {
         assertEquals(if (mapsApp) HandoffTarget.MapsDryRun else HandoffTarget.BrowserDryRun, target)
         assertEquals(dayLinks.maps, links.maps)
         assertEquals(dayLinks.web, links.web)
-        // «До след.» → the Навигатор gets the next point only
+        // «Вести по картам»: the preferred maps app straight away, every point of the day (no sheet, no Навигатор)
+        val beforeCta = flow.lastHandoff
         compose.onNodeWithTag("road.handoff", useUnmergedTree = true).performScrollTo().performClick()
+        compose.waitUntil(10_000) { flow.lastHandoff !== beforeCta }
+        val (ctaLinks, ctaTarget) = flow.lastHandoff!!
+        Log.i("VerstE2e", "handoff cta $ctaTarget maps=${ctaLinks.maps}")
+        val ctaInstalled = if (google) flow.handoffLauncher?.googleInstalled() == true else flow.handoffLauncher?.mapsInstalled() == true
+        val ctaExpected = when {
+            !ctaInstalled -> HandoffTarget.BrowserDryRun // no maps apps on the emulator
+            google -> HandoffTarget.GoogleDryRun
+            else -> HandoffTarget.MapsDryRun
+        }
+        assertEquals(ctaExpected, ctaTarget)
+        assertTrue(ctaLinks.maps!!, ctaLinks.maps!!.startsWith(if (google) "https://www.google.com/maps/dir/?api=1" else "yandexmaps://maps.yandex.ru/?rtext="))
+        assertTrue(flow.handoffSheet == null)
+        // a long-press opens the sheet; «До след.» → the Навигатор gets the next point only
+        compose.onNodeWithTag("road.handoff", useUnmergedTree = true).performScrollTo().performTouchInput { longClick() }
         waitTag("handoff")
         compose.waitUntil(10_000) { flow.handoffSheet?.handoff != null }
         compose.onNodeWithTag("handoff.tab.next", useUnmergedTree = true).performClick()
@@ -203,7 +223,14 @@ class RoundR1Test {
         compose.waitUntil(5_000) { flow.stopMenu == null }
         val from = flow.lastHandoff!!.first
         val engineStop = kotlinx.coroutines.runBlocking { gateway.handoff(r.tripJson, app.verst.core.model.HandoffArgs.fromStop(stop.id)) }
-        assertEquals((engineStop as app.verst.core.model.EngineResult.Ok).value.parts.first().links, from)
+        val stopPart = (engineStop as app.verst.core.model.EngineResult.Ok).value.parts.first()
+        // CEO 29.10: from this stop to the end of its day in the preferred maps app (all the engine's points)
+        if (google) {
+            assertEquals(NaviLinks.googleOf(stopPart.points, app.verst.core.model.RouteMode.DRIVE), from.maps)
+        } else {
+            assertEquals(stopPart.links.maps, from.maps)
+            assertEquals(stopPart.links.web, from.web)
+        }
 
         // Offline without the Карты app: the button keeps its look; the tap explains it (5.13 §3).
         compose.runOnUiThread { flow.setOffline(true) }

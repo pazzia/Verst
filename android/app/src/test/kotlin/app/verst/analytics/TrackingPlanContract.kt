@@ -82,7 +82,7 @@ object TrackingPlanContract {
         "stop_id" to token,
         "price_bucket" to oneOf("<3k", "3-5k", "5-8k", "8-12k", ">12k", "unknown"),
         "place_id" to token,
-        "app" to oneOf("yandex_navigator", "yandex_maps", "2gis", "web"),
+        "app" to oneOf("yandex_navigator", "yandex_maps", "google_maps", "2gis", "web"),
         "day" to count,
         "start_date" to { v: Any -> v is String && DATE.matches(v) },
         "channel" to oneOf("messenger", "social", "other", "unknown"),

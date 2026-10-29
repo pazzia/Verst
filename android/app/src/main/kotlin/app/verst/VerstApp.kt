@@ -42,6 +42,7 @@ class VerstApp : Application(), coil.ImageLoaderFactory {
         ) { engine.restart() }.also {
             it.locator = AndroidLocator(this)
             it.addressFallback = app.verst.platform.AndroidGeocoder(this)
+            it.countrySource = app.verst.platform.TelephonyCountrySource(this) // CEO 29.10: the maps app by country
         }
     }
 

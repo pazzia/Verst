@@ -19,10 +19,12 @@ import app.verst.VerstApp
 import app.verst.core.model.AppLanguage
 import app.verst.core.model.AppTheme
 import app.verst.core.model.Car
+import app.verst.core.model.MapsChoice
 import app.verst.core.model.TripStorage
 import app.verst.core.ui.theme.Palette
 import app.verst.engine.EngineStatus
 import app.verst.nav.VerstFlow
+import app.verst.nav.phoneCountry
 import app.verst.settings.AppPrefs
 import app.verst.settings.Themes
 import kotlinx.coroutines.launch
@@ -52,6 +54,7 @@ fun SettingsRoute(flow: VerstFlow) {
         themePending = Themes.isDay(ctx, s.theme) != Palette.day, copied = copied,
         serverUrl = AppPrefs.serverUrl, serverChecking = serverChecking, serverCheck = serverCheck, lastPlan = app.gateway.lastPlan,
         serverConsentAsk = consentAsk, serverForgotten = forgotten,
+        country = flow.phoneCountry,
     )
     SettingsScreen(
         ui,
@@ -144,6 +147,10 @@ fun SettingsRoute(flow: VerstFlow) {
 
             override fun avoidTolls(on: Boolean) {
                 AppPrefs.update { it.copy(avoidTolls = on) }
+            }
+
+            override fun mapsApp(choice: MapsChoice) {
+                flow.mapsChoiceWrite(choice)
             }
 
             override fun checkServer() {

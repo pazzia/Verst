@@ -61,10 +61,22 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     app.verst.nav.Toast.EngineFailed -> stringResource(R.string.waybill_sync_failed)
     app.verst.nav.Toast.NeedInternet -> stringResource(R.string.common_need_internet)
     app.verst.nav.Toast.TripDeleted -> stringResource(R.string.trips_deleted)
-    is app.verst.nav.Toast.HandoffWeb -> stringResource(if (t.walk) R.string.handoff_toast_web_walk else R.string.handoff_toast_web)
+    is app.verst.nav.Toast.HandoffWeb -> stringResource(
+        when {
+            t.google -> R.string.handoff_toast_web_google
+            t.walk -> R.string.handoff_toast_web_walk
+            else -> R.string.handoff_toast_web
+        },
+    )
     app.verst.nav.Toast.HandoffOffline -> stringResource(R.string.handoff_offline)
     app.verst.nav.Toast.HandoffFailed -> stringResource(R.string.handoff_failed)
-    is app.verst.nav.Toast.HandoffOpen -> stringResource(if (t.navi) R.string.handoff_open_navi else R.string.handoff_open_maps)
+    is app.verst.nav.Toast.HandoffOpen -> stringResource(
+        when (t.app) {
+            app.verst.nav.HandoffApp.NAVI -> R.string.handoff_open_navi
+            app.verst.nav.HandoffApp.MAPS -> R.string.handoff_open_maps
+            app.verst.nav.HandoffApp.GOOGLE -> R.string.handoff_open_google
+        },
+    )
     is app.verst.nav.Toast.LocationDenied -> stringResource(R.string.loc_denied_plate, t.town)
     app.verst.nav.Toast.LocationBlocked -> stringResource(R.string.loc_blocked)
     is app.verst.nav.Toast.LocationTimeout -> stringResource(R.string.loc_timeout, t.town)

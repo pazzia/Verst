@@ -6,12 +6,29 @@ import app.verst.core.model.dto.StopDto
 import app.verst.core.model.NaviLinks
 import app.verst.core.model.LatLon
 import app.verst.core.model.HandoffArgs
+import app.verst.core.model.MapsChoice
+import app.verst.core.model.MapsCountries
+import app.verst.core.model.RouteMode
 import app.verst.core.model.dto.HandoffDto
 import app.verst.core.model.dto.HandoffLinksDto
 import app.verst.analytics.AnalyticsEvent
 import kotlinx.coroutines.launch
 
 /** HYG-02: Navigator hand-off (5.13, ADR-0014) and its sheet (5.13 §5) — `VerstFlow` extensions (the state stays in the class). */
+
+// ---- which maps app (CEO 29.10)
+
+/** The phone's country now (ISO alpha-2, upper case), or null when unknown. */
+val VerstFlow.phoneCountry: String? get() = MapsCountries.normalize(countrySource?.country())
+
+/**
+ * CEO 29.10: the maps app that gets the day's route — the user's «Навигация» choice, else Яндекс Карты where Яндекс
+ * routes with confidence (and when the country is unknown), Google Карты elsewhere.
+ */
+val VerstFlow.preferredMaps: HandoffApp get() = MapsCountries.preferred(mapsChoiceRead(), phoneCountry).handoffApp
+
+/** The user chose the app in «Настройки» (not the automatic choice by the country). */
+val VerstFlow.mapsChosen: Boolean get() = mapsChoiceRead() != MapsChoice.AUTO
 
 // ---- hand-off (5.13)
 
@@ -32,30 +49,29 @@ fun VerstFlow.closeDayMenu() {
     dayHandoff = null
 }
 
-/** «В навигатор: день N». */
+/** «По картам: день N»: the preferred maps app with every point of the day. */
 fun VerstFlow.dayMenuGo() {
     val h = dayHandoff ?: return
     val day = dayMenu
     dayMenu = null
-    launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false, day = h.day ?: day)
+    launchApp(preferredMaps, if (h.day == null && day != null) h.copy(day = day) else h, next = false)
 }
 
-/** «Вести в навигаторе» / a day's «вести»: the remembered app directly, else the sheet on [day]. */
+/**
+ * CEO 29.10 «Вести по картам» (the Road screen's main button): the preferred maps app ([preferredMaps]) opens
+ * directly with every point of [day] in order — no sheet, never the Навигатор with one point.
+ */
 fun VerstFlow.handoff(day: Int) {
-    val app = handoffRememberedApp
-    if (handoffRemember && app != null) {
-        val r = result ?: return
-        val session = tripSession
-        scope.launch {
-            val h = dayHandoffOf(r, day) ?: return@launch
-            if (session == tripSession) launchApp(app, h, next = false)
-        }
-    } else {
-        openHandoffSheet(day)
+    val r = result ?: return
+    val app = preferredMaps
+    val session = tripSession
+    scope.launch {
+        val h = dayHandoffOf(r, day) ?: return@launch
+        if (session == tripSession) launchApp(app, h, next = false)
     }
 }
 
-/** The sheet on [day] (a long-press always opens it, even with «Запомнить выбор»). */
+/** The sheet on [day]: a day's «вести» and a long-press of «Вести по картам» (the choice of the app). */
 fun VerstFlow.openHandoffSheet(day: Int) {
     val r = result ?: return
     handoffSheet = HandoffSheet(day, null, day)
@@ -95,14 +111,22 @@ fun VerstFlow.closeHandoffSheet() {
 
 fun VerstFlow.toggleHandoffRemember() {
     handoffRemember = !handoffRemember
-    if (!handoffRemember) handoffRememberedApp = null
 }
 
-/** A card of the sheet: open that app (and remember it when «Запомнить выбор» is on). */
+/**
+ * A card of the sheet: open that app. With «Запомнить выбор» a maps app becomes the «Навигация» setting (the
+ * Навигатор takes one point, so it is never the default).
+ */
 fun VerstFlow.handoffPick(app: HandoffApp) {
     val cur = handoffSheet ?: return
     val h = cur.handoff ?: return
-    if (handoffRemember) handoffRememberedApp = app
+    if (handoffRemember) {
+        when (app) {
+            HandoffApp.MAPS -> mapsChoiceWrite(MapsChoice.YANDEX)
+            HandoffApp.GOOGLE -> mapsChoiceWrite(MapsChoice.GOOGLE)
+            HandoffApp.NAVI -> Unit
+        }
+    }
     handoffSheet = null
     launchApp(app, h, next = cur.day == null)
     roadFocusSeq += 1
@@ -112,47 +136,66 @@ fun VerstFlow.handoffInstall(app: HandoffApp) {
     handoffLauncher?.openStore(app)
 }
 
-/** The Навигатор / Карты link of [h]: unsigned the Навигатор gets the next point only (ADR-0015 §1). */
-internal fun VerstFlow.launchApp(app: HandoffApp, h: HandoffDto, next: Boolean) {
-    val part = h.parts.firstOrNull() ?: return
+/**
+ * Opens [app] with the hand-off [h] (part [partIndex] of a split walk): Яндекс / Google Карты with every point of
+ * the part, or only to the next point ([next], the «До след.» tab); the Навигатор always to the next point only
+ * (CEO 29.10: without a Яндекс-signed URL it takes one point from us). A maps app that is not installed → the same
+ * route in the browser (offline: «нужен интернет»). [walk]: walking mode (`rtt=pd`, `travelmode=walking`), not
+ * reported to analytics.
+ */
+internal fun VerstFlow.launchApp(app: HandoffApp, h: HandoffDto, next: Boolean, walk: Boolean = false, partIndex: Int = 1) {
+    val part = h.parts.firstOrNull { it.index == partIndex } ?: h.parts.firstOrNull() ?: return
     val l = part.links
+    val mode = if (walk) RouteMode.WALK else RouteMode.DRIVE
     val nextPt = part.next ?: part.points.firstOrNull { it.role != "origin" }
     // a pre-v3 / local hand-off has no `next`: the day's first stop after its start
     val nextMaps = nextPt?.let { runCatching { LatLon(it.lat, it.lon) }.getOrNull() }
         ?: h.day?.let { d -> result?.trip?.daysList?.firstOrNull { it.day == d } }?.stops?.drop(1)
             ?.firstOrNull { it.lat != null && it.lon != null }?.let { runCatching { LatLon(it.lat!!, it.lon!!) }.getOrNull() }
+    val toNext = next && nextMaps != null
     val uri: String?
     val web: String?
     when (app) {
         HandoffApp.NAVI -> {
-            uri = if (next || !handoffSigned) l.navigatorNext ?: nextMaps?.let { NaviLinks.naviRoute(null, it, emptyList()) } else l.navigator
+            uri = l.navigatorNext ?: nextMaps?.let { NaviLinks.naviRoute(null, it, emptyList()) }
             web = null
         }
         HandoffApp.MAPS -> {
-            uri = if (next && nextMaps != null) NaviLinks.mapsAppRoute(listOf(nextMaps)) else l.maps
-            web = if (next && nextMaps != null) NaviLinks.webRoute(listOf(nextMaps)) else l.web
+            uri = if (toNext) NaviLinks.mapsAppRoute(listOfNotNull(nextMaps), mode) else l.maps
+            web = if (toNext) NaviLinks.webRoute(listOfNotNull(nextMaps), mode) else l.web
+        }
+        HandoffApp.GOOGLE -> {
+            // the same https link opens the app (8 waypoints + the destination) or, without it, the browser
+            uri = if (toNext) NaviLinks.googleRoute(listOfNotNull(nextMaps), mode, fromHere = true) else NaviLinks.googleOf(part.points, mode)
+            web = uri
         }
     }
-    val mapsApp = handoffLauncher?.mapsInstalled() == true
-    if (app == HandoffApp.MAPS && !mapsApp && !connectivity.online) {
+    val installed = when (app) {
+        HandoffApp.NAVI -> navigatorInstalled
+        HandoffApp.MAPS -> handoffLauncher?.mapsInstalled() == true
+        HandoffApp.GOOGLE -> handoffLauncher?.googleInstalled() == true
+    }
+    if (app != HandoffApp.NAVI && !installed && !connectivity.online) {
         showToast(Toast.HandoffOffline)
         return
     }
     val target = if (debugHandoffDryRun) {
         when {
             app == HandoffApp.NAVI -> HandoffTarget.NavigatorDryRun
-            mapsApp -> HandoffTarget.MapsDryRun
-            else -> HandoffTarget.BrowserDryRun
+            !installed -> HandoffTarget.BrowserDryRun
+            app == HandoffApp.GOOGLE -> HandoffTarget.GoogleDryRun
+            else -> HandoffTarget.MapsDryRun
         }
     } else {
         handoffLauncher?.openIn(app, uri, web) ?: HandoffTarget.None
     }
-    lastHandoff = HandoffLinksDto(navigator = if (app == HandoffApp.NAVI) uri else null, maps = if (app == HandoffApp.MAPS) uri else null, web = web) to target
-    naviApp(target)?.let { opened -> track { AnalyticsEvent.NavigatorOpened(tripId, opened, h.day) } }
+    lastHandoff = HandoffLinksDto(navigator = if (app == HandoffApp.NAVI) uri else null, maps = if (app != HandoffApp.NAVI) uri else null, web = web) to target
+    if (!walk) naviApp(target)?.let { opened -> track { AnalyticsEvent.NavigatorOpened(tripId, opened, h.day) } }
     when (target) {
-        HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> showToast(Toast.HandoffOpen(navi = true))
-        HandoffTarget.Maps, HandoffTarget.MapsDryRun -> showToast(Toast.HandoffOpen(navi = false))
-        HandoffTarget.Browser, HandoffTarget.BrowserDryRun -> showToast(Toast.HandoffWeb(false))
+        HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> showToast(Toast.HandoffOpen(HandoffApp.NAVI))
+        HandoffTarget.Maps, HandoffTarget.MapsDryRun -> showToast(Toast.HandoffOpen(HandoffApp.MAPS))
+        HandoffTarget.Google, HandoffTarget.GoogleDryRun -> showToast(Toast.HandoffOpen(HandoffApp.GOOGLE))
+        HandoffTarget.Browser, HandoffTarget.BrowserDryRun -> showToast(Toast.HandoffWeb(walk, google = app == HandoffApp.GOOGLE))
         HandoffTarget.None -> showToast(Toast.HandoffFailed)
     }
 }
@@ -176,13 +219,13 @@ fun VerstFlow.closeStopMenu() {
     roadFocusSeq += 1
 }
 
-/** «Открыть в навигаторе отсюда»: from this stop to the end of its day. */
+/** «Вести по картам отсюда»: the preferred maps app from this stop to the end of its day. */
 fun VerstFlow.navigatorFromStop() {
     val h = stopHandoff ?: return
     val day = stopMenu?.day
     stopMenu = null
     stopHandoff = null
-    launchHandoff(h.parts.firstOrNull()?.links ?: return, walk = false, day = day)
+    launchApp(preferredMaps, if (h.day == null && day != null) h.copy(day = day) else h, next = false)
     roadFocusSeq += 1 // back from the app: the row (5.9 §5)
 }
 
@@ -194,17 +237,18 @@ fun VerstFlow.stopMenuReplace() {
     openReplace(s)
 }
 
-/** 5.13 §2: what the car label names (navigator → maps → web), resolved from the installed apps. */
-val VerstFlow.carTarget: HandoffTarget
-    get() = when {
-        handoffLauncher?.navigatorInstalled() == true -> HandoffTarget.Navigator
-        handoffLauncher?.mapsInstalled() == true -> HandoffTarget.Maps
-        else -> HandoffTarget.Browser
-    }
+/** What the car labels name: the preferred maps app ([preferredMaps]), or the browser when it is not installed. */
+val VerstFlow.carTarget: HandoffTarget get() = mapsTarget(preferredMaps)
 
-/** Walk: maps → web. */
-val VerstFlow.walkTarget: HandoffTarget
-    get() = if (handoffLauncher?.mapsInstalled() == true) HandoffTarget.Maps else HandoffTarget.Browser
+/** Walks use the same preference (walking mode). */
+val VerstFlow.walkTarget: HandoffTarget get() = carTarget
+
+/** Where [app] would open now. */
+fun VerstFlow.mapsTarget(app: HandoffApp): HandoffTarget = when (app) {
+    HandoffApp.MAPS -> if (handoffLauncher?.mapsInstalled() == true) HandoffTarget.Maps else HandoffTarget.Browser
+    HandoffApp.GOOGLE -> if (handoffLauncher?.googleInstalled() == true) HandoffTarget.Google else HandoffTarget.Browser
+    HandoffApp.NAVI -> if (navigatorInstalled) HandoffTarget.Navigator else HandoffTarget.None
+}
 
 /** Kept for the R1 callers: the navigator app is installed. */
 val VerstFlow.navigatorInstalled: Boolean get() = handoffLauncher?.navigatorInstalled() ?: false
@@ -212,31 +256,3 @@ val VerstFlow.navigatorInstalled: Boolean get() = handoffLauncher?.navigatorInst
 internal suspend fun VerstFlow.engineHandoff(routeJson: String, options: String): HandoffDto? =
     (gateway.handoff(routeJson, options) as? EngineResult.Ok)?.value?.takeIf { h -> h.parts.isNotEmpty() }
         ?.let { h -> handoffSigner?.sign(h) ?: h }
-
-/**
- * One tap opens the target (no chooser); a web fallback says so; offline without an app → «нужен интернет».
- * [day]: the trip day handed off (ENG-05 `navigator_opened`; walks are not reported).
- */
-internal fun VerstFlow.launchHandoff(links: HandoffLinksDto, walk: Boolean, day: Int? = null) {
-    val resolved = if (walk) walkTarget else carTarget
-    if (resolved == HandoffTarget.Browser && !connectivity.online) {
-        showToast(Toast.HandoffOffline)
-        return
-    }
-    val target = if (debugHandoffDryRun) {
-        when (resolved) {
-            HandoffTarget.Navigator -> HandoffTarget.NavigatorDryRun
-            HandoffTarget.Maps -> HandoffTarget.MapsDryRun
-            else -> HandoffTarget.BrowserDryRun
-        }
-    } else {
-        handoffLauncher?.open(links, walk) ?: HandoffTarget.None
-    }
-    lastHandoff = links to target
-    if (!walk) naviApp(target)?.let { app -> track { AnalyticsEvent.NavigatorOpened(tripId, app, day) } }
-    when (target) {
-        HandoffTarget.Browser -> showToast(Toast.HandoffWeb(walk))
-        HandoffTarget.None -> showToast(Toast.HandoffFailed)
-        else -> Unit
-    }
-}

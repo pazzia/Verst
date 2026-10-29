@@ -11,10 +11,12 @@
          removed so the app never declares it (docs/legal/risk-register.md R-07, SPEC §16: location + internet only). -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
 
-    <!-- S3-R1 hand-off (Android 11+ package visibility): the navigator / maps apps and a browser for the web route. -->
+    <!-- S3-R1 hand-off (Android 11+ package visibility): the navigator / maps apps and a browser for the web route.
+         CEO 29.10: Google Maps too (the default maps app abroad). -->
     <queries>
         <package android:name="ru.yandex.yandexnavi" />
         <package android:name="ru.yandex.yandexmaps" />
+        <package android:name="com.google.android.apps.maps" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="yandexnavi" />

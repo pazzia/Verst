@@ -137,8 +137,10 @@ data class RoadUi(
     /** 5.13 day menu (day number) and its hand-off. */
     val dayMenu: Int? = null,
     val dayHandoff: HandoffDto? = null,
-    /** 5.13 §2: what the car label names (Navigator / Maps / Browser). */
+    /** 5.13 §2: what the car label names (Maps / Google / Browser). */
     val carTarget: HandoffTarget = HandoffTarget.Browser,
+    /** CEO 29.10: the maps app «Вести по картам» opens (Яндекс Карты or Google Карты; the browser names it too). */
+    val maps: app.verst.nav.HandoffApp = app.verst.nav.HandoffApp.MAPS,
     /** S3-R1 focus restore. */
     val focus: RoadFocus = RoadFocus(),
     /** 5.9: an open card. */
@@ -199,7 +201,10 @@ interface RoadActions {
     fun aboutData() = Unit
     fun closeAboutData() = Unit
 
-    /** 5.5 §10.1: «Вести в навигаторе» / a day's «вести» → the hand-off sheet on that day; long-press = always the sheet. */
+    /**
+     * CEO 29.10: «Вести по картам» → the preferred maps app with every point of the day; a day's «вести» and a long-press
+     * of the button → the hand-off sheet on that day (the choice of the app).
+     */
     fun handoff(day: Int) = dayNavigator(day)
     fun handoffSheet(day: Int) = handoff(day)
 
@@ -293,14 +298,14 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
                         Modifier.fillMaxSize().verticalScroll(scroll).testTag("road.list")
                             .onGloballyPositioned { content = it },
                     ) {
-                        Intro(trip, ui.handoffDay, a)
+                        Intro(trip, ui, a)
                         val parkingOn = parkingAware(trip)
                         Column(
                             Modifier.fillMaxWidth().roadSection()
                                 .onGloballyPositioned { c -> content?.let { root -> if (root.isAttached && c.isAttached) section = root.localPositionOf(c, Offset.Zero).y.roundToInt() to c.size.height } },
                         ) {
                             trip.daysList.forEachIndexed { di, d ->
-                                DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0, parkingOn, { a.handoff(d.day) }) { a.handoffSheet(d.day) }
+                                DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0, parkingOn, { a.handoffSheet(d.day) }) { a.handoffSheet(d.day) }
                                 d.stops.forEachIndexed { si, st ->
                                     StopRow(
                                         st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name,
@@ -344,9 +349,9 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
             val r = ui.replace
             if (r != null) ReplaceSheet(r, windowH, a)
             val m = ui.stopMenu
-            if (m != null) StopMenuSheet(m, ui.stopHandoff, ui.carTarget, windowH, a)
+            if (m != null) StopMenuSheet(m, ui.stopHandoff, ui.carTarget, ui.maps, windowH, a)
             val dm = ui.dayMenu
-            if (dm != null) DayMenuSheet(dm, ui.dayHandoff, ui.carTarget, windowH, a)
+            if (dm != null) DayMenuSheet(dm, ui.dayHandoff, ui.carTarget, ui.maps, windowH, a)
             val c = ui.card
             if (c != null) CardSheet(c, windowH, a.card())
             if (ui.aboutData) AboutDataSheet(windowH, a::closeAboutData)
@@ -402,6 +407,7 @@ private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
     s: StopDto,
     handoff: HandoffDto?,
     target: HandoffTarget,
+    maps: app.verst.nav.HandoffApp,
     windowH: androidx.compose.ui.unit.Dp,
     a: RoadActions,
 ) {
@@ -411,7 +417,7 @@ private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
         val items = mutableListOf<@Composable () -> Unit>()
         val handoffRow = s.kind != "fuel" && s.kind != "rest" && s.lat != null && s.lon != null
         if (handoffRow) {
-            items += { HandoffItem(stringResource(R.string.handoff_from_stop), target, handoff?.truncated == true, enabled = handoff != null, tag = "stopmenu.navigator", onClick = a::navigatorFromStop) }
+            items += { HandoffItem(stringResource(R.string.handoff_from_stop), target, handoff?.truncated == true, enabled = handoff != null, tag = "stopmenu.navigator", maps = maps, onClick = a::navigatorFromStop) }
         }
         val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
         if (canReplace) items += { ActionItem(stringResource(R.string.stopmenu_swap), "stopmenu.swap", a::stopMenuReplace) }
@@ -423,30 +429,45 @@ private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
     }
 }
 
-/** 5.13 day menu: «День N» and one item «В навигатор: день N». */
+/** 5.13 day menu: «День N» and one item «По картам: день N». */
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.DayMenuSheet(
     day: Int,
     handoff: HandoffDto?,
     target: HandoffTarget,
+    maps: app.verst.nav.HandoffApp,
     windowH: androidx.compose.ui.unit.Dp,
     a: RoadActions,
 ) {
     BottomSheet(stringResource(R.string.road_day, day), a::closeDayMenu, "daymenu", windowH) {
-        HandoffItem(stringResource(R.string.handoff_day, day), target, handoff?.truncated == true, enabled = handoff != null, tag = "daymenu.go", onClick = a::dayMenuGo)
+        HandoffItem(stringResource(R.string.handoff_day, day), target, handoff?.truncated == true, enabled = handoff != null, tag = "daymenu.go", maps = maps, onClick = a::dayMenuGo)
     }
 }
 
-/** components §22 `HandoffItem`: navigator glyph, title, the target line, the truncated note, ↗ (it leaves the app). */
+/**
+ * components §22 `HandoffItem`: navigator glyph, title, the target line, the truncated note, ↗ (it leaves the app).
+ * The line names where it opens: [maps] (Яндекс / Google Карты) or that app's site in the browser.
+ */
 @Composable
-internal fun HandoffItem(title: String, target: HandoffTarget, truncated: Boolean, enabled: Boolean, tag: String, onClick: () -> Unit) {
+internal fun HandoffItem(
+    title: String,
+    target: HandoffTarget,
+    truncated: Boolean,
+    enabled: Boolean,
+    tag: String,
+    maps: app.verst.nav.HandoffApp = app.verst.nav.HandoffApp.MAPS,
+    onClick: () -> Unit,
+) {
+    val google = maps == app.verst.nav.HandoffApp.GOOGLE
     val line = when (target) {
         HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> stringResource(R.string.handoff_navigator)
         HandoffTarget.Maps, HandoffTarget.MapsDryRun -> stringResource(R.string.handoff_maps_car)
-        else -> stringResource(R.string.handoff_web)
+        HandoffTarget.Google, HandoffTarget.GoogleDryRun -> stringResource(R.string.handoff_google_car)
+        else -> stringResource(if (google) R.string.handoff_google_web else R.string.handoff_web)
     }
     val cd = when (target) {
         HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> stringResource(R.string.handoff_cd_navigator)
+        HandoffTarget.Maps, HandoffTarget.MapsDryRun, HandoffTarget.Google, HandoffTarget.GoogleDryRun -> line
         else -> stringResource(R.string.handoff_cd_web)
     }
     Row(
@@ -604,7 +625,8 @@ private fun TitleSign(trip: TripDto, bearing8: String, modifier: Modifier) {
 }
 
 @Composable
-private fun Intro(trip: TripDto, handoffDay: Int, a: RoadActions) {
+private fun Intro(trip: TripDto, ui: RoadUi, a: RoadActions) {
+    val handoffDay = ui.handoffDay
     val onAbout = a::aboutData
     // S-21 / 5.5 §2.2: L1 at the list top, L2 +6, L3 +8, road column 18 below L3 (padding 4 + margin 14).
     Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -623,8 +645,8 @@ private fun Intro(trip: TripDto, handoffDay: Int, a: RoadActions) {
             InfoChip(crewShort(trip.input.crew.adults, trip.input.crew.children, trip.input.crew.dog))
             InfoChip(stringResource(R.string.road_chip_pace, RuFormat.thousands(trip.input.dailyKm)))
         }
-        // 5.5 §10.1: «Вести в навигаторе» under the chips (a link carries one day → the sheet on today's day)
-        HandoffCta(handoffDay, { a.handoff(handoffDay) }, { a.handoffSheet(handoffDay) }, Modifier.padding(top = 6.dp))
+        // 5.5 §10.1 / CEO 29.10: «Вести по картам» under the chips — today's day in the preferred maps app, every point
+        HandoffCta(handoffDay, { a.handoff(handoffDay) }, { a.handoffSheet(handoffDay) }, Modifier.padding(top = 6.dp), maps = ui.maps, target = ui.carTarget)
         Txt(stringResource(R.string.road_intro), T.body.mdTight, C.text.secondary, Modifier.padding(top = 4.dp))
         // 5.5 §9 (S3-FINAL P1-02): the open-data notice is a muted info line, not a warning plate; with a synthetic
         // route both notes share one line (`route_approx_open_data`)

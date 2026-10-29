@@ -101,4 +101,65 @@ class NaviLinksTest {
         assertTrue(home.web, home.web.contains("rtext=~"))
         assertNull(NaviLinks.fromStop(g02, "nope"))
     }
+    /** CEO 29.10 (C): Google Maps directions — origin, destination, the waypoints in order, driving. */
+    @Test
+    fun googleRouteFormat() {
+        val via = listOf(LatLon(56.3, 38.1), LatLon(56.7, 38.8))
+        assertEquals(
+            "https://www.google.com/maps/dir/?api=1&origin=55.755800,37.617300&destination=57.626100,39.884500" +
+                "&waypoints=56.300000,38.100000%7C56.700000,38.800000&travelmode=driving",
+            NaviLinks.googleRoute(listOf(msk) + via + yar),
+        )
+        // two points: no waypoints at all
+        assertEquals(
+            "https://www.google.com/maps/dir/?api=1&origin=55.755800,37.617300&destination=57.626100,39.884500&travelmode=driving",
+            NaviLinks.googleRoute(listOf(msk, yar)),
+        )
+        // from the phone: no origin, every point but the last is a waypoint; a single point is from the phone too
+        assertEquals(
+            "https://www.google.com/maps/dir/?api=1&destination=57.626100,39.884500&waypoints=55.755800,37.617300&travelmode=driving",
+            NaviLinks.googleRoute(listOf(msk, yar), fromHere = true),
+        )
+        assertEquals("https://www.google.com/maps/dir/?api=1&destination=57.626100,39.884500&travelmode=driving", NaviLinks.googleRoute(listOf(yar)))
+    }
+
+    @Test
+    fun googleRouteThinsToEightWaypointsKeepingOrderAndEnds() {
+        val via = (0 until 20).map { LatLon(50.0 + it / 100.0, 30.0) }
+        val url = NaviLinks.googleRoute(listOf(msk) + via + yar)
+        val wp = url.substringAfter("waypoints=").substringBefore("&").split("%7C")
+        assertEquals(NaviLinks.MAX_GOOGLE_WAYPOINTS, wp.size)
+        assertEquals("50.000000,30.000000", wp.first())
+        assertEquals("50.190000,30.000000", wp.last())
+        assertEquals(wp.sortedBy { it.substringBefore(",").toDouble() }, wp) // order kept
+        assertTrue(url, url.contains("origin=55.755800,37.617300&destination=57.626100,39.884500&"))
+        // from the phone: 8 waypoints + the destination (the app takes 9)
+        val here = NaviLinks.googleRoute(via + yar, fromHere = true)
+        assertFalse(here.contains("origin="))
+        assertEquals(8, here.substringAfter("waypoints=").substringBefore("&").split("%7C").size)
+    }
+
+    @Test
+    fun googleRouteWalkingAndFromHandoffPoints() {
+        assertTrue(NaviLinks.googleRoute(listOf(msk, LatLon(55.76, 37.62)), RouteMode.WALK).endsWith("&travelmode=walking"))
+        val p = { lat: Double, role: String -> app.verst.core.model.dto.HandoffPointDto(lat, 37.6, "x", role) }
+        // the engine's car day «from here»: no origin point → Google starts at the phone
+        val day = NaviLinks.googleOf(listOf(p(55.8, "via"), p(55.9, "destination")), RouteMode.DRIVE)!!
+        assertFalse(day, day.contains("origin="))
+        assertTrue(day, day.contains("destination=55.900000,37.600000&waypoints=55.800000,37.600000&travelmode=driving"))
+        // a car part with an origin starts there
+        assertTrue(NaviLinks.googleOf(listOf(p(55.7, "origin"), p(55.9, "destination")), RouteMode.DRIVE)!!.contains("origin=55.700000,37.600000"))
+        // a later part of a split walk starts at its boundary point, never at the phone
+        val walk = NaviLinks.googleOf(listOf(p(55.7, "via"), p(55.8, "via"), p(55.9, "destination")), RouteMode.WALK)!!
+        assertTrue(walk, walk.contains("origin=55.700000,37.600000&destination=55.900000,37.600000&waypoints=55.800000,37.600000&travelmode=walking"))
+        assertNull(NaviLinks.googleOf(emptyList(), RouteMode.DRIVE))
+    }
+
+    @Test
+    fun localDayHandoffKnowsWhereItStarts() {
+        val d1 = g02.daysList.first()
+        assertFalse(NaviLinks.day(d1)!!.fromHere)
+        val end = g02.daysList.last().stops.last()
+        assertTrue(NaviLinks.fromStop(g02, end.id)!!.fromHere)
+    }
 }

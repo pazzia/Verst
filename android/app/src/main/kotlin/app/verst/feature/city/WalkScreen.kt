@@ -117,6 +117,8 @@ data class WalkUi(
     /** `NOT_ENOUGH_POIS` after a filter change: the plate replaces the column. */
     val few: WalkFew? = null,
     val excludedCount: Int = 0,
+    /** CEO 29.10: the maps app the walk opens in (the same preference as the car: Яндекс Карты or Google Карты). */
+    val maps: app.verst.nav.HandoffApp = app.verst.nav.HandoffApp.MAPS,
 )
 
 interface WalkActions : PickerActions {
@@ -334,7 +336,11 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         }
         // L3a: the walk hand-off, one button per part when the engine split the walk
         val parts = ui.handoff?.parts.orEmpty()
-        val label = if (ui.target == HandoffTarget.Maps || ui.target == HandoffTarget.MapsDryRun) stringResource(R.string.handoff_walk_cta) else stringResource(R.string.handoff_web)
+        val label = when (ui.target) {
+            HandoffTarget.Maps, HandoffTarget.MapsDryRun -> stringResource(R.string.handoff_walk_cta)
+            HandoffTarget.Google, HandoffTarget.GoogleDryRun -> stringResource(R.string.handoff_walk_cta_google)
+            else -> stringResource(if (ui.maps == app.verst.nav.HandoffApp.GOOGLE) R.string.handoff_google_web else R.string.handoff_web)
+        }
         if (parts.size > 1) {
             parts.forEach { p ->
                 // the part on its own line: «Открыть Яндекс Карты в браузере» / «Часть 1 из 2» (never clipped)

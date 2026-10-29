@@ -31,6 +31,9 @@ import app.verst.core.model.AppLanguage
 import app.verst.core.model.AppSettings
 import app.verst.core.model.AppTheme
 import app.verst.core.model.Car
+import app.verst.core.model.MapsApp
+import app.verst.core.model.MapsChoice
+import app.verst.core.model.MapsCountries
 import app.verst.core.model.Money
 import app.verst.core.model.RatesDto
 import app.verst.core.model.TripStorage
@@ -81,6 +84,8 @@ data class SettingsUi(
     val serverConsentAsk: Boolean = false,
     /** «Отвязать от сервера»: null = not tried, true = done, false = the server did not answer. */
     val serverForgotten: Boolean? = null,
+    /** CEO 29.10 «Навигация»: the country the phone is in now (ISO alpha-2), null = unknown. */
+    val country: String? = null,
 )
 
 interface SettingsActions {
@@ -103,6 +108,8 @@ interface SettingsActions {
     fun tank(steps: Int)
     fun fuel(type: String)
     fun avoidTolls(on: Boolean)
+    /** CEO 29.10 «Навигация»: automatic / Яндекс Карты / Google Карты. */
+    fun mapsApp(choice: MapsChoice) = Unit
 }
 
 @Composable
@@ -145,6 +152,19 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
                 st.avoidTolls, "settings.tolls", a::avoidTolls,
             )
             Note(stringResource(R.string.settings_car_note))
+
+            // CEO 29.10: which maps app gets the day's route; the line says what «Автоматически» does here and now
+            Section(stringResource(R.string.settings_maps))
+            Choices(
+                listOf(
+                    MapsChoice.AUTO to stringResource(R.string.settings_maps_auto),
+                    MapsChoice.YANDEX to stringResource(R.string.handoff_app_maps),
+                    MapsChoice.GOOGLE to stringResource(R.string.handoff_app_google),
+                ),
+                st.mapsApp, "settings.maps", a::mapsApp,
+            )
+            Txt(mapsLine(st.mapsApp, ui.country), T.body.mdStrong, C.text.primary, Modifier.testTag("settings.maps.line"))
+            Note(stringResource(R.string.handoff_settings_note))
 
             Section(stringResource(R.string.settings_language))
             Choices(
@@ -294,6 +314,46 @@ private fun isoDate(iso: String, l: AppLanguage): String =
 /** «8,5» / «8.5» in the app's language. */
 private fun litres(v: Double, l: AppLanguage): String =
     java.text.NumberFormat.getNumberInstance(locale(l)).apply { maximumFractionDigits = 1; minimumFractionDigits = 0 }.format(v)
+
+/**
+ * What «Навигация» does now: the user's own choice, or the automatic one for [country] — «Сейчас вы в России —
+ * маршрут откроют Яндекс Карты», «…за рубежом … откроем Google Карты». Russian names only for the countries where
+ * Яндекс routes (Georgia gets the neutral line: phones in Abkhazia report GE too).
+ */
+@Composable
+private fun mapsLine(choice: MapsChoice, country: String?): String {
+    val c = MapsCountries.normalize(country)
+    return when (choice) {
+        MapsChoice.YANDEX -> stringResource(R.string.handoff_settings_always_yandex)
+        MapsChoice.GOOGLE -> stringResource(R.string.handoff_settings_always_google)
+        MapsChoice.AUTO -> when (MapsCountries.auto(c)) {
+            MapsApp.GOOGLE -> stringResource(R.string.handoff_settings_abroad)
+            MapsApp.YANDEX -> {
+                val where = countryIn(c)
+                when {
+                    c == null -> stringResource(R.string.handoff_settings_unknown)
+                    where != null -> stringResource(R.string.handoff_settings_in, stringResource(where))
+                    else -> stringResource(R.string.handoff_settings_yandex_here)
+                }
+            }
+        }
+    }
+}
+
+/** «в России», «в Казахстане»… for the countries where Яндекс routes; null for the rest (and for Georgia). */
+private fun countryIn(iso: String?): Int? = when (iso) {
+    "RU" -> R.string.settings_maps_in_ru
+    "TR" -> R.string.settings_maps_in_tr
+    "AZ" -> R.string.settings_maps_in_az
+    "AM" -> R.string.settings_maps_in_am
+    "KZ" -> R.string.settings_maps_in_kz
+    "KG" -> R.string.settings_maps_in_kg
+    "TJ" -> R.string.settings_maps_in_tj
+    "BY" -> R.string.settings_maps_in_by
+    "UZ" -> R.string.settings_maps_in_uz
+    "MD" -> R.string.settings_maps_in_md
+    else -> null
+}
 
 @Composable
 private fun Section(text: String) = Txt(text, T.label.md, C.text.muted, Modifier.padding(top = 8.dp))

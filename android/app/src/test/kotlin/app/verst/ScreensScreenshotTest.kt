@@ -520,10 +520,27 @@ class ScreensScreenshotTest {
         if (p.sundayRu != null) assertTrue(compose.onAllNodesWithText("воскресенье", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty())
     }
 
+    /** CEO 29.10: «Вести по картам» names the app it opens (and the browser when that app is missing). */
+    @Test
+    fun roadHandoffCtaGoogle() {
+        shot("road", "cta-google") {
+            RoadScreen(RoadUi(s4Trip(), "NE", carTarget = HandoffTarget.Google, maps = app.verst.nav.HandoffApp.GOOGLE), noRoad)
+        }
+        compose.onNodeWithText("Вести по картам", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.handoff.sub", useUnmergedTree = true).assertTextEquals("Google Карты · все точки дня 1")
+    }
+
+    @Test
+    fun roadHandoffCtaYandex() {
+        shot("road", "cta-yandex") { RoadScreen(RoadUi(s4Trip(), "NE", carTarget = HandoffTarget.Maps), noRoad) }
+        compose.onNodeWithTag("road.handoff.sub", useUnmergedTree = true).assertTextEquals("Яндекс Карты · все точки дня 1")
+    }
+
     @Test
     fun roadS4Top() {
         shot("road", "s4-top") { RoadScreen(RoadUi(s4Trip(), "NE"), noRoad) }
         compose.onNodeWithTag("road.handoff").assertExists()
+        compose.onNodeWithTag("road.handoff.sub", useUnmergedTree = true).assertTextContains("в браузере", substring = true) // no maps app
         compose.onNodeWithTag("road.day.1.navigator").assertExists()
         compose.onNodeWithTag("road.day.1.parking", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
@@ -629,22 +646,64 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("road.stop.${night.id}", useUnmergedTree = true).assertIsDisplayed()
     }
 
-    /** 5.13 §5 (S4) unsigned: day 1 → Карты first with «весь день», Навигатор the next point with the 5-a-day note. */
+    /**
+     * CEO 29.10, in Russia: day 1 → Яндекс Карты first with «рекомендуем здесь», Google Карты second (not installed →
+     * the browser), the Навигатор last, to the next point only, with the 5-a-day note.
+     */
     @Test
     fun handoffSheetDayUnsigned() {
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
-        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = true, naviInstalled = true, signed = false, remember = false)
+        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = true, naviInstalled = true, remember = false)
         shot("handoff", "s4-day-unsigned") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
         compose.onNodeWithTag("handoff.maps.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("рекомендуем здесь", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.google.badge", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("handoff.google.note", useUnmergedTree = true).assertTextContains("браузере", substring = true)
         compose.onNodeWithTag("handoff.navi.note", useUnmergedTree = true).assertTextContains("5 раз", substring = true)
+        compose.onNodeWithText("только до следующей точки", substring = true, useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("handoff.tab.1").assertIsSelected()
+        // the Яндекс Карты card is above the Google one, the Навигатор last
+        val y = { tag: String -> compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot.top }
+        assertTrue(y("handoff.maps") < y("handoff.google"))
+        assertTrue(y("handoff.google") < y("handoff.navi"))
+    }
+
+    /** CEO 29.10, abroad: Google Карты first with «рекомендуем здесь»; the user's own choice says «ваш выбор». */
+    @Test
+    fun handoffSheetGoogleFirstAbroad() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        val ui = app.verst.feature.road.HandoffSheetUi(
+            app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = false, naviInstalled = false, remember = false,
+            preferred = app.verst.nav.HandoffApp.GOOGLE, googleInstalled = true,
+        )
+        shot("handoff", "google-first") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
+        compose.onNodeWithTag("handoff.google.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("рекомендуем здесь", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.maps.badge", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("handoff.google.note", useUnmergedTree = true).assertDoesNotExist() // installed
+        compose.onNodeWithText("(до 9)", substring = true, useUnmergedTree = true).assertExists()
+        val y = { tag: String -> compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot.top }
+        assertTrue(y("handoff.google") < y("handoff.maps"))
+    }
+
+    @Test
+    fun handoffSheetUsersChoice() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        val ui = app.verst.feature.road.HandoffSheetUi(
+            app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = true, naviInstalled = true, remember = true,
+            preferred = app.verst.nav.HandoffApp.GOOGLE, googleInstalled = false, chosen = true,
+        )
+        shot("handoff", "google-chosen") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
+        compose.onNodeWithTag("handoff.google.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("ваш выбор", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.google.note", useUnmergedTree = true).assertTextContains("до 3", substring = true)
     }
 
     /** «До след.» with the Навигатор not installed: it dims with «Установить…»; Карты (web) keeps its place. */
     @Test
     fun handoffSheetNextNaviMissing() {
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
-        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(null, h, 1), mapsInstalled = false, naviInstalled = false, signed = false, remember = true)
+        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(null, h, 1), mapsInstalled = false, naviInstalled = false, remember = true)
         shot("handoff", "s4-next-missing") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
         compose.onNodeWithTag("handoff.navi.install", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("handoff.maps.note", useUnmergedTree = true).assertTextContains("браузере", substring = true)
@@ -656,7 +715,7 @@ class ScreensScreenshotTest {
     fun roadDayMenu() {
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
         shot("road", "day-menu") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", dayMenu = 1, dayHandoff = h, carTarget = HandoffTarget.Maps), noRoad) }
-        compose.onNodeWithText("В навигатор: день 1").assertExists()
+        compose.onNodeWithText("По картам: день 1").assertExists()
         compose.onNodeWithText("Открыть в Яндекс Картах").assertExists()
     }
 
@@ -1534,6 +1593,39 @@ class ScreensScreenshotTest {
         override fun tank(steps: Int) { calls += "tank:$steps" }
         override fun fuel(type: String) { calls += "fuel:$type" }
         override fun avoidTolls(on: Boolean) { calls += "tolls:$on" }
+        override fun mapsApp(choice: app.verst.core.model.MapsChoice) { calls += "maps:$choice" }
+    }
+
+    /** CEO 29.10 «Навигация»: the automatic choice says what it does where the phone is; the user can override it. */
+    @Test
+    fun settingsMapsInRussia() {
+        val spy = SettingsSpy()
+        shot("settings", "maps-russia") { app.verst.feature.settings.SettingsScreen(settingsUi.copy(country = "RU"), spy) }
+        compose.onNodeWithTag("settings.maps.AUTO").performScrollTo().assertIsSelected()
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextEquals("Сейчас вы в России — маршрут откроют Яндекс Карты")
+        compose.onNodeWithTag("settings.maps.GOOGLE").performScrollTo().performClick()
+        assertEquals(listOf("maps:GOOGLE"), spy.calls)
+    }
+
+    @Test
+    fun settingsMapsAbroad() {
+        shot("settings", "maps-abroad") { app.verst.feature.settings.SettingsScreen(settingsUi.copy(country = "DE"), SettingsSpy()) }
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextContains("за рубежом", substring = true)
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextContains("Google Карты", substring = true)
+    }
+
+    @Test
+    fun settingsMapsUsersChoiceWins() {
+        val chosen = settingsUi.copy(settings = settingsUi.settings.copy(mapsApp = app.verst.core.model.MapsChoice.YANDEX), country = "DE")
+        shot("settings", "maps-chosen") { app.verst.feature.settings.SettingsScreen(chosen, SettingsSpy()) }
+        compose.onNodeWithTag("settings.maps.YANDEX").performScrollTo().assertIsSelected()
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextEquals("Маршрут дня всегда откроют Яндекс Карты")
+    }
+
+    @Test
+    fun settingsMapsUnknownCountry() {
+        shot("settings", "maps-unknown") { app.verst.feature.settings.SettingsScreen(settingsUi, SettingsSpy()) }
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextContains("откроем Яндекс Карты", substring = true)
     }
 
     @Test

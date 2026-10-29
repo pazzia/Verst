@@ -15,10 +15,13 @@ import android.os.Build
 import android.os.CancellationSignal
 import android.os.Looper
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.Log
 import app.verst.core.model.GeoPoint
+import app.verst.core.model.MapsCountries
 import app.verst.core.model.dto.HandoffLinksDto
 import app.verst.core.model.NaviLinks
+import app.verst.nav.CountrySource
 import app.verst.nav.HandoffLauncher
 import app.verst.nav.HandoffTarget
 import app.verst.nav.HandoffApp
@@ -104,7 +107,8 @@ class AndroidLocator(private val context: Context) : Locator {
 /**
  * 5.13 / ADR-0014 hand-off: car → Яндекс Навигатор → Яндекс Карты → the web route; walk → Карты → web. One tap
  * opens the target (no chooser); an `ActivityNotFoundException` falls through to the next link. The packages and
- * the schemes are declared in `<queries>`.
+ * the schemes are declared in `<queries>`. CEO 29.10: [openIn] is what the app uses — Яндекс Карты or Google Карты
+ * with every point of the day (the Google https link goes to the Google Maps package, else to the browser).
  */
 class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
     override fun navigatorInstalled(): Boolean =
@@ -112,6 +116,9 @@ class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
 
     override fun mapsInstalled(): Boolean =
         activity.packageManager.getLaunchIntentForPackage(NaviLinks.MAPS_PACKAGE) != null
+
+    override fun googleInstalled(): Boolean =
+        activity.packageManager.getLaunchIntentForPackage(NaviLinks.GOOGLE_MAPS_PACKAGE) != null
 
     override fun open(links: HandoffLinksDto, walk: Boolean): HandoffTarget {
         val navi = links.navigator
@@ -129,10 +136,14 @@ class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
     }
 
     override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
-        if (app == HandoffApp.NAVI) {
-            return if (uri != null && navigatorInstalled() && start(uri, NaviLinks.NAVI_PACKAGE)) HandoffTarget.Navigator else HandoffTarget.None
+        when (app) {
+            HandoffApp.NAVI ->
+                return if (uri != null && navigatorInstalled() && start(uri, NaviLinks.NAVI_PACKAGE)) HandoffTarget.Navigator else HandoffTarget.None
+            HandoffApp.MAPS ->
+                if (uri != null && mapsInstalled() && start(uri, NaviLinks.MAPS_PACKAGE)) return HandoffTarget.Maps
+            HandoffApp.GOOGLE ->
+                if (uri != null && googleInstalled() && start(uri, NaviLinks.GOOGLE_MAPS_PACKAGE)) return HandoffTarget.Google
         }
-        if (uri != null && mapsInstalled() && start(uri, NaviLinks.MAPS_PACKAGE)) return HandoffTarget.Maps
         val w = web ?: return HandoffTarget.None
         return try {
             activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(w)).addCategory(Intent.CATEGORY_BROWSABLE))
@@ -144,7 +155,11 @@ class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
     }
 
     override fun openStore(app: HandoffApp) {
-        val pkg = if (app == HandoffApp.NAVI) NaviLinks.NAVI_PACKAGE else NaviLinks.MAPS_PACKAGE
+        val pkg = when (app) {
+            HandoffApp.NAVI -> NaviLinks.NAVI_PACKAGE
+            HandoffApp.MAPS -> NaviLinks.MAPS_PACKAGE
+            HandoffApp.GOOGLE -> NaviLinks.GOOGLE_MAPS_PACKAGE
+        }
         val market = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg"))
         if (runCatching { activity.startActivity(market) }.isFailure) {
             runCatching { activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$pkg"))) }
@@ -161,6 +176,20 @@ class IntentHandoffLauncher(private val activity: Activity) : HandoffLauncher {
 
     companion object {
         const val TAG = "VerstHandoff"
+    }
+}
+
+/**
+ * CEO 29.10: where the phone is now, for the maps app of the hand-off — the mobile network's country, else the SIM's,
+ * else the system locale's region (the app's language setting does not change [Locale.getDefault]). No permission is
+ * needed; a tablet without a SIM falls back to the locale.
+ */
+class TelephonyCountrySource(private val context: Context) : CountrySource {
+    override fun country(): String? {
+        val tm = runCatching { context.getSystemService(TelephonyManager::class.java) }.getOrNull()
+        val network = runCatching { tm?.networkCountryIso }.getOrNull()
+        val sim = runCatching { tm?.simCountryIso }.getOrNull()
+        return MapsCountries.normalize(network) ?: MapsCountries.normalize(sim) ?: MapsCountries.normalize(java.util.Locale.getDefault().country)
     }
 }
 

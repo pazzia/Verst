@@ -372,11 +372,11 @@ internal fun VerstFlow.localWalkHandoff(w: app.verst.core.model.dto.WalkRouteDto
     return NaviLinks.walking(pts).toDto(null, mode = "walk")
 }
 
-/** «Пешком в Яндекс Картах» (part [index] of a split walk). */
+/** «Вести пешком» (part [index] of a split walk): the preferred maps app (CEO 29.10), walking mode. */
 fun VerstFlow.walkHandoffGo(index: Int = 1) {
     val h = walkHandoff ?: walk?.let { localWalkHandoff(it) } ?: return
-    val part = h.parts.firstOrNull { it.index == index } ?: h.parts.firstOrNull() ?: return
-    launchHandoff(part.links, walk = true)
+    if (h.parts.isEmpty()) return
+    launchApp(preferredMaps, h, next = false, walk = true, partIndex = index)
     walkFocusSeq += 1
 }
 

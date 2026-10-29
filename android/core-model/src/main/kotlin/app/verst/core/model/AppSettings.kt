@@ -35,6 +35,8 @@ data class AppSettings(
     val fuelType: String = Car.DEFAULT_FUEL,
     val tankL: Int = Car.DEFAULT_TANK,
     val avoidTolls: Boolean = false,
+    /** CEO 29.10 «Навигация»: which maps app gets the day's route (automatic = by the country the phone is in). */
+    val mapsApp: MapsChoice = MapsChoice.AUTO,
 ) {
     /** A setting that only takes effect after the app restarts (the palette is read once per process). */
     fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme

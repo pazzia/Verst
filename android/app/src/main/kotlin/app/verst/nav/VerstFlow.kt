@@ -95,12 +95,12 @@ sealed interface Toast {
     data object EngineFailed : Toast
     data object NeedInternet : Toast
 
-    /** 5.13 hand-off toasts. */
-    data class HandoffWeb(val walk: Boolean) : Toast
+    /** 5.13 hand-off toasts; [google]: Google Карты were the app (not installed → the browser). */
+    data class HandoffWeb(val walk: Boolean, val google: Boolean = false) : Toast
     data object HandoffOffline : Toast
     data object HandoffFailed : Toast
-    /** 5.13 §5: «Открываем Яндекс Карты / Навигатор» (1 s) before the app opens. */
-    data class HandoffOpen(val navi: Boolean) : Toast
+    /** 5.13 §5: «Открываем Яндекс Карты / Google Карты / Навигатор» (1 s) before the app opens. */
+    data class HandoffOpen(val app: HandoffApp) : Toast
 
     /** 5.12 location toasts ([town] = the origin that stays). */
     data class LocationDenied(val town: String) : Toast
@@ -209,16 +209,25 @@ class VerstFlow(
         internal set
     var dayHandoff: HandoffDto? by mutableStateOf(null)
         internal set
-    /** 5.13 §5 (S4) the hand-off sheet, and «Запомнить выбор» (persisted with the defaults). */
+    /**
+     * 5.13 §5 (S4) the hand-off sheet, and «Запомнить выбор» (persisted with the defaults): with it on, the maps app
+     * picked in the sheet becomes the «Настройки → Навигация» choice.
+     */
     var handoffSheet: HandoffSheet? by mutableStateOf(null)
         internal set
     var handoffRemember by mutableStateOf(false)
         internal set
-    var handoffRememberedApp: HandoffApp? by mutableStateOf(null)
-        internal set
     /**
-     * ADR-0015 §1: the build's Яндекс signing key (MainActivity, from BuildConfig). Without it the hand-off is
-     * unsigned: Карты get the whole day and the Навигатор the next point only (5 unsigned launches a day).
+     * CEO 29.10 «Навигация»: the user's maps choice (AppPrefs in the app; unit tests swap both for a variable).
+     * Compose reads it through AppPrefs' state, so the screens follow a change.
+     */
+    var mapsChoiceRead: () -> app.verst.core.model.MapsChoice = { app.verst.settings.AppPrefs.settings.mapsApp }
+    var mapsChoiceWrite: (app.verst.core.model.MapsChoice) -> Unit = { c -> app.verst.settings.AppPrefs.update { it.copy(mapsApp = c) } }
+    /** Where the phone is now (TelephonyManager, set by the app); null = unknown → Яндекс Карты. */
+    var countrySource: CountrySource? = null
+    /**
+     * ADR-0015 §1: the build's Яндекс signing key (MainActivity, from BuildConfig). CEO 29.10: we do not get a key, so
+     * the Навигатор gets the next point only and the whole day goes to the maps apps; the signer stays for the record.
      */
     var handoffSigner: app.verst.core.model.HandoffSigner? = null
     val handoffSigned: Boolean get() = handoffSigner != null
@@ -532,6 +541,7 @@ class VerstFlow(
     internal fun naviApp(target: HandoffTarget): AnalyticsEvent.NaviApp? = when (target) {
         HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> AnalyticsEvent.NaviApp.YANDEX_NAVIGATOR
         HandoffTarget.Maps, HandoffTarget.MapsDryRun -> AnalyticsEvent.NaviApp.YANDEX_MAPS
+        HandoffTarget.Google, HandoffTarget.GoogleDryRun -> AnalyticsEvent.NaviApp.GOOGLE_MAPS
         HandoffTarget.Browser, HandoffTarget.BrowserDryRun -> AnalyticsEvent.NaviApp.WEB
         HandoffTarget.None -> null
     }
@@ -1517,7 +1527,8 @@ class VerstFlow(
         originLabel = origin.label, originLat = origin.lat, originLon = origin.lon, originGen = originGen,
         locationAsked = locationAsked, originFromGps = originFromGps,
         walkAdults = cityAdults, walkChildren = cityChildren, walkDog = cityDog,
-        handoffRemember = handoffRemember, handoffApp = handoffRememberedApp?.name,
+        // CEO 29.10: the remembered app is the «Навигация» setting now (AppSettings.mapsApp)
+        handoffRemember = handoffRemember, handoffApp = null,
     )
 
     private fun applyDefaults(d: DefaultsDto) {
@@ -1537,7 +1548,6 @@ class VerstFlow(
         cityChildren = d.walkChildren.coerceIn(0, 9)
         cityDog = d.walkDog
         handoffRemember = d.handoffRemember
-        handoffRememberedApp = d.handoffApp?.let { n -> HandoffApp.entries.firstOrNull { it.name == n } }
         val o = GeoPoint(d.originLabel, d.originLat, d.originLon)
         if (o != origin) {
             origin = o
@@ -1648,29 +1658,51 @@ enum class GpsState { Off, Waiting, On, Failed }
 /** The answers to the post-trip question «Вы съездили?» (tracking plan §2.3, VAL-04). */
 enum class DrivenAnswer { FULL, PARTIAL, NO }
 
-/** Where a hand-off went. */
-/** Where a hand-off went (or would go: the dry runs of the e2e). */
-enum class HandoffTarget { Navigator, Maps, Browser, None, NavigatorDryRun, MapsDryRun, BrowserDryRun }
+/** Where a hand-off went (or would go: the dry runs of the e2e). [Maps] = Яндекс Карты, [Google] = Google Карты. */
+enum class HandoffTarget { Navigator, Maps, Google, Browser, None, NavigatorDryRun, MapsDryRun, GoogleDryRun, BrowserDryRun }
 
 /** Opens ADR-0014 links outside the app: car navigator → maps → web, walk maps → web (the activity uses intents). */
 interface HandoffLauncher {
     fun navigatorInstalled(): Boolean
     fun mapsInstalled(): Boolean = false
+    /** CEO 29.10: the Google Maps app (`com.google.android.apps.maps`). */
+    fun googleInstalled(): Boolean = false
     fun open(links: HandoffLinksDto, walk: Boolean): HandoffTarget
 
     /**
-     * 5.13 §5 (S4): open exactly the app the user chose with [uri]; Карты without the app → [web] in the browser;
-     * Навигатор without the app → [HandoffTarget.None] (the sheet offers the store instead).
+     * 5.13 §5 (S4): open exactly the app the user chose with [uri]; Яндекс / Google Карты without the app → [web] in
+     * the browser; Навигатор without the app → [HandoffTarget.None] (the sheet offers the store instead).
      */
-    fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget =
-        open(if (app == HandoffApp.NAVI) HandoffLinksDto(navigator = uri) else HandoffLinksDto(maps = uri, web = web), walk = app == HandoffApp.MAPS)
+    fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget = when (app) {
+        HandoffApp.NAVI -> open(HandoffLinksDto(navigator = uri), walk = false)
+        HandoffApp.MAPS -> open(HandoffLinksDto(maps = uri, web = web), walk = true)
+        HandoffApp.GOOGLE -> open(HandoffLinksDto(web = web), walk = true)
+    }
 
     /** «Установить из магазина приложений». */
     fun openStore(app: HandoffApp) = Unit
 }
 
-/** The two hand-off apps of the S4 sheet (5.13 §5). */
-enum class HandoffApp { MAPS, NAVI }
+/**
+ * The hand-off apps of the S4 sheet (5.13 §5): [MAPS] Яндекс Карты and [GOOGLE] Google Карты take every point of the
+ * day (CEO 29.10); [NAVI] Яндекс Навигатор takes one point from us, so it only goes to the next point.
+ */
+enum class HandoffApp { MAPS, GOOGLE, NAVI }
+
+/** The sheet row / launcher app of a maps app. */
+val app.verst.core.model.MapsApp.handoffApp: HandoffApp
+    get() = when (this) {
+        app.verst.core.model.MapsApp.YANDEX -> HandoffApp.MAPS
+        app.verst.core.model.MapsApp.GOOGLE -> HandoffApp.GOOGLE
+    }
+
+/**
+ * Where the phone is now, ISO 3166 alpha-2 (CEO 29.10: TelephonyManager network → SIM → the system locale in the
+ * app); null = unknown. An interface so unit tests can fake the country.
+ */
+fun interface CountrySource {
+    fun country(): String?
+}
 
 /** 5.13 §5: the open hand-off sheet: [day] or the «До след.» scope ([day] = null), and the engine's day hand-off. */
 data class HandoffSheet(val day: Int?, val handoff: HandoffDto? = null, val handoffDay: Int = day ?: 1)
@@ -1742,9 +1774,21 @@ data class WalkFew(
 /** The picker sheets of 5.10 (prefs) and 5.11 (filter bar). */
 enum class CityPicker { DURATION, PRESET, CREW, BUDGET, PACE }
 
-/** The R1 local links as an ADR-0014 hand-off (the fallback when the engine call fails). */
-fun NaviHandoff.toDto(day: Int?, mode: String = "car"): HandoffDto =
-    HandoffDto(mode, day, listOf(HandoffPartDto(1, emptyList(), HandoffLinksDto(navi, mapsApp, web))), truncated = false)
+/**
+ * The R1 local links as an ADR-0014 hand-off (the fallback when the engine call fails). The points carry their roles
+ * like the engine's (`origin` only when the route does not start at the phone), so Google Карты get the same route.
+ */
+fun NaviHandoff.toDto(day: Int?, mode: String = "car"): HandoffDto {
+    val pts = points.mapIndexed { i, p ->
+        val role = when {
+            i == 0 && !fromHere && points.size > 1 -> "origin"
+            i == points.lastIndex -> "destination"
+            else -> "via"
+        }
+        app.verst.core.model.dto.HandoffPointDto(p.lat, p.lon, role = role)
+    }
+    return HandoffDto(mode, day, listOf(HandoffPartDto(1, pts, HandoffLinksDto(navi, mapsApp, web))), truncated = false)
+}
 
 /** Great-circle distance for «the nearest town». */
 object TownMath {

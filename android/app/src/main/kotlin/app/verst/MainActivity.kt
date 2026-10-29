@@ -73,6 +73,8 @@ import app.verst.nav.buildCustomWalk
 import app.verst.nav.buildWalk
 import app.verst.nav.canUndo
 import app.verst.nav.carTarget
+import app.verst.nav.mapsChosen
+import app.verst.nav.preferredMaps
 import app.verst.nav.cardPickHotel
 import app.verst.nav.cardRemoveWalkStop
 import app.verst.nav.cardReplace
@@ -427,7 +429,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         r.trip.daysList.flatMap { it.stops }.filter { flow.isBooked(it.id) }.map { it.id }.toSet(), r.townPrepRu,
                         online = flow.connectivity.online,
                         stopMenu = flow.stopMenu, navigatorInstalled = flow.navigatorInstalled, stopHandoff = flow.stopHandoff,
-                        dayMenu = flow.dayMenu, dayHandoff = flow.dayHandoff, carTarget = flow.carTarget,
+                        dayMenu = flow.dayMenu, dayHandoff = flow.dayHandoff, carTarget = flow.carTarget, maps = flow.preferredMaps,
                         focus = RoadFocus(flow.roadFocusId, flow.roadTopId, flow.roadFocusSeq, flow.roadScrollY),
                         card = flow.card?.takeIf { it.source == app.verst.nav.CardSource.ROAD }?.ui,
                         aboutData = flow.aboutData,
@@ -437,7 +439,9 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         handoffDay = flow.handoffDay(r.trip),
                         handoff = flow.handoffSheet?.let {
                             app.verst.feature.road.HandoffSheetUi(
-                                it, flow.handoffLauncher?.mapsInstalled() == true, flow.navigatorInstalled, flow.handoffSigned, flow.handoffRemember,
+                                it, flow.handoffLauncher?.mapsInstalled() == true, flow.navigatorInstalled, flow.handoffRemember,
+                                preferred = flow.preferredMaps, googleInstalled = flow.handoffLauncher?.googleInstalled() == true,
+                                chosen = flow.mapsChosen,
                             )
                         },
                     ),
@@ -624,6 +628,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                             flow.cityAdults, flow.cityChildren, flow.cityDog, flow.cityPace, flow.cityBudget,
                         ),
                         picker = flow.cityPicker, otherNone = flow.walkOtherNone, few = flow.walkFew,
+                        maps = flow.preferredMaps,
                     ),
                     object : app.verst.feature.city.WalkActions {
                         override fun back() {

@@ -58,6 +58,8 @@ import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
 import app.verst.feature.common.OpenDataRing
+import app.verst.nav.HandoffApp
+import app.verst.nav.HandoffTarget
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
@@ -127,15 +129,29 @@ internal fun parkingTotalText(p: ParkingSum, rub: Int = p.rub): String = when (p
 /**
  * components §26 `HandoffCta`: full width, min-h 60: navigator arrow 26, title 18/700, sub 12/600, chevron. Designer
  * В-5 (28.10): an outline, not the filled yellow — the plan is read and edited first, leaving for the navigator is
- * the second step.
+ * the second step. CEO 29.10: «Вести по картам» opens [maps] (the preferred Яндекс / Google Карты) with every point of
+ * [day]; the sub-line names the app and says when it opens in the browser ([target] = Browser); a long-press opens
+ * the sheet with the choice.
  */
 @Composable
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
-internal fun HandoffCta(day: Int, onClick: () -> Unit, onLongClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun HandoffCta(
+    day: Int,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    maps: HandoffApp = HandoffApp.MAPS,
+    target: HandoffTarget = HandoffTarget.Maps,
+) {
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     val shape = RoundedCornerShape(DesignTokens.radius.r12)
-    val cd = stringResource(R.string.road_handoff_cta) + ". " + stringResource(R.string.road_handoff_cta_sub, day)
+    val web = target == HandoffTarget.Browser || target == HandoffTarget.BrowserDryRun
+    val sub = when (maps) {
+        HandoffApp.GOOGLE -> stringResource(if (web) R.string.handoff_cta_sub_google_web else R.string.handoff_cta_sub_google, day)
+        HandoffApp.MAPS, HandoffApp.NAVI -> stringResource(if (web) R.string.handoff_cta_sub_yandex_web else R.string.handoff_cta_sub_yandex, day)
+    }
+    val cd = stringResource(R.string.road_handoff_cta) + ". " + sub
     Row(
         modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.handoffCtaH).clip(shape)
             .background(if (pressed) C.accent.yellow.copy(alpha = 0.12f) else androidx.compose.ui.graphics.Color.Transparent)
@@ -150,7 +166,7 @@ internal fun HandoffCta(day: Int, onClick: () -> Unit, onLongClick: () -> Unit, 
         GlyphIcon(Glyph.NAVIGATOR, C.accent.yellowText, 26.dp, filled = true)
         Column(Modifier.weight(1f)) {
             Txt(stringResource(R.string.road_handoff_cta), T.cta.lg, C.accent.yellowText, maxLines = 1)
-            Txt(stringResource(R.string.road_handoff_cta_sub, day), T.body.smStrong, C.text.secondary, maxLines = 1)
+            Txt(sub, T.body.smStrong, C.text.secondary, Modifier.testTag("road.handoff.sub"), maxLines = 1)
         }
         GlyphIcon(Glyph.RIGHT, C.accent.yellowText, 18.dp)
     }

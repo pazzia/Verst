@@ -7,9 +7,13 @@ import app.verst.core.model.EngineArgs
 import app.verst.core.model.EngineJson
 import app.verst.core.model.EngineResult
 import app.verst.core.model.GeoPoint
+import app.verst.core.model.LatLon
+import app.verst.core.model.MapsChoice
+import app.verst.core.model.NaviLinks
 import app.verst.core.model.PlanRequest
 import app.verst.core.model.TripFigures
 import app.verst.core.model.dto.EstimateDto
+import app.verst.core.model.dto.HandoffLinksDto
 import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlaceNameDto
 import app.verst.core.model.dto.PlanResultDto
@@ -332,37 +336,58 @@ class VerstFlowTest {
     }
 
     /**
-     * 5.13 §5 (S4): the sheet on a day → Карты get the whole day (unsigned), «До след.» → the Навигатор gets the
-     * next point only; «Запомнить выбор» then opens the remembered app straight from «вести».
+     * CEO 29.10: «Вести по картам» opens the preferred maps app directly with the whole day (Яндекс Карты in Russia);
+     * in the sheet Google Карты get the same points (an https link), the Навигатор the next point only (both tabs);
+     * «Запомнить выбор» stores the maps app as the «Навигация» setting, never the Навигатор.
      */
     @Test
-    fun handoffSheetUnsignedRoutesAndRememberedChoice() = runTest {
+    fun handoffSheetRoutesAndRememberedChoice() = runTest {
         val gw = FakeGateway()
         val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        var choice = MapsChoice.AUTO
+        flow.mapsChoiceRead = { choice }
+        flow.mapsChoiceWrite = { choice = it }
+        flow.countrySource = CountrySource { "ru" }
         val opened = mutableListOf<Triple<HandoffApp, String?, String?>>()
         flow.handoffLauncher = object : HandoffLauncher {
             override fun navigatorInstalled() = true
             override fun mapsInstalled() = true
-            override fun open(links: app.verst.core.model.dto.HandoffLinksDto, walk: Boolean) = HandoffTarget.None
+            override fun googleInstalled() = true
+            override fun open(links: HandoffLinksDto, walk: Boolean) = HandoffTarget.None
             override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
                 opened += Triple(app, uri, web)
-                return if (app == HandoffApp.NAVI) HandoffTarget.Navigator else HandoffTarget.Maps
+                return when (app) {
+                    HandoffApp.NAVI -> HandoffTarget.Navigator
+                    HandoffApp.MAPS -> HandoffTarget.Maps
+                    HandoffApp.GOOGLE -> HandoffTarget.Google
+                }
             }
         }
         settle()
         flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
         settle(10_000)
         val day = flow.result!!.trip.daysList.first()
-        val local = app.verst.core.model.NaviLinks.day(day)!!
-        flow.handoff(day.day)
-        settle()
-        assertEquals(day.day, flow.handoffSheet!!.day)
-        assertNotNull(flow.handoffSheet!!.handoff)
-        flow.handoffPick(HandoffApp.MAPS)
+        val local = NaviLinks.day(day)!!
+        // «Вести по картам»: in Russia Яндекс Карты open directly with the whole day — no sheet, no Навигатор
+        assertEquals(HandoffApp.MAPS, flow.preferredMaps)
+        flow.handoff(day.day); settle()
         assertNull(flow.handoffSheet)
         assertEquals(Triple(HandoffApp.MAPS, local.mapsApp, local.web), opened.single())
-        assertEquals(Toast.HandoffOpen(navi = false), flow.toast)
-        // «До след.»: the Навигатор to the next point only (no vias)
+        assertEquals(HandoffTarget.Maps, flow.lastHandoff!!.second)
+        // the sheet (a day's «вести» / a long-press): Google Карты get the same points by https
+        flow.openHandoffSheet(day.day); settle()
+        assertEquals(day.day, flow.handoffSheet!!.day)
+        assertNotNull(flow.handoffSheet!!.handoff)
+        flow.handoffPick(HandoffApp.GOOGLE)
+        assertNull(flow.handoffSheet)
+        val g = opened.last()
+        assertEquals(HandoffApp.GOOGLE, g.first)
+        assertEquals(NaviLinks.googleRoute(local.points), g.second)
+        assertEquals(g.second, g.third) // without the app, the same link in the browser
+        assertTrue(g.second!!, g.second!!.endsWith("&travelmode=driving"))
+        assertEquals(Toast.HandoffOpen(HandoffApp.GOOGLE), flow.toast)
+        assertEquals(MapsChoice.AUTO, choice) // «Запомнить выбор» is off
+        // «До след.»: the Навигатор to the next point only (no vias) — and so is the day scope
         flow.openHandoffSheet(day.day); settle()
         flow.handoffScope(null)
         flow.handoffPick(HandoffApp.NAVI)
@@ -370,38 +395,54 @@ class VerstFlowTest {
         assertEquals(HandoffApp.NAVI, navi.first)
         assertTrue(navi.second!!.startsWith("yandexnavi://build_route_on_map?lat_to="))
         assertFalse(navi.second!!.contains("lat_via_0"))
-        // unsigned, even the day scope never sends the whole day to the Навигатор
         flow.openHandoffSheet(day.day); settle()
         flow.handoffPick(HandoffApp.NAVI)
         assertFalse(opened.last().second!!.contains("lat_via_0"))
-        // «Запомнить выбор»: the next «вести» opens Карты directly; a long-press still opens the sheet
+        // «Запомнить выбор» + Google Карты → the «Навигация» setting; «Вести по картам» then opens Google Карты
         flow.openHandoffSheet(day.day); settle()
         flow.toggleHandoffRemember()
-        flow.handoffPick(HandoffApp.MAPS)
+        flow.handoffPick(HandoffApp.GOOGLE)
+        assertEquals(MapsChoice.GOOGLE, choice)
+        assertEquals(HandoffApp.GOOGLE, flow.preferredMaps) // the user's choice wins over Russia
         val n = opened.size
         flow.handoff(day.day); settle()
         assertNull(flow.handoffSheet)
         assertEquals(n + 1, opened.size)
-        assertEquals(HandoffApp.MAPS, opened.last().first)
+        assertEquals(HandoffApp.GOOGLE, opened.last().first)
+        // the Навигатор is never remembered
+        flow.openHandoffSheet(day.day); settle()
+        flow.handoffPick(HandoffApp.NAVI)
+        assertEquals(MapsChoice.GOOGLE, choice)
         flow.openHandoffSheet(day.day); settle()
         assertNotNull(flow.handoffSheet)
         flow.back()
         assertNull(flow.handoffSheet)
     }
 
+    /**
+     * CEO 29.10: the day menu, the stop menu and walks open the preferred maps app — Яндекс Карты in Russia and when
+     * the country is unknown, Google Карты abroad, the user's choice over both; the browser and offline fallbacks.
+     */
     @Test
     fun handoffDayMenuStopMenuTargetsAndFallbacks() = runTest {
         val gw = FakeGateway()
         val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
-        val opened = mutableListOf<Pair<app.verst.core.model.dto.HandoffLinksDto, Boolean>>()
-        var navi = false
+        var choice = MapsChoice.AUTO
+        flow.mapsChoiceRead = { choice }
+        flow.mapsChoiceWrite = { choice = it }
+        var country: String? = "RU"
+        flow.countrySource = CountrySource { country }
+        val opened = mutableListOf<Triple<HandoffApp, String?, String?>>()
         var maps = false
+        var google = false
         var result = HandoffTarget.Browser
         flow.handoffLauncher = object : HandoffLauncher {
-            override fun navigatorInstalled() = navi
+            override fun navigatorInstalled() = true
             override fun mapsInstalled() = maps
-            override fun open(links: app.verst.core.model.dto.HandoffLinksDto, walk: Boolean): HandoffTarget {
-                opened += links to walk
+            override fun googleInstalled() = google
+            override fun open(links: HandoffLinksDto, walk: Boolean) = HandoffTarget.None
+            override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
+                opened += Triple(app, uri, web)
                 return result
             }
         }
@@ -409,40 +450,68 @@ class VerstFlowTest {
         flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
         settle(10_000)
         val day = flow.result!!.trip.daysList.first()
-        // The day menu: the engine has no `handoff` in the fake → the local ADR-0014 links of the day.
+        // The day menu: the engine has no `handoff` in the fake → the local links; Яндекс Карты missing → the browser.
         flow.openDayMenu(day.day)
         settle()
         assertEquals(day.day, flow.dayMenu)
         assertEquals(HandoffTarget.Browser, flow.carTarget)
         val links = flow.dayHandoff!!.parts.single().links
-        assertEquals(app.verst.core.model.NaviLinks.day(day)!!.navi, links.navigator)
         flow.dayMenuGo()
         assertNull(flow.dayMenu)
-        assertEquals(links to false, opened.single())
+        assertEquals(Triple(HandoffApp.MAPS, links.maps, links.web), opened.single()) // never the Навигатор, though installed
         assertEquals(Toast.HandoffWeb(walk = false), flow.toast) // the web fallback says so
-        // The stop menu with the navigator installed → no toast.
-        navi = true
-        result = HandoffTarget.Navigator
+        // The stop menu: from this stop to the end of its day, in Яндекс Карты.
+        maps = true
+        result = HandoffTarget.Maps
         flow.openStopMenu(day.stops[1])
         settle()
-        assertEquals(HandoffTarget.Navigator, flow.carTarget)
+        assertEquals(HandoffTarget.Maps, flow.carTarget)
         flow.navigatorFromStop()
         assertNull(flow.stopMenu)
-        assertEquals(HandoffTarget.Navigator, flow.lastHandoff!!.second)
-        assertTrue(opened.last().first.navigator!!.startsWith("yandexnavi://build_route_on_map?lat_from="))
-        // Offline without an app → «нужен интернет», nothing opens; all links failing → «не получилось».
-        navi = false
+        assertEquals(HandoffTarget.Maps, flow.lastHandoff!!.second)
+        assertEquals(NaviLinks.fromStop(flow.result!!.trip, day.stops[1].id)!!.mapsApp, opened.last().second)
+        // Abroad: Google Карты lead; not installed → the browser label, installed → the app.
+        country = "DE"
+        assertEquals(HandoffApp.GOOGLE, flow.preferredMaps)
+        assertEquals(HandoffTarget.Browser, flow.carTarget)
+        google = true
+        assertEquals(HandoffTarget.Google, flow.carTarget)
+        result = HandoffTarget.Google
+        flow.openDayMenu(day.day); settle(); flow.dayMenuGo()
+        val g = opened.last()
+        assertEquals(HandoffApp.GOOGLE, g.first)
+        assertTrue(g.second!!, g.second!!.startsWith("https://www.google.com/maps/dir/?api=1&origin="))
+        assertEquals(Toast.HandoffOpen(HandoffApp.GOOGLE), flow.toast)
+        // Walks: the same preference, in walking mode.
+        flow.walkHandoff = NaviLinks.walking(listOf(LatLon(57.62, 39.88), LatLon(57.625, 39.885), LatLon(57.63, 39.89))).toDto(null, mode = "walk")
+        flow.walkHandoffGo(1)
+        assertEquals(HandoffApp.GOOGLE, opened.last().first)
+        assertTrue(opened.last().second!!, opened.last().second!!.endsWith("&travelmode=walking"))
+        assertTrue(opened.last().second!!, opened.last().second!!.contains("origin=57.620000,39.880000"))
+        // the user's choice wins over the country
+        choice = MapsChoice.YANDEX
+        assertEquals(HandoffApp.MAPS, flow.preferredMaps)
+        flow.walkHandoffGo(1)
+        assertEquals(HandoffApp.MAPS, opened.last().first)
+        assertTrue(opened.last().second!!, opened.last().second!!.endsWith("&rtt=pd"))
+        // unknown country → Яндекс Карты
+        choice = MapsChoice.AUTO
+        country = null
+        assertEquals(HandoffApp.MAPS, flow.preferredMaps)
+        // Offline without the app → «нужен интернет», nothing opens; the launcher failing → «не получилось».
+        maps = false
+        val before = opened.size
         flow.setOffline(true)
         flow.openDayMenu(day.day); settle(); flow.dayMenuGo()
         assertEquals(Toast.HandoffOffline, flow.toast)
-        assertEquals(2, opened.size)
+        assertEquals(before, opened.size)
         flow.setOffline(false)
         result = HandoffTarget.None
         flow.openDayMenu(day.day); settle(); flow.dayMenuGo()
         assertEquals(Toast.HandoffFailed, flow.toast)
-        // Maps only: the car label names Яндекс Карты.
+        // the walk label follows the same app
+        assertEquals(HandoffTarget.Browser, flow.walkTarget)
         maps = true
-        assertEquals(HandoffTarget.Maps, flow.carTarget)
         assertEquals(HandoffTarget.Maps, flow.walkTarget)
     }
 
