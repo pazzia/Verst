@@ -25,6 +25,7 @@ import app.verst.core.model.GeoPoint
 import app.verst.engine.ChaquopyPlannerGateway
 import app.verst.nav.GpsState
 import app.verst.nav.HandoffTarget
+import app.verst.nav.preferredMaps
 import app.verst.nav.Route
 import app.verst.nav.Seat
 import java.io.File
@@ -278,9 +279,23 @@ class Sprint3Test {
         compose.waitUntil(5_000) { flow.lastHandoff != null }
         val (links, target) = flow.lastHandoff!!
         Log.i("VerstE2e", "S3-4 walk handoff $target ${links.web}")
-        assertEquals(HandoffTarget.BrowserDryRun, target) // no Yandex apps on the emulator
-        assertTrue(links.web!!.startsWith("https://yandex.ru/maps/?rtext="))
-        assertTrue(links.web!!.endsWith("&rtt=pd"))
+        // CEO 29.10: the preferred maps app by the phone's country (the emulator may report "us" → Google Карты,
+        // which the Google APIs image has); no Яндекс apps on the emulator → the web route
+        val google = flow.preferredMaps == app.verst.nav.HandoffApp.GOOGLE
+        val installed = if (google) flow.handoffLauncher?.googleInstalled() == true else flow.handoffLauncher?.mapsInstalled() == true
+        val expected = when {
+            !installed -> HandoffTarget.BrowserDryRun
+            google -> HandoffTarget.GoogleDryRun
+            else -> HandoffTarget.MapsDryRun
+        }
+        assertEquals(expected, target)
+        if (google) {
+            assertTrue(links.web!!, links.web!!.startsWith("https://www.google.com/maps/dir/?api=1"))
+            assertTrue(links.web!!, links.web!!.contains("travelmode=walking"))
+        } else {
+            assertTrue(links.web!!.startsWith("https://yandex.ru/maps/?rtext="))
+            assertTrue(links.web!!.endsWith("&rtt=pd"))
+        }
         // 18+: «По рюмочным» asks every time; «Нет» sends nothing
         back()
         waitTag("city.go")
