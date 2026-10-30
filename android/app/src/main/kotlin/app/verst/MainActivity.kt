@@ -86,6 +86,7 @@ import app.verst.nav.closeCityCustom
 import app.verst.nav.closeDayMenu
 import app.verst.nav.closeHandoffSheet
 import app.verst.nav.closeParking
+import app.verst.nav.closeBorder
 import app.verst.nav.closePartner
 import app.verst.nav.closeReplace
 import app.verst.nav.closeReport
@@ -246,6 +247,14 @@ class MainActivity : ComponentActivity() {
 fun mockShareText(context: Context, engineText: String): String =
     engineText.trimEnd() + "\n\n" + context.getString(app.verst.core.ui.R.string.mock_share_note)
 
+/**
+ * The engine's share text of [r]; CEO 29.10: «без расходов за границей» on the total line when the rouble total leaves
+ * the costs abroad out (`trip.abroad.roubleTotalIncomplete`).
+ */
+fun shareText(context: Context, r: app.verst.core.model.dto.PlanResultDto): String = app.verst.core.model.ShareText.withAbroad(
+    r.shareText, r.trip.abroad?.roubleTotalIncomplete == true, context.getString(app.verst.core.ui.R.string.share_abroad_incomplete),
+)
+
 /** Android share sheet with the engine's share text (5.5 T2, 5.6 K2), marked as demo data. */
 private fun share(context: Context, text: String) {
     val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, mockShareText(context, text))
@@ -301,6 +310,14 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
             flow::confirmDelete, flow::cancelDelete,
         )
     }
+    if (flow.abroadConsentAsk) {
+        // CEO 29.10 / security review В-1: a trip abroad is planned on the server — the settings' consent dialog first
+        NaviDialog(
+            stringResource(UiR.string.settings_server_consent_title), stringResource(UiR.string.settings_server_consent_body),
+            stringResource(UiR.string.settings_server_consent_yes), stringResource(UiR.string.settings_server_consent_no),
+            "abroad.consent", { flow.answerAbroadConsent(true) }, { flow.answerAbroadConsent(false) },
+        )
+    }
     if (flow.limitDialog) {
         NaviDialog(
             stringResource(UiR.string.common_storage_full_title), stringResource(UiR.string.common_storage_full_body),
@@ -314,7 +331,8 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 private fun Screens(flow: VerstFlow, context: Context) {
     val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
         flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
-        flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null
+        flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null ||
+        flow.roadBorder != null || flow.abroadConsentAsk
     BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
@@ -358,8 +376,10 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 addressState = flow.addressState,
                 focusTo = flow.focusToField,
                 addressResults = flow.addressResults,
-                abroad = flow.destinationAbroad,
+                abroad = flow.abroadBlocked,
                 abroadMaps = flow.preferredMaps,
+                abroadServer = flow.abroadOnServer,
+                abroadNoServer = !flow.serverConfigured(),
             ),
             onBack = { flow.back() },
             onQuery = flow::updateQuery,
@@ -399,6 +419,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 budgetOutcome = flow.budgetEstimate?.outcome,
                 budgetTotal = flow.budgetEstimate?.totalRub,
                 budgetStatus = flow.budgetEstimate?.budgetStatus,
+                abroad = flow.destinationAbroad,
+                goEnabled = !flow.abroadBlocked,
             ),
             object : InstrumentsActions {
                 override fun back() {
@@ -417,7 +439,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
             flow.drive,
             // The engine figure of this request (estimate = plan); «—» only if ПОЕХАЛИ beat the first estimate.
             kmLabel = flow.figures?.figures?.km?.let { RuFormat.thousands(it) } ?: "—",
-            action = { flow.driveAction(it.code) },
+            action = { flow.driveAction(it) },
             onCancel = { flow.back() },
             onDone = { if (flow.drive.noFit) flow.openNoFit() else flow.openRoad() },
             onErrorAction = flow::onDriveError,
@@ -440,6 +462,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         minimum = flow.showingMinimum,
                         tappable = flow::tappable,
                         parking = flow.roadParking,
+                        border = flow.roadBorder,
                         handoffDay = flow.handoffDay(r.trip),
                         handoff = flow.handoffSheet?.let {
                             app.verst.feature.road.HandoffSheetUi(
@@ -457,7 +480,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun save() = flow.save()
                         override fun share() {
                             flow.tripShared()
-                            share(context, r.shareText)
+                            share(context, shareText(context, r))
                         }
                         override fun replace(stop: StopDto) = flow.openReplace(stop)
                         override fun pick(altId: String?) = flow.pickAlternative(altId)
@@ -482,6 +505,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun focusShown() = flow.roadFocusShown()
                         override fun parking(stop: StopDto) = flow.openParking(stop)
                         override fun closeParking() = flow.closeParking()
+                        override fun closeBorder() = flow.closeBorder()
                         override fun handoff(day: Int) = flow.handoff(day)
                         override fun handoffSheet(day: Int) = flow.openHandoffSheet(day)
                         override fun handoffSheet(): app.verst.feature.road.HandoffSheetActions = object : app.verst.feature.road.HandoffSheetActions {
@@ -544,7 +568,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun save() = flow.save()
                         override fun share() {
                             flow.tripShared()
-                            share(context, r.shareText)
+                            share(context, shareText(context, r))
                         }
                         override fun refit() = flow.refit()
                     },

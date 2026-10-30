@@ -61,8 +61,19 @@ fun errorMessageRes(code: String): Int = when (code) {
     "INVALID_INPUT" -> R.string.error_invalid_input
     "UNREACHABLE" -> R.string.error_unreachable
     "TOO_SHORT" -> R.string.error_too_short
+    // CEO 29.10: a trip abroad is planned only on the server
+    app.verst.engine.ServerPlannerGateway.ABROAD_OFFLINE -> R.string.abroad_server_line
+    app.verst.engine.ServerPlannerGateway.ABROAD_NO_SERVER -> R.string.abroad_error_no_server
+    app.verst.engine.ServerPlannerGateway.ABROAD_NO_CONSENT -> R.string.abroad_error_no_consent
     else -> R.string.error_upstream // UPSTREAM, INTERNAL, NO_WORLD, TZDATA_MISSING, engine start failures
 }
+
+/**
+ * The error's text: CEO 29.10 — the engine's own sentence about a point abroad («Граница закрыта для легковых до
+ * 2 января 2027: …»), else our copy for the code.
+ */
+@Composable
+fun errorMessage(e: EngineErrorDto): String = e.abroadText ?: stringResource(errorMessageRes(e.code))
 
 fun actionLabelRes(action: DriveAction): Int = when (action) {
     DriveAction.RETRY -> R.string.common_try_again
@@ -101,7 +112,7 @@ fun DriveScreen(
                 when {
                     err != null -> {
                         val act = action(err)
-                        val msg = stringResource(errorMessageRes(err.code))
+                        val msg = errorMessage(err)
                         PrimaryCta(stringResource(actionLabelRes(act)), { onErrorAction(act, msg) }, Modifier.testTag("drive.error.cta"))
                     }
                     ui.done && ui.noFit -> PrimaryCta(stringResource(R.string.budget_nofit_cta), onDone, Modifier.testTag("drive.nofit"))
@@ -122,8 +133,13 @@ private fun Panel(ui: DriveUi, kmLabel: String) {
         val err = ui.error
         if (err != null) {
             Txt(stringResource(R.string.drive_failed), T.label.md, C.navi.label, Modifier.testTag("drive.failed"))
-            Txt(stringResource(errorMessageRes(err.code)), T.body.step, C.text.primary, Modifier.semantics { liveRegion = LiveRegionMode.Polite })
-            Txt(stringResource(R.string.drive_error_sub), T.body.md, C.navi.text)
+            val abroad = err.abroadText
+            Txt(
+                abroad ?: stringResource(errorMessageRes(err.code)), T.body.step, C.text.primary,
+                Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("drive.error.message"), maxLines = if (abroad != null) 4 else Int.MAX_VALUE,
+            )
+            // a verdict about the place is not fixed by trying again
+            if (abroad == null) Txt(stringResource(R.string.drive_error_sub), T.body.md, C.navi.text)
             return@Column
         }
         Row(Modifier.fillMaxWidth()) {

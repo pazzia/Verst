@@ -97,6 +97,32 @@ class ServerClientTest {
         assertEquals("TOO_SHORT", (client.plan(input) {} as EngineResult.Err).error.code)
     }
 
+    /**
+     * CEO 29.10 (trips abroad): `INVALID_INPUT` about a point abroad is the engine's verdict — final, with the server's
+     * sentence in `message` (the sample is the API's real body for Москва → Баку, core-model test resources).
+     */
+    @Test
+    fun aVerdictAboutAPointAbroadIsFinal() = runBlocking {
+        store.auth = ServerAuth(server.url("/").toString().trimEnd('/'), "d1", "x".repeat(43))
+        val closed = root.resolve("android/core-model/src/test/resources/abroad/error-border-closed.json").readText()
+        server.enqueue(MockResponse().setResponseCode(400).setBody(closed))
+        val r = client.plan(input) {} as EngineResult.Err
+        assertEquals("border_closed", r.error.reason)
+        assertEquals("AZ", r.error.country)
+        assertEquals("2027-01-02T06:00:00+04:00", r.error.until)
+        assertTrue(r.error.abroadText!!.startsWith("Граница закрыта для легковых до 2 января 2027"))
+        // the same in the stream, and the other two reasons
+        val payload = Json.parseToJsonElement(closed).jsonObject["error"].toString()
+        server.enqueue(sse("event: error\ndata: $payload"))
+        assertEquals("border_closed", (client.plan(input) {} as EngineResult.Err).error.reason)
+        for (reason in listOf("outside_supported", "no_crossing")) {
+            server.enqueue(MockResponse().setResponseCode(400).setBody("""{"error":{"code":"INVALID_INPUT","message":"Туда пока не планируем","details":{"field":"destination","reason":"$reason"}}}"""))
+            val e = client.plan(input) {} as EngineResult.Err
+            assertEquals(reason, e.error.reason)
+            assertEquals("Туда пока не планируем", e.error.abroadText)
+        }
+    }
+
     @Test
     fun everyOtherServerAnswerIsUnavailableSoThePhonePlans() = runBlocking {
         store.auth = ServerAuth(server.url("/").toString().trimEnd('/'), "d1", "x".repeat(43))

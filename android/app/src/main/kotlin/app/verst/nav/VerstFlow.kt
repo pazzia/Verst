@@ -248,6 +248,9 @@ class VerstFlow(
     /** 5.5 §10.6: the stop whose ParkingSheet is open (Road ahead). */
     var roadParking: StopDto? by mutableStateOf(null)
         internal set
+    /** CEO 29.10 (trips abroad): the border stop whose sheet is open (documents, fees, facts with sources). */
+    var roadBorder: StopDto? by mutableStateOf(null)
+        internal set
 
     // ---- 5.8 budget fit
     var noFit: app.verst.core.model.dto.NoFitDto? by mutableStateOf(null)
@@ -747,6 +750,14 @@ class VerstFlow(
 
     /** System back and every back link. Sheets close first. Returns false on the root (the activity finishes). */
     fun back(): Boolean {
+        if (abroadConsentAsk) {
+            answerAbroadConsent(false)
+            return true
+        }
+        if (roadBorder != null) {
+            closeBorder()
+            return true
+        }
         if (ageGate != null) {
             answerAge(false)
             return true
@@ -1011,16 +1022,43 @@ class VerstFlow(
     val destinationPoint: GeoPoint? get() = destination?.let { GeoPoint(it.name, it.lat, it.lon) }
 
     /**
-     * CEO 29.10: the picked КУДА is an address abroad. The engine plans only in Russia (`INVALID_INPUT`
-     * outside_russia), so no estimate and no plan are sent: the Navigator shows the plate and hands the road to the
-     * maps app instead ([abroadHandoff]).
+     * CEO 29.10: the picked КУДА is an address abroad. The phone engine plans only in Russia (`INVALID_INPUT`
+     * outside_russia): no estimate is asked for it, and (wave 1) only the server plans it — see [abroadOnServer].
      */
     val destinationAbroad: Boolean get() = readyRoute == null && destination?.abroad == true
+
+    /**
+     * CEO 29.10 (trips abroad, wave 1): this build has a server, which plans trips abroad. The app's gateway knows it;
+     * unit tests with a fake engine set it.
+     */
+    var serverConfigured: () -> Boolean = { (gateway as? app.verst.engine.ServerPlannerGateway)?.serverConfigured == true }
+
+    /** Security review В-1: the tester's consent to plan on the server (AppPrefs in the app; unit tests swap both). */
+    var serverConsentRead: () -> Boolean = { app.verst.settings.AppPrefs.settings.serverConsent }
+    var serverConsentWrite: () -> Unit = { app.verst.settings.AppPrefs.update { it.copy(serverConsent = true) } }
+
+    /**
+     * CEO 29.10 (wave 1): КУДА is abroad and the server can plan it now (a server in this build, the phone online) —
+     * whatever «Где строить маршрут» says. The screens say so in one line («Поездку за границу строит сервер Версты —
+     * нужен интернет.»).
+     */
+    val abroadOnServer: Boolean get() = destinationAbroad && serverConfigured() && connectivity.online
+
+    /**
+     * КУДА is abroad and nothing can plan it now (offline, or a build without a server): the Navigator's plate with the
+     * maps hand-off ([abroadHandoff]); no plan is sent.
+     */
+    val abroadBlocked: Boolean get() = destinationAbroad && !abroadOnServer
+
+    /** Security review В-1 before the first trip abroad: the settings' consent dialog («Согласен» / «Не сейчас»). */
+    var abroadConsentAsk by mutableStateOf(false)
+        private set
 
     /** ПОЕХАЛИ on 5.2 → Instruments with A → B. */
     fun openInstrumentsFree() {
         val d = destination ?: return
-        if (d.abroad) return // CEO 29.10: never a doomed plan abroad (the plate says why)
+        // CEO 29.10: never a doomed plan abroad — only the server plans there (the plate says why when it can't)
+        if (d.abroad && !(serverConfigured() && connectivity.online)) return
         readyRoute = null
         if (!dailyKmTouched) dailyKm = TripMath.defaultDailyKm(rowKm[d.pointKey] ?: 0)
         push(Route.Instruments)
@@ -1126,6 +1164,7 @@ class VerstFlow(
         mood = mood,
         vehicle = carVehicle(),
         avoidTolls = app.verst.settings.AppPrefs.settings.avoidTolls,
+        abroad = destinationAbroad, // CEO 29.10: the server plans it, never the phone
     )
 
     /** The car from the settings (traveller К4), or null while it is the engine's default car. */
@@ -1143,9 +1182,17 @@ class VerstFlow(
 
     // ------------------------------------------------------------------------------------------ drive
 
-    /** ПОЕХАЛИ on 5.3 → Drive; the plan runs on `verst-python`, the steps are paced ≥ 400 ms (5.4 §6). */
+    /**
+     * ПОЕХАЛИ on 5.3 → Drive; the plan runs on `verst-python` (or the server), the steps are paced ≥ 400 ms (5.4 §6).
+     * CEO 29.10: a trip abroad goes to the server only — nothing without one or offline (the plate), and the consent
+     * dialog first when the tester has not agreed to plan on the server yet.
+     */
     fun go() {
-        if (destinationAbroad) return // CEO 29.10: a plan abroad would only fail (`INVALID_INPUT` outside_russia)
+        if (abroadBlocked) return // a plan abroad on the phone would only fail (`INVALID_INPUT` outside_russia)
+        if (destinationAbroad && !serverConsentRead()) {
+            abroadConsentAsk = true
+            return
+        }
         if (top != Route.Drive) push(Route.Drive)
         val r = request()
         track {
@@ -1157,6 +1204,14 @@ class VerstFlow(
             )
         }
         startPlan(r, planId = UUID.randomUUID().toString()) // tracking plan §2.5 q3: a new trip_id per ПОЕХАЛИ only
+    }
+
+    /** The consent dialog's answer: «Согласен» records the consent and plans on the server; «Не сейчас» stays. */
+    fun answerAbroadConsent(agree: Boolean) {
+        abroadConsentAsk = false
+        if (!agree) return
+        serverConsentWrite()
+        if (serverConsentRead()) go()
     }
 
     fun retryPlan() = startPlan(lastPlanRequest ?: request())
@@ -1271,6 +1326,7 @@ class VerstFlow(
         openedFromSaved = fromSaved
         expandedLine = null
         replace = null
+        roadBorder = null
         stopMenu = null
         stopHandoff = null
         dayMenu = null
@@ -1297,9 +1353,16 @@ class VerstFlow(
 
     fun driveAction(code: String): DriveAction = when (code) {
         "INVALID_INPUT" -> DriveAction.TO_INSTRUMENTS
-        "UNREACHABLE", "TOO_SHORT" -> DriveAction.CHANGE_ROUTE
+        "UNREACHABLE", "TOO_SHORT", app.verst.engine.ServerPlannerGateway.ABROAD_NO_SERVER -> DriveAction.CHANGE_ROUTE
+        app.verst.engine.ServerPlannerGateway.ABROAD_NO_CONSENT -> DriveAction.TO_INSTRUMENTS
         else -> DriveAction.RETRY
     }
+
+    /**
+     * CEO 29.10: the engine's verdict about a point abroad (a closed border, no crossing, a country it does not plan)
+     * is about the route — back to the Navigator with the server's own sentence; the rest by [code][driveAction].
+     */
+    fun driveAction(e: EngineErrorDto): DriveAction = if (e.abroadVerdict) DriveAction.CHANGE_ROUTE else driveAction(e.code)
 
     /** Error CTA: retry, back to Instruments, or back to the Navigator with the error in its caption. */
     fun onDriveError(action: DriveAction, message: String) {

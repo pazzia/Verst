@@ -52,6 +52,7 @@ class ServerPlannerGatewayTest {
     private val phone = Phone()
     private var enabled = true
     private var online = true
+    private var consent = true
     private val store = object : ServerClient.AuthStore {
         var auth: ServerAuth? = null
         override fun load() = auth
@@ -73,7 +74,7 @@ class ServerPlannerGatewayTest {
         store.auth = ServerAuth(server.url("/").toString().trimEnd('/'), "d1", "x".repeat(43))
         val http = OkHttpClient.Builder().build()
         val client = ServerClient({ server.url("/").toString() }, store, "0.2", { "ru-RU" }, { http })
-        gateway = ServerPlannerGateway(phone, client, { enabled }, { online })
+        gateway = ServerPlannerGateway(phone, client, { enabled }, { online }, consent = { consent })
     }
 
     @After
@@ -117,6 +118,61 @@ class ServerPlannerGatewayTest {
         assertEquals("UNREACHABLE", (gateway.planOutcome("r1", request) {} as EngineResult.Err).error.code)
         assertEquals(0, phone.plans)
         assertTrue(gateway.lastPlan!!.server)
+    }
+
+    // ---- CEO 29.10: trips abroad (wave 1) — the server only, whatever the setting, never the phone
+
+    private val tbilisi = PlanRequest(GeoPoint("Москва", 55.7558, 37.6173), GeoPoint("Тбилиси", 41.7151, 44.8271), abroad = true)
+
+    @Test
+    fun aTripAbroadGoesToTheServerEvenWithThePhoneSetting() = runBlocking {
+        enabled = false // «Где строить маршрут»: Телефон
+        server.enqueue(MockResponse().setHeader("Content-Type", "text/event-stream").setBody("event: done\ndata: $result\n\n"))
+        val r = gateway.planOutcome("r1", tbilisi) {}
+        assertTrue(r is EngineResult.Ok && (r as EngineResult.Ok).value is PlanOutcome.Plan)
+        assertEquals(1, server.requestCount)
+        assertEquals(0, phone.plans)
+        assertTrue(gateway.lastPlan!!.server)
+        assertTrue(gateway.serverConfigured)
+    }
+
+    @Test
+    fun aTripAbroadNeverFallsBackToThePhone() = runBlocking {
+        enabled = false
+        // the closed border: the server's verdict and sentence, as is
+        server.enqueue(
+            MockResponse().setResponseCode(400).setBody(
+                """{"error":{"code":"INVALID_INPUT","message":"Граница закрыта для легковых до 2 января 2027","details":{"field":"destination","reason":"border_closed","country":"AZ","until":"2027-01-02T06:00:00+04:00"}}}""",
+            ),
+        )
+        val closed = (gateway.planOutcome("r1", tbilisi) {} as EngineResult.Err).error
+        assertEquals("border_closed", closed.reason)
+        assertEquals("Граница закрыта для легковых до 2 января 2027", closed.abroadText)
+        // server trouble: an error to show, not a phone plan that would reject the point
+        server.enqueue(MockResponse().setResponseCode(503).setBody("{}"))
+        assertEquals("UPSTREAM", (gateway.planOutcome("r2", tbilisi) {} as EngineResult.Err).error.code)
+        // a schema rejection too (for a Russian trip it falls back)
+        server.enqueue(MockResponse().setResponseCode(400).setBody("""{"error":{"code":"INVALID_INPUT","message":"","details":{"field":"mood"}}}"""))
+        assertEquals("UPSTREAM", (gateway.planOutcome("r3", tbilisi) {} as EngineResult.Err).error.code)
+        // offline, or before the consent: nothing is sent anywhere
+        online = false
+        assertEquals(ServerPlannerGateway.ABROAD_OFFLINE, (gateway.planOutcome("r4", tbilisi) {} as EngineResult.Err).error.code)
+        online = true
+        consent = false
+        assertEquals(ServerPlannerGateway.ABROAD_NO_CONSENT, (gateway.planOutcome("r5", tbilisi) {} as EngineResult.Err).error.code)
+        assertEquals(3, server.requestCount)
+        assertEquals(0, phone.plans)
+    }
+
+    @Test
+    fun aTripAbroadWithoutAServerInTheBuild() = runBlocking {
+        val none = ServerPlannerGateway(phone, ServerClient({ null }, store, "0.2", { "ru-RU" }), { true }, { true })
+        assertFalse(none.serverConfigured)
+        assertEquals(ServerPlannerGateway.ABROAD_NO_SERVER, (none.planOutcome("r1", tbilisi) {} as EngineResult.Err).error.code)
+        assertEquals(0, phone.plans)
+        // a Russian trip still plans on the phone
+        assertEquals("PHONE", (none.planOutcome("r2", request) {} as EngineResult.Err).error.code)
+        assertEquals(1, phone.plans)
     }
 
     @Test

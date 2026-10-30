@@ -104,11 +104,15 @@ data class NavigatorUi(
     /** 5.12 §5: КУДА autofocuses (false after a GPS fix set ОТКУДА). */
     val focusTo: Boolean = true,
     /**
-     * CEO 29.10: КУДА is an address abroad — no plan (the engine plans only in Russia): the plate and the button
-     * that opens the road in [abroadMaps] (the preferred maps app).
+     * CEO 29.10: КУДА is an address abroad and nothing can plan it now (offline, or no server in this build; the phone
+     * engine plans only in Russia): the plate and the button that opens the road in [abroadMaps] (the preferred maps app).
      */
     val abroad: Boolean = false,
     val abroadMaps: app.verst.nav.HandoffApp = app.verst.nav.HandoffApp.MAPS,
+    /** CEO 29.10 (wave 1): КУДА is abroad and the server plans it — one line says so, ПОЕХАЛИ works. */
+    val abroadServer: Boolean = false,
+    /** The plate's reason: this build has no server (else: no internet now). */
+    val abroadNoServer: Boolean = false,
 )
 
 /** 5.12: location and address answers of the Navigator. */
@@ -288,7 +292,10 @@ private fun Panel(
             if (ui.editingFrom && typing) MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
             if (!picked && ui.addressQuery && ui.addressFirst) AddressBlock(ui, q, location::findAddress, onPick)
             when {
-                picked -> if (ui.abroad) AbroadPlate(ui.destination?.name.orEmpty(), ui.abroadMaps, onAbroadMaps)
+                picked -> {
+                    if (ui.abroad) AbroadPlate(ui.destination?.name.orEmpty(), ui.abroadMaps, ui.abroadNoServer, onAbroadMaps)
+                    if (ui.abroadServer) AbroadServerLine()
+                }
                 q.length < 2 -> if (ui.popular.isNotEmpty()) {
                     Txt(stringResource(R.string.navigator_popular), T.label.md, C.navi.hint, Modifier.padding(top = 4.dp))
                     Rows(ui.popular.take(6), ui.rowKm, onPick)
@@ -554,17 +561,18 @@ private fun androidx.compose.foundation.layout.BoxScope.LocationSheet(windowH: a
 }
 
 /**
- * CEO 29.10: КУДА is abroad. The engine plans stops, nights and the budget only in Russia, so the plate says so
- * honestly and offers the road itself in the preferred maps app (ОТКУДА → КУДА), instead of a plan that would fail.
+ * CEO 29.10: КУДА is abroad and cannot be planned now. Only the server plans trips abroad (the phone engine knows only
+ * Russia), so the plate says honestly why not now — no internet, or no server in this build — and offers the road
+ * itself in the preferred maps app (ОТКУДА → КУДА), instead of a plan that would fail.
  */
 @Composable
-private fun AbroadPlate(place: String, maps: app.verst.nav.HandoffApp, onMaps: () -> Unit) {
+private fun AbroadPlate(place: String, maps: app.verst.nav.HandoffApp, noServer: Boolean, onMaps: () -> Unit) {
     Column(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list).padding(12.dp).testTag("navigator.abroad"),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Txt(stringResource(R.string.navigator_abroad_title), T.list.title, C.text.primary)
-        Txt(stringResource(R.string.navigator_abroad_body, place), T.body.sm, C.navi.labelSecondary)
+        Txt(stringResource(if (noServer) R.string.navigator_abroad_body_no_server else R.string.navigator_abroad_body, place), T.body.sm, C.navi.labelSecondary)
         val label = stringResource(if (maps == app.verst.nav.HandoffApp.GOOGLE) R.string.handoff_google_car else R.string.handoff_maps_car)
         Box(
             Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).clip(RoundedCornerShape(DesignTokens.radius.r10))
@@ -572,6 +580,16 @@ private fun AbroadPlate(place: String, maps: app.verst.nav.HandoffApp, onMaps: (
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center,
         ) { Txt(label, T.button.md, C.text.onLight, maxLines = 1) }
+    }
+}
+
+/** CEO 29.10 (wave 1): КУДА abroad goes to the server — one line under the picked КУДА. */
+@Composable
+private fun AbroadServerLine() {
+    Row(Modifier.fillMaxWidth().padding(top = 4.dp).testTag("navigator.abroad.server"), verticalAlignment = Alignment.CenterVertically) {
+        app.verst.core.ui.components.GlyphIcon(app.verst.core.ui.components.Glyph.INFO, C.navi.labelSecondary, 14.dp)
+        Spacer(Modifier.width(6.dp))
+        Txt(stringResource(R.string.abroad_server_line), T.body.sm, C.navi.labelSecondary)
     }
 }
 

@@ -104,7 +104,18 @@ data class StopDto(
     val unknownFacts: List<String> = emptyList(),
     /** ADR-0019: the engine's line for them («Часы не известны — уточните»); null for open data (its ring says it). */
     val unknownRu: String? = null,
+    /**
+     * CEO 29.10 (trips abroad, server only): a `kind: "border"` stop's crossing — documents, fees, facts with their
+     * sources, the wait; null on every other stop and in every trip planned before.
+     */
+    val border: BorderDto? = null,
+    /** Block 1 local time: the zone of a stop whose clock differs from the trip's, and the engine's line for it. */
+    val localTz: String? = null,
+    val localTimeRu: String? = null,
 ) {
+    /** CEO 29.10: a night or a meal abroad — its price is not known (`unknownFacts: ["price"]`), never 0 ₽. */
+    val priceUnknown: Boolean get() = "price" in unknownFacts
+
     /**
      * A «Разминка» stop of the fun mood (5.5 §10.4): `funFor` (ADR-0015 §5) or, as the engine sends it today, a
      * sight with a `rest.fun.*` reason («Весело и познавательно: 30 минут — …»).
@@ -242,6 +253,8 @@ data class TripDto(
     val budgetFit: BudgetFitDto? = null,
     /** ADR-0012 §4: the route left the fixture road graph (synthetic) — distances are approximate. */
     val approxDistances: Boolean = false,
+    /** CEO 29.10 (trips abroad, server only): what the trip abroad costs and what the rouble total leaves out. */
+    val abroad: AbroadDto? = null,
 )
 
 @Serializable
@@ -284,9 +297,30 @@ data class EngineErrorDto(
     val noData: List<String> = emptyList(),
     /** CEO 29.10: the engine's sentence for [noData] («У нас пока нет данных о пивных барах в этом городе — …»). */
     val messageRu: String? = null,
+    /** CEO 29.10 (trips abroad): the country of a point the engine cannot plan to (`AZ`), and until when (ISO). */
+    val country: String? = null,
+    val until: String? = null,
 ) {
     /** CEO 29.10: `NOT_ENOUGH_POIS` because we have no data of the kind here (not «мало мест»). */
     val isNoData: Boolean get() = reason == "no_data" || noData.isNotEmpty()
+
+    /**
+     * CEO 29.10 (trips abroad, wave 1): the engine's verdict about a point abroad — outside what it plans, a closed
+     * border (Азербайджан), no crossing. Final: the phone engine knows only Russia and could not do better.
+     */
+    val abroadVerdict: Boolean get() = code == "INVALID_INPUT" && reason in ABROAD_REASONS
+
+    /**
+     * The sentence to show for an [abroadVerdict], as the engine wrote it: `messageRu` from the phone bridge, the
+     * API's `message` from the server (where it puts `messageRu`); null when it is not such a verdict.
+     */
+    val abroadText: String?
+        get() = if (abroadVerdict) (messageRu ?: message)?.takeIf { it.isNotBlank() } else null
+
+    companion object {
+        /** `INVALID_INPUT.reason` of a point abroad (docs/plan/abroad-wave1-engine.md «Формат ответа»). */
+        val ABROAD_REASONS = setOf("outside_supported", "border_closed", "no_crossing")
+    }
 
     /** The engine's verified suggestions, decoded defensively (unknown shapes are skipped). */
     val walkSuggestions: List<WalkSuggestion>

@@ -869,6 +869,180 @@ class VerstFlowTest {
         assertEquals(1, gw.plans)
     }
 
+    // ---- CEO 29.10: trips abroad, wave 1 — only the server plans them
+
+    /** The server of the abroad tests (no network in unit tests): what it answers, what it was asked. */
+    private class FakeServer : app.verst.data.net.PlanServer {
+        var present = true
+        val inputs = mutableListOf<String>()
+        /** null: the server is unavailable (transport, 5xx). */
+        var answer: EngineResult<app.verst.core.model.dto.PlanOutcome>? = null
+        override val configured: Boolean get() = present
+        override suspend fun plan(inputJson: String, onEvent: (PlanEventDto) -> Unit): EngineResult<app.verst.core.model.dto.PlanOutcome> {
+            inputs += inputJson
+            return answer ?: throw app.verst.data.net.ServerUnavailable("HTTP 503")
+        }
+    }
+
+    /** Real engine output: Владикавказ → Тбилиси on the server's `world_v1` (core-model test resources). */
+    private val abroadPlan: EngineResult<app.verst.core.model.dto.PlanOutcome> by lazy {
+        val result = root.resolve("android/core-model/src/test/resources/abroad/plan-vladikavkaz-tbilisi.json").readText()
+        EngineJson.planOutcome("""{"ok":true,"result":$result}""")
+    }
+    private val tbilisi = SuggestionDto("address", "Тбилиси", "Тбилиси · Грузия", 41.7151, 44.8271, countryCode = "ge")
+    private val baku = SuggestionDto("address", "Баку", "Баку · Азербайджан", 40.4093, 49.8671, countryCode = "az")
+
+    /**
+     * «Где строить маршрут»: Телефон (`enabled = false`), yet a destination abroad goes to the server — after the
+     * tester's consent (the settings' dialog), and a Russian destination still plans on the phone.
+     */
+    @Test
+    fun aTripAbroadGoesToTheServerEvenWithThePhoneSettingAfterTheConsent() = runTest {
+        val phone = FakeGateway()
+        val server = FakeServer().apply { answer = abroadPlan }
+        val net = app.verst.engine.Connectivity()
+        var consent = false
+        val gw = app.verst.engine.ServerPlannerGateway(phone, server, enabled = { false }, online = { net.online }, consent = { consent })
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, connectivity = net) {}
+        flow.serverConsentRead = { consent }
+        flow.serverConsentWrite = { consent = true }
+        settle()
+        flow.openNavigator()
+        settle()
+        val estimatesBefore = phone.estimates.size
+        flow.pick(tbilisi)
+        settle()
+        assertTrue(flow.destinationAbroad)
+        assertTrue(flow.abroadOnServer)
+        assertFalse("no plate: the server plans it", flow.abroadBlocked)
+        assertEquals("no estimate abroad on the phone", estimatesBefore, phone.estimates.size)
+        flow.openInstrumentsFree()
+        assertEquals(Route.Instruments, flow.top)
+
+        // no consent yet: the dialog, nothing sent; «Не сейчас» (or back) keeps the Instruments
+        flow.go()
+        assertTrue(flow.abroadConsentAsk)
+        assertEquals(Route.Instruments, flow.top)
+        flow.answerAbroadConsent(false)
+        assertFalse(flow.abroadConsentAsk)
+        assertFalse(consent)
+        flow.go()
+        assertTrue(flow.abroadConsentAsk)
+        assertTrue(flow.back())
+        assertFalse(flow.abroadConsentAsk)
+        assertEquals(Route.Instruments, flow.top)
+        settle(10_000)
+        assertTrue(server.inputs.isEmpty())
+
+        // «Согласен»: the consent is kept and the trip is planned on the server
+        flow.go()
+        flow.answerAbroadConsent(true)
+        assertTrue(consent)
+        settle(10_000)
+        assertEquals(1, server.inputs.size)
+        assertTrue(server.inputs.single().contains("44.8271"))
+        assertFalse("routing only", server.inputs.single().contains("abroad"))
+        assertEquals(0, phone.plans)
+        assertTrue(flow.lastPlanRequest!!.abroad)
+        assertEquals(Route.Road, flow.top)
+        val trip = flow.result!!.trip
+        assertTrue(trip.abroad!!.roubleTotalIncomplete)
+        assertTrue(trip.daysList.flatMap { it.stops }.any { it.kind == "border" && it.border != null })
+        assertTrue(gw.lastPlan!!.server)
+
+        // the border row opens its sheet; back closes it
+        val border = trip.daysList.flatMap { it.stops }.first { it.kind == "border" }
+        assertTrue(flow.tappable(border))
+        flow.openCard(border)
+        assertEquals(border, flow.roadBorder)
+        assertNull(flow.card)
+        assertTrue(flow.back())
+        assertNull(flow.roadBorder)
+        assertEquals(Route.Road, flow.top)
+
+        // a Russian destination with the phone setting: the phone plans, as before
+        while (flow.back()) Unit
+        flow.openNavigator()
+        flow.pick(yar)
+        assertFalse(flow.destinationAbroad)
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        assertEquals(1, phone.plans)
+        assertEquals(1, server.inputs.size)
+        assertFalse(flow.lastPlanRequest!!.abroad)
+    }
+
+    /**
+     * Offline (or no server in the build): the plate with the maps hand-off, nothing planned. The server's verdict on
+     * a closed border is shown in its own words and goes back to the Navigator; neither it nor a server failure falls
+     * back to the phone.
+     */
+    @Test
+    fun aTripAbroadOfflineShowsThePlateAndTheServersVerdictIsShownWithoutThePhone() = runTest {
+        val phone = FakeGateway()
+        val server = FakeServer()
+        val net = app.verst.engine.Connectivity()
+        val gw = app.verst.engine.ServerPlannerGateway(phone, server, enabled = { true }, online = { net.online }, consent = { true })
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, connectivity = net) {}
+        flow.serverConsentRead = { true }
+        settle()
+        flow.openNavigator()
+        settle()
+        flow.pick(baku)
+
+        // offline: the honest plate, ПОЕХАЛИ does nothing
+        flow.setOffline(true)
+        assertTrue(flow.abroadBlocked)
+        assertFalse(flow.abroadOnServer)
+        flow.openInstrumentsFree()
+        assertEquals(Route.Navigator, flow.top)
+        flow.go()
+        settle(10_000)
+        assertEquals(Route.Navigator, flow.top)
+        assertTrue(server.inputs.isEmpty())
+        assertEquals(0, phone.plans)
+        // no server in the build: the plate too (its other reason)
+        flow.setOffline(false)
+        server.present = false
+        assertTrue(flow.abroadBlocked)
+        assertFalse(flow.serverConfigured())
+        server.present = true
+        assertTrue(flow.abroadOnServer)
+
+        // Азербайджан: the server's verdict, final — shown as is, «Изменить маршрут» back to the Navigator
+        val sentence = "Граница закрыта для легковых до 2 января 2027: сухопутные границы Азербайджана закрыты. Не проверено."
+        server.answer = EngineResult.Err(
+            app.verst.core.model.dto.EngineErrorDto(
+                "INVALID_INPUT", sentence, field = "destination", reason = "border_closed", country = "AZ", until = "2027-01-02T06:00:00+04:00",
+            ),
+        )
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        assertEquals(Route.Drive, flow.top)
+        val err = flow.drive.error!!
+        assertEquals("border_closed", err.reason)
+        assertEquals(sentence, err.abroadText)
+        assertEquals(DriveAction.CHANGE_ROUTE, flow.driveAction(err))
+        assertEquals(0, phone.plans)
+        flow.onDriveError(flow.driveAction(err), err.abroadText!!)
+        assertEquals(Route.Navigator, flow.top)
+        assertEquals(sentence, flow.routeError)
+
+        // server trouble for a trip abroad: an error to retry, never a phone plan (it would reject the point)
+        flow.pick(tbilisi)
+        assertNull(flow.routeError)
+        server.answer = null
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        assertEquals("UPSTREAM", flow.drive.error!!.code)
+        assertEquals(DriveAction.RETRY, flow.driveAction(flow.drive.error!!))
+        assertEquals(2, server.inputs.size)
+        assertEquals(0, phone.plans)
+    }
+
     @Test
     fun noFitOptionsGoBackToInstrumentsAndTheMinimumIsShownOverBudget() = runTest {
         val gw = object : PlannerGateway by FakeGateway() {

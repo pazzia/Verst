@@ -244,6 +244,11 @@ data class PlanRequest(
     /** The car from the settings; null = the engine's default (8 l/100 km, АИ-95, 50 l), not sent. */
     val vehicle: VehicleInput? = null,
     val avoidTolls: Boolean = false,
+    /**
+     * CEO 29.10 (trips abroad, wave 1): the destination is abroad, so only the server plans it — whatever «Где строить
+     * маршрут» says, and never the phone engine (it knows only Russia). Routing only: not sent to the engine.
+     */
+    val abroad: Boolean = false,
 ) {
     fun toInputJson(): String {
         fun point(p: GeoPoint): JsonElement = buildJsonObject {

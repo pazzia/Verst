@@ -30,6 +30,8 @@ class VerstApp : Application(), coil.ImageLoaderFactory {
         app.verst.engine.ServerPlannerGateway(
             ChaquopyPlannerGateway(engine), server,
             enabled = { app.verst.settings.AppPrefs.settings.planOnServer }, online = { flow.connectivity.online },
+            // CEO 29.10: a trip abroad goes to the server whatever the setting, but only with the tester's consent
+            consent = { app.verst.settings.AppPrefs.settings.serverConsent },
         )
     }
 

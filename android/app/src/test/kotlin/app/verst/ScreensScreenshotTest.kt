@@ -206,7 +206,10 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("≈", substring = true, useUnmergedTree = true).assertDoesNotExist()
     }
 
-    /** CEO 29.10: КУДА abroad — the honest plate instead of a plan, its button opens the road in the maps app. */
+    /**
+     * CEO 29.10: КУДА abroad offline — the honest plate (only the server plans trips abroad, it needs the internet)
+     * instead of a plan; its button opens the road in the maps app.
+     */
     @Test
     fun navigatorAbroadPlate() {
         val prague = SuggestionDto("address", "Прага", "Прага · Чехия", 50.0874, 14.4213, countryCode = "cz")
@@ -215,12 +218,36 @@ class ScreensScreenshotTest {
             NavigatorScreen(navigator("Прага", emptyList(), prague).copy(abroad = true), {}, {}, {}, {}, {}, onAbroadMaps = { maps++ })
         }
         compose.onNodeWithTag("navigator.abroad", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("Маршруты за границу Верста пока не строит", useUnmergedTree = true).assertExists()
-        compose.onNodeWithText("смету мы считаем только по России", substring = true, useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Поездку за границу строит только сервер Версты", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Сейчас нет интернета", substring = true, useUnmergedTree = true).assertExists()
         compose.onNodeWithText("«Прага»", substring = true, useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("navigator.start").assertIsNotEnabled()
         compose.onNodeWithTag("navigator.abroad.maps").performScrollTo().performClick()
         compose.waitForIdle()
         assertEquals(1, maps)
+    }
+
+    /** CEO 29.10: the same plate in a build without a server says that reason. */
+    @Test
+    fun navigatorAbroadPlateNoServer() {
+        val tbilisi = SuggestionDto("address", "Тбилиси", "Тбилиси · Грузия", 41.7151, 44.8271, countryCode = "ge")
+        shot("navigator", "abroad-no-server") {
+            NavigatorScreen(navigator("Тбилиси", emptyList(), tbilisi).copy(abroad = true, abroadNoServer = true), {}, {}, {}, {}, {})
+        }
+        compose.onNodeWithText("В этой сборке нет сервера", substring = true, useUnmergedTree = true).assertExists()
+    }
+
+    /** CEO 29.10 (wave 1): online with a server, КУДА abroad is planned there — one line, no plate, ПОЕХАЛИ works. */
+    @Test
+    fun navigatorAbroadOnTheServer() {
+        val tbilisi = SuggestionDto("address", "Тбилиси", "Тбилиси · Грузия", 41.7151, 44.8271, countryCode = "ge")
+        shot("navigator", "abroad-server") {
+            NavigatorScreen(navigator("Тбилиси", emptyList(), tbilisi).copy(abroadServer = true), {}, {}, {}, {}, {})
+        }
+        compose.onNodeWithTag("navigator.abroad", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("navigator.abroad.server", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Поездку за границу строит сервер Версты — нужен интернет.", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("navigator.start").assertIsEnabled()
     }
 
     @Test
@@ -282,6 +309,19 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("весело и познавательно", substring = true).assertExists() // the caption meta suffix
     }
 
+    /** CEO 29.10: a trip abroad on the Instruments — no estimate, the one line about the server instead. */
+    @Test
+    fun instrumentsAbroad() {
+        shot("instruments", "abroad") {
+            InstrumentsScreen(
+                InstrumentsUi("Москва → Тбилиси", "Москва", false, null, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 600, 2, Mood.CALM, originGen = "Москвы", abroad = true),
+                noActions,
+            )
+        }
+        compose.onNodeWithTag("instruments.abroad", useUnmergedTree = true).assertTextEquals("Поездку за границу строит сервер Версты — нужен интернет.")
+        compose.onNodeWithTag("instruments.start").assertIsEnabled()
+    }
+
     @Test
     fun instrumentsJustDriveAdults() {
         shot("instruments", "s4-mood-just-drive") {
@@ -316,6 +356,22 @@ class ScreensScreenshotTest {
         }
         compose.onNodeWithText("Не нашли дорогу на машине до этой точки").assertExists()
         compose.onNodeWithText("Изменить маршрут").assertExists()
+    }
+
+    /** CEO 29.10: the server's verdict on a closed border, in its own words, and «Изменить маршрут». */
+    @Test
+    fun driveErrorBorderClosed() {
+        val sentence = "Граница закрыта для легковых до 2 января 2027: сухопутные границы Азербайджана закрыты для легковых машин. Не проверено."
+        val err = EngineErrorDto("INVALID_INPUT", sentence, field = "destination", reason = "border_closed", country = "AZ")
+        var message: String? = null
+        shot("drive", "error-border-closed") {
+            DriveScreen(DriveUi(error = err), "—", { DriveAction.CHANGE_ROUTE }, {}, {}, { _, m -> message = m })
+        }
+        compose.onNodeWithTag("drive.error.message", useUnmergedTree = true).assertTextEquals(sentence)
+        compose.onNodeWithText("Параметры поездки сохранены", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Изменить маршрут").performClick()
+        compose.waitForIdle()
+        assertEquals(sentence, message) // the Navigator caption shows it
     }
 
     @Test
@@ -742,6 +798,103 @@ class ScreensScreenshotTest {
         val r = v2PlanTrip("plan-synthetic.json")
         shot("road", "approx-distances") { RoadScreen(RoadUi(r.trip, "E"), noRoad) }
         compose.onNodeWithTag("road.approx", useUnmergedTree = true).assertExists()
+    }
+
+    // ---------------------------------------------------------------------------------------- CEO 29.10: trips abroad
+
+    /** Real engine output from the server's `world_v1` (core-model test resources): Владикавказ → Тбилиси. */
+    private fun abroadTrip(): PlanResultDto {
+        val result = root.resolve("android/core-model/src/test/resources/abroad/plan-vladikavkaz-tbilisi.json").readText()
+        return (EngineJson.planOutcome("""{"ok":true,"result":$result}""") as EngineResult.Ok).value.let { it as app.verst.core.model.dto.PlanOutcome.Plan }.result
+    }
+
+    /**
+     * The border row: the «граница» sign, a tap opens its sheet («Документы и сборы»); the stops after it say the local
+     * time, the café abroad «цена не указана» (never 0 ₽); the approximate-distances notice; the footer says the total
+     * leaves the costs abroad out.
+     */
+    @Test
+    fun roadAbroadBorderRow() {
+        val r = abroadTrip()
+        val stops = r.trip.daysList.flatMap { it.stops }
+        val border = stops.first { it.kind == "border" }
+        val food = stops.first { it.kind == "food" }
+        val opened = mutableListOf<String>()
+        shot("road", "abroad-border-row") {
+            RoadScreen(
+                RoadUi(r.trip, "S"),
+                object : RoadActions by noRoad {
+                    override fun card(stop: StopDto) {
+                        opened += stop.id
+                    }
+                },
+            )
+        }
+        compose.onNodeWithTag("road.approx", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.abroad", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.stop.${border.id}").assertExists()
+        assertTrue("a border row opens its sheet", compose.onNodeWithTag("road.stop.${border.id}").fetchSemanticsNode().config.contains(SemanticsActions.OnClick))
+        compose.onNodeWithTag("road.border.${border.id}", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.border.${border.id}").performSemanticsAction(SemanticsActions.OnClick)
+        compose.waitForIdle()
+        assertEquals(listOf(border.id), opened)
+        compose.onNodeWithTag("road.localtime.${food.id}", useUnmergedTree = true).assertTextEquals(food.localTimeRu!!)
+        compose.onNodeWithText("цена не указана", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.abroad.incomplete", useUnmergedTree = true).assertTextEquals("Итог без расходов за границей")
+        assertTrue(r.trip.cost.totalRub > 0)
+    }
+
+    /**
+     * The border sheet: documents, fees (counted or why not), the wait — unknown, the margin is our estimate — and every
+     * fact with «не проверено» and its source, which opens in the browser.
+     */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1400dp-port-xxhdpi")
+    fun roadAbroadBorderSheet() {
+        val r = abroadTrip()
+        val border = r.trip.daysList.flatMap { it.stops }.first { it.kind == "border" }
+        val b = border.border!!
+        val opened = mutableListOf<String>()
+        shot("road", "abroad-border-sheet", 390, 1400) {
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.ui.platform.LocalUriHandler provides object : androidx.compose.ui.platform.UriHandler {
+                    override fun openUri(uri: String) {
+                        opened += uri
+                    }
+                },
+            ) { RoadScreen(RoadUi(r.trip, "S", border = border), noRoad) }
+        }
+        compose.onNodeWithTag("border.wait", useUnmergedTree = true)
+            .assertTextEquals("Время ожидания неизвестно · в плане заложен запас 2 ч (это наша оценка, не данные)")
+        compose.onNodeWithTag("border.route", useUnmergedTree = true).assertTextEquals("Россия → Грузия")
+        compose.onNodeWithTag("border.coords", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Загранпаспорт", useUnmergedTree = true).assertExists()
+        b.documents.indices.forEach { compose.onNodeWithTag("border.doc.$it.unverified", useUnmergedTree = true).assertExists() }
+        b.facts.indices.forEach { i ->
+            compose.onNodeWithTag("border.fact.$i.unverified", useUnmergedTree = true).assertExists()
+            compose.onNodeWithTag("border.fact.$i.source.0", useUnmergedTree = true).assertExists()
+        }
+        // the TPL price is from a secondary source: shown, not counted — the engine says why
+        val tpl = b.fees.indexOfFirst { it.key == "tpl" }
+        compose.onNodeWithTag("border.fee.$tpl.extra", useUnmergedTree = true).assertTextEquals(b.fees[tpl].notCountedRu!!)
+        compose.onNodeWithTag("border.fact.0.source.0").performSemanticsAction(SemanticsActions.OnClick)
+        compose.waitForIdle()
+        assertEquals(listOf(b.facts[0].sources[0].url), opened)
+        compose.onNodeWithTag("border.ok").assertExists()
+    }
+
+    /** The Waybill's «За границей»: the total without the costs abroad, what is left out, fuel in lari as such. */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1200dp-port-xxhdpi")
+    fun waybillAbroad() {
+        val trip = abroadTrip().trip
+        shot("waybill", "abroad", 390, 1200) { WaybillScreen(waybill(trip), noWaybill) }
+        compose.onNodeWithTag("waybill.abroad", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("waybill.abroad.incomplete", useUnmergedTree = true).assertTextEquals("Итог без расходов за границей")
+        trip.abroad!!.notInRoubleTotalRu.indices.forEach { compose.onNodeWithTag("waybill.abroad.missing.$it", useUnmergedTree = true).assertExists() }
+        compose.onNodeWithTag("waybill.abroad.fuel.GE", useUnmergedTree = true)
+            .assertTextEquals("Топливо: ≈ 40\u00A0GEL — в местной валюте, в итог в рублях не входит")
+        compose.onNodeWithTag("waybill.abroad.counted", useUnmergedTree = true).assertTextContains("GEL", substring = true)
     }
 
     @Test

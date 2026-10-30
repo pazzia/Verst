@@ -149,10 +149,14 @@ data class RoadUi(
     val aboutData: Boolean = false,
     /** 5.8: the minimum of a no-fit, shown over budget everywhere. */
     val minimum: Boolean = false,
-    /** M§15.5: which rows open a card (sights, nights with a hotel). */
-    val tappable: (StopDto) -> Boolean = { it.kind == "sight" || (it.kind == "overnight" && it.hotelOptions.isNotEmpty()) },
+    /** M§15.5: which rows open a card (sights, nights with a hotel); CEO 29.10: a border crossing opens its sheet. */
+    val tappable: (StopDto) -> Boolean = {
+        it.kind == "sight" || (it.kind == "overnight" && it.hotelOptions.isNotEmpty()) || (it.kind == "border" && it.border != null)
+    },
     /** 5.5 §10.6: the stop whose ParkingSheet is open. */
     val parking: StopDto? = null,
+    /** CEO 29.10 (trips abroad): the border stop whose sheet is open. */
+    val border: StopDto? = null,
     /** 5.5 §10.1: the day «Вести в навигаторе» starts with (today's day of a running trip, else 1). */
     val handoffDay: Int = 1,
     /** 5.13 §5: the open hand-off sheet. */
@@ -211,6 +215,9 @@ interface RoadActions {
     /** 5.5 §10.6: the P part of a row → the ParkingSheet. */
     fun parking(stop: StopDto) = Unit
     fun closeParking() = Unit
+
+    /** CEO 29.10: the border sheet (opened by a tap on the row, through [card]). */
+    fun closeBorder() = Unit
 
     /** 5.13 §5 the hand-off sheet's actions. */
     fun handoffSheet(): HandoffSheetActions = object : HandoffSheetActions {
@@ -357,6 +364,8 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
             if (ui.aboutData) AboutDataSheet(windowH, a::closeAboutData)
             val pk = ui.parking
             if (pk != null) ParkingSheet(pk, windowH, a::closeParking)
+            val bd = ui.border
+            if (bd != null) BorderSheet(bd, windowH, a::closeBorder)
             val hs = ui.handoff
             if (hs != null) HandoffSheetView(trip, hs, windowH, a.handoffSheet())
         }
@@ -415,7 +424,8 @@ private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
         // components §22 (S3-QA): items with 1 dp `dash.control` dividers, no gap. (1) the hand-off — not for
         // fuel / rest stops or a stop without coordinates; (2) «Заменить» where the row has it; (3) D-7.
         val items = mutableListOf<@Composable () -> Unit>()
-        val handoffRow = s.kind != "fuel" && s.kind != "rest" && s.lat != null && s.lon != null
+        // CEO 29.10: not a border crossing either — its point is approximate (a town near it, not the checkpoint)
+        val handoffRow = s.kind != "fuel" && s.kind != "rest" && s.kind != "border" && s.lat != null && s.lon != null
         if (handoffRow) {
             items += { HandoffItem(stringResource(R.string.handoff_from_stop), target, handoff?.truncated == true, enabled = handoff != null, tag = "stopmenu.navigator", maps = maps, onClick = a::navigatorFromStop) }
         }
@@ -652,7 +662,8 @@ private fun Intro(trip: TripDto, ui: RoadUi, a: RoadActions) {
         // route both notes share one line (`route_approx_open_data`)
         // 5.5 §10.2: rows mark open data with the dotted ring; the legend is said once here (with «О данных»)
         val ringRows = trip.daysList.any { d -> d.stops.any { !it.verified } }
-        val openData = trip.warnings.firstOrNull { it.code == "UNVERIFIED_PLACES" || it.level == "info" }
+        // CEO 29.10: the trip-abroad notice has its own line below (it is not about open data)
+        val openData = trip.warnings.firstOrNull { it.code == "UNVERIFIED_PLACES" || (it.level == "info" && it.code != ABROAD_WARNING) }
         val infoText = when {
             trip.approxDistances && openData != null && !ringRows -> stringResource(R.string.route_approx_open_data)
             trip.approxDistances -> stringResource(R.string.route_approx)
@@ -669,6 +680,14 @@ private fun Intro(trip: TripDto, ui: RoadUi, a: RoadActions) {
                         .clickable(role = Role.Button, onClick = onAbout).testTag("road.approx.more"),
                     contentAlignment = Alignment.Center,
                 ) { Txt(stringResource(R.string.route_approx_more), T.body.mdStrong, C.navi.label) }
+            }
+        }
+        // CEO 29.10 (trips abroad): «цены, сборы и правила там … не проверены» — a muted info line too
+        trip.warnings.firstOrNull { it.code == ABROAD_WARNING }?.message?.let { m ->
+            Row(Modifier.fillMaxWidth().testTag("road.abroad"), verticalAlignment = Alignment.CenterVertically) {
+                GlyphIcon(Glyph.INFO, C.text.muted, 14.dp)
+                Spacer(Modifier.width(6.dp))
+                Txt(m, T.body.sm, C.text.muted, Modifier.weight(1f, fill = false))
             }
         }
         Legends(ringRows && !trip.approxDistances, posts = trip.daysList.any { d -> d.stops.any { it.kmDriven != null } }, onAbout)
@@ -790,14 +809,16 @@ private fun StopRow(
     val cost: String? = when (s.kind) {
         // ADR-0019 E-2: 0 ₽ of an unknown price is not «вход свободный»
         "sight" -> if ("ticket" in s.unknownFacts) stringResource(R.string.road_ticket_unknown) else if (s.costRub == 0) stringResource(R.string.road_free) else rub(s.costRub)
-        "food", "overnight" -> rub(s.costRub)
+        // CEO 29.10: a night or a meal abroad has no known price — «цена не указана», never 0 ₽ (the walk's rule)
+        "food", "overnight" -> if (s.priceUnknown) stringResource(R.string.walk_stop_price_unknown) else rub(s.costRub)
         "rest" -> stringResource(R.string.common_rub, app.verst.settings.AppPrefs.money(0))
         "fuel" -> if (s.costRub > 0) rub(s.costRub) else null
         else -> null
     }
     val kindCd = (s.poiKindRu ?: app.verst.feature.common.kindWord(s.poiKind))?.lowercase()
     val parkingCd = if (showParking) stringResource(R.string.cd_road_parking_inline, parkingInline(s.parking)).substringBefore(". ") else null
-    val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, s.unknownRu, cost, parkingCd).joinToString(", ")
+    val crossing = s.kind == "border"
+    val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, s.localTimeRu, s.unknownRu, cost, parkingCd).joinToString(", ")
     val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
     // S3-R1: the restored row flashes `accent.yellow` at 14 % and fades (reduced motion: on, then off).
     val reduced = LocalReducedMotion.current
@@ -849,7 +870,8 @@ private fun StopRow(
         }
         // the sign column 66–132 (city signs with their 2 dp outline may overflow it by a dp each side)
         Box(Modifier.widthIn(min = 66.dp), contentAlignment = Alignment.TopCenter) {
-            RoadSign(s.sign, s.name, app.verst.feature.common.signTags(s.poiKind, s.tags))
+            // CEO 29.10: a crossing gets the «граница» sign (the engine sends `city`)
+            RoadSign(if (crossing) app.verst.core.ui.components.BORDER_SIGN else s.sign, s.name, app.verst.feature.common.signTags(s.poiKind, s.tags))
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(Modifier.fillMaxWidth()) {
@@ -862,17 +884,21 @@ private fun StopRow(
             app.verst.feature.common.TagRow(
                 if (s.kind == "sight") s.poiKind else null,
                 if (s.stretch) s.dwellMin.takeIf { it > 0 } ?: 30 else null,
-                openData = !s.verified,
+                openData = !s.verified || s.border?.unverified == true, // a crossing's facts: nobody checked them
                 modifier = Modifier.padding(vertical = 1.dp).testTag("road.tags.${s.id}"),
                 label = if (s.kind == "sight") s.poiKindRu else null,
             )
             if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note, maxLines = 2)
             // ADR-0019: what nobody checked for this stop («Часы не известны — уточните»), under the reason
             s.unknownRu?.let { Txt(it, T.body.sm, C.text.muted, Modifier.testTag("road.unknown.${s.id}"), maxLines = 2) }
+            // block 1 / CEO 29.10: a stop on another clock (after the border) says its local time
+            s.localTimeRu?.let { Txt(it, T.body.sm, C.text.muted, Modifier.testTag("road.localtime.${s.id}"), maxLines = 1) }
             val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
-            if (cost != null || canReplace || hotel || showParking) {
+            val borderSheet = crossing && s.border != null && onTap != null
+            if (cost != null || canReplace || hotel || showParking || borderSheet) {
                 CostsLine(cost, s.parking, showParking, "road.stop.${s.id}", onParking) {
-                    if (hotel) HotelAction(booked, if (booked) stringResource(R.string.cd_road_booked) else stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
+                    if (borderSheet) QuietAction(stringResource(R.string.road_border_open), stringResource(R.string.road_border_open), "road.border.${s.id}", C.navi.label, { onTap?.invoke() })
+                    else if (hotel) HotelAction(booked, if (booked) stringResource(R.string.cd_road_booked) else stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
                     // designer В-5: «заменить» is a visible outline button (components §2.6), not quiet text
                     else if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
                 }
@@ -980,8 +1006,11 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
     val tight = fit?.smallOverrun == true && budget != null && c.totalRub > budget
     val over = budget != null && (minimum || (c.overBudget && !tight))
     val fits = budget != null && !over && !tight
+    // CEO 29.10 (trips abroad): the rouble total leaves the costs abroad out — the label says so
+    val incomplete = trip.abroad?.roubleTotalIncomplete == true
     val label = when {
         over -> stringResource(R.string.road_waybill_over, app.verst.settings.AppPrefs.money((c.totalRub - budget!!).coerceAtLeast(0)))
+        incomplete -> stringResource(R.string.road_total_abroad_incomplete)
         else -> stringResource(R.string.road_waybill_label)
     }
     val total = rub(c.totalRub)
@@ -990,6 +1019,7 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
     val parkingRub = if (parkingOn) c.lines.firstOrNull { it.key == "parking" }?.rub ?: parkingSum.rub else null
     val parkingText = parkingRub?.let { parkingTotalText(parkingSum, it) }
     val cd = stringResource(R.string.cd_road_waybill, app.verst.settings.AppPrefs.money(c.totalRub)) + ". " + perPerson +
+        (if (incomplete) ". " + stringResource(R.string.road_total_abroad_incomplete) else "") +
         (parkingText?.let { ". " + stringResource(R.string.road_footer_parking) + " " + it } ?: "")
     Row(
         Modifier
@@ -1007,7 +1037,7 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
         // The label spans the row; the per-person line (F3) sits on the amount line, right of it (S-22).
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (fits || tight) {
+                if ((fits || tight) && !incomplete) {
                     // «ПУТЕВОЙ ЛИСТ ·» + the badge (components §20)
                     Txt(label.substringBefore(" · ") + " · ", T.body.smStrong, C.text.onLightMuted, maxLines = 1)
                     if (fits) {
@@ -1018,7 +1048,12 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
                         Txt(stringResource(R.string.budget_tight_badge, app.verst.settings.AppPrefs.money(c.totalRub - budget!!)), T.body.smStrong, C.text.onLightMuted, Modifier.testTag("road.tight"), maxLines = 1)
                     }
                 } else {
-                    Txt(label, T.body.smStrong, if (over) C.paper.inkRed else C.text.onLightMuted, Modifier.testTag(if (over) "road.over" else "road.label"), maxLines = 1)
+                    val tag = when {
+                        over -> "road.over"
+                        incomplete -> "road.abroad.incomplete"
+                        else -> "road.label"
+                    }
+                    Txt(label, T.body.smStrong, if (over) C.paper.inkRed else C.text.onLightMuted, Modifier.testTag(tag), maxLines = 1)
                 }
             }
             Row(verticalAlignment = Alignment.Bottom) {
@@ -1037,3 +1072,6 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
 
 
 private val TightLines = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both)
+
+/** CEO 29.10: the engine's info warning of a trip abroad («цены, сборы и правила там … не проверены»). */
+private const val ABROAD_WARNING = "ABROAD"

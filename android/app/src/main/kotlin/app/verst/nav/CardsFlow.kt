@@ -10,13 +10,21 @@ import kotlinx.coroutines.launch
 
 // ---- cards (5.9)
 
-/** Tappable rows only (M§15.5): a sight, or a night with a hotel. */
-fun VerstFlow.tappable(s: StopDto): Boolean = s.kind == "sight" || (s.kind == "overnight" && s.hotelOptions.isNotEmpty())
+/** Tappable rows only (M§15.5): a sight, a night with a hotel; CEO 29.10: a border crossing (its sheet). */
+fun VerstFlow.tappable(s: StopDto): Boolean =
+    s.kind == "sight" || (s.kind == "overnight" && s.hotelOptions.isNotEmpty()) || isBorder(s)
 
-/** A Road-ahead row → its card; the row is the focus for the way back. */
+/** CEO 29.10 (trips abroad): a crossing with the engine's facts to show. */
+internal fun isBorder(s: StopDto): Boolean = s.kind == "border" && s.border != null
+
+/** A Road-ahead row → its card (a border row → its sheet); the row is the focus for the way back. */
 fun VerstFlow.openCard(stop: StopDto) {
     if (!tappable(stop)) return
     roadFocusId = stop.id
+    if (isBorder(stop)) {
+        roadBorder = stop
+        return
+    }
     val hotel = stop.kind == "overnight"
     val option = if (hotel) stop.hotelOptions.firstOrNull { it.placeId == stop.selectedHotelId } ?: stop.hotelOptions.firstOrNull() else null
     val placeId = if (hotel) option?.placeId ?: stop.placeId else stop.placeId
@@ -213,6 +221,12 @@ fun VerstFlow.openParking(stop: StopDto) {
 
 fun VerstFlow.closeParking() {
     roadParking = null
+}
+
+/** CEO 29.10: the border sheet closes; focus goes back to its row. */
+fun VerstFlow.closeBorder() {
+    roadBorder = null
+    roadFocusSeq += 1
 }
 
 /**

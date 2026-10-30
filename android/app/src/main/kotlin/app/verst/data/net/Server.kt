@@ -40,6 +40,15 @@ sealed interface ServerCheck {
 /** How the server could not be used for a plan (the phone engine took over). */
 class ServerUnavailable(message: String) : IOException(message)
 
+/** The server's plan as the gateway sees it (SRV-01): [ServerClient], or a fake in unit tests. */
+interface PlanServer {
+    /** This build has a server (`VERST_SERVER_URL`). */
+    val configured: Boolean
+
+    /** The plan on the server; the engine's final verdict as an error, any other trouble as [ServerUnavailable]. */
+    suspend fun plan(inputJson: String, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome>
+}
+
 /**
  * SRV-01: the verst-api client (ADR-0020). Device registration (`POST /v1/devices`, the token kept by [store]),
  * the health check and the server plan: `POST /v1/trips/plan` with `Accept: text/event-stream`, whose `stage` /
@@ -52,13 +61,13 @@ class ServerClient(
     private val appVersion: String,
     private val locale: () -> String,
     private val http: () -> OkHttpClient = { planClient },
-) {
+) : PlanServer {
     interface AuthStore {
         fun load(): ServerAuth?
         fun save(auth: ServerAuth?)
     }
 
-    val configured: Boolean get() = !baseUrl().isNullOrBlank()
+    override val configured: Boolean get() = !baseUrl().isNullOrBlank()
 
     /** `GET /healthz`; registers the device on the way when it is not yet. */
     suspend fun check(): ServerCheck = withContext(Dispatchers.IO) {
@@ -106,11 +115,11 @@ class ServerClient(
 
     /**
      * The plan on the server; [onEvent] gets the progress events on the reading thread. Only the engine's own verdict
-     * about the trip ([FINAL]) comes back as an [EngineResult.Err]; every other failure — transport, 5xx, 429, 413,
+     * about the trip ([isFinal]) comes back as an [EngineResult.Err]; every other failure — transport, 5xx, 429, 413,
      * a request the server's schema rejects, `UPSTREAM` in the stream — is a [ServerUnavailable], so the phone engine
      * plans instead (acceptance 28.10, QA B-3). Cancelling the caller cancels the HTTP call.
      */
-    suspend fun plan(inputJson: String, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome> {
+    override suspend fun plan(inputJson: String, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome> {
         val base = baseUrl()?.trimEnd('/') ?: throw ServerUnavailable("no server in this build")
         var token = withContext(Dispatchers.IO) { token(base) }
         repeat(2) { attempt ->
@@ -189,9 +198,9 @@ class ServerClient(
         }
     }
 
-    /** The engine's verdict is final only for [FINAL] codes; the phone engine retries the rest. */
+    /** The engine's verdict is final only when [isFinal]; the phone engine retries the rest. */
     private fun final(r: EngineResult.Err, context: String): EngineResult<PlanOutcome> =
-        if (r.error.code in FINAL) r else throw ServerUnavailable(if (r.error.code == "INTERNAL") context else "${r.error.code} ($context)")
+        if (isFinal(r.error)) r else throw ServerUnavailable(if (r.error.code == "INTERNAL") context else "${r.error.code} ($context)")
 
     /** A `done` the app cannot decode (a newer server) is the server's problem, not the trip's. */
     private fun decoded(r: EngineResult<PlanOutcome>): EngineResult<PlanOutcome> =
@@ -238,6 +247,14 @@ class ServerClient(
 
         /** Engine answers about the trip itself: the phone engine would say the same, so they are not retried. */
         val FINAL = setOf("UNREACHABLE", "TOO_SHORT")
+
+        /**
+         * [FINAL] codes, and (CEO 29.10, trips abroad) `INVALID_INPUT` about a point abroad — `outside_supported`,
+         * `border_closed`, `no_crossing` ([EngineErrorDto.ABROAD_REASONS]): the phone engine knows only Russia, so
+         * it could only say worse; the server's `message` («Граница закрыта для легковых до 2 января 2027…») is
+         * shown as is. Any other `INVALID_INPUT` (the server's schema rejected the request) still falls back.
+         */
+        fun isFinal(e: EngineErrorDto): Boolean = e.code in FINAL || e.abroadVerdict
 
         /** Security review М-3: a line of the stream or a JSON body above this is a broken server, not a plan. */
         const val MAX_BODY = 4L * 1024 * 1024

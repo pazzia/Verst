@@ -53,6 +53,7 @@ import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.CostLineDto
 import app.verst.core.model.dto.TripDto
 import app.verst.core.model.dto.BudgetFitDto
+import app.verst.core.model.dto.LocalMoney
 import app.verst.core.ui.R
 import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Glyph
@@ -158,6 +159,8 @@ private fun Sheet(ui: WaybillUi, a: WaybillActions) {
             }
             // ADR-0019 E-2: the total says what it leaves out («Без билетов в 1 место — цена неизвестна»)
             cost.totalNoteRu?.let { Txt(it, T.paper.label, C.paper.text, Modifier.padding(top = 4.dp, end = 100.dp).testTag("waybill.total.note")) }
+            // CEO 29.10 (trips abroad): «За границей» — what the rouble total leaves out, fuel in the local currency
+            trip.abroad?.let { AbroadBlock(it) }
             // 5.8 §3: «Подогнали под бюджет» + one line per lever (the savings sum to initial − total)
             val fit = trip.budgetFit
             if (fit != null && fit.levers.isNotEmpty()) LeverLines(fit)
@@ -401,6 +404,45 @@ private fun TotalRow(total: Int) {
     TableRow(0.dp, TotalCol, Modifier.semantics(mergeDescendants = true) { heading(); contentDescription = cd }, left = {
         Txt(stringResource(R.string.waybill_total), T.paper.total, C.paper.text, Modifier.padding(6.dp))
     }, right = { Fade(value) { Txt(it, T.hand.xl, C.paper.ink, Modifier.padding(vertical = 4.dp).testTag("waybill.total"), align = TextAlign.End, maxLines = 1) } })
+}
+
+/**
+ * CEO 29.10 (trips abroad): the block the engine's total note points to («смотрите блок «За границей»»): «Итог без
+ * расходов за границей» with the engine's list of what is left out, then per country the km and the fuel — in roubles
+ * only with the server's Bank of Russia rate, else as is in the local currency («≈ 37 GEL»), then the counted sums.
+ */
+@Composable
+private fun AbroadBlock(abroad: app.verst.core.model.dto.AbroadDto) {
+    Column(Modifier.fillMaxWidth().padding(top = 8.dp, end = 100.dp).testTag("waybill.abroad"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(Modifier.semantics(mergeDescendants = true) { heading() }, verticalAlignment = Alignment.CenterVertically) {
+            Txt(stringResource(R.string.waybill_abroad_title), T.paper.body, C.paper.text)
+            if (abroad.unverified) Txt(" · " + stringResource(R.string.common_unverified), T.paper.label, C.paper.label)
+        }
+        if (abroad.roubleTotalIncomplete) {
+            Txt(stringResource(R.string.road_total_abroad_incomplete), T.paper.label, C.paper.text, Modifier.testTag("waybill.abroad.incomplete"))
+            abroad.notInRoubleTotalRu.forEachIndexed { i, m ->
+                Txt("— $m", T.paper.label, C.paper.text, Modifier.padding(start = 8.dp).testTag("waybill.abroad.missing.$i"))
+            }
+        }
+        abroad.countries.forEach { c ->
+            val km = RuFormat.thousands(kotlin.math.round(c.km).toInt())
+            Txt(stringResource(R.string.waybill_abroad_country, c.nameRu.ifBlank { c.code }, km), T.paper.label, C.paper.text, Modifier.padding(top = 4.dp))
+            val f = c.fuel
+            val local = LocalMoney.approx(f?.amount, f?.currency ?: c.currency)
+            val rub = if (f != null && f.inRoubleTotal) f.rub else null
+            val fuel = when {
+                f == null -> null
+                rub != null -> stringResource(R.string.waybill_abroad_fuel, app.verst.settings.AppPrefs.money(rub) + (local?.let { " ($it)" } ?: ""))
+                local != null -> stringResource(R.string.waybill_abroad_fuel_local, local)
+                else -> stringResource(R.string.waybill_abroad_fuel_unknown)
+            }
+            if (fuel != null) Txt(fuel, T.hand.sm, C.paper.ink, Modifier.padding(start = 8.dp).testTag("waybill.abroad.fuel.${c.code}"))
+        }
+        val totals = abroad.localTotals.mapNotNull { LocalMoney.approx(it.amount, it.currency) }
+        if (totals.isNotEmpty()) {
+            Txt(stringResource(R.string.waybill_abroad_counted, totals.joinToString(", ")), T.paper.label, C.paper.text, Modifier.padding(top = 4.dp).testTag("waybill.abroad.counted"))
+        }
+    }
 }
 
 @Composable
