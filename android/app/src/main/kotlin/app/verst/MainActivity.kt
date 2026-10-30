@@ -311,9 +311,10 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
         )
     }
     if (flow.abroadConsentAsk) {
-        // CEO 29.10 / security review В-1: a trip abroad is planned on the server — the settings' consent dialog first
+        // CEO 29.10 / security review В-1: a trip abroad is planned on the server — the settings' consent dialog first,
+        // its body without «без связи — на телефоне» (abroad there is no phone fallback)
         NaviDialog(
-            stringResource(UiR.string.settings_server_consent_title), stringResource(UiR.string.settings_server_consent_body),
+            stringResource(UiR.string.settings_server_consent_title), stringResource(UiR.string.abroad_consent_body),
             stringResource(UiR.string.settings_server_consent_yes), stringResource(UiR.string.settings_server_consent_no),
             "abroad.consent", { flow.answerAbroadConsent(true) }, { flow.answerAbroadConsent(false) },
         )

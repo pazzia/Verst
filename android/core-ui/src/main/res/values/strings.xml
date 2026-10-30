@@ -262,6 +262,7 @@
     <string name="road_ticket_unknown">цена билета неизвестна</string>
     <string name="abroad_error_no_server">В этой сборке нет сервера — поездку за границу построить нельзя.</string>
     <string name="abroad_error_no_consent">Чтобы построить поездку за границу, нужно согласие на планирование на сервере.</string>
+    <string name="abroad_consent_body">Поездку за границу строит только сервер Версты. На тестовый сервер в Нидерландах уйдут точки маршрута, состав экипажа, бюджет и машина. Маршрут там не хранится. Без связи такую поездку не построить.</string>
     <string name="sign_border">ГРАНИЦА</string>
     <string name="road_border_open">Документы и сборы</string>
     <string name="border_label">ПУНКТ ПРОПУСКА</string>
