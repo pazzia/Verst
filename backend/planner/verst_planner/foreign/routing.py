@@ -3,7 +3,10 @@
 There is no road graph abroad. A request is cut into runs: consecutive waypoints all in Russia go to the
 world's own routing in one request (the phone's `HybridRouting`, the server's GraphHopper), so a Russian
 leg keeps its exact behaviour; every leg with an end outside Russia is the calibrated road model (straight
-line x ratio, `Route.synthetic`). The parts are stitched into one route, `synthetic` when any part is, so the
+line x ratio, `Route.synthetic`). A long leg abroad (>= `VIA_MIN_LEG_KM`) goes through the country's big
+towns when they chain up within `VIA_MAX_DETOUR` of the straight line (`TownChain`, CEO 30.10: Москва →
+Алматы ran 2,500 km across the empty steppe with four roadside nights; the highways join the big towns).
+The parts are stitched into one route, `synthetic` when any part is, so the
 trip says its distances are approximate (`approxDistances`).
 
 `BorderTolls` prices the Russian parts with the world's toll port (real refs or the B-1 corridors); the
@@ -12,16 +15,23 @@ legs abroad have no toll here — the `abroad` block says what is known about to
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import dataclasses
+import heapq
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 from verst_planner.adapters.catalogue.routing import synthetic_route
 from verst_planner.domain.errors import Unreachable
 from verst_planner.domain.model import LatLon, Route, RouteDetail, RouteRequest, TollHit
+from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.roadmodel import RoadModel
 from verst_planner.ports import RoutingPort, TollRepository
 
 KEEP_PARTS = 16  # routes whose parts are remembered for the toll port (one plan needs one)
+VIA_MIN_LEG_KM = 400.0  # a shorter leg abroad stays one straight line
+VIA_MIN_POP = 10_000  # towns a highway is assumed to join
+VIA_HOP_KM = 350.0  # the longest straight hop between two of them
+VIA_MAX_DETOUR = 1.5  # a chain longer than this x the straight line is not taken
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,11 +73,66 @@ def stitch(parts: list[Route]) -> Route:
     )
 
 
+class TownChain:
+    """The shortest chain of towns (hops <= `VIA_HOP_KM`) from `a` to `b`: the via points of a leg abroad."""
+
+    def __init__(self, towns: Iterable[LatLon]) -> None:
+        self.towns = sorted(set(towns), key=lambda p: (p.lat, p.lon))
+
+    def via(self, a: LatLon, b: LatLon) -> list[LatLon]:
+        direct = haversine_km(a, b)
+        if direct < VIA_MIN_LEG_KM:
+            return []
+        limit = direct * VIA_MAX_DETOUR
+        near = [t for t in self.towns if t not in (a, b) and haversine_km(a, t) + haversine_km(t, b) <= limit]
+        nodes = [a, b, *near]
+        dist = [float("inf")] * len(nodes)
+        prev = [-1] * len(nodes)
+        dist[0] = 0.0
+        heap = [(0.0, 0)]
+        while heap:
+            d, i = heapq.heappop(heap)
+            if d > dist[i]:
+                continue
+            if i == 1:
+                break
+            for j in range(1, len(nodes)):
+                h = haversine_km(nodes[i], nodes[j])
+                if j != i and h <= VIA_HOP_KM and d + h < dist[j]:
+                    dist[j] = d + h
+                    prev[j] = i
+                    heapq.heappush(heap, (dist[j], j))
+        if prev[1] < 0 or dist[1] > limit:
+            return []
+        chain, i = [], prev[1]
+        while i > 0:
+            chain.append(nodes[i])
+            i = prev[i]
+        return chain[::-1]
+
+
+def leg_abroad(a: LatLon, b: LatLon, model: RoadModel, chain: TownChain | None) -> Route:
+    """One leg with an end abroad: the road model through the chain's towns (or straight), one leg for the
+    planner — the via towns are not waypoints."""
+    via = chain.via(a, b) if chain is not None else []
+    r = synthetic_route((a, *via, b), model)
+    if not via:
+        return r
+    return dataclasses.replace(r, waypoint_idx=(0, len(r.points) - 1), snapped=(a, b))
+
+
 class BorderRouting:
-    def __init__(self, inner: RoutingPort, model: RoadModel, russian: Callable[[LatLon], bool]) -> None:
+    def __init__(
+        self,
+        inner: RoutingPort,
+        model: RoadModel,
+        russian: Callable[[LatLon], bool],
+        chain: TownChain | None = None,
+    ) -> None:
         self.inner = inner
         self.model = model
         self.russian = russian
+        self.chain = chain
         self._parts: dict[int, tuple[Route, list[Part]]] = {}
         self.calls = 0
 
@@ -90,7 +155,7 @@ class BorderRouting:
                     raise Unreachable(i + e.point_index, e.snap_km) from e
                 i = j
             else:
-                pieces.append((synthetic_route(pts[i : i + 2], self.model), False))
+                pieces.append((leg_abroad(pts[i], pts[i + 1], self.model, self.chain), False))
                 i += 1
         out = stitch([r for r, _ in pieces])
         parts, km0 = [], 0.0
@@ -127,4 +192,4 @@ class BorderTolls:
         return hits
 
 
-__all__ = ["BorderRouting", "BorderTolls", "Part", "stitch"]
+__all__ = ["BorderRouting", "BorderTolls", "Part", "TownChain", "leg_abroad", "stitch"]

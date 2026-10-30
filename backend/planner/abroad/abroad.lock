@@ -1,0 +1,977 @@
+{
+ "countries": {
+  "ab": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 3,
+    "pois": 18,
+    "bars": 10,
+    "food": 56,
+    "links": 0,
+    "credits": 9
+   },
+   "totalBytes": 6542,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 1859,
+     "sha256": "7bb3a6ca38545d5654ab1dc5f4998545e8c9e0584fdb93151acbe32c1fd3af2c"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 320,
+     "sha256": "3673d80c507b4be6681176ab3a5ea2e68e0b5e93643b825ca7c03cbf91b1b10e"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 1889,
+     "sha256": "7337143c0ced6919edf778c761831d73c24108317a72aa64105542e52a17d78f"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 512,
+     "sha256": "1645a0b9ad15f4b0a60da8b40963dbe3894d5db190901b1358d9574c69a1b06d"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 1962,
+     "sha256": "e7f7a9497e80d2396158702ca773503a40586058e81237f7aa7f760cd10d4fcd"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/europe/georgia-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T02:39:22+00:00",
+    "run": "40973130646",
+    "country": "AB",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q23334": "Abkhazia",
+     "Q2977": "cathedral",
+     "Q16970": "church building",
+     "Q23413": "castle",
+     "Q22698": "park",
+     "Q132834": "madrasa",
+     "Q32815": "mosque",
+     "Q1107656": "garden",
+     "Q33506": "museum",
+     "Q44613": "monastery",
+     "Q570116": "tourist attraction",
+     "Q183342": "federal city of Russia",
+     "Q263274": "kremlin",
+     "Q57821": "fortification",
+     "Q1851368": "waterfront",
+     "Q2319498": "architectural landmark",
+     "Q174782": "square",
+     "Q4989906": "monument",
+     "Q179700": "statue",
+     "Q839954": "archaeological site",
+     "Q5003624": "memorial",
+     "Q162875": "mausoleum",
+     "Q6017969": "scenic viewpoint",
+     "Q7930989": "city or town"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 8,
+    "townsSha256": "3673d80c507b4be6681176ab3a5ea2e68e0b5e93643b825ca7c03cbf91b1b10e",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 813,
+    "sha256": "7dae9fb8e30b5fa9b1eb6e8c98821b1fe42b5b6b4997968c9534a05784bb706d"
+   }
+  },
+  "am": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 47,
+    "pois": 323,
+    "bars": 116,
+    "food": 771,
+    "links": 0,
+    "credits": 149
+   },
+   "totalBytes": 53445,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 5087,
+     "sha256": "66f2fa4c443d3ac71bf09ba101e790df2d7baa7960ae588b6c419b1b994a088a"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 2256,
+     "sha256": "090a6ea982977480f32b685bb1ed68a0d104e27e835f803661699c09e3e42f5b"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 23217,
+     "sha256": "5e71d08d1f84bea22f70873d90654070b9b0d38dd10ab62fd1cceee8282235f4"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 3240,
+     "sha256": "f2f3b2decc39a3993999575b08267196d15a1df8d572a640fab181dbfc43b24a"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 19645,
+     "sha256": "f8f389109feea0aa08a5b635d070f97f37d744696c05ff7adf42bea6d5451ae9"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/asia/armenia-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T03:01:01+00:00",
+    "run": "40973130646",
+    "country": "AM",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q2977": "cathedral",
+     "Q22698": "park",
+     "Q399": "Armenia",
+     "Q23413": "castle",
+     "Q32815": "mosque",
+     "Q16970": "church building",
+     "Q33506": "museum",
+     "Q174782": "square",
+     "Q179700": "statue",
+     "Q7930989": "city or town",
+     "Q44613": "monastery",
+     "Q183342": "federal city of Russia",
+     "Q57821": "fortification",
+     "Q132834": "madrasa",
+     "Q263274": "kremlin",
+     "Q162875": "mausoleum",
+     "Q570116": "tourist attraction",
+     "Q839954": "archaeological site",
+     "Q1107656": "garden",
+     "Q1851368": "waterfront",
+     "Q2319498": "architectural landmark",
+     "Q4989906": "monument",
+     "Q5003624": "memorial",
+     "Q6017969": "scenic viewpoint"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 80,
+    "townsSha256": "090a6ea982977480f32b685bb1ed68a0d104e27e835f803661699c09e3e42f5b",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 3210,
+    "sha256": "e187d0d7b795ce7e127a632cf651a6e60f6e91d476a7f2b6bf27d9f3499a81d9"
+   }
+  },
+  "az": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 92,
+    "pois": 374,
+    "bars": 190,
+    "food": 1729,
+    "links": 0,
+    "credits": 152
+   },
+   "totalBytes": 82672,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 5635,
+     "sha256": "75f4d63f53ffda5a8f3406fcd55ff95a43329de686728e3a029d140a0ac7e868"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 4713,
+     "sha256": "ebb65eb8a6ec8f8b23ef166ef6720966bf07ea4a8460d18f2555f384adc8886e"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 32290,
+     "sha256": "954b1ec7897ba2cf4f60ced8304e61505c3f37ce3847a264226ee02b45e8310f"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 4368,
+     "sha256": "41d3c949074a5b59e7da77efd73fd22064a857bfbc54e4a0f0ff0e9061385f5a"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 35666,
+     "sha256": "36a89ddbef8a77197e2c75e0a15077a180a23abc55161d23780d9bdcfb196721"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/asia/azerbaijan-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T03:31:21+00:00",
+    "run": "40973130646",
+    "country": "AZ",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q227": "Azerbaijan",
+     "Q22698": "park",
+     "Q23413": "castle",
+     "Q2977": "cathedral",
+     "Q16970": "church building",
+     "Q32815": "mosque",
+     "Q5003624": "memorial",
+     "Q33506": "museum",
+     "Q183342": "federal city of Russia",
+     "Q1851368": "waterfront",
+     "Q6017969": "scenic viewpoint",
+     "Q44613": "monastery",
+     "Q7930989": "city or town",
+     "Q2319498": "architectural landmark",
+     "Q4989906": "monument",
+     "Q57821": "fortification",
+     "Q263274": "kremlin",
+     "Q570116": "tourist attraction",
+     "Q132834": "madrasa",
+     "Q162875": "mausoleum",
+     "Q1107656": "garden",
+     "Q174782": "square",
+     "Q839954": "archaeological site",
+     "Q179700": "statue"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 288,
+    "townsSha256": "ebb65eb8a6ec8f8b23ef166ef6720966bf07ea4a8460d18f2555f384adc8886e",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 8148,
+    "sha256": "169ae3fa8cbf9ec93fda0e1b29061a30a00a4b325405415bb3952f1eaf1a9597"
+   }
+  },
+  "by": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 116,
+    "pois": 1147,
+    "bars": 550,
+    "food": 2712,
+    "links": 0,
+    "credits": 361
+   },
+   "totalBytes": 173685,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 12968,
+     "sha256": "b6b16def691bbfc550cfa4cd708e4969850ad0287ac4767c1761d5248c252ca5"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 6299,
+     "sha256": "598ec1da59f4085220e8ae66e1b06df9180997b294220ad6c8156ff0eb3c69ed"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 77956,
+     "sha256": "991651d1869b103347408c1ecfc8c2b750944786fcffea4e7ea7db9a312a08e8"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 14147,
+     "sha256": "b39be921d15e283d01de538188a45ab59ad5617074f25a1528156aadd4329799"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 62315,
+     "sha256": "06b0b815586b5ea8586aead28bb03c188806185030d6660e50d923fdf5fb6200"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/europe/belarus-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T01:29:10+00:00",
+    "run": "40973130646",
+    "country": "BY",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q2977": "cathedral",
+     "Q16970": "church building",
+     "Q184": "Belarus",
+     "Q162875": "mausoleum",
+     "Q22698": "park",
+     "Q183342": "federal city of Russia",
+     "Q179700": "statue",
+     "Q23413": "castle",
+     "Q263274": "kremlin",
+     "Q570116": "tourist attraction",
+     "Q174782": "square",
+     "Q32815": "mosque",
+     "Q1107656": "garden",
+     "Q33506": "museum",
+     "Q44613": "monastery",
+     "Q1851368": "waterfront",
+     "Q132834": "madrasa",
+     "Q57821": "fortification",
+     "Q2319498": "architectural landmark",
+     "Q4989906": "monument",
+     "Q839954": "archaeological site",
+     "Q5003624": "memorial",
+     "Q6017969": "scenic viewpoint",
+     "Q7930989": "city or town"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 282,
+    "townsSha256": "598ec1da59f4085220e8ae66e1b06df9180997b294220ad6c8156ff0eb3c69ed",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 8786,
+    "sha256": "5ff28e35aba0140994e43affa3fa03576ae7ca968f264d9efd9b597b86dff313"
+   }
+  },
+  "ge": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 55,
+    "pois": 313,
+    "bars": 229,
+    "food": 1060,
+    "links": 0,
+    "credits": 183
+   },
+   "totalBytes": 60581,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 5786,
+     "sha256": "420967f2514f21a5ff6b6283c127ba685a1100aecbd87e51976b0e4b2713c11d"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 2646,
+     "sha256": "172504200a939bf93b98ed8fb992bc14f98c192455a2da9d4be272f8358f8361"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 20619,
+     "sha256": "37166fd903fc13f5ec2c7f5b9c39a0f4c17ccd93653b3c72d5ead4f2be57669c"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 5781,
+     "sha256": "18b97bf5fab6ac12bf8e12c57984c7448b8c7a729fefdb5cfad01c2d825e1884"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 25749,
+     "sha256": "99399b9a14ebf9ea26cdf149b7364ffd5440acbff284e0adcbb63103de98777d"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/europe/georgia-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T02:11:32+00:00",
+    "run": "40973130646",
+    "country": "GE",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q2977": "cathedral",
+     "Q16970": "church building",
+     "Q230": "Georgia",
+     "Q22698": "park",
+     "Q33506": "museum",
+     "Q32815": "mosque",
+     "Q44613": "monastery",
+     "Q57821": "fortification",
+     "Q23413": "castle",
+     "Q162875": "mausoleum",
+     "Q174782": "square",
+     "Q132834": "madrasa",
+     "Q179700": "statue",
+     "Q839954": "archaeological site",
+     "Q183342": "federal city of Russia",
+     "Q1107656": "garden",
+     "Q1851368": "waterfront",
+     "Q2319498": "architectural landmark",
+     "Q6017969": "scenic viewpoint",
+     "Q7930989": "city or town",
+     "Q263274": "kremlin",
+     "Q570116": "tourist attraction",
+     "Q4989906": "monument",
+     "Q5003624": "memorial"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 101,
+    "townsSha256": "172504200a939bf93b98ed8fb992bc14f98c192455a2da9d4be272f8358f8361",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 3841,
+    "sha256": "ae57b864cf2bb6dd2587eaa436118c70a4e925c21902b56f76a0b13af1f546de"
+   }
+  },
+  "kg": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 29,
+    "pois": 75,
+    "bars": 95,
+    "food": 892,
+    "links": 0,
+    "credits": 34
+   },
+   "totalBytes": 32097,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 2644,
+     "sha256": "6a484fcdbff587274c5e8c7c880ec16ad310563bef14b5a5457a979485e3d670"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 1772,
+     "sha256": "e9c833f4304f440ec852a65b002c7dd03279ad9531e0bfba0e59fbf7f10656dd"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 4934,
+     "sha256": "a7abb97db6f3c25c4a2c487fa02bcb92fc0de7d398d38600d4e5244dd1877b6d"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 2595,
+     "sha256": "f6e031430fffb7125981a15f8b34b497e2e208829bab62bbcbe6af61722b396c"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 20152,
+     "sha256": "851b64e2d58acb539b21be8b65a33a7041a7a960a0b03e5df606500e895380e7"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/asia/kyrgyzstan-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T04:15:53+00:00",
+    "run": "40973130646",
+    "country": "KG",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q813": "Kyrgyzstan",
+     "Q2977": "cathedral",
+     "Q839954": "archaeological site",
+     "Q132834": "madrasa",
+     "Q22698": "park",
+     "Q162875": "mausoleum",
+     "Q6017969": "scenic viewpoint",
+     "Q7930989": "city or town",
+     "Q1107656": "garden",
+     "Q16970": "church building",
+     "Q23413": "castle",
+     "Q183342": "federal city of Russia",
+     "Q263274": "kremlin",
+     "Q174782": "square",
+     "Q570116": "tourist attraction",
+     "Q32815": "mosque",
+     "Q1851368": "waterfront",
+     "Q2319498": "architectural landmark",
+     "Q4989906": "monument",
+     "Q33506": "museum",
+     "Q179700": "statue",
+     "Q5003624": "memorial",
+     "Q44613": "monastery",
+     "Q57821": "fortification"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 68,
+    "townsSha256": "e9c833f4304f440ec852a65b002c7dd03279ad9531e0bfba0e59fbf7f10656dd",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 2854,
+    "sha256": "5b33fa3c16273e2bdf54444b0f31620796d9471645dd94b076a8ea848a19293d"
+   }
+  },
+  "kz": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 91,
+    "pois": 312,
+    "bars": 528,
+    "food": 3664,
+    "links": 0,
+    "credits": 130
+   },
+   "totalBytes": 118203,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 6493,
+     "sha256": "c3bcd7b7e45703bc70c553df4c3694ac89465f94c0829a1fc909f23c682e0733"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 4537,
+     "sha256": "5ac88d36a796283c6abd974c44ab5a6befa14029b954995221074eb4ce2d6bd6"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 20678,
+     "sha256": "ea1e95488a377958c5f4e4a71ee96364dcb4523bd326b16a391d5b8ea6b9bb17"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 12089,
+     "sha256": "a5f91b86e8fdc96bcef8aeb743811812f32e86faa3a8fcfa7338856cbd88d135"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 74406,
+     "sha256": "1f9abb8e799f05bba14fb0ad78d35a644f403b02b9021e67242923f4455121b4"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/asia/kazakhstan-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T01:20:34+00:00",
+    "run": "40973130646",
+    "country": "KZ",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q232": "Kazakhstan",
+     "Q16970": "church building",
+     "Q23413": "castle",
+     "Q33506": "museum",
+     "Q32815": "mosque",
+     "Q2977": "cathedral",
+     "Q57821": "fortification",
+     "Q44613": "monastery",
+     "Q22698": "park",
+     "Q162875": "mausoleum",
+     "Q174782": "square",
+     "Q132834": "madrasa",
+     "Q183342": "federal city of Russia",
+     "Q179700": "statue",
+     "Q1107656": "garden",
+     "Q263274": "kremlin",
+     "Q5003624": "memorial",
+     "Q570116": "tourist attraction",
+     "Q1851368": "waterfront",
+     "Q839954": "archaeological site",
+     "Q2319498": "architectural landmark",
+     "Q4989906": "monument",
+     "Q6017969": "scenic viewpoint",
+     "Q7930989": "city or town"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 292,
+    "townsSha256": "5ac88d36a796283c6abd974c44ab5a6befa14029b954995221074eb4ce2d6bd6",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 8906,
+    "sha256": "e01366c68ad3cdade25424fb77aa20439f8b4ce7febf0229a1c1c64c33086760"
+   }
+  },
+  "tr": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 908,
+    "pois": 2170,
+    "bars": 797,
+    "food": 12115,
+    "links": 0,
+    "credits": 825
+   },
+   "totalBytes": 414748,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 20714,
+     "sha256": "08c1783438e8315b4b2ac20ffce3576f66741330fa83ab6e5ac02555fb13b749"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 35661,
+     "sha256": "100411aef6edb2eae69af5e1675ec8e7a231ca1ccc60b88f6d0a5910439e891b"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 103838,
+     "sha256": "cab31629ee7df9756816fa2f6edd581a4836fad32394a938be7ad7521536aae8"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 17184,
+     "sha256": "32904fd9d7bd9a5e8feaa63eb6b62996fe0b0460a3fd44730450ea806c6c4583"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 237351,
+     "sha256": "cb32f268e038cb1d8acaa792ef3fae7d05ac56817b24a8e91c039997bfa31f51"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/europe/turkey-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T06:43:03+00:00",
+    "run": "40973130646",
+    "country": "TR",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q43": "Turkey",
+     "Q16970": "church building",
+     "Q23413": "castle",
+     "Q2977": "cathedral",
+     "Q22698": "park",
+     "Q33506": "museum",
+     "Q132834": "madrasa",
+     "Q32815": "mosque",
+     "Q162875": "mausoleum",
+     "Q179700": "statue",
+     "Q174782": "square",
+     "Q570116": "tourist attraction",
+     "Q183342": "federal city of Russia",
+     "Q263274": "kremlin",
+     "Q44613": "monastery",
+     "Q839954": "archaeological site",
+     "Q4989906": "monument",
+     "Q57821": "fortification",
+     "Q1851368": "waterfront",
+     "Q2319498": "architectural landmark",
+     "Q6017969": "scenic viewpoint",
+     "Q7930989": "city or town",
+     "Q1107656": "garden",
+     "Q5003624": "memorial"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 2044,
+    "townsSha256": "100411aef6edb2eae69af5e1675ec8e7a231ca1ccc60b88f6d0a5910439e891b",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 49284,
+    "sha256": "5574a9f5bf5eb04916205b84e35dd569095b3a11efd989d297013c4d50f72d3c"
+   }
+  },
+  "uz": {
+   "version": "wd-20261030-abroad2",
+   "builtAt": "2026-10-30",
+   "counts": {
+    "towns": 64,
+    "pois": 376,
+    "bars": 221,
+    "food": 2359,
+    "links": 0,
+    "credits": 143
+   },
+   "totalBytes": 95396,
+   "files": {
+    "catalogue_meta.json.gz": {
+     "bytes": 4925,
+     "sha256": "1de0b5dbacc82ee5c70b481e70c51df0e56c215b2cee64eca8f68d0dc64040e5"
+    },
+    "catalogue_towns.json.gz": {
+     "bytes": 3178,
+     "sha256": "365d5f323426d6b3eef28334b2635772b2783a2ea903a1f49b80ac676e187b90"
+    },
+    "catalogue_pois.json.gz": {
+     "bytes": 28614,
+     "sha256": "75ad4313f044b87528dc3b03c2fe86e0deb1ad2b161ca2d271a74f6e5723e26d"
+    },
+    "catalogue_bars.json.gz": {
+     "bytes": 5556,
+     "sha256": "3bfec806a0f8c1a7a5dae70d98c15b432c8330062b4def89a65ea9905d24b598"
+    },
+    "catalogue_food.json.gz": {
+     "bytes": 53123,
+     "sha256": "c7c64c5894c3cfb650536eb83cd1f90dff04719e3d0ee42a79fefc3098847047"
+    }
+   },
+   "sources": {
+    "wikidata": "query.wikidata.org",
+    "osm": "https://download.geofabrik.de/asia/uzbekistan-latest.osm.pbf",
+    "commons": "commons.wikimedia.org",
+    "wikipedia": "ru.wikipedia.org",
+    "wikivoyage": "ru.wikivoyage.org",
+    "fetchedAt": "2026-10-30T03:53:20+00:00",
+    "run": "40973130646",
+    "country": "UZ",
+    "workflow": "data-abroad.yml"
+   },
+   "classCheck": {
+    "labels": {
+     "Q265": "Uzbekistan",
+     "Q16970": "church building",
+     "Q22698": "park",
+     "Q2977": "cathedral",
+     "Q33506": "museum",
+     "Q23413": "castle",
+     "Q162875": "mausoleum",
+     "Q174782": "square",
+     "Q132834": "madrasa",
+     "Q57821": "fortification",
+     "Q44613": "monastery",
+     "Q839954": "archaeological site",
+     "Q179700": "statue",
+     "Q32815": "mosque",
+     "Q570116": "tourist attraction",
+     "Q183342": "federal city of Russia",
+     "Q263274": "kremlin",
+     "Q1107656": "garden",
+     "Q4989906": "monument",
+     "Q5003624": "memorial",
+     "Q1851368": "waterfront",
+     "Q2319498": "architectural landmark",
+     "Q6017969": "scenic viewpoint",
+     "Q7930989": "city or town"
+    },
+    "mismatches": {},
+    "ok": true,
+    "resolved": {},
+    "unresolved": []
+   },
+   "forms": {
+    "total": 48,
+    "match": 47,
+    "misses": [
+     {
+      "name": "Пушкино",
+      "got": {
+       "gen": "Пушкина",
+       "prep": "Пушкине"
+      },
+      "want": [
+       "Пушкино",
+       "Пушкино"
+      ]
+     }
+    ],
+    "pymorphy3": "2.0.2"
+   },
+   "failedTowns": {
+    "pois": [],
+    "bars": []
+   },
+   "parks": {
+    "version": "wd-20261030-abroad2",
+    "count": 141,
+    "townsSha256": "365d5f323426d6b3eef28334b2635772b2783a2ea903a1f49b80ac676e187b90",
+    "file": "catalogue_parks.json.gz",
+    "bytes": 4941,
+    "sha256": "0033f8b28dba1fa5ac98cc90deaf2d0df5a5f3d1168e425354dbaf7b73238150"
+   }
+  }
+ },
+ "totalBytes": 1128152
+}

@@ -1,0 +1,32 @@
+{
+ "labels": {
+  "Q2977": "cathedral",
+  "Q22698": "park",
+  "Q399": "Armenia",
+  "Q23413": "castle",
+  "Q32815": "mosque",
+  "Q16970": "church building",
+  "Q33506": "museum",
+  "Q174782": "square",
+  "Q179700": "statue",
+  "Q7930989": "city or town",
+  "Q44613": "monastery",
+  "Q183342": "federal city of Russia",
+  "Q57821": "fortification",
+  "Q132834": "madrasa",
+  "Q263274": "kremlin",
+  "Q162875": "mausoleum",
+  "Q570116": "tourist attraction",
+  "Q839954": "archaeological site",
+  "Q1107656": "garden",
+  "Q1851368": "waterfront",
+  "Q2319498": "architectural landmark",
+  "Q4989906": "monument",
+  "Q5003624": "memorial",
+  "Q6017969": "scenic viewpoint"
+ },
+ "mismatches": {},
+ "ok": true,
+ "resolved": {},
+ "unresolved": []
+}

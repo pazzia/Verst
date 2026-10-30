@@ -46,7 +46,7 @@ from verst_planner.events import NEVER, NULL_SINK, CancelToken, ProgressSink
 from verst_planner.explain import ru
 from verst_planner.explain.templates import ReasonTemplates
 from verst_planner.foreign.rates import rate_or_none
-from verst_planner.foreign.routing import BorderRouting, BorderTolls
+from verst_planner.foreign.routing import VIA_MIN_POP, BorderRouting, BorderTolls, TownChain
 from verst_planner.foreign.rules import RUSSIA, UNVERIFIED_RU, CountryRules, Fee, sources_json
 from verst_planner.foreign.world import AbroadWorld
 from verst_planner.geo.roadmodel import RoadModel
@@ -125,7 +125,12 @@ class AbroadPlanner(Planner):
         parking: ParkingPort | None = None,
     ) -> None:
         aw = world
-        border_routing = BorderRouting(routing, model, lambda p: aw.locator.country_at(p) == RUSSIA)
+        chain = TownChain(
+            t.point
+            for t in aw.world.towns.values()
+            if t.population >= VIA_MIN_POP and aw.country_of_region.get(t.region_code, RUSSIA) != RUSSIA
+        )
+        border_routing = BorderRouting(routing, model, lambda p: aw.locator.country_at(p) == RUSSIA, chain)
         super().__init__(
             routing=border_routing,
             places=aw.ports.places,

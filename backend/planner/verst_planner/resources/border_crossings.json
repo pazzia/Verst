@@ -80,7 +80,7 @@
     {
       "id": "sarpi",
       "between": ["GE", "TR"],
-      "nameRu": "Граница: Сарпи — Sarp",
+      "nameRu": "Граница: Сарпи — Сарп",
       "marker": false,
       "anchor": {"country": "GE", "towns": ["Батуми"]},
       "facts": [

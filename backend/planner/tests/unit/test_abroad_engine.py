@@ -403,3 +403,21 @@ class AbroadDataTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TownChainTest(unittest.TestCase):
+    """CEO 30.10: a long leg abroad goes through the big towns (the highways join them), not the steppe."""
+
+    def test_long_leg_goes_through_towns_off_the_straight_line(self) -> None:
+        from verst_planner.foreign.routing import TownChain
+
+        a, b = LatLon(50.0, 50.0), LatLon(50.0, 62.0)  # ~860 km along a parallel; towns ~210 km apart
+        towns = [LatLon(51.0, 53.0), LatLon(51.0, 56.0), LatLon(51.0, 59.0), LatLon(45.0, 56.0)]
+        self.assertEqual(TownChain(towns).via(a, b), towns[:3])
+
+    def test_short_leg_or_no_chain_stays_straight(self) -> None:
+        from verst_planner.foreign.routing import TownChain
+
+        a = LatLon(50.0, 50.0)
+        self.assertEqual(TownChain([LatLon(50.5, 51.0)]).via(a, LatLon(50.0, 53.0)), [])  # ~215 km
+        self.assertEqual(TownChain([LatLon(50.2, 52.0)]).via(a, LatLon(50.0, 60.0)), [])  # a 560 km gap
