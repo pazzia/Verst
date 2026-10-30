@@ -865,7 +865,7 @@ class ScreensScreenshotTest {
             ) { RoadScreen(RoadUi(r.trip, "S", border = border), noRoad) }
         }
         compose.onNodeWithTag("border.wait", useUnmergedTree = true)
-            .assertTextEquals("Время ожидания неизвестно · в плане заложен запас 2 ч (это наша оценка, не данные)")
+            .assertTextEquals("Время ожидания неизвестно · в плане заложен запас 2\u00A0ч (это наша оценка, не данные)")
         compose.onNodeWithTag("border.route", useUnmergedTree = true).assertTextEquals("Россия → Грузия")
         compose.onNodeWithTag("border.coords", useUnmergedTree = true).assertExists()
         compose.onNodeWithText("Загранпаспорт", useUnmergedTree = true).assertExists()
@@ -1851,7 +1851,7 @@ class ScreensScreenshotTest {
         assertTrue(compose.onAllNodesWithTag("settings.restart").fetchSemanticsNodes().isEmpty())
         // acceptance 28.10: the screen is «Настройки», the car is set here (traveller К4)
         compose.onNodeWithText("Настройки").assertExists()
-        compose.onNodeWithTag("settings.consumption.value", useUnmergedTree = true).assertTextEquals("8 л на 100 км")
+        compose.onNodeWithTag("settings.consumption.value", useUnmergedTree = true).assertTextEquals("8\u00A0л на 100\u00A0км")
         compose.onNodeWithTag("settings.fuel.ai95").assertIsSelected()
         compose.onNodeWithTag("settings.tolls.false").assertIsSelected()
         compose.onNodeWithTag("settings.consumption.more").performScrollTo().performClick()

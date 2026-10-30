@@ -32,8 +32,8 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `common_offline` | НЕТ СЕТИ | `OfflinePlate` |
 | `common_need_internet` | Нужен интернет | disabled actions |
 | `common_need_internet_navigator` | Нужен интернет, чтобы открыть навигатор | toast |
-| `common_estimate_rub` | ≈ {amount} ₽ | amount pre-formatted with U+202F |
-| `common_rub` | {amount} ₽ | |
+| `common_estimate_rub` | ≈ {amount} | amount pre-formatted with U+202F |
+| `common_rub` | {amount} |  |
 | `common_km` | {km} км | |
 | `common_km_approx` | ≈ {km} км | straight-line distances (OI-23) |
 | `common_unverified` | не проверено | = engine `note.unverified` |
@@ -211,7 +211,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `instruments_days_ring` | {n} {days} на кольцо | [plural: `plural_day`] |
 | `instruments_days_oneway` | {n} {days} в пути | [plural: `plural_day`] |
 | `instruments_budget_label` | БЮДЖЕТ | |
-| `instruments_budget_value` | до {amount} ₽ | |
+| `instruments_budget_value` | до {amount} |  |
 | `instruments_budget_any` | не важно | |
 | `instruments_gauge_empty` | E | fuel gauge letter at the red end (components §6, Latin as on a real dashboard); `cd` not needed: the gauge node speaks the budget |
 | `instruments_gauge_full` | F | fuel gauge letter at the full end |
@@ -230,7 +230,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `cd_instruments_km` | {km} километров в день | |
 | `cd_instruments_km_less` | Меньше на 50 км |  |
 | `cd_instruments_km_more` | Больше на 50 км |  |
-| `cd_instruments_budget_value` | Бюджет до {amount} рублей |  |
+| `cd_instruments_budget_value` | Бюджет до {amount} |  |
 | `cd_instruments_budget_any` | Бюджет не важен |  |
 | `cd_instruments_budget_less` | Уменьшить бюджет |  |
 | `cd_instruments_budget_more` | Увеличить бюджет |  |
@@ -281,7 +281,7 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `road_title` | Дорога впереди | h1 |
 | `road_chip_days` | {d} {days} · {nights} {nights_word} | [plural: `plural_day`, `plural_night`]; args: day count, day word, night count, night word («3 дня · 2 ночи») |
 | `road_chip_pace` | до {km} км в день | |
-| `road_intro` | Знаки по пути — как увидите их на трассе. Любой можно заменить. | |
+| `road_intro` | Знаки по пути — как увидите их на трассе. Любой можно заменить, а «⋯» у знака — вести по картам отсюда или сообщить об ошибке. |  |
 | `road_day` | День {n} | |
 | `road_day_meta` | {km} км · ≈ {h} ч за рулём |  |
 | `road_day_meta_home` | {km} км · домой | last day of a round trip |
@@ -296,15 +296,15 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `road_swap` | заменить | |
 | `road_pick_hotel` | Выбрать отель → | |
 | `road_booked` | Забронировано | the check is **not** a character (Verst Sans Narrow has no U+2713; it fell back to «√»): draw §17.4 `check` 16 × 16, stroke 2, same colour as the text, gap 6, after the text |
-| `road_excursion` | Экскурсия от {amount} ₽ ↗ | SPEC §14 |
+| `road_excursion` | Экскурсия от {amount} ↗ | SPEC §14 |
 | `road_waybill_label` | ПУТЕВОЙ ЛИСТ · СКОЛЬКО СТОИТ | |
-| `road_waybill_over` | ПУТЕВОЙ ЛИСТ · ПЕРЕРАСХОД {amount} ₽ | over budget |
-| `road_waybill_per_person` | ≈ {amount} ₽ на человека | footer, right of the amount (5.5 F3); `perPersonRub` from the engine cost, U+202F thousands; hidden when the crew is 1 person |
+| `road_waybill_over` | ПУТЕВОЙ ЛИСТ · ПЕРЕРАСХОД {amount} | over budget |
+| `road_waybill_per_person` | ≈ {amount} на человека | footer, right of the amount (5.5 F3); `perPersonRub` from the engine cost, U+202F thousands; hidden when the crew is 1 person |
 | `road_prices_from` | Цены от {date} | prices older than 24 h |
 | `road_prices_refresh` | Обновить цены | |
-| `road_prices_updated` | Цены обновлены: ≈ {amount} ₽ | toast |
+| `road_prices_updated` | Цены обновлены: ≈ {amount} | toast |
 | `road_offline_plate` | Без сети: бронирование и навигатор недоступны | |
-| `road_replaced_toast` | Заменили. Путевой лист: ≈ {amount} ₽ | + `common_undo` |
+| `road_replaced_toast` | Заменили. Путевой лист: ≈ {amount} | + `common_undo` |
 | `road_replace_sync_later` | Замену сохраним на сервере, когда появится сеть | |
 | `cd_road_save` | Сохранить офлайн | toolbar |
 | `cd_road_saved` | Сохранено офлайн | toolbar, saved |
@@ -319,9 +319,9 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `cd_road_warning` | Внимание: {text} | |
 | `cd_road_swap` | Заменить: {name} | |
 | `cd_road_hotel` | Выбрать отель в {town_prep} | |
-| `cd_road_action_navigator` | Открыть в навигаторе отсюда | custom action |
+| `cd_road_action_navigator` | Вести по картам отсюда | custom action |
 | `cd_road_action_report` | Сообщить об ошибке | custom action |
-| `cd_road_waybill` | Путевой лист, сколько стоит: примерно {amount} рублей | |
+| `cd_road_waybill` | Путевой лист, сколько стоит: примерно {amount} |  |
 | `stopmenu_navigator` | ОТКРЫТЬ В НАВИГАТОРЕ ОТСЮДА | D-5 |
 | `stopmenu_yandex_navi` | Яндекс Навигатор | app names, no logos |
 | `stopmenu_yandex_maps` | Яндекс Карты |  |
@@ -335,9 +335,9 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `replace_title` | Заменить: {name} | D-6 |
 | `replace_subtitle` | Варианты в то же время, ± 45 минут | |
 | `replace_current` | сейчас | |
-| `replace_delta` | {min_sign}{min} мин · {rub_sign}{amount} ₽ | independent signs «+» / «−» (U+2212): «+4 мин · −150 ₽»; `{min}` and `{amount}` are absolute values (amount with U+202F) |
+| `replace_delta` | {min_sign}{min} мин · {rub_sign}{amount} | independent signs «+» / «−» (U+2212): «+4 мин · −150 ₽»; `{min}` and `{amount}` are absolute values (amount with U+202F) |
 | `replace_delta_min` | {min_sign}{min} мин | when the price difference is 0 |
-| `replace_delta_rub` | {rub_sign}{amount} ₽ | when the time difference is 0 |
+| `replace_delta_rub` | {rub_sign}{amount} | when the time difference is 0 |
 | `replace_delta_none` | то же время и цена | both differences are 0 |
 | `replace_confirm` | Заменить | CTA |
 | `replace_keep` | Оставить как есть | |
@@ -390,12 +390,12 @@ Version 1.0.0 · 2026-10-23 · Owner: Designer · Reviewed sources: SPEC §5, §
 | `waybill_stamp_mid` | В ПУТЬ |  |
 | `waybill_stamp_bottom` | ГОТОВЫ |  |
 | `cd_waybill_heading` | Путевой лист легкового автомобиля, номер {n} | |
-| `cd_waybill_line` | {name}, {amount} рублей. Расчёт: {formula_spoken}. {expand} |  |
+| `cd_waybill_line` | {name}, {amount}. Расчёт: {formula_spoken}. {expand} |  |
 | `cd_waybill_expand` | Раскрыть подробности |  |
 | `cd_waybill_collapse` | Свернуть подробности |  |
-| `cd_waybill_reserve` | Резерв 10 процентов, на пробки и «давай заедем», {amount} рублей | |
-| `cd_waybill_total` | Итого примерно {amount} рублей | |
-| `cd_waybill_ready` | Путевой лист готов: итого примерно {amount} рублей | announcement |
+| `cd_waybill_reserve` | Резерв 10 процентов, на пробки и «давай заедем», {amount} |  |
+| `cd_waybill_total` | Итого примерно {amount} |  |
+| `cd_waybill_ready` | Путевой лист готов: итого примерно {amount} | announcement |
 | `pro_plate` | Поездка Pro · безлимит, PDF, карты без сети | |
 | `pro_plate_joined` | Поездка Pro · вы в списке | the check is **not** a character (Verst Sans Narrow has no U+2713; it fell back to «√»): draw §17.4 `check` 16 × 16, stroke 2, same colour as the text, gap 6, after the text |
 | `pro_title` | Поездка Pro | sheet |
@@ -444,7 +444,7 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `cd_exit_sign` | Указатель: съезд на {town}, центр, гостиница через {distance_spoken} | |
 | `cd_exit_heading` | Ночёвка {k} из {n}, километр {km}, приезд в {time}. {town} | |
 | `cd_exit_group` | Где ночуем | radio group |
-| `cd_exit_option` | {name}, {tags}, примерно {amount} рублей за ночь | |
+| `cd_exit_option` | {name}, {tags}, примерно {amount} за ночь |  |
 | `cd_exit_book` | Забронировать ночь через Яндекс Путешествия, откроется Яндекс Путешествия | |
 | `trips_title` | Мои поездки | sheet D-1 |
 | `trips_subtitle` | {n} {saved} · открываются без сети | [plural: `plural_saved`] |
@@ -461,7 +461,7 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `trips_limit_reached_open` | Открыть «Мои поездки» | primary; secondary = `common_dialog_cancel` |
 | `trips_past` | прошла | small label before the meta of a past trip (D-1 order: upcoming first) |
 | `cd_trips_deleted` | Поездка «{name}» удалена. Вернуть, кнопка | live region for the undo toast |
-| `cd_trips_row` | {name}, {dates}, {d} {days}, примерно {amount} рублей. Открыть | |
+| `cd_trips_row` | {name}, {dates}, {d} {days}, примерно {amount}. Открыть |  |
 
 ## 9. Plurals (`<plurals>`, ICU one / few / many / other)
 
@@ -485,8 +485,10 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `plural_minute` | минута | минуты | минут | минуты |
 | `plural_km_spoken` | километр | километра | километров | километра |
 | `plural_rub_spoken` | рубль | рубля | рублей | рубля |
+| `plural_town` | город | города | городов | города |
+| `plural_day_until` | дня | дней | дней | дня |
 
-`plural_day_gen` is used after «за» («за 1 день», «за 3 дня», «за 5 дней»); `plural_minute` has the same forms as the engine's `plural.minute`.
+`plural_town` is the Waybill parking formula «· 5 городов»; `plural_day_until` is the genitive after «до» («Сократить до 3 дней»). `plural_day_gen` is used after «за» («за 1 день», «за 3 дня», «за 5 дней»); `plural_minute` has the same forms as the engine's `plural.minute`.
 
 Engine plurals (`strings.ru.json`): `plural.day`, `plural.minute`, `plural.meal`, `plural.seat`, `plural.region_prep` — identical forms; the client uses its own `<plurals>` for UI text and never re-plurals engine output.
 
@@ -689,10 +691,10 @@ Keys for the on-device mock build (architecture-android-mvp M§9, ADR-0010). Spe
 | `mock_partner_hotel` | {hotel}, {town} | |
 | `mock_partner_dates` | {checkin} — {checkout} · {nights} {nights_word} | [plural: `plural_night`]; dates «7 нояб.» |
 | `mock_partner_guests` | Гости: {guests} | guests = `waybill_crew_*` parts |
-| `mock_partner_price` | ≈ {amount} ₽ за {nights} {nights_word} | [plural: `plural_night`] |
+| `mock_partner_price` | ≈ {amount} за {nights} {nights_word} | [plural: `plural_night`] |
 | `mock_partner_note` | Это демо-сборка: настоящего бронирования и оплаты нет. В рабочей версии здесь откроется сайт партнёра по бронированию с этими датами. | |
 | `mock_partner_back` | Вернуться в Версту | primary button; dismissal → «Забронировали?» |
-| `cd_mock_partner` | Бронирование ночи, демо, вымышленный партнёр. {hotel}, {checkin} — {checkout}, примерно {amount} рублей | pane description |
+| `cd_mock_partner` | Бронирование ночи, демо, вымышленный партнёр. {hotel}, {checkin} — {checkout}, примерно {amount} | pane description |
 | `mock_map_unavailable` | Карта появится в следующей версии — пока введите город или адрес | plate after tapping «точка на карте» (D-14) |
 | `mock_build_line` | Сборка {n} · {sha} · демо-данные | D-4 footer, long-press 2 s → debug panel (D-16) |
 | `mock_share_note` | Посчитано в демо-сборке «Версты», цены примерные | last line of the share text instead of the link (D-16) |
@@ -726,24 +728,24 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | Key | Text | Notes |
 | --- | --- | --- |
 | `budget_nofit_title` | Не помещается в бюджет | 5.8 h1 |
-| `budget_nofit_sign` | {amount} ₽ | number in the round «ограничение» sign, e.g. «30 000 ₽» |
-| `budget_nofit_min` | Даже самый экономный вариант — ≈ {amount} ₽ | under the engine `textRu` |
+| `budget_nofit_sign` | {amount} | number in the round «ограничение» sign, e.g. «30 000 ₽» |
+| `budget_nofit_min` | Даже самый экономный вариант — ≈ {amount} | under the engine `textRu` |
 | `budget_nofit_options` | ЧТО МОЖНО СДЕЛАТЬ | section label |
 | `budget_option_shorten` | Сократить до {d} {days} | [plural: `plural_day`]; sub = option `titleRu` |
-| `budget_option_shorten_sub` | {title} · ≈ {amount} ₽ | «Золотое кольцо · коротко · ≈ 29 700 ₽» |
+| `budget_option_shorten_sub` | {title} · ≈ {amount} | «Золотое кольцо · коротко · ≈ 29 700 ₽» |
 | `budget_option_cheaper` | Ближе и дешевле: {title} | option `titleRu` |
-| `budget_option_cheaper_sub` | ≈ {amount} ₽ · помещается в бюджет | |
-| `budget_option_cheaper_sub_over` | ≈ {amount} ₽ · дешевле, но больше бюджета | cheaper-route option with `fits: false`; never «помещается» (S3-QA, was pending) |
-| `budget_option_raise` | Поднять бюджет до {amount} ₽ | |
+| `budget_option_cheaper_sub` | ≈ {amount} · помещается в бюджет |  |
+| `budget_option_cheaper_sub_over` | ≈ {amount} · дешевле, но больше бюджета | cheaper-route option with `fits: false`; never «помещается» (S3-QA, was pending) |
+| `budget_option_raise` | Поднять бюджет до {amount} |  |
 | `budget_option_raise_sub` | тот же маршрут, без изменений | |
 | `budget_nofit_cta` | Смотреть варианты | Drive CTA when the outcome is `no_fit` (auto-advance 1 s) |
 | `budget_nofit_min_label` | САМЫЙ ЭКОНОМНЫЙ ВАРИАНТ | minimum plate label (uppercase copy) |
 | `waybill_tight_label` | Сверх бюджета | Waybill «Остаток» label for a small overrun (value in ink) |
 | `budget_show_minimum` | Показать самый экономный вариант | text button; the trip then shows as over budget everywhere |
 | `budget_fit_badge` | В БЮДЖЕТЕ | Road ahead footer badge (uppercase copy) |
-| `budget_tight_badge` | ЧУТЬ БОЛЬШЕ: +{amount} ₽ | small overrun badge |
+| `budget_tight_badge` | ЧУТЬ БОЛЬШЕ: +{amount} | small overrun badge |
 | `budget_fitted_title` | Подогнали под бюджет | Waybill heading of the lever lines |
-| `budget_lever_line` | {lever}: −{amount} ₽ | one line per lever under the Waybill total |
+| `budget_lever_line` | {lever}: −{amount} | one line per lever under the Waybill total |
 | `budget_lever_lodging_cheap` | дешевле ночёвки | lever names (engine codes) |
 | `budget_lever_family_rooms` | семейные номера | |
 | `budget_lever_food_economy` | кафе попроще | |
@@ -752,11 +754,11 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `budget_lever_variant` | короткий вариант маршрута | |
 | `budget_refit` | Подогнать под бюджет | Waybill over-budget action (re-plan → Drive) |
 | `budget_alt_breaks` | не в бюджете | replace-sheet row mark (`breaksBudget`) |
-| `budget_instruments_fits` | ≈ {amount} ₽ — в бюджете | Instruments caption meta suffix (`estimate.outcome`) |
-| `budget_instruments_fitted` | ≈ {amount} ₽ — подгоним под бюджет | estimate needed levers |
+| `budget_instruments_fits` | ≈ {amount} — в бюджете | Instruments caption meta suffix (`estimate.outcome`) |
+| `budget_instruments_fitted` | ≈ {amount} — подгоним под бюджет | estimate needed levers |
 | `budget_instruments_nofit` | не помещается в бюджет | `color.accent.redText` |
 | `drive_step_budget` | Подбираем под бюджет: {lever} | engine stage text template (key `budget`), for reference |
-| `cd_budget_nofit` | Не помещается в бюджет {budget} рублей. Самый экономный вариант примерно {amount} рублей. Есть варианты | |
+| `cd_budget_nofit` | Не помещается в бюджет {budget}. Самый экономный вариант примерно {amount}. Есть варианты |  |
 | `cd_budget_option` | {title}. {sub}. Применить | |
 
 ### 15.2 Cards (5.9, DES-301)
@@ -789,7 +791,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `card_kind_hotel` | гостиница · {town} | |
 | `card_kind_line` | {kind} · {town} | |
 | `card_hours_unverified` | часы уточняйте | when `hours.verified = false` |
-| `card_ticket` | билет ≈ {adult} ₽, детский ≈ {child} ₽ | `ticket.estimate = true` → add `card_price_estimate` |
+| `card_ticket` | билет ≈ {adult}, детский ≈ {child} | `ticket.estimate = true` → add `card_price_estimate` |
 | `card_ticket_free` | вход свободный | |
 | `card_per_night` | за ночь | hotel fact after the price: «≈ 6 000 ₽ за ночь» (S3-QA, was pending) |
 | `card_price_estimate` | цена примерная | |
@@ -843,7 +845,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `city_pace_normal` | обычный | |
 | `city_pace_fast` | бодро | |
 | `city_budget_label` | БЮДЖЕТ НА ВСЕХ | tickets + food/drinks for the whole group |
-| `city_budget_value` | до {amount} ₽ | chips 2 000 / 5 000 / 10 000 + `instruments_budget_any` |
+| `city_budget_value` | до {amount} | chips 2 000 / 5 000 / 10 000 + `instruments_budget_any` |
 | `city_return_label` | Вернуться к старту | switch |
 | `city_build` | Собрать прогулку | YellowButton in the custom sheet |
 | `city_caption_label` | ПРОГУЛКА | |
@@ -882,8 +884,8 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `walk_other` | Другой вариант | re-run with `exclude` |
 | `walk_remove_stop` | Убрать эту точку | card / stop menu action |
 | `walk_footer_label` | СКОЛЬКО СТОИТ ПРОГУЛКА | |
-| `walk_footer_total` | ≈ {amount} ₽ на всех | |
-| `walk_footer_per_person` | ≈ {amount} ₽ на человека | |
+| `walk_footer_total` | ≈ {amount} на всех |  |
+| `walk_footer_per_person` | ≈ {amount} на человека |  |
 | `walk_footer_free` | Бесплатно | footer amount when the walk total is 0 ₽; the per-person line is hidden (S3-QA P1-03) |
 | `walk_footer_free_sub` | вход везде свободный | right-hand line of the free footer |
 | `walk_saved_kind` | прогулка | «Мои поездки» meta word for walks |
@@ -928,7 +930,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `route_approx_open_data` | Расстояния приблизительные · места из открытых данных | one info line when both `approxDistances` and `UNVERIFIED_PLACES` apply; followed by the «О данных» link (S3-FINAL) |
 | `route_approx_more` | О данных | link → «О данных» |
 | `about_data_title` | О данных | screen |
-| `about_data_body` | Города и достопримечательности — Wikidata (CC0). Бары, детские площадки, парковки, часы работы, часть описаний и адреса — © участники OpenStreetMap, данные доступны по лицензии ODbL 1.0. Каталог мест в приложении — производная база данных OpenStreetMap; он тоже распространяется по ODbL 1.0, копию можно скачать бесплатно. Описания из Википедии и Викигида — CC BY-SA 4.0, тексты сокращены, ссылка на статью — в карточке. Фото — Wikimedia Commons: автор и лицензия — в подписи под фото. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и кафе в демо-сборке вымышленные. | ODbL package (D-IR-07, lawyer brief appendix B) |
+| `about_data_body` | Города и достопримечательности — Wikidata (CC0). Бары, рестораны и кафе, детские площадки, парковки, часы работы, часть описаний и адреса — © участники OpenStreetMap, данные доступны по лицензии ODbL 1.0. Каталог мест в приложении — производная база данных OpenStreetMap; он тоже распространяется по ODbL 1.0, копию можно скачать бесплатно. Описания из Википедии и Викигида — CC BY-SA 4.0, тексты сокращены, ссылка на статью — в карточке. Фото — Wikimedia Commons: автор и лицензия — в подписи под фото. Вне центральной России расстояния и время в пути посчитаны приблизительно. Гостиницы и придорожные кафе в демо-сборке вымышленные. | ODbL package (D-IR-07, lawyer brief appendix B) |
 | `about_data_copy` | Скачать копию каталога (ODbL) | link ↗ → `data/catalogue` (free copy, ODbL 4.6) |
 | `about_data_odbl` | Лицензия ODbL 1.0 | link ↗ → opendatacommons.org/licenses/odbl/1-0/ |
 | `about_data_osm` | Авторские права OpenStreetMap | link ↗ → openstreetmap.org/copyright |
@@ -945,11 +947,11 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `handoff_maps_car` | Открыть в Яндекс Картах | car, only Карты installed |
 | `handoff_maps_walk` | Пешком в Яндекс Картах | walk |
 | `handoff_web` | Открыть Яндекс Карты в браузере | no app |
-| `handoff_day` | В навигатор: день {n} | day-header menu item |
-| `handoff_from_stop` | Открыть в навигаторе отсюда | stop-menu item (replaces `stopmenu_navigator` text) |
-| `handoff_truncated` | Навигатор принимает до 8 промежуточных точек — взяли главные | note under the item when `truncated` |
+| `handoff_day` | По картам: день {n} | day-header menu item |
+| `handoff_from_stop` | Вести по картам отсюда | stop-menu item (replaces `stopmenu_navigator` text) |
+| `handoff_truncated` | Карты принимают до 8 промежуточных точек — взяли главные | note under the item when `truncated` |
 | `handoff_part` | Часть {k} из {n} | walk split into parts |
-| `handoff_toast_web` | Яндекс Навигатор не установлен — открыли карту в браузере | after the fallback |
+| `handoff_toast_web` | Яндекс Карты не установлены — открыли маршрут в браузере | after the fallback |
 | `handoff_toast_web_walk` | Яндекс Карты не установлены — открыли карту в браузере | |
 | `handoff_offline` | Нужен интернет, чтобы открыть карту в браузере | |
 | `handoff_failed` | Не получилось открыть карту. Попробуйте ещё раз | |
@@ -986,16 +988,15 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 
 | Key | Text | Notes |
 | --- | --- | --- |
-| `road_handoff_cta` | Вести в навигаторе | yellow button under the chips → hand-off sheet (5.13 §5) |
-| `road_handoff_cta_sub` | по дням · начнём с дня {n} | `{n}` = today's day (1 before the trip) |
+| `road_handoff_cta` | Вести по картам | yellow button under the chips → hand-off sheet (5.13 §5) |
 | `road_handoff_day` | вести | day-header outline button |
-| `cd_road_handoff_day` | Вести в навигаторе: день {n} | |
+| `cd_road_handoff_day` | Вести по картам: день {n} — выбрать приложение |  |
 | `road_odometer` | {km} км | km post number (variant B) = engine `kmDriven`; the odometer tag is retired (5.5 §10.7) |
 | `road_meta_driven` | {ahead} · пройдено {km} км | variant A — **not used** (CEO chose B) |
 | `road_km_post_label` | пройдено | **not used** (S4 QA: the label collided with the sign) |
 | `road_km_post_legend` | — столбик у дороги: сколько км пройдено от старта | legend under the chips, after a mini post |
 | `cd_road_km_post` | пройдено {km} километров | TalkBack |
-| `road_parking_inline_paid` | ≈ {amount} ₽ | P part of the costs line |
+| `road_parking_inline_paid` | ≈ {amount} | P part of the costs line |
 | `road_parking_inline_free` | бесплатно | |
 | `road_parking_inline_unknown` | ? | |
 | `cd_road_parking_inline` | Парковка: {value}. Подробнее | `{value}` «примерно 300 рублей» / «бесплатно» / «нет данных» |
@@ -1025,16 +1026,16 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `road_amenity_playground` | детская площадка | |
 | `road_break_title` | Перерыв {min} мин | the fallback break (ADR-0015 §5), at most one per day with a note |
 | `road_break_note` | Остановитесь, где удобно: размяться и сменить водителя | only on the first break of the day; later breaks have no note |
-| `road_parking_plate_paid` | ≈ {amount} ₽ | supplementary plate under the «P» sign; `{amount}` = engine `parking.rub` |
+| `road_parking_plate_paid` | ≈ {amount} | supplementary plate under the «P» sign; `{amount}` = engine `parking.rub` |
 | `road_parking_plate_free` | бесплатно | |
 | `road_parking_plate_unknown` | ? | `parking: null` |
 | `road_parking_detail` | парковка · {detail} | text line after the note |
-| `road_parking_zone` | {zone} · ≈ {rate} ₽/ч × {h} ч | `{zone}` = engine zone name, default `road_parking_zone_default` |
+| `road_parking_zone` | {zone} · ≈ {rate}/ч × {h} ч | `{zone}` = engine zone name, default `road_parking_zone_default` |
 | `road_parking_zone_default` | платная зона | |
 | `road_parking_unknown` | нет данных — уточните на месте | |
-| `road_parking_day` | ≈ {amount} ₽ | day header, after a small «P» |
-| `road_parking_day_unknown` | ≈ {amount} ₽ + ? | some stops of the day without data |
-| `cd_road_parking_day` | Парковки за день: примерно {amount} рублей | add `cd_road_parking_day_unknown` when needed |
+| `road_parking_day` | ≈ {amount} | day header, after a small «P» |
+| `road_parking_day_unknown` | ≈ {amount} + ? | some stops of the day without data |
+| `cd_road_parking_day` | Парковки за день: примерно {amount} | add `cd_road_parking_day_unknown` when needed |
 | `cd_road_parking_day_unknown` | и {k} без данных | |
 | `road_footer_parking` | из них парковки | footer right block; the amount below it |
 | `road_parking_sheet_label` | ПАРКОВКА | `ParkingSheet` |
@@ -1044,11 +1045,11 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `road_parking_row_where` | Где | |
 | `road_parking_note` | ≈ — цена примерная. Сумма уже в путевом листе и в бюджете. | big cities add the engine note («тарифы в центре меняются в течение дня») |
 | `road_parking_ok` | Понятно | |
-| `road_parking_paid` | ≈ {rate} ₽/ч · ≈ {amount} ₽ за стоянку | card fact / TalkBack long form |
+| `road_parking_paid` | ≈ {rate}/ч · ≈ {amount} за стоянку | card fact / TalkBack long form |
 | `road_parking_free` | бесплатно рядом | `source = free` |
 | `road_parking_free_entrance` | бесплатно у входа | OSM parking with `fee=no` ≤ 100 m |
 | `road_parking_hotel` | у гостиницы · бесплатно | hotel fact, not a cost |
-| `cd_road_parking` | Парковка примерно {rate} рублей в час, за стоянку примерно {amount} рублей | |
+| `cd_road_parking` | Парковка примерно {rate} в час, за стоянку примерно {amount} |  |
 | `road_open_data_legend` | — из открытых данных, часы уточняйте | legend after the dotted-ring mark, once under the chips |
 | `cd_open_data` | данные из открытых источников, часы уточняйте | TalkBack for the dotted ring on a row |
 
@@ -1067,7 +1068,7 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 
 | Key | Text | Notes |
 | --- | --- | --- |
-| `handoff_sheet_title` | Вести в навигаторе | |
+| `handoff_sheet_title` | Чем вести |  |
 | `handoff_scope_day` | День {n} | tab |
 | `handoff_scope_next` | До след. | tab; TalkBack `handoff_cd_scope_next` |
 | `handoff_cd_scope_next` | До следующей точки | |
@@ -1075,14 +1076,10 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `handoff_next_line` | Следующая точка: {name} · {km} км | |
 | `handoff_app_maps` | Яндекс Карты | card title |
 | `handoff_app_navi` | Яндекс Навигатор | card title |
-| `handoff_badge_day` | весь день | yellow badge on the app that takes the whole day |
 | `handoff_maps_day` | все {points} дня по порядку; в Картах нажмите «В путь» — поведут с голосом | unsigned and signed |
 | `handoff_maps_next` | маршрут до точки, с голосом | |
 | `handoff_navi_next` | только до следующей точки: {name}, {km} км | unsigned (ADR-0015 §1) |
-| `handoff_navi_day` | все {points} дня, сразу ведёт с голосом | signed |
 | `handoff_navi_limit` | по ссылке открывается до 5 раз в сутки, потом — в браузере | unsigned only |
-| `handoff_explain_unsigned` | Навигатор пока принимает от нас только одну точку, поэтому весь день с остановками ведут Карты — в них тоже есть ведение с голосом. | |
-| `handoff_explain_signed` | Навигатор получает весь день: старт, финиш и до 8 остановок между ними. Карты — запасной вариант. | |
 | `handoff_maps_missing` | не установлены — откроем карту в браузере | |
 | `handoff_navi_missing` | не установлен | |
 | `handoff_install` | Установить из магазина приложений | opens the store page |
@@ -1110,7 +1107,7 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `card_dogs_no` | с собакой — нельзя | fact chip |
 | `card_dogs_yes` | с собакой можно | |
 | `card_parking_free` | P бесплатно у входа | fact chip |
-| `card_parking_paid` | P ≈ {rate} ₽/ч | fact chip |
+| `card_parking_paid` | P ≈ {rate}/ч | fact chip |
 | `card_open_data` | часы и цены — из открытых данных, уточняйте | once, after the facts; only when a fact is open data |
 
 ### 16.7 «По городу» start and the walk (5.10 §10, 5.11 §10)
@@ -1149,7 +1146,7 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | `walk_info_child` | С ребёнком: добавили детскую площадку и кафе с детским меню. | green info plate |
 | `walk_info_child_museums` | С ребёнком: взяли интерактивные музеи и паузы каждые полтора часа. | |
 | `walk_info_dog` | С собакой: парки, набережные, виды и площади — без закрытых помещений. | |
-| `walk_stop_dog_no` | С собакой внутрь нельзя. | per indoor stop, end of its note |
+| `walk_stop_dog_no` | С собакой внутрь обычно нельзя. | per indoor stop, end of its note |
 | `walk_untimed_header` | Порядок по пути · заходите, куда открыто | replaces «Старт … · финиш …» |
 | `walk_untimed_facts` | Без расписания · {places} по пути · ≈ {km} км | `{places}` = `plural_place` |
 | `walk_filters_cd` | Условия прогулки | toolbar pane title |
@@ -1175,8 +1172,279 @@ Specs: §9/§10 «Sprint 4» sections of 5.1, 5.3, 5.5, 5.6, 5.9, 5.10, 5.11, 5.
 | --- | --- | --- |
 | `online_later` | уточним при интернете | the only visible trace of missing online data: quiet inline text in the value's spot |
 | `online_failed` | Не получилось загрузить — попробуйте ещё раз | online, server error / unreadable answer (never `online_later`) |
-| `addr_failed` | Не получилось найти адрес — попробуйте ещё раз | address search, online error |
+| `addr_failed` | Сервис адресов сейчас не отвечает — попробуйте через минуту | address search, online error |
 | `road_parking_note_unknown` | Тариф неизвестен — в путевом листе это место «без данных», в сумму не входит. | parking sheet note for «P ?» |
 | `cd_parking_loading` | Парковка: загружаем | TalkBack for the shimmer (first-time fetch > 300 ms only) |
 
 Retired with the CEO decision (no live spaces, no visible states): `online_loading`, `online_updated_*`, `online_need_check`, `online_banner`, `online_cached_note`, `parking_live_*`, `parking_row_free_*`, `parking_free_*`, `parking_offline_*`, `parking_none_*` (the no-data sheet keeps `road_parking_unknown`), `parking_loading_note`, `cd_parking_live`.
+
+## 17. Synced from the app 30.10 (strings added in code after Sprint 4)
+
+These keys were written straight into `strings.xml` during the CEO rounds of 27–30.10; they are here so `design/tools/gen_strings.py` keeps them. Subheadings are the comments from `strings.xml`. Placeholder names are generic ({x}, {y} for text, {n}, {k} for counts).
+
+### Misc
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `navigator_abroad_title` | Поездку за границу строит только сервер Версты | |
+| `navigator_abroad_body` | Сейчас нет интернета, а на телефоне Верста планирует только по России. Можно открыть дорогу до точки «{x}» в картах. | |
+| `navigator_abroad_body_no_server` | В этой сборке нет сервера, а на телефоне Верста планирует только по России. Можно открыть дорогу до точки «{x}» в картах. | |
+| `abroad_server_line` | Поездку за границу строит сервер Версты — нужен интернет. | |
+| `road_ticket_unknown` | цена билета неизвестна | |
+| `abroad_error_no_server` | В этой сборке нет сервера — поездку за границу построить нельзя. | |
+| `abroad_error_no_consent` | Чтобы построить поездку за границу, нужно согласие на планирование на сервере. | |
+| `abroad_consent_body` | Поездку за границу строит только сервер Версты. На тестовый сервер в Нидерландах уйдут точки маршрута, состав экипажа, бюджет и машина. Маршрут там не хранится. Без связи такую поездку не построить. | |
+| `sign_border` | ГРАНИЦА | |
+| `road_border_open` | Документы и сборы | |
+| `border_label` | ПУНКТ ПРОПУСКА | |
+| `border_wait_unknown` | Время ожидания неизвестно · в плане заложен запас {x} ч (это наша оценка, не данные) | |
+| `border_wait_unknown_no_buffer` | Время ожидания неизвестно | |
+| `border_wait_buffer` | В плане заложен запас {x} ч (это наша оценка, не данные) | |
+| `border_documents` | Документы | |
+| `border_fees` | Сборы и страховки | |
+| `border_facts` | О переходе | |
+| `border_risks` | Риски | |
+| `border_rules` | Правила в стране | |
+| `border_risk_on_trip` | в даты поездки | |
+| `border_fee_counted` | {x} · учтено в суммах за границей | |
+| `cd_border_source` | Открыть источник: {x} | |
+| `road_total_abroad_incomplete` | Итог без расходов за границей | |
+| `waybill_abroad_title` | За границей | |
+| `waybill_abroad_country` | {x} · ≈ {y} км | |
+| `waybill_abroad_fuel` | Топливо: {x} | |
+| `waybill_abroad_fuel_local` | Топливо: {x} — в местной валюте, в итог в рублях не входит | |
+| `waybill_abroad_fuel_unknown` | Топливо: цены нет — не учтено | |
+| `waybill_abroad_counted` | Учтено за границей: {x} | |
+| `share_abroad_incomplete` | без расходов за границей | |
+| `cd_road_stop_more` | Действия: {x} | |
+| `card_ticket_unknown` | цена билета неизвестна | |
+| `card_hours_unknown` | часы не известны — уточните | |
+| `cd_card_with_address` | Карточка: {x}, адрес: {y} | |
+| `card_address_loading` | Адрес уточняется… | |
+| `card_address_copied` | Адрес скопирован | |
+| `cd_card_address_copy` | скопировать адрес | |
+
+### S4-RELEASE (Manager): some stops unknown, the known ones free (app-only, dev-notes)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `road_parking_free_unknown` | бесплатно + ? | |
+| `handoff_app_google` | Google Карты | |
+| `handoff_badge_here` | рекомендуем здесь | |
+| `handoff_badge_chosen` | ваш выбор | |
+| `handoff_explain` | Яндекс Навигатор по ссылке от нас строит маршрут только до одной точки, поэтому весь день с остановками открывают карты — в них тоже ведут с голосом. Какие карты открывать сразу — в Настройках. | |
+| `handoff_google_day` | все {x} дня по порядку (до 9), ведёт с голосом | |
+| `handoff_google_missing` | не установлены — откроем в браузере, там промежуточных точек меньше (до 3) | |
+| `handoff_google_car` | Открыть в Google Картах | |
+| `handoff_google_web` | Открыть Google Карты в браузере | |
+| `handoff_walk_cta_google` | Вести пешком в Google Картах | |
+| `handoff_toast_web_google` | Google Карты не установлены — открыли маршрут в браузере | |
+| `handoff_open_google` | Открываем Google Карты | |
+| `handoff_cta_sub_yandex` | Яндекс Карты · все точки дня {n} | |
+| `handoff_cta_sub_yandex_web` | Яндекс Карты в браузере · все точки дня {n} | |
+| `handoff_cta_sub_google` | Google Карты · все точки дня {n} | |
+| `handoff_cta_sub_google_web` | Google Карты в браузере · день {n}, до 3 промежуточных точек | |
+
+### S4 dev: units the deck spells inline (5.5 §10.8 km post «км», ParkingSheet «Стоим ≈ 2 ч»)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `common_km_unit` | км | |
+| `common_hours_approx` | ≈ {n} ч | |
+| `common_hours_short` | {n} ч | |
+| `card_hours_daily` | ежедневно | |
+
+### S4 dev: the M6 amenity tags of rest / fuel rows the deck has no word for
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `road_amenity_walk` | где погулять | |
+| `road_amenity_view` | вид | |
+| `road_amenity_ev` | зарядка для электромобиля | |
+| `road_amenity_24h` | круглосуточно | |
+
+### D-IR-20 personal cabinet
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `settings_entry_cd` | Настройки | |
+| `settings_subtitle` | Без регистрации: всё хранится на этом телефоне | |
+| `settings_language` | ЯЗЫК | |
+| `settings_language_ru` | Русский | |
+| `settings_language_en` | English | |
+| `settings_language_note` | Описания мест и пояснения к маршруту пока только на русском | |
+| `settings_currency` | ВАЛЮТА | |
+| `settings_currency_rate` | Курс Банка России на {x}. Маршрут считается в рублях, здесь показан пересчёт | |
+| `settings_currency_no_rate` | Курсы в эту сборку не загрузились: суммы показаны в рублях | |
+| `settings_theme` | ТЕМА | |
+| `settings_theme_night` | Ночная | |
+| `settings_theme_day` | Дневная | |
+| `settings_theme_system` | Как в системе | |
+| `settings_theme_restart` | Тема применится после перезапуска приложения | |
+| `settings_restart` | Перезапустить | |
+| `settings_storage` | ГДЕ ХРАНИТЬ ПОЕЗДКИ | |
+| `settings_storage_device` | На этом телефоне | |
+| `settings_storage_device_sub` | В памяти приложения. Работает без интернета | |
+| `settings_storage_folder` | В папке на телефоне | |
+| `settings_storage_folder_sub` | Копия всех поездок в файле {x} | |
+| `settings_storage_folder_pick` | Выбрать папку | |
+| `settings_storage_folder_now` | Записать сейчас | |
+| `settings_storage_folder_written` | Записано {x} · поездок: {n} | |
+| `settings_storage_folder_failed` | Не удалось записать в папку ({x}). Поездки сохранены в приложении | |
+| `settings_storage_cloud` | В облаке | |
+| `settings_storage_cloud_sub` | Появится вместе с аккаунтами | |
+| `settings_build` | СБОРКА | |
+| `settings_build_version` | Версия {x} · сборка {n} | |
+| `settings_build_commit` | Коммит {x} | |
+| `settings_build_date` | Собрана {x} | |
+| `settings_build_engine` | Движок {x} · Python {y} | |
+| `settings_build_catalogue` | Каталог {x} | |
+| `settings_build_copy` | Скопировать сведения о сборке | |
+| `settings_build_copied` | Скопировано | |
+| `settings_builds_seen` | СБОРКИ НА ЭТОМ ТЕЛЕФОНЕ | |
+| `settings_builds_row` | Сборка {n} · {x} · с {y} | |
+| `settings_dev` | Для разработчиков | |
+
+### SRV-01 server (settings)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `settings_server` | СЕРВЕР | |
+| `settings_server_none` | В этой сборке сервера нет: маршрут строится на телефоне | |
+| `settings_server_url` | Адрес: {x} | |
+| `settings_server_plan` | Где строить маршрут | |
+| `settings_server_plan_phone` | На телефоне | |
+| `settings_server_plan_server` | На сервере | |
+| `settings_server_note` | На сервер уходят точки маршрута и состав экипажа. Поездки на нём не хранятся. Нет связи — маршрут строится на телефоне. | |
+| `settings_server_check` | Проверить соединение | |
+| `settings_server_checking` | Проверяем… | |
+| `settings_server_ok` | Сервер отвечает за {n} мс, устройство зарегистрировано | |
+| `settings_server_ok_unregistered` | Сервер отвечает за {n} мс, но регистрация не прошла | |
+| `settings_server_failed` | Нет связи: {x} | |
+| `settings_server_last_server` | Последний маршрут построен на сервере за {n} мс | |
+| `settings_server_last_phone` | Последний маршрут построен на телефоне ({x}) | |
+
+### Acceptance 28.10: the settings screen, the car (traveller К4), server consent (security В-1)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `settings_screen_title` | Настройки | |
+| `settings_car` | МАШИНА | |
+| `settings_car_note` | Расход и топливо считаются в смете, «объезжать платные» меняет маршрут. | |
+| `settings_consumption_value` | {x} л на 100 км | |
+| `settings_tank_value` | {n} л | |
+| `cd_settings_consumption_less` | Уменьшить расход | |
+| `cd_settings_consumption_more` | Увеличить расход | |
+| `cd_settings_tank_less` | Уменьшить бак | |
+| `cd_settings_tank_more` | Увеличить бак | |
+| `settings_tolls` | ПЛАТНЫЕ ДОРОГИ | |
+| `settings_tolls_allow` | Можно по платным | |
+| `settings_tolls_avoid` | Объезжать платные | |
+| `settings_maps` | НАВИГАЦИЯ | |
+| `settings_maps_auto` | Автоматически | |
+| `settings_maps_in_ru` | в России | |
+| `settings_maps_in_tr` | в Турции | |
+| `settings_maps_in_az` | в Азербайджане | |
+| `settings_maps_in_am` | в Армении | |
+| `settings_maps_in_kz` | в Казахстане | |
+| `settings_maps_in_kg` | в Киргизии | |
+| `settings_maps_in_tj` | в Таджикистане | |
+| `settings_maps_in_by` | в Беларуси | |
+| `settings_maps_in_uz` | в Узбекистане | |
+| `settings_maps_in_md` | в Молдове | |
+| `handoff_settings_in` | Сейчас вы {x} — маршрут откроют Яндекс Карты | |
+| `handoff_settings_yandex_here` | Здесь Яндекс Карты строят маршруты — откроем их | |
+| `handoff_settings_unknown` | Не удалось понять, в какой вы стране, — откроем Яндекс Карты | |
+| `handoff_settings_abroad` | Сейчас вы за рубежом: здесь Яндекс Карты строят маршруты хуже — откроем Google Карты | |
+| `handoff_settings_always_yandex` | Маршрут дня всегда откроют Яндекс Карты | |
+| `handoff_settings_always_google` | Маршрут дня всегда откроют Google Карты | |
+| `handoff_settings_note` | Карты получают все точки дня по порядку и ведут с голосом. Автоматически: в России и странах, где Яндекс строит маршруты, — Яндекс Карты, в остальных — Google Карты. | |
+| `settings_server_consent_title` | Строить маршрут на сервере? | |
+| `settings_server_consent_body` | На тестовый сервер в Нидерландах уйдут точки маршрута, состав экипажа, бюджет и машина. Маршрут там не хранится. Без связи маршрут строится на телефоне. | |
+| `settings_server_consent_yes` | Согласен | |
+| `settings_server_consent_no` | Не сейчас | |
+| `settings_server_privacy` | Какие данные уходят на сервер ↗ | |
+| `settings_server_forget` | Отвязать от сервера | |
+| `settings_server_forgotten` | Отвязано: устройство и его данные на сервере удалены | |
+| `settings_server_forget_failed` | Сервер не ответил. Маршрут уже строится на телефоне; повторите, когда будет связь | |
+
+### CEO 29.10: no data of a kind in this town is a gap of our base, not «мало мест»
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `walk_few_no_data_fallback` | У нас пока нет данных о таких местах в этом городе — это пробел нашей базы, а не города. | |
+| `walk_few_no_data_none` | Выберите другую прогулку выше. | |
+| `city_preset_nodata` | нет данных | |
+| `cd_city_preset_nodata` | {x}, недоступно. {y} | |
+
+### CEO 29.10: OSM restaurants and cafés have no prices — never 0 ₽ or «бесплатно»
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `walk_stop_price_unknown` | цена не указана | |
+| `walk_warn_price_unknown` | Цены в кафе и ресторанах не указаны — уточняйте на месте. | |
+| `walk_footer_price_unknown` | Цены не указаны | |
+| `walk_footer_price_unknown_sub` | уточняйте на месте | |
+| `walk_footer_without_food` | без кафе и ресторанов | |
+
+### CEO 29.10: walk stop kinds (food places from OSM, bar kinds)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `kind_restaurant` | РЕСТОРАН | |
+| `kind_cafe` | КАФЕ | |
+| `kind_fast_food` | ФАСТФУД | |
+| `kind_food_court` | ФУД-КОРТ | |
+| `kind_ryumochnaya` | РЮМОЧНАЯ | |
+| `kind_pub` | ПИВНОЙ БАР | |
+| `kind_craft` | КРАФТОВОЕ ПИВО | |
+| `kind_bar` | БАР | |
+| `card_kind_restaurant` | ресторан | |
+| `card_kind_cafe` | кафе | |
+| `card_kind_fast_food` | фастфуд | |
+| `card_kind_food_court` | фуд-корт | |
+
+### CEO 29.10: OSM cuisine tags the app has words for (others are left out, never shown raw)
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `cuisine_russian` | русская кухня | |
+| `cuisine_georgian` | грузинская кухня | |
+| `cuisine_armenian` | армянская кухня | |
+| `cuisine_azerbaijani` | азербайджанская кухня | |
+| `cuisine_uzbek` | узбекская кухня | |
+| `cuisine_caucasian` | кавказская кухня | |
+| `cuisine_ukrainian` | украинская кухня | |
+| `cuisine_italian` | итальянская кухня | |
+| `cuisine_pizza` | пицца | |
+| `cuisine_japanese` | японская кухня | |
+| `cuisine_sushi` | суши | |
+| `cuisine_chinese` | китайская кухня | |
+| `cuisine_asian` | азиатская кухня | |
+| `cuisine_korean` | корейская кухня | |
+| `cuisine_vietnamese` | вьетнамская кухня | |
+| `cuisine_thai` | тайская кухня | |
+| `cuisine_indian` | индийская кухня | |
+| `cuisine_french` | французская кухня | |
+| `cuisine_european` | европейская кухня | |
+| `cuisine_mediterranean` | средиземноморская кухня | |
+| `cuisine_greek` | греческая кухня | |
+| `cuisine_turkish` | турецкая кухня | |
+| `cuisine_mexican` | мексиканская кухня | |
+| `cuisine_american` | американская кухня | |
+| `cuisine_burger` | бургеры | |
+| `cuisine_steak_house` | стейки | |
+| `cuisine_seafood` | морепродукты | |
+| `cuisine_fish` | рыба | |
+| `cuisine_kebab` | кебаб | |
+| `cuisine_shawarma` | шаурма | |
+| `cuisine_regional` | местная кухня | |
+| `cuisine_coffee_shop` | кофейня | |
+| `cuisine_bakery` | выпечка | |
+| `cuisine_cake` | торты и десерты | |
+| `cuisine_pancake` | блины | |
+| `cuisine_ice_cream` | мороженое | |
+| `cuisine_sandwich` | сэндвичи | |
+| `cuisine_chicken` | курица | |
+| `cuisine_vegetarian` | вегетарианское меню | |
+| `cuisine_vegan` | веганское меню | |

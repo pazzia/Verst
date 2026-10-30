@@ -109,14 +109,12 @@
         <item quantity="many">рублей</item>
         <item quantity="other">рубля</item>
     </plurals>
-    <!-- S4 dev: the Waybill parking formula «· 5 городов» -->
     <plurals name="plural_town">
         <item quantity="one">город</item>
         <item quantity="few">города</item>
         <item quantity="many">городов</item>
         <item quantity="other">города</item>
     </plurals>
-    <!-- «Сократить до N дней»: genitive after «до» (designer В-3, traveller М1) -->
     <plurals name="plural_day_until">
         <item quantity="one">дня</item>
         <item quantity="few">дней</item>

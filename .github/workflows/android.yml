@@ -81,6 +81,9 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - name: Strings are generated from design/copy-ru.md (a key added only to strings.xml is lost on regeneration)
+        run: python3 design/tools/gen_strings.py --check
+
       - name: python3 -m unittest discover
         working-directory: backend/planner
         run: |
