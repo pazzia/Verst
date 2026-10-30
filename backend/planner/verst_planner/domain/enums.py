@@ -76,6 +76,7 @@ class StopKind(StrEnum):
     OVERNIGHT = "overnight"
     VIA = "via"
     FINISH = "finish"
+    BORDER = "border"  # CEO 29.10 (trips abroad, server only): a state border crossing on the route
 
 
 class SignType(StrEnum):
@@ -109,6 +110,7 @@ class WarningCode(StrEnum):
     UNVERIFIED_PLACES = "UNVERIFIED_PLACES"
     STOP_CLOSED = "STOP_CLOSED"
     TIME_ZONE = "TIME_ZONE"  # acceptance 2026-10-28 (QA B-4): a day crosses a time-zone border
+    ABROAD = "ABROAD"  # CEO 29.10: the trip leaves Russia; prices and rules there are not verified
 
 
 class StageKey(StrEnum):
@@ -139,5 +141,6 @@ SIGN_BY_KIND: dict[StopKind, SignType] = {
     StopKind.FOOD: SignType.FOOD,
     StopKind.REST: SignType.REST,
     StopKind.OVERNIGHT: SignType.HOTEL,
+    StopKind.BORDER: SignType.CITY,
 }
 """Stop kind → road sign (SPEC §5.5). A no-hotel overnight uses `SignType.CITY` instead (A§4.1)."""

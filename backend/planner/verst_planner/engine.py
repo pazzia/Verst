@@ -108,7 +108,7 @@ from verst_planner.pipeline.checks import budget_limit, covers_lunch_window
 from verst_planner.pipeline.corridor import build_corridor, place_fixed
 from verst_planner.pipeline.day_split import split_days
 from verst_planner.pipeline.overnight import choose_overnights
-from verst_planner.pipeline.resolve import normalize_input, resolve_points
+from verst_planner.pipeline.resolve import ResolvedPoints, normalize_input, resolve_points
 from verst_planner.pipeline.rest import plan_rests
 from verst_planner.pipeline.schedule import ScheduledDay, assign_ids, schedule_with_rerun
 from verst_planner.pipeline.sights import admit_sights, plan_lunch_after_sights, plan_lunches, plan_sights
@@ -122,6 +122,7 @@ from verst_planner.pipeline.timeline import (
 )
 from verst_planner.pipeline.town_visit import plan_town_visits
 from verst_planner.ports import (
+    BorderPort,
     Clock,
     GeocodingPort,
     ParkingPort,
@@ -169,8 +170,9 @@ class Planner:
         config: PlannerConfig,
         templates: ReasonTemplates,
         parking: ParkingPort | None = None,
+        borders: BorderPort | None = None,
     ) -> None:
-        self.ports = Ports(routing, places, prices, tolls, regions, geocoding, parking)
+        self.ports = Ports(routing, places, prices, tolls, regions, geocoding, parking, borders)
         self.clock = clock
         self.cfg = config
         self.templates = templates
@@ -265,12 +267,14 @@ class Planner:
         t = self.templates
         inp = normalize_input(raw, ctx)
         pts = resolve_points(inp, ctx)
+        self._resolved(pts, inp, ctx)
         cancel.check()  # before stage 2
         sink.emit(StageEvent(StageKey.SPLIT, t.render("stage.route"), 0.05))
         route = build_base_route(pts, inp, ctx)
         warnings: list[PlanWarning] = list(toll_warnings(route, inp, ctx))
         cancel.check()  # before stage 3
         corridor = build_corridor(route, inp, ctx)
+        self._corridor_built(corridor, ctx)
         admit_sights(corridor, inp, ctx)
         ctx.corridor_towns = corridor.towns
         split = split_days(route, corridor, inp, pts.template, ctx)
@@ -337,9 +341,13 @@ class Planner:
         region_kms = region_km(route, all_stops, ctx)
         views = [_sched_view(sd) for sd in sched]
         cost = compute_cost(
-            dataclasses.replace(
-                _cost_input(views, nights.choices, corridor, region_kms, toll_hits, inp, ctx, profile),
-                tolls_unknown=tolls_unknown,
+            self._adjust_cost_input(
+                dataclasses.replace(
+                    _cost_input(views, nights.choices, corridor, region_kms, toll_hits, inp, ctx, profile),
+                    tolls_unknown=tolls_unknown,
+                ),
+                views,
+                ctx,
             ),
             inp,
             self.cfg,
@@ -357,6 +365,23 @@ class Planner:
             ctx,
             engine_state(profile, region_kms, toll_hits, views, corridor, ctx),
         )
+        return self._finished(plan, ctx)
+
+    # ------------------------------------------------------------------------------------- extension hooks
+    # No-ops here; the server's trips-abroad planner (`verst_planner.foreign.planner`) overrides them
+
+    def _resolved(self, pts: ResolvedPoints, inp: NormalizedInput, ctx: PlanContext) -> None:
+        """After stage 1: the waypoints (with any border crossings) are known."""
+
+    def _corridor_built(self, corridor: Corridor, ctx: PlanContext) -> None:
+        """After stage 3: the corridor may be narrowed before any stop is chosen from it."""
+
+    def _adjust_cost_input(self, ci: CostInput, days: Sequence[Sched], ctx: PlanContext) -> CostInput:
+        """Stage 12: the cost facts before they are priced."""
+        return ci
+
+    def _finished(self, plan: TripPlan, ctx: PlanContext) -> TripPlan:
+        """The assembled plan of one run (before the budget fitter compares runs)."""
         return plan
 
     @staticmethod

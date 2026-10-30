@@ -11,7 +11,7 @@ from conftest import CONTRACTS
 from fastapi.testclient import TestClient
 from verst_planner import mobile
 
-from verst_api.engine import WORLD, Engine
+from verst_api.engine import RUSSIA_WORLD, Engine
 from verst_api.schemas import PlanNoFit, PlanOk, ReadyRoute, RouteOut, TripInputIn
 
 PLAN_CASES = sorted(p.stem for p in CONTRACTS.glob("plan-*.json"))
@@ -27,9 +27,11 @@ def test_every_plan_contract_is_covered() -> None:
 
 
 def bridge_plan(engine: Engine, input_json: dict[str, Any]) -> dict[str, Any]:
-    """What the phone's engine returns for the same input (run on the engine thread: the bridge is
-    single-threaded)."""
-    text = engine.submit(lambda: mobile.plan(WORLD, "contract-test", json.dumps(input_json), None)).result()
+    """What the phone's engine (`russia_v1`) returns for the same input (run on the engine thread: the bridge
+    is single-threaded). The server plans in `world_v1`; a trip inside Russia must not change there."""
+    text = engine.submit(
+        lambda: mobile.plan(RUSSIA_WORLD, "contract-test", json.dumps(input_json), None)
+    ).result()
     envelope = json.loads(text)
     assert envelope["ok"], envelope
     result: dict[str, Any] = envelope["result"]
@@ -40,7 +42,7 @@ def bridge_plan(engine: Engine, input_json: dict[str, Any]) -> dict[str, Any]:
 def test_plan_equals_the_bridge(client: TestClient, auth: dict[str, str], engine: Engine, name: str) -> None:
     """No forked serialiser: the server body is byte-for-byte the bridge's `plan` result for the input."""
     c = contract(name)
-    assert c["request"]["function"] == "plan" and c["request"]["args"]["world"] == WORLD
+    assert c["request"]["function"] == "plan" and c["request"]["args"]["world"] == RUSSIA_WORLD
     r = client.post("/v1/trips/plan", json=c["request"]["args"]["input_json"], headers=auth)
     assert r.status_code == 200, r.text
     assert r.headers["content-type"] == "application/json"
@@ -120,7 +122,7 @@ def test_ready_routes_match_the_bridge(client: TestClient, auth: dict[str, str])
     r = client.get("/v1/ready-routes", params={"lat": 55.7558, "lon": 37.6173, "limit": 20}, headers=auth)
     assert r.status_code == 200
     items = r.json()["items"]
-    expected = json.loads(mobile.ready_routes(WORLD, 55.7558, 37.6173, 50, 20))["result"]
+    expected = json.loads(mobile.ready_routes(RUSSIA_WORLD, 55.7558, 37.6173, 50, 20))["result"]
     assert items == expected and len(items) >= 3
     for item in items:
         ReadyRoute.model_validate(item)

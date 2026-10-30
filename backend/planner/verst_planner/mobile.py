@@ -178,7 +178,13 @@ def _envelope(fn: Callable[[], Any]) -> str:
         try:
             body: dict[str, Any] = {"ok": True, "result": fn()}
         except InvalidInput as e:
-            body = {"ok": False, "error": _error(e.code, str(e), field=e.field, reason=e.reason)}
+            # CEO 29.10 (trips abroad): `country`, `messageRu`, `until` only when set (others keep bytes)
+            extra = {
+                k: v
+                for k, v in (("country", e.country), ("messageRu", e.message_ru), ("until", e.until))
+                if v is not None
+            }
+            body = {"ok": False, "error": _error(e.code, str(e), field=e.field, reason=e.reason, **extra)}
         except Unreachable as e:
             body = {"ok": False, "error": _error(e.code, str(e), pointIndex=e.point_index)}
         except TooShort as e:
@@ -1035,6 +1041,61 @@ def _load_catalogue() -> dict[str, Any]:
 def load_catalogue() -> str:
     """Compose `russia_v1` from `central_russia_v1` and the packaged catalogue (ADR-0012 §4)."""
     return _envelope(_load_catalogue)
+
+
+# ---------------------------------------------------------------------- trips abroad (CEO 29.10, server)
+
+ABROAD_WORLD = "world_v1"
+ABROAD_DIR_ENV = "VERST_ABROAD_DIR"
+RATES_FILE_ENV = "VERST_RATES_FILE"
+
+
+def default_abroad_dir() -> Path:
+    """`backend/planner/abroad` next to the package (never inside it: the APK packs only the package)."""
+    return Path(__file__).resolve().parents[1] / "abroad"
+
+
+def _load_abroad(path: Any = None, rates_path: Any = None) -> dict[str, Any]:
+    import os
+
+    from verst_planner.adapters.catalogue import road_model
+    from verst_planner.foreign import catalogues as abroad_catalogues
+    from verst_planner.foreign import world as abroad_world
+    from verst_planner.foreign.planner import AbroadPlanner
+    from verst_planner.foreign.rates import Rates
+
+    base = _WORLDS.get(CATALOGUE_WORLD)
+    if base is None or base.catalogue is None or not isinstance(base.fakes, CataloguePorts):
+        raise EngineFailure("NO_WORLD", f"{CATALOGUE_WORLD} must be loaded before the world abroad")
+    raw_dir = str(path or "") or os.environ.get(ABROAD_DIR_ENV, "")
+    root = Path(raw_dir) if raw_dir else default_abroad_dir()
+    raw_rates = str(rates_path or "") or os.environ.get(RATES_FILE_ENV, "")
+    t0 = time.perf_counter()
+    try:
+        cats = abroad_catalogues.load_dir(root)
+    except CatalogueError as e:
+        raise EngineFailure("NO_CATALOGUE", str(e)) from e
+    rates = Rates.load(Path(raw_rates)) if raw_rates else None
+    aw = abroad_world.build(base.catalogue, base.fakes, cats, rates, loaded_from=root)
+    planner = AbroadPlanner(
+        russian=base.planner,
+        world=aw,
+        routing=base.fakes.routing,
+        model=road_model(),
+        clock=_CLOCK,
+        config=PlannerConfig.from_dict(OPEN_DATA_CONFIG),
+        templates=ReasonTemplates.default(),
+        parking=base.fakes.parking,
+    )
+    _WORLDS[ABROAD_WORLD] = _World(aw.world, aw.ports, planner, aw.cw, base.bars, base.food)
+    return {**aw.info(), "ms": round((time.perf_counter() - t0) * 1000)}
+
+
+def load_abroad(path: str = "", rates_path: str = "") -> str:
+    """Server only: compose `world_v1` = `russia_v1` + the catalogues under `path` (default
+    `$VERST_ABROAD_DIR`, else `backend/planner/abroad`); a missing folder gives a world that is Russia only.
+    `rates_path` (default `$VERST_RATES_FILE`): the Bank of Russia rates file of `tools/ci/fetch_rates.py`."""
+    return _envelope(lambda: _load_abroad(path, rates_path))
 
 
 def _town_json(w: _World, t: Town) -> dict[str, Any]:

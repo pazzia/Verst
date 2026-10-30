@@ -5,6 +5,7 @@
 !backend/api/migrations
 !backend/planner/verst_planner
 !backend/planner/fixtures/worlds/central_russia_v1.json
+!backend/planner/abroad
 !infra/api/entrypoint.sh
 **/__pycache__
 **/*.pyc

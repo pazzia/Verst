@@ -11,7 +11,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 
 from verst_planner.domain.enums import (
     CostKey,
@@ -606,6 +606,29 @@ class ScheduledStop:
     border; the local time is said in `local_time_ru` and, on the day's first stop in the new zone, in the
     reason («По местному времени — 11:35 (+1 ч).»)."""
     local_time_ru: str | None = None
+    border: Mapping[str, Any] | None = None
+    """CEO 29.10 (trips abroad, server only): a `BORDER` stop's crossing — documents, insurance, fees, the
+    wait (known or not), each with its sources and the «не проверено» flag (JSON `border`, else absent)."""
+
+
+@dataclass(frozen=True, slots=True)
+class BorderPoint:
+    """CEO 29.10: a state border crossing inserted between two waypoints of different countries.
+
+    `point` is the crossing's own coordinates when a source gives them, else (`coords_approx`) the nearest
+    catalogue town on the `from_country` side. `marker`: a border without a checkpoint (Russia — Belarus),
+    a «граница» row without a dwell."""
+
+    id: str
+    name_ru: str
+    point: LatLon
+    from_country: str
+    to_country: str
+    marker: bool = False
+    coords_approx: bool = True
+    town_id: str | None = None
+    coords_note_ru: str = ""
+    """Where the point comes from when it is approximate («ближайший город каталога: Владикавказ»)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -819,6 +842,10 @@ class TripPlan:
     """The route is synthetic (ADR-0012 §4): distances and times are estimates («≈»)."""
     budget_fit: BudgetFit | None = None
     """ADR-0011: set when the first plan exceeded the budget and the fitter changed the trip."""
+    abroad: Mapping[str, Any] | None = None
+    """CEO 29.10 (server only): the part of the trip outside Russia — km, fuel and fees in the local currency
+    (dated, sourced, «не проверено»), what is unknown, and whether the rouble total is incomplete. JSON
+    `abroad`, absent on a trip inside Russia (the golden snapshots keep their bytes)."""
 
 
 class _Unset:

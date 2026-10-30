@@ -110,5 +110,6 @@
     "breakfast_price_frac": 0.6,
     "dinner_last_day_after": "19:00"
   },
-  "toll_night": ["00:00", "06:00"]
+  "toll_night": ["00:00", "06:00"],
+  "border": {"buffer_min": 120}
 }

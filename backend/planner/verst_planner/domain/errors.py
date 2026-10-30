@@ -8,10 +8,24 @@ class PlannerError(Exception):
 class InvalidInput(PlannerError):
     code = "INVALID_INPUT"
 
-    def __init__(self, field: str, reason: str) -> None:
+    def __init__(
+        self,
+        field: str,
+        reason: str,
+        *,
+        country: str | None = None,
+        message_ru: str | None = None,
+        until: str | None = None,
+    ) -> None:
         super().__init__(f"{field}: {reason}")
         self.field = field
         self.reason = reason
+        self.country = country
+        """CEO 29.10 (trips abroad): the country of the point (`outside_supported`, `border_closed`)."""
+        self.message_ru = message_ru
+        """A user-facing Russian sentence when the reason needs more than a code (a closed border)."""
+        self.until = until
+        """`border_closed`: the ISO date-time the closure is announced to end."""
 
 
 class Unreachable(PlannerError):

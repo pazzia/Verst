@@ -5,6 +5,7 @@ from verst_planner.explain.templates import RESOURCES, TEMPLATE_KEYS, ReasonTemp
 
 # Documented params per key (A§8.1)
 DOC_PARAMS: dict[str, dict[str, str | int | float]] = {
+    "border.checkpoint": {"buffer": "два часа"},
     "overnight.shift.hotels": {
         "shift": "Не в Ростове, а на 55 км дальше",
         "crew_suffix": ", куда пускают с собакой",

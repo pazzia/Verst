@@ -17,7 +17,9 @@ from datetime import datetime
 from pathlib import Path
 
 URL = "https://www.cbr.ru/scripts/XML_daily.asp"
-CODES = ["USD", "EUR", "CNY", "KZT", "BYN", "TRY", "AED", "GEL", "AMD", "THB", "IDR"]
+# CEO 29.10 (trips abroad): + AZN, UZS, KGS. `parse` keeps only the codes the Bank of Russia answer contains,
+# so a currency it does not publish is simply absent from the file (never guessed).
+CODES = ["USD", "EUR", "CNY", "KZT", "BYN", "TRY", "AED", "GEL", "AMD", "THB", "IDR", "AZN", "UZS", "KGS"]
 
 
 def parse(xml: bytes) -> dict:

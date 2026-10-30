@@ -119,6 +119,14 @@ class RestCfg:
 
 
 @dataclass(frozen=True, slots=True)
+class BorderCfg:
+    """CEO 29.10 (trips abroad): the time planned at a border checkpoint. No source gives a wait time for the
+    crossings of wave 1, so this is a planning buffer — the stop says so — not a fact."""
+
+    buffer_min: int
+
+
+@dataclass(frozen=True, slots=True)
 class DwellCfg:
     coffee: int
     fuel: int
@@ -227,6 +235,7 @@ class PlannerConfig:
     alternatives: AlternativesCfg
     cost: CostCfg
     toll_night: tuple[time, time]
+    border: BorderCfg
 
     @classmethod
     def default(cls) -> PlannerConfig:

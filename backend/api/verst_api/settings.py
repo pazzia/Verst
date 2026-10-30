@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     graphhopper_timeout_s: float = Field(6.0, gt=0, le=30)
     synthetic_fallback: bool = False  # GraphHopper down → road model (flagged) instead of 503 UPSTREAM
 
+    # CEO 29.10 (trips abroad, server only): the catalogues abroad (`<dir>/<cc>/catalogue_*.json.gz`; unset =
+    # backend/planner/abroad next to the engine; missing or empty = Russia only) and the Bank of Russia rates
+    # file of tools/ci/fetch_rates.py (unset = money abroad in the local currency only).
+    abroad_dir: str | None = None
+    rates_file: str | None = None
+
     clock: str = "system"  # "system" | "golden" | ISO datetime with offset (tests and demos)
     plan_timeout_s: float = Field(25.0, gt=0, le=120)
     sse_heartbeat_s: float = Field(5.0, gt=0, le=60)

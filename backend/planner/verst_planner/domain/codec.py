@@ -524,6 +524,8 @@ def stop_to_json(s: ScheduledStop) -> Json:
         out |= {"unknownFacts": list(s.unknown_facts), "unknownRu": s.unknown_ru}
     if s.local_tz is not None:  # QA B-4: only on stops in another zone than their day's clock
         out |= {"localTz": s.local_tz, "localTimeRu": s.local_time_ru}
+    if s.border is not None:  # CEO 29.10: only on a border crossing (trips abroad, server only)
+        out["border"] = s.border
     return out
 
 
@@ -559,6 +561,7 @@ def stop_from_json(d: Mapping[str, Any]) -> ScheduledStop:
         unknown_ru=d.get("unknownRu"),
         local_tz=d.get("localTz"),
         local_time_ru=d.get("localTimeRu"),
+        border=d.get("border"),
     )
 
 
@@ -1004,7 +1007,7 @@ def lever_to_json(x: BudgetLever) -> Json:
 
 
 # S3-FINAL P1-2 (5.5 §9): notices about the data, not about this trip, are an info line, not a yellow plate.
-INFO_WARNINGS = frozenset({WarningCode.UNVERIFIED_PLACES})
+INFO_WARNINGS = frozenset({WarningCode.UNVERIFIED_PLACES, WarningCode.ABROAD})
 
 
 def _warning_to_json(w: PlanWarning) -> dict[str, Any]:
@@ -1050,6 +1053,8 @@ def plan_to_json(p: TripPlan, public: bool = True, trip_id: str | None = None) -
         out["approxDistances"] = True  # omitted when false: the golden snapshots stay byte-identical
     if p.budget_fit is not None:
         out["budgetFit"] = budget_fit_to_json(p.budget_fit)
+    if p.abroad is not None:  # CEO 29.10: only on a trip that leaves Russia (server only)
+        out["abroad"] = p.abroad
     if not public:
         out["engineState"] = engine_state_to_json(p.engine_state)
     return out
@@ -1087,4 +1092,5 @@ def plan_from_json(d: Mapping[str, Any]) -> TripPlan:
         engine_state=engine_state_from_json(d["engineState"]),
         approx_distances=bool(d.get("approxDistances", False)),
         budget_fit=None if d.get("budgetFit") is None else budget_fit_from_json(d["budgetFit"]),
+        abroad=d.get("abroad"),
     )

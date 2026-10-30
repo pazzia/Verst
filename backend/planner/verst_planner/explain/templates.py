@@ -52,6 +52,8 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "finish.home",
     "finish.default",
     "via.user",
+    "border.checkpoint",
+    "border.marker",
     "alternatives.none",
     "alternatives.one",
     "stage.route",
@@ -75,6 +77,7 @@ TEMPLATE_KEYS: tuple[str, ...] = (
     "warning.UNVERIFIED_PLACES",
     "warning.STOP_CLOSED",
     "warning.TIME_ZONE",
+    "warning.ABROAD",
     "tz.local",
 )
 """Every key of A§8.1, all required."""

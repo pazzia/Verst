@@ -9,6 +9,13 @@ catalogue, composed as `russia_v1` by `mobile.load_catalogue()`. The server buil
 world's ports with the server routing (GraphHopper, ADR-0017) and renders results with the bridge's own
 functions, so the JSON is byte-for-byte the shape of `docs/contracts/v2` (no forked serialiser).
 
+CEO 29.10 (trips abroad, server only): the server plans in `world_v1` = `russia_v1` + the catalogues abroad
+under `VERST_ABROAD_DIR` (default `backend/planner/abroad`; missing or empty = Russia only, and a point abroad
+is `INVALID_INPUT outside_supported`). A trip inside Russia is planned by the Russian server planner exactly
+as before; a trip abroad by `AbroadPlanner` (Russian legs on the server routing, legs abroad on the road
+model, border stops, the `abroad` block). Money abroad is converted only with `VERST_RATES_FILE` (the Bank of
+Russia rates of `tools/ci/fetch_rates.py`).
+
 Seams: the bridge has no public "plan with this routing" entry point yet, so three of its internal names are
 used, resolved and checked once at start (`_seams`). The follow-up for the planner owner is in ADR-0020 §10.
 """
@@ -28,6 +35,7 @@ from pathlib import Path
 from typing import Any, TypeVar
 
 from verst_planner import ENGINE_VERSION, mobile
+from verst_planner.adapters.catalogue import road_model
 from verst_planner.adapters.catalogue.world import WORLD_ID as CATALOGUE_WORLD
 from verst_planner.adapters.fake import GOLDEN_CLOCK
 from verst_planner.adapters.fake.clock import FixedClock
@@ -41,6 +49,7 @@ from verst_planner.events import CancelToken, ProgressSink
 from verst_planner.explain import ru
 from verst_planner.explain.templates import ReasonTemplates
 from verst_planner.fit import NoFit
+from verst_planner.foreign.planner import AbroadPlanner
 from verst_planner.ports import Clock, RoutingPort
 
 from verst_api import metrics
@@ -53,7 +62,8 @@ log = logging.getLogger("verst_api.engine")
 T = TypeVar("T")
 
 BASE_WORLD = "central_russia_v1"
-WORLD = CATALOGUE_WORLD  # "russia_v1": fixture world + packaged catalogue, the phone's data
+RUSSIA_WORLD = CATALOGUE_WORLD  # "russia_v1": fixture world + packaged catalogue, the phone's data
+WORLD = mobile.ABROAD_WORLD  # "world_v1": russia_v1 + the catalogues abroad on disk (CEO 29.10, server only)
 PLANNER_ROOT = Path(mobile.__file__).resolve().parents[1]
 WORLD_FILE = PLANNER_ROOT / "fixtures" / "worlds" / f"{BASE_WORLD}.json"
 READY_ROUTE_RADIUS_KM = 50.0  # A§6.12 / SPEC §7.6: hub town within 50 km
@@ -71,7 +81,8 @@ def executor() -> concurrent.futures.ThreadPoolExecutor:
 
 @dataclass(frozen=True, slots=True)
 class _Seams:
-    world: Any  # mobile._World of russia_v1
+    world: Any  # mobile._World of world_v1
+    russia: Any  # mobile._World of russia_v1 (its ports: the Russian server planner)
     trip_result: Callable[[Any, Any], dict[str, Any]]
     no_fit_result: Callable[[Any, Any], dict[str, Any]]
 
@@ -86,9 +97,13 @@ def _seams() -> _Seams:
             "verst_planner.mobile changed: _WORLDS / _trip_result / _no_fit_result (ADR-0020 §10)"
         )
     w = worlds.get(WORLD)
-    if w is None or not hasattr(w, "fakes") or not hasattr(w, "world"):
-        raise RuntimeError(f"verst_planner.mobile: world {WORLD!r} is not loaded")
-    return _Seams(w, trip_result, no_fit_result)
+    r = worlds.get(RUSSIA_WORLD)
+    for wid, x in ((WORLD, w), (RUSSIA_WORLD, r)):
+        if x is None or not hasattr(x, "fakes") or not hasattr(x, "world"):
+            raise RuntimeError(f"verst_planner.mobile: world {wid!r} is not loaded")
+    if not isinstance(getattr(w, "planner", None), AbroadPlanner):
+        raise RuntimeError(f"verst_planner.mobile: world {WORLD!r} has no AbroadPlanner")
+    return _Seams(w, r, trip_result, no_fit_result)
 
 
 def _unwrap(envelope_text: str) -> Any:
@@ -124,6 +139,7 @@ class Engine:
         self._seams: _Seams | None = None
         self._planner: Planner | None = None
         self.catalogue_version: str | None = None
+        self.abroad: dict[str, Any] = {}
 
     # ------------------------------------------------------------------ lifecycle
     def load(self) -> None:
@@ -131,33 +147,55 @@ class Engine:
         executor().submit(self._load).result()
 
     def _load(self) -> None:
-        if WORLD not in _unwrap(mobile.selfcheck())["worlds"]:
+        if RUSSIA_WORLD not in _unwrap(mobile.selfcheck())["worlds"]:
             _unwrap(mobile.set_clock(self.settings.clock))
             _unwrap(mobile.load_world(WORLD_FILE.read_text("utf-8")))
             _unwrap(mobile.load_catalogue())
+        # every Engine composes world_v1 from its own settings (a missing folder = Russia only)
+        settings = self.settings
+        self.abroad = _unwrap(mobile.load_abroad(settings.abroad_dir or "", settings.rates_file or ""))
         check = _unwrap(mobile.selfcheck())  # also proves the time zones resolve (TZDATA_MISSING otherwise)
         self.catalogue_version = (check.get("catalogue") or {}).get("version")
         seams = _seams()
-        ports = seams.world.fakes
+        ports = seams.russia.fakes
         routing: RoutingPort = ports.routing
         if self.graphhopper is not None:
             routing = ServerRouting(
                 self.graphhopper, ports.routing if self.settings.synthetic_fallback else None
             )
-        self._planner = Planner(
+        clock = make_clock(self.settings.clock)
+        config = PlannerConfig.from_dict(mobile.OPEN_DATA_CONFIG)
+        russian = Planner(
             routing=routing,
             places=ports.places,
             prices=ports.prices,
             tolls=ports.tolls,
             regions=ports.regions,
             geocoding=ports.geocoding,
-            clock=make_clock(self.settings.clock),
-            config=PlannerConfig.from_dict(mobile.OPEN_DATA_CONFIG),
+            clock=clock,
+            config=config,
+            templates=ReasonTemplates.default(),
+            parking=getattr(ports, "parking", None),
+        )
+        self._planner = AbroadPlanner(
+            russian=russian,
+            world=seams.world.planner.aw,
+            routing=routing,
+            model=road_model(),
+            clock=clock,
+            config=config,
             templates=ReasonTemplates.default(),
             parking=getattr(ports, "parking", None),
         )
         self._seams = seams
-        log.info("engine ready", extra={"engine_version": ENGINE_VERSION, "routing": self.routing_mode})
+        log.info(
+            "engine ready",
+            extra={
+                "engine_version": ENGINE_VERSION,
+                "routing": self.routing_mode,
+                "abroad": ",".join(self.abroad.get("countries") or []) or "none",
+            },
+        )
 
     @property
     def ready(self) -> bool:

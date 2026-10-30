@@ -16,6 +16,7 @@ from verst_planner.domain.model import (
     Route,
     TownCandidate,
 )
+from verst_planner.explain import ru
 from verst_planner.geo.distance import haversine_km, point_segment_km
 from verst_planner.geo.index import PolylineIndex
 from verst_planner.geo.polyline import douglas_peucker
@@ -200,6 +201,11 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
     )
 
 
+BORDER_AFTER_KM = 0.001
+"""CEO 29.10: a border stop sits a metre past its waypoint, so the stops of the town it is anchored to (a
+lunch, a park in Владикавказ) come before the crossing, not after it."""
+
+
 def place_fixed(
     pts: ResolvedPoints, corridor: Corridor, inp: NormalizedInput, ctx: PlanContext
 ) -> list[PlannedStop]:
@@ -217,6 +223,25 @@ def place_fixed(
     for i in user_vias:
         w = pts.waypoints[i]
         town = towns.get(w.town_id) if w.town_id else None
+        if w.border is not None:  # CEO 29.10: a state border (a checkpoint buffer, or a dwell-less marker)
+            out.append(
+                PlannedStop(
+                    kind=StopKind.BORDER,
+                    km_at=wp_km[i] + BORDER_AFTER_KM,
+                    name_ru=w.label,
+                    point=w.point,
+                    town=town,
+                    dwell_min=0 if w.border.marker else ctx.cfg.border.buffer_min,
+                    fixed=True,
+                    reason_key="border.marker" if w.border.marker else "border.checkpoint",
+                    reason_params={
+                        "crossing": w.border.id,
+                        "buffer": ru.duration_phrase(ctx.cfg.border.buffer_min),
+                    },
+                    region_code=town.region_code if town else ctx.region_at(w.point).code,
+                )
+            )
+            continue
         out.append(
             PlannedStop(
                 kind=StopKind.VIA,
