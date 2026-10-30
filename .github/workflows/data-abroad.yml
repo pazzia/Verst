@@ -13,7 +13,8 @@
 # publishes everything.
 #
 # Trigger from a working branch (ccr-*): edit backend/planner/tools/data/data-abroad.request and push. Optional
-# lines in that file: `countries: BY KZ` (default: all nine) and `ru-parks: no` (default: yes).
+# lines in that file: `countries: BY KZ` (default: all nine; `none` builds only the Russian parks) and
+# `ru-parks: no` (default: yes).
 # Once this file is on the default branch also: Actions → data-abroad → Run workflow, or
 #   gh workflow run data-abroad.yml --ref main -f countries="GE AB"
 # Result: bot/data-abroad-<run_number> (backend/planner/abroad/**, abroad.lock, the Russian catalogue_parks and
@@ -82,6 +83,9 @@ jobs:
           from countries import WAVE1
           known = {c.code for c in WAVE1}
           codes = sys.argv[1].upper().split()
+          if codes == ["NONE"]:   # only the Russian parks
+              print("matrix=")
+              sys.exit(0)
           bad = [c for c in codes if c not in known]
           assert codes and not bad, f"unknown countries {bad}; known: {sorted(known)}"
           print("matrix=" + json.dumps({"cc": codes}))
@@ -92,6 +96,7 @@ jobs:
 
   country:
     needs: plan
+    if: ${{ needs.plan.outputs.matrix != '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 340
     strategy:
@@ -237,7 +242,7 @@ jobs:
     needs: plan
     if: ${{ needs.plan.outputs.ru_parks == 'yes' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 170
     env:
       RAW: ${{ github.workspace }}/data-raw
       RES: backend/planner/verst_planner/resources
@@ -247,15 +252,31 @@ jobs:
         with:
           python-version: "3.12"
       - name: Parks of the shipped Russian catalogue (Geofabrik russia-latest + osmium)
-        timeout-minutes: 75
+        timeout-minutes: 150
         run: |
           sudo apt-get install -y -qq osmium-tool >/dev/null
           mkdir -p "$RAW" ru-parks
-          curl -fsSL --retry 3 -A "$UA" -o "$RUNNER_TEMP/ru.osm.pbf" https://download.geofabrik.de/russia-latest.osm.pbf
+          # One connection got ~1 MB/s from Geofabrik at night (run 2 timed out at 75 min): 8 ranged parts in
+          # parallel, glued and checked against the published md5 (taken before and after, so a mid-download
+          # update of russia-latest fails here instead of giving a broken extract).
+          URL=https://download.geofabrik.de/russia-latest.osm.pbf
+          MD5=$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)
+          LEN=$(curl -fsSIL --retry 3 -A "$UA" "$URL" | tr -d '\r' | awk 'tolower($1)=="content-length:"{n=$2} END{print n}')
+          echo "russia-latest: $LEN bytes, md5 $MD5" | tee "$RAW/log.txt"
+          N=8; P=$(( (LEN + N - 1) / N )); pids=()
+          for i in $(seq 0 $((N - 1))); do
+            S=$((i * P)); E=$((S + P - 1)); [ "$E" -ge "$LEN" ] && E=$((LEN - 1))
+            curl -fsSL --retry 5 --retry-all-errors -A "$UA" -r "$S-$E" -o "$RUNNER_TEMP/ru.part$i" "$URL" &
+            pids+=($!)
+          done
+          for p in "${pids[@]}"; do wait "$p"; done
+          for i in $(seq 0 $((N - 1))); do cat "$RUNNER_TEMP/ru.part$i"; rm -f "$RUNNER_TEMP/ru.part$i"; done > "$RUNNER_TEMP/ru.osm.pbf"
+          echo "$MD5  $RUNNER_TEMP/ru.osm.pbf" | md5sum -c - | tee -a "$RAW/log.txt"
+          [ "$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)" = "$MD5" ]
           osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" wr/leisure=park,garden -o "$RUNNER_TEMP/parks.osm.pbf" --overwrite
           osmium export "$RUNNER_TEMP/parks.osm.pbf" -f geojsonseq --add-unique-id=type_id \
             -o "$RUNNER_TEMP/parks.geojsonseq" --overwrite
-          python3 $T/parks_from_extract.py "$RAW" "$RUNNER_TEMP/parks.geojsonseq" --catalogue "$RES" 2>&1 | tee "$RAW/log.txt"
+          python3 $T/parks_from_extract.py "$RAW" "$RUNNER_TEMP/parks.geojsonseq" --catalogue "$RES" 2>&1 | tee -a "$RAW/log.txt"
           python3 $T/build_parks.py "$RAW" "$RES" --lock "$T/catalogue_parks.lock" 2>&1 | tee -a "$RAW/log.txt"
           cp "$RES/catalogue_parks.json.gz" "$T/catalogue_parks.lock" ru-parks/
           gzip -9n -c "$RAW/parks.json" > ru-parks/parks.json.gz
@@ -274,9 +295,11 @@ jobs:
     timeout-minutes: 20
     env:
       ABROAD: backend/planner/abroad
+      MATRIX: ${{ needs.plan.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
+        if: ${{ needs.plan.outputs.matrix != '' }}
         with:
           pattern: abroad-*
           merge-multiple: true
@@ -291,12 +314,13 @@ jobs:
           ls -R dl | head -100
           mkdir -p "$ABROAD" "$T/report-abroad"
           for d in dl/out/*/; do
+            [ -d "$d" ] || continue
             cc=$(basename "$d")
             [ "$cc" = report ] && continue
             mkdir -p "$ABROAD/$cc"
             cp -f "$d"/catalogue_*.json.gz "$d"/lock.json "$d"/parks.lock.json "$ABROAD/$cc/" 2>/dev/null || true
           done
-          python3 $T/write_lock.py abroad "$ABROAD" "$ABROAD/abroad.lock"
+          [ -n "$MATRIX" ] && python3 $T/write_lock.py abroad "$ABROAD" "$ABROAD/abroad.lock"
           rm -f "$ABROAD"/*/lock.json "$ABROAD"/*/parks.lock.json
           cp -rf dl/out/report/. "$T/report-abroad/" 2>/dev/null || true
           if [ -f dl/ru-parks/catalogue_parks.json.gz ]; then
@@ -308,7 +332,7 @@ jobs:
           {
             echo "### data-abroad ${{ needs.plan.outputs.version }}"
             echo '```'
-            python3 -c "import json; d=json.load(open('$ABROAD/abroad.lock')); print(json.dumps({c: {'counts': v['counts'], 'bytes': v['totalBytes'], 'parks': (v.get('parks') or {}).get('count')} for c, v in d['countries'].items()}, indent=1)); print('total bytes', d['totalBytes'])"
+            [ -f "$ABROAD/abroad.lock" ] && python3 -c "import json; d=json.load(open('$ABROAD/abroad.lock')); print(json.dumps({c: {'counts': v['counts'], 'bytes': v['totalBytes'], 'parks': (v.get('parks') or {}).get('count')} for c, v in d['countries'].items()}, indent=1)); print('total bytes', d['totalBytes'])"
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Push to bot/data-abroad-${{ github.run_number }} and bot/raw-abroad-${{ github.run_number }}
