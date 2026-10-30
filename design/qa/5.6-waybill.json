@@ -1,0 +1,236 @@
+{
+ "screen": "5.6-waybill",
+ "notes": "P-11 samples the stamp ring at its top (centre 317, 652.3; radius 45.5) drawn at alpha 0.85 over the paper: expected composite, ±1.",
+ "points": [
+  {
+   "item": "P-01",
+   "state": "reference",
+   "kind": "text",
+   "region": [
+    14,
+    14,
+    108,
+    32
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "P-02",
+   "state": "reference",
+   "x": 20,
+   "y": 200,
+   "hex": "#EEF2F4",
+   "size": "390x844"
+  },
+  {
+   "item": "P-03",
+   "state": "reference",
+   "x": 140,
+   "y": 60,
+   "hex": "#8C8C93",
+   "size": "390x844"
+  },
+  {
+   "item": "P-03",
+   "state": "reference",
+   "x": 195,
+   "y": 78,
+   "hex": "#5D5D63",
+   "size": "390x844"
+  },
+  {
+   "item": "P-04",
+   "state": "reference",
+   "x": 195,
+   "y": 147.9,
+   "hex": "#22313D",
+   "size": "390x844"
+  },
+  {
+   "item": "P-05",
+   "state": "reference",
+   "kind": "text",
+   "region": [
+    122,
+    156.9,
+    200,
+    22.8
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "P-06",
+   "state": "reference",
+   "x": 30.75,
+   "y": 400,
+   "hex": "#22313D",
+   "size": "390x844"
+  },
+  {
+   "item": "P-06",
+   "state": "reference",
+   "kind": "text",
+   "region": [
+    37,
+    244.8,
+    150,
+    20
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "P-07",
+   "state": "reference",
+   "kind": "present",
+   "region": [
+    289,
+    266.6,
+    70,
+    220
+   ],
+   "hex": "#1B3FA0",
+   "min_px": 30,
+   "size": "390x844"
+  },
+  {
+   "item": "P-08",
+   "state": "reserve-off",
+   "kind": "text",
+   "region": [
+    289,
+    486.6,
+    70,
+    44
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "P-09",
+   "state": "line-expanded",
+   "kind": "text",
+   "region": [
+    31,
+    266.6,
+    327,
+    120
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "P-10",
+   "state": "over-budget",
+   "kind": "present",
+   "region": [
+    200,
+    582,
+    160,
+    40
+   ],
+   "hex": "#B3261E",
+   "min_px": 20,
+   "size": "390x844"
+  },
+  {
+   "item": "P-10",
+   "state": "no-budget",
+   "kind": "text",
+   "region": [
+    200,
+    582,
+    160,
+    40
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "P-11",
+   "state": "stamp-final",
+   "x": 317,
+   "y": 606.8,
+   "hex": "#715AAD",
+   "tol": 1,
+   "size": "390x844"
+  },
+  {
+   "item": "P-13",
+   "state": "reference",
+   "kind": "present",
+   "region": [
+    20,
+    720,
+    350,
+    34
+   ],
+   "hex": "#FFD23F",
+   "min_px": 20,
+   "size": "390x844"
+  },
+  {
+   "item": "P-14",
+   "state": "reference",
+   "x": 24,
+   "y": 796,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "P-14",
+   "state": "reference",
+   "x": 210,
+   "y": 796,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "P-14",
+   "state": "reference",
+   "x": 195,
+   "y": 834,
+   "hex": "#161618",
+   "size": "390x844"
+  },
+  {
+   "item": "P-13",
+   "state": "pro-sheet",
+   "kind": "text",
+   "region": [
+    0,
+    300,
+    390,
+    544
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "P-13",
+   "state": "pro-joined",
+   "kind": "text",
+   "region": [
+    0,
+    300,
+    390,
+    544
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "P-15",
+   "state": "g02",
+   "kind": "present",
+   "region": [
+    289,
+    266.6,
+    70,
+    280
+   ],
+   "hex": "#1B3FA0",
+   "min_px": 30,
+   "size": "390x844"
+  }
+ ],
+ "justified": {
+  "P-12": "motion: checked on the clock-sequence screenshots <state>-t<ms> (DES-11x step 5), not in a static frame",
+  "P-16": "semantics/touch: XScreenSemanticsTest (build/tests/failures.txt), not visual",
+  "P-15": "exact figures are read against the fixture (step 4); the ink presence in the ₽ column is sampled"
+ }
+}

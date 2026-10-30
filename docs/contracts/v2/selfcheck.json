@@ -1,0 +1,54 @@
+{
+ "request": {
+  "function": "selfcheck",
+  "args": {}
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "engineVersion": "0.1.0",
+   "apiVersion": 3,
+   "python": "3.12.x",
+   "tz": {
+    "Asia/Anadyr": true,
+    "Asia/Barnaul": true,
+    "Asia/Chita": true,
+    "Asia/Irkutsk": true,
+    "Asia/Kamchatka": true,
+    "Asia/Krasnoyarsk": true,
+    "Asia/Magadan": true,
+    "Asia/Novokuznetsk": true,
+    "Asia/Novosibirsk": true,
+    "Asia/Omsk": true,
+    "Asia/Sakhalin": true,
+    "Asia/Tomsk": true,
+    "Asia/Vladivostok": true,
+    "Asia/Yakutsk": true,
+    "Asia/Yekaterinburg": true,
+    "Europe/Astrakhan": true,
+    "Europe/Kaliningrad": true,
+    "Europe/Kirov": true,
+    "Europe/Moscow": true,
+    "Europe/Samara": true,
+    "Europe/Saratov": true,
+    "Europe/Ulyanovsk": true,
+    "Europe/Volgograd": true
+   },
+   "resources": true,
+   "worlds": [
+    "central_russia_v1",
+    "edge_cases_v1",
+    "russia_v1"
+   ],
+   "catalogue": {
+    "version": "wd-20261029-osm2",
+    "builtAt": "2026-10-29",
+    "towns": 1114,
+    "pois": 10921,
+    "bars": 5625,
+    "food": 29906
+   }
+  },
+  "ms": 0
+ }
+}

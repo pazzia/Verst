@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED from design/icons/tourist-generic.svg by design/tools/gen_vectors.py. Do not edit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF141416"
+        android:fillType="nonZero"
+        android:pathData="M12.832 2.445L14.832 5.445L13.168 6.555L11.168 3.555ZM15 6L15 18L13 18L13 6ZM14 19L10 19L10 17L14 17ZM9 18L9 6L11 6L11 18ZM9.168 5.445L11.168 2.445L12.832 3.555L10.832 6.555ZM7 20L17 20L17 22L7 22ZM7.5 21L7.5 18L9.5 18L9.5 21ZM8.5 17L15.5 17L15.5 19L8.5 19ZM16.5 18L16.5 21L14.5 21L14.5 18ZM13 3A1 1 0 1 1 11 3A1 1 0 1 1 13 3ZM15 6A1 1 0 1 1 13 6A1 1 0 1 1 15 6ZM15 18A1 1 0 1 1 13 18A1 1 0 1 1 15 18ZM11 18A1 1 0 1 1 9 18A1 1 0 1 1 11 18ZM11 6A1 1 0 1 1 9 6A1 1 0 1 1 11 6ZM8 21A1 1 0 1 1 6 21A1 1 0 1 1 8 21ZM18 21A1 1 0 1 1 16 21A1 1 0 1 1 18 21ZM9.5 21A1 1 0 1 1 7.5 21A1 1 0 1 1 9.5 21ZM9.5 18A1 1 0 1 1 7.5 18A1 1 0 1 1 9.5 18ZM16.5 18A1 1 0 1 1 14.5 18A1 1 0 1 1 16.5 18ZM16.5 21A1 1 0 1 1 14.5 21A1 1 0 1 1 16.5 21Z" />
+</vector>

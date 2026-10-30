@@ -1,0 +1,58 @@
+{
+  "id": "G11",
+  "slug": "edge_fuel_gap",
+  "titleRu": "Тестовск → Пустошь, 300 км без заправок, бак 30 л",
+  "world": "edge_cases_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 58.0,
+      "lon": 50.0,
+      "label": "Тестовск"
+    },
+    "destination": {
+      "lat": 62.06967,
+      "lon": 50.0,
+      "label": "Пустошь"
+    },
+    "crew": {
+      "adults": 1,
+      "children": 0,
+      "dog": false
+    },
+    "dailyKm": 500,
+    "vehicle": {
+      "consumption": 8.0,
+      "fuelType": "ai95",
+      "tankL": 30
+    },
+    "startAt": "2026-10-24T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 1,
+    "nights": 0,
+    "kmRange": [
+      450,
+      465
+    ],
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "route: Тестовск → Пустошь 450 km on Р-998, one day (more_stops, R = 90 min, ≈ 0.73 driving min per km)",
+      "fuel (one region): Тестовая область 453 + 1 = 454 km × 0.08 × 61.00 = 2 217 → 2 220",
+      "rests (A§16.11.1): areas only at km 60 / 160 / 260 / 360. From the start: km 60 is 44 min (< G), km 160 is 117 min (outside [60, 105]) → step 3 extended window [max(45, 30), 120] takes km 160; from it km 260 is 74 min ∈ [60, 90] → step 2; lunch Кафе «Северное» (km 330, 24/7) 51 min later; finish 90 min after the lunch → every stretch ≤ R + 30 = 120 min (was 242 min without a break)",
+      "food: 1 adult, lunch 500; finish 15:12 → no dinner → 500",
+      "subtotal 2 220 + 500 = 2 720; reserve 270 (272); total round_to(2 990, 100) = 3 000"
+    ],
+    "warnings": [
+      "FUEL_GAP"
+    ],
+    "costTotalRub": {
+      "value": 3000,
+      "tolerancePct": 5
+    }
+  }
+}

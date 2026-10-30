@@ -1,0 +1,283 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-12",
+   "input_json": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "preset": "beer",
+    "adultConfirmed": true,
+    "crew": {
+     "adults": 2,
+     "children": 1
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-12",
+   "titleRu": "Казань: пивной маршрут",
+   "townId": "t_kazan",
+   "townName": "Казань",
+   "townPrep": "Казани",
+   "preset": "beer",
+   "startAt": "2026-10-23T18:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T21:53",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 2.5,
+   "walkMin": 33,
+   "durationMin": 233,
+   "requestedDurationMin": 240,
+   "crewNotesRu": [
+    "С ребёнком: берите воду и перекус, на длинных отрезках — пауза."
+   ],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "finish": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "n4367567491",
+     "kind": "pub",
+     "nameRu": "Top Hop",
+     "lat": 55.7931,
+     "lon": 49.10971,
+     "arriveAt": "2026-10-23T18:06",
+     "departAt": "2026-10-23T18:46",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 6,
+     "costRub": 1200,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "00:00–01:00, 12:00–00:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "pub",
+     "poiKindRu": "Пивной бар",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w02",
+     "poiId": "n5219799122",
+     "kind": "pub",
+     "nameRu": "Brisket BBQ by Beerpoint",
+     "lat": 55.79252,
+     "lon": 49.10962,
+     "arriveAt": "2026-10-23T18:47",
+     "departAt": "2026-10-23T19:27",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.1,
+     "walkMinFromPrev": 1,
+     "costRub": 1200,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "12:00–23:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "pub",
+     "poiKindRu": "Пивной бар",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w03",
+     "poiId": "n5674258521",
+     "kind": "craft",
+     "nameRu": "Brew Barrel",
+     "lat": 55.789,
+     "lon": 49.11417,
+     "arriveAt": "2026-10-23T19:35",
+     "departAt": "2026-10-23T20:15",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 8,
+     "costRub": 1200,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "12:00–02:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "craft",
+     "poiKindRu": "Крафтовое пиво",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w04",
+     "poiId": "n5316528821",
+     "kind": "craft",
+     "nameRu": "Drink Craft",
+     "lat": 55.79035,
+     "lon": 49.11603,
+     "arriveAt": "2026-10-23T20:19",
+     "departAt": "2026-10-23T20:59",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.2,
+     "walkMinFromPrev": 3,
+     "costRub": 1200,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "16:00–03:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "craft",
+     "poiKindRu": "Крафтовое пиво",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w05",
+     "poiId": "n1665281699",
+     "kind": "pub",
+     "nameRu": "SПБ",
+     "lat": 55.79161,
+     "lon": 49.11271,
+     "arriveAt": "2026-10-23T21:03",
+     "departAt": "2026-10-23T21:43",
+     "dwellMin": 40,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 4,
+     "costRub": 1200,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "00:00–02:00, 12:00–00:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "pub",
+     "poiKindRu": "Пивной бар",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    }
+   ],
+   "cost": {
+    "totalRub": 6000,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     },
+     {
+      "key": "drinks",
+      "rub": 6000
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    },
+    {
+     "code": "CHILD_BARS",
+     "messageRu": "Взрослый маршрут: в бары и рюмочные с детьми обычно не пускают."
+    }
+   ],
+   "responsibleNoteRu": "Пейте умеренно, чередуйте с водой и едой. За руль — только трезвым.",
+   "polyline": [
+    [
+     55.7963,
+     49.1088
+    ],
+    [
+     55.7931,
+     49.10971
+    ],
+    [
+     55.79252,
+     49.10962
+    ],
+    [
+     55.789,
+     49.11417
+    ],
+    [
+     55.79035,
+     49.11603
+    ],
+    [
+     55.79161,
+     49.11271
+    ],
+    [
+     55.7963,
+     49.1088
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "townId": null,
+    "preset": "beer",
+    "durationMin": 240,
+    "interests": [],
+    "pace": "normal",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T18:00",
+    "crew": {
+     "adults": 2,
+     "children": 1,
+     "dog": false
+    },
+    "adultConfirmed": true,
+    "exclude": []
+   },
+   "requestKey": "7c09edb540c20e77"
+  },
+  "ms": 0
+ }
+}

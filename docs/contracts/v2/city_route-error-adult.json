@@ -1,0 +1,30 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-5",
+   "input_json": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "preset": "beer"
+   }
+  }
+ },
+ "response": {
+  "ok": false,
+  "error": {
+   "code": "INVALID_INPUT",
+   "message": "adultConfirmed: required",
+   "field": "adultConfirmed",
+   "reason": "required",
+   "pointIndex": null,
+   "roadKm": null,
+   "detail": null
+  },
+  "ms": 0
+ }
+}

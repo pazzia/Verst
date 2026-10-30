@@ -1,0 +1,85 @@
+{
+ "request": {
+  "function": "handoff",
+  "args": {
+   "world": "russia_v1",
+   "route_json": {
+    "$ref": "result.trip of plan(russia_v1, Москва → Ярославль, 2 adults, 500 km/day)"
+   },
+   "options_json": {
+    "mode": "car",
+    "fromStopId": "d1s02",
+    "fromHere": false
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "mode": "car",
+   "day": 1,
+   "parts": [
+    {
+     "index": 1,
+     "points": [
+      {
+       "lat": 56.317109,
+       "lon": 38.143898,
+       "nameRu": "Троице-Сергиева лавра",
+       "role": "origin"
+      },
+      {
+       "lat": 56.745144,
+       "lon": 38.834647,
+       "nameRu": "Плещеево озеро",
+       "role": "via"
+      },
+      {
+       "lat": 57.186204,
+       "lon": 39.419573,
+       "nameRu": "Трапезная у кремля",
+       "role": "via"
+      },
+      {
+       "lat": 57.188013,
+       "lon": 39.421231,
+       "nameRu": "Ростовский кремль",
+       "role": "via"
+      },
+      {
+       "lat": 57.618865,
+       "lon": 39.894566,
+       "nameRu": "Спасо-Преображенский монастырь",
+       "role": "via"
+      },
+      {
+       "lat": 57.6261,
+       "lon": 39.8845,
+       "nameRu": "Ярославль",
+       "role": "destination"
+      }
+     ],
+     "links": {
+      "navigator": "yandexnavi://build_route_on_map?lat_to=57.626100&lon_to=39.884500&lat_from=56.317109&lon_from=38.143898&lat_via_0=56.745144&lon_via_0=38.834647&lat_via_1=57.186204&lon_via_1=39.419573&lat_via_2=57.188013&lon_via_2=39.421231&lat_via_3=57.618865&lon_via_3=39.894566",
+      "maps": "yandexmaps://maps.yandex.ru/?rtext=56.317109,38.143898~56.745144,38.834647~57.186204,39.419573~57.188013,39.421231~57.618865,39.894566~57.626100,39.884500&rtt=auto",
+      "web": "https://yandex.ru/maps/?rtext=56.317109,38.143898~56.745144,38.834647~57.186204,39.419573~57.188013,39.421231~57.618865,39.894566~57.626100,39.884500&rtt=auto",
+      "navigatorNext": "yandexnavi://build_route_on_map?lat_to=56.745144&lon_to=38.834647"
+     },
+     "next": {
+      "lat": 56.745144,
+      "lon": 38.834647,
+      "nameRu": "Плещеево озеро",
+      "role": "destination"
+     }
+    }
+   ],
+   "truncated": false,
+   "order": [
+    "maps",
+    "navigatorNext",
+    "web"
+   ]
+  },
+  "ms": 0
+ }
+}

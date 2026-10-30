@@ -1,0 +1,1633 @@
+{
+  "plan": {
+    "id": "trp_golden",
+    "title": "Тула · Ясная Поляна",
+    "km": 425,
+    "days": 2,
+    "nights": 1,
+    "roundTrip": true,
+    "daysList": [
+      {
+        "day": 1,
+        "km": 188,
+        "driveMin": 151,
+        "tz": "Europe/Moscow",
+        "startAt": "2026-10-24T09:00",
+        "endAt": "2026-10-24T15:01",
+        "overBudget": false,
+        "stops": [
+          {
+            "id": "d1s01",
+            "seq": 1,
+            "day": 1,
+            "kind": "start",
+            "sign": "city",
+            "placeId": null,
+            "townId": null,
+            "name": "Москва",
+            "note": null,
+            "lat": 55.7558,
+            "lon": 37.6173,
+            "arriveAt": null,
+            "departAt": "2026-10-24T09:00",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 0,
+            "kmAt": 0,
+            "dwellMin": 0,
+            "tags": [],
+            "costRub": 0,
+            "reason": "Выезд в 09:00.",
+            "verified": true,
+            "replaceable": false,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s02",
+            "seq": 2,
+            "day": 1,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_ser_museum",
+            "townId": "t_serpukhov",
+            "name": "Серпуховский историко-художественный музей",
+            "note": null,
+            "lat": 54.91218251306817,
+            "lon": 37.415788637961406,
+            "arriveAt": "2026-10-24T10:14",
+            "departAt": "2026-10-24T11:14",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 101,
+            "kmAt": 100,
+            "dwellMin": 60,
+            "tags": [
+              "museum"
+            ],
+            "costRub": 700,
+            "reason": "Час на осмотр.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d1s02_pl_ser_vysotsky",
+                "placeId": "pl_ser_vysotsky",
+                "name": "Высоцкий монастырь",
+                "deltaMin": -6,
+                "deltaRub": -700,
+                "shiftMin": -6,
+                "units": {
+                  "deltaKm": 0.945,
+                  "regionCode": "RU-MOS",
+                  "checkRub": null,
+                  "adultRub": 0,
+                  "childRub": 0,
+                  "name": "Высоцкий монастырь",
+                  "placeId": "pl_ser_vysotsky",
+                  "priceRub": "61.80",
+                  "regionName": "Московская область",
+                  "tripKmDelta": 1
+                },
+                "stop": {
+                  "id": "d1s02",
+                  "seq": 2,
+                  "day": 1,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_ser_vysotsky",
+                  "townId": "t_serpukhov",
+                  "name": "Высоцкий монастырь",
+                  "note": null,
+                  "lat": 54.91037376960225,
+                  "lon": 37.40328560339765,
+                  "arriveAt": "2026-10-24T10:19",
+                  "departAt": "2026-10-24T11:04",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 101,
+                  "kmAt": 101,
+                  "dwellMin": 45,
+                  "tags": [
+                    "monastery",
+                    "free_entry"
+                  ],
+                  "costRub": 0,
+                  "reason": "45 мин на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T10:19",
+                    "departAt": "2026-10-24T11:04",
+                    "kmFromPrev": 101
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T12:07",
+                    "departAt": "2026-10-24T13:37",
+                    "kmFromPrev": 84
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T13:46",
+                    "departAt": "2026-10-24T14:46",
+                    "kmFromPrev": 2
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T14:55",
+                    "departAt": null,
+                    "kmFromPrev": 1
+                  }
+                ]
+              },
+              {
+                "id": "alt_d1s02_pl_ser_park",
+                "placeId": "pl_ser_park",
+                "name": "Парк «Питомник»",
+                "deltaMin": -30,
+                "deltaRub": -700,
+                "shiftMin": -30,
+                "units": {
+                  "deltaKm": -0.21,
+                  "regionCode": "RU-MOS",
+                  "checkRub": null,
+                  "adultRub": 0,
+                  "childRub": 0,
+                  "name": "Парк «Питомник»",
+                  "placeId": "pl_ser_park",
+                  "priceRub": "61.80",
+                  "regionName": "Московская область",
+                  "tripKmDelta": -1
+                },
+                "stop": {
+                  "id": "d1s02",
+                  "seq": 2,
+                  "day": 1,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_ser_park",
+                  "townId": "t_serpukhov",
+                  "name": "Парк «Питомник»",
+                  "note": null,
+                  "lat": 54.91851311519887,
+                  "lon": 37.41422575864094,
+                  "arriveAt": "2026-10-24T10:14",
+                  "departAt": "2026-10-24T10:44",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 100,
+                  "kmAt": 100,
+                  "dwellMin": 30,
+                  "tags": [
+                    "playground",
+                    "walk",
+                    "free_entry"
+                  ],
+                  "costRub": 0,
+                  "reason": "Полчаса на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T10:14",
+                    "departAt": "2026-10-24T10:44",
+                    "kmFromPrev": 100
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T11:43",
+                    "departAt": "2026-10-24T13:13",
+                    "kmFromPrev": 84
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T13:22",
+                    "departAt": "2026-10-24T14:22",
+                    "kmFromPrev": 2
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T14:31",
+                    "departAt": null,
+                    "kmFromPrev": 1
+                  }
+                ]
+              },
+              {
+                "id": "alt_d1s02_pl_ser_vladychny",
+                "placeId": "pl_ser_vladychny",
+                "name": "Владычный монастырь",
+                "deltaMin": -6,
+                "deltaRub": -700,
+                "shiftMin": -6,
+                "units": {
+                  "deltaKm": 0.773,
+                  "regionCode": "RU-MOS",
+                  "checkRub": null,
+                  "adultRub": 0,
+                  "childRub": 0,
+                  "name": "Владычный монастырь",
+                  "placeId": "pl_ser_vladychny",
+                  "priceRub": "61.80",
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
+                },
+                "stop": {
+                  "id": "d1s02",
+                  "seq": 2,
+                  "day": 1,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_ser_vladychny",
+                  "townId": "t_serpukhov",
+                  "name": "Владычный монастырь",
+                  "note": null,
+                  "lat": 54.91941748693183,
+                  "lon": 37.42047727592282,
+                  "arriveAt": "2026-10-24T10:18",
+                  "departAt": "2026-10-24T11:03",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 100,
+                  "kmAt": 99,
+                  "dwellMin": 45,
+                  "tags": [
+                    "monastery",
+                    "free_entry"
+                  ],
+                  "costRub": 0,
+                  "reason": "45 мин на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T10:18",
+                    "departAt": "2026-10-24T11:03",
+                    "kmFromPrev": 100
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T12:07",
+                    "departAt": "2026-10-24T13:37",
+                    "kmFromPrev": 85
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T13:46",
+                    "departAt": "2026-10-24T14:46",
+                    "kmFromPrev": 2
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T14:55",
+                    "departAt": null,
+                    "kmFromPrev": 1
+                  }
+                ]
+              }
+            ],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s03",
+            "seq": 3,
+            "day": 1,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_tul_weapons",
+            "townId": "t_tula",
+            "name": "Музей оружия",
+            "note": null,
+            "lat": 54.198526230397746,
+            "lon": 37.62804800576619,
+            "arriveAt": "2026-10-24T12:13",
+            "departAt": "2026-10-24T13:43",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 83,
+            "kmAt": 183,
+            "dwellMin": 90,
+            "tags": [
+              "playground",
+              "museum"
+            ],
+            "costRub": 1200,
+            "reason": "Полтора часа на осмотр.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d1s03_pl_tul_kremlin",
+                "placeId": "pl_tul_kremlin",
+                "name": "Тульский кремль",
+                "deltaMin": -31,
+                "deltaRub": -300,
+                "shiftMin": -31,
+                "units": {
+                  "deltaKm": -0.594,
+                  "regionCode": "RU-TUL",
+                  "checkRub": null,
+                  "adultRub": 300,
+                  "childRub": 150,
+                  "name": "Тульский кремль",
+                  "placeId": "pl_tul_kremlin",
+                  "priceRub": "61.70",
+                  "regionName": "Тульская область",
+                  "tripKmDelta": -1
+                },
+                "stop": {
+                  "id": "d1s03",
+                  "seq": 3,
+                  "day": 1,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_tul_kremlin",
+                  "townId": "t_tula",
+                  "name": "Тульский кремль",
+                  "note": null,
+                  "lat": 54.19671748693183,
+                  "lon": 37.62497714697585,
+                  "arriveAt": "2026-10-24T12:13",
+                  "departAt": "2026-10-24T13:13",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 83,
+                  "kmAt": 183,
+                  "dwellMin": 60,
+                  "tags": [
+                    "walk",
+                    "museum",
+                    "kremlin"
+                  ],
+                  "costRub": 900,
+                  "reason": "Час на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T10:14",
+                    "departAt": "2026-10-24T11:14",
+                    "kmFromPrev": 101
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T12:13",
+                    "departAt": "2026-10-24T13:13",
+                    "kmFromPrev": 83
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T13:21",
+                    "departAt": "2026-10-24T14:21",
+                    "kmFromPrev": 1
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T14:30",
+                    "departAt": null,
+                    "kmFromPrev": 1
+                  }
+                ]
+              },
+              {
+                "id": "alt_d1s03_pl_tul_embankment",
+                "placeId": "pl_tul_embankment",
+                "name": "Набережная Упы",
+                "deltaMin": -62,
+                "deltaRub": -1210,
+                "shiftMin": -62,
+                "units": {
+                  "deltaKm": -1.188,
+                  "regionCode": "RU-TUL",
+                  "checkRub": null,
+                  "adultRub": 0,
+                  "childRub": 0,
+                  "name": "Набережная Упы",
+                  "placeId": "pl_tul_embankment",
+                  "priceRub": "61.70",
+                  "regionName": "Тульская область",
+                  "tripKmDelta": -2
+                },
+                "stop": {
+                  "id": "d1s03",
+                  "seq": 3,
+                  "day": 1,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_tul_embankment",
+                  "townId": "t_tula",
+                  "name": "Набережная Упы",
+                  "note": null,
+                  "lat": 54.194908743465916,
+                  "lon": 37.621906288185514,
+                  "arriveAt": "2026-10-24T12:12",
+                  "departAt": "2026-10-24T12:42",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 83,
+                  "kmAt": 183,
+                  "dwellMin": 30,
+                  "tags": [
+                    "view",
+                    "walk",
+                    "free_entry"
+                  ],
+                  "costRub": 0,
+                  "reason": "Полчаса на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null,
+                  "unknownFacts": [
+                    "hours"
+                  ],
+                  "unknownRu": "Часы не известны — уточните"
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T10:14",
+                    "departAt": "2026-10-24T11:14",
+                    "kmFromPrev": 101
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T12:12",
+                    "departAt": "2026-10-24T12:42",
+                    "kmFromPrev": 83
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T12:50",
+                    "departAt": "2026-10-24T13:50",
+                    "kmFromPrev": 1
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T13:59",
+                    "departAt": null,
+                    "kmFromPrev": 1
+                  }
+                ]
+              }
+            ],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s04",
+            "seq": 4,
+            "day": 1,
+            "kind": "food",
+            "sign": "food",
+            "placeId": "pl_tul_cafe_samovar",
+            "townId": "t_tula",
+            "name": "Кафе «Самовар»",
+            "note": null,
+            "lat": 54.195813115198874,
+            "lon": 37.621906288185514,
+            "arriveAt": "2026-10-24T13:52",
+            "departAt": "2026-10-24T14:52",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 2,
+            "kmAt": 183,
+            "dwellMin": 60,
+            "tags": [
+              "kids_menu",
+              "parking"
+            ],
+            "costRub": 2800,
+            "reason": "Обед, есть детское меню.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d1s04_pl_tul_cafe_pryanik",
+                "placeId": "pl_tul_cafe_pryanik",
+                "name": "Пряничная",
+                "deltaMin": 1,
+                "deltaRub": -400,
+                "shiftMin": 1,
+                "units": {
+                  "deltaKm": 0.211,
+                  "regionCode": "RU-TUL",
+                  "checkRub": 600,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Пряничная",
+                  "placeId": "pl_tul_cafe_pryanik",
+                  "priceRub": "61.70",
+                  "regionName": "Тульская область",
+                  "tripKmDelta": 0
+                },
+                "stop": {
+                  "id": "d1s04",
+                  "seq": 4,
+                  "day": 1,
+                  "kind": "food",
+                  "sign": "food",
+                  "placeId": "pl_tul_cafe_pryanik",
+                  "townId": "t_tula",
+                  "name": "Пряничная",
+                  "note": null,
+                  "lat": 54.194908743465916,
+                  "lon": 37.62344171758068,
+                  "arriveAt": "2026-10-24T13:53",
+                  "departAt": "2026-10-24T14:53",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 2,
+                  "kmAt": 183,
+                  "dwellMin": 60,
+                  "tags": [
+                    "kids_menu",
+                    "playground"
+                  ],
+                  "costRub": 2400,
+                  "reason": "Обед, есть детское меню.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T10:14",
+                    "departAt": "2026-10-24T11:14",
+                    "kmFromPrev": 101
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T12:13",
+                    "departAt": "2026-10-24T13:43",
+                    "kmFromPrev": 83
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T13:53",
+                    "departAt": "2026-10-24T14:53",
+                    "kmFromPrev": 2
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T15:02",
+                    "departAt": null,
+                    "kmFromPrev": 1
+                  }
+                ]
+              },
+              {
+                "id": "alt_d1s04_pl_tul_cafe_kremlin",
+                "placeId": "pl_tul_cafe_kremlin",
+                "name": "Кафе у кремля",
+                "deltaMin": 1,
+                "deltaRub": -200,
+                "shiftMin": 1,
+                "units": {
+                  "deltaKm": 0.211,
+                  "regionCode": "RU-TUL",
+                  "checkRub": 650,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Кафе у кремля",
+                  "placeId": "pl_tul_cafe_kremlin",
+                  "priceRub": "61.70",
+                  "regionName": "Тульская область",
+                  "tripKmDelta": 0
+                },
+                "stop": {
+                  "id": "d1s04",
+                  "seq": 4,
+                  "day": 1,
+                  "kind": "food",
+                  "sign": "food",
+                  "placeId": "pl_tul_cafe_kremlin",
+                  "townId": "t_tula",
+                  "name": "Кафе у кремля",
+                  "note": null,
+                  "lat": 54.194908743465916,
+                  "lon": 37.62344171758068,
+                  "arriveAt": "2026-10-24T13:53",
+                  "departAt": "2026-10-24T14:53",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 2,
+                  "kmAt": 183,
+                  "dwellMin": 60,
+                  "tags": [
+                    "kids_menu"
+                  ],
+                  "costRub": 2600,
+                  "reason": "Обед, есть детское меню.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d1s01",
+                    "seq": 1,
+                    "arriveAt": null,
+                    "departAt": "2026-10-24T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d1s02",
+                    "seq": 2,
+                    "arriveAt": "2026-10-24T10:14",
+                    "departAt": "2026-10-24T11:14",
+                    "kmFromPrev": 101
+                  },
+                  {
+                    "stopId": "d1s03",
+                    "seq": 3,
+                    "arriveAt": "2026-10-24T12:13",
+                    "departAt": "2026-10-24T13:43",
+                    "kmFromPrev": 83
+                  },
+                  {
+                    "stopId": "d1s04",
+                    "seq": 4,
+                    "arriveAt": "2026-10-24T13:53",
+                    "departAt": "2026-10-24T14:53",
+                    "kmFromPrev": 2
+                  },
+                  {
+                    "stopId": "d1s05",
+                    "seq": 5,
+                    "arriveAt": "2026-10-24T15:02",
+                    "departAt": null,
+                    "kmFromPrev": 1
+                  }
+                ]
+              }
+            ],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d1s05",
+            "seq": 5,
+            "day": 1,
+            "kind": "overnight",
+            "sign": "hotel",
+            "placeId": "pl_tul_hotel_kremlin",
+            "townId": "t_tula",
+            "name": "Тула",
+            "note": null,
+            "lat": 54.195813115198874,
+            "lon": 37.62344171758068,
+            "arriveAt": "2026-10-24T15:01",
+            "departAt": null,
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 1,
+            "kmAt": 183,
+            "dwellMin": 0,
+            "tags": [
+              "dogs_allowed",
+              "family_room",
+              "parking"
+            ],
+            "costRub": 5500,
+            "reason": "Ночёвка из готового маршрута «Тула · Ясная Поляна».",
+            "verified": true,
+            "replaceable": false,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [
+              {
+                "placeId": "pl_tul_hotel_kremlin",
+                "name": "Тульский кремль-отель",
+                "tags": [
+                  "dogs_allowed",
+                  "family_room",
+                  "parking"
+                ],
+                "priceNightRub": 5500,
+                "rooms": 1,
+                "priceCrewRub": 5500,
+                "verified": true,
+                "exitDistanceM": 440
+              },
+              {
+                "placeId": "pl_tul_hotel_pryanik",
+                "name": "Пряничный двор",
+                "tags": [
+                  "family_room",
+                  "parking"
+                ],
+                "priceNightRub": 4800,
+                "rooms": 1,
+                "priceCrewRub": 4800,
+                "verified": true,
+                "exitDistanceM": 619
+              }
+            ],
+            "selectedHotelId": "pl_tul_hotel_kremlin"
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "km": 237,
+        "driveMin": 185,
+        "tz": "Europe/Moscow",
+        "startAt": "2026-10-25T09:00",
+        "endAt": "2026-10-25T15:50",
+        "overBudget": false,
+        "stops": [
+          {
+            "id": "d2s01",
+            "seq": 6,
+            "day": 2,
+            "kind": "start",
+            "sign": "city",
+            "placeId": null,
+            "townId": "t_tula",
+            "name": "Тула",
+            "note": null,
+            "lat": 54.195813115198874,
+            "lon": 37.62344171758068,
+            "arriveAt": null,
+            "departAt": "2026-10-25T09:00",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 0,
+            "kmAt": 183,
+            "dwellMin": 0,
+            "tags": [],
+            "costRub": 0,
+            "reason": "Выезд в 09:00.",
+            "verified": true,
+            "replaceable": false,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d2s02",
+            "seq": 7,
+            "day": 2,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_tul_yasnaya",
+            "townId": null,
+            "name": "Ясная Поляна",
+            "note": null,
+            "lat": 54.075,
+            "lon": 37.527034129378016,
+            "arriveAt": "2026-10-25T09:17",
+            "departAt": "2026-10-25T11:17",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 17,
+            "kmAt": 198,
+            "dwellMin": 120,
+            "tags": [
+              "walk",
+              "museum"
+            ],
+            "costRub": 1500,
+            "reason": "Два часа на осмотр.",
+            "verified": true,
+            "replaceable": false,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d2s03",
+            "seq": 8,
+            "day": 2,
+            "kind": "sight",
+            "sign": "tourist",
+            "placeId": "pl_tul_gingerbread",
+            "townId": "t_tula",
+            "name": "Музей «Тульский пряник»",
+            "note": null,
+            "lat": 54.195813115198874,
+            "lon": 37.62344171758068,
+            "arriveAt": "2026-10-25T11:52",
+            "departAt": "2026-10-25T12:37",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 35,
+            "kmAt": 231,
+            "dwellMin": 45,
+            "tags": [
+              "playground",
+              "museum"
+            ],
+            "costRub": 600,
+            "reason": "45 мин на осмотр.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d2s03_pl_tul_samovar",
+                "placeId": "pl_tul_samovar",
+                "name": "Музей «Тульские самовары»",
+                "deltaMin": -1,
+                "deltaRub": 0,
+                "shiftMin": -1,
+                "units": {
+                  "deltaKm": -0.211,
+                  "regionCode": "RU-TUL",
+                  "checkRub": null,
+                  "adultRub": 200,
+                  "childRub": 100,
+                  "name": "Музей «Тульские самовары»",
+                  "placeId": "pl_tul_samovar",
+                  "priceRub": "61.70",
+                  "regionName": "Тульская область",
+                  "tripKmDelta": -1
+                },
+                "stop": {
+                  "id": "d2s03",
+                  "seq": 8,
+                  "day": 2,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_tul_samovar",
+                  "townId": "t_tula",
+                  "name": "Музей «Тульские самовары»",
+                  "note": null,
+                  "lat": 54.19671748693183,
+                  "lon": 37.621906288185514,
+                  "arriveAt": "2026-10-25T11:52",
+                  "departAt": "2026-10-25T12:37",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 35,
+                  "kmAt": 231,
+                  "dwellMin": 45,
+                  "tags": [
+                    "museum"
+                  ],
+                  "costRub": 600,
+                  "reason": "45 мин на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T09:17",
+                    "departAt": "2026-10-25T11:17",
+                    "kmFromPrev": 17
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:52",
+                    "departAt": "2026-10-25T12:37",
+                    "kmFromPrev": 35
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T13:35",
+                    "departAt": "2026-10-25T14:35",
+                    "kmFromPrev": 84
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T15:49",
+                    "departAt": null,
+                    "kmFromPrev": 100
+                  }
+                ]
+              },
+              {
+                "id": "alt_d2s03_pl_tul_lefty",
+                "placeId": "pl_tul_lefty",
+                "name": "Музей «Тульский левша»",
+                "deltaMin": -15,
+                "deltaRub": -140,
+                "shiftMin": -15,
+                "units": {
+                  "deltaKm": 0.0,
+                  "regionCode": "RU-TUL",
+                  "checkRub": null,
+                  "adultRub": 150,
+                  "childRub": 80,
+                  "name": "Музей «Тульский левша»",
+                  "placeId": "pl_tul_lefty",
+                  "priceRub": "61.70",
+                  "regionName": "Тульская область",
+                  "tripKmDelta": 0
+                },
+                "stop": {
+                  "id": "d2s03",
+                  "seq": 8,
+                  "day": 2,
+                  "kind": "sight",
+                  "sign": "tourist",
+                  "placeId": "pl_tul_lefty",
+                  "townId": "t_tula",
+                  "name": "Музей «Тульский левша»",
+                  "note": null,
+                  "lat": 54.195813115198874,
+                  "lon": 37.62344171758068,
+                  "arriveAt": "2026-10-25T11:52",
+                  "departAt": "2026-10-25T12:22",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 35,
+                  "kmAt": 231,
+                  "dwellMin": 30,
+                  "tags": [
+                    "museum"
+                  ],
+                  "costRub": 460,
+                  "reason": "Полчаса на осмотр.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T09:17",
+                    "departAt": "2026-10-25T11:17",
+                    "kmFromPrev": 17
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:52",
+                    "departAt": "2026-10-25T12:22",
+                    "kmFromPrev": 35
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T13:21",
+                    "departAt": "2026-10-25T14:21",
+                    "kmFromPrev": 84
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T15:35",
+                    "departAt": null,
+                    "kmFromPrev": 100
+                  }
+                ]
+              }
+            ],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d2s04",
+            "seq": 9,
+            "day": 2,
+            "kind": "food",
+            "sign": "food",
+            "placeId": "pl_ser_cafe",
+            "townId": "t_serpukhov",
+            "name": "Кафе «Ока»",
+            "note": null,
+            "lat": 54.916704371732955,
+            "lon": 37.415788637961406,
+            "arriveAt": "2026-10-25T13:36",
+            "departAt": "2026-10-25T14:36",
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 84,
+            "kmAt": 314,
+            "dwellMin": 60,
+            "tags": [
+              "kids_menu",
+              "parking"
+            ],
+            "costRub": 2600,
+            "reason": "Обед, есть детское меню.",
+            "verified": true,
+            "replaceable": true,
+            "alternatives": [
+              {
+                "id": "alt_d2s04_pl_ser_cafe_vladychny",
+                "placeId": "pl_ser_cafe_vladychny",
+                "name": "Кафе «Владычное»",
+                "deltaMin": 9,
+                "deltaRub": 0,
+                "shiftMin": 9,
+                "units": {
+                  "deltaKm": 0.434,
+                  "regionCode": "RU-MOS",
+                  "checkRub": 650,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Кафе «Владычное»",
+                  "placeId": "pl_ser_cafe_vladychny",
+                  "priceRub": "61.80",
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
+                },
+                "stop": {
+                  "id": "d2s04",
+                  "seq": 9,
+                  "day": 2,
+                  "kind": "food",
+                  "sign": "food",
+                  "placeId": "pl_ser_cafe_vladychny",
+                  "townId": "t_serpukhov",
+                  "name": "Кафе «Владычное»",
+                  "note": null,
+                  "lat": 54.91851311519887,
+                  "lon": 37.41891439660235,
+                  "arriveAt": "2026-10-25T13:41",
+                  "departAt": "2026-10-25T14:41",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 84,
+                  "kmAt": 314,
+                  "dwellMin": 60,
+                  "tags": [
+                    "kids_menu",
+                    "parking"
+                  ],
+                  "costRub": 2600,
+                  "reason": "Обед, есть детское меню.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T09:17",
+                    "departAt": "2026-10-25T11:17",
+                    "kmFromPrev": 17
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:52",
+                    "departAt": "2026-10-25T12:37",
+                    "kmFromPrev": 35
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T13:41",
+                    "departAt": "2026-10-25T14:41",
+                    "kmFromPrev": 84
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T15:59",
+                    "departAt": null,
+                    "kmFromPrev": 100
+                  }
+                ]
+              },
+              {
+                "id": "alt_d2s04_pl_ser_cafe_oka",
+                "placeId": "pl_ser_cafe_oka",
+                "name": "Кафе «Окская пристань»",
+                "deltaMin": 8,
+                "deltaRub": 400,
+                "shiftMin": 8,
+                "units": {
+                  "deltaKm": 0.262,
+                  "regionCode": "RU-MOS",
+                  "checkRub": 750,
+                  "adultRub": null,
+                  "childRub": null,
+                  "name": "Кафе «Окская пристань»",
+                  "placeId": "pl_ser_cafe_oka",
+                  "priceRub": "61.80",
+                  "regionName": "Московская область",
+                  "tripKmDelta": 0
+                },
+                "stop": {
+                  "id": "d2s04",
+                  "seq": 9,
+                  "day": 2,
+                  "kind": "food",
+                  "sign": "food",
+                  "placeId": "pl_ser_cafe_oka",
+                  "townId": "t_serpukhov",
+                  "name": "Кафе «Окская пристань»",
+                  "note": null,
+                  "lat": 54.91127814133521,
+                  "lon": 37.40641136203859,
+                  "arriveAt": "2026-10-25T13:40",
+                  "departAt": "2026-10-25T14:40",
+                  "tz": "Europe/Moscow",
+                  "kmFromPrev": 83,
+                  "kmAt": 314,
+                  "dwellMin": 60,
+                  "tags": [
+                    "parking",
+                    "view"
+                  ],
+                  "costRub": 3000,
+                  "reason": "Обед, парковка у входа.",
+                  "verified": true,
+                  "replaceable": true,
+                  "alternatives": [],
+                  "alternativesNote": null,
+                  "hotelOptions": [],
+                  "selectedHotelId": null
+                },
+                "dayPatch": [
+                  {
+                    "stopId": "d2s01",
+                    "seq": 6,
+                    "arriveAt": null,
+                    "departAt": "2026-10-25T09:00",
+                    "kmFromPrev": 0
+                  },
+                  {
+                    "stopId": "d2s02",
+                    "seq": 7,
+                    "arriveAt": "2026-10-25T09:17",
+                    "departAt": "2026-10-25T11:17",
+                    "kmFromPrev": 17
+                  },
+                  {
+                    "stopId": "d2s03",
+                    "seq": 8,
+                    "arriveAt": "2026-10-25T11:52",
+                    "departAt": "2026-10-25T12:37",
+                    "kmFromPrev": 35
+                  },
+                  {
+                    "stopId": "d2s04",
+                    "seq": 9,
+                    "arriveAt": "2026-10-25T13:40",
+                    "departAt": "2026-10-25T14:40",
+                    "kmFromPrev": 83
+                  },
+                  {
+                    "stopId": "d2s05",
+                    "seq": 10,
+                    "arriveAt": "2026-10-25T15:58",
+                    "departAt": null,
+                    "kmFromPrev": 101
+                  }
+                ]
+              }
+            ],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          },
+          {
+            "id": "d2s05",
+            "seq": 10,
+            "day": 2,
+            "kind": "finish",
+            "sign": "city",
+            "placeId": null,
+            "townId": null,
+            "name": "Москва",
+            "note": null,
+            "lat": 55.7558,
+            "lon": 37.6173,
+            "arriveAt": "2026-10-25T15:50",
+            "departAt": null,
+            "tz": "Europe/Moscow",
+            "kmFromPrev": 100,
+            "kmAt": 414,
+            "dwellMin": 0,
+            "tags": [],
+            "costRub": 0,
+            "reason": "Дома к ужину.",
+            "verified": true,
+            "replaceable": false,
+            "alternatives": [],
+            "alternativesNote": null,
+            "hotelOptions": [],
+            "selectedHotelId": null
+          }
+        ]
+      }
+    ],
+    "cost": {
+      "lines": [
+        {
+          "key": "fuel",
+          "title": "Бензин АИ-95",
+          "rub": 2100,
+          "formula": "425 км × 8 л/100 × ≈ 61,80 ₽ (средняя по 3 регионам)",
+          "asOf": "2026-10",
+          "enabled": true,
+          "breakdown": [
+            {
+              "label": "Москва",
+              "formula": "44 км × 8 л/100 × 62,50 ₽ = 220 ₽",
+              "rub": 220
+            },
+            {
+              "label": "Московская область",
+              "formula": "241 км × 8 л/100 × 61,80 ₽ = 1 190 ₽",
+              "rub": 1190
+            },
+            {
+              "label": "Тульская область",
+              "formula": "139 км × 8 л/100 × 61,70 ₽ = 690 ₽",
+              "rub": 690
+            }
+          ]
+        },
+        {
+          "key": "tolls",
+          "title": "Платные дороги",
+          "rub": 0,
+          "formula": "платных дорог нет",
+          "asOf": "2026-10",
+          "enabled": true,
+          "breakdown": []
+        },
+        {
+          "key": "lodging",
+          "title": "Ночёвки",
+          "rub": 5500,
+          "formula": "Тула, 1 × 5 500",
+          "asOf": "2026-09",
+          "enabled": true,
+          "breakdown": [
+            {
+              "label": "Ночь 1: Тула",
+              "formula": "1 × 5 500",
+              "rub": 5500
+            }
+          ]
+        },
+        {
+          "key": "food",
+          "title": "Питание",
+          "rub": 9560,
+          "formula": "4 чел. × 4 приёма × ≈ 600 (в среднем)",
+          "asOf": "2026-09",
+          "enabled": true,
+          "breakdown": [
+            {
+              "label": "День 1",
+              "formula": "обед 700 + ужин 650",
+              "rub": 5400
+            },
+            {
+              "label": "День 2",
+              "formula": "завтрак 390 + обед 650",
+              "rub": 4160
+            }
+          ]
+        },
+        {
+          "key": "tickets",
+          "title": "Билеты",
+          "rub": 4000,
+          "formula": "4 места × (2 взр. + 2 реб.)",
+          "asOf": "2026-09",
+          "enabled": true,
+          "breakdown": [
+            {
+              "label": "Серпуховский историко-художественный музей",
+              "formula": "2 × 250 + 2 × 100",
+              "rub": 700
+            },
+            {
+              "label": "Музей оружия",
+              "formula": "2 × 400 + 2 × 200",
+              "rub": 1200
+            },
+            {
+              "label": "Ясная Поляна",
+              "formula": "2 × 500 + 2 × 250",
+              "rub": 1500
+            },
+            {
+              "label": "Музей «Тульский пряник»",
+              "formula": "2 × 200 + 2 × 100",
+              "rub": 600
+            }
+          ]
+        },
+        {
+          "key": "reserve",
+          "title": "Резерв 10%",
+          "rub": 2120,
+          "formula": "на пробки и «давай заедем»",
+          "asOf": "2026-09",
+          "enabled": true,
+          "breakdown": []
+        }
+      ],
+      "reserveOn": true,
+      "subtotalRub": 21160,
+      "totalRub": 23300,
+      "perPersonRub": 5800,
+      "budgetRub": null,
+      "remainingRub": null,
+      "overBudget": false,
+      "hints": [],
+      "hintKeys": [],
+      "pricesAsOf": "2026-09",
+      "units": {
+        "fuel": {
+          "consumption": 8.0,
+          "fuelType": "ai95",
+          "regions": [
+            {
+              "regionCode": "RU-MOW",
+              "regionName": "Москва",
+              "km": 44.0,
+              "priceRub": "62.50"
+            },
+            {
+              "regionCode": "RU-MOS",
+              "regionName": "Московская область",
+              "km": 241.333,
+              "priceRub": "61.80"
+            },
+            {
+              "regionCode": "RU-TUL",
+              "regionName": "Тульская область",
+              "km": 138.994,
+              "priceRub": "61.70"
+            }
+          ],
+          "asOf": "2026-10",
+          "tripKm": 425
+        },
+        "tolls": [],
+        "nights": [
+          {
+            "stopId": "d1s05",
+            "day": 1,
+            "townName": "Тула",
+            "selectedPlaceId": "pl_tul_hotel_kremlin",
+            "priceNightRub": 5500,
+            "options": [
+              {
+                "placeId": "pl_tul_hotel_kremlin",
+                "priceNightRub": 5500,
+                "breakfastIncluded": false
+              },
+              {
+                "placeId": "pl_tul_hotel_pryanik",
+                "priceNightRub": 4800,
+                "breakfastIncluded": false
+              }
+            ],
+            "defaultPrice": false,
+            "breakfastIncluded": false,
+            "breakfastCheckRub": 390
+          }
+        ],
+        "meals": [
+          {
+            "day": 1,
+            "meal": "lunch",
+            "stopId": "d1s04",
+            "checkRub": 700
+          },
+          {
+            "day": 1,
+            "meal": "dinner",
+            "stopId": "d1s05",
+            "checkRub": 650
+          },
+          {
+            "day": 2,
+            "meal": "lunch",
+            "stopId": "d2s04",
+            "checkRub": 650
+          }
+        ],
+        "tickets": [
+          {
+            "stopId": "d1s02",
+            "placeId": "pl_ser_museum",
+            "name": "Серпуховский историко-художественный музей",
+            "adultRub": 250,
+            "childRub": 100
+          },
+          {
+            "stopId": "d1s03",
+            "placeId": "pl_tul_weapons",
+            "name": "Музей оружия",
+            "adultRub": 400,
+            "childRub": 200
+          },
+          {
+            "stopId": "d2s02",
+            "placeId": "pl_tul_yasnaya",
+            "name": "Ясная Поляна",
+            "adultRub": 500,
+            "childRub": 250
+          },
+          {
+            "stopId": "d2s03",
+            "placeId": "pl_tul_gingerbread",
+            "name": "Музей «Тульский пряник»",
+            "adultRub": 200,
+            "childRub": 100
+          }
+        ],
+        "reserveFrac": "0.10",
+        "lineStep": 10,
+        "totalStep": 100,
+        "childAges": null,
+        "assumedChildAge": 8,
+        "childFoodWeightUnder7": "0.50",
+        "asOf": {
+          "fuel": "2026-10",
+          "tolls": "2026-10",
+          "lodging": "2026-09",
+          "food": "2026-09",
+          "tickets": "2026-09",
+          "reserve": "2026-09"
+        },
+        "moodJustDrive": false
+      }
+    },
+    "reasons": {
+      "overnights": [
+        {
+          "day": 1,
+          "townId": "t_tula",
+          "town": "Тула",
+          "text": "Ночёвка из готового маршрута «Тула · Ясная Поляна».",
+          "candidates": [
+            "Тула"
+          ],
+          "fallback": "template"
+        }
+      ]
+    },
+    "warnings": [],
+    "input": {
+      "origin": {
+        "lat": 55.7558,
+        "lon": 37.6173,
+        "label": "Москва",
+        "placeId": null,
+        "townId": null
+      },
+      "destination": null,
+      "vias": [],
+      "readyRouteId": "rr_tula_yasnaya",
+      "roundTrip": true,
+      "crew": {
+        "adults": 2,
+        "children": 2,
+        "dog": false,
+        "childAges": null
+      },
+      "dailyKm": 300,
+      "budget": null,
+      "vehicle": {
+        "consumption": 8.0,
+        "fuelType": "ai95",
+        "tankL": 50.0
+      },
+      "startAt": "2026-10-24T09:00",
+      "tz": "Europe/Moscow",
+      "mood": "calm",
+      "avoidTolls": false,
+      "reserveOn": true,
+      "simplify": false
+    },
+    "engineVersion": "0.1.0"
+  },
+  "text": "Тула · Ясная Поляна · 425 км · 2 дня\nДень 1 · 188 км\n09:00 Москва\n10:14 Серпуховский историко-художественный музей\n12:13 Музей оружия\n13:52 Кафе «Самовар»\n15:01 Тула\nДень 2 · 237 км\n09:00 Тула\n09:17 Ясная Поляна\n11:52 Музей «Тульский пряник»\n13:36 Кафе «Ока»\n15:50 Москва\nИтого ≈ 23 300 ₽ на 4 чел."
+}

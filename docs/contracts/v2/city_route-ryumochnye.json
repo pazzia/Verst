@@ -1,0 +1,221 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-3",
+   "input_json": {
+    "start": {
+     "lat": 59.9386,
+     "lon": 30.3141,
+     "label": "Санкт-Петербург, Дворцовая площадь"
+    },
+    "preset": "ryumochnye",
+    "adultConfirmed": true,
+    "crew": {
+     "adults": 2
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-3",
+   "titleRu": "Санкт-Петербург: по рюмочным",
+   "townId": "Q656",
+   "townName": "Санкт-Петербург",
+   "townPrep": "Санкт-Петербурге",
+   "preset": "ryumochnye",
+   "startAt": "2026-10-23T18:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T20:49",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 7.1,
+   "walkMin": 94,
+   "durationMin": 169,
+   "requestedDurationMin": 240,
+   "crewNotesRu": [],
+   "interestsWidened": false,
+   "shorter": {
+    "reason": "reach",
+    "requestedMin": 240,
+    "actualMin": 169,
+    "messageRu": "Получилось 2 ч 45 мин вместо 4 ч — остальные места слишком далеко для пешей прогулки"
+   },
+   "returnToStart": true,
+   "start": {
+    "lat": 59.9386,
+    "lon": 30.3141,
+    "label": "Санкт-Петербург, Дворцовая площадь"
+   },
+   "finish": {
+    "lat": 59.9386,
+    "lon": 30.3141,
+    "label": "Санкт-Петербург, Дворцовая площадь"
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "n5036390683",
+     "kind": "ryumochnaya",
+     "nameRu": "Рюмочная в Бутылке",
+     "lat": 59.92926,
+     "lon": 30.28819,
+     "arriveAt": "2026-10-23T18:30",
+     "departAt": "2026-10-23T18:55",
+     "dwellMin": 25,
+     "walkKmFromPrev": 2.3,
+     "walkMinFromPrev": 31,
+     "costRub": 600,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "13:00–00:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "ryumochnaya",
+     "poiKindRu": "Рюмочная",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w02",
+     "poiId": "n11341890314",
+     "kind": "ryumochnaya",
+     "nameRu": "Икра и водки",
+     "lat": 59.92999,
+     "lon": 30.31959,
+     "arriveAt": "2026-10-23T19:26",
+     "departAt": "2026-10-23T19:51",
+     "dwellMin": 25,
+     "walkKmFromPrev": 2.3,
+     "walkMinFromPrev": 30,
+     "costRub": 600,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "18:00–02:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "ryumochnaya",
+     "poiKindRu": "Рюмочная",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w03",
+     "poiId": "n1016200988",
+     "kind": "ryumochnaya",
+     "nameRu": "Настоечная (812)",
+     "lat": 59.94115,
+     "lon": 30.32423,
+     "arriveAt": "2026-10-23T20:13",
+     "departAt": "2026-10-23T20:38",
+     "dwellMin": 25,
+     "walkKmFromPrev": 1.6,
+     "walkMinFromPrev": 22,
+     "costRub": 600,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "16:00–02:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "ryumochnaya",
+     "poiKindRu": "Рюмочная",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    }
+   ],
+   "cost": {
+    "totalRub": 1800,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     },
+     {
+      "key": "drinks",
+      "rub": 1800
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    },
+    {
+     "code": "SHORTER_THAN_ASKED",
+     "messageRu": "Получилось 2 ч 45 мин вместо 4 ч — остальные места слишком далеко для пешей прогулки"
+    }
+   ],
+   "responsibleNoteRu": "Пейте умеренно, чередуйте с водой и едой. За руль — только трезвым.",
+   "polyline": [
+    [
+     59.9386,
+     30.3141
+    ],
+    [
+     59.92926,
+     30.28819
+    ],
+    [
+     59.92999,
+     30.31959
+    ],
+    [
+     59.94115,
+     30.32423
+    ],
+    [
+     59.9386,
+     30.3141
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 59.9386,
+     "lon": 30.3141,
+     "label": "Санкт-Петербург, Дворцовая площадь"
+    },
+    "townId": null,
+    "preset": "ryumochnye",
+    "durationMin": 240,
+    "interests": [],
+    "pace": "normal",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T18:00",
+    "crew": {
+     "adults": 2,
+     "children": 0,
+     "dog": false
+    },
+    "adultConfirmed": true,
+    "exclude": []
+   },
+   "requestKey": "88b3098be9fda1d5"
+  },
+  "ms": 0
+ }
+}

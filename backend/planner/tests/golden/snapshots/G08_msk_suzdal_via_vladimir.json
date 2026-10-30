@@ -1,0 +1,2072 @@
+{
+  "id": "trp_golden",
+  "title": "Москва → Суздаль",
+  "km": 230,
+  "days": 1,
+  "nights": 0,
+  "roundTrip": false,
+  "daysList": [
+    {
+      "day": 1,
+      "km": 230,
+      "driveMin": 208,
+      "tz": "Europe/Moscow",
+      "startAt": "2026-10-24T08:00",
+      "endAt": "2026-10-24T16:33",
+      "overBudget": false,
+      "stops": [
+        {
+          "id": "d1s01",
+          "seq": 1,
+          "day": 1,
+          "kind": "start",
+          "sign": "city",
+          "placeId": null,
+          "townId": null,
+          "name": "Москва",
+          "note": null,
+          "lat": 55.7558,
+          "lon": 37.6173,
+          "arriveAt": null,
+          "departAt": "2026-10-24T08:00",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 0,
+          "kmAt": 0,
+          "dwellMin": 0,
+          "tags": [],
+          "costRub": 0,
+          "reason": "Выезд в 08:00.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s02",
+          "seq": 2,
+          "day": 1,
+          "kind": "rest",
+          "sign": "rest",
+          "placeId": "pl_m7w_rest_080",
+          "townId": null,
+          "name": "Площадка отдыха, М-7, 80 км",
+          "note": null,
+          "lat": 55.89102694997542,
+          "lon": 38.843898615649366,
+          "arriveAt": "2026-10-24T09:10",
+          "departAt": "2026-10-24T09:30",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 80,
+          "kmAt": 80,
+          "dwellMin": 20,
+          "tags": [
+            "wc",
+            "walk"
+          ],
+          "costRub": 0,
+          "reason": "Разминка 20 минут после 1 ч 15 мин за рулём.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s02_pl_m7w_rest_125",
+              "placeId": "pl_m7w_rest_125",
+              "name": "Площадка отдыха, М-7, 125 км",
+              "deltaMin": 0,
+              "deltaRub": 0,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": -0.0,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, М-7, 125 км",
+                "placeId": "pl_m7w_rest_125",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 0
+              },
+              "stop": {
+                "id": "d1s02",
+                "seq": 2,
+                "day": 1,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_m7w_rest_125",
+                "townId": null,
+                "name": "Площадка отдыха, М-7, 125 км",
+                "note": null,
+                "lat": 55.939331332311575,
+                "lon": 39.5183067772068,
+                "arriveAt": "2026-10-24T09:43",
+                "departAt": "2026-10-24T10:03",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 125,
+                "kmAt": 125,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc",
+                  "view"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут после 1 ч 45 мин за рулём.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:43",
+                  "departAt": "2026-10-24T10:03",
+                  "kmFromPrev": 125
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 62
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T12:11",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:15",
+                  "departAt": "2026-10-24T12:45",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:21",
+                  "departAt": "2026-10-24T14:21",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:24",
+                  "departAt": "2026-10-24T15:24",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:29",
+                  "departAt": "2026-10-24T16:29",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:33",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            },
+            {
+              "id": "alt_d1s02_pl_m7w_rest_035",
+              "placeId": "pl_m7w_rest_035",
+              "name": "Площадка отдыха, М-7, 35 км",
+              "deltaMin": 3,
+              "deltaRub": 0,
+              "shiftMin": 3,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-MOS",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Площадка отдыха, М-7, 35 км",
+                "placeId": "pl_m7w_rest_035",
+                "priceRub": "61.80",
+                "regionName": "Московская область",
+                "tripKmDelta": 0
+              },
+              "stop": {
+                "id": "d1s02",
+                "seq": 2,
+                "day": 1,
+                "kind": "rest",
+                "sign": "rest",
+                "placeId": "pl_m7w_rest_035",
+                "townId": null,
+                "name": "Площадка отдыха, М-7, 35 км",
+                "note": null,
+                "lat": 55.816803819443614,
+                "lon": 38.16064188626265,
+                "arriveAt": "2026-10-24T08:35",
+                "departAt": "2026-10-24T08:55",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 35,
+                "kmAt": 35,
+                "dwellMin": 20,
+                "tags": [
+                  "playground",
+                  "wc"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 20 минут после получаса за рулём.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T08:35",
+                  "departAt": "2026-10-24T08:55",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:57",
+                  "departAt": "2026-10-24T11:27",
+                  "kmFromPrev": 152
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:29",
+                  "departAt": "2026-10-24T12:14",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:18",
+                  "departAt": "2026-10-24T12:48",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:24",
+                  "departAt": "2026-10-24T14:24",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:27",
+                  "departAt": "2026-10-24T15:27",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:32",
+                  "departAt": "2026-10-24T16:32",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:36",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            },
+            {
+              "id": "alt_d1s02_pl_m7w_fuel_065",
+              "placeId": "pl_m7w_fuel_065",
+              "name": "АЗС, М-7, 65 км",
+              "deltaMin": -2,
+              "deltaRub": 0,
+              "shiftMin": -2,
+              "units": {
+                "deltaKm": 0.0,
+                "regionCode": "RU-MOS",
+                "checkRub": null,
+                "adultRub": null,
+                "childRub": null,
+                "name": "АЗС, М-7, 65 км",
+                "placeId": "pl_m7w_fuel_065",
+                "priceRub": "61.80",
+                "regionName": "Московская область",
+                "tripKmDelta": 0
+              },
+              "stop": {
+                "id": "d1s02",
+                "seq": 2,
+                "day": 1,
+                "kind": "fuel",
+                "sign": "fuel",
+                "placeId": "pl_m7w_fuel_065",
+                "townId": null,
+                "name": "АЗС, М-7, 65 км",
+                "note": null,
+                "lat": 55.86558529492254,
+                "lon": 38.6198136292486,
+                "arriveAt": "2026-10-24T09:00",
+                "departAt": "2026-10-24T09:15",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 65,
+                "kmAt": 65,
+                "dwellMin": 15,
+                "tags": [
+                  "wc",
+                  "cafe_at_fuel"
+                ],
+                "costRub": 0,
+                "reason": "Разминка 15 минут после часа за рулём.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours",
+                  "fuel"
+                ],
+                "unknownRu": "Не проверено: часы работы, есть ли АИ-95 — уточните"
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:00",
+                  "departAt": "2026-10-24T09:15",
+                  "kmFromPrev": 65
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:52",
+                  "departAt": "2026-10-24T11:22",
+                  "kmFromPrev": 122
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:24",
+                  "departAt": "2026-10-24T12:09",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:13",
+                  "departAt": "2026-10-24T12:43",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:19",
+                  "departAt": "2026-10-24T14:19",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:22",
+                  "departAt": "2026-10-24T15:22",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:27",
+                  "departAt": "2026-10-24T16:27",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:31",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            }
+          ],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s03",
+          "seq": 3,
+          "day": 1,
+          "kind": "via",
+          "sign": "city",
+          "placeId": null,
+          "townId": null,
+          "name": "Владимир",
+          "note": null,
+          "lat": 56.129,
+          "lon": 40.4066,
+          "arriveAt": "2026-10-24T10:54",
+          "departAt": "2026-10-24T11:24",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 107,
+          "kmAt": 187,
+          "dwellMin": 30,
+          "tags": [],
+          "costRub": 0,
+          "reason": "Заезд по вашей просьбе.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s04",
+          "seq": 4,
+          "day": 1,
+          "kind": "sight",
+          "sign": "tourist",
+          "placeId": "pl_vla_dmitrievsky",
+          "townId": "t_vladimir",
+          "name": "Дмитриевский собор",
+          "note": null,
+          "lat": 56.126286884801125,
+          "lon": 40.41465913324249,
+          "arriveAt": "2026-10-24T11:26",
+          "departAt": "2026-10-24T12:11",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 1,
+          "kmAt": 187,
+          "dwellMin": 45,
+          "tags": [
+            "museum"
+          ],
+          "costRub": 500,
+          "reason": "45 мин на осмотр.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s04_pl_vla_view",
+              "placeId": "pl_vla_view",
+              "name": "Смотровая у Успенского собора",
+              "deltaMin": -15,
+              "deltaRub": -500,
+              "shiftMin": -15,
+              "units": {
+                "deltaKm": 0.003,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Смотровая у Успенского собора",
+                "placeId": "pl_vla_view",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 0
+              },
+              "stop": {
+                "id": "d1s04",
+                "seq": 4,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_vla_view",
+                "townId": "t_vladimir",
+                "name": "Смотровая у Успенского собора",
+                "note": null,
+                "lat": 56.12447814133521,
+                "lon": 40.41143547994549,
+                "arriveAt": "2026-10-24T11:26",
+                "departAt": "2026-10-24T11:56",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 1,
+                "kmAt": 187,
+                "dwellMin": 30,
+                "tags": [
+                  "view",
+                  "walk",
+                  "free_entry"
+                ],
+                "costRub": 0,
+                "reason": "Полчаса на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T11:56",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:00",
+                  "departAt": "2026-10-24T12:30",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:06",
+                  "departAt": "2026-10-24T14:06",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:09",
+                  "departAt": "2026-10-24T15:09",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:14",
+                  "departAt": "2026-10-24T16:14",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:18",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            },
+            {
+              "id": "alt_d1s04_pl_vla_water_tower",
+              "placeId": "pl_vla_water_tower",
+              "name": "Старая водонапорная башня",
+              "deltaMin": -14,
+              "deltaRub": -200,
+              "shiftMin": -14,
+              "units": {
+                "deltaKm": 0.227,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": 150,
+                "childRub": 80,
+                "name": "Старая водонапорная башня",
+                "placeId": "pl_vla_water_tower",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 1
+              },
+              "stop": {
+                "id": "d1s04",
+                "seq": 4,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_vla_water_tower",
+                "townId": "t_vladimir",
+                "name": "Старая водонапорная башня",
+                "note": null,
+                "lat": 56.126286884801125,
+                "lon": 40.41627095989099,
+                "arriveAt": "2026-10-24T11:27",
+                "departAt": "2026-10-24T11:57",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 1,
+                "kmAt": 187,
+                "dwellMin": 30,
+                "tags": [
+                  "view",
+                  "museum"
+                ],
+                "costRub": 300,
+                "reason": "Полчаса на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:27",
+                  "departAt": "2026-10-24T11:57",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:01",
+                  "departAt": "2026-10-24T12:31",
+                  "kmFromPrev": 2
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:07",
+                  "departAt": "2026-10-24T14:07",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:10",
+                  "departAt": "2026-10-24T15:10",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:15",
+                  "departAt": "2026-10-24T16:15",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:19",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            },
+            {
+              "id": "alt_d1s04_pl_vla_cathedral_square",
+              "placeId": "pl_vla_cathedral_square",
+              "name": "Соборная площадь Владимира",
+              "deltaMin": -15,
+              "deltaRub": -500,
+              "shiftMin": -15,
+              "units": {
+                "deltaKm": -0.044,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Соборная площадь Владимира",
+                "placeId": "pl_vla_cathedral_square",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 0
+              },
+              "stop": {
+                "id": "d1s04",
+                "seq": 4,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_vla_cathedral_square",
+                "townId": "t_vladimir",
+                "name": "Соборная площадь Владимира",
+                "note": null,
+                "lat": 56.12538251306817,
+                "lon": 40.41304730659399,
+                "arriveAt": "2026-10-24T11:26",
+                "departAt": "2026-10-24T11:56",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 1,
+                "kmAt": 187,
+                "dwellMin": 30,
+                "tags": [
+                  "walk",
+                  "free_entry"
+                ],
+                "costRub": 0,
+                "reason": "Полчаса на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T11:56",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:00",
+                  "departAt": "2026-10-24T12:30",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:06",
+                  "departAt": "2026-10-24T14:06",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:09",
+                  "departAt": "2026-10-24T15:09",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:14",
+                  "departAt": "2026-10-24T16:14",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:18",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            }
+          ],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s05",
+          "seq": 5,
+          "day": 1,
+          "kind": "sight",
+          "sign": "tourist",
+          "placeId": "pl_vla_golden_gate",
+          "townId": "t_vladimir",
+          "name": "Золотые ворота",
+          "note": null,
+          "lat": 56.129904371732955,
+          "lon": 40.41304730659399,
+          "arriveAt": "2026-10-24T12:15",
+          "departAt": "2026-10-24T12:45",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 1,
+          "kmAt": 187,
+          "dwellMin": 30,
+          "tags": [
+            "view",
+            "museum"
+          ],
+          "costRub": 500,
+          "reason": "Полчаса на осмотр.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s05_pl_vla_view",
+              "placeId": "pl_vla_view",
+              "name": "Смотровая у Успенского собора",
+              "deltaMin": 0,
+              "deltaRub": -500,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": 0.499,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Смотровая у Успенского собора",
+                "placeId": "pl_vla_view",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 1
+              },
+              "stop": {
+                "id": "d1s05",
+                "seq": 5,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_vla_view",
+                "townId": "t_vladimir",
+                "name": "Смотровая у Успенского собора",
+                "note": null,
+                "lat": 56.12447814133521,
+                "lon": 40.41143547994549,
+                "arriveAt": "2026-10-24T12:15",
+                "departAt": "2026-10-24T12:45",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 2,
+                "kmAt": 187,
+                "dwellMin": 30,
+                "tags": [
+                  "view",
+                  "walk",
+                  "free_entry"
+                ],
+                "costRub": 0,
+                "reason": "Полчаса на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T12:11",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:15",
+                  "departAt": "2026-10-24T12:45",
+                  "kmFromPrev": 2
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:21",
+                  "departAt": "2026-10-24T14:21",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:24",
+                  "departAt": "2026-10-24T15:24",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:29",
+                  "departAt": "2026-10-24T16:29",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:33",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            },
+            {
+              "id": "alt_d1s05_pl_vla_water_tower",
+              "placeId": "pl_vla_water_tower",
+              "name": "Старая водонапорная башня",
+              "deltaMin": 1,
+              "deltaRub": -200,
+              "shiftMin": 1,
+              "units": {
+                "deltaKm": 0.724,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": 150,
+                "childRub": 80,
+                "name": "Старая водонапорная башня",
+                "placeId": "pl_vla_water_tower",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 1
+              },
+              "stop": {
+                "id": "d1s05",
+                "seq": 5,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_vla_water_tower",
+                "townId": "t_vladimir",
+                "name": "Старая водонапорная башня",
+                "note": null,
+                "lat": 56.126286884801125,
+                "lon": 40.41627095989099,
+                "arriveAt": "2026-10-24T12:16",
+                "departAt": "2026-10-24T12:46",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 2,
+                "kmAt": 187,
+                "dwellMin": 30,
+                "tags": [
+                  "view",
+                  "museum"
+                ],
+                "costRub": 300,
+                "reason": "Полчаса на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T12:11",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:16",
+                  "departAt": "2026-10-24T12:46",
+                  "kmFromPrev": 2
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:22",
+                  "departAt": "2026-10-24T14:22",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:25",
+                  "departAt": "2026-10-24T15:25",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:30",
+                  "departAt": "2026-10-24T16:30",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:34",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            },
+            {
+              "id": "alt_d1s05_pl_vla_cathedral_square",
+              "placeId": "pl_vla_cathedral_square",
+              "name": "Соборная площадь Владимира",
+              "deltaMin": 0,
+              "deltaRub": -500,
+              "shiftMin": 0,
+              "units": {
+                "deltaKm": 0.453,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Соборная площадь Владимира",
+                "placeId": "pl_vla_cathedral_square",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 1
+              },
+              "stop": {
+                "id": "d1s05",
+                "seq": 5,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_vla_cathedral_square",
+                "townId": "t_vladimir",
+                "name": "Соборная площадь Владимира",
+                "note": null,
+                "lat": 56.12538251306817,
+                "lon": 40.41304730659399,
+                "arriveAt": "2026-10-24T12:15",
+                "departAt": "2026-10-24T12:45",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 1,
+                "kmAt": 187,
+                "dwellMin": 30,
+                "tags": [
+                  "walk",
+                  "free_entry"
+                ],
+                "costRub": 0,
+                "reason": "Полчаса на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours"
+                ],
+                "unknownRu": "Часы не известны — уточните"
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T12:11",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:15",
+                  "departAt": "2026-10-24T12:45",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:21",
+                  "departAt": "2026-10-24T14:21",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:24",
+                  "departAt": "2026-10-24T15:24",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:29",
+                  "departAt": "2026-10-24T16:29",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:33",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            }
+          ],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s06",
+          "seq": 6,
+          "day": 1,
+          "kind": "sight",
+          "sign": "tourist",
+          "placeId": "pl_suz_kremlin",
+          "townId": "t_suzdal",
+          "name": "Суздальский кремль",
+          "note": null,
+          "lat": 56.41065628267043,
+          "lon": 40.44827237120489,
+          "arriveAt": "2026-10-24T13:21",
+          "departAt": "2026-10-24T14:21",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 35,
+          "kmAt": 221,
+          "dwellMin": 60,
+          "tags": [
+            "museum",
+            "kremlin"
+          ],
+          "costRub": 800,
+          "reason": "Час на осмотр.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s06_pl_suz_rizopolozhensky",
+              "placeId": "pl_suz_rizopolozhensky",
+              "name": "Ризоположенский монастырь",
+              "deltaMin": -14,
+              "deltaRub": -800,
+              "shiftMin": -14,
+              "units": {
+                "deltaKm": 0.447,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Ризоположенский монастырь",
+                "placeId": "pl_suz_rizopolozhensky",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 1
+              },
+              "stop": {
+                "id": "d1s06",
+                "seq": 6,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_suz_rizopolozhensky",
+                "townId": "t_suzdal",
+                "name": "Ризоположенский монастырь",
+                "note": null,
+                "lat": 56.414273769602254,
+                "lon": 40.451520618674806,
+                "arriveAt": "2026-10-24T13:21",
+                "departAt": "2026-10-24T14:06",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 35,
+                "kmAt": 221,
+                "dwellMin": 45,
+                "tags": [
+                  "monastery",
+                  "free_entry"
+                ],
+                "costRub": 0,
+                "reason": "45 мин на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T12:11",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:15",
+                  "departAt": "2026-10-24T12:45",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:21",
+                  "departAt": "2026-10-24T14:06",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:10",
+                  "departAt": "2026-10-24T15:10",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:15",
+                  "departAt": "2026-10-24T16:15",
+                  "kmFromPrev": 3
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:19",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            }
+          ],
+          "alternativesNote": "Нашли только один вариант в это время.",
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s07",
+          "seq": 7,
+          "day": 1,
+          "kind": "food",
+          "sign": "food",
+          "placeId": "pl_suz_rest_trapeznaya",
+          "townId": "t_suzdal",
+          "name": "Трапезная в кремле",
+          "note": null,
+          "lat": 56.41156065440339,
+          "lon": 40.44827237120489,
+          "arriveAt": "2026-10-24T14:24",
+          "departAt": "2026-10-24T15:24",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 1,
+          "kmAt": 221,
+          "dwellMin": 60,
+          "tags": [
+            "kids_menu",
+            "parking"
+          ],
+          "costRub": 1600,
+          "reason": "Обед, парковка у входа.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s07_pl_suz_cafe_kremlin",
+              "placeId": "pl_suz_cafe_kremlin",
+              "name": "Трапезная «Кремлёвская»",
+              "deltaMin": -3,
+              "deltaRub": 200,
+              "shiftMin": -3,
+              "units": {
+                "deltaKm": -0.37,
+                "regionCode": "RU-VLA",
+                "checkRub": 900,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Трапезная «Кремлёвская»",
+                "placeId": "pl_suz_cafe_kremlin",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 0
+              },
+              "stop": {
+                "id": "d1s07",
+                "seq": 7,
+                "day": 1,
+                "kind": "food",
+                "sign": "food",
+                "placeId": "pl_suz_cafe_kremlin",
+                "townId": "t_suzdal",
+                "name": "Трапезная «Кремлёвская»",
+                "note": null,
+                "lat": 56.416986884801126,
+                "lon": 40.44664824746992,
+                "arriveAt": "2026-10-24T14:23",
+                "departAt": "2026-10-24T15:23",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 1,
+                "kmAt": 222,
+                "dwellMin": 60,
+                "tags": [
+                  "kids_menu",
+                  "parking"
+                ],
+                "costRub": 1800,
+                "reason": "Обед, парковка у входа.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T12:11",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:15",
+                  "departAt": "2026-10-24T12:45",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:21",
+                  "departAt": "2026-10-24T14:21",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:23",
+                  "departAt": "2026-10-24T15:23",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:26",
+                  "departAt": "2026-10-24T16:26",
+                  "kmFromPrev": 2
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:30",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            },
+            {
+              "id": "alt_d1s07_pl_suz_cafe_ogurets",
+              "placeId": "pl_suz_cafe_ogurets",
+              "name": "Кафе «Огурец»",
+              "deltaMin": -3,
+              "deltaRub": 0,
+              "shiftMin": -3,
+              "units": {
+                "deltaKm": -0.649,
+                "regionCode": "RU-VLA",
+                "checkRub": 800,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Кафе «Огурец»",
+                "placeId": "pl_suz_cafe_ogurets",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": 0
+              },
+              "stop": {
+                "id": "d1s07",
+                "seq": 7,
+                "day": 1,
+                "kind": "food",
+                "sign": "food",
+                "placeId": "pl_suz_cafe_ogurets",
+                "townId": "t_suzdal",
+                "name": "Кафе «Огурец»",
+                "note": null,
+                "lat": 56.417891256534084,
+                "lon": 40.44502412373496,
+                "arriveAt": "2026-10-24T14:23",
+                "departAt": "2026-10-24T15:23",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 1,
+                "kmAt": 222,
+                "dwellMin": 60,
+                "tags": [
+                  "kids_menu"
+                ],
+                "costRub": 1600,
+                "reason": "Обед в Суздале.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T12:11",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:15",
+                  "departAt": "2026-10-24T12:45",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:21",
+                  "departAt": "2026-10-24T14:21",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:23",
+                  "departAt": "2026-10-24T15:23",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:26",
+                  "departAt": "2026-10-24T16:26",
+                  "kmFromPrev": 2
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:30",
+                  "departAt": null,
+                  "kmFromPrev": 2
+                }
+              ]
+            }
+          ],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s08",
+          "seq": 8,
+          "day": 1,
+          "kind": "sight",
+          "sign": "tourist",
+          "placeId": "pl_suz_wooden",
+          "townId": "t_suzdal",
+          "name": "Музей деревянного зодчества",
+          "note": null,
+          "lat": 56.41517814133521,
+          "lon": 40.46288948481954,
+          "arriveAt": "2026-10-24T15:29",
+          "departAt": "2026-10-24T16:29",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 3,
+          "kmAt": 222,
+          "dwellMin": 60,
+          "tags": [
+            "walk",
+            "museum"
+          ],
+          "costRub": 600,
+          "reason": "Час на осмотр.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [
+            {
+              "id": "alt_d1s08_pl_suz_rizopolozhensky",
+              "placeId": "pl_suz_rizopolozhensky",
+              "name": "Ризоположенский монастырь",
+              "deltaMin": -18,
+              "deltaRub": -610,
+              "shiftMin": -18,
+              "units": {
+                "deltaKm": -1.804,
+                "regionCode": "RU-VLA",
+                "checkRub": null,
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Ризоположенский монастырь",
+                "placeId": "pl_suz_rizopolozhensky",
+                "priceRub": "61.40",
+                "regionName": "Владимирская область",
+                "tripKmDelta": -1
+              },
+              "stop": {
+                "id": "d1s08",
+                "seq": 8,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_suz_rizopolozhensky",
+                "townId": "t_suzdal",
+                "name": "Ризоположенский монастырь",
+                "note": null,
+                "lat": 56.414273769602254,
+                "lon": 40.451520618674806,
+                "arriveAt": "2026-10-24T15:28",
+                "departAt": "2026-10-24T16:13",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 2,
+                "kmAt": 221,
+                "dwellMin": 45,
+                "tags": [
+                  "monastery",
+                  "free_entry"
+                ],
+                "costRub": 0,
+                "reason": "45 мин на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T09:10",
+                  "departAt": "2026-10-24T09:30",
+                  "kmFromPrev": 80
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T10:54",
+                  "departAt": "2026-10-24T11:24",
+                  "kmFromPrev": 107
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T11:26",
+                  "departAt": "2026-10-24T12:11",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T12:15",
+                  "departAt": "2026-10-24T12:45",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T13:21",
+                  "departAt": "2026-10-24T14:21",
+                  "kmFromPrev": 35
+                },
+                {
+                  "stopId": "d1s07",
+                  "seq": 7,
+                  "arriveAt": "2026-10-24T14:24",
+                  "departAt": "2026-10-24T15:24",
+                  "kmFromPrev": 1
+                },
+                {
+                  "stopId": "d1s08",
+                  "seq": 8,
+                  "arriveAt": "2026-10-24T15:28",
+                  "departAt": "2026-10-24T16:13",
+                  "kmFromPrev": 2
+                },
+                {
+                  "stopId": "d1s09",
+                  "seq": 9,
+                  "arriveAt": "2026-10-24T16:15",
+                  "departAt": null,
+                  "kmFromPrev": 1
+                }
+              ]
+            }
+          ],
+          "alternativesNote": "Нашли только один вариант в это время.",
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s09",
+          "seq": 9,
+          "day": 1,
+          "kind": "finish",
+          "sign": "city",
+          "placeId": null,
+          "townId": null,
+          "name": "Суздаль",
+          "note": null,
+          "lat": 56.4197,
+          "lon": 40.4434,
+          "arriveAt": "2026-10-24T16:33",
+          "departAt": null,
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 2,
+          "kmAt": 222,
+          "dwellMin": 0,
+          "tags": [],
+          "costRub": 0,
+          "reason": "Финиш.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        }
+      ]
+    }
+  ],
+  "cost": {
+    "lines": [
+      {
+        "key": "fuel",
+        "title": "Бензин АИ-95",
+        "rub": 1140,
+        "formula": "230 км × 8 л/100 × ≈ 61,60 ₽ (средняя по 3 регионам)",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "Москва",
+            "formula": "10 км × 8 л/100 × 62,50 ₽ = 50 ₽",
+            "rub": 50
+          },
+          {
+            "label": "Московская область",
+            "formula": "70 км × 8 л/100 × 61,80 ₽ = 350 ₽",
+            "rub": 350
+          },
+          {
+            "label": "Владимирская область",
+            "formula": "150 км × 8 л/100 × 61,40 ₽ = 740 ₽",
+            "rub": 740
+          }
+        ]
+      },
+      {
+        "key": "tolls",
+        "title": "Платные дороги",
+        "rub": 0,
+        "formula": "платных дорог нет",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": []
+      },
+      {
+        "key": "lodging",
+        "title": "Ночёвки",
+        "rub": 0,
+        "formula": "без ночёвок",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": []
+      },
+      {
+        "key": "food",
+        "title": "Питание",
+        "rub": 1600,
+        "formula": "2 чел. × 1 приём × 800",
+        "asOf": "2026-09",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "День 1",
+            "formula": "обед 800",
+            "rub": 1600
+          }
+        ]
+      },
+      {
+        "key": "tickets",
+        "title": "Билеты",
+        "rub": 2400,
+        "formula": "4 места × 2 взр.",
+        "asOf": "2026-09",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "Дмитриевский собор",
+            "formula": "2 × 250",
+            "rub": 500
+          },
+          {
+            "label": "Золотые ворота",
+            "formula": "2 × 250",
+            "rub": 500
+          },
+          {
+            "label": "Суздальский кремль",
+            "formula": "2 × 400",
+            "rub": 800
+          },
+          {
+            "label": "Музей деревянного зодчества",
+            "formula": "2 × 300",
+            "rub": 600
+          }
+        ]
+      },
+      {
+        "key": "reserve",
+        "title": "Резерв 10%",
+        "rub": 510,
+        "formula": "на пробки и «давай заедем»",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": []
+      }
+    ],
+    "reserveOn": true,
+    "subtotalRub": 5140,
+    "totalRub": 5700,
+    "perPersonRub": 2900,
+    "budgetRub": null,
+    "remainingRub": null,
+    "overBudget": false,
+    "hints": [],
+    "hintKeys": [],
+    "pricesAsOf": "2026-10",
+    "units": {
+      "fuel": {
+        "consumption": 8.0,
+        "fuelType": "ai95",
+        "regions": [
+          {
+            "regionCode": "RU-MOW",
+            "regionName": "Москва",
+            "km": 10.0,
+            "priceRub": "62.50"
+          },
+          {
+            "regionCode": "RU-MOS",
+            "regionName": "Московская область",
+            "km": 70.0,
+            "priceRub": "61.80"
+          },
+          {
+            "regionCode": "RU-VLA",
+            "regionName": "Владимирская область",
+            "km": 150.434,
+            "priceRub": "61.40"
+          }
+        ],
+        "asOf": "2026-10",
+        "tripKm": 230
+      },
+      "tolls": [],
+      "nights": [],
+      "meals": [
+        {
+          "day": 1,
+          "meal": "lunch",
+          "stopId": "d1s07",
+          "checkRub": 800
+        }
+      ],
+      "tickets": [
+        {
+          "stopId": "d1s04",
+          "placeId": "pl_vla_dmitrievsky",
+          "name": "Дмитриевский собор",
+          "adultRub": 250,
+          "childRub": 100
+        },
+        {
+          "stopId": "d1s05",
+          "placeId": "pl_vla_golden_gate",
+          "name": "Золотые ворота",
+          "adultRub": 250,
+          "childRub": 120
+        },
+        {
+          "stopId": "d1s06",
+          "placeId": "pl_suz_kremlin",
+          "name": "Суздальский кремль",
+          "adultRub": 400,
+          "childRub": 200
+        },
+        {
+          "stopId": "d1s08",
+          "placeId": "pl_suz_wooden",
+          "name": "Музей деревянного зодчества",
+          "adultRub": 300,
+          "childRub": 150
+        }
+      ],
+      "reserveFrac": "0.10",
+      "lineStep": 10,
+      "totalStep": 100,
+      "childAges": null,
+      "assumedChildAge": 8,
+      "childFoodWeightUnder7": "0.50",
+      "asOf": {
+        "fuel": "2026-10",
+        "tolls": "2026-10",
+        "lodging": "2026-10",
+        "food": "2026-09",
+        "tickets": "2026-09",
+        "reserve": "2026-10"
+      },
+      "moodJustDrive": false
+    }
+  },
+  "reasons": {
+    "overnights": []
+  },
+  "warnings": [],
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва",
+      "placeId": null,
+      "townId": null
+    },
+    "destination": {
+      "lat": 56.4197,
+      "lon": 40.4434,
+      "label": "Суздаль",
+      "placeId": null,
+      "townId": null
+    },
+    "vias": [
+      {
+        "lat": 56.129,
+        "lon": 40.4066,
+        "label": "Владимир",
+        "placeId": null,
+        "townId": null
+      }
+    ],
+    "readyRouteId": null,
+    "roundTrip": false,
+    "crew": {
+      "adults": 2,
+      "children": 0,
+      "dog": false,
+      "childAges": null
+    },
+    "dailyKm": 300,
+    "budget": null,
+    "vehicle": {
+      "consumption": 8.0,
+      "fuelType": "ai95",
+      "tankL": 50.0
+    },
+    "startAt": "2026-10-24T08:00",
+    "tz": "Europe/Moscow",
+    "mood": "more_stops",
+    "avoidTolls": false,
+    "reserveOn": true,
+    "simplify": false
+  },
+  "engineVersion": "0.1.0"
+}

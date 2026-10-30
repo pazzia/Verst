@@ -1,0 +1,66 @@
+[
+ {
+  "osm": "w7201",
+  "name": "Большой тестовый парк",
+  "lat": 41.705,
+  "lon": 44.805,
+  "area": 250000,
+  "tags": {
+   "leisure": "park",
+   "name": "Большой тестовый парк",
+   "wikidata": "Q900304"
+  },
+  "townQid": "Q900201"
+ },
+ {
+  "osm": "w7202",
+  "name": "Сквер",
+  "lat": 41.703,
+  "lon": 44.803,
+  "area": 4000,
+  "tags": {
+   "leisure": "garden",
+   "name": "სკვერი",
+   "name:ru": "Сквер",
+   "opening_hours": "Mo-Su 08:00-20:00"
+  },
+  "townQid": "Q900201"
+ },
+ {
+  "osm": "r7203",
+  "name": "Большой тестовый парк",
+  "lat": 41.706,
+  "lon": 44.806,
+  "area": 1000,
+  "tags": {
+   "leisure": "park",
+   "name": "Большой тестовый парк"
+  },
+  "townQid": "Q900201"
+ },
+ {
+  "osm": "w7204",
+  "name": "Test Park",
+  "lat": 42.272,
+  "lon": 42.702,
+  "area": 30000,
+  "tags": {
+   "leisure": "park",
+   "name": "ტესტ პარკი",
+   "name:en": "Test Park"
+  },
+  "townQid": "Q900202"
+ },
+ {
+  "osm": "w7205",
+  "name": "Сельский парк",
+  "lat": 42.0,
+  "lon": 43.0,
+  "area": 9000,
+  "tags": {
+   "leisure": "park",
+   "name": "Сельский парк"
+  },
+  "townQid": "Q900203"
+ }
+]

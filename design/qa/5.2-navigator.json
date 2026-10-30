@@ -1,0 +1,389 @@
+{
+ "screen": "5.2-navigator",
+ "notes": "GPS indicator is hidden in the mock build (D-16): N-05 checks only the header text. Dashed borders (1 dp) are not sampled.",
+ "points": [
+  {
+   "item": "N-01",
+   "state": "default-query-yaro",
+   "x": 60,
+   "y": 20,
+   "hex": "#2B2850",
+   "size": "390x844"
+  },
+  {
+   "item": "N-01",
+   "state": "default-query-yaro",
+   "x": 60,
+   "y": 60,
+   "hex": "#8E4A6B",
+   "size": "390x844"
+  },
+  {
+   "item": "N-01",
+   "state": "default-query-yaro",
+   "x": 60,
+   "y": 85,
+   "hex": "#D9655A",
+   "size": "390x844"
+  },
+  {
+   "item": "N-01",
+   "state": "default-query-yaro",
+   "x": 60,
+   "y": 99,
+   "hex": "#F29A5E",
+   "size": "390x844"
+  },
+  {
+   "item": "N-01",
+   "state": "default-query-yaro",
+   "x": 40,
+   "y": 120,
+   "hex": "#2C3A33",
+   "size": "390x844"
+  },
+  {
+   "item": "N-01",
+   "state": "default-query-yaro",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 119.73,
+   "seed": 173.3,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    153.26,
+    null
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "N-01",
+   "state": "default-query-yaro",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 119.73,
+   "seed": 216.7,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    null,
+    236.74
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "N-02",
+   "state": "default-query-yaro",
+   "x": 195,
+   "y": 131,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "N-02",
+   "state": "default-query-yaro",
+   "x": 300,
+   "y": 165,
+   "hex": "#161618",
+   "size": "390x844"
+  },
+  {
+   "item": "N-03",
+   "state": "default-query-yaro",
+   "kind": "text",
+   "region": [
+    34,
+    150,
+    70,
+    26
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-04",
+   "state": "default-query-yaro",
+   "x": 17.5,
+   "y": 400,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "N-04",
+   "state": "default-query-yaro",
+   "x": 24,
+   "y": 400,
+   "hex": "#0B1218",
+   "size": "390x844"
+  },
+  {
+   "item": "N-05",
+   "state": "default-query-yaro",
+   "kind": "text",
+   "region": [
+    33,
+    207,
+    150,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-06",
+   "state": "default-query-yaro",
+   "x": 250,
+   "y": 236,
+   "hex": "#16222C",
+   "size": "390x844"
+  },
+  {
+   "item": "N-06",
+   "state": "default-query-yaro",
+   "x": 47.5,
+   "y": 256,
+   "hex": "#7FA6D9",
+   "size": "390x844"
+  },
+  {
+   "item": "N-07",
+   "state": "default-query-yaro",
+   "x": 34,
+   "y": 319,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "N-07",
+   "state": "default-query-yaro",
+   "x": 300,
+   "y": 296,
+   "hex": "#16222C",
+   "size": "390x844"
+  },
+  {
+   "item": "N-07",
+   "state": "default-query-yaro",
+   "x": 53,
+   "y": 319,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "N-08",
+   "state": "default-query-yaro",
+   "x": 300,
+   "y": 362,
+   "hex": "#1A2C3B",
+   "size": "390x844"
+  },
+  {
+   "item": "N-08",
+   "state": "default-query-yaro",
+   "x": 300,
+   "y": 414,
+   "hex": "#0F1A22",
+   "size": "390x844"
+  },
+  {
+   "item": "N-08",
+   "state": "default-query-yaro",
+   "x": 49,
+   "y": 383,
+   "hex": "#1E4FA3",
+   "size": "390x844"
+  },
+  {
+   "item": "N-08",
+   "state": "default-query-yaro",
+   "x": 49,
+   "y": 539,
+   "hex": "#6B3E26",
+   "size": "390x844"
+  },
+  {
+   "item": "N-10",
+   "state": "default-query-yaro",
+   "kind": "text",
+   "region": [
+    40,
+    562,
+    140,
+    22
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-11",
+   "state": "popular-chips",
+   "x": 40,
+   "y": 453,
+   "hex": "#16222C",
+   "size": "390x844"
+  },
+  {
+   "item": "N-11",
+   "state": "popular-chips",
+   "kind": "text",
+   "region": [
+    33,
+    411,
+    200,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-12",
+   "state": "default-query-yaro",
+   "kind": "text",
+   "region": [
+    22,
+    762,
+    200,
+    23
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-12",
+   "state": "default-query-yaro",
+   "x": 288,
+   "y": 775,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "N-12",
+   "state": "default-query-yaro",
+   "x": 305,
+   "y": 768,
+   "hex": "#1C1C1F",
+   "size": "390x844"
+  },
+  {
+   "item": "N-12",
+   "state": "default-query-yaro",
+   "x": 327,
+   "y": 741.5,
+   "hex": "#D8402B",
+   "size": "390x844"
+  },
+  {
+   "item": "N-14",
+   "state": "no-destination",
+   "x": 327,
+   "y": 741.5,
+   "hex": "#55555E",
+   "size": "390x844"
+  },
+  {
+   "item": "N-14",
+   "state": "no-destination",
+   "kind": "text",
+   "region": [
+    22,
+    762,
+    200,
+    23
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-15",
+   "state": "too-short",
+   "kind": "text",
+   "region": [
+    22,
+    785,
+    240,
+    17
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-15",
+   "state": "unreachable",
+   "kind": "text",
+   "region": [
+    22,
+    785,
+    240,
+    17
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-16",
+   "state": "no-results",
+   "x": 351,
+   "y": 362,
+   "hex": "#0F1A22",
+   "size": "390x844"
+  },
+  {
+   "item": "N-16",
+   "state": "no-results",
+   "kind": "text",
+   "region": [
+    45,
+    365,
+    280,
+    40
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-16",
+   "state": "outside-russia",
+   "kind": "text",
+   "region": [
+    45,
+    365,
+    280,
+    40
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-18",
+   "state": "map-unavailable-plate",
+   "x": 22,
+   "y": 680,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "N-18",
+   "state": "map-unavailable-plate",
+   "kind": "text",
+   "region": [
+    34,
+    640,
+    320,
+    40
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "N-17",
+   "state": "vias-3",
+   "kind": "text",
+   "region": [
+    33,
+    231,
+    324,
+    220
+   ],
+   "size": "390x844"
+  }
+ ],
+ "justified": {
+  "N-09": "debounce / ≤ 6 rows: NavigatorViewModelTest.debounceCancelsStale + reading",
+  "N-13": "IME behaviour: not rendered by Robolectric; emulator journey (DES-117)",
+  "N-19": "semantics/touch: XScreenSemanticsTest (build/tests/failures.txt), not visual"
+ }
+}

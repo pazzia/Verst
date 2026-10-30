@@ -1,0 +1,1600 @@
+{
+ "outcome": "plan",
+ "trip": {
+  "id": null,
+  "title": "Владикавказ → Тбилиси",
+  "km": 176,
+  "days": 1,
+  "nights": 0,
+  "roundTrip": false,
+  "daysList": [
+   {
+    "day": 1,
+    "km": 176,
+    "driveMin": 144,
+    "tz": "Europe/Moscow",
+    "startAt": "2026-10-24T08:00",
+    "endAt": "2026-10-24T13:44",
+    "overBudget": false,
+    "stops": [
+     {
+      "id": "d1s01",
+      "seq": 1,
+      "day": 1,
+      "kind": "start",
+      "sign": "city",
+      "placeId": null,
+      "townId": null,
+      "name": "Владикавказ",
+      "note": null,
+      "lat": 43.0205,
+      "lon": 44.6819,
+      "arriveAt": null,
+      "departAt": "2026-10-24T08:00",
+      "tz": "Europe/Moscow",
+      "kmFromPrev": 0,
+      "kmAt": 0,
+      "dwellMin": 0,
+      "tags": [],
+      "costRub": 0,
+      "reason": "Выезд в 08:00.",
+      "verified": true,
+      "replaceable": false,
+      "alternatives": [],
+      "alternativesNote": null,
+      "hotelOptions": [],
+      "selectedHotelId": null,
+      "kmDriven": 0,
+      "kmLeft": 176
+     },
+     {
+      "id": "d1s02",
+      "seq": 2,
+      "day": 1,
+      "kind": "border",
+      "sign": "city",
+      "placeId": null,
+      "townId": "Q5239",
+      "name": "Граница: Верхний Ларс — Дарьяли",
+      "note": null,
+      "lat": 43.04,
+      "lon": 44.6775,
+      "arriveAt": "2026-10-24T08:02",
+      "departAt": "2026-10-24T10:02",
+      "tz": "Europe/Moscow",
+      "kmFromPrev": 2,
+      "kmAt": 2,
+      "dwellMin": 120,
+      "tags": [],
+      "costRub": 0,
+      "reason": "Пункт пропуска. Время ожидания неизвестно — заложили запас два часа: это настройка планировщика, не факт.",
+      "verified": true,
+      "replaceable": false,
+      "alternatives": [],
+      "alternativesNote": null,
+      "hotelOptions": [],
+      "selectedHotelId": null,
+      "border": {
+       "crossingId": "verkhny_lars",
+       "nameRu": "Граница: Верхний Ларс — Дарьяли",
+       "from": "RU",
+       "to": "GE",
+       "fromRu": "Россия",
+       "toRu": "Грузия",
+       "marker": false,
+       "coordsApprox": true,
+       "coordsNoteRu": "Координат пункта пропуска в источниках нет; точка на маршруте — ближайший город каталога: Владикавказ",
+       "waitKnown": false,
+       "waitRu": "Время ожидания неизвестно: ни один источник его не называет",
+       "waitSources": [],
+       "bufferMin": 120,
+       "bufferRu": "Заложили запас два часа — это настройка планировщика, а не факт",
+       "facts": [
+        {
+         "textRu": "Единственный автомобильный переход Россия — Грузия для легковых; Верхний Ларс — в Северной Осетии",
+         "sources": [
+          {
+           "url": "https://lenta.ru/articles/2026/06/11/pravila-vezda-v-gruziyu-2026/",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          },
+          {
+           "url": "https://110km.ru/art/na-mashine-v-gruziyu-cherez-verhniy-lars-rashody-i-strahovki-187021.html",
+           "type": "secondary",
+           "typeRu": "вторичный источник"
+          }
+         ]
+        },
+        {
+         "textRu": "Круглосуточно с 01.06.2013, 39 полос; текущий режим не подтверждён",
+         "sources": [
+          {
+           "url": "https://www.alta.ru/articles/25785/",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          }
+         ]
+        },
+        {
+         "textRu": "Электронная очередь Росгранстроя — только для грузовых; онлайн-очереди для легковых нет",
+         "sources": [
+          {
+           "url": "https://mintrans.gov.ru/press-center/news/12740",
+           "type": "official",
+           "typeRu": "официальный источник"
+          }
+         ]
+        },
+        {
+         "textRu": "Открыт ли переход сегодня (погода), ежедневно сообщает Armenpress",
+         "sources": [
+          {
+           "url": "https://armenpress.am/ru/article/1109477/amp",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          }
+         ]
+        }
+       ],
+       "risks": [
+        {
+         "textRu": "С ноября по март переход закрывают из-за погоды на Крестовом перевале",
+         "sources": [
+          {
+           "url": "https://trans.info/ru/problemyi-na-rossiysko-gruzinskoy-granitse-chto-ne-tak-s-verhnim-larsom-196571",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          }
+         ],
+         "appliesOnTripDate": false
+        }
+       ],
+       "documents": [
+        {
+         "textRu": "Загранпаспорт",
+         "sources": [
+          {
+           "url": "https://www.kommersant.ru/doc/8691138",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          }
+         ]
+        },
+        {
+         "textRu": "Водительское удостоверение и оригинал СТС",
+         "sources": [
+          {
+           "url": "https://www.kommersant.ru/doc/8691138",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          }
+         ]
+        },
+        {
+         "textRu": "Если водитель не собственник — нотариальная доверенность с правом выезда за границу",
+         "sources": [
+          {
+           "url": "https://www.kommersant.ru/doc/8691138",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          }
+         ]
+        },
+        {
+         "textRu": "Машина с иностранными номерами — не дольше 90 дней",
+         "sources": [
+          {
+           "url": "https://www.kommersant.ru/doc/8691138",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          }
+         ]
+        }
+       ],
+       "fees": [
+        {
+         "key": "tpl",
+         "textRu": "Обязательная страховка гражданской ответственности (TPL) с 01.03.2018: на tpl.ge или на границе; штраф без полиса 100–200 GEL. Цены по вторичному источнику: 15 дней — 30 GEL, месяц — 50 GEL, 3 месяца — 85 GEL, год — 130 GEL.",
+         "mandatory": true,
+         "counted": false,
+         "notCountedWhy": "secondary_source",
+         "notCountedRu": "Сумма только из вторичного источника — показана, но не учтена",
+         "currency": "GEL",
+         "amount": null,
+         "periodDays": null,
+         "rub": null,
+         "inRoubleTotal": false,
+         "sources": [
+          {
+           "url": "https://sakhva-travel.com/en/blog/travel-insurance-georgia-2026/",
+           "type": "secondary",
+           "typeRu": "вторичный источник"
+          }
+         ],
+         "ruleSources": [
+          {
+           "url": "https://tpl.ge/en/terms-and-conditions",
+           "type": "official",
+           "typeRu": "официальный источник"
+          },
+          {
+           "url": "https://www.tpl.ge/en/faq",
+           "type": "official",
+           "typeRu": "официальный источник"
+          }
+         ],
+         "unverified": true
+        },
+        {
+         "key": "medical",
+         "textRu": "Медицинская страховка обязательна с 01.01.2026: покрытие не меньше 30 000 GEL; штраф 300 GEL (по другому источнику — от 100 GEL). Цена полиса не найдена.",
+         "mandatory": true,
+         "counted": false,
+         "notCountedWhy": "no_amount",
+         "notCountedRu": "Суммы в источниках нет — не учтён",
+         "currency": null,
+         "amount": null,
+         "periodDays": null,
+         "rub": null,
+         "inRoubleTotal": false,
+         "sources": [
+          {
+           "url": "https://lenta.ru/articles/2026/06/11/pravila-vezda-v-gruziyu-2026/",
+           "type": "primary",
+           "typeRu": "первичный источник"
+          },
+          {
+           "url": "https://cover.ge/ru/from-russia",
+           "type": "secondary",
+           "typeRu": "вторичный источник"
+          }
+         ],
+         "ruleSources": [],
+         "unverified": true
+        }
+       ],
+       "rules": [
+        {
+         "textRu": "Город — 60, за городом — 90, магистраль — 110 км/ч",
+         "sources": [
+          {
+           "url": "https://madloba.info/faq/cars-and-driving/speeding-fines-in-georgia/",
+           "type": "secondary",
+           "typeRu": "вторичный источник"
+          }
+         ]
+        },
+        {
+         "textRu": "С российскими правами можно водить год после последнего въезда, с оригиналом удостоверения; нужно ли международное — спорно",
+         "sources": [
+          {
+           "url": "https://madloba.info/en/faq/cars-and-driving/driving-in-georgia-with-a-foreign-licence/",
+           "type": "secondary",
+           "typeRu": "вторичный источник"
+          }
+         ]
+        }
+       ],
+       "unverified": true,
+       "checkedAt": "2026-10-29",
+       "noteRu": "Цены, сборы и правила за границей взяты из текста поисковой выдачи 29.10.2026; страницы первоисточников не открывались — не проверено."
+      },
+      "kmDriven": 2,
+      "kmLeft": 174
+     },
+     {
+      "id": "d1s03",
+      "seq": 3,
+      "day": 1,
+      "kind": "rest",
+      "sign": "rest",
+      "placeId": "syn_r_4229807_4476372",
+      "townId": null,
+      "name": "Площадка отдыха, 99 км",
+      "note": null,
+      "lat": 42.29807,
+      "lon": 44.76372,
+      "arriveAt": "2026-10-24T11:22",
+      "departAt": "2026-10-24T11:42",
+      "tz": "Europe/Moscow",
+      "kmFromPrev": 97,
+      "kmAt": 99,
+      "dwellMin": 20,
+      "tags": [
+       "wc"
+      ],
+      "costRub": 0,
+      "reason": "Разминка 20 минут после 1 ч 15 мин за рулём. По местному времени — 12:22 (+1 ч).",
+      "verified": true,
+      "replaceable": true,
+      "alternatives": [
+       {
+        "id": "alt_d1s03_syn_f_4238769_4475360",
+        "placeId": "syn_f_4238769_4475360",
+        "name": "АЗС у трассы",
+        "deltaMin": -5,
+        "deltaRub": 0,
+        "shiftMin": -5,
+        "units": {
+         "deltaKm": -0.0,
+         "regionCode": "GE-MM",
+         "checkRub": null,
+         "adultRub": null,
+         "childRub": null,
+         "name": "АЗС у трассы",
+         "placeId": "syn_f_4238769_4475360",
+         "priceRub": "61.50",
+         "regionName": "Мцхета-Мтианети",
+         "tripKmDelta": 0
+        },
+        "stop": {
+         "id": "d1s03",
+         "seq": 3,
+         "day": 1,
+         "kind": "fuel",
+         "sign": "fuel",
+         "placeId": "syn_f_4238769_4475360",
+         "townId": null,
+         "name": "АЗС у трассы, 88 км",
+         "note": null,
+         "lat": 42.38769,
+         "lon": 44.7536,
+         "arriveAt": "2026-10-24T11:12",
+         "departAt": "2026-10-24T11:27",
+         "tz": "Europe/Moscow",
+         "kmFromPrev": 85,
+         "kmAt": 88,
+         "dwellMin": 15,
+         "tags": [
+          "wc",
+          "cafe_at_fuel",
+          "24h"
+         ],
+         "costRub": 0,
+         "reason": "Разминка 15 минут после 1 ч 15 мин за рулём.",
+         "verified": true,
+         "replaceable": true,
+         "alternatives": [],
+         "alternativesNote": null,
+         "hotelOptions": [],
+         "selectedHotelId": null,
+         "unknownFacts": [
+          "fuel"
+         ],
+         "unknownRu": "Есть ли АИ-95 — не проверено",
+         "localTz": "Asia/Tbilisi",
+         "localTimeRu": "По местному времени — 12:12 (+1 ч)."
+        },
+        "dayPatch": [
+         {
+          "stopId": "d1s01",
+          "seq": 1,
+          "arriveAt": null,
+          "departAt": "2026-10-24T08:00",
+          "kmFromPrev": 0
+         },
+         {
+          "stopId": "d1s02",
+          "seq": 2,
+          "arriveAt": "2026-10-24T08:02",
+          "departAt": "2026-10-24T10:02",
+          "kmFromPrev": 2
+         },
+         {
+          "stopId": "d1s03",
+          "seq": 3,
+          "arriveAt": "2026-10-24T11:12",
+          "departAt": "2026-10-24T11:27",
+          "kmFromPrev": 85
+         },
+         {
+          "stopId": "d1s04",
+          "seq": 4,
+          "arriveAt": "2026-10-24T12:39",
+          "departAt": "2026-10-24T13:39",
+          "kmFromPrev": 88
+         },
+         {
+          "stopId": "d1s05",
+          "seq": 5,
+          "arriveAt": "2026-10-24T13:39",
+          "departAt": null,
+          "kmFromPrev": 0
+         }
+        ]
+       },
+       {
+        "id": "alt_d1s03_syn_f_4193959_4480419",
+        "placeId": "syn_f_4193959_4480419",
+        "name": "АЗС у трассы",
+        "deltaMin": -5,
+        "deltaRub": 0,
+        "shiftMin": -5,
+        "units": {
+         "deltaKm": -0.002,
+         "regionCode": "GE-MM",
+         "checkRub": null,
+         "adultRub": null,
+         "childRub": null,
+         "name": "АЗС у трассы",
+         "placeId": "syn_f_4193959_4480419",
+         "priceRub": "61.50",
+         "regionName": "Мцхета-Мтианети",
+         "tripKmDelta": 0
+        },
+        "stop": {
+         "id": "d1s03",
+         "seq": 3,
+         "day": 1,
+         "kind": "fuel",
+         "sign": "fuel",
+         "placeId": "syn_f_4193959_4480419",
+         "townId": null,
+         "name": "АЗС у трассы у Мцхета",
+         "note": null,
+         "lat": 41.93959,
+         "lon": 44.80419,
+         "arriveAt": "2026-10-24T12:00",
+         "departAt": "2026-10-24T12:15",
+         "tz": "Europe/Moscow",
+         "kmFromPrev": 144,
+         "kmAt": 146,
+         "dwellMin": 15,
+         "tags": [
+          "wc",
+          "cafe_at_fuel",
+          "24h"
+         ],
+         "costRub": 0,
+         "reason": "Разминка 15 минут после двух часов за рулём.",
+         "verified": true,
+         "replaceable": true,
+         "alternatives": [],
+         "alternativesNote": null,
+         "hotelOptions": [],
+         "selectedHotelId": null,
+         "unknownFacts": [
+          "fuel"
+         ],
+         "unknownRu": "Есть ли АИ-95 — не проверено",
+         "localTz": "Asia/Tbilisi",
+         "localTimeRu": "По местному времени — 13:00 (+1 ч)."
+        },
+        "dayPatch": [
+         {
+          "stopId": "d1s01",
+          "seq": 1,
+          "arriveAt": null,
+          "departAt": "2026-10-24T08:00",
+          "kmFromPrev": 0
+         },
+         {
+          "stopId": "d1s02",
+          "seq": 2,
+          "arriveAt": "2026-10-24T08:02",
+          "departAt": "2026-10-24T10:02",
+          "kmFromPrev": 2
+         },
+         {
+          "stopId": "d1s03",
+          "seq": 3,
+          "arriveAt": "2026-10-24T12:00",
+          "departAt": "2026-10-24T12:15",
+          "kmFromPrev": 144
+         },
+         {
+          "stopId": "d1s04",
+          "seq": 4,
+          "arriveAt": "2026-10-24T12:39",
+          "departAt": "2026-10-24T13:39",
+          "kmFromPrev": 30
+         },
+         {
+          "stopId": "d1s05",
+          "seq": 5,
+          "arriveAt": "2026-10-24T13:39",
+          "departAt": null,
+          "kmFromPrev": 0
+         }
+        ]
+       }
+      ],
+      "alternativesNote": null,
+      "hotelOptions": [],
+      "selectedHotelId": null,
+      "localTz": "Asia/Tbilisi",
+      "localTimeRu": "По местному времени — 12:22 (+1 ч).",
+      "kmDriven": 99,
+      "kmLeft": 77,
+      "amenities": [
+       "wc"
+      ],
+      "parking": null
+     },
+     {
+      "id": "d1s04",
+      "seq": 4,
+      "day": 1,
+      "kind": "food",
+      "sign": "food",
+      "placeId": "osm_n9300002",
+      "townId": "Q9100001",
+      "name": "Test Cafe",
+      "note": "не проверено",
+      "lat": 41.716,
+      "lon": 44.828,
+      "arriveAt": "2026-10-24T12:44",
+      "departAt": "2026-10-24T13:44",
+      "tz": "Europe/Moscow",
+      "kmFromPrev": 76,
+      "kmAt": 175,
+      "dwellMin": 60,
+      "tags": [],
+      "costRub": 0,
+      "reason": "Обед в Тбилиси.",
+      "verified": false,
+      "replaceable": true,
+      "alternatives": [],
+      "alternativesNote": "Других вариантов в это время поблизости нет.",
+      "hotelOptions": [],
+      "selectedHotelId": null,
+      "unknownFacts": [
+       "hours",
+       "price"
+      ],
+      "unknownRu": "Цена за границей неизвестна — в рублёвый итог не входит",
+      "localTz": "Asia/Tbilisi",
+      "localTimeRu": "По местному времени — 13:44 (+1 ч).",
+      "kmDriven": 175,
+      "kmLeft": 1,
+      "parking": null
+     },
+     {
+      "id": "d1s05",
+      "seq": 5,
+      "day": 1,
+      "kind": "finish",
+      "sign": "city",
+      "placeId": null,
+      "townId": null,
+      "name": "Тбилиси",
+      "note": null,
+      "lat": 41.7151,
+      "lon": 44.8271,
+      "arriveAt": "2026-10-24T13:44",
+      "departAt": null,
+      "tz": "Europe/Moscow",
+      "kmFromPrev": 0,
+      "kmAt": 175,
+      "dwellMin": 0,
+      "tags": [],
+      "costRub": 0,
+      "reason": "Финиш.",
+      "verified": true,
+      "replaceable": false,
+      "alternatives": [],
+      "alternativesNote": null,
+      "hotelOptions": [],
+      "selectedHotelId": null,
+      "localTz": "Asia/Tbilisi",
+      "localTimeRu": "По местному времени — 14:44 (+1 ч).",
+      "kmDriven": 176,
+      "kmLeft": 0
+     }
+    ]
+   }
+  ],
+  "cost": {
+   "lines": [
+    {
+     "key": "fuel",
+     "title": "Бензин АИ-95",
+     "rub": 300,
+     "formula": "60 км × 8 л/100 × 61,50 ₽",
+     "asOf": "2026-10",
+     "enabled": true,
+     "breakdown": [
+      {
+       "label": "Северная Осетия",
+       "formula": "60 км × 8 л/100 × 61,50 ₽ = 300 ₽",
+       "rub": 300
+      }
+     ]
+    },
+    {
+     "key": "tolls",
+     "title": "Платные дороги",
+     "rub": 0,
+     "formula": "не учтены: маршрут приближённый",
+     "asOf": "2026-10",
+     "enabled": true,
+     "breakdown": []
+    },
+    {
+     "key": "lodging",
+     "title": "Ночёвки",
+     "rub": 0,
+     "formula": "без ночёвок",
+     "asOf": "2026-10",
+     "enabled": true,
+     "breakdown": []
+    },
+    {
+     "key": "food",
+     "title": "Питание",
+     "rub": 0,
+     "formula": "без остановок на еду",
+     "asOf": "2026-10",
+     "enabled": true,
+     "breakdown": []
+    },
+    {
+     "key": "tickets",
+     "title": "Билеты",
+     "rub": 0,
+     "formula": "вход свободный",
+     "asOf": "2026-10",
+     "enabled": true,
+     "breakdown": []
+    },
+    {
+     "key": "reserve",
+     "title": "Резерв 10%",
+     "rub": 30,
+     "formula": "на пробки и «давай заедем»",
+     "asOf": "2026-10",
+     "enabled": true,
+     "breakdown": []
+    }
+   ],
+   "reserveOn": true,
+   "subtotalRub": 300,
+   "totalRub": 300,
+   "perPersonRub": 200,
+   "budgetRub": null,
+   "remainingRub": null,
+   "overBudget": false,
+   "hints": [],
+   "hintKeys": [],
+   "pricesAsOf": "2026-10",
+   "units": {
+    "fuel": {
+     "consumption": 8.0,
+     "fuelType": "ai95",
+     "regions": [
+      {
+       "regionCode": "RU-SE",
+       "regionName": "Северная Осетия",
+       "km": 60.0,
+       "priceRub": "61.50"
+      }
+     ],
+     "asOf": "2026-10",
+     "tripKm": null
+    },
+    "tolls": [],
+    "tollsUnknown": true,
+    "nights": [],
+    "meals": [],
+    "tickets": [],
+    "reserveFrac": "0.10",
+    "lineStep": 10,
+    "totalStep": 100,
+    "childAges": null,
+    "assumedChildAge": 8,
+    "childFoodWeightUnder7": "0.50",
+    "asOf": {
+     "fuel": "2026-10",
+     "tolls": "2026-10",
+     "lodging": "2026-10",
+     "food": "2026-10",
+     "tickets": "2026-10",
+     "reserve": "2026-10"
+    },
+    "moodJustDrive": false
+   },
+   "totalNoteRu": "За границей посчитано не всё — смотрите блок «За границей»."
+  },
+  "reasons": {
+   "overnights": []
+  },
+  "warnings": [
+   {
+    "code": "UNVERIFIED_PLACES",
+    "day": null,
+    "message": "Места — из открытых данных: часы и цены уточняйте",
+    "detail": "osm_places",
+    "level": "info"
+   },
+   {
+    "code": "TIME_ZONE",
+    "day": 1,
+    "message": "В день 1 меняется часовой пояс: время в плане дня — по часам места, откуда выехали утром",
+    "detail": "tz_change"
+   },
+   {
+    "code": "ABROAD",
+    "day": null,
+    "message": "Поездка за границу: цены, сборы и правила там взяты из поисковой выдачи и не проверены — смотрите блок «За границей»",
+    "detail": "abroad",
+    "level": "info"
+   }
+  ],
+  "input": {
+   "origin": {
+    "lat": 43.0205,
+    "lon": 44.6819,
+    "label": "Владикавказ",
+    "placeId": null,
+    "townId": null
+   },
+   "destination": {
+    "lat": 41.7151,
+    "lon": 44.8271,
+    "label": "Тбилиси",
+    "placeId": null,
+    "townId": null
+   },
+   "vias": [],
+   "readyRouteId": null,
+   "roundTrip": false,
+   "crew": {
+    "adults": 2,
+    "children": 0,
+    "dog": false,
+    "childAges": null
+   },
+   "dailyKm": 300,
+   "budget": null,
+   "vehicle": {
+    "consumption": 8.0,
+    "fuelType": "ai95",
+    "tankL": 50.0
+   },
+   "startAt": "2026-10-24T08:00",
+   "tz": "Europe/Moscow",
+   "mood": "more_stops",
+   "avoidTolls": false,
+   "reserveOn": true,
+   "simplify": false
+  },
+  "engineVersion": "0.1.0",
+  "approxDistances": true,
+  "abroad": {
+   "unverified": true,
+   "checkedAt": "2026-10-29",
+   "noteRu": "Цены, сборы и правила за границей взяты из текста поисковой выдачи 29.10.2026; страницы первоисточников не открывались — не проверено.",
+   "countries": [
+    {
+     "code": "GE",
+     "nameRu": "Грузия",
+     "currency": "GEL",
+     "km": 116.1,
+     "tz": [
+      "Asia/Tbilisi"
+     ],
+     "fuel": {
+      "fuelType": "ai95",
+      "litres": 9.3,
+      "currency": "GEL",
+      "sources": [
+       {
+        "url": "https://amindi.org/en/fuel-prices",
+        "type": "secondary",
+        "typeRu": "вторичный источник"
+       }
+      ],
+      "noteRu": "Цены сетей Rompetrol и Wissol на 07.10.2026 по агрегатору amindi.org (вторичный источник; госрегулятора цен нет). Считаем по верхней. Соответствие марок Regular — АИ-92 и Premium — АИ-95 — наше допущение, не проверено.",
+      "unverified": true,
+      "pricePerLitre": "4.29",
+      "priceRange": [
+       "4.16",
+       "4.29"
+      ],
+      "validFrom": "2026-10-07",
+      "amount": "39.90",
+      "rub": null,
+      "inRoubleTotal": false
+     },
+     "tolls": {
+      "status": "unknown",
+      "counted": false,
+      "textRu": "Платных дорог для легковых не найдено, но и официального подтверждения, что их нет, тоже нет — не учтено.",
+      "sources": []
+     },
+     "fees": [
+      {
+       "key": "tpl",
+       "textRu": "Обязательная страховка гражданской ответственности (TPL) с 01.03.2018: на tpl.ge или на границе; штраф без полиса 100–200 GEL. Цены по вторичному источнику: 15 дней — 30 GEL, месяц — 50 GEL, 3 месяца — 85 GEL, год — 130 GEL.",
+       "mandatory": true,
+       "counted": false,
+       "notCountedWhy": "secondary_source",
+       "notCountedRu": "Сумма только из вторичного источника — показана, но не учтена",
+       "currency": "GEL",
+       "amount": null,
+       "periodDays": null,
+       "rub": null,
+       "inRoubleTotal": false,
+       "sources": [
+        {
+         "url": "https://sakhva-travel.com/en/blog/travel-insurance-georgia-2026/",
+         "type": "secondary",
+         "typeRu": "вторичный источник"
+        }
+       ],
+       "ruleSources": [
+        {
+         "url": "https://tpl.ge/en/terms-and-conditions",
+         "type": "official",
+         "typeRu": "официальный источник"
+        },
+        {
+         "url": "https://www.tpl.ge/en/faq",
+         "type": "official",
+         "typeRu": "официальный источник"
+        }
+       ],
+       "unverified": true
+      },
+      {
+       "key": "medical",
+       "textRu": "Медицинская страховка обязательна с 01.01.2026: покрытие не меньше 30 000 GEL; штраф 300 GEL (по другому источнику — от 100 GEL). Цена полиса не найдена.",
+       "mandatory": true,
+       "counted": false,
+       "notCountedWhy": "no_amount",
+       "notCountedRu": "Суммы в источниках нет — не учтён",
+       "currency": null,
+       "amount": null,
+       "periodDays": null,
+       "rub": null,
+       "inRoubleTotal": false,
+       "sources": [
+        {
+         "url": "https://lenta.ru/articles/2026/06/11/pravila-vezda-v-gruziyu-2026/",
+         "type": "primary",
+         "typeRu": "первичный источник"
+        },
+        {
+         "url": "https://cover.ge/ru/from-russia",
+         "type": "secondary",
+         "typeRu": "вторичный источник"
+        }
+       ],
+       "ruleSources": [],
+       "unverified": true
+      }
+     ],
+     "nightsUnpriced": 0,
+     "mealsUnpriced": 1,
+     "documents": [
+      {
+       "textRu": "Загранпаспорт",
+       "sources": [
+        {
+         "url": "https://www.kommersant.ru/doc/8691138",
+         "type": "primary",
+         "typeRu": "первичный источник"
+        }
+       ]
+      },
+      {
+       "textRu": "Водительское удостоверение и оригинал СТС",
+       "sources": [
+        {
+         "url": "https://www.kommersant.ru/doc/8691138",
+         "type": "primary",
+         "typeRu": "первичный источник"
+        }
+       ]
+      },
+      {
+       "textRu": "Если водитель не собственник — нотариальная доверенность с правом выезда за границу",
+       "sources": [
+        {
+         "url": "https://www.kommersant.ru/doc/8691138",
+         "type": "primary",
+         "typeRu": "первичный источник"
+        }
+       ]
+      },
+      {
+       "textRu": "Машина с иностранными номерами — не дольше 90 дней",
+       "sources": [
+        {
+         "url": "https://www.kommersant.ru/doc/8691138",
+         "type": "primary",
+         "typeRu": "первичный источник"
+        }
+       ]
+      }
+     ],
+     "rules": [
+      {
+       "textRu": "Город — 60, за городом — 90, магистраль — 110 км/ч",
+       "sources": [
+        {
+         "url": "https://madloba.info/faq/cars-and-driving/speeding-fines-in-georgia/",
+         "type": "secondary",
+         "typeRu": "вторичный источник"
+        }
+       ]
+      },
+      {
+       "textRu": "С российскими правами можно водить год после последнего въезда, с оригиналом удостоверения; нужно ли международное — спорно",
+       "sources": [
+        {
+         "url": "https://madloba.info/en/faq/cars-and-driving/driving-in-georgia-with-a-foreign-licence/",
+         "type": "secondary",
+         "typeRu": "вторичный источник"
+        }
+       ]
+      }
+     ],
+     "unverified": true
+    }
+   ],
+   "localTotals": [
+    {
+     "currency": "GEL",
+     "amount": "39.90",
+     "rub": null
+    }
+   ],
+   "localTotalsRu": "Учтённые суммы за границей в местной валюте (топливо и обязательные сборы из официальных и первичных источников); не проверено",
+   "rates": null,
+   "ratesNoteRu": "Курсов Банка России на сервере нет — суммы за границей только в местной валюте и в рублёвый итог не входят",
+   "roubleTotalIncomplete": true,
+   "notInRoubleTotalRu": [
+    "Грузия: топливо — посчитано в GEL, курса Банка России на сервере нет",
+    "Грузия: обязательные сборы и страховки — в рублёвый итог не входят",
+    "Грузия: платные дороги — не учтены",
+    "Грузия: еда (1) — цен нет"
+   ],
+   "totalNoteRu": "За границей посчитано не всё — смотрите блок «За границей»."
+  },
+  "engineState": {
+   "profileKm": [
+    0.0,
+    1.0,
+    2.0,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    7.0,
+    8.0,
+    9.0,
+    10.0,
+    11.0,
+    12.0,
+    13.0,
+    14.0,
+    15.0,
+    16.0,
+    17.0,
+    18.0,
+    19.0,
+    20.0,
+    21.0,
+    22.0,
+    23.0,
+    24.0,
+    25.0,
+    26.0,
+    27.0,
+    28.0,
+    29.0,
+    30.0,
+    31.0,
+    32.0,
+    33.0,
+    34.0,
+    35.0,
+    36.0,
+    37.0,
+    38.0,
+    39.0,
+    40.0,
+    41.0,
+    42.0,
+    43.0,
+    44.0,
+    45.0,
+    46.0,
+    47.0,
+    48.0,
+    49.0,
+    50.0,
+    51.0,
+    52.0,
+    53.0,
+    54.0,
+    55.0,
+    56.0,
+    57.0,
+    58.0,
+    59.0,
+    60.0,
+    61.0,
+    62.0,
+    63.0,
+    64.0,
+    65.0,
+    66.0,
+    67.0,
+    68.0,
+    69.0,
+    70.0,
+    71.0,
+    72.0,
+    73.0,
+    74.0,
+    75.0,
+    76.0,
+    77.0,
+    78.0,
+    79.0,
+    80.0,
+    81.0,
+    82.0,
+    83.0,
+    84.0,
+    85.0,
+    86.0,
+    87.0,
+    88.0,
+    89.0,
+    90.0,
+    91.0,
+    92.0,
+    93.0,
+    94.0,
+    95.0,
+    96.0,
+    97.0,
+    98.0,
+    99.0,
+    100.0,
+    101.0,
+    102.0,
+    103.0,
+    104.0,
+    105.0,
+    106.0,
+    107.0,
+    108.0,
+    109.0,
+    110.0,
+    111.0,
+    112.0,
+    113.0,
+    114.0,
+    115.0,
+    116.0,
+    117.0,
+    118.0,
+    119.0,
+    120.0,
+    121.0,
+    122.0,
+    123.0,
+    124.0,
+    125.0,
+    126.0,
+    127.0,
+    128.0,
+    129.0,
+    130.0,
+    131.0,
+    132.0,
+    133.0,
+    134.0,
+    135.0,
+    136.0,
+    137.0,
+    138.0,
+    139.0,
+    140.0,
+    141.0,
+    142.0,
+    143.0,
+    144.0,
+    145.0,
+    146.0,
+    147.0,
+    148.0,
+    149.0,
+    150.0,
+    151.0,
+    152.0,
+    153.0,
+    154.0,
+    155.0,
+    156.0,
+    157.0,
+    158.0,
+    159.0,
+    160.0,
+    161.0,
+    162.0,
+    163.0,
+    164.0,
+    165.0,
+    166.0,
+    167.0,
+    168.0,
+    169.0,
+    170.0,
+    171.0,
+    172.0,
+    173.0,
+    174.0,
+    175.0,
+    175.37436029309828
+   ],
+   "profileMin": [
+    0.0,
+    0.75,
+    1.5,
+    2.2479433885265365,
+    2.99455418150771,
+    3.7411649744888833,
+    4.4877757674700565,
+    5.23438656045123,
+    5.980997353432404,
+    6.727608146413577,
+    7.474218939394751,
+    8.220829732375925,
+    8.967440525357096,
+    9.71405131833827,
+    10.460662111319444,
+    11.207272904300618,
+    11.953883697281793,
+    12.700494490262965,
+    13.447105283244138,
+    14.193716076225313,
+    14.940326869206487,
+    15.686937662187658,
+    16.43354845516883,
+    17.180159248150005,
+    17.926770041131178,
+    18.673380834112354,
+    19.419991627093527,
+    20.166602420074696,
+    20.913213213055872,
+    21.659824006037045,
+    22.406434799018218,
+    23.153045591999394,
+    23.899656384980567,
+    24.64626717796174,
+    25.392877970942916,
+    26.13948876392409,
+    26.88609955690526,
+    27.632710349886434,
+    28.37932114286761,
+    29.12593193584878,
+    29.872542728829952,
+    30.619153521811125,
+    31.365764314792298,
+    32.11237510777347,
+    32.85898590075465,
+    33.60559669373582,
+    34.35220748671699,
+    35.098818279698165,
+    35.84542907267934,
+    36.59203986566051,
+    37.33865065864168,
+    38.085261451622856,
+    38.83187224460403,
+    39.5784830375852,
+    40.32509383056638,
+    41.07170462354755,
+    41.81831541652872,
+    42.5649262095099,
+    43.31153700249107,
+    44.058147795472244,
+    44.80475858845342,
+    45.5513693814346,
+    46.29798017441576,
+    47.04459096739694,
+    47.791201760378115,
+    48.53781255335929,
+    49.28442334634046,
+    50.03103413932163,
+    50.777644932302806,
+    51.52425572528398,
+    52.27086651826516,
+    53.017477311246324,
+    53.7640881042275,
+    54.51069889720868,
+    55.25730969018985,
+    56.00392048317102,
+    56.75053127615219,
+    57.49714206913336,
+    58.24375286211453,
+    58.990363655095706,
+    59.736974448076886,
+    60.48358524105806,
+    61.23019603403923,
+    61.976806827020404,
+    62.72341762000158,
+    63.47002841298275,
+    64.21663920596393,
+    64.9632499989451,
+    65.70986079192627,
+    66.45647158490745,
+    67.20308237788862,
+    67.94969317086979,
+    68.69630396385097,
+    69.44291475683214,
+    70.18952554981333,
+    70.93613634279448,
+    71.68274713577566,
+    72.42935792875683,
+    73.175968721738,
+    73.92257951471919,
+    74.66919030770036,
+    75.41580110068153,
+    76.1624118936627,
+    76.90902268664387,
+    77.65563347962505,
+    78.40224427260623,
+    79.1488550655874,
+    79.89546585856857,
+    80.64207665154973,
+    81.3886874445309,
+    82.13529823751209,
+    82.88190903049326,
+    83.62851982347443,
+    84.3751306164556,
+    85.1217414094368,
+    85.86835220241795,
+    86.61496299539913,
+    87.3615737883803,
+    88.10818458136148,
+    88.85479537434266,
+    89.60140616732383,
+    90.34801696030499,
+    91.09462775328616,
+    91.84123854626735,
+    92.58784933924852,
+    93.3344601322297,
+    94.08107092521087,
+    94.82768171819204,
+    95.5742925111732,
+    96.32090330415438,
+    97.06751409713556,
+    97.81412489011674,
+    98.56073568309793,
+    99.3073464760791,
+    100.05395726906026,
+    100.80056806204144,
+    101.54717885502261,
+    102.2937896480038,
+    103.04040044098497,
+    103.78701123396614,
+    104.53362202694731,
+    105.28023281992847,
+    106.02684361290966,
+    106.77345440589083,
+    107.520065198872,
+    108.26667599185318,
+    109.01328678483435,
+    109.75989757781551,
+    110.5065083707967,
+    111.25311916377785,
+    111.99972995675903,
+    112.7463407497402,
+    113.49295154272139,
+    114.23956233570254,
+    114.98617312868372,
+    115.73278392166489,
+    116.47939471464608,
+    117.22600550762725,
+    117.97261630060842,
+    118.7192270935896,
+    119.46583788657077,
+    120.21244867955194,
+    120.95905947253311,
+    121.70567026551429,
+    122.45228105849546,
+    123.19889185147665,
+    123.9455026444578,
+    124.69211343743898,
+    125.43872423042015,
+    126.18533502340132,
+    126.93194581638251,
+    127.67855660936368,
+    128.42516740234484,
+    129.17177819532603,
+    129.9183889883072,
+    130.66499978128837,
+    130.94450121657914
+   ],
+   "regionKm": [
+    [
+     "RU-SE",
+     60.0
+    ],
+    [
+     "GE-MM",
+     100.521
+    ],
+    [
+     "GE-TB",
+     15.588
+    ]
+   ],
+   "tollHits": [],
+   "driveTimeFactor": 1.1,
+   "days": [
+    {
+     "day": 1,
+     "kmStart": 0.0,
+     "kmEnd": 175.37436029309828,
+     "startAt": "2026-10-24T08:00",
+     "tz": "Europe/Moscow",
+     "budgetMin": 600,
+     "stops": [
+      {
+       "stopId": "d1s01",
+       "kind": "start",
+       "kmAt": 0.0,
+       "detourKm": 0.0,
+       "detourMin": 0,
+       "dwellMin": 0,
+       "fixed": true,
+       "auto": false,
+       "score": 0.0,
+       "placeId": null,
+       "regionCode": "RU-SE",
+       "reasonKey": "",
+       "reasonParams": [],
+       "meal": null,
+       "litres": 0.0,
+       "coffee": false,
+       "pool": ""
+      },
+      {
+       "stopId": "d1s02",
+       "kind": "border",
+       "kmAt": 2.394188004734085,
+       "detourKm": 0.0,
+       "detourMin": 0,
+       "dwellMin": 120,
+       "fixed": true,
+       "auto": false,
+       "score": 0.0,
+       "placeId": null,
+       "regionCode": "RU-SE",
+       "reasonKey": "border.checkpoint",
+       "reasonParams": [
+        [
+         "crossing",
+         "verkhny_lars"
+        ],
+        [
+         "buffer",
+         "два часа"
+        ]
+       ],
+       "meal": null,
+       "litres": 0.0,
+       "coffee": false,
+       "pool": ""
+      },
+      {
+       "stopId": "d1s03",
+       "kind": "rest",
+       "kmAt": 99.2806179331347,
+       "detourKm": 0.5210533929160992,
+       "detourMin": 0,
+       "dwellMin": 20,
+       "fixed": false,
+       "auto": true,
+       "score": 2.0,
+       "placeId": "syn_r_4229807_4476372",
+       "regionCode": "GE-MM",
+       "reasonKey": "rest.generic",
+       "reasonParams": [
+        [
+         "min",
+         20
+        ],
+        [
+         "min_word",
+         "минут"
+        ],
+        [
+         "drive",
+         "1 ч 15 мин"
+        ]
+       ],
+       "meal": null,
+       "litres": 0.0,
+       "coffee": false,
+       "pool": "rest"
+      },
+      {
+       "stopId": "d1s04",
+       "kind": "food",
+       "kmAt": 175.26496469071446,
+       "detourKm": 0.2134049056589952,
+       "detourMin": 0,
+       "dwellMin": 60,
+       "fixed": false,
+       "auto": true,
+       "score": 0.5,
+       "placeId": "osm_n9300002",
+       "regionCode": "GE-TB",
+       "reasonKey": "lunch.default",
+       "reasonParams": [
+        [
+         "town_prep",
+         "Тбилиси"
+        ]
+       ],
+       "meal": "lunch",
+       "litres": 0.0,
+       "coffee": false,
+       "pool": "food"
+      },
+      {
+       "stopId": "d1s05",
+       "kind": "finish",
+       "kmAt": 175.37436029309828,
+       "detourKm": 0.0,
+       "detourMin": 0,
+       "dwellMin": 0,
+       "fixed": true,
+       "auto": false,
+       "score": 0.0,
+       "placeId": null,
+       "regionCode": "GE-TB",
+       "reasonKey": "",
+       "reasonParams": [],
+       "meal": null,
+       "litres": 0.0,
+       "coffee": false,
+       "pool": ""
+      }
+     ]
+    }
+   ],
+   "candidates": [
+    {
+     "placeId": "Q9200003",
+     "kmAt": 158.06303244960188,
+     "lateralKm": 7.5202664607469,
+     "detourKm": 19.55269279794194,
+     "detourMin": 31,
+     "roadClass": "primary",
+     "regionCode": "GE-MM"
+    },
+    {
+     "placeId": "Q9200001",
+     "kmAt": 175.37436029309828,
+     "lateralKm": 3.0617819847416015,
+     "detourKm": 7.960633160328164,
+     "detourMin": 14,
+     "roadClass": "primary",
+     "regionCode": "GE-TB"
+    },
+    {
+     "placeId": "Q9200002",
+     "kmAt": 175.37436029309828,
+     "lateralKm": 2.4941958938107507,
+     "detourKm": 6.484909323907952,
+     "detourMin": 12,
+     "roadClass": "primary",
+     "regionCode": "GE-TB"
+    },
+    {
+     "placeId": "syn_c_Q5239_0",
+     "kmAt": 2.123345213231834,
+     "lateralKm": 0.2632321478044238,
+     "detourKm": 0.6844035842915018,
+     "detourMin": 0,
+     "roadClass": "primary",
+     "regionCode": "RU-SE"
+    },
+    {
+     "placeId": "syn_c_Q5239_1",
+     "kmAt": 2.393188004734085,
+     "lateralKm": 0.5000508473725543,
+     "detourKm": 1.3001322031686413,
+     "detourMin": 4,
+     "roadClass": "primary",
+     "regionCode": "RU-SE"
+    },
+    {
+     "placeId": "osm_n9300002",
+     "kmAt": 175.26496469071446,
+     "lateralKm": 0.0820788098688443,
+     "detourKm": 0.2134049056589952,
+     "detourMin": 0,
+     "roadClass": "primary",
+     "regionCode": "GE-TB"
+    },
+    {
+     "placeId": "syn_f_4238769_4475360",
+     "kmAt": 87.57967489638922,
+     "lateralKm": 0.20035344403807487,
+     "detourKm": 0.5209189544989947,
+     "detourMin": 0,
+     "roadClass": "primary",
+     "regionCode": "GE-MM"
+    },
+    {
+     "placeId": "syn_f_4193959_4480419",
+     "kmAt": 146.0843091123972,
+     "lateralKm": 0.19979252114393048,
+     "detourKm": 0.5194605549742193,
+     "detourMin": 0,
+     "roadClass": "primary",
+     "regionCode": "GE-MM"
+    },
+    {
+     "placeId": "syn_r_4229807_4476372",
+     "kmAt": 99.2806179331347,
+     "lateralKm": 0.2004051511215766,
+     "detourKm": 0.5210533929160992,
+     "detourMin": 0,
+     "roadClass": "primary",
+     "regionCode": "GE-MM"
+    },
+    {
+     "placeId": "syn_r_4176034_4482443",
+     "kmAt": 169.487491660304,
+     "lateralKm": 0.19980340684576914,
+     "detourKm": 0.5194888577989998,
+     "detourMin": 0,
+     "roadClass": "primary",
+     "regionCode": "GE-TB"
+    }
+   ],
+   "rerun": 0,
+   "townKms": [
+    [
+     "Q105035",
+     2.393188004734085
+    ],
+    [
+     "Q163935",
+     2.393188004734085
+    ],
+    [
+     "Q5222",
+     2.393188004734085
+    ],
+    [
+     "Q5239",
+     2.393188004734085
+    ],
+    [
+     "Q9100006",
+     126.39598878355004
+    ],
+    [
+     "Q9100002",
+     157.56875281766548
+    ],
+    [
+     "Q9100001",
+     175.37436029309828
+    ]
+   ]
+  }
+ },
+ "shareText": "Владикавказ → Тбилиси · 176 км · 1 день\nДень 1 · 176 км\n08:00 Владикавказ\n08:02 Граница: Верхний Ларс — Дарьяли\n11:22 Площадка отдыха, 99 км\n12:44 Test Cafe\n13:44 Тбилиси\nИтого ≈ 300 ₽ на 2 чел.",
+ "pricesMonthRu": "октябрь",
+ "pricesYear": "2026",
+ "townPrepRu": {
+  "Q5239": "Владикавказе",
+  "Q9100001": "Тбилиси"
+ },
+ "townGenRu": {
+  "Q5239": "Владикавказа",
+  "Q9100001": "Тбилиси"
+ }
+}

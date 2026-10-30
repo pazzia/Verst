@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copy the app needs that is not in design/copy-ru.md yet (requested from the Designer in docs/dev-notes.md).
+  Move each key into the deck and delete it here once it lands.
+-->
+<resources>
+</resources>

@@ -1,0 +1,336 @@
+{
+ "screen": "5.7-exit",
+ "notes": "E-02 edges are scanned at y 298.5 and 271.7, above the headlight polygon (it starts at y 300), so anti-aliased headlight edges do not break the asphalt run. Turn-signal blink (E-05) is motion: only the back link is sampled.",
+ "points": [
+  {
+   "item": "E-01",
+   "state": "default",
+   "x": 200,
+   "y": 20,
+   "hex": "#121130",
+   "size": "390x844"
+  },
+  {
+   "item": "E-01",
+   "state": "default",
+   "x": 40,
+   "y": 180,
+   "hex": "#2B2850",
+   "size": "390x844"
+  },
+  {
+   "item": "E-01",
+   "state": "default",
+   "x": 40,
+   "y": 225,
+   "hex": "#4E3768",
+   "size": "390x844"
+  },
+  {
+   "item": "E-01",
+   "state": "default",
+   "x": 75,
+   "y": 66,
+   "hex": "#F2E3B3",
+   "size": "390x844"
+  },
+  {
+   "item": "E-01",
+   "state": "default",
+   "x": 40,
+   "y": 300,
+   "hex": "#1A231F",
+   "size": "390x844"
+  },
+  {
+   "item": "E-02",
+   "state": "default",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 298.53,
+   "seed": 169.47,
+   "match": [
+    "#2E2E33"
+   ],
+   "match_tol": 4,
+   "expect": [
+    145.74,
+    null
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "E-02",
+   "state": "default",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 298.53,
+   "seed": 220.53,
+   "match": [
+    "#2E2E33"
+   ],
+   "match_tol": 4,
+   "expect": [
+    null,
+    244.26
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "E-02",
+   "state": "default",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 271.7,
+   "seed": 175.79,
+   "match": [
+    "#2E2E33"
+   ],
+   "match_tol": 4,
+   "expect": [
+    157.93,
+    null
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "E-02",
+   "state": "default",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 271.7,
+   "seed": 214.21,
+   "match": [
+    "#2E2E33"
+   ],
+   "match_tol": 4,
+   "expect": [
+    null,
+    232.07
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "E-03",
+   "state": "default",
+   "x": 180,
+   "y": 330,
+   "hex": "#43413F",
+   "tol": 1,
+   "size": "390x844"
+  },
+  {
+   "item": "E-04",
+   "state": "default",
+   "x": 164,
+   "y": 150,
+   "hex": "#1E4FA3",
+   "size": "390x844"
+  },
+  {
+   "item": "E-04",
+   "state": "default",
+   "x": 167,
+   "y": 150,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "E-04",
+   "state": "default",
+   "x": 180,
+   "y": 156,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "E-04",
+   "state": "default",
+   "x": 317,
+   "y": 250,
+   "hex": "#55565C",
+   "size": "390x844"
+  },
+  {
+   "item": "E-05",
+   "state": "default",
+   "x": 195,
+   "y": 409,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "E-05",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    34,
+    424,
+    94,
+    32
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "E-06",
+   "state": "default",
+   "x": 17,
+   "y": 600,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "E-06",
+   "state": "default",
+   "x": 26,
+   "y": 590,
+   "hex": "#0B1218",
+   "size": "390x844"
+  },
+  {
+   "item": "E-06",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    32,
+    504,
+    200,
+    24
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "E-07",
+   "state": "default",
+   "x": 40,
+   "y": 603,
+   "hex": "#16222C",
+   "size": "390x844"
+  },
+  {
+   "item": "E-07",
+   "state": "default",
+   "x": 40,
+   "y": 672,
+   "hex": "#0B1218",
+   "size": "390x844"
+  },
+  {
+   "item": "E-07",
+   "state": "default",
+   "x": 46,
+   "y": 698,
+   "hex": "#5A7893",
+   "size": "390x844"
+  },
+  {
+   "item": "E-07",
+   "state": "default",
+   "x": 54,
+   "y": 629.7,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "E-07",
+   "state": "default",
+   "x": 54,
+   "y": 624.7,
+   "hex": "#0B1218",
+   "size": "390x844"
+  },
+  {
+   "item": "E-08",
+   "state": "default",
+   "x": 22,
+   "y": 790,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "E-08",
+   "state": "offline",
+   "x": 22,
+   "y": 790,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "E-08",
+   "state": "offline",
+   "kind": "text",
+   "region": [
+    32,
+    772,
+    200,
+    36
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "E-07",
+   "state": "three-options",
+   "kind": "text",
+   "region": [
+    32,
+    598,
+    326,
+    210
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "E-08",
+   "state": "no-lodging",
+   "kind": "text",
+   "region": [
+    32,
+    598,
+    326,
+    140
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "E-09",
+   "state": "mock-partner-sheet",
+   "kind": "text",
+   "region": [
+    0,
+    300,
+    390,
+    544
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "E-09",
+   "state": "booked-dialog",
+   "kind": "text",
+   "region": [
+    24,
+    300,
+    342,
+    300
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "E-09",
+   "state": "booked",
+   "kind": "present",
+   "region": [
+    32,
+    598,
+    326,
+    62
+   ],
+   "hex": "#FFD23F",
+   "min_px": 20,
+   "size": "390x844"
+  }
+ ],
+ "justified": {
+  "E-10": "semantics/touch: XScreenSemanticsTest (build/tests/failures.txt), not visual"
+ }
+}

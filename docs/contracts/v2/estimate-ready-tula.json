@@ -1,0 +1,36 @@
+{
+ "request": {
+  "function": "estimate",
+  "args": {
+   "world": "central_russia_v1",
+   "request_id": "c-rr-tula",
+   "input_json": {
+    "origin": {
+     "lat": 55.7558,
+     "lon": 37.6173,
+     "label": "Москва"
+    },
+    "readyRouteId": "rr_tula_yasnaya",
+    "crew": {
+     "adults": 2,
+     "children": 1,
+     "dog": true
+    },
+    "dailyKm": 300,
+    "budget": 40000,
+    "startAt": "2026-11-07T08:00"
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "km": 423,
+   "days": 2,
+   "outcome": "plan",
+   "totalRub": 15300,
+   "budgetStatus": "fits"
+  },
+  "ms": 0
+ }
+}

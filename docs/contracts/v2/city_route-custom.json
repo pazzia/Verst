@@ -1,0 +1,234 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-4",
+   "input_json": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "preset": "custom",
+    "interests": [
+     "parks",
+     "views",
+     "food"
+    ],
+    "durationMin": 240,
+    "pace": "slow"
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-4",
+   "titleRu": "Ярославль: прогулка по интересам",
+   "townId": "t_yaroslavl",
+   "townName": "Ярославль",
+   "townPrep": "Ярославле",
+   "preset": "custom",
+   "startAt": "2026-10-23T09:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T12:16",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 4.5,
+   "walkMin": 77,
+   "durationMin": 196,
+   "requestedDurationMin": 240,
+   "crewNotesRu": [],
+   "interestsWidened": false,
+   "shorter": {
+    "reason": "places",
+    "requestedMin": 240,
+    "actualMin": 196,
+    "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — больше открытых мест рядом нет"
+   },
+   "returnToStart": true,
+   "start": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "finish": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "n12059168165",
+     "kind": "cafe",
+     "nameRu": "Surf Coffee",
+     "lat": 57.62596,
+     "lon": 39.88981,
+     "arriveAt": "2026-10-23T09:07",
+     "departAt": "2026-10-23T09:57",
+     "dwellMin": 50,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 7,
+     "costRub": 0,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "08:00–23:00",
+      "openNow": true,
+      "source": "osm"
+     },
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [
+      "price"
+     ],
+     "poiKind": "cafe",
+     "poiKindRu": "Кафе",
+     "cuisine": "coffee_shop",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w02",
+     "poiId": "pl_yar_strelka",
+     "kind": "viewpoint",
+     "nameRu": "Стрелка и Волжская набережная",
+     "lat": 57.633335,
+     "lon": 39.909665,
+     "arriveAt": "2026-10-23T10:29",
+     "departAt": "2026-10-23T10:48",
+     "dwellMin": 19,
+     "walkKmFromPrev": 1.9,
+     "walkMinFromPrev": 32,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "curated",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w03",
+     "poiId": "n5618684621",
+     "kind": "cafe",
+     "nameRu": "Сладости & радости",
+     "lat": 57.62835,
+     "lon": 39.89314,
+     "arriveAt": "2026-10-23T11:13",
+     "departAt": "2026-10-23T12:03",
+     "dwellMin": 50,
+     "walkKmFromPrev": 1.5,
+     "walkMinFromPrev": 25,
+     "costRub": 0,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "08:00–22:00",
+      "openNow": true,
+      "source": "osm"
+     },
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [
+      "price"
+     ],
+     "poiKind": "cafe",
+     "poiKindRu": "Кафе",
+     "cuisine": "cake;coffee_shop",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    }
+   ],
+   "cost": {
+    "totalRub": 0,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    },
+    {
+     "code": "PRICE_UNKNOWN",
+     "messageRu": "Цены в кафе и ресторанах в открытых данных не указаны — в сумму они не входят."
+    },
+    {
+     "code": "SHORTER_THAN_ASKED",
+     "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — больше открытых мест рядом нет"
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     57.6261,
+     39.8845
+    ],
+    [
+     57.62596,
+     39.88981
+    ],
+    [
+     57.633335,
+     39.909665
+    ],
+    [
+     57.62835,
+     39.89314
+    ],
+    [
+     57.6261,
+     39.8845
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "townId": null,
+    "preset": "custom",
+    "durationMin": 240,
+    "interests": [
+     "parks",
+     "views",
+     "food"
+    ],
+    "pace": "slow",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T09:00",
+    "crew": {
+     "adults": 1,
+     "children": 0,
+     "dog": false
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   },
+   "requestKey": "66ad7000494d1d23"
+  },
+  "ms": 0
+ }
+}

@@ -1,0 +1,11 @@
+# ADR-0014: the only places where the hand-off brand names (Яндекс Навигатор, Яндекс Карты) may appear.
+# json:<parent>.<key>  — string values of <key> inside an object stored under <parent> (engine `handoff` links)
+# android:<glob>       — Android string keys (BrandDenyListTest, Kotlin side)
+json:links.navigator
+json:links.maps
+json:links.web
+android:handoff_*
+json:links.navigatorNext
+json:toSign.navigator
+json:toSign.navigatorNext
+json:toSign.maps

@@ -1,0 +1,69 @@
+{
+ "request": {
+  "function": "poi_details",
+  "args": {
+   "world": "russia_v1",
+   "place_id": "pl_yar_ilya"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "id": "pl_yar_ilya",
+   "kind": "sight",
+   "poiKind": "temple",
+   "poiKindRu": "Храм",
+   "nameRu": "Церковь Ильи Пророка",
+   "descriptionRu": null,
+   "extractRu": "Це́рковь Илии́ Проро́ка — православный храм в историческом центре Ярославля на Советской площади, выдающийся памятник архитектуры Ярославской школы зодчества и живописи XVII века.",
+   "extractSource": {
+    "key": "wikipedia",
+    "nameRu": "Из статьи Википедии, текст сокращён",
+    "licence": "CC BY-SA 4.0",
+    "url": "https://www.wikidata.org/wiki/Special:GoToLinkedPage/ruwiki/Q4177920",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "abridged": true
+   },
+   "cardLevel": 3,
+   "quality": 53,
+   "fee": null,
+   "website": null,
+   "townName": "Ярославль",
+   "lat": 57.62971748693183,
+   "lon": 39.89288849931893,
+   "image": {
+    "card": "https://commons.wikimedia.org/wiki/Special:FilePath/%D0%97%D0%B0%D0%B6%D0%B8%D0%B3%D0%B0%D1%8F_%D1%81%D0%B2%D0%B5%D1%82.jpg?width=800",
+    "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/%D0%97%D0%B0%D0%B6%D0%B8%D0%B3%D0%B0%D1%8F_%D1%81%D0%B2%D0%B5%D1%82.jpg?width=400",
+    "page": "https://commons.wikimedia.org/wiki/File:%D0%97%D0%B0%D0%B6%D0%B8%D0%B3%D0%B0%D1%8F_%D1%81%D0%B2%D0%B5%D1%82.jpg",
+    "credit": {
+     "author": "ВладимирФото",
+     "licence": "CC BY-SA 4.0",
+     "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+    },
+    "isArea": false,
+    "labelRu": "Фото: Wikimedia Commons · ВладимирФото · CC BY-SA 4.0",
+    "source": "p18"
+   },
+   "whyRu": null,
+   "hours": {
+    "textRu": "Tu-Su 10:00-18:00",
+    "verified": true,
+    "known": true
+   },
+   "ticket": {
+    "adultRub": 200,
+    "childRub": 100,
+    "estimate": false,
+    "known": true
+   },
+   "isFictional": false,
+   "attributionRu": [
+    "Из статьи Википедии, текст сокращён · CC BY-SA 4.0"
+   ],
+   "wikidataId": "Q4177920",
+   "placeSource": "curated",
+   "placeAttributionRu": null
+  },
+  "ms": 0
+ }
+}

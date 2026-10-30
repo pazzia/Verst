@@ -1,0 +1,8 @@
+{
+ "version": "wd-20261029-osm2",
+ "count": 3488,
+ "townsSha256": "9ff68f042d50dc7c803c8725493f94efc82e7e5d5452889a850c9c91b460f22f",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 87598,
+ "sha256": "101d3efdec3719ea9d98a611c8c89463c232f2aa7c39d820d9305f538c1c42e6"
+}

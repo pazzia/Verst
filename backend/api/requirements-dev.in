@@ -1,0 +1,8 @@
+# Test and lint tools (ADR-0020). Lock: requirements-dev.lock (hashes), constrained by the runtime lock.
+-c requirements.lock
+pytest
+# starlette.testclient (Starlette ≥ 1.x) uses httpx2; plain httpx is deprecated there.
+httpx2
+coverage
+ruff
+mypy

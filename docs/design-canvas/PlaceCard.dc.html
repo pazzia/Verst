@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Карточка места</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,a{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+@keyframes sh{from{transform:translateX(-90px)}to{transform:translateX(360px)}}
+.shimmer{animation:sh 1.2s linear infinite}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.photo{animation:fade .25s ease both}
+@keyframes flash{from{background:#1C1C20}to{background:transparent}}
+.flash{animation:flash 1.2s ease-out both}
+</style>
+</helmet>
+<!-- 5.9 Card (design/screens/5.9-place-card.md, ADR-0012 §6). Tap the sight or the hotel row behind the sheet
+     (the fuel row is not tappable); tap the photo to cycle: landscape → portrait → tiny (contained) → no photo
+     → offline → loading. «Фото» in this canvas are drawn stand-ins: the app loads real Wikimedia Commons files. -->
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 150px">
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 50px; background: #2B2850"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 50px; height: 34px; background: #8E4A6B"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 84px; height: 26px; background: #D9655A"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 110px; height: 22px; background: #F29A5E"></div>
+    <div style="position: absolute; left: 20px; right: 20px; top: 56px; height: 49px; background: #1E4FA3; border-radius: 7px; padding: 3px; box-sizing: border-box">
+      <div style="height: 100%; border: 2px solid #F4F4F0; border-radius: 5px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-weight: 700; font-size: 20px"><span>↗ Золотое кольцо</span><span>761</span></div>
+    </div>
+    <div style="position: absolute; left: 0; right: 0; top: 110px; height: 40px; background: #161618; border-radius: 50% 50% 0 0 / 30px 30px 0 0"></div>
+  </div>
+  <div aria-hidden="true" style="position: absolute; left: 14px; top: 150px; bottom: 0; width: 46px; background: #3A3A3F; border-left: 3px solid #F4F4F0; border-right: 3px solid #F4F4F0; box-sizing: border-box">
+    <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: repeating-linear-gradient(to bottom,#F4F4F0 0 32px,transparent 32px 64px)"></div>
+  </div>
+  <sc-for list="{{rows}}" as="r" hint-placeholder-count="3">
+    <button type="button" onClick="{{r.open}}" aria-label="{{r.cd}}" class="{{r.cls}}" style="{{r.style}}">
+      <span aria-hidden="true" style="{{r.sign}}"><span style="{{r.plate}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{r.path}}"></path></svg></span></span>
+      <span style="display: flex; flex-direction: column; gap: 3px; text-align: left; min-width: 0">
+        <span style="font-size: 12px; color: #8C8C93">{{r.line}}</span>
+        <span style="font-weight: 700; font-size: 17px">{{r.name}}</span>
+        <span style="font-size: 13px; color: #C4C4CA">{{r.note}}</span>
+      </span>
+    </button>
+  </sc-for>
+
+  <div aria-hidden="true" style="{{scrimStyle}}" onClick="{{close}}"></div>
+  <div role="dialog" aria-label="{{pane}}" style="{{sheetStyle}}">
+    <div aria-hidden="true" style="width: 36px; height: 4px; border-radius: 2px; background: #3A3A42; margin: 0 auto 16px"></div>
+    <div style="display: flex; align-items: flex-start; gap: 12px">
+      <span aria-hidden="true" style="{{miniSign}}"><span style="{{miniPlate}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{miniStroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{miniPath}}"></path></svg></span></span>
+      <span style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+        <h2 style="margin: 0; font-size: 20px; line-height: 23px; font-weight: 700">{{title}}</h2>
+        <span style="font-size: 12px; color: #8C8C93">{{kind}}</span>
+      </span>
+      <button type="button" onClick="{{close}}" aria-label="Закрыть" style="width: 44px; height: 44px; margin: -8px -10px 0 0; border: none; background: transparent; color: #B9B9C0; font-size: 22px; cursor: pointer">×</button>
+    </div>
+
+    <button type="button" onClick="{{nextPhoto}}" aria-label="{{photoCd}}" style="position: relative; display: block; width: 350px; height: 233px; margin-top: 12px; padding: 0; border: none; border-radius: 12px; overflow: hidden; background: {{mat}}; cursor: pointer">
+      <span class="photo" style="{{imgCrop}}">
+        <span style="{{sky}}"></span><span style="{{ground}}"></span><span style="{{wall}}"></span>
+        <span style="{{dome1}}"></span><span style="{{dome2}}"></span><span style="{{dome3}}"></span><span style="{{tower}}"></span>
+      </span>
+      <span class="photo" style="{{imgTiny}}">
+        <span style="position: absolute; left: 0; right: 0; top: 0; height: 55px; background: linear-gradient(#9BB9D8,#E7D2B0)"></span>
+        <span style="position: absolute; left: 0; right: 0; top: 55px; bottom: 0; background: #5C7A4A"></span>
+        <span style="position: absolute; left: 44px; top: 30px; width: 34px; height: 32px; background: #F1ECE2"></span>
+        <span style="position: absolute; left: 50px; top: 16px; width: 22px; height: 18px; border-radius: 50% 50% 0 0; background: #3D6FB0"></span>
+      </span>
+      <span style="{{area}}">ФОТО РАЙОНА</span>
+      <span style="{{scrim}}"></span>
+      <span style="{{credit}}">{{creditText}}</span>
+      <span style="{{ph}}">
+        <svg aria-hidden="true" width="96" height="64" viewBox="0 0 96 64" fill="none" stroke="#8C8C93" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="{{phPath}}"></path>
+          <path d="{{phFill}}" fill="#B9B9C0" stroke="none"></path>
+        </svg>
+        <span style="{{phTextStyle}}">{{phText}}</span>
+      </span>
+      <span style="{{loading}}"><span class="shimmer" style="position: absolute; top: 0; bottom: 0; width: 90px; background: linear-gradient(90deg,transparent,#2E2E33,transparent)"></span></span>
+      <span aria-hidden="true" style="position: absolute; inset: 0; border: 1px solid #3A3A42; border-radius: 12px; pointer-events: none"></span>
+    </button>
+    <span style="{{creditBelow}}">{{creditText}}</span>
+    <span style="{{hotelNote}}">Гостиница в демо-сборке вымышленная — на фото район, а не она</span>
+
+    <div style="margin-top: 12px; font-size: 13px; line-height: 1.4; color: #C4C4CA">{{desc}}</div>
+    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: #B9B9C0">
+      <sc-for list="{{facts}}" as="f" hint-placeholder-count="2"><span>{{f}}</span></sc-for>
+    </div>
+    <a href="{{actionHref}}" style="margin-top: 16px; height: 56px; border-radius: 12px; background: #232327; border: 1px solid #3A3A42; box-sizing: border-box; color: #F4F4F0; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; text-decoration: none">{{action}}</a>
+    <button type="button" style="display: block; margin: 4px auto 0; min-height: 44px; border: none; background: transparent; color: #8C8C93; font-weight: 600; font-size: 12px">Сообщить об ошибке</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { open: 'sight', photo: 0, flash: null }; }
+  renderVals() {
+    const st = this.state, hotel = st.open === 'hotel', n = ' ', t = ' ';
+    const photo = ['landscape', 'portrait', 'tiny', 'none', 'offline', 'loading'][st.photo];
+    const shown = photo === 'landscape' || photo === 'portrait';
+    const abs = 'position:absolute;display:block;', hide = 'display:none';
+    const church = 'M12 2v3M10.5 3.5h3M8 21V12l4-4 4 4v9M5 21h14M10 21v-4a2 2 0 0 1 4 0v4';
+    const fuel = 'M5 21V5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v16M3 21h13M14 9h2.5l2 2v6a1.5 1.5 0 0 1-3 0v-3H14M7 8h5';
+    const bed = 'M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5';
+    const sign = (bg, w, h, brown) => 'width:' + w + 'px;height:' + h + 'px;flex-shrink:0;margin-left:' + ((68 - w) / 2) + 'px;border-radius:5px;background:' + bg + ';box-shadow:' + (brown ? 'inset 0 0 0 3px ' + bg + ',inset 0 0 0 5px #F4F4F0' : 'none') + ';display:flex;align-items:center;justify-content:center';
+    const plate = (svc) => svc ? 'width:40px;height:40px;margin-bottom:12px;background:#F4F4F0;border-radius:2px;display:flex;align-items:center;justify-content:center' : 'display:flex';
+    const base = 'position:absolute;left:72px;right:16px;display:flex;gap:12px;align-items:flex-start;padding:8px 0 12px;border:none;background:transparent;color:#F4F4F0;text-align:left;';
+    const rows = [
+      { key: 'sight', top: 178, line: 'через 73' + n + 'км · 09:05', name: 'Троице-Сергиева лавра', note: 'Полтора часа на осмотр.', s: sign('#6B3E26', 56, 56, true), path: church, svc: false, tap: true },
+      { key: 'fuel', top: 268, line: 'через 64' + n + 'км · 10:40', name: 'АЗС у трассы, 140' + n + 'км', note: 'Заправка, кофе.', s: sign('#1E4FA3', 50, 62), path: fuel, svc: true, tap: false },
+      { key: 'hotel', top: 366, line: 'через 59' + n + 'км · 14:50', name: 'Ночёвка · Ярославль', note: 'У Стрелки, в центре.', s: sign('#1E4FA3', 50, 62), path: bed, svc: true, tap: true }
+    ].map(r => ({
+      line: r.line, name: r.name, note: r.note, sign: r.s, path: r.path, plate: plate(r.svc), stroke: r.svc ? '#141416' : '#F4F4F0',
+      cls: st.flash === r.key ? 'flash' : '',
+      cd: r.tap ? r.name + '. Открыть карточку' : r.name,
+      style: base + 'top:' + r.top + 'px;cursor:' + (r.tap ? 'pointer' : 'default'),
+      open: () => { if (r.tap) this.setState({ open: r.key, photo: 0 }); }
+    }));
+    const open = !!st.open, por = photo === 'portrait';
+    const credit = hotel ? 'Фото района: Ярославль · Wikimedia Commons' : 'Фото: Wikimedia Commons · автор снимка · CC BY-SA 4.0';
+    const phSight = 'M30 56h36M38 56V30h20v26M42 30l6-8 6 8M48 22v-8M45 16h6';
+    const phCity = 'M14 56h68M18 56V28h18v28M40 56V18h18v28M62 56V32h16v24M23 34h3M29 34h3M45 24h3M51 24h3M45 32h3M51 32h3M67 38h3';
+    const phPath = hotel ? phCity : phSight;
+    const phFill = hotel ? '' : 'M42 30a6 7 0 0 1 12 0z';
+    return {
+      rows,
+      close: () => this.setState({ flash: st.open, open: null }),
+      scrimStyle: open ? 'position:absolute;inset:0;background:rgba(0,0,0,.6)' : hide,
+      sheetStyle: open ? 'position:absolute;left:0;right:0;bottom:0;background:#161618;border-radius:16px 16px 0 0;box-shadow:0 -2px 0 #232327;padding:8px 20px 24px' : hide,
+      pane: 'Карточка: ' + (hotel ? 'У Стрелки, в центре' : 'Троице-Сергиева лавра'),
+      title: hotel ? 'У Стрелки, в центре' : 'Троице-Сергиева лавра',
+      kind: hotel ? 'гостиница · Ярославль' : 'монастырь · Сергиев Посад',
+      miniSign: hotel ? 'width:35px;height:43px;border-radius:3px;background:#1E4FA3;display:flex;align-items:center;justify-content:center;flex-shrink:0'
+                      : 'width:39px;height:39px;border-radius:4px;background:#6B3E26;box-shadow:inset 0 0 0 2px #6B3E26,inset 0 0 0 3.5px #F4F4F0;display:flex;align-items:center;justify-content:center;flex-shrink:0',
+      miniPlate: hotel ? 'width:28px;height:28px;margin-bottom:9px;background:#F4F4F0;border-radius:2px;display:flex;align-items:center;justify-content:center' : 'display:flex',
+      miniPath: hotel ? bed : church, miniStroke: hotel ? '#141416' : '#F4F4F0',
+      nextPhoto: () => this.setState({ photo: (st.photo + 1) % 6 }),
+      photoCd: photo === 'loading' ? 'Загружаем фото' : hotel ? 'Фото района: Ярославль. Это не фото гостиницы' : 'Фото: Троице-Сергиева лавра',
+      mat: hotel ? '#25242C' : '#2A2630',
+      imgCrop: shown ? abs + (por ? 'inset:-130px 0 0 0' : 'inset:0') : hide,
+      sky: abs + 'left:0;right:0;top:0;height:' + (por ? 300 : 183) + 'px;background:' + (hotel ? 'linear-gradient(#7FA6D9,#E8C79A)' : 'linear-gradient(#6E9BD1,#F2D3A6)'),
+      ground: abs + 'left:0;right:0;bottom:0;height:50px;background:' + (hotel ? '#4C6E8A' : '#6A7F52'),
+      wall: hotel ? abs + 'left:0;right:0;bottom:50px;height:44px;background:linear-gradient(90deg,#D9C9AE 0 30%,#B8A486 30% 34%,#E6D7BD 34% 70%,#C9B596 70%)'
+                  : abs + 'left:30px;right:30px;bottom:50px;height:56px;background:#F1ECE2',
+      dome1: hotel ? hide : abs + 'left:84px;bottom:106px;width:36px;height:34px;border-radius:50% 50% 8px 8px;background:#3D6FB0',
+      dome2: hotel ? hide : abs + 'left:160px;bottom:106px;width:44px;height:44px;border-radius:50% 50% 8px 8px;background:#E2B33C',
+      dome3: hotel ? hide : abs + 'left:240px;bottom:106px;width:36px;height:34px;border-radius:50% 50% 8px 8px;background:#3D6FB0',
+      tower: hotel ? hide : abs + 'left:290px;bottom:50px;width:22px;height:' + (por ? 210 : 150) + 'px;background:#EDE6D8',
+      imgTiny: photo === 'tiny' ? abs + 'left:115px;top:71px;width:120px;height:90px;border-radius:2px;overflow:hidden' : hide,
+      area: hotel && (shown || photo === 'tiny') ? abs + 'left:10px;top:10px;height:22px;line-height:22px;padding:0 8px;border-radius:4px;background:rgba(0,0,0,.62);font-size:11px;font-weight:600;letter-spacing:.08em;color:#F4F4F0' : hide,
+      scrim: shown ? abs + 'left:0;right:0;bottom:0;height:56px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.62))' : hide,
+      credit: shown ? abs + 'left:12px;right:12px;bottom:8px;font-size:11px;font-weight:500;color:#F4F4F0;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis' : hide,
+      creditText: credit,
+      creditBelow: photo === 'tiny' ? 'display:block;margin-top:4px;font-size:11px;font-weight:500;color:#8C8C93' : hide,
+      ph: (photo === 'none' || photo === 'offline' || photo === 'loading') ? abs + 'inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px' : hide,
+      phPath, phFill,
+      phText: photo === 'offline' ? 'Фото загрузится, когда будет интернет' : 'Фото пока нет',
+      phTextStyle: photo === 'loading' ? 'visibility:hidden;font-size:12px' : 'font-size:12px;color:#8C8C93',
+      loading: photo === 'loading' ? abs + 'inset:0;overflow:hidden' : hide,
+      hotelNote: hotel ? 'display:block;margin-top:6px;font-size:12px;line-height:15.6px;color:#B9B9C0' : hide,
+      desc: hotel ? 'Тихая гостиница у слияния Волги и Которосли, рядом набережная и Стрелка.' : 'Главный монастырь Подмосковья: стены XVI века, Успенский собор, колокольня. Собака ждёт с одним из взрослых.',
+      facts: hotel ? ['можно с собакой · семейный номер · парковка', '≈' + n + '6' + t + '000' + n + '₽ за ночь']
+                   : ['вход свободный', 'часы уточняйте', 'объект культурного наследия'],
+      action: hotel ? 'Выбрать отель' : 'Заменить',
+      actionHref: hotel ? 'Exit.dc.html' : '#'
+    };
+  }
+}
+</script>
+</body>
+</html>

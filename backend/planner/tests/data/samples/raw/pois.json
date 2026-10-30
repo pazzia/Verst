@@ -1,0 +1,297 @@
+[
+ {
+  "qid": "Q900101",
+  "name": "Эрмитаж",
+  "desc": "художественный музей",
+  "lat": 59.9398,
+  "lon": 30.3146,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 180,
+  "heritage": true,
+  "image": "Hermitage sample.jpg",
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900102",
+  "name": "Русский музей",
+  "desc": "музей русского искусства",
+  "lat": 59.9386,
+  "lon": 30.3326,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 90,
+  "heritage": true,
+  "image": "Russian museum sample.jpg",
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900103",
+  "name": "Исаакиевский собор",
+  "desc": "собор и музей",
+  "lat": 59.9341,
+  "lon": 30.3062,
+  "roots": [
+   "Q2977",
+   "Q33506"
+  ],
+  "sitelinks": 120,
+  "heritage": true,
+  "image": "Isaac sample.jpg",
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900104",
+  "name": "Петропавловская крепость",
+  "desc": "крепость на Заячьем острове",
+  "lat": 59.95,
+  "lon": 30.3167,
+  "roots": [
+   "Q57821"
+  ],
+  "sitelinks": 110,
+  "heritage": true,
+  "image": "Peter and Paul sample.jpg",
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900105",
+  "name": "Кунсткамера",
+  "desc": "музей антропологии и этнографии",
+  "lat": 59.9415,
+  "lon": 30.3046,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 70,
+  "heritage": true,
+  "image": null,
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900106",
+  "name": "Летний сад",
+  "desc": "сад XVIII века",
+  "lat": 59.9447,
+  "lon": 30.3363,
+  "roots": [
+   "Q1107656"
+  ],
+  "sitelinks": 60,
+  "heritage": true,
+  "image": "Summer garden sample.jpg",
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900107",
+  "name": "Дворцовая площадь",
+  "desc": "главная площадь города",
+  "lat": 59.939,
+  "lon": 30.3158,
+  "roots": [
+   "Q174782"
+  ],
+  "sitelinks": 80,
+  "heritage": true,
+  "image": "Palace square sample.jpg",
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900108",
+  "name": "Медный всадник",
+  "desc": "памятник Петру I",
+  "lat": 59.9364,
+  "lon": 30.3022,
+  "roots": [
+   "Q4989906"
+  ],
+  "sitelinks": 75,
+  "heritage": true,
+  "image": "Bronze horseman sample.jpg",
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900109",
+  "name": "Музей Фаберже",
+  "desc": "музей ювелирного искусства",
+  "lat": 59.9349,
+  "lon": 30.3433,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 40,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900110",
+  "name": "Казанский собор",
+  "desc": "собор на Невском проспекте",
+  "lat": 59.9343,
+  "lon": 30.3248,
+  "roots": [
+   "Q2977"
+  ],
+  "sitelinks": 65,
+  "heritage": true,
+  "image": null,
+  "townQid": "Q656"
+ },
+ {
+  "qid": "Q900201",
+  "name": "Церковь Ильи Пророка",
+  "desc": "храм XVII века",
+  "lat": 57.6299,
+  "lon": 39.8939,
+  "roots": [
+   "Q16970"
+  ],
+  "sitelinks": 30,
+  "heritage": true,
+  "image": "Ilya church sample.jpg",
+  "townQid": "Q900002"
+ },
+ {
+  "qid": "Q900202",
+  "name": "Спасо-Преображенский монастырь",
+  "desc": "монастырь в центре Ярославля",
+  "lat": 57.6221,
+  "lon": 39.8898,
+  "roots": [
+   "Q44613"
+  ],
+  "sitelinks": 35,
+  "heritage": true,
+  "image": null,
+  "townQid": "Q900002"
+ },
+ {
+  "qid": "Q900203",
+  "name": "Ярославский художественный музей",
+  "desc": "музей",
+  "lat": 57.6295,
+  "lon": 39.8975,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 15,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900002"
+ },
+ {
+  "qid": "Q900204",
+  "name": "Волжская набережная",
+  "desc": "набережная Волги",
+  "lat": 57.63,
+  "lon": 39.9,
+  "roots": [
+   "Q1851368"
+  ],
+  "sitelinks": 10,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900002"
+ },
+ {
+  "qid": "Q900205",
+  "name": "Музей «Музыка и время»",
+  "desc": "частный музей",
+  "lat": 57.6255,
+  "lon": 39.899,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 8,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900002"
+ },
+ {
+  "qid": "Q900206",
+  "name": "Стрелка",
+  "desc": "место слияния Волги и Которосли",
+  "lat": 57.6205,
+  "lon": 39.9011,
+  "roots": [
+   "Q6017969"
+  ],
+  "sitelinks": 12,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900002"
+ },
+ {
+  "qid": "Q900301",
+  "name": "Пермская художественная галерея",
+  "desc": "музей",
+  "lat": 58.0193,
+  "lon": 56.2337,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 25,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900006"
+ },
+ {
+  "qid": "Q900302",
+  "name": "Набережная Камы",
+  "desc": "набережная",
+  "lat": 58.017,
+  "lon": 56.24,
+  "roots": [
+   "Q1851368"
+  ],
+  "sitelinks": 5,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900006"
+ },
+ {
+  "qid": "Q900401",
+  "name": "Путевой дворец",
+  "desc": "дворец XVIII века",
+  "lat": 56.8616,
+  "lon": 35.8957,
+  "roots": [
+   "Q2319498"
+  ],
+  "sitelinks": 20,
+  "heritage": true,
+  "image": null,
+  "townQid": "Q900009"
+ },
+ {
+  "qid": "Q900901",
+  "name": "Музей Лукойл",
+  "desc": "",
+  "lat": 58.01,
+  "lon": 56.25,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 1,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900006"
+ },
+ {
+  "qid": "Q900902",
+  "name": "Станция метро",
+  "desc": "",
+  "lat": 59.93,
+  "lon": 30.32,
+  "roots": [
+   "Q928830"
+  ],
+  "sitelinks": 50,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q656"
+ }
+]

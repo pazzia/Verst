@@ -1,0 +1,49 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-14",
+   "input_json": {
+    "start": {
+     "lat": 55.05,
+     "lon": 60.1,
+     "label": "Миасс"
+    },
+    "preset": "beer",
+    "adultConfirmed": true,
+    "durationMin": 240
+   }
+  }
+ },
+ "response": {
+  "ok": false,
+  "error": {
+   "code": "NOT_ENOUGH_POIS",
+   "message": "not enough places for preset 'beer'",
+   "field": "preset",
+   "reason": "no_data",
+   "pointIndex": null,
+   "roadKm": null,
+   "detail": null,
+   "suggestions": [
+    {
+     "preset": "overview",
+     "stops": 2,
+     "titleRu": "Обзорная прогулка"
+    },
+    {
+     "preset": "custom",
+     "stops": 2,
+     "titleRu": "История, архитектура, парки и виды"
+    }
+   ],
+   "requestKey": "a4431880440691f2",
+   "noData": [
+    "beer"
+   ],
+   "messageRu": "У нас пока нет данных о пивных барах в этом городе — это пробел нашей базы, а не города."
+  },
+  "ms": 0
+ }
+}

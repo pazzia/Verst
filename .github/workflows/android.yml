@@ -1,0 +1,521 @@
+# Verst mock MVP: planner tests, build, test, screenshot, lint, emulator journey, GitHub pre-release, ci-logs.
+# Design: docs/architecture-android-mvp.md §12. Diagnostics are readable WITHOUT Actions logs:
+#   * check-run annotations  GET /repos/pazzia/Verst/check-runs/{job_id}/annotations
+#   * branch ci-logs         git fetch origin +ci-logs:refs/remotes/origin/ci-logs --depth=1
+name: android
+# The run's title in the Actions list: the version of its APK (keep «0.3» equal to VERST_VERSION below)
+run-name: "Верста 0.3.${{ github.run_number }}${{ github.ref_name != 'main' && ' · тест ветки' || '' }}"
+
+on:
+  push:
+    # dev/** and ci-drill: the Developer's CI feedback loop (no release; release runs on main only).
+    branches: [main, "dev/**", ci-drill]
+    paths:
+      - "android/**"
+      - "backend/planner/verst_planner/**"
+      - "backend/planner/fixtures/**"
+      - "backend/planner/tests/golden/**"
+      - "backend/planner/tests/contract/**"
+      - "docs/contracts/**"
+      - "design/**"
+      - "tools/ci/**"
+      - ".github/workflows/android.yml"
+  pull_request:
+    paths:
+      - "android/**"
+      - "backend/planner/verst_planner/**"
+      - "design/**"
+      - "tools/ci/**"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Publish the GitHub pre-release verst-<run number> (main only)"
+        type: boolean
+        default: true
+      run_e2e:
+        description: "Run the emulator journey"
+        type: boolean
+        default: true
+      force_release:
+        description: "Publish even if the emulator journey failed or was skipped (never past red planner or unit tests)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # releases + ci-logs branch
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true   # a newer push supersedes the run (saves billed minutes); its ci-logs job is cancelled too
+
+env:
+  VERST_BUILD_NUMBER: ${{ github.run_number }}
+  # versionName of the APK and the name of its file and artifact: «Верста 0.3.162», Verst-0.3.162.apk.
+  # 0.3 from 28.10.2026: the new signing key (a fresh install line after the 0.2 demo builds).
+  VERST_VERSION: 0.3.${{ github.run_number }}
+  VERST_GIT_SHA: ${{ github.sha }}
+  # SRV-01: the CEO's test VM in the Netherlands (tests only, 152-FZ: the beta backend moves to Russia)
+  VERST_SERVER_URL: https://212-108-82-26.sslip.io
+  JAVA_VERSION: "17"
+  PYTHON_VERSION: "3.12"   # must equal chaquopy.defaultConfig.version (bytecode compiled at build time)
+
+defaults:
+  run:
+    shell: bash   # bash -eo pipefail: `cmd | tee log` fails when cmd fails
+
+jobs:
+  # ---------------------------------------------------------------------------------------- planner
+  # HYG-01: the engine's own suite (unit, contract, golden, brand deny-list) gates the release, on the
+  # interpreter line the APK ships (PYTHON_VERSION = Chaquopy). Runs in parallel with build.
+  planner:
+    name: planner tests (release gate)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      OUT: ${{ github.workspace }}/ci-out/planner
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Strings are generated from design/copy-ru.md (a key added only to strings.xml is lost on regeneration)
+        run: python3 design/tools/gen_strings.py --check
+
+      - name: python3 -m unittest discover
+        working-directory: backend/planner
+        run: |
+          mkdir -p "$OUT"
+          python3 --version | tee "$OUT/unittest.log"
+          python3 -m unittest discover 2>&1 | tee -a "$OUT/unittest.log"
+
+      - name: Errors for ci-logs
+        if: ${{ failure() }}
+        run: grep -E '^(FAIL|ERROR):' "$OUT/unittest.log" > "$OUT/errors.txt" || echo "planner tests failed, see unittest.log" > "$OUT/errors.txt"
+
+      - name: Upload diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-planner
+          path: ci-out/
+          retention-days: 14
+
+  # ------------------------------------------------------------------------------------------ build
+  build:
+    name: build · unit · screenshots · lint
+    runs-on: ubuntu-24.04   # pinned: ubuntu-latest migrates to Ubuntu 26 from 2026-10-19
+    timeout-minutes: 50
+    env:
+      LOGS: ${{ github.workspace }}/raw-logs   # full logs stay outside ci-out; gzipped copies go to ci-out/build/raw-logs
+      DIAG: ${{ github.workspace }}/ci-out/build
+      VERST_SCREENSHOTS_DIR: ${{ github.workspace }}/ci-out/screenshots
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Prepare
+        run: |
+          mkdir -p "$LOGS" "$DIAG" "$VERST_SCREENSHOTS_DIR"
+          echo "VERST_BUILD_DATE=$(date -u +'%Y-%m-%d %H:%M UTC')" >> "$GITHUB_ENV"   # D-IR-20 build details
+          { java -version; python3 --version; android/gradlew --version || echo "gradlew --version failed"; } 2>&1 | tee "$LOGS/toolchain.log"
+
+      - name: Currency rates (Банк России) into the APK
+        # D-IR-20 currency setting; on failure the placeholder stays and the app shows roubles only
+        run: python3 tools/ci/fetch_rates.py android/app/src/main/assets/rates.json
+
+      - name: Signing key (GitHub Secrets)
+        # Security review 28.10 (К-1): the key is never in the repository. Without the secret the APK is signed
+        # with a throwaway debug key: it builds and tests, but does not install over an earlier CI build.
+        env:
+          KEYSTORE_B64: ${{ secrets.VERST_SIGNING_KEYSTORE_B64 }}
+          STOREPASS: ${{ secrets.VERST_SIGNING_STORE_PASSWORD }}
+          KEYPASS: ${{ secrets.VERST_SIGNING_KEY_PASSWORD }}
+          ALIAS: ${{ secrets.VERST_SIGNING_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::warning title=signing::VERST_SIGNING_KEYSTORE_B64 is not set: throwaway debug signature (will not install over earlier builds)"
+            exit 0
+          fi
+          umask 077
+          K="$RUNNER_TEMP/verst-demo.jks"
+          printf '%s' "$KEYSTORE_B64" | tr -d ' \r\n' | base64 -d > "$K"
+          # the file's own hash (not secret): compare with `sha256sum verst-demo.jks` where the key was made
+          echo "keystore file: $(stat -c %s "$K") bytes, sha256 $(sha256sum "$K" | cut -d' ' -f1)"
+          # name the secret that is wrong instead of Gradle's «Failed to read key … null»
+          export STOREPASS="${STOREPASS%$'\n'}" KEYPASS="${KEYPASS%$'\n'}" ALIAS="${ALIAS%$'\n'}"
+          if ! keytool -list -keystore "$K" -storetype PKCS12 -storepass:env STOREPASS >/dev/null 2>&1; then
+            echo "::error title=signing::VERST_SIGNING_STORE_PASSWORD does not open the keystore (or VERST_SIGNING_KEYSTORE_B64 is not the whole base64 line)"; exit 1
+          fi
+          if ! keytool -list -keystore "$K" -storetype PKCS12 -storepass:env STOREPASS -alias "$ALIAS" >/dev/null 2>&1; then
+            echo "::error title=signing::VERST_SIGNING_KEY_ALIAS is not in the keystore (expected verst-demo)"; exit 1
+          fi
+          if [ "$KEYPASS" != "$STOREPASS" ]; then
+            echo "::error title=signing::VERST_SIGNING_KEY_PASSWORD differs from VERST_SIGNING_STORE_PASSWORD (a PKCS12 key has one password)"; exit 1
+          fi
+          echo "VERST_SIGNING_KEYSTORE=$K" >> "$GITHUB_ENV"
+
+      - name: Assemble demo APK + androidTest APK
+        id: assemble
+        working-directory: android
+        env:
+          VERST_SIGNING_STORE_PASSWORD: ${{ secrets.VERST_SIGNING_STORE_PASSWORD }}
+          VERST_SIGNING_KEY_ALIAS: ${{ secrets.VERST_SIGNING_KEY_ALIAS }}
+          VERST_SIGNING_KEY_PASSWORD: ${{ secrets.VERST_SIGNING_KEY_PASSWORD }}
+        run: ./gradlew :app:assembleDemo :app:assembleDemoAndroidTest --console=plain --stacktrace 2>&1 | tee "$LOGS/assemble.log"
+
+      - name: Demo manifest has no test activity (release review P2-4)
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          M=$(find android/app/build/intermediates -path '*demo*' -name AndroidManifest.xml -path '*merged_manifest*' | head -1)
+          echo "merged demo manifest: $M"
+          test -n "$M"
+          if grep -n 'androidx.activity.ComponentActivity' "$M"; then echo "::error::ui-test ComponentActivity in the demo manifest"; exit 1; fi
+          # DEV-300 / ADR-0012 §7: exactly these 4 permissions, and no cleartext switch.
+          grep -o 'uses-permission[^>]*android:name="[^"]*"' "$M" | sed 's/.*android:name="//;s/"//' | grep '^android\.permission\.' | sort -u | tee "$DIAG/permissions.txt"
+          printf '%s\n' android.permission.ACCESS_COARSE_LOCATION android.permission.ACCESS_FINE_LOCATION android.permission.ACCESS_NETWORK_STATE android.permission.INTERNET > /tmp/expected-permissions.txt
+          if ! diff -u /tmp/expected-permissions.txt "$DIAG/permissions.txt"; then echo "::error::merged manifest permissions differ from ADR-0012 §7"; exit 1; fi
+          if grep -n 'usesCleartextTraffic' "$M"; then echo "::error::usesCleartextTraffic in the merged manifest"; exit 1; fi
+          # D-IR-22: the launcher icon is wired (until 29.10 it was drawn but not referenced: the system icon showed)
+          grep -q 'android:icon="@mipmap/ic_launcher"' "$M" || { echo "::error::the merged manifest has no android:icon=@mipmap/ic_launcher"; exit 1; }
+      - name: Diagnose assemble
+        if: ${{ !cancelled() && steps.assemble.outcome == 'failure' }}
+        run: python3 tools/ci/diagnose.py --out "$DIAG" gradle --log "$LOGS/assemble.log" --step assemble
+
+      - name: Unit, contract and screenshot tests
+        id: unit
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        working-directory: android
+        run: ./gradlew :core-model:test :core-ui:testDebugUnitTest :app:testDebugUnitTest --continue --console=plain --stacktrace 2>&1 | tee "$LOGS/unit.log"
+
+      - name: Diagnose tests
+        if: ${{ !cancelled() && steps.unit.outcome != 'skipped' }}
+        run: |
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 3 gradle --log "$LOGS/unit.log" --step unit
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 7 junit --root android
+
+      - name: Android Lint
+        id: lint
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        working-directory: android
+        run: ./gradlew :app:lintDemo :core-ui:lintDebug --continue --console=plain 2>&1 | tee "$LOGS/lint.log"
+
+      - name: Diagnose lint
+        if: ${{ !cancelled() && steps.lint.outcome != 'skipped' }}
+        run: |
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 2 gradle --log "$LOGS/lint.log" --step lint
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 8 lint --root android
+
+      - name: Chaquopy licences (into ci-logs and the APK)
+        id: licences
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          mkdir -p "$DIAG/licences"
+          # AGP owns the output dir of a generated asset source (build/generated/assets/chaquopyLicences/<variant>)
+          SRC=$(find android/app/build/generated -path '*/licences/chaquopy.json' | sort | head -1)
+          echo "licences from: ${SRC:-none}"
+          cp "$(dirname "$SRC")"/chaquopy.* "$DIAG/licences/"
+          unzip -l android/app/build/outputs/apk/demo/app-demo.apk 'assets/licences/*' | tee "$DIAG/licences/apk-entries.txt"
+          grep -q 'assets/licences/chaquopy.txt' "$DIAG/licences/apk-entries.txt"
+          python3 - "$DIAG/licences/chaquopy.json" <<'EOF' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, sys
+          rows = json.load(open(sys.argv[1]))
+          assert rows, "no Chaquopy licence found"
+          print("### Chaquopy licences")
+          for r in rows:
+              print(f"- `{r['artifact']}` {r['source']}: {r.get('licence') or r.get('firstLine')} {r.get('url', '')}")
+          EOF
+
+      - name: APK size budget (warn 45 MB, fail 60 MB) and content (no server-only catalogue abroad)
+        id: apk
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: python3 tools/ci/diagnose.py --out "$DIAG" apk --apk android/app/build/outputs/apk/demo/app-demo.apk --warn-mb 45 --fail-mb 60
+
+      - name: APK signer
+        # Security review 28.10 (К-1): which key signed the APK. Its SHA-256 matches
+        # `keytool -list -v -keystore verst-demo.jks` on the key owner's machine; the debug key with the secret set fails.
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          SIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$SIGNER" verify --print-certs android/app/build/outputs/apk/demo/app-demo.apk | tee "$DIAG/apk-signer.txt"
+          { echo "### APK signer"; echo '```'; cat "$DIAG/apk-signer.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "${VERST_SIGNING_KEYSTORE:-}" ] && grep -q 'CN=Android Debug' "$DIAG/apk-signer.txt"; then
+            echo "::error title=signing::the signing secrets are set, but the APK is signed with the debug key"; exit 1
+          fi
+
+      - name: Upload Verst-${{ env.VERST_VERSION }}.apk
+        # the file to install, named by its version (the «apks» artifact below is for the emulator and release jobs)
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/demo/app-demo.apk "dist/Verst-$VERST_VERSION.apk"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        with:
+          name: Verst-${{ env.VERST_VERSION }}
+          path: dist/Verst-${{ env.VERST_VERSION }}.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload APKs
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: apks
+          path: |
+            android/app/build/outputs/apk/demo/app-demo.apk
+            android/app/build/outputs/apk/androidTest/demo/app-demo-androidTest.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Collect diagnostics
+        if: ${{ always() }}
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+        run: |
+          python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 0 steps --job build --json "$STEPS_JSON"
+          mkdir -p "$DIAG/raw-logs"
+          for f in "$LOGS"/*.log; do [ -f "$f" ] && gzip -c "$f" > "$DIAG/raw-logs/$(basename "$f").gz"; done
+          for f in "$LOGS"/*.log; do
+            s=$(basename "$f" .log)
+            [ -f "$DIAG/logs/$s.log.txt" ] || python3 tools/ci/diagnose.py --out "$DIAG" --max-annotations 0 gradle --log "$f" --step "$s"
+          done
+          find android -path '*/build/reports/tests' -type d -prune -print0 | tar -czf "$DIAG/test-reports.tgz" --null -T - 2>/dev/null || true
+          python3 tools/ci/diagnose.py --out "$DIAG" summarize
+
+      - name: Upload diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-build
+          path: ci-out/
+          include-hidden-files: false
+          retention-days: 14
+
+  # -------------------------------------------------------------------------------------------- e2e
+  e2e:
+    name: emulator journey (real Python engine)
+    needs: build
+    if: ${{ needs.build.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.run_e2e) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      OUT: ${{ github.workspace }}/ci-out/e2e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: apks
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          mkdir -p "$OUT"
+          find apks -name '*.apk' -exec ls -l {} \;
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-34-google_apis-x86_64-v1
+
+      - name: Create AVD snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: echo "AVD snapshot created"
+
+      - name: Run journey
+        id: journey
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: bash tools/ci/run_e2e.sh "$(find apks -name app-demo.apk | head -1)" "$(find apks -name app-demo-androidTest.apk | head -1)" ci-out/e2e
+
+      - name: Diagnose journey
+        if: ${{ always() }}
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+        run: |
+          D="python3 tools/ci/diagnose.py --out $OUT"
+          $D --max-annotations 6 instrument --log "$OUT/instrument.txt"
+          $D --max-annotations 4 logcat --log "$OUT/logcat.txt"
+          $D --max-annotations 0 steps --job e2e --json "$STEPS_JSON"
+          rm -f "$OUT/logcat.txt"
+          $D summarize
+
+      - name: Upload diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-e2e
+          path: ci-out/
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------------------- release
+  release:
+    name: GitHub pre-release
+    needs: [planner, build, e2e]
+    if: >-
+      ${{ !cancelled() && github.ref == 'refs/heads/main'
+          && needs.planner.result == 'success' && needs.build.result == 'success'
+          && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.release))
+          && (needs.e2e.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.force_release)) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: verst-${{ github.run_number }}
+      OUT: ${{ github.workspace }}/ci-out/release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: apks
+
+      - name: Prepare files and notes
+        env:
+          E2E_RESULT: ${{ needs.e2e.result }}
+          HEAD_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          mkdir -p "$OUT" dist
+          APK=$(find apks -name app-demo.apk | head -1)
+          F="Verst-$VERST_VERSION.apk"
+          cp "$APK" "dist/$F"
+          cp "$APK" "dist/Verst-latest.apk"
+          (cd dist && sha256sum "$F" > "$F.sha256")
+          SIZE=$(du -m "dist/$F" | cut -f1)
+          {
+            echo "Верста $VERST_VERSION — демо-сборка: всё работает на телефоне без интернета, на тестовых данных (города центральной России)."
+            echo
+            echo "**Как поставить:** откройте этот файл на телефоне → «Установить». Если Android спросит — разрешите установку из этого источника. Старую демо-сборку удалять не нужно: новая ставится поверх, сохранённые поездки остаются."
+            echo
+            echo "- Файл: \`$F\` (≈ ${SIZE} МБ), sha256 в \`$F.sha256\`"
+            echo "- Постоянная ссылка на последнюю сборку: https://github.com/${{ github.repository }}/releases/download/verst-latest/Verst-latest.apk"
+            echo "- Проверка на эмуляторе: ${E2E_RESULT}"
+            echo "- Коммит: ${{ github.sha }}"
+            echo "- Данные: каталог мест — производная база данных OpenStreetMap (© участники OpenStreetMap), лицензия ODbL 1.0. Бесплатная копия каталога этой сборки, лицензии и описание сборки: https://github.com/${{ github.repository }}/tree/${{ github.sha }}/data/catalogue"
+            echo
+            echo "Изменения: $(echo "${HEAD_MSG:-ручной запуск}" | head -1)"
+          } > dist/notes.md
+          cp dist/notes.md "$OUT/notes.md"
+
+      - name: Create pre-release ${{ env.TAG }}
+        id: create
+        run: |
+          gh release create "$TAG" "dist/Verst-$VERST_VERSION.apk" "dist/Verst-$VERST_VERSION.apk.sha256" \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
+            --title "Верста $VERST_VERSION" --notes-file dist/notes.md 2>&1 | tee "$OUT/create.log"
+
+      - name: Move verst-latest
+        id: latest
+        run: |
+          # mvp-mock-latest: the 0.2 builds' link, signed with the old key — removed so nobody installs it
+          for t in verst-latest mvp-mock-latest; do gh release delete "$t" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true; done
+          gh release create verst-latest dist/Verst-latest.apk \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
+            --title "Верста $VERST_VERSION · последняя сборка" --notes-file dist/notes.md 2>&1 | tee "$OUT/latest.log"
+
+      - name: Keep the newest 10 numbered pre-releases
+        run: |
+          gh release list --repo "${{ github.repository }}" --limit 200 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | test("^(verst|mvp-mock)-[0-9]+$"))] | sort_by(.createdAt) | reverse | .[10:] | .[].tagName' \
+          | while read -r t; do gh release delete "$t" --repo "${{ github.repository }}" --yes --cleanup-tag; done
+
+      - name: Record release
+        if: ${{ always() }}
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+        run: |
+          gh release view "$TAG" --repo "${{ github.repository }}" --json tagName,url,assets > "$OUT/release.json" 2>/dev/null || echo '{}' > "$OUT/release.json"
+          python3 tools/ci/diagnose.py --out "$OUT" --max-annotations 0 steps --job release --json "$STEPS_JSON"
+          echo "::notice title=Release::https://github.com/${{ github.repository }}/releases/tag/$TAG"
+
+      - name: Upload diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: diag-release
+          path: ci-out/
+          retention-days: 14
+
+  # --------------------------------------------------------------------------------------- ci-logs
+  ci-logs:
+    name: publish diagnostics to ci-logs
+    needs: [planner, build, e2e, release]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: ci-logs-publish
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/ci
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true   # a run cancelled before any upload still publishes its job results
+        with:
+          pattern: diag-*
+          path: ci-in
+
+      - name: Assemble run directory
+        id: combine
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          RUN="${{ github.run_id }}-${{ github.run_attempt }}"
+          mkdir -p "run/$RUN" ci-in
+          for d in ci-in/*/; do [ -d "$d" ] && cp -R "$d." "run/$RUN/"; done
+          META=$(python3 tools/ci/combine_run.py "run/$RUN")
+          echo "run=$RUN" >> "$GITHUB_OUTPUT"
+          echo "meta=$META" >> "$GITHUB_OUTPUT"
+          cat "run/$RUN/summary.md"
+
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RUN_META_JSON: ${{ steps.combine.outputs.meta }}
+        run: |
+          bash tools/ci/publish_ci_logs.sh "${{ steps.combine.outputs.run }}" "run/${{ steps.combine.outputs.run }}"
+          echo "::notice title=ci-logs::runs/${{ steps.combine.outputs.run }} (git fetch origin +ci-logs:refs/remotes/origin/ci-logs --depth=1)"

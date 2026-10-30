@@ -1,0 +1,100 @@
+{
+  "$schema": "verst-design-tokens/1",
+  "$meta": {
+    "name": "Verst variant B «Дневная трасса» — day colour tokens (proposal, not merged into design/tokens.json)",
+    "version": "0.1.0",
+    "date": "2026-10-26",
+    "scope": "Windshield and Instruments mockups in design/variants-ir/b/. Type, spacing, radius, stroke and motion are shared with the night theme (design/tokens.json + the variant additions listed in design/variants-ir/README.md §6).",
+    "rule": "Same token names as the night theme wherever the role is the same, so Kotlin can switch palettes by theme (DesignTokens.color ↔ DesignTokens.colorDay). Yellow is never used as text or a thin line on a light surface: on light it is only a filled plate with a dark border and dark text.",
+    "contrast": "Every text/background pair is checked by design/variants-ir/tools/contrast.py (WCAG 2.2 AA: 4.5:1 text, 3:1 UI boundaries)."
+  },
+  "color": {
+    "sky": {
+      "band1": { "value": "#86BCE3", "use": "Top sky band (day); under the mirror caption and the Instruments back link" },
+      "band2": { "value": "#A3CCEA", "use": "Sky band 2; Instruments strip lower band" },
+      "band3": { "value": "#BFDCF0", "use": "Sky band 3" },
+      "band4": { "value": "#D8E9F3", "use": "Sky band 4" },
+      "band5": { "value": "#EAF2F2", "use": "Horizon haze" },
+      "hills": { "value": "#8FA79E", "use": "Far hills silhouette" }
+    },
+    "scene": {
+      "sun": { "value": "#FFF3C9", "use": "High day sun disc" },
+      "cloud": { "value": "#F6FAFC", "use": "Two posterised flat clouds (Windshield only)" },
+      "groundFar": { "value": "#9CBB84", "use": "Fields near the horizon" },
+      "ground": { "value": "#86A96F", "use": "Fields" },
+      "road": { "value": "#62666D", "use": "Asphalt" },
+      "roadEdge": { "value": "#FFFFFF", "use": "Road edges and lane dashes" }
+    },
+    "interior": {
+      "liner": { "value": "#B4BAC2", "use": "Roof liner and A-pillars (grey plastic in daylight)" },
+      "pole": { "value": "#7D838C", "use": "Gantry legs" }
+    },
+    "dash": {
+      "base": { "value": "#E4E7EA", "use": "Windshield dashboard surface" },
+      "raised": { "value": "#EEF0F2", "use": "Instruments root" },
+      "rim": { "value": "#BFC5CC", "use": "Dashboard top rim line; navigator bezel" },
+      "divider": { "value": "#CDD2D8", "use": "Hairline between control rows (decorative, not a boundary)" }
+    },
+    "key": {
+      "fill": { "value": "#FFFFFF", "use": "Stepper keys, chips, switch-chip, settings row" },
+      "border": { "value": "#6F7A87", "use": "1 dp border of keys and unselected chips (WCAG 1.4.11 ≥ 3:1)" },
+      "shadow": { "value": "#BFC5CC", "use": "Inset bottom edge of keys (0 −3 dp), same geometry as shadow.key" },
+      "pressed": { "value": "#E9EDF2", "use": "Pressed key/chip fill" },
+      "disabledText": { "value": "#8C949E", "use": "Disabled «−» at a limit (WCAG-exempt, still ≥ 2.5:1)" }
+    },
+    "well": {
+      "fill": { "value": "#FFFFFF", "use": "Instrument well face (odometer and gauge summaries)" },
+      "border": { "value": "#BFC5CC", "use": "Well rim 4 dp" },
+      "gaugeTrack": { "value": "#D5DAE0", "use": "Gauge arc track" },
+      "gaugeFill": { "value": "#1E4FA3", "use": "Gauge arc: estimate share of the budget (= sign.blue)" },
+      "gaugeTick": { "value": "#15181C", "use": "Budget limit tick on the arc" }
+    },
+    "text": {
+      "primary": { "value": "#15181C", "use": "Main text on light" },
+      "secondary": { "value": "#3D4550", "use": "Secondary text on light" },
+      "muted": { "value": "#545D69", "use": "Section labels and footnotes (min 14 sp)" },
+      "onCta": { "value": "#15181C", "use": "Text on the yellow CTA plate" }
+    },
+    "sign": {
+      "blue": { "value": "#1E4FA3", "use": "Unchanged GOST blue" },
+      "blueSelected": { "value": "#163B7A", "use": "Pressed sign row" },
+      "blueText": { "value": "#D6E0F5", "use": "Meaning line and footnote on the sign" },
+      "white": { "value": "#F4F4F0", "use": "Sign inner border, names" }
+    },
+    "accent": {
+      "yellowOnSign": { "value": "#FFD23F", "use": "Pressed-row text on the blue sign (yellow text only on dark blue)" }
+    },
+    "cta": {
+      "fill": { "value": "#FFD23F", "use": "Primary action plate (temporary-sign yellow)" },
+      "border": { "value": "#15181C", "use": "2 dp inner border of the CTA plate — carries the 3:1 boundary on light" },
+      "pressed": { "value": "#F2C21F", "use": "Pressed CTA plate" }
+    },
+    "chip": {
+      "selectedFill": { "value": "#DCE6F7", "use": "Selected chip / radio card fill" },
+      "selectedBorder": { "value": "#1E4FA3", "use": "Selected chip 2 dp border; radio dot" },
+      "selectedText": { "value": "#163B7A", "use": "Selected chip text and check" }
+    },
+    "navi": {
+      "screen": { "value": "#F7F9FB", "use": "Navigator display in day mode" },
+      "field": { "value": "#FFFFFF", "use": "«Куда едем?» field" },
+      "fieldBorder": { "value": "#6E7A88", "use": "Field border 1.5 dp (WCAG 1.4.11)" },
+      "text": { "value": "#15181C", "use": "Field title" },
+      "hint": { "value": "#4F5B68", "use": "Field sub-line" },
+      "label": { "value": "#1E4FA3", "use": "«Старт: Москва» button, panel label" }
+    },
+    "mirror": {
+      "bezel": { "value": "#3A3F47", "use": "Mirror bezel and stem (black plastic, same in day)" },
+      "skyReflect": { "value": "#A3CCEA", "use": "Reflected sky" },
+      "groundReflect": { "value": "#86A96F", "use": "Reflected fields" },
+      "bench": { "value": "#C9CED5", "use": "Back bench in the summary mirror" },
+      "label": { "value": "#15181C", "use": "Crew caption under the mirror (on sky.band1)" }
+    },
+    "crew": {
+      "adult": { "value": "#2E343C", "use": "Adult silhouette (backlit, dark in daylight)" },
+      "child": { "value": "#D99A00", "use": "Child silhouette (darker yellow to read on the light bench)" },
+      "dog": { "value": "#A8743A", "use": "Dog silhouette" }
+    },
+    "link": { "value": "#1E4FA3", "use": "Secondary text links («По городу пешком», «Изменить»)" },
+    "focus": { "value": "#1E4FA3", "use": "Keyboard focus ring 2 dp, offset 2 dp (yellow fails on light)" }
+  }
+}

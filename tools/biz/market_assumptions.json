@@ -1,0 +1,248 @@
+{
+  "meta": {
+    "model": "Market sizing: domestic car trips with overnights in Russia → TAM / SAM / SOM, bottom-up first, top-down cross-check",
+    "version": "1.0",
+    "as_of": "2026-10-26",
+    "currency": "RUB",
+    "owner": "Business Analyst",
+    "base_year": 2025,
+    "som_years": [2027, 2028, 2029],
+    "revenue_per_trip_source": "tools/biz/unit_economics.py per_trip(): gross revenue per planned trip (hotel + excursions + Trip Pro), before the 6 % tax",
+    "access_note": "Web figures were found by web search on 2026-10-26. Direct page fetches are blocked in the work environment (DNS), so every cited URL is «по выдержке из поиска» and must be opened once by a human before the number goes into the deck."
+  },
+  "sources": {
+    "M01": {
+      "title": "Финмаркет со ссылкой на Росстат: в 2025 году в коллективных средствах размещения России размещено 92,042 млн человек (на ≈ 2 млн больше, чем в 2024: 90,1 млн); ЦФО — 27,9 млн, Москва — 12,87 млн (по месту размещения, не по месту жительства)",
+      "url": "https://www.finmarket.ru/news/6610655",
+      "published": "≈ 29.04.2026 (по выдержке из поиска)",
+      "accessed": "2026-10-26"
+    },
+    "M02": {
+      "title": "Путешествуем.рф: Д. Чернышенко — к 2030 году количество турпоездок на автомобиле вырастет с 26 млн до 50 млн ежегодно (концепция развития автотуризма); 26 млн — данные Минэкономразвития за 2023 год (М. Решетников, июнь 2024)",
+      "url": "https://xn--90aivcdt6dxbc.xn--p1ai/articles/news/dmitriy-chernyshenko-k-2030-godu-kolichestvo-turpoezdok-na-avtomobile-vyrastet-s-26-mln-do-50-mln-ezh/ ; https://ruinformer.com/page/v-pravitelstve-rf-obsudili-perspektivy-razvitija-avtoturizma-v-strane",
+      "published": "2024 (по выдержке из поиска; ruinformer — 04.06.2024)",
+      "accessed": "2026-10-26"
+    },
+    "M03": {
+      "title": "Известия: М. Решетников — доля туристов, путешествующих на автомобиле, летом 2025 года должна достигнуть 43 % (годом ранее 38 %); Фонтанка: Д. Вахруков — по итогам 2025 года доля вырастет с 38 % до 43 % (прогноз Минэкономразвития)",
+      "url": "https://iz.ru/export/google/amp/1919280 ; https://www.fontanka.ru/2025/08/26/76001199/",
+      "published": "2025 (Фонтанка — 26.08.2025)",
+      "accessed": "2026-10-26"
+    },
+    "M04": {
+      "title": "Профиль: по подсчётам Минэкономразвития ежегодно по дорогам РФ передвигаются 22–23 млн автотуристов, по оценке Российского союза туриндустрии — до 42 млн (разница в определении «автотуриста»)",
+      "url": "https://profile.ru/cars/dorogoj-dlinnoju-chem-privlekajut-turistov-avtomobilnye-puteshestviya-po-strane-1534279/amp/",
+      "published": "не нашли (метаданные противоречат тексту)",
+      "accessed": "2026-10-26"
+    },
+    "M05": {
+      "title": "Население: Москва 13 274 285 человек на 01.01.2025 (Мосстат, Эксперт); Московская агломерация (Москва + Московская область) 22,05 млн (Т—Ж со ссылкой на Росстат, дата не указана); Россия ≈ 146 млн на 01.01.2025 (Росстат, ОСН)",
+      "url": "https://expert.ru/news/chislennost-naseleniya-moskvy-dostigla-13-3-mln-chelovek/ ; https://t-j.ru/demography-moscow/ ; https://www.osnmedia.ru/obshhestvo/chislennost-naseleniya-rossii-na-1-yanvarya-2025-goda-sostavila-146-mln/amp/",
+      "published": "2025",
+      "accessed": "2026-10-26"
+    },
+    "M06": {
+      "title": "РБК: исследование Авто.ру и Яндекс Путешествий — 69 % опрошенных за последний год ездили в поездки на личном автомобиле, 80 % планируют в 2026 году; 62 % планирующих автопутешествие намерены взять детей; 60 % респондентов с детьми выбирают автомобиль для семейных поездок",
+      "url": "https://www.rbc.ru/rbcfreenews/69c370409a7947bce43fd982",
+      "published": "≈ 2026 (по выдержке из поиска; дата не подтверждена)",
+      "accessed": "2026-10-26"
+    },
+    "M07": {
+      "title": "Hi-Tech Mail: каждый третий россиянин использует интернет при планировании поездок; рекомендации из мобильных приложений получает четверть опрошенных; 55 % держат план в голове",
+      "url": "https://hi-tech.mail.ru/news/127904-kak-rossiyane-gotovyatsya-k-otpusku-i-puteshestvuyut-statistika/",
+      "published": "не нашли",
+      "accessed": "2026-10-26"
+    },
+    "M08": {
+      "title": "Коммерсантъ: основным каналом планирования летнего отдыха стали цифровые платформы — ими воспользовались 63 % путешественников; напрямую к отелям и авиакомпаниям обращается 21 %",
+      "url": "https://www.kommersant.ru/doc/7941287",
+      "published": "год опроса в выдержке не указан",
+      "accessed": "2026-10-26"
+    },
+    "M09": {
+      "title": "Retail.ru: Zoozavr — 48 % владельцев собак всегда берут питомца в поездку; 39 % сталкиваются с нехваткой вариантов размещения",
+      "url": "https://www.retail.ru/news/zoozavr-izuchil-otnoshenie-rossiyan-k-poezdkam-s-pitomtsami-10-iyunya-2025-265631/",
+      "published": "10.06.2025",
+      "accessed": "2026-10-26"
+    },
+    "M10": {
+      "title": "Эксперт со ссылкой на Bnovo: доля агрегаторов в бронированиях гостиниц выросла до 39 %",
+      "url": "https://expert.ru/obshchestvo/turistam-naklikali-otdykh",
+      "published": "≈ 2025 (по выдержке из поиска)",
+      "accessed": "2026-10-26"
+    },
+    "M11": {
+      "title": "Tourdom: в 2023 году в КСР России размещено 73 млн человек; доля Москвы 11,8 %, Московской области 6,9 % (по месту размещения). Расходится с рядом 83,6 млн (2023) у Чернышенко — разные публикации Росстата",
+      "url": "https://www.tourdom.ru/news/chislo-turistov-v-moskve-i-moskovskoy-oblasti-rastet-no-k-rekordnym-tsifram-est-voprosy.html",
+      "published": "2024 (по выдержке из поиска)",
+      "accessed": "2026-10-26"
+    },
+    "M12": {
+      "title": "Коммерсантъ FM: по оценкам рынка, число путешествующих по стране в 2025 году выросло лишь на 1–5 %",
+      "url": "https://www.kommersant.ru/doc/8340699",
+      "published": "≈ 2026 (по выдержке из поиска)",
+      "accessed": "2026-10-26"
+    },
+    "M13": {
+      "title": "Юнит-экономика Версты (BIZ-01): выручка на одну запланированную поездку по сценариям; цена ночи, ночей в брони, комиссия",
+      "url": "docs/traction/unit-economics.md ; tools/biz/assumptions.json",
+      "published": "2026-10-25",
+      "accessed": "2026-10-26"
+    }
+  },
+  "inputs": {
+    "car_trips_base_year": {
+      "label_ru": "Турпоездок на автомобиле по России в базовом году",
+      "group": "units",
+      "unit": "million trips per year",
+      "values": {
+        "conservative": 26.0,
+        "base": 34.98,
+        "optimistic": 39.58
+      },
+      "status": "cited",
+      "sources": ["M01", "M02", "M03"],
+      "reasoning": "A tourist trip (Rosstat) includes at least one overnight away from home, so every unit here is a trip with an overnight. Conservative = Минэкономразвития count for 2023 (26 mln, M02), used unchanged as the 2025 value (no growth credited). Base = Rosstat 2025 guests in collective accommodation 92.04 mln (M01) × car share 38 % (the 2024 share, M03) = 34.98 mln. Optimistic = 92.04 × 43 % (the 2025 share, which was a forecast, M03) = 39.58 mln. Caveats: the 92.04 mln counts people placed in hotels (including business travellers and foreigners) and misses trips spent with relatives or in private rentals; the car share is a share of tourists, not of hotel guests. The three numbers bracket the РСТ upper estimate (up to 42 mln car tourists, M04).",
+      "date": "2026-10-26"
+    },
+    "market_growth": {
+      "label_ru": "Рост числа автопоездок в год",
+      "group": "units",
+      "unit": "growth per year",
+      "values": {
+        "conservative": 0.0215,
+        "base": 0.05,
+        "optimistic": 0.098
+      },
+      "status": {
+        "conservative": "cited",
+        "base": "assumed",
+        "optimistic": "cited"
+      },
+      "sources": ["M01", "M02", "M12"],
+      "reasoning": "Conservative = growth of hotel guests in 2025 (92.04 / 90.1 − 1 = 2.15 %, M01), in line with the market's 1–5 % (M12). Base = 5 %: total trips grow slowly but the car share keeps rising (38 % → 43 %). Optimistic = the government target 26 → 50 mln car trips between 2023 and 2030 = 9.8 % a year (M02); this is a target, not a forecast.",
+      "date": "2026-10-26"
+    },
+    "share_moscow_origin": {
+      "label_ru": "Доля автопоездок, начинающихся в Москве и Московской области",
+      "group": "sam",
+      "unit": "share of car trips",
+      "values": {
+        "conservative": 0.151,
+        "base": 0.18,
+        "optimistic": 0.22
+      },
+      "status": {
+        "conservative": "cited",
+        "base": "assumed",
+        "optimistic": "assumed"
+      },
+      "sources": ["M05", "M11"],
+      "reasoning": "No source for the origin of car trips was found (searched 2026-10-26; Rosstat and booking services publish destinations, not origins). Conservative = population share: 22.05 mln (Moscow + region) / 146 mln = 15.1 % (M05). Base and optimistic assume Moscow residents travel more than average (higher incomes; Moscow + region also take 18.7 % of hotel guests as a destination, M11). Measure: VAL-01 screener «старт Москва и МО», then plan start points in ENG-05.",
+      "date": "2026-10-26"
+    },
+    "share_family_or_dog": {
+      "label_ru": "Доля поездок с детьми или собакой",
+      "group": "sam",
+      "unit": "share of car trips",
+      "values": {
+        "conservative": 0.4,
+        "base": 0.5,
+        "optimistic": 0.62
+      },
+      "status": {
+        "conservative": "assumed",
+        "base": "assumed",
+        "optimistic": "cited"
+      },
+      "sources": ["M06", "M09"],
+      "reasoning": "Optimistic = 62 % of people planning a car trip in 2026 intend to take children (Авто.ру + Яндекс Путешествия, M06): an intention, from a car-owner audience, so an upper bound; dog owners (48 % always take the dog, M09) are not added on top to avoid double counting families with both. Base and conservative are lower because intentions overstate actual trips and couples are a large share of weekend trips. Measure: VAL-01 segment counts, then crew composition in plan requests (ENG-05).",
+      "date": "2026-10-26"
+    },
+    "share_app_planned": {
+      "label_ru": "Доля поездок, которые планируют в приложении или онлайн-сервисе",
+      "group": "sam",
+      "unit": "share of car trips",
+      "values": {
+        "conservative": 0.25,
+        "base": 0.33,
+        "optimistic": 0.63
+      },
+      "status": "cited",
+      "sources": ["M07", "M08"],
+      "reasoning": "Conservative = a quarter get recommendations from mobile apps (M07). Base = one third use the internet when planning (M07). Optimistic = 63 % used digital platforms to plan summer holidays (M08) — this includes booking sites and air/rail tickets, so it is an upper bound for «planned a car trip in an app». All three are general travel surveys, not car-trip surveys. Measure: VAL-01 «what did you use to plan».",
+      "date": "2026-10-26"
+    },
+    "som_penetration_y1": {
+      "label_ru": "SOM: доля поездок SAM, спланированных в Версте, год 1 (2027)",
+      "group": "som",
+      "unit": "share of SAM trips",
+      "values": {
+        "conservative": 0.0015,
+        "base": 0.003,
+        "optimistic": 0.01
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "Year 1 is the first public season (launch after M6, February 2027) with organic channels only (D-IR-12). Set so that it agrees within 2× with the 2027 trips of the 18-month financial model divided by SAM (financial-model.md §8.2), assuming roughly half of Verst's users fall inside the SAM segment.",
+      "date": "2026-10-26"
+    },
+    "som_penetration_y2": {
+      "label_ru": "SOM: доля поездок SAM, спланированных в Версте, год 2 (2028)",
+      "group": "som",
+      "unit": "share of SAM trips",
+      "values": {
+        "conservative": 0.004,
+        "base": 0.01,
+        "optimistic": 0.025
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "Second season with the web planner, SEO pages and partner distribution (B2G, Alice agent platform if accepted).",
+      "date": "2026-10-26"
+    },
+    "som_penetration_y3": {
+      "label_ru": "SOM: доля поездок SAM, спланированных в Версте, год 3 (2029)",
+      "group": "som",
+      "unit": "share of SAM trips",
+      "values": {
+        "conservative": 0.008,
+        "base": 0.02,
+        "optimistic": 0.05
+      },
+      "status": "assumed",
+      "sources": [],
+      "reasoning": "Capped at 5 % of SAM in the optimistic case (the usual ceiling for a new entrant in 3–5 years); free competitors with distribution (Яндекс, Russpass) make the base 2 %.",
+      "date": "2026-10-26"
+    },
+    "aggregator_share": {
+      "label_ru": "Сверху вниз: доля броней отелей через агрегаторы",
+      "group": "topdown",
+      "unit": "share of hotel bookings",
+      "values": {
+        "conservative": 0.39,
+        "base": 0.39,
+        "optimistic": 0.39
+      },
+      "status": "cited",
+      "sources": ["M10"],
+      "reasoning": "Bnovo via Эксперт: aggregators hold 39 % of hotel bookings. Only bookings through an aggregator can pay Verst an affiliate commission; the rest go direct to the hotel (BIZ-02 is the separate direct channel).",
+      "date": "2026-10-26"
+    }
+  },
+  "reference": {
+    "ksr_guests_2025_mln": 92.04,
+    "ksr_guests_2024_mln": 90.1,
+    "car_share_2024": 0.38,
+    "car_share_2025_forecast": 0.43,
+    "car_trips_2023_mln": 26.0,
+    "car_trips_2030_target_mln": 50.0,
+    "moscow_agglomeration_mln": 22.05,
+    "russia_population_mln": 146.0,
+    "minec_car_tourists_mln": [22.0, 23.0],
+    "rst_car_tourists_max_mln": 42.0,
+    "ksr_guests_2023_tourdom_mln": 73.0,
+    "ksr_guests_2023_chernyshenko_mln": 83.6,
+    "note_ru": "Справочные значения для сверки сверху вниз и для самопроверки: скрипт пересчитывает из них базовые входные данные и падает, если они разошлись."
+  }
+}

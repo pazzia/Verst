@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED from design/copy-ru.md by design/tools/gen_strings.py. Do not edit: change the deck and regenerate. -->
+<resources>
+    <plurals name="plural_day">
+        <item quantity="one">день</item>
+        <item quantity="few">дня</item>
+        <item quantity="many">дней</item>
+        <item quantity="other">дня</item>
+    </plurals>
+    <plurals name="plural_day_gen">
+        <item quantity="one">день</item>
+        <item quantity="few">дня</item>
+        <item quantity="many">дней</item>
+        <item quantity="other">дня</item>
+    </plurals>
+    <plurals name="plural_day_upper">
+        <item quantity="one">ДЕНЬ</item>
+        <item quantity="few">ДНЯ</item>
+        <item quantity="many">ДНЕЙ</item>
+        <item quantity="other">ДНЯ</item>
+    </plurals>
+    <plurals name="plural_night">
+        <item quantity="one">ночь</item>
+        <item quantity="few">ночи</item>
+        <item quantity="many">ночей</item>
+        <item quantity="other">ночи</item>
+    </plurals>
+    <plurals name="plural_route">
+        <item quantity="one">маршрут</item>
+        <item quantity="few">маршрута</item>
+        <item quantity="many">маршрутов</item>
+        <item quantity="other">маршрута</item>
+    </plurals>
+    <plurals name="plural_variant">
+        <item quantity="one">вариант</item>
+        <item quantity="few">варианта</item>
+        <item quantity="many">вариантов</item>
+        <item quantity="other">варианта</item>
+    </plurals>
+    <plurals name="plural_saved">
+        <item quantity="one">сохранённая</item>
+        <item quantity="few">сохранённые</item>
+        <item quantity="many">сохранённых</item>
+        <item quantity="other">сохранённой</item>
+    </plurals>
+    <plurals name="plural_adult">
+        <item quantity="one">взрослый</item>
+        <item quantity="few">взрослых</item>
+        <item quantity="many">взрослых</item>
+        <item quantity="other">взрослого</item>
+    </plurals>
+    <plurals name="plural_child">
+        <item quantity="one">ребёнок</item>
+        <item quantity="few">ребёнка</item>
+        <item quantity="many">детей</item>
+        <item quantity="other">ребёнка</item>
+    </plurals>
+    <plurals name="plural_via">
+        <item quantity="one">заезд</item>
+        <item quantity="few">заезда</item>
+        <item quantity="many">заездов</item>
+        <item quantity="other">заезда</item>
+    </plurals>
+    <plurals name="plural_stage">
+        <item quantity="one">этап</item>
+        <item quantity="few">этапа</item>
+        <item quantity="many">этапов</item>
+        <item quantity="other">этапа</item>
+    </plurals>
+    <plurals name="plural_place">
+        <item quantity="one">место</item>
+        <item quantity="few">места</item>
+        <item quantity="many">мест</item>
+        <item quantity="other">места</item>
+    </plurals>
+    <plurals name="plural_point">
+        <item quantity="one">точка</item>
+        <item quantity="few">точки</item>
+        <item quantity="many">точек</item>
+        <item quantity="other">точки</item>
+    </plurals>
+    <plurals name="plural_person">
+        <item quantity="one">человек</item>
+        <item quantity="few">человека</item>
+        <item quantity="many">человек</item>
+        <item quantity="other">человека</item>
+    </plurals>
+    <plurals name="plural_hour">
+        <item quantity="one">час</item>
+        <item quantity="few">часа</item>
+        <item quantity="many">часов</item>
+        <item quantity="other">часа</item>
+    </plurals>
+    <plurals name="plural_minute">
+        <item quantity="one">минута</item>
+        <item quantity="few">минуты</item>
+        <item quantity="many">минут</item>
+        <item quantity="other">минуты</item>
+    </plurals>
+    <plurals name="plural_km_spoken">
+        <item quantity="one">километр</item>
+        <item quantity="few">километра</item>
+        <item quantity="many">километров</item>
+        <item quantity="other">километра</item>
+    </plurals>
+    <plurals name="plural_rub_spoken">
+        <item quantity="one">рубль</item>
+        <item quantity="few">рубля</item>
+        <item quantity="many">рублей</item>
+        <item quantity="other">рубля</item>
+    </plurals>
+    <plurals name="plural_town">
+        <item quantity="one">город</item>
+        <item quantity="few">города</item>
+        <item quantity="many">городов</item>
+        <item quantity="other">города</item>
+    </plurals>
+    <plurals name="plural_day_until">
+        <item quantity="one">дня</item>
+        <item quantity="few">дней</item>
+        <item quantity="many">дней</item>
+        <item quantity="other">дня</item>
+    </plurals>
+</resources>

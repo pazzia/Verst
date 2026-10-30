@@ -1,0 +1,138 @@
+# CEO 2026-10-29: the OSM part of the catalogue from a fresh Geofabrik extract — bars (new kinds: рюмочные and
+# beer places by name and tags; every catalogue town; per-town cap by population) and food places (restaurants,
+# cafés, fast food, food courts) — on top of the published raw responses (towns and POIs: bot/raw-7; Wikipedia,
+# Wikivoyage, OSM POIs, parking: bot/extras-1; photo sizes: bot/photos-1), then the catalogue build and lock.
+# Nothing else is re-fetched (Wikidata, Wikipedia, Commons stay as published), so only catalogue_bars,
+# catalogue_food and catalogue_meta change. ~40 min (the 3.7 GB download and two osmium passes).
+#
+# Trigger from the working branch: change backend/planner/tools/data/data-osm.request (one line: why) and push.
+# Once this file is on the default branch: Actions → data-osm → Run workflow (inputs below), or
+#   gh workflow run data-osm.yml --ref main
+# Result: branch bot/data-osm-<run_number> (the catalogue files, catalogue.lock, report/) to merge, and
+# bot/raw-osm-<run_number> (bars.json + food.json, ODbL) to rebuild the same catalogue anywhere.
+name: data-osm
+on:
+  push:
+    # a rebuild is asked for by editing the request file on a working branch (pushes go to that branch only)
+    branches: ["ccr-*", data-osm-request]
+    paths: [backend/planner/tools/data/data-osm.request]
+  workflow_dispatch:
+    inputs:
+      raw:
+        description: "Raw responses branch (towns, POIs)"
+        default: "bot/raw-7"
+        required: true
+      extras:
+        description: "Extras branch (Wikipedia, Wikivoyage, OSM POIs, parking)"
+        default: "bot/extras-1"
+        required: true
+      photos:
+        description: "Photo meta branch"
+        default: "bot/photos-1"
+        required: true
+      version:
+        description: "Catalogue version (empty: wd-<UTC date>-osm<run number>)"
+        default: ""
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-osm
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash   # -eo pipefail, so `| tee` keeps the exit code
+
+jobs:
+  osm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      RAW: ${{ github.workspace }}/data-raw
+      OUT: ${{ github.workspace }}/backend/planner/verst_planner/resources
+      T: backend/planner/tools/data
+      RAW_BRANCH: ${{ inputs.raw || 'bot/raw-7' }}
+      EXTRAS_BRANCH: ${{ inputs.extras || 'bot/extras-1' }}
+      PHOTOS_BRANCH: ${{ inputs.photos || 'bot/photos-1' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Restore the published raw responses
+        run: |
+          mkdir -p "$RAW"
+          git fetch -q origin "$RAW_BRANCH" "$EXTRAS_BRANCH" "$PHOTOS_BRANCH"
+          git show "origin/$RAW_BRANCH:data-raw.tar.gz" | tar -xz -C "$RAW"
+          git show "origin/$EXTRAS_BRANCH:data-extra/extras.tar.gz" | tar -xz -C "$RAW"
+          git show "origin/$PHOTOS_BRANCH:out/photo_meta.json.gz" | gunzip > "$RAW/photo_meta.json"
+          ls "$RAW" | tee "$RAW/log.txt"
+      - name: Bars and food places (Geofabrik extract + osmium)
+        timeout-minutes: 75
+        run: |
+          sudo apt-get install -y -qq osmium-tool >/dev/null
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/ru.osm.pbf" https://download.geofabrik.de/russia-latest.osm.pbf
+          ls -l "$RUNNER_TEMP/ru.osm.pbf" | tee -a "$RAW/log.txt"
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/amenity=bar,pub,biergarten nwr/craft=brewery \
+            -o "$RUNNER_TEMP/bars.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/bars.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/bars.geojsonseq" --overwrite
+          python3 $T/bars_from_extract.py "$RAW" "$RUNNER_TEMP/bars.geojsonseq" 2>&1 | tee -a "$RAW/log.txt"
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/amenity=restaurant,cafe,fast_food,food_court \
+            -o "$RUNNER_TEMP/food.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/food.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/food.geojsonseq" --overwrite
+          python3 $T/food_from_extract.py "$RAW" "$RUNNER_TEMP/food.geojsonseq" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Provenance (sources.json)
+        run: |
+          python3 - <<'PY'
+          import datetime, gzip, json, os
+          src = dict(json.load(gzip.open(os.environ["OUT"] + "/catalogue_meta.json.gz"))["sources"])
+          src.update({
+              "osm": "download.geofabrik.de/russia-latest.osm.pbf",
+              "osmFetchedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+              "osmRun": os.environ["GITHUB_RUN_ID"],
+              "rebuilt": "data-osm.yml: bars and food from the Geofabrik extract of osmFetchedAt; towns and POIs "
+                         f"from {os.environ['RAW_BRANCH']}, extras from {os.environ['EXTRAS_BRANCH']}, photo meta "
+                         f"from {os.environ['PHOTOS_BRANCH']}",
+          })
+          json.dump(src, open(os.environ["RAW"] + "/sources.json", "w"), ensure_ascii=False)
+          PY
+      - name: Build the catalogue and the lock
+        run: |
+          VERSION="${{ inputs.version }}"
+          VERSION="${VERSION:-wd-$(date -u +%Y%m%d)-osm${{ github.run_number }}}"
+          python3 $T/build_catalogue.py "$RAW" --out "$OUT" --version "$VERSION" --built-at "$(date -u +%Y-%m-%d)" \
+            2>&1 | tee -a "$RAW/log.txt"
+          python3 $T/write_lock.py "$RAW" "$OUT" $T/catalogue.lock
+      - name: Size check (tests/unit/test_catalogue.py test_size_budget — 2.5 MB target, 4 MB hard limit)
+        run: |
+          ls -l "$OUT"/catalogue_*.json.gz | tee -a "$RAW/log.txt"
+          TOTAL=$(cat "$OUT"/catalogue_*.json.gz | wc -c)
+          echo "catalogue total: $TOTAL bytes" | tee -a "$RAW/log.txt"
+          if [ "$TOTAL" -gt 2500000 ]; then
+            echo "::warning::catalogue is $TOTAL bytes (> 2.5 MB): lower FOOD_CAP_* in build_catalogue.py"
+          fi
+      - name: Push to bot/data-osm-${{ github.run_number }} and bot/raw-osm-${{ github.run_number }}
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "verst-ci"
+          git config user.email "verst-ci@users.noreply.github.com"
+          git checkout -b "bot/data-osm-${{ github.run_number }}"
+          mkdir -p $T/report
+          cp -f "$RAW"/bars_failed.json "$RAW"/log.txt $T/report/ 2>/dev/null || true
+          git add backend/planner/verst_planner/resources/catalogue_*.json.gz $T/catalogue.lock
+          git add -A $T/report
+          git commit -m "data: bars and food from the OSM extract, run ${{ github.run_id }}" \
+                     -m "Generated by .github/workflows/data-osm.yml; see backend/planner/tools/data/catalogue.lock." || true
+          git push origin "bot/data-osm-${{ github.run_number }}"
+          # The raw OSM rows, to rebuild the same catalogue from the sandbox (artifacts are not reachable there).
+          git checkout --orphan "bot/raw-osm-${{ github.run_number }}"
+          git rm -rq --cached . && git clean -fdq -e data-raw
+          tar -C "$RAW" -czf osm-raw.tar.gz bars.json food.json sources.json
+          git add osm-raw.tar.gz
+          git commit -qm "data: OSM bars and food rows of run ${{ github.run_id }} (ODbL 1.0)"
+          git push origin "bot/raw-osm-${{ github.run_number }}"

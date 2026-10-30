@@ -1,0 +1,33 @@
+{
+  "id": "G10",
+  "slug": "edge_too_short",
+  "titleRu": "Тестовск → Ближний, 12 км",
+  "world": "edge_cases_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 58.0,
+      "lon": 50.0,
+      "label": "Тестовск"
+    },
+    "destination": {
+      "lat": 57.89148,
+      "lon": 50.0,
+      "label": "Ближний"
+    },
+    "crew": {
+      "adults": 2,
+      "children": 0,
+      "dog": false
+    },
+    "dailyKm": 300,
+    "startAt": "2026-10-24T08:00"
+  },
+  "expect": {
+    "error": "TOO_SHORT",
+    "costWorkings": [
+      "12 km < too_short_km 20 → TOO_SHORT"
+    ]
+  }
+}

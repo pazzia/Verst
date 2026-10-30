@@ -1,0 +1,9 @@
+# verst-api runtime dependencies (ADR-0020). Lock: requirements.lock (hashes), regenerate with
+#   uv pip compile requirements.in --generate-hashes --python-version 3.12 --exclude-newer <date ≥ 14 days ago> -o requirements.lock
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+psycopg[binary]
+psycopg-pool
+prometheus-client

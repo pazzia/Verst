@@ -1,0 +1,304 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-8",
+   "input_json": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "preset": "museums",
+    "durationMin": 480,
+    "crew": {
+     "adults": 2
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-8",
+   "titleRu": "Ярославль: музейный маршрут",
+   "townId": "t_yaroslavl",
+   "townName": "Ярославль",
+   "townPrep": "Ярославле",
+   "preset": "museums",
+   "startAt": "2026-10-23T10:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T17:57",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 9.1,
+   "walkMin": 156,
+   "durationMin": 478,
+   "requestedDurationMin": 480,
+   "crewNotesRu": [],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "finish": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "pl_yar_tolchkovo",
+     "kind": "museum",
+     "nameRu": "Церковь Иоанна Предтечи в Толчкове",
+     "lat": 57.636952,
+     "lon": 39.861012,
+     "arriveAt": "2026-10-23T10:41",
+     "departAt": "2026-10-23T11:43",
+     "dwellMin": 62,
+     "walkKmFromPrev": 2.4,
+     "walkMinFromPrev": 41,
+     "costRub": 300,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "10:00–17:00",
+      "openNow": true,
+      "source": "curated"
+     },
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "curated",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w02",
+     "poiId": "Q1189431",
+     "kind": "museum",
+     "nameRu": "Мемориальный дом-музей М. Богдановича",
+     "lat": 57.62452,
+     "lon": 39.87074,
+     "arriveAt": "2026-10-23T12:16",
+     "departAt": "2026-10-23T13:18",
+     "dwellMin": 62,
+     "walkKmFromPrev": 1.9,
+     "walkMinFromPrev": 33,
+     "costRub": 800,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w03",
+     "poiId": "pl_yar_spaso",
+     "kind": "monastery",
+     "nameRu": "Спасо-Преображенский монастырь",
+     "lat": 57.618865,
+     "lon": 39.894566,
+     "arriveAt": "2026-10-23T13:52",
+     "departAt": "2026-10-23T14:54",
+     "dwellMin": 62,
+     "walkKmFromPrev": 2.0,
+     "walkMinFromPrev": 35,
+     "costRub": 1000,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "curated"
+     },
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "monastery",
+     "poiKindRu": "Монастырь",
+     "placeSource": "curated",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w04",
+     "poiId": "Q3329597",
+     "kind": "museum",
+     "nameRu": "Ярославский художественный музей",
+     "lat": 57.62814,
+     "lon": 39.89718,
+     "arriveAt": "2026-10-23T15:18",
+     "departAt": "2026-10-23T16:20",
+     "dwellMin": 62,
+     "walkKmFromPrev": 1.4,
+     "walkMinFromPrev": 23,
+     "costRub": 800,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "11:00–21:00",
+      "openNow": true,
+      "source": "osm"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w05",
+     "poiId": "Q4085572",
+     "kind": "monument",
+     "nameRu": "Беседка на Волжской набережной",
+     "lat": 57.62994,
+     "lon": 39.89631,
+     "arriveAt": "2026-10-23T16:24",
+     "departAt": "2026-10-23T16:36",
+     "dwellMin": 12,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 5,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "attraction",
+     "poiKindRu": "Достопримечательность",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w06",
+     "poiId": "pl_yar_ilya",
+     "kind": "museum",
+     "nameRu": "Церковь Ильи Пророка",
+     "lat": 57.629717,
+     "lon": 39.892888,
+     "arriveAt": "2026-10-23T16:41",
+     "departAt": "2026-10-23T17:43",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 5,
+     "costRub": 400,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "curated"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "curated",
+     "placeAttributionRu": null
+    }
+   ],
+   "cost": {
+    "totalRub": 3300,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 3300
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     57.6261,
+     39.8845
+    ],
+    [
+     57.636952,
+     39.861012
+    ],
+    [
+     57.62452,
+     39.87074
+    ],
+    [
+     57.618865,
+     39.894566
+    ],
+    [
+     57.62814,
+     39.89718
+    ],
+    [
+     57.62994,
+     39.89631
+    ],
+    [
+     57.629717,
+     39.892888
+    ],
+    [
+     57.6261,
+     39.8845
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "townId": null,
+    "preset": "museums",
+    "durationMin": 480,
+    "interests": [],
+    "pace": "slow",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T10:00",
+    "crew": {
+     "adults": 2,
+     "children": 0,
+     "dog": false
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   },
+   "requestKey": "dd3d35a4d054006a"
+  },
+  "ms": 0
+ }
+}

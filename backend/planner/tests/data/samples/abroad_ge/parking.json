@@ -1,0 +1,18 @@
+[
+ {
+  "osm": "w7401",
+  "lat": 41.7015,
+  "lon": 44.8015,
+  "fee": "yes",
+  "charge": "2 GEL/hour",
+  "capacity": "40"
+ },
+ {
+  "osm": "w7402",
+  "lat": 41.7016,
+  "lon": 44.8016,
+  "fee": "yes",
+  "charge": "1 р/ч",
+  "capacity": null
+ }
+]

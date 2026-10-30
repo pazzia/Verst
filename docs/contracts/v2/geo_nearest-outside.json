@@ -1,0 +1,29 @@
+{
+ "request": {
+  "function": "geo_nearest",
+  "args": {
+   "world": "russia_v1",
+   "lat": 48.8566,
+   "lon": 2.3522
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "town": {
+    "id": "Q158101",
+    "name": "Мамоново",
+    "nameGenRu": "Мамонова",
+    "namePrepRu": "Мамонове",
+    "regionRu": "Калининградская область",
+    "tz": "Europe/Kaliningrad",
+    "lat": 54.46667,
+    "lon": 19.93333,
+    "population": 8177
+   },
+   "distanceKm": 1358.6,
+   "insideRussia": false
+  },
+  "ms": 0
+ }
+}

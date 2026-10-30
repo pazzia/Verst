@@ -1,0 +1,117 @@
+{
+  "id": "G03",
+  "slug": "msk_volgograd_dog_child",
+  "titleRu": "Москва → Волгоград, 500 км/день, с собакой и ребёнком",
+  "world": "central_russia_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва"
+    },
+    "destination": {
+      "lat": 48.708,
+      "lon": 44.5133,
+      "label": "Волгоград"
+    },
+    "crew": {
+      "adults": 2,
+      "children": 1,
+      "dog": true,
+      "childAges": [
+        5
+      ]
+    },
+    "dailyKm": 500,
+    "budget": 60000,
+    "startAt": "2026-10-24T07:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 2,
+    "nights": 1,
+    "kmRange": [
+      975,
+      1010
+    ],
+    "maxDayKm": 525,
+    "overnightTownIds": [
+      "t_tambov"
+    ],
+    "overnightFallbacks": [
+      "none"
+    ],
+    "warnings": [],
+    "mustIncludePlaceIds": [
+      "pl_tam_hotel_derzhavinskaya"
+    ],
+    "mustExcludePlaceIds": [
+      "pl_kotovsk_hotel_1",
+      "pl_kotovsk_hotel_2",
+      "pl_kotovsk_hotel_3"
+    ],
+    "stopKindsPerDay": {
+      "1": {
+        "fuel": [
+          1,
+          1
+        ]
+      },
+      "2": {
+        "fuel": [
+          0,
+          0
+        ]
+      }
+    },
+    "stopKmRange": {
+      "1": {
+        "fuel": [
+          427,
+          467
+        ]
+      }
+    },
+    "costTotalRub": {
+      "value": 17700,
+      "tolerancePct": 5
+    },
+    "costLinesRub": {
+      "lodging": {
+        "value": 5200,
+        "tolerancePct": 0
+      },
+      "tolls": {
+        "value": 400,
+        "tolerancePct": 0
+      },
+      "fuel": {
+        "value": 4850,
+        "tolerancePct": 5
+      },
+      "food": {
+        "value": 5600,
+        "tolerancePct": 0
+      }
+    },
+    "costFormulaContains": {
+      "food": "2,5 чел. × 4 приёма"
+    },
+    "remainingIsBudgetMinusTotal": true,
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "route: Москва → Волгоград on М-4/Р-22, 980 km of edges + detours ≈ 11 km → ≈ 991 km",
+      "fuel by region (8 l/100): Волгоградская 299 + 2 = 301 km × 61.30 = 1 474; Тамбовская 185 + 6 = 191 km × 60.50 = 923; Рязанская 166 + 2 = 168 km × 61.20 = 820; Московская 133 + 1 = 134 km × 61.80 = 662; Воронежская 125 + 1 = 126 km × 61.00 = 614; Липецкая 53 km × 60.80 = 258; Москва 19 km × 62.50 = 95 → Σ 4 845 → 4 850 (±5 %)",
+      "lodging (dog + family, 3 people): Тамбов Державинская 4.4 + 0.5 (guarded) + 0.3 − 0.52 = 4.68 > «Тамбов» 4.3 + 0.3 − 0.45 = 4.15 → 5 200 × 1 room",
+      "food: 2 adults + child of 5 (weight 0.5) = 2.5 people. Day 1 lunch Кафе «У дороги», Р-22 at km 445 (500, roadside check 500 + (k mod 4) · 100); dinner Тамбов median_low(650, 650, 850) = 650; Державинская has no confirmed breakfast (ADR-0019 E-3) → day 2 breakfast 0.6 × 650 = 390; day 2 lunch Кафе «Придорожное», Р-22 at km 745 → 700; finish 17:47 < 19:00 → no dinner. 2.5 × (500 + 650 + 390 + 700) = 5 600",
+      "sights (DEV-113 T1): day 1 cap 2 reached at Скопинское озеро 5.23 > next in pool Городской парк Скопина 3.6 + 0.5·walk·dog + 0.5·playground·kids + 0.5·curated = 5.1 (fixture 3.7 → 3.6, margin was 0.033)",
+      "tickets: Скопинское городище, Сад Мичурина, Набережная Тамбова are free → 0",
+      "tolls (ENG-02): М-4 ПВП км 71 (km 21–93) on Saturday 24.10 → weekend tariff 400 (weekday 310)",
+      "subtotal 4 850 + 400 + 5 200 + 5 600 + 0 = 16 050; reserve 1 610 (1 605 half up); total round_to(17 660, 100) = 17 700"
+    ]
+  }
+}

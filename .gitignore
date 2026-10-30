@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+.coverage
+.coverage.*
+htmlcov/
+
+# Golden-trip mismatch output
+*.actual.json
+
+# Gradle / Android
+.gradle/
+**/build/
+local.properties
+*.apk
+*.aab
+captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store

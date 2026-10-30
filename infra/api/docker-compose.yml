@@ -1,0 +1,109 @@
+# Verst beta on one VM in Russia (ENG-04, ADR-0020 §7): Caddy (TLS) → verst-api → PostgreSQL 16, daily
+# backups, and optionally GraphHopper on the same VM (profile "routing"; ADR-0017).
+#
+#   cp .env.example .env && $EDITOR .env
+#   docker compose build api
+#   docker compose --profile routing up -d        # or without --profile when GraphHopper runs elsewhere
+#
+# Only Caddy publishes ports. Images are pinned by tag here and by digest at release (README.md).
+name: verst
+
+services:
+  proxy:
+    image: caddy:2.11.6-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      VERST_DOMAIN: ${VERST_DOMAIN:?set VERST_DOMAIN in .env}
+      VERST_ACME_EMAIL: ${VERST_ACME_EMAIL:?set VERST_ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/api/Dockerfile
+    image: verst-api:${VERST_API_TAG:-local}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      VERST_DATABASE_URL: postgresql://verst_api:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/verst
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    expose:
+      - "8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    stop_grace_period: 35s
+
+  postgres:
+    image: postgres:16.14-trixie
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: verst
+      POSTGRES_USER: verst_api
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      TZ: Europe/Moscow
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - log_min_duration_statement=1000
+      # statements are logged without bind values (no coordinates or ids in parameters)
+      - -c
+      - log_parameter_max_length=0
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U verst_api -d verst"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    shm_size: 256m
+
+  backup:
+    image: prodrigestivill/postgres-backup-local:16-debian-d257e5d
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: verst
+      POSTGRES_USER: verst_api
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_EXTRA_OPTS: "-Z6 --no-owner --no-privileges"
+      SCHEDULE: "0 3 * * *"          # 03:00 Moscow time
+      BACKUP_KEEP_DAYS: "14"         # SPEC §11
+      BACKUP_KEEP_WEEKS: "4"
+      BACKUP_KEEP_MONTHS: "3"
+      HEALTHCHECK_PORT: "8080"
+      TZ: Europe/Moscow
+    volumes:
+      - ${VERST_BACKUP_DIR:-/srv/verst/backups}:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  graphhopper:
+    profiles: [routing]
+    extends:
+      file: ../routing/docker-compose.yml
+      service: graphhopper
+    ports: !reset []                 # internal network only: api reaches it as http://graphhopper:8989
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
