@@ -32,12 +32,12 @@
    "startAt": "2026-10-23T09:00",
    "startsTomorrow": false,
    "startNoteRu": null,
-   "endAt": "2026-10-23T10:46",
+   "endAt": "2026-10-23T10:38",
    "unlimited": false,
    "tz": "Europe/Moscow",
-   "walkKm": 4.3,
-   "walkMin": 57,
-   "durationMin": 107,
+   "walkKm": 2.1,
+   "walkMin": 29,
+   "durationMin": 99,
    "requestedDurationMin": 120,
    "crewNotesRu": [
     "С собакой: вода, пакеты и поводок; маршрут без закрытых мест."
@@ -58,44 +58,16 @@
    "stops": [
     {
      "id": "w01",
-     "poiId": "Q30890544",
-     "kind": "embankment",
-     "nameRu": "Кремлёвская набережная",
-     "lat": 55.80383,
-     "lon": 49.11676,
-     "arriveAt": "2026-10-23T09:16",
-     "departAt": "2026-10-23T09:31",
-     "dwellMin": 15,
-     "walkKmFromPrev": 1.3,
-     "walkMinFromPrev": 17,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": null,
-      "openNow": null,
-      "source": "default"
-     },
-     "noteRu": null,
-     "hasPhoto": true,
-     "tappable": true,
-     "unknownFacts": [],
-     "poiKind": "embankment",
-     "poiKindRu": "Набережная",
-     "placeSource": "wikidata",
-     "placeAttributionRu": null
-    },
-    {
-     "id": "w02",
-     "poiId": "Q4493322",
+     "poiId": "osm_w702946071",
      "kind": "park",
-     "nameRu": "Фуксовский сад",
-     "lat": 55.79973,
-     "lon": 49.12991,
-     "arriveAt": "2026-10-23T09:48",
-     "departAt": "2026-10-23T10:23",
+     "nameRu": "Сквер имени Асгата Галимзянова",
+     "lat": 55.79867,
+     "lon": 49.10286,
+     "arriveAt": "2026-10-23T09:07",
+     "departAt": "2026-10-23T09:42",
      "dwellMin": 35,
-     "walkKmFromPrev": 1.2,
-     "walkMinFromPrev": 16,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 8,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -104,13 +76,41 @@
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
+     "hasPhoto": false,
      "tappable": true,
      "unknownFacts": [],
      "poiKind": "park",
      "poiKindRu": "Парк",
-     "placeSource": "wikidata",
-     "placeAttributionRu": null
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w02",
+     "poiId": "osm_w129285240",
+     "kind": "park",
+     "nameRu": "Дворцовая площадь",
+     "lat": 55.80133,
+     "lon": 49.11147,
+     "arriveAt": "2026-10-23T09:53",
+     "departAt": "2026-10-23T10:28",
+     "dwellMin": 35,
+     "walkKmFromPrev": 0.8,
+     "walkMinFromPrev": 11,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     }
    ],
    "cost": {
@@ -136,12 +136,12 @@
      49.1088
     ],
     [
-     55.80383,
-     49.11676
+     55.79867,
+     49.10286
     ],
     [
-     55.79973,
-     49.12991
+     55.80133,
+     49.11147
     ],
     [
      55.7963,

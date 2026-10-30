@@ -45,10 +45,10 @@
    "crewNotesRu": [],
    "interestsWidened": false,
    "shorter": {
-    "reason": "places",
+    "reason": "reach",
     "requestedMin": 240,
     "actualMin": 196,
-    "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — больше открытых мест рядом нет"
+    "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — остальные места слишком далеко для пешей прогулки"
    },
    "returnToStart": true,
    "start": {
@@ -174,7 +174,7 @@
     },
     {
      "code": "SHORTER_THAN_ASKED",
-     "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — больше открытых мест рядом нет"
+     "messageRu": "Получилось 3 ч 15 мин вместо 4 ч — остальные места слишком далеко для пешей прогулки"
     }
    ],
    "responsibleNoteRu": null,

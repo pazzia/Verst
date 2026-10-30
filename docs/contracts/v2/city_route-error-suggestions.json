@@ -6,9 +6,9 @@
    "request_id": "c-walk-14",
    "input_json": {
     "start": {
-     "lat": 55.05,
-     "lon": 60.1,
-     "label": "Миасс"
+     "lat": 56.152,
+     "lon": 101.633,
+     "label": "Братск"
     },
     "preset": "beer",
     "adultConfirmed": true,
@@ -38,7 +38,7 @@
      "titleRu": "История, архитектура, парки и виды"
     }
    ],
-   "requestKey": "a4431880440691f2",
+   "requestKey": "0430daf0f8d9e5fa",
    "noData": [
     "beer"
    ],

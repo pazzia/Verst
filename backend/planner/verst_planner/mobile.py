@@ -32,6 +32,7 @@ import argparse
 import dataclasses
 import gc
 import json
+import math
 import sys
 import threading
 import time
@@ -48,7 +49,7 @@ from verst_planner import handoff as handoff_mod
 from verst_planner.adapters.catalogue import CataloguePorts, CatalogueWorld, build_catalogue_ports, compose
 from verst_planner.adapters.catalogue.world import WORLD_ID as CATALOGUE_WORLD
 from verst_planner.adapters.fake import GOLDEN_CLOCK, FakePorts, FakeWorld, build_fakes
-from verst_planner.catalogue import Catalogue, CatalogueError, load_packaged
+from verst_planner.catalogue import Catalogue, CatalogueError, CatPark, load_packaged, load_packaged_parks
 from verst_planner.catalogue.photos import image_urls
 from verst_planner.city import presets as city_presets_mod
 from verst_planner.city.route import NotEnoughPois, WalkTown, build_walk, request_key
@@ -131,10 +132,13 @@ class _World:
     catalogue: CatalogueWorld | None = None
     bars: GridIndex[str] | None = None
     food: GridIndex[str] | None = None
+    parks: GridIndex[str] | None = None
 
 
 _WORLDS: dict[str, _World] = {}
 _CATALOGUE: list[Catalogue] = []  # the loaded catalogue (0 or 1 element)
+_PARKS: dict[str, CatPark] = {}  # CEO 30.10: named OSM parks of the catalogue's towns (walk «парки»)
+PARK_KIND = "park"  # a garden walks like a park
 _CLOCK: SystemClock | _Fixed = SystemClock()
 _CANCELS: dict[str, CancelToken] = {}
 _TOMBSTONES: dict[str, None] = {}  # insertion-ordered set of ids cancelled before their plan started
@@ -1022,14 +1026,19 @@ def _load_catalogue() -> dict[str, Any]:
         food: GridIndex[str] = GridIndex(0.05)
         for f in cat.food:
             food.add(f.point, f.id)
+        park_list = load_packaged_parks(cat)
+        parks: GridIndex[str] = GridIndex(0.05)
+        for pk in park_list:
+            parks.add(pk.point, pk.id)
     finally:
         if was_enabled:
             gc.enable()
     gc.freeze()
-    _WORLDS[CATALOGUE_WORLD] = _World(
-        cw.world, ports, _planner(ports, _CLOCK, OPEN_DATA_CONFIG), cw, bars, food
-    )
+    planner = _planner(ports, _CLOCK, OPEN_DATA_CONFIG)
+    _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, planner, cw, bars, food, parks if park_list else None)
     _CATALOGUE[:] = [cat]
+    _PARKS.clear()
+    _PARKS.update((pk.id, pk) for pk in park_list)
     return {
         **cat.info(),
         "world": CATALOGUE_WORLD,
@@ -1087,7 +1096,7 @@ def _load_abroad(path: Any = None, rates_path: Any = None) -> dict[str, Any]:
         templates=ReasonTemplates.default(),
         parking=base.fakes.parking,
     )
-    _WORLDS[ABROAD_WORLD] = _World(aw.world, aw.ports, planner, aw.cw, base.bars, base.food)
+    _WORLDS[ABROAD_WORLD] = _World(aw.world, aw.ports, planner, aw.cw, base.bars, base.food, base.parks)
     return {**aw.info(), "ms": round((time.perf_counter() - t0) * 1000)}
 
 
@@ -1350,8 +1359,37 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                     price_known=False,
                 )
             )
+    park_weight = weights.get(PARK_KIND, 0.0)
+    if w.parks is not None and park_weight > 0:
+        for _d, pkid in w.parks.within(inp.start, radius):
+            pk = _PARKS[pkid]
+            if pkid in inp.exclude or pk.poi is not None:
+                continue  # a park with a `catalogue_pois` twin is already a sight candidate
+            hours = _safe_hours(pk.hours)
+            out.append(
+                Candidate(
+                    id=pk.id,
+                    name=pk.name,
+                    kind=PARK_KIND,
+                    point=pk.point,
+                    popularity=park_popularity(pk.area_m2),
+                    heritage=False,
+                    hours=hours,
+                    hours_verified=hours is not None,
+                    hours_source="osm" if hours is not None else "default",
+                    cost_rub=0,
+                    dwell_min=dwell_for(PARK_KIND, 0, inp),
+                    has_photo=False,
+                    weight=park_weight,
+                )
+            )
     out.sort(key=lambda c: (-round(c.base_score, 9), c.id))
     return out[: city_presets_mod.POOL_MAX]
+
+
+def park_popularity(area_m2: int) -> float:
+    """A bigger park is the likelier walk: 0.3 for a square of 100 m², 0.9 from 1 km² (log scale)."""
+    return max(0.3, min(0.9, 0.3 + 0.15 * (math.log10(max(area_m2, 1)) - 2)))
 
 
 def _kinds_near(w: _World, start: LatLon, kinds: frozenset[str], town_id: str | None) -> bool:
@@ -1370,6 +1408,8 @@ def _kinds_near(w: _World, start: LatLon, kinds: frozenset[str], town_id: str | 
             near |= {cat.food_by_id[f].kind for _d, f in w.food.within(start, km)} if w.food else set()
             if data_kinds & near:
                 return True
+    if PARK_KIND in kinds and w.parks is not None and w.parks.within(start, km):
+        return True
     if kinds & frozenset(city_presets_mod.SIGHT_KINDS):
         for p in w.fakes.places.places_near(start, km, frozenset({PlaceType.SIGHT})):
             if _poi_kind(w, p) in kinds:
@@ -1464,6 +1504,9 @@ def _walk_details(w: _World, result: dict[str, Any]) -> dict[str, Any]:
             food = cat.food_by_id.get(pid)
             if food is not None:
                 s["cuisine"] = food.cuisine
+        elif pid in _PARKS:
+            s["poiKind"] = PARK_KIND
+            s["poiKindRu"] = ru.kind_label(PARK_KIND)
         s.update(place_source(w, pid))
     return result
 
@@ -1820,6 +1863,28 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
             "lon": b.point.lon,
             "image": None,
             "hours": {"textRu": b.hours or ru.text("poi.hours_default"), "verified": False},
+            "ticket": None,
+            "isFictional": False,
+            "attributionRu": [ru.text("poi.osm")],
+            "wikidataId": None,
+            "placeSource": "osm",
+            "placeAttributionRu": ru.text(OSM_PLACE_ATTRIBUTION),
+        }
+    if pid in _PARKS:
+        pk = _PARKS[pid]
+        town_id = w.catalogue.town_of_qid.get(pk.town) if w.catalogue else None
+        town = w.world.towns.get(town_id or "")
+        return {
+            "id": pk.id,
+            "kind": "sight",
+            "poiKind": PARK_KIND,
+            "nameRu": pk.name,
+            "descriptionRu": None,
+            "townName": town.name_ru if town else None,
+            "lat": pk.point.lat,
+            "lon": pk.point.lon,
+            "image": None,
+            "hours": {"textRu": pk.hours, "verified": True} if pk.hours else None,
             "ticket": None,
             "isFictional": False,
             "attributionRu": [ru.text("poi.osm")],

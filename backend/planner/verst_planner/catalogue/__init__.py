@@ -10,6 +10,7 @@ A table document is ``{"v": 1, "n": N, "cols": {"name": [v0, v1, …], …}}``; 
 from __future__ import annotations
 
 import gzip
+import hashlib
 import io
 import json
 from collections.abc import Sequence
@@ -64,9 +65,9 @@ OPTIONAL_FILES = frozenset({"food"})
 """Files an older catalogue does not have (read as empty: the walk then says there is no such data yet)."""
 
 # CEO 29.10: named OSM parks and gardens with their area, for the walk «парки» (`tools/data/build_parks.py`).
-# A separate file, not in FILES: it ships on its own and `load_packaged` does not read it yet. `town` indexes
-# `catalogue_towns` of the build whose sha256 the document names (`townsSha256`); `area` is in m²; `poi` is
-# the `catalogue_pois` id of the same park or null.
+# A separate file, not in FILES: it ships on its own; `load_packaged_parks` reads it (CEO 30.10). `town`
+# indexes `catalogue_towns` of the build whose sha256 the document names (`townsSha256`); `area` is in m²;
+# `poi` is the `catalogue_pois` id of the same park or null.
 PARKS_FILE = "catalogue_parks.json.gz"
 PARK_KINDS = ("park", "garden")
 PARK_COLS = ("id", "name", "kind", "lat", "lon", "town", "area", "poi", "hours")
@@ -125,6 +126,20 @@ class CatBar:
     kind: str
     point: LatLon
     town: str
+    hours: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class CatPark:
+    """A named OSM park or garden (`catalogue_parks`): a walk stop «park» when no POI is the same park."""
+
+    id: str
+    name: str
+    kind: str  # park | garden
+    point: LatLon
+    town: str  # the town's Wikidata id
+    area_m2: int
+    poi: str | None  # the `catalogue_pois` id of the same park, if any
     hours: str | None
 
 
@@ -386,6 +401,45 @@ def parking_points(doc: Any) -> list[CatParking]:
     ]
 
 
+def parks_from_doc(doc: Any, towns: Sequence[CatTown]) -> list[CatPark]:
+    """`catalogue_parks` decoded; `towns` = `catalogue_towns` in file order (the build of `townsSha256`)."""
+    if not isinstance(doc, dict) or doc.get("v") != 1:
+        raise CatalogueError("parks: unsupported format")
+    c, kinds = doc["cols"], doc["kinds"]
+    out = []
+    for i, pid in enumerate(c["id"]):
+        out.append(
+            CatPark(
+                id=str(pid),
+                name=str(c["name"][i]),
+                kind=str(kinds[c["kind"][i]]),
+                point=LatLon(c["lat"][i] / COORD_SCALE, c["lon"][i] / COORD_SCALE),
+                town=towns[c["town"][i]].id,
+                area_m2=int(c["area"][i]),
+                poi=c["poi"][i],
+                hours=c["hours"][i],
+            )
+        )
+    return out
+
+
+def load_packaged_parks(cat: Catalogue) -> list[CatPark]:
+    """The packaged parks of `cat`, or [] when the file is missing or was built from other towns (its
+    `townsSha256` is not the shipped `catalogue_towns`): the walk then says it has no park data."""
+    try:
+        raw = resources.read_bytes(PARKS_FILE)
+        towns_sha = hashlib.sha256(resources.read_bytes(FILES["towns"])).hexdigest()
+    except (FileNotFoundError, OSError):
+        return []
+    doc = load_gz(raw, PARKS_FILE)
+    if not isinstance(doc, dict) or doc.get("townsSha256") != towns_sha:
+        return []
+    try:
+        return parks_from_doc(doc, cat.towns)
+    except (KeyError, IndexError, TypeError, ValueError) as e:
+        raise CatalogueError(f"parks: malformed ({e!r})") from e
+
+
 def load_packaged() -> Catalogue:
     """The catalogue shipped in `verst_planner/resources` (raises `CatalogueError`)."""
     docs: dict[str, Any] = {}
@@ -417,6 +471,7 @@ __all__ = [
     "TOWN_COLS",
     "CatBar",
     "CatFood",
+    "CatPark",
     "CatPoi",
     "CatTown",
     "Catalogue",
@@ -429,5 +484,7 @@ __all__ = [
     "from_docs",
     "load_gz",
     "load_packaged",
+    "load_packaged_parks",
+    "parks_from_doc",
     "to_coord",
 ]
