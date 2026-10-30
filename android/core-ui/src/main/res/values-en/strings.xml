@@ -262,6 +262,7 @@
     <string name="road_ticket_unknown">ticket price unknown</string>
     <string name="abroad_error_no_server">This build has no server, so a trip abroad can\'t be planned.</string>
     <string name="abroad_error_no_consent">To plan a trip abroad, agree to planning on the server.</string>
+    <string name="abroad_consent_body">Only the Verst server plans trips abroad. The route points, the crew, the budget and the car go to a test server in the Netherlands. The trip is not stored there. Offline, such a trip cannot be planned.</string>
     <string name="sign_border">BORDER</string>
     <string name="road_border_open">Documents and fees</string>
     <string name="border_label">BORDER CROSSING</string>
