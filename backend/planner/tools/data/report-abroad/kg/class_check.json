@@ -1,0 +1,32 @@
+{
+ "labels": {
+  "Q813": "Kyrgyzstan",
+  "Q2977": "cathedral",
+  "Q839954": "archaeological site",
+  "Q132834": "madrasa",
+  "Q22698": "park",
+  "Q162875": "mausoleum",
+  "Q6017969": "scenic viewpoint",
+  "Q7930989": "city or town",
+  "Q1107656": "garden",
+  "Q16970": "church building",
+  "Q23413": "castle",
+  "Q183342": "federal city of Russia",
+  "Q263274": "kremlin",
+  "Q174782": "square",
+  "Q570116": "tourist attraction",
+  "Q32815": "mosque",
+  "Q1851368": "waterfront",
+  "Q2319498": "architectural landmark",
+  "Q4989906": "monument",
+  "Q33506": "museum",
+  "Q179700": "statue",
+  "Q5003624": "memorial",
+  "Q44613": "monastery",
+  "Q57821": "fortification"
+ },
+ "mismatches": {},
+ "ok": true,
+ "resolved": {},
+ "unresolved": []
+}
