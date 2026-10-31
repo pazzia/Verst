@@ -125,7 +125,7 @@ fun StepperKey(glyph: String, enabled: Boolean, cd: String, onClick: () -> Unit,
     ) { Txt(glyph, T.button.glyph.copy(fontWeight = FontWeight.W700), if (enabled) C.camper.ink else C.text.disabled) }
 }
 
-/** components §15 `PrimaryCta`; camper fork: the orange craft button (white label + arrow), 58 high, full width. */
+/** components §15 `PrimaryCta`; camper fork: the orange craft button (dark ink label + arrow), 58 high, full width. */
 @Composable
 fun PrimaryCta(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     CraftPressable(

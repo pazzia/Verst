@@ -399,7 +399,7 @@ private fun ReserveRow(line: CostLineDto, on: Boolean, busy: Boolean, onToggle: 
                     Modifier.size(22.dp).clip(box).background(if (on) C.camper.green else C.camper.field).border(CraftDefaults.BorderThin, C.camper.border, box),
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (on) GlyphIcon(Glyph.CHECK, C.camper.onOrange, 16.dp, Modifier.testTag("waybill.reserve.check"))
+                    if (on) GlyphIcon(Glyph.CHECK, C.camper.onAccent, 16.dp, Modifier.testTag("waybill.reserve.check"))
                 }
                 Spacer(Modifier.width(10.dp))
                 Column {

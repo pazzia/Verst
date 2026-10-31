@@ -473,7 +473,7 @@ internal fun BoxScope.CarMarker(top: Float, bottom: Float, progress: Float, x: D
         drawRoundRect(C.camper.border, Offset(1.75f * d, 1f * d), Size(14.5f * d, 30f * d), CornerRadius(5 * d), style = Stroke(1.5f * d))
         drawRoundRect(C.camper.border.copy(alpha = 0.85f), Offset(4.5f * d, 4.5f * d), Size(9 * d, 3.5f * d), CornerRadius(1.5f * d))
         // the roof: the van's white paper over the orange
-        drawRoundRect(C.camper.onOrange.copy(alpha = 0.35f), Offset(5 * d, 10 * d), Size(8 * d, 8 * d), CornerRadius(2 * d))
+        drawRoundRect(C.camper.onAccent.copy(alpha = 0.35f), Offset(5 * d, 10 * d), Size(8 * d, 8 * d), CornerRadius(2 * d))
         drawPath(
             Path().apply { moveTo(4f * d, 26f * d); lineTo(14f * d, 26f * d); lineTo(12.5f * d, 21.5f * d); lineTo(5.5f * d, 21.5f * d); close() },
             C.camper.border.copy(alpha = 0.85f),

@@ -386,12 +386,14 @@ object DesignTokens {
             val inkMuted: Color = Color(0xFF6E5847)
             /** Camper: primary accent fill (CraftButton, active tab and tile, selected chip; --accent-orange) */
             val orange: Color = Color(0xFFE87A3D)
-            /** Camper: pressed primary button fill */
-            val orangePressed: Color = Color(0xFFD2672C)
+            /** Camper: pressed primary button fill (ink label 4.8:1) */
+            val orangePressed: Color = Color(0xFFD96E31)
             /** Camper: orange as TEXT on paper (overlines «КЕМПЕР-ГИД», links, prices) = accent.yellowText */
             val orangeText: Color = Color(0xFFA84B14)
-            /** Camper: text and icons on camper.orange / green / blue fills (mockup white) */
-            val onOrange: Color = Color(0xFFFFFFFF)
+            /** Camper: text and icons on camper.orange fills (= camper.ink, 5.4:1; the mockup white was 2.88:1) */
+            val onOrange: Color = Color(0xFF2C1E13)
+            /** Camper: text and icons on camper.green / blue / stamp fills (mockup white) */
+            val onAccent: Color = Color(0xFFFFFFFF)
             /** Camper: badge fill, logo tile (--accent-amber) */
             val amber: Color = Color(0xFFF4A261)
             /** Camper: badge text on amber (mockup brown) */

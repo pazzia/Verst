@@ -199,7 +199,7 @@ private fun SeatTile(seat: Seat, side: String, onClick: () -> Unit, modifier: Mo
 @Composable
 private fun DogTile(on: Boolean, onClick: () -> Unit, modifier: Modifier) {
     val cd = stringResource(if (on) R.string.cd_instruments_dog_on else R.string.cd_instruments_dog_off)
-    val fg = if (on) C.camper.onOrange else C.camper.inkMuted
+    val fg = if (on) C.camper.onAccent else C.camper.inkMuted
     Column(
         modifier
             .height(68.dp)

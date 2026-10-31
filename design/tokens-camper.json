@@ -11,7 +11,7 @@
       "accent.yellow becomes an AMBER fill (#F5A867, with text.onLight 7.7:1); it stays readable as text on the dark-blue selected sign row (5.5:1). The brand orange #E87A3D is camper.orange, used by the Craft components.",
       "Yellow-as-text tokens (accent.yellowText, budget.tight, stretch.text) become burnt orange / dark amber (>= 5:1 on paper).",
       "GOST road signs stay signs (sign.blue = the mockup blue #1E4FA3, sign.brown); only sign.white / sign.black are warmed.",
-      "White text on camper.orange (CraftButton, mockup) measures 2.88:1: below AA for 16 sp text. Switch camper.onOrange to camper.ink (5.4:1) if the CEO wants AA there."
+      "Text and icons on camper.orange are dark brown ink (camper.onOrange = ink, 5.4:1; CEO 31.10 «сделай как считаешь нужно»): the mockup white measured 2.88:1, below AA. White stays on the darker fills (camper.onAccent on green, blue, stamp)."
     ],
     "regenerate": "python3 design/tools/apply_day_palette.py && python3 design/tools/apply_camper_palette.py && python3 tools/sync_design_tokens.py; check: python3 -I design/tools/apply_camper_palette.py --check"
   },
@@ -643,16 +643,20 @@
       "use": "Camper: primary accent fill (CraftButton, active tab and tile, selected chip; --accent-orange)"
     },
     "orangePressed": {
-      "value": "#D2672C",
-      "use": "Camper: pressed primary button fill"
+      "value": "#D96E31",
+      "use": "Camper: pressed primary button fill (ink label 4.8:1)"
     },
     "orangeText": {
       "value": "#A84B14",
       "use": "Camper: orange as TEXT on paper (overlines «КЕМПЕР-ГИД», links, prices) = accent.yellowText"
     },
     "onOrange": {
+      "value": "#2C1E13",
+      "use": "Camper: text and icons on camper.orange fills (= camper.ink, 5.4:1; the mockup white was 2.88:1)"
+    },
+    "onAccent": {
       "value": "#FFFFFF",
-      "use": "Camper: text and icons on camper.orange / green / blue fills (mockup white)"
+      "use": "Camper: text and icons on camper.green / blue / stamp fills (mockup white)"
     },
     "amber": {
       "value": "#F4A261",

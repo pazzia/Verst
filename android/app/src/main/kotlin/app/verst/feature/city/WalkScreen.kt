@@ -321,7 +321,7 @@ private fun HeaderCard(w: WalkRouteDto) {
             Modifier.fillMaxWidth().semantics(mergeDescendants = true) { heading(); contentDescription = "${w.titleRu}, $kmText" },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            CraftIconTile(R.drawable.ic_tourist_walk, active = false, size = 36.dp, fill = C.camper.green, tint = C.camper.onOrange)
+            CraftIconTile(R.drawable.ic_tourist_walk, active = false, size = 36.dp, fill = C.camper.green, tint = C.camper.onAccent)
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 Txt(overline, CraftType.overline, C.camper.greenText, maxLines = 1)
@@ -597,7 +597,7 @@ private fun StopNumber(n: Int) {
     val (fill, fg) = when ((n - 1) % 3) {
         0 -> C.camper.orange to C.camper.onOrange
         1 -> C.camper.amber to C.camper.onAmber
-        else -> C.camper.green to C.camper.onOrange
+        else -> C.camper.green to C.camper.onAccent
     }
     Box(
         Modifier.size(StopDisc).craftShadow(StopDisc / 2, CraftDefaults.TileShadow, CraftDefaults.TileShadow, C.camper.border)

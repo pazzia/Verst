@@ -371,7 +371,7 @@ internal fun WalkInfoPlate(text: String, tag: String) {
         Box(
             Modifier.size(22.dp).clip(CircleShape).background(C.camper.green).border(CraftDefaults.BadgeBorder, C.camper.border, CircleShape),
             contentAlignment = Alignment.Center,
-        ) { GlyphIcon(Glyph.CHECK, C.camper.onOrange, 12.dp) }
+        ) { GlyphIcon(Glyph.CHECK, C.camper.onAccent, 12.dp) }
         Txt(text, CraftType.body, C.camper.ink, Modifier.weight(1f))
     }
 }

@@ -176,7 +176,7 @@ private fun CrewCard(adults: Int, children: Int, dog: Boolean, onEdit: (() -> Un
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     repeat(adults.coerceAtLeast(0)) { CraftIconTile(R.drawable.ic_crew_adult, active = false, size = 22.dp, fill = C.camper.amber, tint = C.camper.border) }
                     repeat(children.coerceAtLeast(0)) { CraftIconTile(R.drawable.ic_crew_child, active = true, size = 22.dp) }
-                    if (dog) CraftIconTile(R.drawable.ic_ui_dog, active = false, size = 22.dp, fill = C.camper.green, tint = C.camper.onOrange)
+                    if (dog) CraftIconTile(R.drawable.ic_ui_dog, active = false, size = 22.dp, fill = C.camper.green, tint = C.camper.onAccent)
                 }
             }
             // D-IR-20: the settings entry of the windshield (was the round gear in the corner of the scene)
@@ -371,7 +371,7 @@ private fun CityCard(town: String, onClick: () -> Unit) {
         onClick = onClick,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            CraftIconTile(R.drawable.ic_tourist_walk, active = false, size = 36.dp, fill = C.camper.green, tint = C.camper.onOrange)
+            CraftIconTile(R.drawable.ic_tourist_walk, active = false, size = 36.dp, fill = C.camper.green, tint = C.camper.onAccent)
             Column(Modifier.weight(1f)) {
                 Txt(stringResource(R.string.windshield_city_title), CraftType.cardTitle, C.camper.ink, maxLines = 1)
                 Txt(stringResource(R.string.windshield_city_sub, town), CraftType.caption, C.camper.inkSoft, maxLines = 1)

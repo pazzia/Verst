@@ -479,7 +479,7 @@ private fun SuggestionRow(s: SuggestionDto, km: Int?, index: Int, tagPrefix: Str
             // 5.12 §2: address rows carry «У» (улица)
             Txt(
                 if (address) stringResource(R.string.navigator_type_address) else stringResource(if (city) R.string.navigator_type_city else R.string.navigator_type_place),
-                T.badge, C.camper.onOrange,
+                T.badge, C.camper.onAccent,
             )
         }
         Spacer(Modifier.width(10.dp))

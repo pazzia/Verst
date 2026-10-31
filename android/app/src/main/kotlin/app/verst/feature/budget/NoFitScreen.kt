@@ -142,7 +142,7 @@ private fun LimitSign(budget: Int, modifier: Modifier) {
             .clearAndSetSemantics {}
             .testTag("nofit.sign"),
         contentAlignment = Alignment.Center,
-    ) { Txt(text, style, C.camper.onOrange, maxLines = 1, align = TextAlign.Center) }
+    ) { Txt(text, style, C.camper.onAccent, maxLines = 1, align = TextAlign.Center) }
 }
 
 /** components §20 `BudgetOption` as a craft row: title, sub, the estimate (green when it fits), chevron. */

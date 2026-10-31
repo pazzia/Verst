@@ -278,8 +278,8 @@ fun CraftBadge(text: String, modifier: Modifier = Modifier, color: CraftBadgeCol
     val (fill, fg) = when (color) {
         CraftBadgeColor.AMBER -> C.camper.amber to C.camper.onAmber
         CraftBadgeColor.ORANGE -> C.camper.orange to C.camper.onOrange
-        CraftBadgeColor.GREEN -> C.camper.green to C.camper.onOrange
-        CraftBadgeColor.BLUE -> C.camper.blue to C.camper.onOrange
+        CraftBadgeColor.GREEN -> C.camper.green to C.camper.onAccent
+        CraftBadgeColor.BLUE -> C.camper.blue to C.camper.onAccent
     }
     val shape = RoundedCornerShape(CraftDefaults.BadgeRadius)
     Box(
@@ -322,7 +322,7 @@ fun CraftChip(
 
 /**
  * A rounded-square icon tile (tab bar, stop markers, the header gear): 2 dp brown border, 2 × 2 dp hard shadow;
- * [active] = orange with a white icon, else paper with a brown icon. [fill] / [tint] override both (the amber logo
+ * [active] = orange with an ink icon, else paper with a brown icon. [fill] / [tint] override both (the amber logo
  * tile). With [onClick] the tile sits in a 44 dp touch target; [cd] is its TalkBack label.
  */
 @Composable
