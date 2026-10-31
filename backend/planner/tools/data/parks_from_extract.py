@@ -26,7 +26,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from bars_from_extract import KINDS
+from bars_from_extract import osm_object
 from fetch_overpass import all_towns, assign, radius_all_m
 
 PARK_LEISURE = frozenset({"park", "garden"})
@@ -88,19 +88,6 @@ def area_and_centre(geom: dict[str, Any]) -> tuple[float, float, float] | None:
     if total <= 0:
         return None
     return total, sy / total, sx / total
-
-
-def osm_object(fid: str) -> tuple[str, int] | None:
-    """The OSM object of an `osmium export --add-unique-id=type_id` feature id: `n1`/`w2`/`r3` as they are, and
-    an area `a<id>` back to its way (`a246` → way 123: area id = 2 × way id) or relation (`a91` → relation 45:
-    2 × relation id + 1). Run 1 of data-abroad.yml (29.10) found no park at all: osmium writes every park
-    polygon with an `a…` id (the `w…` feature of a closed way is its LineString, which has no area)."""
-    if len(fid) < 2 or not fid[1:].isdigit():
-        return None
-    n = int(fid[1:])
-    if fid[0] == "a":
-        return ("relation", (n - 1) // 2) if n % 2 else ("way", n // 2)
-    return (KINDS[fid[0]], n) if fid[0] in KINDS else None
 
 
 def parks_from_features(lines: Iterable[str], min_area: float = MIN_AREA_M2) -> list[dict[str, Any]]:

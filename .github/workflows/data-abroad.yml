@@ -262,23 +262,7 @@ jobs:
         run: |
           sudo apt-get install -y -qq osmium-tool >/dev/null
           mkdir -p "$RAW" ru-parks
-          # One connection got ~1 MB/s from Geofabrik at night (run 2 timed out at 75 min): 8 ranged parts in
-          # parallel, glued and checked against the published md5 (taken before and after, so a mid-download
-          # update of russia-latest fails here instead of giving a broken extract).
-          URL=https://download.geofabrik.de/russia-latest.osm.pbf
-          MD5=$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)
-          LEN=$(curl -fsSIL --retry 3 -A "$UA" "$URL" | tr -d '\r' | awk 'tolower($1)=="content-length:"{n=$2} END{print n}')
-          echo "russia-latest: $LEN bytes, md5 $MD5" | tee "$RAW/log.txt"
-          N=8; P=$(( (LEN + N - 1) / N )); pids=()
-          for i in $(seq 0 $((N - 1))); do
-            S=$((i * P)); E=$((S + P - 1)); [ "$E" -ge "$LEN" ] && E=$((LEN - 1))
-            curl -fsSL --retry 5 --retry-all-errors -A "$UA" -r "$S-$E" -o "$RUNNER_TEMP/ru.part$i" "$URL" &
-            pids+=($!)
-          done
-          for p in "${pids[@]}"; do wait "$p"; done
-          for i in $(seq 0 $((N - 1))); do cat "$RUNNER_TEMP/ru.part$i"; rm -f "$RUNNER_TEMP/ru.part$i"; done > "$RUNNER_TEMP/ru.osm.pbf"
-          echo "$MD5  $RUNNER_TEMP/ru.osm.pbf" | md5sum -c - | tee -a "$RAW/log.txt"
-          [ "$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)" = "$MD5" ]
+          tools/ci/fetch_pbf.sh https://download.geofabrik.de/russia-latest.osm.pbf "$RUNNER_TEMP/ru.osm.pbf" | tee "$RAW/log.txt"
           osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" wr/leisure=park,garden -o "$RUNNER_TEMP/parks.osm.pbf" --overwrite
           osmium export "$RUNNER_TEMP/parks.osm.pbf" -f geojsonseq --add-unique-id=type_id \
             -o "$RUNNER_TEMP/parks.geojsonseq" --overwrite

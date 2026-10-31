@@ -477,6 +477,54 @@ jobs:
           path: ci-out/
           retention-days: 14
 
+  test-release:
+    # CEO 31.10: every green build of a working branch at one permanent public link, no GitHub login, no zip:
+    # releases/download/verst-test-latest/Verst-test-latest.apk (main keeps verst-latest). The tag points at the
+    # default branch: a GITHUB_TOKEN may not create a ref on a branch history that changes workflow files; the
+    # notes name the branch commit the APK was built from.
+    name: Test build at a permanent link (working branches)
+    needs: [planner, build, e2e]
+    if: >-
+      ${{ !cancelled() && github.ref != 'refs/heads/main'
+          && needs.planner.result == 'success' && needs.build.result == 'success'
+          && (needs.e2e.result == 'success' || needs.e2e.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: verst-test-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: apks
+      - name: Publish ${{ env.TAG }}
+        env:
+          E2E_RESULT: ${{ needs.e2e.result }}
+          HEAD_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          mkdir -p dist
+          APK=$(find apks -name app-demo.apk | head -1)
+          cp "$APK" "dist/Verst-test-latest.apk"
+          cp "$APK" "dist/Verst-$VERST_VERSION.apk"
+          (cd dist && sha256sum "Verst-$VERST_VERSION.apk" > "Verst-$VERST_VERSION.apk.sha256")
+          {
+            echo "Верста $VERST_VERSION — тестовая сборка ветки \`${{ github.ref_name }}\` (ещё не в main)."
+            echo
+            echo "- Постоянная ссылка на последнюю тестовую сборку: https://github.com/${{ github.repository }}/releases/download/$TAG/Verst-test-latest.apk"
+            echo "- Тот же файл с номером версии: \`Verst-$VERST_VERSION.apk\` (sha256 рядом)"
+            echo "- Проверка на эмуляторе: ${E2E_RESULT}"
+            echo "- Собрано из коммита ${{ github.sha }} (метка релиза стоит на main — так требует GitHub)"
+            echo
+            echo "Изменения: $(echo "${HEAD_MSG:-ручной запуск}" | head -1)"
+          } > dist/notes.md
+          gh release delete "$TAG" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" dist/Verst-test-latest.apk "dist/Verst-$VERST_VERSION.apk" \
+            "dist/Verst-$VERST_VERSION.apk.sha256" \
+            --repo "${{ github.repository }}" --target "${{ github.event.repository.default_branch }}" --prerelease \
+            --title "Верста $VERST_VERSION · тестовая сборка" --notes-file dist/notes.md
+          echo "::notice title=Test build::https://github.com/${{ github.repository }}/releases/download/$TAG/Verst-test-latest.apk"
+
   # --------------------------------------------------------------------------------------- ci-logs
   ci-logs:
     name: publish diagnostics to ci-logs

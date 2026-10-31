@@ -26,6 +26,19 @@ from fetch_overpass import all_towns, assign, radius_all_m
 KINDS = {"n": "node", "w": "way", "r": "relation"}
 
 
+def osm_object(fid: str) -> tuple[str, int] | None:
+    """The OSM object of an `osmium export --add-unique-id=type_id` feature id: `n1`/`w2`/`r3` as they are, and
+    an area `a<id>` back to its way (`a246` → way 123: area id = 2 × way id) or relation (`a91` → relation 45:
+    2 × relation id + 1). osmium writes a closed way or multipolygon that is an area (a bar or café drawn as its
+    building) with an `a…` id only: before 31.10 every such place was lost (parks found it on 29.10)."""
+    if len(fid) < 2 or not fid[1:].isdigit():
+        return None
+    n = int(fid[1:])
+    if fid[0] == "a":
+        return ("relation", (n - 1) // 2) if n % 2 else ("way", n // 2)
+    return (KINDS[fid[0]], n) if fid[0] in KINDS else None
+
+
 def _coords(geom: dict[str, Any]) -> list[list[float]]:
     t, c = geom.get("type"), geom.get("coordinates")
     if t == "Point":
@@ -42,23 +55,26 @@ def _coords(geom: dict[str, Any]) -> list[list[float]]:
 
 
 def elements_from_features(lines: Iterable[str], require_name: bool = True) -> list[dict[str, Any]]:
-    """GeoJSON-seq features (`id` = n123/w123/r123) → Overpass-shaped elements with a centre point."""
+    """GeoJSON-seq features (`id` = n123/w123/r123/a246) → Overpass-shaped elements with a centre point (an
+    `a…` area is its way or relation; the first feature of an object wins)."""
     out = []
+    seen: set[tuple[str, int]] = set()
     for raw in lines:
         line = raw.strip().lstrip("\x1e")
         if not line:
             continue
         f = json.loads(line)
-        fid = str(f.get("id", ""))
+        obj = osm_object(str(f.get("id", "")))
         pts = _coords(f.get("geometry") or {})
-        if not fid or fid[0] not in KINDS or not pts:
+        if obj is None or not pts or obj in seen:
             continue
         lon = sum(p[0] for p in pts) / len(pts)
         lat = sum(p[1] for p in pts) / len(pts)
         tags = {k: v for k, v in (f.get("properties") or {}).items() if isinstance(v, str)}
         if require_name and not tags.get("name"):
             continue
-        out.append({"type": KINDS[fid[0]], "id": int(fid[1:]), "lat": lat, "lon": lon, "tags": tags})
+        seen.add(obj)
+        out.append({"type": obj[0], "id": obj[1], "lat": lat, "lon": lon, "tags": tags})
     return out
 
 

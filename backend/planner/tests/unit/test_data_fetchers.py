@@ -203,10 +203,16 @@ class ExtractTest(unittest.TestCase):
             f("r3", {"type": "MultiPolygon", "coordinates": [[[[10, 10], [12, 12]]]]}, name="Пивоварня"),
             f("n4", {"type": "Point", "coordinates": [1, 1]}, amenity="pub"),  # no name
             f("x5", {"type": "Point", "coordinates": [1, 1]}, name="?"),
+            # CEO 31.10: a bar drawn as its building is an osmium area: a246 = way 123, a91 = relation 45
+            f("a246", {"type": "Polygon", "coordinates": [[[4, 4], [6, 4], [6, 6], [4, 6]]]}, name="Бар-дом"),
+            f("a91", {"type": "MultiPolygon", "coordinates": [[[[8, 8], [9, 9]]]]}, name="Рюмочная"),
+            # the same way 2 again as an area: the first feature of an object wins
+            f("a4", {"type": "Polygon", "coordinates": [[[0, 0], [2, 0], [2, 2], [0, 2]]]}, name="Паб"),
             "",
         ]
         els = self.ex.elements_from_features(lines)
-        self.assertEqual([(e["type"], e["id"]) for e in els], [("node", 1), ("way", 2), ("relation", 3)])
+        got = [(e["type"], e["id"]) for e in els]
+        self.assertEqual(got, [("node", 1), ("way", 2), ("relation", 3), ("way", 123), ("relation", 45)])
         self.assertEqual((els[1]["lat"], els[1]["lon"]), (1.0, 1.0))
         self.assertEqual((els[2]["lat"], els[2]["lon"]), (11.0, 11.0))
         self.assertEqual(els[0]["tags"], {"name": "Бар", "amenity": "bar"})
