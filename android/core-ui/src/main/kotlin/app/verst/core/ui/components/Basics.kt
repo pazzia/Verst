@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -28,6 +27,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -87,80 +87,75 @@ fun BackLink(label: String, color: Color, cd: String, onClick: () -> Unit, modif
 
 private val BackLabelMax = 150.dp
 
-/** components §13 `InfoChip`. */
+/** components §13 `InfoChip`; camper fork: a white-paper craft pill with a 1.5 dp brown border. */
 @Composable
 fun InfoChip(text: String, modifier: Modifier = Modifier) {
+    val shape = RoundedCornerShape(CraftDefaults.BadgeRadius)
     Box(
         modifier
-            .clip(RoundedCornerShape(DesignTokens.radius.r12))
-            .background(C.dash.controlAlt)
+            .clip(shape)
+            .background(C.camper.field)
+            .border(CraftDefaults.BadgeBorder, C.camper.border, shape)
             .padding(horizontal = 9.dp, vertical = DesignTokens.space.s4),
-    ) { Txt(text, T.body.smStrong, C.text.primary, maxLines = 1) }
+    ) { Txt(text, T.body.smStrong, C.camper.ink, maxLines = 1) }
 }
 
-/** components §13 `MoodChip` / `FrontSeatChip`: white when on, dashed outline when off. */
+/** components §13 `MoodChip` / `FrontSeatChip`; camper fork: [CraftChip] (orange when on, white paper when off). */
 @Composable
 fun ToggleChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, role: Role = Role.RadioButton) {
-    val shape = RoundedCornerShape(22.dp)
-    Box(
-        modifier
-            .defaultMinSize(minHeight = DesignTokens.size.touchMin)
-            .clip(shape)
-            .then(if (selected) Modifier.background(C.sign.white) else Modifier.border(DesignTokens.stroke.w1, C.dash.outlineDashed, shape))
-            .clickable(role = role, onClick = onClick)
-            .padding(horizontal = DesignTokens.space.s14),
-        contentAlignment = Alignment.Center,
-    ) { Txt(text, T.body.mdStrong, if (selected) C.text.onLight else C.text.secondary, maxLines = 1) }
+    CraftChip(text, selected, onClick, modifier, role)
 }
 
-/** components §5 `StepperKey` (− / +). */
+/** components §5 `StepperKey` (− / +); camper fork: a header-tan key, 2 dp brown border, 2 × 2 dp hard shadow. */
 @Composable
 fun StepperKey(glyph: String, enabled: Boolean, cd: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val radius = CraftDefaults.FieldRadius
+    val shape = RoundedCornerShape(radius)
     Box(
         modifier
             .size(DesignTokens.size.keyW, DesignTokens.size.keyH)
-            .clip(RoundedCornerShape(DesignTokens.radius.r10))
-            .background(C.dash.controlAlt)
-            // S-28 `shadow.key`: a 3 dp inner bottom band of `dash.keyShadow` (none when disabled).
-            .drawBehind { if (enabled) drawRect(C.dash.keyShadow, androidx.compose.ui.geometry.Offset(0f, size.height - 3.dp.toPx()), androidx.compose.ui.geometry.Size(size.width, 3.dp.toPx())) }
+            // the hard shadow replaces S-28 `shadow.key` (none when disabled)
+            .then(if (enabled) Modifier.craftShadow(radius, CraftDefaults.TileShadow, CraftDefaults.TileShadow, C.camper.border) else Modifier)
+            .clip(shape)
+            .background(C.camper.header)
+            .border(CraftDefaults.BorderThin, if (enabled) C.camper.border else C.camper.border.copy(alpha = 0.4f), shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics { contentDescription = cd },
         contentAlignment = Alignment.Center,
-    ) { Txt(glyph, T.button.glyph, if (enabled) C.text.primary else C.text.disabled) }
+    ) { Txt(glyph, T.button.glyph.copy(fontWeight = FontWeight.W700), if (enabled) C.camper.ink else C.text.disabled) }
 }
 
-/** components §15 `PrimaryCta`: yellow, 58 high, label + arrow. */
+/** components §15 `PrimaryCta`; camper fork: the orange craft button (white label + arrow), 58 high, full width. */
 @Composable
 fun PrimaryCta(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier
-            .fillMaxWidth()
-            .height(DesignTokens.size.ctaH)
-            .clip(RoundedCornerShape(DesignTokens.radius.r12))
-            .background(C.accent.yellow)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = DesignTokens.space.s18),
-        verticalAlignment = Alignment.CenterVertically,
+    CraftPressable(
+        fill = C.camper.orange,
+        pressedFill = C.camper.orangePressed,
+        enabled = true,
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth().height(DesignTokens.size.ctaH),
+        minHeight = DesignTokens.size.ctaH,
+        horizontalPadding = DesignTokens.space.s18,
+        arrangement = Arrangement.Start,
     ) {
-        Txt(text, T.cta.md, C.text.onLight, maxLines = 1, modifier = Modifier.weight(1f))
-        Icon(R.drawable.ic_arrow_right, C.text.onLight, 22.dp)
+        Txt(text, T.cta.md, C.camper.onOrange, maxLines = 1, modifier = Modifier.weight(1f))
+        Icon(R.drawable.ic_arrow_right, C.camper.onOrange, 22.dp)
     }
 }
 
-/** components §15 `SecondaryButton`. */
+/** components §15 `SecondaryButton`; camper fork: the paper craft button ([CraftSecondaryButton] look, 56 high). */
 @Composable
 fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(DesignTokens.radius.r12)
-    Box(
-        modifier
-            .height(DesignTokens.size.buttonH)
-            .clip(shape)
-            .background(C.dash.control)
-            .border(DesignTokens.stroke.w1, C.dash.outline, shape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = DesignTokens.space.s12),
-        contentAlignment = Alignment.Center,
-    ) { Txt(text, T.button.md, C.text.primary, maxLines = 1, align = TextAlign.Center) }
+    CraftPressable(
+        fill = C.camper.paper,
+        pressedFill = C.camper.header,
+        enabled = true,
+        onClick = onClick,
+        modifier = modifier.height(DesignTokens.size.buttonH),
+        minHeight = DesignTokens.size.buttonH,
+        horizontalPadding = DesignTokens.space.s12,
+        arrangement = Arrangement.Center,
+    ) { Txt(text, T.button.md, C.camper.ink, maxLines = 1, align = TextAlign.Center) }
 }
 
 /** A placeholder plate for loading rows (components §16 `Shimmer`, static: no infinite animation). */

@@ -1,0 +1,682 @@
+{
+  "$meta": {
+    "name": "Verst «Кемпер-гид» camper paper palette (fork camper-ui)",
+    "version": "1.0.0",
+    "date": "2026-10-31",
+    "basis": "design/camper/mockup-13-screens.html (CEO 31.10): paper #F5EFEB / #FAF4EE, header #EFE6DC, brown #4A3525, text #322317, orange #E87A3D, amber #F4A261, green #588157, blue #1E4FA3, stamp #B23A22.",
+    "structure": "\"color\" has the leaf names of every colour token in design/DesignTokens.kt (tokens.json \"color\" + the day proposed tokens accent.yellowText, dash.odometerDrum); \"camper\" holds the new DesignTokens.color.camper.* group. Same alpha semantics as tokens.json.",
+    "rules": [
+      "One palette in both themes: design/tools/apply_camper_palette.py writes every colour token as a plain value (no Palette.day switch), so the Settings theme choice changes nothing visible.",
+      "Light paper, dark brown ink: text.primary >= 7:1 on dash.base / dash.raised; secondary, muted, note >= 4.5:1; disabled >= 3:1.",
+      "accent.yellow becomes an AMBER fill (#F5A867, with text.onLight 7.7:1); it stays readable as text on the dark-blue selected sign row (5.5:1). The brand orange #E87A3D is camper.orange, used by the Craft components.",
+      "Yellow-as-text tokens (accent.yellowText, budget.tight, stretch.text) become burnt orange / dark amber (>= 5:1 on paper).",
+      "GOST road signs stay signs (sign.blue = the mockup blue #1E4FA3, sign.brown); only sign.white / sign.black are warmed.",
+      "White text on camper.orange (CraftButton, mockup) measures 2.88:1: below AA for 16 sp text. Switch camper.onOrange to camper.ink (5.4:1) if the CEO wants AA there."
+    ],
+    "regenerate": "python3 design/tools/apply_day_palette.py && python3 design/tools/apply_camper_palette.py && python3 tools/sync_design_tokens.py; check: python3 -I design/tools/apply_camper_palette.py --check"
+  },
+  "color": {
+    "dash": {
+      "base": {
+        "value": "#F5EFEB",
+        "use": "App background; root of Windshield, Navigator, Drive, Exit"
+      },
+      "raised": {
+        "value": "#FAF4EE",
+        "use": "Dashboard surface; root of Instruments, Road ahead, Waybill"
+      },
+      "control": {
+        "value": "#E9DDD0",
+        "use": "Bezels: navigator frame, start-button bezel, instrument-well border, dashboard rim line, secondary button fill"
+      },
+      "controlAlt": {
+        "value": "#FFFDF9",
+        "use": "Keys (- / +), mirror bezel and stem, info chips"
+      },
+      "well": {
+        "value": "#FFFDF9",
+        "use": "Instrument well (odometer, fuel gauge) background"
+      },
+      "face": {
+        "value": "#FFF9F2",
+        "use": "Start-button face; odometer drums 1-3"
+      },
+      "keyShadow": {
+        "value": "#C2AC95",
+        "use": "Inset bottom edge of keys (0 -3dp)"
+      },
+      "pressed": {
+        "value": "#F0E5D9",
+        "use": "Pressed row background on dashboard surfaces (mockup :hover)"
+      },
+      "outline": {
+        "value": "#A08468",
+        "use": "Outline buttons (заменить, Сохранить офлайн); filled seat background"
+      },
+      "outlineDashed": {
+        "value": "#86694F",
+        "use": "Empty-seat dashed border; front-passenger chip border when off"
+      },
+      "bench": {
+        "value": "#EADFD2",
+        "use": "Back bench inside the large mirror"
+      },
+      "odometerFrame": {
+        "value": "#2A1D13",
+        "use": "Odometer digit frame"
+      },
+      "odometerDrum": {
+        "value": "#3A2A1D",
+        "use": "Odometer drums 1-3 behind sign.white digits"
+      }
+    },
+    "interior": {
+      "liner": {
+        "value": "#D2BEA6",
+        "use": "Roof liner and A-pillars"
+      },
+      "pole": {
+        "value": "#8A735D",
+        "use": "Static roadside poles; itinerary row connector stub"
+      }
+    },
+    "mirror": {
+      "glass": {
+        "value": "#4A3525",
+        "use": "Mirror glass background and crew silhouettes in the small mirror"
+      },
+      "glare": {
+        "value": "#FFFFFF",
+        "alpha": 0.22,
+        "use": "Diagonal glare band on the small mirror"
+      },
+      "label": {
+        "value": "#2C1E13",
+        "use": "Mirror caption, back links on sky, adult silhouette in the large mirror"
+      }
+    },
+    "text": {
+      "primary": {
+        "value": "#2C1E13",
+        "use": "Main text on dark"
+      },
+      "secondary": {
+        "value": "#5C4636",
+        "use": "Secondary text on dark"
+      },
+      "muted": {
+        "value": "#6E5847",
+        "use": "Labels, captions, back links (min 11 sp)"
+      },
+      "note": {
+        "value": "#4F3B2C",
+        "use": "Stop note line on Road ahead"
+      },
+      "seatEmpty": {
+        "value": "#644E3E",
+        "use": "Empty-seat label \"свободно\" (AA fix; mockup #8C8C93 = 4.27:1)"
+      },
+      "onLight": {
+        "value": "#2C1E13",
+        "use": "Text and pictograms on white or yellow"
+      },
+      "onLightMuted": {
+        "value": "#5C4636",
+        "use": "Small label on the white Waybill button"
+      },
+      "disabled": {
+        "value": "#85705E",
+        "use": "Disabled glyphs and labels (WCAG-exempt, still >= 3:1 on #161618)"
+      }
+    },
+    "sign": {
+      "blue": {
+        "value": "#1E4FA3",
+        "use": "GOST blue: overhead sign, service signs, exit sign, hotel button, city badge"
+      },
+      "blueSelected": {
+        "value": "#163B7A",
+        "use": "Selected overhead-sign row (AA fix; mockup rgba(255,255,255,.14) = #3E68B0 gives yellow 3.82:1)"
+      },
+      "bluePressed": {
+        "value": "#1A468F",
+        "use": "Pressed overhead-sign row and pressed blue button"
+      },
+      "blueText": {
+        "value": "#D6E0F5",
+        "use": "Small text on blue signs (header, footer)"
+      },
+      "plate": {
+        "value": "#FFFFFF",
+        "alpha": 0.1,
+        "use": "Loading placeholder plates on blue signs"
+      },
+      "plateHighlight": {
+        "value": "#FFFFFF",
+        "alpha": 0.2,
+        "use": "Shimmer highlight on placeholder plates"
+      },
+      "brown": {
+        "value": "#6B3E26",
+        "use": "Tourist (sight) signs; place badge"
+      },
+      "white": {
+        "value": "#FFFAF2",
+        "use": "City sign plate, sign borders, pictogram plates"
+      },
+      "black": {
+        "value": "#2A1D13",
+        "use": "City-sign border, pictogram strokes"
+      }
+    },
+    "accent": {
+      "yellow": {
+        "value": "#F5A867",
+        "use": "Selection, primary CTAs, prices, focus ring; dark backgrounds only"
+      },
+      "yellowPressed": {
+        "value": "#EB9550",
+        "use": "Pressed yellow CTA; pressed yellow link (mockup a:hover)"
+      },
+      "red": {
+        "value": "#B23A22",
+        "use": "Start-button ring, fuel-gauge E arc"
+      },
+      "redPulse": {
+        "value": "#B23A22",
+        "alpha": 0.55,
+        "use": "Start-button pulse ring at t=0"
+      },
+      "redText": {
+        "value": "#A3301B",
+        "use": "Red text on dark: gauge \"E\", overspend, offline plate (AA fix; #D8402B = 4.27:1 on well)"
+      },
+      "yellowText": {
+        "value": "#A84B14",
+        "use": "Yellow as TEXT or thin line (prices, «вести», icons, radio, input focus border, cursor, progress fill, step check)"
+      }
+    },
+    "signal": {
+      "green": {
+        "value": "#588157",
+        "use": "Turn signal only"
+      }
+    },
+    "navi": {
+      "screen": {
+        "value": "#FBF6F0",
+        "use": "Navigator display background"
+      },
+      "field": {
+        "value": "#FFFDF9",
+        "use": "Inputs and chips on the navigator; selected hotel row"
+      },
+      "fieldBorder": {
+        "value": "#7A5E48",
+        "use": "Input border; outline button border; street badge"
+      },
+      "label": {
+        "value": "#A84B14",
+        "use": "Navigator labels, secondary actions"
+      },
+      "labelSecondary": {
+        "value": "#644E3E",
+        "use": "Field captions, sub-lines"
+      },
+      "text": {
+        "value": "#2C1E13",
+        "use": "Distances, reason sentence, chip text"
+      },
+      "hint": {
+        "value": "#6E5847",
+        "use": "Placeholder and section labels on the navigator (AA fix; mockup #5F7487 = 3.34:1 on field)"
+      },
+      "list": {
+        "value": "#FFFDF9",
+        "use": "Suggestion row background"
+      },
+      "listSelected": {
+        "value": "#FCE6D3",
+        "use": "Selected suggestion row"
+      },
+      "divider": {
+        "value": "#E3D4C3",
+        "use": "List border/dividers, progress-bar track"
+      },
+      "dashed": {
+        "value": "#9C8169",
+        "use": "Dashed button borders (text identifies the control)"
+      },
+      "radio": {
+        "value": "#7A6350",
+        "use": "Unselected radio ring (WCAG 1.4.11 fix; mockup #3A5266 = 2.31:1 on screen)"
+      }
+    },
+    "sky": {
+      "band1": {
+        "value": "#F1D3B3",
+        "use": "Sunset band 1 (top)"
+      },
+      "band2": {
+        "value": "#F4DCC1",
+        "use": "Sunset band 2; mirror sky"
+      },
+      "band3": {
+        "value": "#F6E4CF",
+        "use": "Sunset band 3"
+      },
+      "band4": {
+        "value": "#F8EBDC",
+        "use": "Sunset band 4"
+      },
+      "band5": {
+        "value": "#FAF1E7",
+        "use": "Sunset band 5 (horizon)"
+      },
+      "night": {
+        "value": "#2B2018",
+        "use": "Night sky on Exit"
+      },
+      "hills": {
+        "value": "#A9B48F",
+        "use": "Hill silhouette"
+      }
+    },
+    "scene": {
+      "sun": {
+        "value": "#FFD9A0",
+        "use": "Sun disc; town lights on Exit"
+      },
+      "moon": {
+        "value": "#F2E3B3",
+        "use": "Crescent moon on Exit"
+      },
+      "star": {
+        "value": "#FFF6E8",
+        "use": "Stars on Exit"
+      },
+      "groundDay": {
+        "value": "#9CAF7E",
+        "use": "Fields (day/dusk); mirror ground"
+      },
+      "groundNight": {
+        "value": "#1F2A1C",
+        "use": "Fields at night (Exit)"
+      },
+      "road": {
+        "value": "#6E6258",
+        "use": "Asphalt; itinerary road column"
+      },
+      "roadNight": {
+        "value": "#2E2A27",
+        "use": "Asphalt at night (Exit)"
+      },
+      "roadEdge": {
+        "value": "#FFFAF2",
+        "use": "Road edge lines and lane dashes"
+      },
+      "roadEdgeNight": {
+        "value": "#D9D2C6",
+        "use": "Road edge lines at night (Exit)"
+      },
+      "headlight": {
+        "value": "#FFECAA",
+        "alpha": 0.1,
+        "use": "Headlight beam on Exit"
+      }
+    },
+    "crew": {
+      "adult": {
+        "value": "#4A3525",
+        "use": "Adult silhouette (large mirror)"
+      },
+      "child": {
+        "value": "#E87A3D",
+        "use": "Child silhouette (large mirror)"
+      },
+      "dog": {
+        "value": "#B07A45",
+        "use": "Dog in the boot"
+      }
+    },
+    "paper": {
+      "sheet": {
+        "value": "#FFFBF5",
+        "use": "Waybill paper"
+      },
+      "lines": {
+        "value": "#C9B6A1",
+        "use": "Form lines, row dividers"
+      },
+      "text": {
+        "value": "#2C1E13",
+        "use": "Printed text, table rules"
+      },
+      "label": {
+        "value": "#644E3E",
+        "use": "Printed small labels (AA fix; mockup #5B7186 = 4.49:1)"
+      },
+      "ink": {
+        "value": "#1E4FA3",
+        "use": "Handwriting ink"
+      },
+      "inkRed": {
+        "value": "#B23A22",
+        "use": "Handwritten overspend (new; #D8402B on paper = 3.98:1)"
+      },
+      "stamp": {
+        "value": "#B23A22",
+        "use": "Stamp (drawn at 0.85 alpha = #715AAD effective)"
+      },
+      "clip": {
+        "value": "#8A735D",
+        "use": "Clipboard clip"
+      },
+      "clipShadow": {
+        "value": "#5C4636",
+        "use": "Clip inset bottom edge"
+      }
+    },
+    "city": {
+      "sky": {
+        "value": "#F1D3B3",
+        "use": "City-walk scene: evening sky behind the facades (= sky.band1)"
+      },
+      "facadeA": {
+        "value": "#CDA27C",
+        "use": "City scene: near facades"
+      },
+      "facadeB": {
+        "value": "#DDC3A6",
+        "use": "City scene: middle facades"
+      },
+      "facadeC": {
+        "value": "#C9B9A6",
+        "use": "City scene: far facades and roof line"
+      },
+      "window": {
+        "value": "#FBEBD3",
+        "use": "Lit windows and shop fronts (= scene.sun tone)"
+      },
+      "windowOff": {
+        "value": "#6B5545",
+        "use": "Unlit windows"
+      },
+      "lamp": {
+        "value": "#EFE6DC",
+        "use": "Street-lamp heads and their glow core"
+      },
+      "lampGlow": {
+        "value": "#FFFFFF",
+        "alpha": 0.12,
+        "use": "Street-lamp glow disc"
+      },
+      "sidewalk": {
+        "value": "#CFC2B3",
+        "use": "Pavement of the walk column and the city scene"
+      },
+      "joint": {
+        "value": "#B8A998",
+        "use": "Pavement tile joints"
+      },
+      "curb": {
+        "value": "#8A7A6A",
+        "use": "Kerb line beside the pavement"
+      },
+      "footprint": {
+        "value": "#4A3525",
+        "alpha": 0.45,
+        "use": "Moving footprints in the walk column"
+      }
+    },
+    "photo": {
+      "mat": {
+        "value": "#EFE6DC",
+        "use": "Photo frame background: placeholder, letterbox mat, loading base"
+      },
+      "matHighlight": {
+        "value": "#F7F0E8",
+        "use": "Placeholder pattern and shimmer highlight"
+      },
+      "scrim": {
+        "value": "#000000",
+        "alpha": 0.62,
+        "use": "Bottom gradient behind the photo credit (alpha at the bottom edge)"
+      },
+      "credit": {
+        "value": "#F4F4F0",
+        "use": "Photo credit text on the scrim"
+      },
+      "border": {
+        "value": "#A68E77",
+        "use": "1 dp inner border of the photo frame (keeps white photos from bleeding into white text)"
+      },
+      "ink": {
+        "value": "#8A735D",
+        "use": "Placeholder illustration lines"
+      },
+      "accent": {
+        "value": "#CDBCA8",
+        "use": "Placeholder illustration fills (dome, trees, glass)"
+      },
+      "phMuseum": {
+        "value": "#EFE6DC",
+        "use": "Placeholder mat: museum"
+      },
+      "phChurch": {
+        "value": "#F0E4DE",
+        "use": "Placeholder mat: church, monastery, kremlin"
+      },
+      "phPark": {
+        "value": "#E5EADB",
+        "use": "Placeholder mat: park, garden"
+      },
+      "phMonument": {
+        "value": "#EEE7DF",
+        "use": "Placeholder mat: monument, memorial, square"
+      },
+      "phView": {
+        "value": "#E4E8E5",
+        "use": "Placeholder mat: viewpoint, embankment"
+      },
+      "phBar": {
+        "value": "#F2E4D5",
+        "use": "Placeholder mat: bar, рюмочная, pub, craft"
+      },
+      "phCity": {
+        "value": "#ECE5DD",
+        "use": "Placeholder mat: town, hotel area, other"
+      }
+    },
+    "budget": {
+      "overFill": {
+        "value": "#F9E1D9",
+        "use": "«Не помещается в бюджет» plate fill"
+      },
+      "overBorder": {
+        "value": "#B23A22",
+        "use": "«Не помещается» plate border (= accent.red)"
+      },
+      "tight": {
+        "value": "#8A4E0A",
+        "use": "«Впритык» text and dot (= accent.yellow)"
+      }
+    },
+    "kind": {
+      "fill": {
+        "value": "#F6E6D6",
+        "use": "Category tag fill (МУЗЕЙ, ПАРК…) on rows and cards (Sprint 4)"
+      },
+      "border": {
+        "value": "#6B3E26",
+        "use": "Category tag border (= tourist brown)"
+      },
+      "text": {
+        "value": "#6B3E26",
+        "use": "Category tag text (AA on fill)"
+      }
+    },
+    "stretch": {
+      "fill": {
+        "value": "#FDEBD3",
+        "use": "«РАЗМИНКА N МИН» tag fill (fun preset stops)"
+      },
+      "border": {
+        "value": "#B36A1E",
+        "use": "«РАЗМИНКА» tag border"
+      },
+      "text": {
+        "value": "#8A4E0A",
+        "use": "«РАЗМИНКА» tag text (= accent.yellow)"
+      }
+    },
+    "hours": {
+      "open": {
+        "value": "#44703F",
+        "use": "Opening hours «открыто» text / dot (Sprint 4 walks, cards)"
+      },
+      "openFill": {
+        "value": "#44703F",
+        "alpha": 0.12,
+        "use": "«открыто» pill fill"
+      },
+      "closed": {
+        "value": "#A3301B",
+        "use": "«сегодня закрыто» text (= accent.redText)"
+      },
+      "closedFill": {
+        "value": "#A3301B",
+        "alpha": 0.1,
+        "use": "«закрыто» pill fill"
+      },
+      "unknown": {
+        "value": "#5C4636",
+        "use": "«часы не указаны» (= text.secondary)"
+      }
+    },
+    "info": {
+      "fill": {
+        "value": "#E6EEDF",
+        "use": "Green info plate fill: how the walk was adapted to the crew"
+      },
+      "border": {
+        "value": "#9DB58F",
+        "use": "Green info plate border"
+      },
+      "mark": {
+        "value": "#44703F",
+        "use": "Green info plate check disc"
+      }
+    },
+    "odometer": {
+      "fill": {
+        "value": "#2A1D13",
+        "use": "Odometer tag under a Road-ahead sign («193 км»)"
+      },
+      "border": {
+        "value": "#5C4636",
+        "use": "Odometer tag border (= dash.outline)"
+      }
+    },
+    "overlay": {
+      "scrim": {
+        "value": "#2C1E13",
+        "alpha": 0.45,
+        "use": "Scrim behind bottom sheets and dialogs (new)"
+      },
+      "focus": {
+        "value": "#1E4FA3",
+        "use": "Keyboard focus ring, 2dp, offset 2dp"
+      },
+      "returnFlash": {
+        "value": "#F4A261",
+        "alpha": 0.3,
+        "use": "Returned-row highlight on Road ahead / walk list (motion.returnToItem)"
+      }
+    }
+  },
+  "camper": {
+    "page": {
+      "value": "#F5EFEB",
+      "use": "Camper: page background behind every screen (--bg-paper)"
+    },
+    "paper": {
+      "value": "#FAF4EE",
+      "use": "Camper: card paper (CraftCard, secondary button, idle icon tile; --card-paper)"
+    },
+    "header": {
+      "value": "#EFE6DC",
+      "use": "Camper: header bar, tab bar, sunken wells and the «Заменить» button fill"
+    },
+    "field": {
+      "value": "#FFFDF9",
+      "use": "Camper: input / read-only field fill (white paper)"
+    },
+    "border": {
+      "value": "#4A3525",
+      "use": "Camper: brown border of cards, buttons, fields, tiles and badges (--border-brown)"
+    },
+    "shadow": {
+      "value": "#4A3525",
+      "alpha": 0.25,
+      "use": "Camper: hard offset shadow of cards (3, 4 dp; --border-brown at 25 %)"
+    },
+    "divider": {
+      "value": "#4A3525",
+      "alpha": 0.2,
+      "use": "Camper: thin and dashed dividers inside cards (--border-brown at 20 %)"
+    },
+    "ink": {
+      "value": "#2C1E13",
+      "use": "Camper: main text (--text-dark, darkened 2 % for 4.5:1 on dash.outline)"
+    },
+    "inkSoft": {
+      "value": "#5C4636",
+      "use": "Camper: secondary text, field captions (8.0:1 on paper)"
+    },
+    "inkMuted": {
+      "value": "#6E5847",
+      "use": "Camper: muted labels and footnotes (>= 4.5:1 on page, paper, header)"
+    },
+    "orange": {
+      "value": "#E87A3D",
+      "use": "Camper: primary accent fill (CraftButton, active tab and tile, selected chip; --accent-orange)"
+    },
+    "orangePressed": {
+      "value": "#D2672C",
+      "use": "Camper: pressed primary button fill"
+    },
+    "orangeText": {
+      "value": "#A84B14",
+      "use": "Camper: orange as TEXT on paper (overlines «КЕМПЕР-ГИД», links, prices) = accent.yellowText"
+    },
+    "onOrange": {
+      "value": "#FFFFFF",
+      "use": "Camper: text and icons on camper.orange / green / blue fills (mockup white)"
+    },
+    "amber": {
+      "value": "#F4A261",
+      "use": "Camper: badge fill, logo tile (--accent-amber)"
+    },
+    "onAmber": {
+      "value": "#4A3525",
+      "use": "Camper: badge text on amber (mockup brown)"
+    },
+    "green": {
+      "value": "#557C54",
+      "use": "Camper: green accent fill, badges «Включён», walking mode (--accent-green #588157, 2 % darker for 4.5:1 with white)"
+    },
+    "greenText": {
+      "value": "#44703F",
+      "use": "Camper: green as TEXT on paper (savings «−4 000 ₽», «Резерв»)"
+    },
+    "blue": {
+      "value": "#1E4FA3",
+      "use": "Camper: blue accent (abroad, border badge; --accent-blue = sign.blue)"
+    },
+    "stamp": {
+      "value": "#B23A22",
+      "use": "Camper: stamp red (dashed stamp «ПРОВЕРЕНО», over-budget disc)"
+    }
+  }
+}

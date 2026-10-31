@@ -204,6 +204,61 @@ ICONS['crew-dog'] = [
     rrect(32 * k - 6 * k - 9 * k, 0, 9 * k, 14 * k, 5 * k, 5 * k, rot=18),
 ]
 
+# Fork camper-ui (CEO 31.10): «Кемпер-гид» UI icons (ic_ui_*), our own drawings after the mockup's subjects
+# (the mockup's FontAwesome glyphs are not copied). Outline style, stroke.icon.pictogram, tinted at use.
+UI_W = 2.2
+
+def poly(pts):
+    """Filled polygon, positive winding (unions with the stroke outlines)."""
+    pts = list(pts)
+    if area(pts) < 0: pts.reverse()
+    return 'M' + 'L'.join(P(q) for q in pts) + 'Z'
+
+def ui_icon(name, d, w=UI_W, extra=()):
+    ICONS['ui-' + name] = (outline(d, w) if d else []) + list(extra)
+
+# camper van, side view: body with the cab slope, cab and side windows, two wheels
+ui_icon('van', 'M5.4 17.5H4a1.5 1.5 0 0 1-1.5-1.5V8A2 2 0 0 1 4.5 6H15l4.5 4.5h0.5A1.5 1.5 0 0 1 21.5 12v4a1.5 1.5 0 0 1-1.5 1.5h-1.4'
+        'M10.6 17.5h2.8M15.2 6.5v4.3h4.3M5.5 9.5h5.5', extra=ring((8, 17.5), 2, UI_W) + ring((16, 17.5), 2, UI_W))
+# compass: rim and a tilted needle
+ui_icon('compass', '', extra=ring((12, 12), 9, UI_W) + [poly([(16.2, 7.8), (13.4, 13.4), (7.8, 16.2), (10.6, 10.6)])])
+# sliders: three rails with knobs at different positions
+ui_icon('sliders', 'M3.5 6h17M3.5 12h17M3.5 18h17', extra=[disc((9, 6), 2.4), disc((15.5, 12), 2.4), disc((7, 18), 2.4)])
+# route: start dot, an S-shaped road, finish dot
+ui_icon('route', 'M5 18.5h9.5a3.25 3.25 0 0 0 0-6.5h-5a3.25 3.25 0 0 1 0-6.5H19', extra=[disc((4.5, 18.5), 2.3), disc((19.5, 5.5), 2.3)])
+# receipt: a sheet with a torn (zigzag) bottom and three lines
+ui_icon('receipt', 'M5.5 2.5H18.5V21L16.333 19.5L14.167 21L12 19.5L9.833 21L7.667 19.5L5.5 21ZM9 7.5h6M9 11.5h6M9 15.5h3.5')
+# gear: rim, eight teeth, hub
+ui_icon('gear', 'M12 2.9v2.2M12 18.9v2.2M2.9 12h2.2M18.9 12h2.2M5.57 5.57l1.55 1.55M16.88 16.88l1.55 1.55M5.57 18.43l1.55-1.55M16.88 7.12l1.55-1.55',
+        w=3.0, extra=ring((12, 12), 6.3, UI_W) + ring((12, 12), 2.4, UI_W))
+# search: lens and handle
+ui_icon('search', 'M15.2 15.2l5.3 5.3', w=2.6, extra=ring((10.5, 10.5), 6, UI_W))
+# camera: body with the viewfinder bump, lens
+ui_icon('camera', 'M2.5 8.5a2 2 0 0 1 2-2h2.8L9 4h6l1.7 2.5h2.8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2Z',
+        extra=ring((12, 13.2), 3.6, UI_W))
+# tent: ground line, A-frame with crossed poles, door
+ui_icon('tent', 'M2 20.5h20M4 20.5L12 6l8 14.5M12 6L10.3 3M12 6l1.7-3M9 20.5l3-5.5 3 5.5')
+# passport: booklet, globe, name line
+ui_icon('passport', 'M6.5 2.5H17.5a2 2 0 0 1 2 2V19.5a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V4.5a2 2 0 0 1 2-2ZM9 17.5h6M8.6 10h6.8',
+        extra=ring((12, 10), 3.4, UI_W))
+# location arrow: the navigator's heading arrow, filled
+ui_icon('location-arrow', 'M20 4L13.2 20L11.2 12.8L4 10.8Z', w=2.0, extra=[poly([(20, 4), (13.2, 20), (11.2, 12.8), (4, 10.8)])])
+# chevron right
+ui_icon('chevron-right', 'M9 5l7 7-7 7', w=2.8)
+# road in perspective: two edges and the centre dashes
+ui_icon('road', 'M8.5 3L4 21M15.5 3L20 21M12 3.5v2.5M12 10v3M12 17v3.5')
+# dog, side view facing right: filled body, neck and head with an ear and a snout; legs and tail as strokes
+ui_icon('dog', 'M7 15l-1 5.5M9.8 15.5v5M14.2 15.5v5M16.6 15l0.9 5.5M5.4 11.5L3 8.2', extra=[
+    rrect(4.6, 10, 13.4, 6, 3, 3),
+    poly([(13.6, 11), (15.4, 7.5), (19, 8.8), (18, 12.4)]),
+    rrect(14.4, 5, 5.6, 5.2, 2.6, 2.6),
+    rrect(17.8, 7, 4.4, 3.2, 1.6, 1.6),
+    rrect(14, 4.4, 2.6, 5.6, 1.3, 1.3, rot=12),
+])
+# beer mug: glass, foam cap, handle, two highlights
+ui_icon('beer', 'M5 7.5h10V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2ZM15 10h2.5a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H15M8.5 11v6.5M11.5 11v6.5'
+        'M5 7.5A2.5 2.5 0 0 1 9 5.5A2.5 2.5 0 0 1 13 5.5A2.5 2.5 0 0 1 15 7.5')
+
 SOURCES = {k: v for k, v in list(ARROWS.items())}
 
 def write():

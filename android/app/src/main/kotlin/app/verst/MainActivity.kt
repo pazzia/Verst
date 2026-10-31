@@ -19,8 +19,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Box
 import app.verst.feature.report.ReportSheet
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.ui.platform.LocalDensity
+import app.verst.core.ui.theme.DesignTokens
+import app.verst.feature.common.AppHeader
+import app.verst.feature.common.AppTabBar
+import app.verst.nav.activeTab
+import app.verst.nav.openSettingsFromHeader
+import app.verst.nav.selectTab
+import app.verst.nav.tabEnabled
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -196,10 +213,10 @@ class MainActivity : ComponentActivity() {
     fun pickTripsFolder() = folderPicker.launch(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // S-02: transparent bars with light icons on the dark UI (the scene/dashboard draw behind them).
+        // S-02, camper fork: transparent bars with DARK icons on the paper UI (the header and the tab bar draw behind them).
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
         )
         super.onCreate(savedInstanceState)
         // ENG-05: AppMetrica only when this build has a key, else the no-op (once per process; app-scoped like the flow).
@@ -261,21 +278,57 @@ private fun share(context: Context, text: String) {
     context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
+/**
+ * Camper fork (CEO 31.10): the paper page with the app header above and the tab bar below every screen; the screen
+ * gets the height between them. The bars consume the status / navigation bar insets, so a screen's `ScreenRoot`
+ * adds no second inset band. Drive (the planning progress) and Debug run full screen without the bars; the tab
+ * bar also steps aside while the keyboard is up (the Navigator's IME handling then works as before).
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun VerstRoot(flow: VerstFlow) {
     val context = LocalContext.current
     val reduced = remember { reducedMotion(context) }
     CompositionLocalProvider(LocalReducedMotion provides reduced) {
-        Box(Modifier.fillMaxSize()) {
-            Screens(flow, context)
+        val top = flow.top
+        val chrome = top != Route.Drive && top != Route.Debug
+        val imeUp = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+        val tabs = chrome && !imeUp
+        // a sheet of the screen is open: the bars are dimmed with it and a tap on them closes it (system back);
+        // the root dialogs below draw their own scrim over the whole window
+        val rootDialog = flow.report != null || flow.deleteAsk != null || flow.abroadConsentAsk || flow.limitDialog
+        val closeSheet: () -> Unit = { flow.back() }
+        val onScrim: (() -> Unit)? = if (overlayOpen(flow) && !rootDialog) closeSheet else null
+        Box(Modifier.fillMaxSize().background(DesignTokens.color.camper.page)) {
+            Column(Modifier.fillMaxSize()) {
+                if (chrome) AppHeader(top == Route.Settings, flow::openSettingsFromHeader, onScrim)
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .then(if (chrome) Modifier.consumeWindowInsets(WindowInsets.statusBars) else Modifier)
+                        .then(if (tabs) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier),
+                ) {
+                    Screens(flow, context)
+                    ScreenToasts(flow)
+                }
+                if (tabs) AppTabBar(flow.activeTab, flow::tabEnabled, flow::selectTab, onScrim)
+            }
             Overlays(flow)
         }
     }
 }
 
-/** Dialogs and the Windshield toast that are not owned by one screen (D-1 delete, 5.5 §4 limit). */
+/** Any sheet or dialog open (system back closes it first). */
+private fun overlayOpen(flow: VerstFlow): Boolean =
+    flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
+        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
+        flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null ||
+        flow.roadBorder != null || flow.abroadConsentAsk
+
+/** The toasts that are not owned by one screen, inside the screen area (between the header and the tab bar). */
 @Composable
-private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow) {
+private fun androidx.compose.foundation.layout.BoxScope.ScreenToasts(flow: VerstFlow) {
     val t = flow.toast
     if (flow.top == Route.Windshield && t != null) {
         // F-02: above the dashboard crest (324 dp dashboard + 16), never over the caption or ПОЕХАЛИ.
@@ -285,6 +338,11 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
         // 5.12 location / address toasts above the caption row (start button + 16).
         PlateToast(toastText(t), bottom = 150.dp, action = app.verst.feature.common.toastAction(t), onAction = flow::toastAction)
     }
+}
+
+/** Dialogs that are not owned by one screen (D-1 delete, 5.5 §4 limit, D-7 report), over the whole window. */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow) {
     flow.report?.let { r ->
         // D-7 over Road ahead or the walk (the screens draw the toast after «Отправить»)
         // the comment field raises the IME: the sheet sits above it
@@ -330,11 +388,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 
 @Composable
 private fun Screens(flow: VerstFlow, context: Context) {
-    val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
-        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
-        flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null ||
-        flow.roadBorder != null || flow.abroadConsentAsk
-    BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
+    BackHandler(enabled = flow.stack.size > 1 || overlayOpen(flow)) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
             WindshieldUi(

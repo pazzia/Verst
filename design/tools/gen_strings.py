@@ -29,7 +29,7 @@ RES = os.path.join(ROOT, 'android', 'core-ui', 'src', 'main', 'res', 'values')
 OUT_STRINGS = os.path.join(RES, 'strings.xml')
 OUT_PLURALS = os.path.join(RES, 'plurals.xml')
 
-UI_SECTIONS = {1, 2, 3, 4, 5, 6, 7, 8, 10, 14, 15, 16, 17}
+UI_SECTIONS = {1, 2, 3, 4, 5, 6, 7, 8, 10, 14, 15, 16, 17, 18}
 PLURAL_SECTION = 9
 QUANTITIES = ('one', 'few', 'many', 'other')
 INT_NAMES = {'n', 'k', 'd', 'a', 'c', 'h', 'm', 'min', 'nights', 'adults', 'children'}

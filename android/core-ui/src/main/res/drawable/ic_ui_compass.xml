@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED from design/icons/ui-compass.svg by design/tools/gen_vectors.py. Do not edit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF141416"
+        android:fillType="nonZero"
+        android:pathData="M22.1 12A10.1 10.1 0 1 1 1.9 12A10.1 10.1 0 1 1 22.1 12ZM19.9 12A7.9 7.9 0 1 0 4.1 12A7.9 7.9 0 1 0 19.9 12ZM16.2 7.8L13.4 13.4L7.8 16.2L10.6 10.6Z" />
+</vector>
