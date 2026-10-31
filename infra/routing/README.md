@@ -32,6 +32,18 @@ infra/routing/dev/record_fixtures.sh ./graphhopper-web-11.0.jar /tmp/gh-fixtures
 `record_fixtures.sh` with no second argument rewrites `backend/planner/tests/data/graphhopper/`; the request
 bodies come from the adapter (`request_body`), so the fixtures always match what it sends.
 
+## The test VM: download the graph built in CI (D-IR-21, CEO 31.10)
+
+1. Actions → routing → Run workflow with `publish: true` (region `russia`): the checked graph becomes the public
+   release `routing-graph-latest` (`graph.tar.gz.partNN` ≤ 1.9 GB, `SHA256SUMS`, `build.json`).
+2. On the VM: `sudo infra/routing/fetch_graph.sh` → `/srv/verst/routing/current` (sha256-checked, the previous
+   graph kept as `previous`).
+3. `docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml --profile routing build graphhopper`,
+   then `… up -d graphhopper`: the host-nginx override serves it with `config-mmap.yml` and `-Xmx1g`.
+4. `.env`: `VERST_ROUTING=graphhopper`, `VERST_GRAPHHOPPER_URL=http://graphhopper:8989`,
+   `VERST_SYNTHETIC_FALLBACK=true`; restart `api`. A point the graph does not cover goes to the road model
+   (`VERST_GRAPH_COVERAGE_FALLBACK`, on by default), flagged `approxDistances` like on the phone.
+
 ## Run it on the maps VM
 
 ```bash

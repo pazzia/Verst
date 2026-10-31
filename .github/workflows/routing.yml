@@ -20,9 +20,13 @@ on:
         description: "Memory cap for the second server run with the graph on disk (MMAP), like a small VM"
         type: string
         default: "2G"
+      publish:
+        description: "Publish the checked graph as the public release routing-graph-latest (infra/routing/fetch_graph.sh)"
+        type: boolean
+        default: false
 
 permissions:
-  contents: read
+  contents: write   # publish: the release routing-graph-latest (read-only otherwise)
 
 concurrency:
   group: routing
@@ -39,6 +43,7 @@ env:
   REGION: ${{ inputs.region }}
   # Inside the workspace, not hidden (upload-artifact@v4 skips dot-directories by default), never committed.
   DATA: ${{ github.workspace }}/_routing/data
+  FETCH_PBF: ${{ github.workspace }}/tools/ci/fetch_pbf.sh   # build_graph.sh: 8 ranged parts + md5
   OUT: ${{ github.workspace }}/_routing/out
 
 jobs:
@@ -220,6 +225,33 @@ jobs:
             sudo grep -E '^(anon|file) ' /sys/fs/cgroup$scope/memory.stat | awk '{printf "  %s %d MB\n", $1, $2/1048576}'; } | tee "$M/memory.txt"
           { echo '```'; cat "$M/memory.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           sudo kill "$pid" || true
+
+      - name: Publish the graph (release routing-graph-latest)
+        # CEO 31.10 / D-IR-21: the VM downloads the checked graph without a GitHub login (fetch_graph.sh) and
+        # serves it with MMAP. Parts ≤ 1.9 GB (GitHub's 2 GB per file). The tag sits on the default branch:
+        # GITHUB_TOKEN may not create refs on a history with workflow changes; the notes name the commit.
+        if: success() && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: routing-graph-latest
+        run: |
+          P="$RUNNER_TEMP/publish"; mkdir -p "$P"
+          tar -C "$DATA" -czf - graph-cache build.json | split -b 1900m -d -a 2 - "$P/graph.tar.gz.part"
+          cp "$DATA/build.json" "$P/"
+          (cd "$P" && sha256sum graph.tar.gz.part* > SHA256SUMS && cat SHA256SUMS && du -sh .)
+          {
+            echo "Граф дорог для GraphHopper $GH_VERSION, регион \`$REGION\`, проверен маршрутами и планами (routing.yml)."
+            echo
+            echo "На ВМ: \`sudo infra/routing/fetch_graph.sh\` (скачает части, проверит sha256, положит в /srv/verst/routing/current)."
+            echo "Собрано из коммита ${{ github.sha }}; данные © участники OpenStreetMap, ODbL 1.0."
+            echo
+            echo '```'; cat "$DATA/build.json"; echo; echo '```'
+          } > "$P/notes.md"
+          gh release delete "$TAG" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" "$P"/graph.tar.gz.part* "$P/SHA256SUMS" "$P/build.json" \
+            --repo "${{ github.repository }}" --target "${{ github.event.repository.default_branch }}" --prerelease \
+            --title "Граф дорог · $REGION" --notes-file "$P/notes.md"
+          echo "::notice title=Graph::https://github.com/${{ github.repository }}/releases/tag/$TAG"
 
       - uses: actions/upload-artifact@v4
         if: always()

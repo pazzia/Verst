@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     graphhopper_url: str | None = None
     graphhopper_timeout_s: float = Field(6.0, gt=0, le=30)
     synthetic_fallback: bool = False  # GraphHopper down → road model (flagged) instead of 503 UPSTREAM
+    # CEO 31.10: a point outside the graph's extract → the road model (flagged) instead of 404 UNREACHABLE
+    graph_coverage_fallback: bool = True
 
     # CEO 29.10 (trips abroad, server only): the catalogues abroad (`<dir>/<cc>/catalogue_*.json.gz`; unset =
     # backend/planner/abroad next to the engine; missing or empty = Russia only) and the Bank of Russia rates

@@ -5,6 +5,12 @@
 #   docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml up -d api postgres backup
 #
 # Starting the three services by name leaves `proxy` (Caddy) and `graphhopper` down.
+#
+# Real roads (D-IR-21, CEO 31.10): the graph built in CI is downloaded with infra/routing/fetch_graph.sh into
+# /srv/verst/routing/current and served from disk (MMAP) with a 1 GB heap:
+#   docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml --profile routing up -d graphhopper
+# and in .env: VERST_ROUTING=graphhopper, VERST_GRAPHHOPPER_URL=http://graphhopper:8989,
+# VERST_SYNTHETIC_FALLBACK=true (GraphHopper down → the road model, flagged), then restart api.
 services:
   api:
     ports:
@@ -19,3 +25,9 @@ services:
       - log_min_duration_statement=1000
       - -c
       - log_parameter_max_length=0
+
+  graphhopper:
+    environment:
+      JAVA_OPTS: "-Xmx1g -Xms1g"      # the graph is not on the heap (MMAP)
+      GH_CONFIG: config-mmap.yml
+    mem_limit: 2g                    # heap + the hot part of the graph in the page cache; the rest stays on disk

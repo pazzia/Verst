@@ -208,3 +208,8 @@ def test_server_routing_unit() -> None:
         ServerRouting(Fails(UpstreamUnavailable("graphhopper")), None).route(req)
     with pytest.raises(Unreachable):  # an answer, never a reason to fall back
         ServerRouting(Fails(Unreachable(1)), Fallback()).route(req)
+    # CEO 31.10: a point outside the graph → the world's own routing, flagged; its refusal keeps GraphHopper's
+    assert ServerRouting(Fails(Unreachable(1)), None, Fallback()).route(req).synthetic is True
+    with pytest.raises(Unreachable) as e:
+        ServerRouting(Fails(Unreachable(1)), None, Fails(Unreachable(0))).route(req)
+    assert e.value.point_index == 1

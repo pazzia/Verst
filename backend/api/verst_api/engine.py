@@ -161,7 +161,9 @@ class Engine:
         routing: RoutingPort = ports.routing
         if self.graphhopper is not None:
             routing = ServerRouting(
-                self.graphhopper, ports.routing if self.settings.synthetic_fallback else None
+                self.graphhopper,
+                ports.routing if self.settings.synthetic_fallback else None,
+                ports.routing if self.settings.graph_coverage_fallback else None,
             )
         clock = make_clock(self.settings.clock)
         config = PlannerConfig.from_dict(mobile.OPEN_DATA_CONFIG)
