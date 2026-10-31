@@ -1,0 +1,106 @@
+··· [0 lines skipped] ···
+
+> Configure project :app
+Warning: Python version 3.12 may have fewer packages available. If you experience problems, try switching to version 3.8.
+
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-ui:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :core-ui:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :core-ui:preDebugBuild UP-TO-DATE
+> Task :core-model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-ui:generateDebugResValues FROM-CACHE
+> Task :app:generateDebugBuildConfig
+> Task :core-ui:generateDebugResources
+> Task :app:stagePlannerSources UP-TO-DATE
+> Task :core-model:compileKotlin UP-TO-DATE
+> Task :core-model:compileJava NO-SOURCE
+> Task :core-model:processResources NO-SOURCE
+> Task :core-model:classes UP-TO-DATE
+> Task :core-model:jar UP-TO-DATE
+> Task :core-ui:packageDebugResources
+> Task :core-ui:parseDebugLocalResources FROM-CACHE
+> Task :core-ui:generateDebugRFile FROM-CACHE
+> Task :core-model:processTestResources
+> Task :app:extractDebugPythonBuildPackages
+> Task :core-ui:javaPreCompileDebug FROM-CACHE
+> Task :core-ui:preDebugUnitTestBuild UP-TO-DATE
+> Task :core-ui:writeDebugAarMetadata
+> Task :core-ui:checkDebugUnitTestAarMetadata
+> Task :core-ui:compileDebugLibraryResources
+> Task :core-ui:generateDebugUnitTestResValues FROM-CACHE
+> Task :core-ui:mapDebugUnitTestSourceSetPaths
+> Task :core-ui:generateDebugUnitTestResources FROM-CACHE
+
+> Task :app:generateDebugPythonRequirements
+Chaquopy: Installing for arm64-v8a
+
+> Task :core-ui:mergeDebugUnitTestResources
+> Task :core-ui:extractDeepLinksDebug FROM-CACHE
+> Task :core-ui:processDebugManifest FROM-CACHE
+> Task :core-ui:processDebugUnitTestManifest
+
+> Task :app:generateDebugPythonRequirements
+Looking in indexes: https://pypi.org/simple, https://chaquo.com/pypi-13.1
+Collecting tzdata==2025.2
+  Using cached tzdata-2025.2-py2.py3-none-any.whl (347 kB)
+
+> Task :core-ui:processDebugUnitTestResources
+> Task :core-ui:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :core-ui:generateDebugUnitTestAssets UP-TO-DATE
+> Task :core-ui:mergeDebugShaders
+> Task :core-ui:compileDebugShaders NO-SOURCE
+> Task :core-ui:generateDebugAssets UP-TO-DATE
+> Task :core-ui:mergeDebugAssets
+> Task :core-ui:mergeDebugUnitTestAssets
+> Task :core-ui:packageDebugUnitTestForUnitTest
+> Task :core-ui:generateDebugUnitTestConfig
+> Task :core-model:compileTestKotlin
+> Task :core-model:compileTestJava NO-SOURCE
+> Task :core-model:testClasses
+
+> Task :app:generateDebugPythonRequirements
+Installing collected packages: tzdata
+Successfully installed tzdata-2025.2
+Chaquopy: Installing for x86_64
+
+> Task :core-ui:compileDebugKotlin
+> Task :core-ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-ui:bundleLibRuntimeToJarDebug
+> Task :core-ui:bundleLibCompileToJarDebug
+> Task :core-ui:processDebugJavaRes
+> Task :app:mergeDebugPythonSources
+> Task :app:generateDebugPythonProxies
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :core-ui:compileDebugUnitTestKotlin
+> Task :core-ui:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :core-ui:processDebugUnitTestJavaRes
+> Task :app:packageDebugResources
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:mergeDebugResources
+> Task :core-ui:testDebugUnitTest
+> Task :app:generateDebugPythonMiscAssets
+> Task :app:generateDebugPythonRequirementsAssets
+> Task :app:generateDebugPythonSourceAssets
+> Task :app:generateDebugPythonBuildAssets
+> Task :app:chaquopyLicences
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:processDebugResources
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:generateDebugUnitTestConfig
+> Task :core-model:test

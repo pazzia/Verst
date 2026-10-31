@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "run": {
+    "id": "40764418447",
+    "attempt": "1",
+    "number": "161",
+    "sha": "e613853ee04e5a90c182788b7aad2d897982b24c",
+    "ref": "refs/heads/ccr-013d3489-181fz2",
+    "event": "workflow_dispatch",
+    "commitMessage": []
+  },
+  "conclusion": "failure",
+  "jobs": {
+    "planner": "success",
+    "build": "failure",
+    "e2e": "skipped",
+    "release": "skipped"
+  },
+  "details": {
+    "build": {
+      "steps.build": {
+        "assemble": "skipped",
+        "unit": "skipped",
+        "lint": "skipped",
+        "licences": "skipped",
+        "apk": "skipped"
+      },
+      "gradle.toolchain": {
+        "buildFailed": false,
+        "errors": 0,
+        "whatWentWrong": []
+      }
+    }
+  },
+  "errorCount": 0,
+  "screenshots": []
+}

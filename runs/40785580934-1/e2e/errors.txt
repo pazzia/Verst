@@ -1,0 +1,2 @@
+[e2e] app.verst.e2e.Sprint4Test.s4Http500AndGarbageRepliesShowNoError
+[e2e] app.verst.e2e.Sprint4Test.s4SlowNetworkStaysUsable

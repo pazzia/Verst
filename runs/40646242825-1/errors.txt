@@ -1,0 +1,4 @@
+[unit] Test - LocalCostBundleTest > replaceItems
+[unit] Gradle: Execution failed for task ':core-model:test'. - Execution failed for task ':core-model:test'.
+> There were failing tests. See the report at: file:///home/runner/work/Verst/Verst/android/core-model/build/reports/tests/test/index.html
+[test] app.verst.core.model.cost.LocalCostBundleTest > replaceItems: java.lang.AssertionError: expected:<143> but was:<139>

@@ -1,0 +1,7 @@
+app.verst.e2e.Sprint3Test.s34CityWalkInYaroslavl
+java.lang.AssertionError: expected:<BrowserDryRun> but was:<GoogleDryRun>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at app.verst.e2e.Sprint3Test.s34CityWalkInYaroslavl(Sprint3Test.kt:281)

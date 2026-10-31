@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "run": {
+    "id": "40995836834",
+    "attempt": "1",
+    "number": "176",
+    "sha": "024d63e44b0b0833def8f3eddd0c1ef6ff4834c0",
+    "ref": "refs/heads/ccr-013d3489-181fz2",
+    "event": "workflow_dispatch",
+    "commitMessage": []
+  },
+  "conclusion": "incomplete",
+  "jobs": {
+    "planner": "success",
+    "build": "cancelled",
+    "e2e": "cancelled",
+    "release": "cancelled"
+  },
+  "details": {
+    "build": {
+      "steps.build": {
+        "assemble": "success",
+        "unit": "cancelled",
+        "lint": "skipped",
+        "licences": "skipped",
+        "apk": "skipped"
+      },
+      "gradle.assemble": {
+        "buildFailed": false,
+        "errors": 0,
+        "whatWentWrong": []
+      },
+      "gradle.toolchain": {
+        "buildFailed": false,
+        "errors": 0,
+        "whatWentWrong": []
+      },
+      "gradle.unit": {
+        "buildFailed": false,
+        "errors": 0,
+        "whatWentWrong": []
+      }
+    }
+  },
+  "errorCount": 0,
+  "screenshots": []
+}

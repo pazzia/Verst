@@ -1,0 +1,7 @@
+Starting: Intent { cmp=app.verst.demo/app.verst.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: app.verst.demo/app.verst.MainActivity
+TotalTime: 2667
+WaitTime: 2673
+Complete

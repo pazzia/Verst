@@ -1,0 +1,173 @@
+··· [0 lines skipped] ···
+Starting a Gradle Daemon (subsequent builds will be faster)
+
+> Configure project :app
+Warning: Python version 3.12 may have fewer packages available. If you experience problems, try switching to version 3.8.
+
+> Task :core-model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-ui:preBuild UP-TO-DATE
+> Task :core-ui:preReleaseBuild UP-TO-DATE
+> Task :app:stagePlannerSources
+> Task :core-ui:mergeReleaseJniLibFolders
+> Task :core-ui:mergeReleaseNativeLibs NO-SOURCE
+> Task :core-ui:copyReleaseJniLibsProjectOnly
+> Task :core-ui:prepareReleaseArtProfile
+> Task :core-ui:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-ui:generateReleaseResValues FROM-CACHE
+> Task :core-ui:generateReleaseResources
+> Task :core-model:processResources NO-SOURCE
+> Task :app:generateDemoPythonJniLibs
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDemoBuild UP-TO-DATE
+> Task :core-ui:packageReleaseResources
+> Task :app:mergeDemoJniLibFolders
+> Task :core-ui:javaPreCompileRelease FROM-CACHE
+> Task :core-ui:writeReleaseAarMetadata
+> Task :core-ui:extractDeepLinksRelease FROM-CACHE
+> Task :core-ui:processReleaseManifest FROM-CACHE
+> Task :app:mergeDemoArtProfile
+> Task :app:desugarDemoFileDependencies FROM-CACHE
+> Task :app:buildKotlinToolingMetadata
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateDemoBuildConfig
+> Task :core-ui:parseReleaseLocalResources
+> Task :core-ui:compileReleaseLibraryResources
+> Task :core-ui:mergeReleaseShaders
+> Task :core-ui:compileReleaseShaders NO-SOURCE
+> Task :core-ui:generateReleaseAssets UP-TO-DATE
+> Task :core-ui:generateReleaseRFile
+> Task :core-ui:mergeReleaseAssets
+> Task :app:extractDemoPythonBuildPackages
+
+> Task :app:generateDemoPythonRequirements
+Chaquopy: Installing for arm64-v8a
+Looking in indexes: https://pypi.org/simple, https://chaquo.com/pypi-13.1
+Collecting tzdata==2025.2
+  Downloading tzdata-2025.2-py2.py3-none-any.whl (347 kB)
+Installing collected packages: tzdata
+Successfully installed tzdata-2025.2
+Chaquopy: Installing for x86_64
+
+> Task :app:mergeDemoPythonSources
+> Task :app:generateDemoPythonProxies
+> Task :app:generateDemoResValues FROM-CACHE
+> Task :app:checkDemoAarMetadata
+> Task :app:mapDemoSourceSetPaths
+> Task :app:generateDemoResources
+> Task :app:packageDemoResources
+> Task :app:parseDemoLocalResources
+> Task :app:createDemoCompatibleScreenManifests
+> Task :app:extractDeepLinksDemo FROM-CACHE
+> Task :app:mergeDemoResources
+> Task :app:processDemoMainManifest
+> Task :app:processDemoManifest
+> Task :app:javaPreCompileDemo FROM-CACHE
+> Task :app:processDemoManifestForPackage
+> Task :app:checkDemoDuplicateClasses
+> Task :app:mergeDemoStartupProfile
+> Task :app:mergeExtDexDemo FROM-CACHE
+> Task :app:processDemoResources
+> Task :app:generateDemoPythonMiscAssets
+> Task :app:generateDemoPythonRequirementsAssets
+> Task :app:generateDemoPythonSourceAssets
+> Task :app:generateDemoPythonBuildAssets
+> Task :app:chaquopyLicences
+> Task :app:mergeDemoShaders
+> Task :app:compileDemoShaders NO-SOURCE
+> Task :app:generateDemoAssets UP-TO-DATE
+> Task :app:mergeDemoAssets
+> Task :app:extractDemoVersionControlInfo
+> Task :app:optimizeDemoResources
+> Task :app:collectDemoDependencies
+> Task :app:sdkDemoDependencyData
+> Task :app:validateSigningDemo
+> Task :app:writeDemoAppMetadata
+> Task :app:writeDemoSigningConfigVersions
+> Task :app:preDemoAndroidTestBuild SKIPPED
+> Task :app:compressDemoAssets
+> Task :app:processDemoAndroidTestManifest
+> Task :app:generateDemoAndroidTestBuildConfig
+> Task :app:generateDemoAndroidTestResValues FROM-CACHE
+> Task :app:checkDemoAndroidTestAarMetadata
+> Task :app:mapDemoAndroidTestSourceSetPaths
+> Task :app:generateDemoAndroidTestResources FROM-CACHE
+> Task :app:mergeDemoAndroidTestResources FROM-CACHE
+> Task :app:processDemoAndroidTestResources FROM-CACHE
+> Task :app:javaPreCompileDemoAndroidTest FROM-CACHE
+> Task :app:mergeDemoAndroidTestShaders
+> Task :app:compileDemoAndroidTestShaders NO-SOURCE
+> Task :app:generateDemoAndroidTestAssets UP-TO-DATE
+> Task :app:mergeDemoAndroidTestAssets
+> Task :app:desugarDemoAndroidTestFileDependencies FROM-CACHE
+> Task :app:compressDemoAndroidTestAssets
+> Task :app:mergeDemoAndroidTestJniLibFolders
+> Task :app:checkDemoAndroidTestDuplicateClasses
+> Task :app:validateSigningDemoAndroidTest
+> Task :app:mergeExtDexDemoAndroidTest FROM-CACHE
+> Task :app:writeDemoAndroidTestSigningConfigVersions
+> Task :core-ui:compileReleaseKotlin
+> Task :core-ui:compileReleaseJavaWithJavac NO-SOURCE
+> Task :core-ui:bundleLibCompileToJarRelease
+> Task :core-ui:bundleLibRuntimeToJarRelease
+> Task :core-ui:processReleaseJavaRes
+> Task :core-ui:bundleLibRuntimeToDirRelease
+
+> Task :core-model:compileKotlin
+w: file:///home/runner/work/Verst/Verst/android/core-model/src/main/kotlin/app/verst/core/model/WalkStart.kt:29:23 Identity-sensitive operation on an instance of value type 'LocalDate!' may cause unexpected behavior or errors.
+w: file:///home/runner/work/Verst/Verst/android/core-model/src/main/kotlin/app/verst/core/model/WalkStart.kt:29:48 Identity-sensitive operation on an instance of value type 'LocalDate!' may cause unexpected behavior or errors.
+
+> Task :core-model:compileJava NO-SOURCE
+> Task :core-model:classes UP-TO-DATE
+> Task :core-model:jar
+> Task :app:mergeDemoNativeLibs
+
+> Task :app:stripDemoDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libchaquopy_java.so, libcrypto_chaquopy.so, libcrypto_python.so, libpython3.12.so, libsqlite3_chaquopy.so, libsqlite3_python.so, libssl_chaquopy.so, libssl_python.so. Run with --info option to learn more.
+
+> Task :app:extractDemoNativeSymbolTables FROM-CACHE
+> Task :app:mergeDemoNativeDebugMetadata NO-SOURCE
+> Task :app:mergeDemoAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDemoAndroidTestDebugSymbols NO-SOURCE
+> Task :app:compileDemoKotlin
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/MainActivity.kt:485:47 The corresponding parameter in the supertype 'HandoffSheetActions' is named 'app'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/MainActivity.kt:486:50 The corresponding parameter in the supertype 'HandoffSheetActions' is named 'app'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/feature/road/RoadScreen.kt:218:27 The corresponding parameter in the supertype 'HandoffSheetActions' is named 'app'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/feature/road/RoadScreen.kt:219:30 The corresponding parameter in the supertype 'HandoffSheetActions' is named 'app'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/platform/Platform.kt:215:97 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+
+> Task :app:compileDemoJavaWithJavac
+> Task :app:dexBuilderDemo
+> Task :app:mergeDemoGlobalSynthetics FROM-CACHE
+> Task :app:processDemoJavaRes
+> Task :app:bundleDemoClassesToCompileJar
+> Task :app:mergeDemoJavaResource
+
+> Task :app:compileDemoAndroidTestKotlin
+w: file:///home/runner/work/Verst/Verst/android/app/src/androidTest/kotlin/app/verst/e2e/Sprint3Test.kt:572:27 This declaration needs opt-in. Its usage should be marked with '@coil.annotation.ExperimentalCoilApi' or '@OptIn(coil.annotation.ExperimentalCoilApi::class)'
+
+> Task :app:compileDemoAndroidTestJavaWithJavac
+> Task :app:dexBuilderDemoAndroidTest
+> Task :app:mergeDemoAndroidTestGlobalSynthetics FROM-CACHE
+> Task :app:processDemoAndroidTestJavaRes
+> Task :app:mergeDemoAndroidTestJavaResource
+> Task :app:mergeDexDemo
+> Task :app:mergeDexDemoAndroidTest
+> Task :app:packageDemoAndroidTest
+> Task :app:createDemoAndroidTestApkListingFileRedirect
+> Task :app:assembleDemoAndroidTest
+> Task :app:compileDemoArtProfile
+> Task :app:packageDemo
+> Task :app:createDemoApkListingFileRedirect
+> Task :app:assembleDemo
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/assemble-1793278438921.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Verst/Verst/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 51s
+106 actionable tasks: 87 executed, 19 from cache

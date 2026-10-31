@@ -1,0 +1,54 @@
+{
+  "G01_msk_yar_round": {
+    "ms": 157,
+    "equal": true
+  },
+  "G02_golden_ring": {
+    "ms": 153,
+    "equal": true
+  },
+  "G03_msk_volgograd_dog_child": {
+    "ms": 123,
+    "equal": true
+  },
+  "G04_msk_kazan_just_drive": {
+    "ms": 124,
+    "equal": true
+  },
+  "G05_edge_no_dog_lodging": {
+    "ms": 33,
+    "equal": true
+  },
+  "G06_msk_kazan_no_tolls": {
+    "ms": 200,
+    "equal": true
+  },
+  "G07_tula_yasnaya": {
+    "ms": 58,
+    "equal": true
+  },
+  "G08_msk_suzdal_via_vladimir": {
+    "ms": 72,
+    "equal": true
+  },
+  "G09_edge_unreachable": {
+    "ms": 4,
+    "error": "UNREACHABLE"
+  },
+  "G10_edge_too_short": {
+    "ms": 6,
+    "error": "TOO_SHORT"
+  },
+  "G11_edge_fuel_gap": {
+    "ms": 19,
+    "equal": true
+  },
+  "G12_edge_day_over_budget": {
+    "ms": 12,
+    "equal": true
+  },
+  "G13_ceo_budget_fit": {
+    "ms": 733,
+    "equal": true
+  }
+}

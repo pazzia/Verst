@@ -1,0 +1,4 @@
+V2 Signer: certificate DN: CN=Verst Demo
+V2 Signer: certificate SHA-256 digest: 24306eac77a56635bd9e880d04b7bdb379f701be4488effae37a2928c602d208
+V2 Signer: certificate SHA-1 digest: c72869d077223b7e7204e939489a13eef47bac79
+V2 Signer: certificate MD5 digest: f4fdb685dbc031adbe1902367a0e69f5

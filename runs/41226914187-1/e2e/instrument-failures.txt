@@ -1,0 +1,22 @@
+app.verst.e2e.RoundR1Test.dayMenuAndStopMenuHandOffTheEngineLinks
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 30000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:504)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:339)
+	at app.verst.e2e.RoundR1Test.waitTag(RoundR1Test.kt:90)
+	at app.verst.e2e.RoundR1Test.waitTag$default(RoundR1Test.kt:89)
+	at app.verst.e2e.RoundR1Test.dayMenuAndStopMenuHandOffTheEngineLinks(RoundR1Test.kt:162)
+
+
+app.verst.e2e.Sprint4DataTest.s4dWalks
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 20000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:504)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:339)
+	at app.verst.e2e.Sprint4DataTest.s4dWalks(Sprint4DataTest.kt:276)
+
+
+app.verst.e2e.Sprint4Test.s4AirplaneModeEverythingWorksAndNothingIsSent
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 20000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:504)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:339)
+	at app.verst.e2e.Sprint4Test.waitTag(Sprint4Test.kt:98)
+	at app.verst.e2e.Sprint4Test.s4AirplaneModeEverythingWorksAndNothingIsSent(Sprint4Test.kt:170)

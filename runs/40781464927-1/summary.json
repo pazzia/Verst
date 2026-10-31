@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "run": {
+    "id": "40781464927",
+    "attempt": "1",
+    "number": "165",
+    "sha": "c5b1d1ea83632f479eede940342360dcf735fdcd",
+    "ref": "refs/heads/ccr-013d3489-181fz2",
+    "event": "workflow_dispatch",
+    "commitMessage": []
+  },
+  "conclusion": "failure",
+  "jobs": {
+    "planner": "success",
+    "build": "failure",
+    "e2e": "skipped",
+    "release": "skipped"
+  },
+  "details": {
+    "build": {
+      "gradle.assemble": {
+        "buildFailed": true,
+        "errors": 7,
+        "whatWentWrong": [
+          "Execution failed for task ':app:compileDemoKotlin'.\n> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction\n   > Compilation error. See log for more details"
+        ]
+      },
+      "steps.build": {
+        "assemble": "failure",
+        "unit": "skipped",
+        "lint": "skipped",
+        "licences": "skipped",
+        "apk": "skipped"
+      },
+      "gradle.toolchain": {
+        "buildFailed": false,
+        "errors": 0,
+        "whatWentWrong": []
+      }
+    }
+  },
+  "errorCount": 9,
+  "screenshots": []
+}

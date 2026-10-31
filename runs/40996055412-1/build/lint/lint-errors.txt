@@ -1,0 +1,1 @@
+Error android/core-ui/src/main/res/values/strings.xml:856 [MissingTranslation] "abroad_consent_body" is not translated in "en" (English)

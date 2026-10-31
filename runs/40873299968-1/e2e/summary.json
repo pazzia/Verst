@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "run": "40873299968",
+  "sha": "d30b1e4601ed8730bd4e1558e0792258e58f746c",
+  "ref": "refs/heads/ccr-013d3489-181fz2",
+  "job": "e2e",
+  "sections": {
+    "instrument": {
+      "tests": 33,
+      "passed": 32,
+      "failed": 1,
+      "crashed": false,
+      "ok": true
+    },
+    "logcat": {
+      "lines": 61916,
+      "kept": 2469,
+      "tracebacks": 0
+    },
+    "steps.e2e": {
+      "avd-cache": "success",
+      "journey": "failure"
+    }
+  }
+}

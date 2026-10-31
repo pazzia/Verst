@@ -1,0 +1,18 @@
+{
+  "engineVersion": "0.1.0",
+  "python": "3.12.7",
+  "pythonStartMs": 1309,
+  "importMs": 700,
+  "worldsMs": 159,
+  "selfcheckMs": 49,
+  "readyMs": 2217,
+  "waitedMs": 0,
+  "catalogueMs": 1392,
+  "readyPlusCatalogueMs": 3609,
+  "catalogueSamplesMs": [
+    1392,
+    1625,
+    1977
+  ],
+  "catalogueMedianMs": 1625
+}

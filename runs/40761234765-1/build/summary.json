@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "run": "40761234765",
+  "sha": "382dad6bc581e7a6deedc33d4d31c192656bf601",
+  "ref": "refs/heads/ccr-013d3489-181fz2",
+  "job": "build",
+  "sections": {
+    "gradle.assemble": {
+      "buildFailed": true,
+      "errors": 1,
+      "whatWentWrong": [
+        "Execution failed for task ':app:packageDemoAndroidTest'.\n> A failure occurred while executing com.android.build.gradle.tasks.PackageAndroidArtifact$IncrementalSplitterRunnable\n   > com.android.ide.common.signing.KeytoolException: Failed to read key verst-demo from store \"/home/runner/work/_temp/verst-demo.jks\": null"
+      ]
+    },
+    "steps.build": {
+      "assemble": "failure",
+      "unit": "skipped",
+      "lint": "skipped",
+      "licences": "skipped",
+      "apk": "skipped"
+    },
+    "gradle.toolchain": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    }
+  }
+}

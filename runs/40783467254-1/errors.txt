@@ -1,0 +1,4 @@
+[unit] Test - NominatimClientTest > oneRequestWithTheUserAgentAndTheRussianParameters
+[unit] Gradle: Execution failed for task ':app:testDebugUnitTest'. - Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///home/runner/work/Verst/Verst/android/app/build/reports/tests/testDebugUnitTest/index.html
+[test] app.verst.data.net.NominatimClientTest > oneRequestWithTheUserAgentAndTheRussianParameters: org.junit.ComparisonFailure: expected:<[5]> but was:<[10]>

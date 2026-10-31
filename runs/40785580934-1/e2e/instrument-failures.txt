@@ -1,0 +1,12 @@
+app.verst.e2e.Sprint4Test.s4Http500AndGarbageRepliesShowNoError
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 15000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:504)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:339)
+	at app.verst.e2e.Sprint4Test.s4Http500AndGarbageRepliesShowNoError(Sprint4Test.kt:238)
+
+
+app.verst.e2e.Sprint4Test.s4SlowNetworkStaysUsable
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 16000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:504)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:339)
+	at app.verst.e2e.Sprint4Test.s4SlowNetworkStaysUsable(Sprint4Test.kt:210)

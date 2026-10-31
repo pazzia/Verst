@@ -1,0 +1,131 @@
+··· [0 lines skipped] ···
+
+> Configure project :app
+Warning: Python version 3.12 may have fewer packages available. If you experience problems, try switching to version 3.8.
+
+> Task :core-ui:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core-ui:preBuild UP-TO-DATE
+> Task :core-ui:preDebugBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :core-ui:generateDebugResValues FROM-CACHE
+> Task :app:generateDebugBuildConfig
+> Task :core-ui:generateDebugResources
+> Task :app:stagePlannerSources UP-TO-DATE
+> Task :core-model:compileKotlin UP-TO-DATE
+> Task :core-model:compileJava NO-SOURCE
+> Task :core-model:processResources NO-SOURCE
+> Task :core-model:classes UP-TO-DATE
+> Task :core-model:jar UP-TO-DATE
+> Task :core-ui:packageDebugResources
+> Task :core-ui:parseDebugLocalResources FROM-CACHE
+> Task :core-ui:generateDebugRFile FROM-CACHE
+> Task :core-model:processTestResources NO-SOURCE
+> Task :core-ui:javaPreCompileDebug FROM-CACHE
+> Task :core-ui:preDebugUnitTestBuild UP-TO-DATE
+> Task :core-ui:writeDebugAarMetadata
+> Task :app:extractDebugPythonBuildPackages
+> Task :core-ui:checkDebugUnitTestAarMetadata
+> Task :core-ui:compileDebugLibraryResources
+> Task :core-ui:generateDebugUnitTestResValues FROM-CACHE
+> Task :core-ui:mapDebugUnitTestSourceSetPaths
+> Task :core-ui:generateDebugUnitTestResources FROM-CACHE
+
+> Task :app:generateDebugPythonRequirements
+Chaquopy: Installing for arm64-v8a
+
+> Task :core-ui:mergeDebugUnitTestResources
+> Task :core-ui:extractDeepLinksDebug FROM-CACHE
+> Task :core-ui:processDebugManifest FROM-CACHE
+> Task :core-ui:processDebugUnitTestManifest
+> Task :core-model:compileTestKotlin
+> Task :core-model:compileTestJava NO-SOURCE
+> Task :core-model:testClasses UP-TO-DATE
+> Task :core-ui:processDebugUnitTestResources
+> Task :core-ui:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :core-ui:generateDebugUnitTestAssets UP-TO-DATE
+> Task :core-ui:mergeDebugShaders
+> Task :core-ui:compileDebugShaders NO-SOURCE
+> Task :core-ui:generateDebugAssets UP-TO-DATE
+> Task :core-ui:mergeDebugAssets
+> Task :core-ui:mergeDebugUnitTestAssets
+> Task :core-ui:packageDebugUnitTestForUnitTest
+> Task :core-ui:generateDebugUnitTestConfig
+
+> Task :app:generateDebugPythonRequirements
+Looking in indexes: https://pypi.org/simple, https://chaquo.com/pypi-13.1
+Collecting tzdata==2025.2
+  Using cached tzdata-2025.2-py2.py3-none-any.whl (347 kB)
+Installing collected packages: tzdata
+Successfully installed tzdata-2025.2
+Chaquopy: Installing for x86_64
+
+> Task :app:mergeDebugPythonSources
+> Task :app:generateDebugPythonProxies
+> Task :core-ui:compileDebugKotlin
+> Task :core-ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core-ui:bundleLibRuntimeToJarDebug
+> Task :core-ui:bundleLibCompileToJarDebug
+> Task :core-ui:processDebugJavaRes
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:checkDebugAarMetadata
+> Task :core-ui:compileDebugUnitTestKotlin
+> Task :core-ui:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :core-ui:processDebugUnitTestJavaRes
+> Task :app:packageDebugResources
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:mergeDebugResources
+> Task :app:generateDebugPythonMiscAssets
+> Task :app:generateDebugPythonRequirementsAssets
+> Task :core-model:test
+> Task :core-ui:testDebugUnitTest
+> Task :app:generateDebugPythonSourceAssets
+> Task :app:generateDebugPythonBuildAssets
+> Task :app:chaquopyLicences
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:processDebugResources
+> Task :app:packageDebugUnitTestForUnitTest
+> Task :app:generateDebugUnitTestConfig
+
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/MainActivity.kt:480:47 The corresponding parameter in the supertype 'HandoffSheetActions' is named 'app'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/MainActivity.kt:481:50 The corresponding parameter in the supertype 'HandoffSheetActions' is named 'app'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/feature/road/RoadScreen.kt:213:27 The corresponding parameter in the supertype 'HandoffSheetActions' is named 'app'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/feature/road/RoadScreen.kt:214:30 The corresponding parameter in the supertype 'HandoffSheetActions' is named 'app'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Verst/Verst/android/app/src/main/kotlin/app/verst/platform/Platform.kt:186:97 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:testDebugUnitTest
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/unit-1793229232807.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Verst/Verst/android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 35s
+72 actionable tasks: 55 executed, 14 from cache, 3 up-to-date

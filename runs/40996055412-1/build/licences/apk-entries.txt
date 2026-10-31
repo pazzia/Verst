@@ -1,0 +1,7 @@
+Archive:  android/app/build/outputs/apk/demo/app-demo.apk
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+      359  1981-01-01 01:01   assets/licences/chaquopy.json
+      205  1981-01-01 01:01   assets/licences/chaquopy.txt
+---------                     -------
+      564                     2 files

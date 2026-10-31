@@ -1,0 +1,10 @@
+[unit] Test - V2ContractsTest > noDataPricesAndFoodStopsDecode
+[unit] Test - ScreensScreenshotTest > cityNotEnoughNoData
+[unit] Test - VerstFlowTest > notEnoughNoDataCarriesTheEnginesMessage
+[unit] Gradle: Execution failed for task ':core-model:test'. - Execution failed for task ':core-model:test'.
+> There were failing tests. See the report at: file:///home/runner/work/Verst/Verst/android/core-model/build/reports/tests/test/index.html
+[unit] Gradle: Execution failed for task ':app:testDebugUnitTest'. - Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///home/runner/work/Verst/Verst/android/app/build/reports/tests/testDebugUnitTest/index.html
+[test] app.verst.ScreensScreenshotTest > cityNotEnoughNoData: java.lang.NullPointerException
+[test] app.verst.nav.VerstFlowTest > notEnoughNoDataCarriesTheEnginesMessage: org.junit.ComparisonFailure: expected:<[no_data]> but was:<[few_places]>
+[test] app.verst.core.model.V2ContractsTest > noDataPricesAndFoodStopsDecode: org.junit.ComparisonFailure: city_route-error-no-data.json expected:<[no_data]> but was:<[few_places]>

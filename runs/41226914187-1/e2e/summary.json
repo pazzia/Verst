@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "run": "41226914187",
+  "sha": "185f929bab3bc900b84090357d77bb0a5df38759",
+  "ref": "refs/heads/camper-ui",
+  "job": "e2e",
+  "sections": {
+    "instrument": {
+      "tests": 33,
+      "passed": 30,
+      "failed": 3,
+      "crashed": false,
+      "ok": true
+    },
+    "logcat": {
+      "lines": 53093,
+      "kept": 2592,
+      "tracebacks": 0
+    },
+    "steps.e2e": {
+      "avd-cache": "success",
+      "journey": "failure"
+    }
+  }
+}

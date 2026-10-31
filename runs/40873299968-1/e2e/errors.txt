@@ -1,0 +1,1 @@
+[e2e] app.verst.e2e.Sprint3Test.s34CityWalkInYaroslavl

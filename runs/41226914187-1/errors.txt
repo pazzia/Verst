@@ -1,0 +1,3 @@
+[e2e] app.verst.e2e.RoundR1Test.dayMenuAndStopMenuHandOffTheEngineLinks
+[e2e] app.verst.e2e.Sprint4DataTest.s4dWalks
+[e2e] app.verst.e2e.Sprint4Test.s4AirplaneModeEverythingWorksAndNothingIsSent

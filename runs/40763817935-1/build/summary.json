@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "run": "40763817935",
+  "sha": "15aa773549fc49cf554714764adfc5b7b954269c",
+  "ref": "refs/heads/ccr-013d3489-181fz2",
+  "job": "build",
+  "sections": {
+    "steps.build": {
+      "assemble": "skipped",
+      "unit": "skipped",
+      "lint": "skipped",
+      "licences": "skipped",
+      "apk": "skipped"
+    },
+    "gradle.toolchain": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    }
+  }
+}

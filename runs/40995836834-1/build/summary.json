@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "run": "40995836834",
+  "sha": "024d63e44b0b0833def8f3eddd0c1ef6ff4834c0",
+  "ref": "refs/heads/ccr-013d3489-181fz2",
+  "job": "build",
+  "sections": {
+    "steps.build": {
+      "assemble": "success",
+      "unit": "cancelled",
+      "lint": "skipped",
+      "licences": "skipped",
+      "apk": "skipped"
+    },
+    "gradle.assemble": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    },
+    "gradle.toolchain": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    },
+    "gradle.unit": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    }
+  }
+}
