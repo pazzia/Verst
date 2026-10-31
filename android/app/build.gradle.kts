@@ -65,7 +65,8 @@ android {
             initWith(getByName("release"))
             isDebuggable = false
             isMinifyEnabled = false
-            applicationIdSuffix = ".demo"
+            // camper-ui fork (CEO 31.10): its own package, so it installs next to «Верста» (app.verst.demo)
+            applicationIdSuffix = ".camper"
             signingConfig = signingConfigs.getByName(if (demoKeystore != null) "demo" else "debug")
             matchingFallbacks += listOf("release")
             buildConfigField("String", "APPMETRICA_API_KEY", "\"$appMetricaTestKey\"")

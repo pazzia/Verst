@@ -314,6 +314,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
+      APP_ID: ${{ github.ref_name == 'camper-ui' && 'app.verst.camper' || 'app.verst.demo' }}   # run_e2e.sh
       OUT: ${{ github.workspace }}/ci-out/e2e
     steps:
       - uses: actions/checkout@v4
@@ -492,7 +493,9 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
-      TAG: verst-test-latest
+      # the camper-ui fork (CEO 31.10) has its own permanent link, so it never replaces the working branch's build
+      TAG: ${{ github.ref_name == 'camper-ui' && 'verst-camper-latest' || 'verst-test-latest' }}
+      APK_NAME: ${{ github.ref_name == 'camper-ui' && 'Verst-camper-latest.apk' || 'Verst-test-latest.apk' }}
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -505,13 +508,13 @@ jobs:
         run: |
           mkdir -p dist
           APK=$(find apks -name app-demo.apk | head -1)
-          cp "$APK" "dist/Verst-test-latest.apk"
+          cp "$APK" "dist/$APK_NAME"
           cp "$APK" "dist/Verst-$VERST_VERSION.apk"
           (cd dist && sha256sum "Verst-$VERST_VERSION.apk" > "Verst-$VERST_VERSION.apk.sha256")
           {
             echo "Верста $VERST_VERSION — тестовая сборка ветки \`${{ github.ref_name }}\` (ещё не в main)."
             echo
-            echo "- Постоянная ссылка на последнюю тестовую сборку: https://github.com/${{ github.repository }}/releases/download/$TAG/Verst-test-latest.apk"
+            echo "- Постоянная ссылка на последнюю тестовую сборку: https://github.com/${{ github.repository }}/releases/download/$TAG/$APK_NAME"
             echo "- Тот же файл с номером версии: \`Verst-$VERST_VERSION.apk\` (sha256 рядом)"
             echo "- Проверка на эмуляторе: ${E2E_RESULT}"
             echo "- Собрано из коммита ${{ github.sha }} (метка релиза стоит на main — так требует GitHub)"
@@ -519,11 +522,11 @@ jobs:
             echo "Изменения: $(echo "${HEAD_MSG:-ручной запуск}" | head -1)"
           } > dist/notes.md
           gh release delete "$TAG" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG" dist/Verst-test-latest.apk "dist/Verst-$VERST_VERSION.apk" \
+          gh release create "$TAG" "dist/$APK_NAME" "dist/Verst-$VERST_VERSION.apk" \
             "dist/Verst-$VERST_VERSION.apk.sha256" \
             --repo "${{ github.repository }}" --target "${{ github.event.repository.default_branch }}" --prerelease \
             --title "Верста $VERST_VERSION · тестовая сборка" --notes-file dist/notes.md
-          echo "::notice title=Test build::https://github.com/${{ github.repository }}/releases/download/$TAG/Verst-test-latest.apk"
+          echo "::notice title=Test build::https://github.com/${{ github.repository }}/releases/download/$TAG/$APK_NAME"
 
   # --------------------------------------------------------------------------------------- ci-logs
   ci-logs:
