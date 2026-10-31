@@ -53,9 +53,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,7 +62,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -74,13 +70,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.layout.layout
 import app.verst.feature.common.scaled
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.AlternativeDto
@@ -92,14 +86,23 @@ import app.verst.core.ui.components.BackLink
 import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.GlyphIcon
 import app.verst.core.ui.components.Icon
-import app.verst.core.ui.components.InfoChip
 import app.verst.core.ui.components.RoadSign
-import app.verst.core.ui.components.SkyStrip
 import app.verst.core.ui.components.Txt
-import app.verst.core.ui.components.PrimaryCta
 import app.verst.core.ui.components.arrowFor
-import app.verst.core.ui.components.dashboardSurface
-import app.verst.core.ui.components.overheadPlate
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.lerp
+import app.verst.core.ui.components.CraftButton
+import app.verst.core.ui.components.CraftCard
+import app.verst.core.ui.components.CraftDefaults
+import app.verst.core.ui.components.CraftIconTile
+import app.verst.core.ui.components.CraftType
+import app.verst.core.ui.components.DashedDivider
+import app.verst.core.ui.components.craftField
+import app.verst.core.ui.components.craftSurface
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
 import app.verst.feature.common.IconButton44
@@ -229,7 +232,12 @@ interface RoadActions {
     }
 }
 
-/** 5.5 Road ahead: the day-by-day signs of the plan, «заменить» (D-6), save/share, the Waybill footer. */
+/**
+ * 5.5 Road ahead: the day-by-day plan, «заменить» (D-6), save/share, the Waybill footer. Fork camper-ui (mockup
+ * screen 6 «Дорога впереди»): the header card (route, km badge, the trip chips), «Вести по картам», the notes card,
+ * then the days' stops in one craft card along a dashed road line — each stop an icon tile of its kind and a paper
+ * row; the car rides the dashed line with the scroll. The app header and the tab bar are MainActivity's.
+ */
 @Composable
 fun RoadScreen(ui: RoadUi, a: RoadActions) {
     val trip = ui.trip
@@ -243,7 +251,6 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
     // 5.9 §5: TalkBack focus moves to the returned row (input focus → TYPE_VIEW_FOCUSED, TalkBack follows it).
     val requesters = remember(trip) { mutableMapOf<String, FocusRequester>() }
     val density = LocalDensity.current
-    val reducedMotion = LocalReducedMotion.current
     LaunchedEffect(ui.focus.seq) {
         // motion.returnToItem (5.9 §5): jump (no animation) back to the same viewport offset, the focus row in view.
         val f = ui.focus
@@ -279,69 +286,75 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
             a.topRow(top, v)
         }
     }
-    ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
+    ScreenRoot(C.camper.page) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val windowH = maxHeight
             Column(Modifier.fillMaxSize()) {
-                Box(Modifier.fillMaxWidth().height(150.dp)) {
-                    SkyStrip(132.dp)
-                    Box(Modifier.fillMaxSize().padding(top = 110.dp).dashboardSurface(curve = 30.dp, rim = false))
-                    // OI-27: «К лобовому» when the trip was opened from «Мои поездки».
+                // The screen's own row under the app header: back (OI-27: «К лобовому» when opened from «Мои
+                // поездки»), save, share.
+                Row(Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                     val back = stringResource(if (ui.fromSaved) R.string.common_back_to_windshield else R.string.common_back_instruments)
-                    BackLink(back, C.mirror.label, stringResource(R.string.cd_back, back), a::back, Modifier.padding(start = 12.dp, top = 10.dp).testTag("road.back"))
-                    Row(Modifier.align(Alignment.TopEnd).padding(top = 6.dp, end = 12.dp)) {
-                        IconButton44(
-                            Glyph.BOOKMARK, if (ui.saved) C.accent.yellowText else C.mirror.label,
-                            stringResource(if (ui.saved) R.string.cd_road_saved else R.string.cd_road_save), "road.save", filled = ui.saved, onClick = a::save,
-                        )
-                        IconButton44(Glyph.SHARE, C.mirror.label, stringResource(R.string.cd_road_share), "road.share", onClick = a::share)
-                    }
-                    TitleSign(trip, ui.bearing8, Modifier.padding(start = 20.dp, end = 20.dp, top = 56.dp).fillMaxWidth())
+                    BackLink(back, C.camper.ink, stringResource(R.string.cd_back, back), a::back, Modifier.testTag("road.back"))
+                    Spacer(Modifier.weight(1f))
+                    IconButton44(
+                        Glyph.BOOKMARK, if (ui.saved) C.camper.orangeText else C.camper.ink,
+                        stringResource(if (ui.saved) R.string.cd_road_saved else R.string.cd_road_save), "road.save", filled = ui.saved, onClick = a::save,
+                    )
+                    IconButton44(Glyph.SHARE, C.camper.ink, stringResource(R.string.cd_road_share), "road.share", onClick = a::share)
                 }
                 Box(Modifier.weight(1f).fillMaxWidth().onSizeChanged { viewportH = it.height }) {
-                    // S-20: one scrolled column; the road section draws a single continuous road (one lane-dash
-                    // phase), the rows draw only their connector stubs. A trip has tens of rows, not thousands.
+                    // S-20: one scrolled column; the stops card draws a single dashed road line behind its rows.
+                    // A trip has tens of rows, not thousands.
                     Column(
                         Modifier.fillMaxSize().verticalScroll(scroll).testTag("road.list")
-                            .onGloballyPositioned { content = it },
+                            .onGloballyPositioned { content = it }
+                            .padding(start = CraftDefaults.ScreenGutter, end = CraftDefaults.ScreenGutter, top = 4.dp, bottom = 28.dp),
+                        verticalArrangement = Arrangement.spacedBy(CraftDefaults.Gap),
                     ) {
-                        Intro(trip, ui, a)
+                        HeaderCard(trip, ui.bearing8)
+                        // 5.5 §10.1 / CEO 29.10: «Вести по картам» — today's day in the preferred maps app, every point
+                        HandoffCta(ui.handoffDay, { a.handoff(ui.handoffDay) }, { a.handoffSheet(ui.handoffDay) }, maps = ui.maps, target = ui.carTarget)
+                        Intro(trip, a)
                         val parkingOn = parkingAware(trip)
-                        Column(
-                            Modifier.fillMaxWidth().roadSection()
-                                .onGloballyPositioned { c -> content?.let { root -> if (root.isAttached && c.isAttached) section = root.localPositionOf(c, Offset.Zero).y.roundToInt() to c.size.height } },
-                        ) {
-                            trip.daysList.forEachIndexed { di, d ->
-                                DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0, parkingOn, { a.handoffSheet(d.day) }) { a.handoffSheet(d.day) }
-                                d.stops.forEachIndexed { si, st ->
-                                    StopRow(
-                                        st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name,
-                                        showParking = parkingOn && showsParking(st),
-                                        onParking = { a.parking(st) },
-                                        highlighted = st.id == highlight,
-                                        focusRequester = requesters.getOrPut(st.id) { FocusRequester() },
-                                        onPlaced = { y, h -> if (rows[st.id] != y to h) rows[st.id] = y to h },
-                                        content = { content },
-                                        onLongPress = { a.stopMenu(st) },
-                                        onReport = { a.reportStop(st) },
-                                        onTap = if (ui.tappable(st)) ({ a.card(st) }) else null,
-                                        onHotel = { a.hotel(st.id) },
-                                    ) { a.replace(st) }
+                        CraftCard(Modifier.fillMaxWidth().padding(end = CraftDefaults.ShadowX), padding = PaddingValues(start = StopsPadStart, end = 10.dp, top = 12.dp, bottom = 4.dp), spacing = 0.dp) {
+                            Column(
+                                Modifier.fillMaxWidth().roadLine()
+                                    .onGloballyPositioned { c -> content?.let { root -> if (root.isAttached && c.isAttached) section = root.localPositionOf(c, Offset.Zero).y.roundToInt() to c.size.height } },
+                            ) {
+                                trip.daysList.forEachIndexed { di, d ->
+                                    DayHeader(d, trip.roundTrip && di == trip.daysList.lastIndex && trip.days > 1, first = di == 0, parkingOn, { a.handoffSheet(d.day) }) { a.handoffSheet(d.day) }
+                                    d.stops.forEachIndexed { si, st ->
+                                        StopRow(
+                                            st, di == 0 && si == 0, st.id in ui.booked, ui.townPrep[st.townId] ?: st.name,
+                                            showParking = parkingOn && showsParking(st),
+                                            onParking = { a.parking(st) },
+                                            highlighted = st.id == highlight,
+                                            focusRequester = requesters.getOrPut(st.id) { FocusRequester() },
+                                            onPlaced = { y, h -> if (rows[st.id] != y to h) rows[st.id] = y to h },
+                                            content = { content },
+                                            onLongPress = { a.stopMenu(st) },
+                                            onReport = { a.reportStop(st) },
+                                            onTap = if (ui.tappable(st)) ({ a.card(st) }) else null,
+                                            onHotel = { a.hotel(st.id) },
+                                        ) { a.replace(st) }
+                                    }
                                 }
                             }
-                            Spacer(Modifier.height(24.dp))
                         }
                     }
-                    // components §26.3: the car rides the visible part of the road with the scroll (z above the km posts)
+                    // components §26.3: the car rides the visible part of the dashed road line with the scroll
                     val (secY, secH) = section
                     if (secH > 0 && viewportH > 0) {
                         val top = with(density) { (secY - scroll.value).coerceAtLeast(0).toDp().value }
                         val bottom = with(density) { (secY + secH - scroll.value).coerceAtMost(viewportH).toDp().value }
-                        CarMarker(top, bottom, if (scroll.maxValue > 0) scroll.value.toFloat() / scroll.maxValue else 0f)
+                        CarMarker(
+                            top, bottom, if (scroll.maxValue > 0) scroll.value.toFloat() / scroll.maxValue else 0f,
+                            x = CraftDefaults.ScreenGutter + StopsPadStart + TileCol / 2 - DesignTokens.size.carMarkerW / 2,
+                        )
                     }
                     Box(
-                        Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(24.dp)
-                            .background(Brush.verticalGradient(listOf(C.dash.raised.copy(alpha = 0f), C.dash.raised))),
+                        Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(20.dp)
+                            .background(Brush.verticalGradient(listOf(C.camper.page.copy(alpha = 0f), C.camper.page))),
                     )
                 }
                 Footer(trip, ui.minimum, parkingAware(trip), a::waybill)
@@ -349,7 +362,7 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
             val t = ui.toast
             if (t != null) {
                 PlateToast(
-                    toastText(t), bottom = 24.dp + DesignTokens.size.ctaWaybillH + 16.dp,
+                    toastText(t), bottom = FooterBottom + DesignTokens.size.ctaWaybillH + 16.dp,
                     action = if (ui.canUndo) stringResource(R.string.common_undo) else null, onAction = a::undo,
                 )
             }
@@ -372,12 +385,21 @@ fun RoadScreen(ui: RoadUi, a: RoadActions) {
     }
 }
 
+/** The stop column of the stops card: the icon tiles (32) sit on the dashed road line at its centre. */
+private val TileCol = CraftDefaults.TileSize
+
+/** The stops card's start padding (the car's x follows it). */
+private val StopsPadStart = 10.dp
+
+/** The footer's distance to the tab bar (its hard shadow fits in it). */
+private val FooterBottom = 12.dp
+
 /** D-6: «Заменить: <name>» with the current stop and the engine's alternatives (Δ min / Δ ₽). */
 @Composable
 private fun androidx.compose.foundation.layout.BoxScope.ReplaceSheet(r: ReplaceUi, windowH: androidx.compose.ui.unit.Dp, a: RoadActions) {
     val s = r.stop
     BottomSheet(stringResource(R.string.replace_title, stopName(s)), a::closeReplace, "replace", windowH) {
-        Txt(stringResource(R.string.replace_subtitle), T.body.sm, C.text.secondary, Modifier.padding(bottom = 10.dp))
+        Txt(stringResource(R.string.replace_subtitle), T.body.sm, C.camper.inkSoft, Modifier.padding(bottom = 10.dp))
         Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             // Sub-line: the engine's own sentence for the place (copy has no per-tag labels for food/rest yet).
             OptionRow(s, s.name, s.note ?: s.reason, stringResource(R.string.replace_current), r.picked == null, "replace.current") { a.pick(null) }
@@ -386,24 +408,23 @@ private fun androidx.compose.foundation.layout.BoxScope.ReplaceSheet(r: ReplaceU
             }
         }
         val note = s.alternativesNote
-        if (note != null) Txt(note, T.body.md, C.text.note, Modifier.padding(top = 10.dp))
+        if (note != null) Txt(note, T.body.md, C.camper.inkSoft, Modifier.padding(top = 10.dp))
         Spacer(Modifier.height(14.dp))
         if (s.alternatives.isNotEmpty()) {
-            // N-13: `YellowButton` h 56, sentence case, no arrow; disabled until another row is picked.
+            // N-13 / fork camper-ui: the orange craft button, sentence case, no arrow; disabled until another row is
+            // picked (the end / bottom padding keep its hard shadow inside the sheet)
             val enabled = r.picked != null && !r.busy
-            Box(
-                Modifier.fillMaxWidth().height(DesignTokens.size.buttonH).clip(RoundedCornerShape(DesignTokens.radius.r12))
-                    .background(if (enabled) C.accent.yellow else C.dash.control)
-                    .clickable(enabled = enabled, role = Role.Button, onClick = a::confirmReplace)
-                    .testTag("replace.confirm"),
-                contentAlignment = Alignment.Center,
-            ) { Txt(stringResource(R.string.replace_confirm), T.cta.sm, if (enabled) C.text.onLight else C.text.disabled, maxLines = 1) }
+            CraftButton(
+                stringResource(R.string.replace_confirm), a::confirmReplace,
+                Modifier.padding(end = CraftDefaults.ShadowX, bottom = CraftDefaults.ShadowY).fillMaxWidth().testTag("replace.confirm"),
+                enabled = enabled,
+            )
         }
         Box(
             Modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = a::closeReplace)
                 .testTag("replace.keep"),
             contentAlignment = Alignment.Center,
-        ) { Txt(stringResource(R.string.replace_keep), T.body.mdStrong, C.text.secondary) }
+        ) { Txt(stringResource(R.string.replace_keep), T.body.mdStrong, C.camper.inkSoft) }
     }
 }
 
@@ -433,7 +454,7 @@ private fun androidx.compose.foundation.layout.BoxScope.StopMenuSheet(
         if (canReplace) items += { ActionItem(stringResource(R.string.stopmenu_swap), "stopmenu.swap", a::stopMenuReplace) }
         items += { ActionItem(stringResource(R.string.stopmenu_report), "stopmenu.report", a::stopMenuReport) }
         items.forEachIndexed { i, item ->
-            if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(C.dash.control))
+            if (i > 0) DashedDivider(thickness = 1.5.dp)
             item()
         }
     }
@@ -487,14 +508,14 @@ internal fun HandoffItem(
             .testTag(tag).padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        GlyphIcon(Glyph.NAVIGATOR, C.accent.yellowText, 22.dp)
+        CraftIconTile(R.drawable.ic_ui_location_arrow, active = enabled)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Txt(title, T.list.title, if (enabled) C.text.primary else C.text.disabled, maxLines = 1)
-            Txt(line, T.body.sm, C.text.muted, maxLines = 1, modifier = Modifier.testTag("$tag.target"))
-            if (truncated) Txt(stringResource(R.string.handoff_truncated), T.body.sm, C.accent.yellowText, Modifier.testTag("$tag.truncated"))
+            Txt(title, T.list.title, if (enabled) C.camper.ink else C.text.disabled, maxLines = 1)
+            Txt(line, T.body.sm, C.camper.inkMuted, maxLines = 1, modifier = Modifier.testTag("$tag.target"))
+            if (truncated) Txt(stringResource(R.string.handoff_truncated), T.body.sm, C.camper.orangeText, Modifier.testTag("$tag.truncated"))
         }
-        GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 16.dp)
+        GlyphIcon(Glyph.UP_RIGHT, C.camper.inkSoft, 16.dp)
     }
 }
 
@@ -529,18 +550,18 @@ internal fun androidx.compose.foundation.layout.BoxScope.AboutDataSheet(windowH:
     // BottomSheet already scrolls its content (a weighted verticalScroll column); a second weighted scroll column
     // here measured at 0 height inside it and hid the whole body (CI run 125).
     BottomSheet(stringResource(R.string.about_data_title), onClose, "aboutdata", windowH) {
-        Txt(stringResource(R.string.about_data_body), T.body.md, C.text.secondary, Modifier.padding(bottom = 8.dp))
+        Txt(stringResource(R.string.about_data_body), T.body.md, C.camper.inkSoft, Modifier.padding(bottom = 8.dp))
         DataLink(stringResource(R.string.about_data_copy), "aboutdata.copy") { open(DataLicence.CATALOGUE_COPY) }
         DataLink(stringResource(R.string.about_data_odbl), "aboutdata.odbl") { open(DataLicence.ODBL) }
         DataLink(stringResource(R.string.about_data_osm), "aboutdata.osm") { open(DataLicence.OSM_COPYRIGHT) }
         if (notice != null) {
             DataLink(stringResource(if (full) R.string.about_data_notice_hide else R.string.about_data_notice), "aboutdata.notice", external = false) { full = !full }
-            if (full) Txt(notice, T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("aboutdata.notice.text"))
+            if (full) Txt(notice, T.body.sm, C.camper.inkSoft, Modifier.padding(top = 4.dp).testTag("aboutdata.notice.text"))
         }
     }
 }
 
-/** A link row of «О данных»: `type.body.mdStrong` `color.navi.label` like `route_approx_more`, touch 44; ↗ when it leaves the app. */
+/** A link row of «О данных»: `type.body.mdStrong` orange text like `route_approx_more`, touch 44; ↗ when it leaves the app. */
 @Composable
 private fun DataLink(title: String, tag: String, external: Boolean = true, onClick: () -> Unit) {
     Row(
@@ -548,54 +569,51 @@ private fun DataLink(title: String, tag: String, external: Boolean = true, onCli
             .clickable(role = Role.Button, onClick = onClick).testTag(tag),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Txt(title, T.body.mdStrong, C.navi.label, Modifier.weight(1f))
-        if (external) GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 16.dp)
+        Txt(title, T.body.mdStrong, C.camper.orangeText, Modifier.weight(1f))
+        if (external) GlyphIcon(Glyph.UP_RIGHT, C.camper.inkSoft, 16.dp)
     }
 }
 
-/** components §22 `ActionItem`: min-h 52, `type.list.title`, left-aligned, no icon; pressed `dash.pressed`. */
+/** components §22 `ActionItem`: min-h 52, `type.list.title`, left-aligned, no icon; pressed `camper.header`. */
 @Composable
 private fun ActionItem(title: String, tag: String, onClick: () -> Unit) {
     val source = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     Box(
         Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp)
-            .background(if (pressed) C.dash.pressed else androidx.compose.ui.graphics.Color.Transparent)
+            .background(if (pressed) C.camper.header else Color.Transparent)
             .clickable(source, indication = null, role = Role.Button, onClick = onClick).testTag(tag),
         contentAlignment = Alignment.CenterStart,
-    ) { Txt(title, T.list.title, C.text.primary, maxLines = 2) }
+    ) { Txt(title, T.list.title, C.camper.ink, maxLines = 2) }
 }
 
-/** D-6 row (N-08): min-h 64, `dash.controlAlt`, radius 10, padding 10 12; radio, the kind's mini sign at 0.7. */
+/** D-6 row (N-08), fork camper-ui: min-h 64, a white-paper field (orange 2 dp frame when picked); radio, the kind's mini sign at 0.7. */
 @Composable
 private fun OptionRow(kind: StopDto, name: String, sub: String?, delta: String, selected: Boolean, tag: String, breaks: Boolean = false, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(DesignTokens.radius.r10)
     Row(
         Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 64.dp)
-            .clip(shape)
-            .background(C.dash.controlAlt)
-            .then(if (selected) Modifier.border(DesignTokens.stroke.w1, C.accent.yellowText, shape) else Modifier)
+            .craftField(focused = selected)
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .testTag(tag)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Box(Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellowText else C.text.secondary, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) {
-            if (selected) Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(C.accent.yellow))
+        Box(Modifier.size(18.dp).border(2.dp, if (selected) C.camper.orange else C.camper.border, RoundedCornerShape(9.dp)), contentAlignment = Alignment.Center) {
+            if (selected) Box(Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(C.camper.orange))
         }
         RoadSign(kind.sign, kind.name, app.verst.feature.common.signTags(kind.poiKind, kind.tags), Modifier.scaled(0.7f))
         Column(Modifier.weight(1f)) {
-            Txt(name, T.title.sm, C.text.primary, maxLines = 1)
-            if (!sub.isNullOrBlank()) Txt(sub, T.body.sm, C.text.secondary, maxLines = 2)
+            Txt(name, T.title.sm, C.camper.ink, maxLines = 1)
+            if (!sub.isNullOrBlank()) Txt(sub, T.body.sm, C.camper.inkSoft, maxLines = 2)
         }
         // 5.8 §3: a `breaksBudget` row — a red dot before the delta and «не в бюджете» (still selectable)
         Column(horizontalAlignment = Alignment.End) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (breaks) Box(Modifier.padding(end = 6.dp).size(6.dp).clip(RoundedCornerShape(3.dp)).background(C.accent.red).testTag("$tag.breaks"))
-                Txt(delta, T.body.mdStrong, C.text.primary, maxLines = 1)
+                Txt(delta, T.body.mdStrong, C.camper.ink, maxLines = 1)
             }
             if (breaks) Txt(stringResource(R.string.budget_alt_breaks), T.body.sm, C.accent.redText, maxLines = 1)
         }
@@ -616,35 +634,35 @@ private fun deltaText(alt: AlternativeDto): String {
     }
 }
 
+/**
+ * Fork camper-ui (mockup screen 6): the header card — «Дорога впереди» (orange overline), the bearing arrow and the
+ * route, the km badge; under them the trip chips (days · nights, crew, pace). The title block is one heading.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TitleSign(trip: TripDto, bearing8: String, modifier: Modifier) {
-    val cd = "${trip.title}, ${trip.km}"
-    Row(
-        modifier
-            .height(49.dp)
-            .overheadPlate(outer = 3.dp, radius = 7.dp, innerRadius = 5.dp)
-            .semantics(mergeDescendants = true) { heading(); contentDescription = cd }
-            .padding(horizontal = 15.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(arrowFor(bearing8), C.sign.white, 20.dp)
-        Spacer(Modifier.width(8.dp))
-        Txt(trip.title, T.sign.xl, C.sign.white, Modifier.weight(1f), maxLines = 1)
-        Txt(RuFormat.thousands(trip.km), T.sign.xl, C.sign.white, Modifier.testTag("road.km"))
-    }
-}
-
-@Composable
-private fun Intro(trip: TripDto, ui: RoadUi, a: RoadActions) {
-    val handoffDay = ui.handoffDay
-    val onAbout = a::aboutData
-    // S-21 / 5.5 §2.2: L1 at the list top, L2 +6, L3 +8, road column 18 below L3 (padding 4 + margin 14).
-    Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 0.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        // N-07: the 29.4 line box exactly (no font padding, trimmed line height), so the chips land at +6.
-        Txt(stringResource(R.string.road_title), T.display.copy(lineHeightStyle = TightLines), C.text.primary, Modifier.semantics { heading() })
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+private fun HeaderCard(trip: TripDto, bearing8: String) {
+    CraftCard(Modifier.fillMaxWidth().padding(end = CraftDefaults.ShadowX), padding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)) {
+        Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) { heading() }, verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Txt(stringResource(R.string.road_title), CraftType.overline, C.camper.orangeText, maxLines = 1)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(arrowFor(bearing8), C.camper.ink, 16.dp)
+                    Spacer(Modifier.width(6.dp))
+                    Txt(trip.title, CraftType.cardTitle, C.camper.ink, Modifier.weight(1f, fill = false), maxLines = 2)
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            // `.craft-badge` with the km on the tagged text itself (e2e reads `road.km`'s text)
+            Box(
+                Modifier.clip(RoundedCornerShape(CraftDefaults.BadgeRadius)).background(C.camper.amber)
+                    .border(CraftDefaults.BadgeBorder, C.camper.border, RoundedCornerShape(CraftDefaults.BadgeRadius))
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                contentAlignment = Alignment.Center,
+            ) { Txt(stringResource(R.string.road_odometer, RuFormat.thousands(trip.km)), CraftType.badge, C.camper.onAmber, Modifier.testTag("road.km"), maxLines = 1) }
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             // S-01: the deck's `road_chip_days` («3 дня · 2 ночи»), now with a string 4th argument.
-            InfoChip(
+            TripPill(
                 if (trip.nights > 0) {
                     stringResource(
                         R.string.road_chip_days, trip.days, pluralStringResource(R.plurals.plural_day, trip.days),
@@ -652,12 +670,31 @@ private fun Intro(trip: TripDto, ui: RoadUi, a: RoadActions) {
                     )
                 } else days(trip.days),
             )
-            InfoChip(crewShort(trip.input.crew.adults, trip.input.crew.children, trip.input.crew.dog))
-            InfoChip(stringResource(R.string.road_chip_pace, RuFormat.thousands(trip.input.dailyKm)))
+            TripPill(crewShort(trip.input.crew.adults, trip.input.crew.children, trip.input.crew.dog))
+            TripPill(stringResource(R.string.road_chip_pace, RuFormat.thousands(trip.input.dailyKm)))
         }
-        // 5.5 §10.1 / CEO 29.10: «Вести по картам» under the chips — today's day in the preferred maps app, every point
-        HandoffCta(handoffDay, { a.handoff(handoffDay) }, { a.handoffSheet(handoffDay) }, Modifier.padding(top = 6.dp), maps = ui.maps, target = ui.carTarget)
-        Txt(stringResource(R.string.road_intro), T.body.mdTight, C.text.secondary, Modifier.padding(top = 4.dp))
+    }
+}
+
+/** A trip chip of the header card: white paper, 1.5 dp brown border, radius 10, ink text. */
+@Composable
+private fun TripPill(text: String) {
+    val shape = RoundedCornerShape(CraftDefaults.BadgeRadius)
+    Box(
+        Modifier.clip(shape).background(C.camper.field).border(CraftDefaults.BadgeBorder, C.camper.border, shape)
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+        contentAlignment = Alignment.Center,
+    ) { Txt(text, T.body.smStrong, C.camper.ink, maxLines = 1) }
+}
+
+/** The amber tint of the warnings card (opaque: the card's hard shadow must not show through). */
+private val WarnTint = lerp(C.camper.paper, C.camper.amber, 0.22f)
+
+@Composable
+private fun Intro(trip: TripDto, a: RoadActions) {
+    val onAbout = a::aboutData
+    CraftCard(Modifier.fillMaxWidth().padding(end = CraftDefaults.ShadowX), spacing = 6.dp) {
+        Txt(stringResource(R.string.road_intro), T.body.mdTight, C.camper.inkSoft)
         // 5.5 §9 (S3-FINAL P1-02): the open-data notice is a muted info line, not a warning plate; with a synthetic
         // route both notes share one line (`route_approx_open_data`)
         // 5.5 §10.2: rows mark open data with the dotted ring; the legend is said once here (with «О данных»)
@@ -670,83 +707,78 @@ private fun Intro(trip: TripDto, ui: RoadUi, a: RoadActions) {
             openData != null && !ringRows -> openData.message
             else -> null
         }
+        val posts = trip.daysList.any { d -> d.stops.any { it.kmDriven != null } }
+        val abroad = trip.warnings.firstOrNull { it.code == ABROAD_WARNING }?.message
+        if (infoText != null || abroad != null || ringRows || posts) DashedDivider()
         if (infoText != null) {
             Row(Modifier.fillMaxWidth().testTag(if (trip.approxDistances) "road.approx" else "road.opendata"), verticalAlignment = Alignment.CenterVertically) {
-                GlyphIcon(Glyph.INFO, C.text.muted, 14.dp)
+                GlyphIcon(Glyph.INFO, C.camper.inkMuted, 14.dp)
                 Spacer(Modifier.width(6.dp))
-                Txt(infoText, T.body.sm, C.text.muted, Modifier.weight(1f, fill = false))
+                Txt(infoText, T.body.sm, C.camper.inkMuted, Modifier.weight(1f, fill = false))
                 Box(
                     Modifier.padding(start = 8.dp).defaultMinSize(minHeight = DesignTokens.size.touchMin)
                         .clickable(role = Role.Button, onClick = onAbout).testTag("road.approx.more"),
                     contentAlignment = Alignment.Center,
-                ) { Txt(stringResource(R.string.route_approx_more), T.body.mdStrong, C.navi.label) }
+                ) { Txt(stringResource(R.string.route_approx_more), T.body.mdStrong, C.camper.orangeText) }
             }
         }
         // CEO 29.10 (trips abroad): «цены, сборы и правила там … не проверены» — a muted info line too
-        trip.warnings.firstOrNull { it.code == ABROAD_WARNING }?.message?.let { m ->
+        abroad?.let { m ->
             Row(Modifier.fillMaxWidth().testTag("road.abroad"), verticalAlignment = Alignment.CenterVertically) {
-                GlyphIcon(Glyph.INFO, C.text.muted, 14.dp)
+                GlyphIcon(Glyph.INFO, C.camper.inkMuted, 14.dp)
                 Spacer(Modifier.width(6.dp))
-                Txt(m, T.body.sm, C.text.muted, Modifier.weight(1f, fill = false))
+                Txt(m, T.body.sm, C.camper.inkMuted, Modifier.weight(1f, fill = false))
             }
         }
-        Legends(ringRows && !trip.approxDistances, posts = trip.daysList.any { d -> d.stops.any { it.kmDriven != null } }, onAbout)
+        Legends(ringRows && !trip.approxDistances, posts = posts, onAbout)
         if (ringRows && trip.approxDistances) Legends(true, posts = false, onAbout = {}, about = false) // «О данных» is on the line above
-        // S3-QA P1-06: one plate per night — the engine sentence, then the night's «Ближайшая подходящая: …» note
-        val seen = mutableSetOf<String>()
-        // S3-QA2: with more than one night plate each one says which night («Ночь 2: не нашли …»)
-        val nightPlates = trip.warnings.count { it.code == "NO_LODGING" && it.message != null }
-        val nightPrefix = stringResource(R.string.road_night_prefix)
-        for (w in trip.warnings) {
-            if (w.code == "UNVERIFIED_PLACES" || w.level == "info") continue // the info line above
-            val raw = w.message ?: continue
-            if (!seen.add("${w.code}|${w.day}|$raw")) continue
-            val night = w.day
-            val msg = if (w.code == "NO_LODGING" && nightPlates > 1 && night != null) {
-                String.format(nightPrefix, night, raw.replaceFirstChar { it.lowercase() })
-            } else raw
-            val second = if (w.code == "NO_LODGING" && w.day != null) {
-                trip.daysList.firstOrNull { it.day == w.day }?.stops?.lastOrNull { it.kind == "overnight" }?.note?.takeIf { it.isNotBlank() && it != raw }
-            } else null
-            Row(
-                Modifier.fillMaxWidth().padding(top = 4.dp)
-                    .border(DesignTokens.stroke.w1, C.accent.yellowText, RoundedCornerShape(DesignTokens.radius.r10))
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Box(Modifier.width(14.dp).height(14.dp).clip(RoundedCornerShape(7.dp)).background(C.accent.yellow), contentAlignment = Alignment.Center) {
-                    Txt("!", T.caption.bold, C.text.onLight)
-                }
-                Column(Modifier.weight(1f)) {
-                    Txt(msg, T.body.md, C.text.primary)
-                    if (second != null) Txt(second, T.body.sm, C.text.secondary, Modifier.padding(top = 2.dp).testTag("road.warning.nearest"))
-                }
+    }
+    // S3-QA P1-06: one plate per night — the engine sentence, then the night's «Ближайшая подходящая: …» note
+    val seen = mutableSetOf<String>()
+    // S3-QA2: with more than one night plate each one says which night («Ночь 2: не нашли …»)
+    val nightPlates = trip.warnings.count { it.code == "NO_LODGING" && it.message != null }
+    val nightPrefix = stringResource(R.string.road_night_prefix)
+    for (w in trip.warnings) {
+        if (w.code == "UNVERIFIED_PLACES" || w.level == "info") continue // the info line above
+        val raw = w.message ?: continue
+        if (!seen.add("${w.code}|${w.day}|$raw")) continue
+        val night = w.day
+        val msg = if (w.code == "NO_LODGING" && nightPlates > 1 && night != null) {
+            String.format(nightPrefix, night, raw.replaceFirstChar { it.lowercase() })
+        } else raw
+        val second = if (w.code == "NO_LODGING" && w.day != null) {
+            trip.daysList.firstOrNull { it.day == w.day }?.stops?.lastOrNull { it.kind == "overnight" }?.note?.takeIf { it.isNotBlank() && it != raw }
+        } else null
+        // fork camper-ui: an amber-tinted craft card with the amber «!» key
+        Row(
+            Modifier.fillMaxWidth().padding(end = CraftDefaults.ShadowX).craftSurface(fill = WarnTint)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Box(
+                Modifier.size(22.dp).clip(RoundedCornerShape(11.dp)).background(C.camper.amber)
+                    .border(CraftDefaults.BadgeBorder, C.camper.border, RoundedCornerShape(11.dp)),
+                contentAlignment = Alignment.Center,
+            ) { Txt("!", T.caption.bold, C.camper.onAmber) }
+            Column(Modifier.weight(1f)) {
+                Txt(msg, T.body.md, C.camper.ink)
+                if (second != null) Txt(second, T.body.sm, C.camper.inkSoft, Modifier.padding(top = 2.dp).testTag("road.warning.nearest"))
             }
         }
     }
 }
 
 /**
- * 5.5 §10.8: the road column x 10…62 (3 dp white edges), centre dashes at x 36 (32 / 64, one global phase);
- * the car lane is x 13–31, the km posts x 37–59.
+ * Mockup `.road-line`: the dashed brown road (3 dp, 6 on / 6 off, one phase for the whole trip) down the centre of
+ * the stop column, behind the tiles.
  */
-private fun Modifier.roadSection(): Modifier = drawBehind {
-    val dp = 1.dp.toPx()
-    drawRect(C.scene.road, Offset(10 * dp, 0f), Size(52 * dp, size.height))
-    drawRect(C.scene.roadEdge, Offset(10 * dp, 0f), Size(3 * dp, size.height))
-    drawRect(C.scene.roadEdge, Offset(59 * dp, 0f), Size(3 * dp, size.height))
-    var y = 0f
-    while (y < size.height) {
-        drawRect(C.scene.roadEdge, Offset(34.5f * dp, y), Size(3 * dp, minOf(32 * dp, size.height - y)))
-        y += 64 * dp
-    }
-}
-
-/** Per row: the 8 × 3 connector stub at x 60, row top + 30 (`color.interior.pole`), from the road to the sign. */
-private fun Modifier.connector(): Modifier = drawBehind {
-    val dp = 1.dp.toPx()
-    drawRect(C.interior.pole, Offset(60 * dp, 30 * dp), Size(8 * dp, 3 * dp))
+private fun Modifier.roadLine(): Modifier = drawBehind {
+    val x = TileCol.toPx() / 2
+    drawLine(
+        C.camper.border, Offset(x, 0f), Offset(x, size.height), strokeWidth = 3.dp.toPx(),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 6.dp.toPx())),
+    )
 }
 
 @Composable
@@ -757,26 +789,48 @@ private fun DayHeader(day: DayDto, home: Boolean, first: Boolean, parkingOn: Boo
     val cd = stringResource(R.string.cd_road_day, day.day, day.km.toString(), hours, pluralStringResource(R.plurals.plural_hour, hours)) +
         if (parkingOn) ". " + dayParkingCd(day) else ""
     Row(
-        // S-21 / 5.5 §10.7: day 1 starts at the road top, later days 6 below the previous row; 10 to row 1.
-        Modifier.fillMaxWidth().padding(start = 66.dp, end = 12.dp, top = if (first) 0.dp else 6.dp, bottom = 10.dp),
+        // the day's road tile on the dashed line, «День N» + meta, the day's «вести»
+        Modifier.fillMaxWidth().padding(top = if (first) 0.dp else 8.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Row(
+        Box(Modifier.width(TileCol), contentAlignment = Alignment.Center) {
+            CraftIconTile(R.drawable.ic_ui_road, active = false, size = 28.dp, fill = C.camper.header)
+        }
+        Column(
             Modifier.weight(1f).semantics(mergeDescendants = true) { heading(); contentDescription = cd },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
         ) {
-            Txt(stringResource(R.string.road_day, day.day), T.title.sm, C.accent.yellowText, maxLines = 1)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Txt(meta, T.body.sm, C.text.muted, maxLines = 1)
-                // 5.5 §10.6: the day's parking under the meta («≈ 500 ₽ + ?»)
-                if (parkingOn) DayParking(day)
-            }
+            Txt(stringResource(R.string.road_day, day.day), CraftType.cardTitle, C.camper.orangeText, maxLines = 1)
+            Txt(meta, T.body.sm, C.camper.inkSoft, maxLines = 1)
+            // 5.5 §10.6: the day's parking under the meta («≈ 500 ₽ + ?»)
+            if (parkingOn) DayParking(day)
         }
         // 5.5 §10.1: «вести» replaces «в навигатор ↗» → the hand-off sheet on this day
         DayGoButton(day.day, onGo, onSheet)
     }
+}
+
+/** The icon tile of a stop: the kind's icon, fill and tint (orange sights, amber nights, blue border, green rest). */
+private class StopTile(val icon: Int, val fill: Color, val tint: Color)
+
+private fun stopTile(s: StopDto, start: Boolean): StopTile = when {
+    s.kind == "sight" -> StopTile(R.drawable.ic_ui_camera, C.camper.orange, C.camper.onOrange)
+    s.kind == "overnight" -> StopTile(R.drawable.ic_ui_tent, C.camper.amber, C.camper.onAmber)
+    s.kind == "border" -> StopTile(R.drawable.ic_ui_passport, C.camper.blue, C.camper.onOrange)
+    s.kind == "rest" -> StopTile(R.drawable.ic_service_rest, C.camper.green, C.camper.onOrange)
+    s.kind == "food" -> StopTile(R.drawable.ic_service_food, C.camper.paper, C.camper.border)
+    s.kind == "fuel" -> StopTile(R.drawable.ic_service_fuel, C.camper.paper, C.camper.border)
+    start || s.kind == "start" -> StopTile(R.drawable.ic_ui_van, C.camper.header, C.camper.border)
+    else -> StopTile(R.drawable.ic_ui_route, C.camper.header, C.camper.border)
+}
+
+/** The overline colour of a stop row (orange sights, green nights, blue border; on paper, AA). */
+private fun stopAccent(s: StopDto): Color = when (s.kind) {
+    "sight" -> C.camper.orangeText
+    "overnight" -> C.camper.greenText
+    "border" -> C.camper.blue
+    else -> C.camper.inkSoft
 }
 
 @Composable
@@ -820,7 +874,7 @@ private fun StopRow(
     val crossing = s.kind == "border"
     val cd = listOfNotNull(line1, kmCd, time, name, kindCd, openDataCd, note, s.localTimeRu, s.unknownRu, cost, parkingCd).joinToString(", ")
     val canReplace = s.replaceable && (s.alternatives.isNotEmpty() || s.alternativesNote != null)
-    // S3-R1: the restored row flashes `accent.yellow` at 14 % and fades (reduced motion: on, then off).
+    // S3-R1: the restored row flashes `overlay.returnFlash` and fades (reduced motion: on, then off).
     val reduced = LocalReducedMotion.current
     val glow by animateFloatAsState(
         if (highlighted) 1f else 0f,
@@ -834,11 +888,11 @@ private fun StopRow(
     val naviLabel = stringResource(R.string.cd_road_action_navigator)
     val swapLabel = stringResource(R.string.stopmenu_swap)
     val reportLabel = stringResource(R.string.cd_road_action_report)
+    val tile = stopTile(s, start)
+    val accent = stopAccent(s)
     Row(
         Modifier.fillMaxWidth()
             .onGloballyPositioned { c -> content()?.let { root -> if (root.isAttached && c.isAttached) onPlaced(root.localPositionOf(c, Offset.Zero).y.roundToInt(), c.size.height) } }
-            .drawBehind { if (glow > 0f) drawRect(C.overlay.returnFlash.copy(alpha = C.overlay.returnFlash.alpha * glow)) } // motion.returnToItem
-            .connector()
             // D-5: a long-press opens the stop menu (children's buttons keep their taps).
             .pointerInput(s.id, onTap != null) {
                 // M§15.5: sights / hotel nights open the card; other rows have no tap at all (no click semantics)
@@ -850,7 +904,7 @@ private fun StopRow(
                     },
                 )
             }
-            .padding(top = 8.dp, bottom = 12.dp, end = 4.dp)
+            .padding(bottom = 12.dp)
             .semantics(mergeDescendants = true) {
                 contentDescription = cd
                 if (onTap != null) onClick(openLabel) { onTap(); true }
@@ -863,44 +917,54 @@ private fun StopRow(
             .focusRequester(focusRequester)
             .focusable()
             .testTag("road.stop.${s.id}"),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        // 5.5 §10.8 decision B: the km post in the post zone x 37–59, row top + 4 (the row's top padding is 8)
-        Box(Modifier.width(66.dp)) {
-            if (kmPost != null) KmPost(kmPost, Modifier.padding(start = 37.dp).offset(y = (-4).dp))
+        // the stop column on the dashed road line: the kind's tile, under it the km post (5.5 §10.8 decision B)
+        Column(Modifier.width(TileCol), horizontalAlignment = Alignment.CenterHorizontally) {
+            CraftIconTile(tile.icon, active = s.kind == "sight", fill = tile.fill, tint = tile.tint)
+            if (kmPost != null) KmPost(kmPost, Modifier.padding(top = 8.dp))
         }
-        // the sign column 66–132 (city signs with their 2 dp outline may overflow it by a dp each side)
-        Box(Modifier.widthIn(min = 66.dp), contentAlignment = Alignment.TopCenter) {
-            // CEO 29.10: a crossing gets the «граница» sign (the engine sends `city`)
-            RoadSign(if (crossing) app.verst.core.ui.components.BORDER_SIGN else s.sign, s.name, app.verst.feature.common.signTags(s.poiKind, s.tags))
-        }
-        Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Row(Modifier.fillMaxWidth()) {
-                Txt(line1, T.body.sm, C.text.muted, Modifier.weight(1f), maxLines = 1)
-                Txt(time, T.body.sm, C.text.muted, align = TextAlign.End)
+        // the paper row (mockup: white paper, 2 dp brown border, radius 12); the restored row glows inside it
+        Column(
+            Modifier.weight(1f)
+                .craftSurface(fill = C.camper.field, radius = 12.dp, border = CraftDefaults.BorderThin, shadow = null)
+                .drawBehind { if (glow > 0f) drawRect(C.overlay.returnFlash.copy(alpha = C.overlay.returnFlash.alpha * glow)) } // motion.returnToItem
+                .padding(start = 10.dp, end = 2.dp, top = 4.dp, bottom = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Txt(line1, CraftType.overline, accent, Modifier.weight(1f), maxLines = 1)
+                Txt(time, CraftType.overline, accent, align = TextAlign.End)
                 MoreButton(stringResource(R.string.cd_road_stop_more, s.name), "road.stop.${s.id}.more", onLongPress)
             }
-            Txt(name, T.title.md, C.text.primary, maxLines = 2)
-            // 5.5 §10.7 part 3: one tag row (StretchTag before the KindTag, then the open-data ring); sights only
-            app.verst.feature.common.TagRow(
-                if (s.kind == "sight") s.poiKind else null,
-                if (s.stretch) s.dwellMin.takeIf { it > 0 } ?: 30 else null,
-                openData = !s.verified || s.border?.unverified == true, // a crossing's facts: nobody checked them
-                modifier = Modifier.padding(vertical = 1.dp).testTag("road.tags.${s.id}"),
-                label = if (s.kind == "sight") s.poiKindRu else null,
-            )
-            if (!note.isNullOrBlank()) Txt(note, T.body.md, C.text.note, maxLines = 2)
-            // ADR-0019: what nobody checked for this stop («Часы не известны — уточните»), under the reason
-            s.unknownRu?.let { Txt(it, T.body.sm, C.text.muted, Modifier.testTag("road.unknown.${s.id}"), maxLines = 2) }
-            // block 1 / CEO 29.10: a stop on another clock (after the border) says its local time
-            s.localTimeRu?.let { Txt(it, T.body.sm, C.text.muted, Modifier.testTag("road.localtime.${s.id}"), maxLines = 1) }
-            val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
-            val borderSheet = crossing && s.border != null && onTap != null
-            if (cost != null || canReplace || hotel || showParking || borderSheet) {
-                CostsLine(cost, s.parking, showParking, "road.stop.${s.id}", onParking) {
-                    if (borderSheet) QuietAction(stringResource(R.string.road_border_open), stringResource(R.string.road_border_open), "road.border.${s.id}", C.navi.label, { onTap?.invoke() })
-                    else if (hotel) HotelAction(booked, if (booked) stringResource(R.string.cd_road_booked) else stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
-                    // designer В-5: «заменить» is a visible outline button (components §2.6), not quiet text
-                    else if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
+            Row(Modifier.fillMaxWidth().padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Txt(name, CraftType.cardTitle, C.camper.ink, Modifier.weight(1f), maxLines = 2)
+                // CEO 29.10: a crossing keeps the «граница» sign (the engine sends `city`)
+                if (crossing) RoadSign(app.verst.core.ui.components.BORDER_SIGN, s.name, emptyList(), Modifier.padding(start = 6.dp).scaled(0.55f))
+            }
+            Column(Modifier.padding(end = 8.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                // 5.5 §10.7 part 3: one tag row (StretchTag before the KindTag, then the open-data ring); sights only
+                app.verst.feature.common.TagRow(
+                    if (s.kind == "sight") s.poiKind else null,
+                    if (s.stretch) s.dwellMin.takeIf { it > 0 } ?: 30 else null,
+                    openData = !s.verified || s.border?.unverified == true, // a crossing's facts: nobody checked them
+                    modifier = Modifier.padding(vertical = 1.dp).testTag("road.tags.${s.id}"),
+                    label = if (s.kind == "sight") s.poiKindRu else null,
+                )
+                if (!note.isNullOrBlank()) Txt(note, T.body.md, C.camper.inkSoft, maxLines = 2)
+                // ADR-0019: what nobody checked for this stop («Часы не известны — уточните»), under the reason
+                s.unknownRu?.let { Txt(it, T.body.sm, C.camper.inkMuted, Modifier.testTag("road.unknown.${s.id}"), maxLines = 2) }
+                // block 1 / CEO 29.10: a stop on another clock (after the border) says its local time
+                s.localTimeRu?.let { Txt(it, T.body.sm, C.camper.inkMuted, Modifier.testTag("road.localtime.${s.id}"), maxLines = 1) }
+                val hotel = s.kind == "overnight" && s.hotelOptions.isNotEmpty()
+                val borderSheet = crossing && s.border != null && onTap != null
+                if (cost != null || canReplace || hotel || showParking || borderSheet) {
+                    CostsLine(cost, s.parking, showParking, "road.stop.${s.id}", onParking) {
+                        if (borderSheet) QuietAction(stringResource(R.string.road_border_open), stringResource(R.string.road_border_open), "road.border.${s.id}", C.camper.blue, { onTap?.invoke() })
+                        else if (hotel) HotelAction(booked, if (booked) stringResource(R.string.cd_road_booked) else stringResource(R.string.cd_road_hotel, townPrep), "road.hotel.${s.id}", onHotel)
+                        // designer В-5: «заменить» is a visible button (components §2.6), not quiet text
+                        else if (canReplace) SwapButton(stringResource(R.string.cd_road_swap, s.name), "road.swap.${s.id}", onReplace)
+                    }
                 }
             }
         }
@@ -933,26 +997,31 @@ private fun noteWithAmenities(s: StopDto): String? {
     return if (note.isNullOrBlank()) line else "${note.trimEnd()} $line"
 }
 
-/** components §26.2: hotels «выбрать отель →» 12/600 `navi.label`; booked «Забронировано ✓». */
+/** components §26.2: hotels «выбрать отель →» 12/600 orange; booked «Забронировано ✓». */
 @Composable
 private fun HotelAction(booked: Boolean, cd: String, tag: String, onClick: () -> Unit) {
     QuietAction(
-        stringResource(if (booked) R.string.road_booked else R.string.road_pick_hotel), cd, tag, C.navi.label, onClick,
-    ) { if (booked) GlyphIcon(Glyph.CHECK, C.navi.label, 14.dp, Modifier.padding(start = 4.dp)) }
+        stringResource(if (booked) R.string.road_booked else R.string.road_pick_hotel), cd, tag, C.camper.orangeText, onClick,
+    ) { if (booked) GlyphIcon(Glyph.CHECK, C.camper.orangeText, 14.dp, Modifier.padding(start = 4.dp)) }
 }
 
-/** components §2.6 `SwapButton` «заменить»: h 32 in the 36 costs line (touch 44), outline, `type.body.smStrong`. */
+/** components §2.6 `SwapButton` «заменить», fork camper-ui: a small paper key (h 30, 2 dp border, tile shadow), touch 44. */
 @Composable
 private fun SwapButton(cd: String, tag: String, onClick: () -> Unit) {
     Box(
         Modifier.touch36().clickable(role = Role.Button, onClick = onClick)
-            .semantics { contentDescription = cd }.testTag(tag).padding(start = 6.dp),
+            .semantics { contentDescription = cd }.testTag(tag).padding(start = 6.dp, end = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            Modifier.height(32.dp).border(DesignTokens.stroke.w1, C.text.secondary, RoundedCornerShape(DesignTokens.radius.r8)).padding(horizontal = 10.dp),
+            Modifier.height(30.dp)
+                .craftSurface(
+                    fill = C.camper.paper, radius = 10.dp, border = CraftDefaults.BorderThin, shadow = C.camper.border,
+                    shadowX = CraftDefaults.TileShadow, shadowY = CraftDefaults.TileShadow,
+                )
+                .padding(horizontal = 10.dp),
             contentAlignment = Alignment.Center,
-        ) { Txt(stringResource(R.string.road_swap), T.body.smStrong, C.text.primary, maxLines = 1) }
+        ) { Txt(stringResource(R.string.road_swap), T.body.smStrong, C.camper.ink, maxLines = 1) }
     }
 }
 
@@ -963,28 +1032,7 @@ private fun MoreButton(cd: String, tag: String, onClick: () -> Unit) {
         Modifier.width(DesignTokens.size.touchMin).touchAt(18.dp).clickable(role = Role.Button, onClick = onClick)
             .semantics { contentDescription = cd }.testTag(tag),
         contentAlignment = Alignment.Center,
-    ) { GlyphIcon(Glyph.MORE, C.text.secondary, 20.dp) }
-}
-
-/** components §2.6 `HotelButton` «Выбрать отель →» (blue), booked «Забронировано ✓». */
-@Composable
-private fun HotelButton(booked: Boolean, cd: String, tag: String, onClick: () -> Unit) {
-    Box(
-        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onClick)
-            .semantics { contentDescription = cd }.testTag(tag),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            Modifier.height(36.dp).clip(RoundedCornerShape(DesignTokens.radius.r8)).background(C.sign.blue).padding(horizontal = 12.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Txt(stringResource(if (booked) R.string.road_booked else R.string.road_pick_hotel), T.body.mdStrong, C.sign.white, maxLines = 1)
-                // N-09: the check is drawn (the font has no «✓»).
-                if (booked) GlyphIcon(Glyph.CHECK, C.sign.white, 16.dp, Modifier.padding(start = 6.dp))
-            }
-        }
-    }
+    ) { GlyphIcon(Glyph.MORE, C.camper.inkSoft, 20.dp) }
 }
 
 @Composable
@@ -997,6 +1045,10 @@ private fun stopName(s: StopDto): String = when {
 
 private const val StretchPrefix = "Разминка"
 
+/**
+ * The footer «ПУТЕВОЙ ЛИСТ · СКОЛЬКО СТОИТ», fork camper-ui: a craft card pinned above the tab bar — the receipt
+ * tile, the label (budget badge / overrun / abroad), the total, per person or «из них парковки», the chevron.
+ */
 @Composable
 private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick: () -> Unit) {
     val c = trip.cost
@@ -1024,28 +1076,29 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
-            .height(DesignTokens.size.ctaWaybillH)
-            .clip(RoundedCornerShape(DesignTokens.radius.r12))
-            .background(C.sign.white)
+            .padding(start = CraftDefaults.ScreenGutter, end = CraftDefaults.ScreenGutter + CraftDefaults.ShadowX, top = 6.dp, bottom = FooterBottom)
+            .defaultMinSize(minHeight = DesignTokens.size.ctaWaybillH)
+            .craftSurface()
             .clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("road.total")
-            .padding(horizontal = 18.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        CraftIconTile(R.drawable.ic_ui_receipt, active = true)
         // The label spans the row; the per-person line (F3) sits on the amount line, right of it (S-22).
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if ((fits || tight) && !incomplete) {
                     // «ПУТЕВОЙ ЛИСТ ·» + the badge (components §20)
-                    Txt(label.substringBefore(" · ") + " · ", T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                    Txt(label.substringBefore(" · ") + " · ", T.body.smStrong, C.camper.inkSoft, maxLines = 1)
                     if (fits) {
-                        GlyphIcon(Glyph.CHECK, C.text.onLightMuted, 12.dp, Modifier.padding(end = 4.dp))
-                        Txt(stringResource(R.string.budget_fit_badge), T.body.smStrong, C.text.onLightMuted, Modifier.testTag("road.fit"), maxLines = 1)
+                        GlyphIcon(Glyph.CHECK, C.camper.greenText, 12.dp, Modifier.padding(end = 4.dp))
+                        Txt(stringResource(R.string.budget_fit_badge), T.body.smStrong, C.camper.greenText, Modifier.testTag("road.fit"), maxLines = 1)
                     } else {
                         Box(Modifier.padding(end = 5.dp).size(8.dp).clip(RoundedCornerShape(4.dp)).background(C.budget.tight))
-                        Txt(stringResource(R.string.budget_tight_badge, app.verst.settings.AppPrefs.money(c.totalRub - budget!!)), T.body.smStrong, C.text.onLightMuted, Modifier.testTag("road.tight"), maxLines = 1)
+                        Txt(stringResource(R.string.budget_tight_badge, app.verst.settings.AppPrefs.money(c.totalRub - budget!!)), T.body.smStrong, C.camper.inkSoft, Modifier.testTag("road.tight"), maxLines = 1)
                     }
                 } else {
                     val tag = when {
@@ -1053,25 +1106,21 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
                         incomplete -> "road.abroad.incomplete"
                         else -> "road.label"
                     }
-                    Txt(label, T.body.smStrong, if (over) C.paper.inkRed else C.text.onLightMuted, Modifier.testTag(tag), maxLines = 1)
+                    Txt(label, T.body.smStrong, if (over) C.accent.redText else C.camper.inkSoft, Modifier.testTag(tag), maxLines = 1)
                 }
             }
             Row(verticalAlignment = Alignment.Bottom) {
-                Txt(total, T.amount, C.text.onLight, Modifier.testTag("road.total.amount"), maxLines = 1)
+                Txt(total, T.amount, C.camper.ink, Modifier.testTag("road.total.amount"), maxLines = 1)
                 Spacer(Modifier.weight(1f))
                 // 5.5 §10.6: with parking the right block (under the label line) says «из них парковки»;
                 // the per-person line yields to it
                 if (parkingRub != null) FooterParking(parkingRub, parkingSum)
-                else Txt(perPerson, T.body.smStrong, C.text.onLightMuted, Modifier.padding(start = 8.dp), maxLines = 1, align = TextAlign.End)
+                else Txt(perPerson, T.body.smStrong, C.camper.inkSoft, Modifier.padding(start = 8.dp), maxLines = 1, align = TextAlign.End)
             }
         }
-        Spacer(Modifier.width(12.dp))
-        Icon(R.drawable.ic_arrow_right, C.text.onLight, 22.dp)
+        Icon(R.drawable.ic_ui_chevron_right, C.camper.border, 18.dp)
     }
 }
-
-
-private val TightLines = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.Both)
 
 /** CEO 29.10: the engine's info warning of a trip abroad («цены, сборы и правила там … не проверены»). */
 private const val ABROAD_WARNING = "ABROAD"

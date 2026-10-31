@@ -44,6 +44,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.verst.core.ui.components.CraftBadge
+import app.verst.core.ui.components.CraftBadgeColor
+import app.verst.core.ui.components.CraftDefaults
 import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
@@ -98,7 +101,7 @@ internal fun transparent(b: android.graphics.Bitmap): Boolean {
 }
 
 /**
- * components §18 `PhotoFrame`: fixed 3 : 2, radius 12, mat fill, hairline over the image; crop (portrait keeps the
+ * components §18 `PhotoFrame`: fixed 3 : 2, radius 12, mat fill; camper fork: a 2 dp brown craft frame over the image; crop (portrait keeps the
  * top, bias −0.35) or contain on the mat; the credit line on the scrim (crop) or under the frame (contain /
  * placeholder hidden); the «ФОТО РАЙОНА» plate for hotel areas. Coil loads [url] with the app's disk cache.
  */
@@ -221,13 +224,13 @@ fun PhotoFrameContent(
                 }
                 if (area || plate != null) AreaPlate(Modifier.align(Alignment.TopStart).padding(10.dp), plate)
             }
-            // hairline over the image
-            Box(Modifier.matchParentSize().border(DesignTokens.stroke.w1, C.photo.border, shape))
+            // camper fork: the brown craft frame over the image (mockup `border border-[#4A3525]`)
+            Box(Modifier.matchParentSize().border(CraftDefaults.BorderThin, C.camper.border, shape))
         }
         // contain mode: the line under the frame. A placeholder has no credit (S3-QA P1-05: it would name a photo
         // that is not on screen), hotel areas included.
         if (credit != null && !crop && loaded != null) {
-            CreditLine(credit, C.text.muted, Modifier.padding(top = 4.dp), onCredit)
+            CreditLine(credit, C.camper.inkMuted, Modifier.padding(top = 4.dp), onCredit)
         }
     }
 }
@@ -241,12 +244,13 @@ private fun CreditLine(text: String, color: Color, modifier: Modifier, onClick: 
     )
 }
 
+/** «ФОТО РАЙОНА» / «ФОТО РЯДОМ» over the photo; camper fork: the amber craft badge. */
 @Composable
 private fun AreaPlate(modifier: Modifier, label: String? = null) {
-    Box(
-        modifier.height(22.dp).clip(RoundedCornerShape(DesignTokens.radius.r4)).background(C.photo.scrim).padding(horizontal = 8.dp).testTag("photo.plate"),
-        contentAlignment = Alignment.Center,
-    ) { Txt(label ?: androidx.compose.ui.res.stringResource(app.verst.core.ui.R.string.card_area_plate), T.photo.label, C.photo.credit, maxLines = 1) }
+    CraftBadge(
+        label ?: androidx.compose.ui.res.stringResource(app.verst.core.ui.R.string.card_area_plate),
+        modifier.testTag("photo.plate"), CraftBadgeColor.AMBER,
+    )
 }
 
 /**

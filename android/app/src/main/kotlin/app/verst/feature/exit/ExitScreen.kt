@@ -107,33 +107,34 @@ interface ExitActions {
     fun undoBooking()
 }
 
-private val DashH = 434.dp
-/** F-04: scene minimum 260 dp → dashboard top ≥ 240 dp, so two hotel options fit at 640. */
-private val MinSceneTop = 240.dp
+/** Fork camper-ui (mockup screen 9): the night card is the dark-brown craft card with amber accents. */
+private val NightFill = C.camper.ink
+private val NightText = C.camper.paper
+private val NightSoft = C.camper.paper.copy(alpha = 0.8f)
 
-/** 5.7 «Съезд к ночёвке»: night scene with the exit sign, the night's hotels, booking through the mock partner. */
+/**
+ * 5.7 «Съезд к ночёвке», fork camper-ui (mockup screen 9): the dark-brown night card — «НОЧЁВКА N ИЗ M» and the km /
+ * time badge in amber, the town, the blue exit sign (its real distance), the night's hotels as amber-framed rows —
+ * and the amber booking button through the demo partner (D-13), «Забронировали?» on return (D-10).
+ */
 @Composable
 fun ExitScreen(ui: ExitUi, a: ExitActions) {
-    ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
+    ScreenRoot(C.camper.page) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
-            val dashTop = maxOf(maxHeight - DashH, MinSceneTop)
-            val overlay = ui.partnerOpen || ui.dialogOpen
-            ExitScene(dashTop + 20.dp, overlay = overlay)
-            val k = maxWidth.value / 390f
-            val ky = minOf(1f, (dashTop + 20.dp).value / 430f)
-            ExitSign(ui, Modifier.offset(x = (162 * k).dp, y = (92 * ky).dp))
-            Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(maxHeight - dashTop).dashboardSurface(34.dp)) {
+            Column(Modifier.fillMaxSize()) {
                 val back = stringResource(R.string.common_back_road)
-                BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), a::back, Modifier.padding(start = 16.dp, top = 8.dp).testTag("exit.back"))
-                TurnSignal(overlay, Modifier.align(Alignment.TopEnd).padding(top = 20.dp, end = 24.dp))
-                Panel(ui, a, Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 54.dp, bottom = 98.dp))
-                BookCta(ui, a, Modifier.align(Alignment.BottomCenter).padding(start = 14.dp, end = 14.dp, bottom = 24.dp))
+                BackLink(back, C.camper.ink, stringResource(R.string.cd_back, back), a::back, Modifier.padding(start = 6.dp, top = 2.dp).testTag("exit.back"))
+                Panel(ui, a, Modifier.weight(1f).fillMaxWidth())
+                BookCta(
+                    ui, a,
+                    Modifier.padding(start = CraftDefaults.ScreenGutter, end = CraftDefaults.ScreenGutter + CraftDefaults.ShadowX, top = 8.dp, bottom = 14.dp),
+                )
             }
             val t = ui.toast
             if (t != null) {
                 val text = if (t is Toast.Booked) stringResource(R.string.exit_booked_toast, ui.townPrep) else toastText(t)
                 PlateToast(
-                    text, bottom = 24.dp + DesignTokens.size.ctaBookH + 16.dp,
+                    text, bottom = 14.dp + DesignTokens.size.ctaBookH + 16.dp,
                     action = if (t is Toast.Booked && ui.canUndo) stringResource(R.string.common_undo) else null, onAction = a::undoBooking,
                 )
             }

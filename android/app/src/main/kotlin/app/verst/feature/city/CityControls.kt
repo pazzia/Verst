@@ -1,5 +1,6 @@
 package app.verst.feature.city
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -26,16 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
@@ -44,9 +45,17 @@ import androidx.compose.ui.unit.dp
 import app.verst.core.model.dto.CityPresetDto
 import app.verst.core.model.dto.WalkSuggestion
 import app.verst.core.ui.R
+import app.verst.core.ui.components.CraftBadge
+import app.verst.core.ui.components.CraftBadgeColor
+import app.verst.core.ui.components.CraftDefaults
+import app.verst.core.ui.components.CraftSecondaryButton
+import app.verst.core.ui.components.CraftType
 import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.GlyphIcon
+import app.verst.core.ui.components.Icon
+import app.verst.core.ui.components.StepperKey
 import app.verst.core.ui.components.Txt
+import app.verst.core.ui.components.craftSurface
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
 import app.verst.nav.CityPicker
@@ -54,7 +63,11 @@ import app.verst.nav.DOG_WALK
 import app.verst.nav.WalkDurations
 import app.verst.nav.WalkFew
 import app.verst.core.ui.theme.DesignTokens.color as C
-import app.verst.core.ui.theme.DesignTokens.type as T
+
+/*
+ * Fork camper-ui (CEO 31.10): the city controls in the «Кемпер-гид» craft look (mockup screen 10) — preset tiles
+ * in a 2-column grid (orange when selected), craft chips, crew rows with craft keys, paper plates.
+ */
 
 /** What the city pickers show (5.10 prefs and the 5.11 filter bar share them). */
 data class PickerUi(
@@ -116,66 +129,84 @@ private fun presetSub(p: CityPresetDto): String {
     }
 }
 
+/** A field caption inside a craft card («СТАРТ ПРОГУЛКИ», «КТО ИДЁТ»; uppercase copy). */
 @Composable
 internal fun SectionLabel(text: String, modifier: Modifier = Modifier) =
-    Txt(text, T.label.md, C.text.muted, modifier.padding(top = 18.dp, bottom = 8.dp))
+    Txt(text, CraftType.sectionTitle, C.camper.inkSoft, modifier.padding(top = 2.dp))
 
-/** components §27 `CrewCell` × 3: Взрослые 1–9, Дети 0–9, Собака (toggle). */
+/**
+ * The head of a craft card (mockup `h3` with the thin rule): an optional overline (green «ПЕШКОМ · ЯРОСЛАВЛЬ»),
+ * the title, the 20 % brown rule under them.
+ */
+@Composable
+internal fun CardHeading(title: String, overline: String? = null, overlineTag: String? = null, overlineColor: Color = C.camper.greenText) {
+    Column(Modifier.fillMaxWidth().semantics(mergeDescendants = true) { heading() }, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        if (overline != null) {
+            Txt(overline, CraftType.overline, overlineColor, if (overlineTag != null) Modifier.testTag(overlineTag) else Modifier, maxLines = 1)
+        }
+        Txt(title, CraftType.cardTitle, C.camper.ink, maxLines = 2)
+        Box(Modifier.fillMaxWidth().padding(top = 4.dp).height(1.dp).background(C.camper.divider))
+    }
+}
+
+/** components §27 `CrewCell` × 3 as craft rows: Взрослые 1–9, Дети 0–9 (− value +), Собака (switch). */
 @Composable
 internal fun CrewCells(adults: Int, children: Int, dog: Boolean, onAdults: (Int) -> Unit, onChildren: (Int) -> Unit, onDog: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        StepperCell(stringResource(R.string.city_crew_adults), adults, 1, 9, "city.crew.adults", Modifier.weight(1f), onAdults)
-        StepperCell(stringResource(R.string.city_crew_kids), children, 0, 9, "city.crew.kids", Modifier.weight(1f), onChildren)
-        DogCell(dog, Modifier.weight(1f), onDog)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        StepperRow(stringResource(R.string.city_crew_adults), R.drawable.ic_crew_adult, adults, 1, 9, "city.crew.adults", onAdults)
+        StepperRow(stringResource(R.string.city_crew_kids), R.drawable.ic_crew_child, children, 0, 9, "city.crew.kids", onChildren)
+        DogRow(dog, onDog)
     }
 }
 
+/** A crew row: icon, label, the craft keys − / + around the value (each key 52 × 44). */
 @Composable
-private fun CellFrame(modifier: Modifier, on: Boolean = false, content: @Composable () -> Unit) {
-    val shape = RoundedCornerShape(14.dp)
-    Box(
-        modifier.height(DesignTokens.size.crewCellH).clip(shape).background(C.dash.well)
-            .border(3.dp, if (on) C.crew.dog else C.dash.control, shape).padding(horizontal = 6.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center,
-    ) { content() }
-}
-
-@Composable
-private fun StepperCell(label: String, value: Int, min: Int, max: Int, tag: String, modifier: Modifier, onChange: (Int) -> Unit) {
-    CellFrame(modifier.semantics(mergeDescendants = false) { stateDescription = "$label: $value" }) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Txt(label, T.label.md, C.text.secondary, maxLines = 1)
-            Txt(value.toString(), T.title.xl, C.text.primary, Modifier.testTag("$tag.value"), maxLines = 1)
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                StepButton(Glyph.MINUS, value > min, "$tag.minus", "$label −") { onChange(value - 1) }
-                StepButton(Glyph.PLUS, value < max, "$tag.plus", "$label +") { onChange(value + 1) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StepButton(g: Glyph, enabled: Boolean, tag: String, cd: String, onClick: () -> Unit) {
-    Box(
-        Modifier.size(44.dp, 34.dp).clip(RoundedCornerShape(10.dp)).background(C.dash.controlAlt)
-            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .semantics { contentDescription = cd }.testTag(tag),
-        contentAlignment = Alignment.Center,
-    ) { GlyphIcon(g, if (enabled) C.text.primary else C.text.disabled, 16.dp) }
-}
-
-@Composable
-private fun DogCell(on: Boolean, modifier: Modifier, onDog: (Boolean) -> Unit) {
-    val label = stringResource(R.string.city_crew_dog)
-    CellFrame(
-        modifier.toggleable(on, role = Role.Switch, onValueChange = onDog).testTag("city.crew.dog"),
-        on = on,
+private fun StepperRow(label: String, @DrawableRes icon: Int, value: Int, min: Int, max: Int, tag: String, onChange: (Int) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).semantics(mergeDescendants = false) { stateDescription = "$label: $value" },
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Txt(label, T.label.md, C.text.secondary, maxLines = 1)
-            GlyphIcon(Glyph.PAW, if (on) C.crew.dog else C.text.muted, 34.dp, filled = on)
-            Txt(stringResource(if (on) R.string.city_crew_dog_on else R.string.city_crew_dog_off), T.body.smStrong, if (on) C.text.primary else C.text.muted, maxLines = 1)
-        }
+        Icon(icon, C.camper.border, 20.dp)
+        Spacer(Modifier.width(10.dp))
+        Txt(label, CraftType.chip, C.camper.ink, Modifier.weight(1f), maxLines = 1)
+        StepperKey("−", value > min, "$label −", { onChange(value - 1) }, Modifier.testTag("$tag.minus"))
+        Txt(value.toString(), CraftType.fieldMono, C.camper.ink, Modifier.widthIn(min = 36.dp).testTag("$tag.value"), maxLines = 1, align = TextAlign.Center)
+        StepperKey("+", value < max, "$label +", { onChange(value + 1) }, Modifier.padding(end = CraftDefaults.TileShadow).testTag("$tag.plus"))
+    }
+}
+
+/** The dog row: a switch row («с нами» / «нет»), the whole row is the target. */
+@Composable
+private fun DogRow(on: Boolean, onDog: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).clip(RoundedCornerShape(CraftDefaults.FieldRadius))
+            .toggleable(on, role = Role.Switch, onValueChange = onDog).testTag("city.crew.dog"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(R.drawable.ic_ui_dog, if (on) C.camper.greenText else C.camper.border, 20.dp)
+        Spacer(Modifier.width(10.dp))
+        Txt(stringResource(R.string.city_crew_dog), CraftType.chip, C.camper.ink, Modifier.weight(1f), maxLines = 1)
+        Txt(
+            stringResource(if (on) R.string.city_crew_dog_on else R.string.city_crew_dog_off), CraftType.caption,
+            if (on) C.camper.greenText else C.camper.inkMuted, Modifier.padding(end = 10.dp), maxLines = 1,
+        )
+        CraftSwitch(on)
+    }
+}
+
+/** The craft switch look (the row carries the semantics): brown-rimmed track, orange when on, paper knob. */
+@Composable
+internal fun CraftSwitch(on: Boolean) {
+    val track = RoundedCornerShape(14.dp)
+    Box(
+        Modifier.size(48.dp, 28.dp).clip(track).background(if (on) C.camper.orange else C.camper.header)
+            .border(CraftDefaults.BorderThin, C.camper.border, track),
+        contentAlignment = if (on) Alignment.CenterEnd else Alignment.CenterStart,
+    ) {
+        Box(
+            Modifier.padding(4.dp).size(20.dp).clip(CircleShape).background(C.camper.field)
+                .border(CraftDefaults.BorderThin, C.camper.border, CircleShape),
+        )
     }
 }
 
@@ -190,28 +221,28 @@ internal fun DurationChips(durationMin: Int?, onPick: (Int?) -> Unit, hint: Bool
     if (hint) {
         Txt(
             stringResource(if (durationMin == null) R.string.city_duration_hint_untimed else R.string.city_duration_hint_timed),
-            T.body.sm, C.text.muted, Modifier.padding(top = 8.dp).testTag("city.duration.hint"),
+            CraftType.caption, C.camper.inkSoft, Modifier.padding(top = 8.dp).testTag("city.duration.hint"),
         )
     }
 }
 
-/** components §21 `ParamChips` (the `MoodChip` look): h 44, radius 22. */
+/** The craft choice chip (CraftChip look: orange + white when on, white paper else), h 44, radio or checkbox. */
 @Composable
 internal fun ParamChip(text: String, on: Boolean, tag: String, multi: Boolean = false, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(CraftDefaults.ChipRadius)
     Box(
-        Modifier.height(44.dp).clip(shape).background(if (on) C.accent.yellow else C.dash.control)
-            .border(DesignTokens.stroke.w1, if (on) C.accent.yellowText else C.dash.outline, shape)
+        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clip(shape).background(if (on) C.camper.orange else C.camper.field)
+            .border(CraftDefaults.BorderThin, C.camper.border, shape)
             .then(if (multi) Modifier.toggleable(on, role = Role.Checkbox, onValueChange = { onClick() }) else Modifier.selectable(on, role = Role.RadioButton, onClick = onClick))
             .testTag(tag).padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,
-    ) { Txt(text, T.body.mdStrong, if (on) C.text.onLight else C.text.secondary, maxLines = 1) }
+    ) { Txt(text, CraftType.chip, if (on) C.camper.onOrange else C.camper.ink, maxLines = 1) }
 }
 
-/** The preset plates in rows of two; children never disable one (S4). */
+/** The preset tiles, two per row (mockup «Выберите пресет»); children never disable one (S4). */
 @Composable
 internal fun PresetGrid(presets: List<CityPresetDto>, selected: String, onPick: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(Modifier.padding(end = CraftDefaults.TileShadow, bottom = CraftDefaults.TileShadow), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         presets.chunked(2).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 row.forEach { p -> PresetPlate(p, p.preset == selected, Modifier.weight(1f)) { onPick(p.preset) } }
@@ -221,64 +252,55 @@ internal fun PresetGrid(presets: List<CityPresetDto>, selected: String, onPick: 
     }
 }
 
-/** components §21 `PresetPlate`: the brown tourist plate, pictogram, name, sub; 18+ badge; selected outline + check. */
+/** A craft preset tile: the icon, the 18+ badge, name and sub; selected = orange fill, white text. */
 @Composable
 private fun PresetPlate(p: CityPresetDto, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val custom = p.preset == "custom"
     val name = presetName(p.preset, p.titleRu)
     val sub = presetSub(p)
     val cd = if (p.adultOnly) stringResource(R.string.cd_city_preset_18, name, sub) else stringResource(R.string.cd_city_preset, name, sub)
-    val shape = RoundedCornerShape(DesignTokens.radius.r5)
-    Box(
-        modifier.height(DesignTokens.size.presetH)
-            .then(if (selected) Modifier.border(2.dp, C.accent.yellowText, RoundedCornerShape(DesignTokens.radius.r5 + 2.dp)).padding(2.dp) else Modifier)
-            .clip(shape)
-            .background(if (custom) Color.Transparent else C.sign.brown)
-            .then(
-                if (custom) {
-                    Modifier.drawBehind {
-                        drawRoundRect(
-                            C.sign.white, style = Stroke(2.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f))),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(DesignTokens.radius.r5.toPx()),
-                        )
-                    }
-                } else {
-                    Modifier.padding(3.dp).border(DesignTokens.stroke.w2, C.sign.white, RoundedCornerShape(DesignTokens.radius.r3))
-                },
+    Column(
+        modifier.defaultMinSize(minHeight = DesignTokens.size.presetH)
+            .craftSurface(
+                if (selected) C.camper.orange else C.camper.field, radius = CraftDefaults.ChipRadius, border = CraftDefaults.BorderThin,
+                shadow = C.camper.border, shadowX = CraftDefaults.TileShadow, shadowY = CraftDefaults.TileShadow,
             )
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("city.preset.${p.preset}")
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        GlyphIcon(presetGlyph(p.preset), C.sign.white, 24.dp, Modifier.align(Alignment.TopStart))
-        Column(Modifier.align(Alignment.BottomStart)) {
-            Txt(name, T.title.sm, C.sign.white, maxLines = 1)
-            Txt(sub, T.body.sm, if (custom) C.mirror.label else C.sign.blueText, maxLines = 1)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(presetIcon(p.preset), if (selected) C.camper.onOrange else presetTint(p.preset), 20.dp)
+            Spacer(Modifier.weight(1f))
+            if (p.adultOnly) CraftBadge(stringResource(R.string.city_badge_18), color = CraftBadgeColor.AMBER)
         }
-        Row(Modifier.align(Alignment.TopEnd), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (p.adultOnly) {
-                Box(Modifier.size(22.dp).clip(CircleShape).background(C.sign.white), contentAlignment = Alignment.Center) {
-                    Txt(stringResource(R.string.city_badge_18), T.caption.bold, C.text.onLight, maxLines = 1)
-                }
-            }
-            if (selected) GlyphIcon(Glyph.CHECK, C.accent.yellowText, 16.dp)
-        }
+        Txt(name, CraftType.chip, if (selected) C.camper.onOrange else C.camper.ink, maxLines = 1)
+        Txt(sub, CraftType.caption, if (selected) C.camper.onOrange else C.camper.inkSoft, maxLines = 1)
     }
 }
 
-private fun presetGlyph(preset: String): Glyph = when (preset) {
-    DOG_WALK -> Glyph.PAW
-    "overview" -> Glyph.BINOCULARS
-    "museums" -> Glyph.MUSEUM
-    "ryumochnye" -> Glyph.GLASS
-    "beer" -> Glyph.MUG
-    else -> Glyph.GEAR
+/** The mockup's preset icons (camera, dog, beer, sliders) and the museum pictogram. */
+@DrawableRes
+private fun presetIcon(preset: String): Int = when (preset) {
+    DOG_WALK -> R.drawable.ic_ui_dog
+    "overview" -> R.drawable.ic_ui_camera
+    "museums" -> R.drawable.ic_tourist_museum
+    "ryumochnye", "beer" -> R.drawable.ic_ui_beer
+    "custom" -> R.drawable.ic_ui_sliders
+    else -> R.drawable.ic_tourist_walk
+}
+
+/** The icon tints of an idle tile (mockup: the dog green, the mug amber — here its text-safe orange). */
+private fun presetTint(preset: String): Color = when (preset) {
+    DOG_WALK -> C.camper.greenText
+    "ryumochnye", "beer" -> C.camper.orangeText
+    else -> C.camper.border
 }
 
 /**
  * CEO 29.10: a preset the engine could not offer because our catalogue has no such places in this town
- * (`noData`): shown disabled under the plates with the engine's reason (`noDataRu`) — a gap of our base, not of
+ * (`noData`): shown disabled under the tiles with the engine's reason (`noDataRu`) — a gap of our base, not of
  * the town. Other unavailable presets stay hidden.
  */
 @Composable
@@ -289,41 +311,52 @@ internal fun NoDataPresets(presets: List<CityPresetDto>) {
             val title = name + stringResource(R.string.common_join_dot) + stringResource(R.string.city_preset_nodata)
             val reason = p.noDataRu ?: stringResource(R.string.walk_few_no_data_fallback)
             val cd = stringResource(R.string.cd_city_preset_nodata, name, reason)
-            val shape = RoundedCornerShape(DesignTokens.radius.r10)
             Row(
-                Modifier.fillMaxWidth().clip(shape).border(DesignTokens.stroke.w1, C.dash.outline, shape)
+                Modifier.fillMaxWidth()
+                    .craftSurface(
+                        C.camper.header, radius = CraftDefaults.ChipRadius, border = CraftDefaults.BorderThin,
+                        borderColor = C.camper.border.copy(alpha = 0.4f), shadow = null,
+                    )
                     .semantics(mergeDescendants = true) { contentDescription = cd; disabled() }
                     .testTag("city.preset.nodata.${p.preset}").padding(horizontal = 12.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                GlyphIcon(presetGlyph(p.preset), C.text.muted, 20.dp)
+                Icon(presetIcon(p.preset), C.camper.inkMuted, 20.dp)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Txt(title, T.title.sm, C.text.muted, maxLines = 1)
-                    Txt(reason, T.body.sm, C.text.muted, Modifier.testTag("city.preset.nodata.${p.preset}.reason"))
+                    Txt(title, CraftType.chip, C.camper.inkMuted, maxLines = 1)
+                    Txt(reason, CraftType.caption, C.camper.inkMuted, Modifier.testTag("city.preset.nodata.${p.preset}.reason"))
                 }
             }
         }
     }
 }
 
-/** components §28 `WalkWarningPlate`: yellow outline, «!» disc, optional actions (informative: ПОШЛИ stays on). */
+/** components §28 `WalkWarningPlate`, craft: paper plate, amber «!» disc, optional actions (informative: ПОШЛИ stays on). */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun WalkWarningPlate(text: String, tag: String, actions: List<Pair<String, () -> Unit>> = emptyList()) {
-    PlateFrame(C.accent.yellowText, Color.Transparent, tag) {
-        Box(Modifier.size(18.dp).clip(CircleShape).background(C.accent.yellow), contentAlignment = Alignment.Center) {
-            Txt("!", T.caption.bold, C.text.onLight)
-        }
+    PlateFrame(tag) {
+        Box(
+            Modifier.size(22.dp).clip(CircleShape).background(C.camper.amber).border(CraftDefaults.BadgeBorder, C.camper.border, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) { Txt("!", CraftType.badge, C.camper.onAmber) }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Txt(text, T.body.md, C.text.primary)
+            Txt(text, CraftType.body, C.camper.ink)
             if (actions.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    Modifier.padding(end = CraftDefaults.TileShadow, bottom = CraftDefaults.TileShadow),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     actions.forEachIndexed { i, (label, onClick) ->
                         Box(
-                            Modifier.height(36.dp).clip(RoundedCornerShape(8.dp)).background(C.dash.control)
-                                .border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(8.dp))
-                                .clickable(role = Role.Button, onClick = onClick).testTag("$tag.action.$i").padding(horizontal = 10.dp),
+                            Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin)
+                                .craftSurface(
+                                    C.camper.paper, radius = CraftDefaults.FieldRadius, border = CraftDefaults.BorderThin,
+                                    shadow = C.camper.border, shadowX = CraftDefaults.TileShadow, shadowY = CraftDefaults.TileShadow,
+                                )
+                                .clickable(role = Role.Button, onClick = onClick).testTag("$tag.action.$i").padding(horizontal = 12.dp),
                             contentAlignment = Alignment.Center,
-                        ) { Txt(label, T.body.smStrong, C.text.primary, maxLines = 1) }
+                        ) { Txt(label, DesignTokens.type.body.smStrong, C.camper.ink, maxLines = 1) }
                     }
                 }
             }
@@ -331,47 +364,48 @@ internal fun WalkWarningPlate(text: String, tag: String, actions: List<Pair<Stri
     }
 }
 
-/** components §28 `WalkInfoPlate`: how the walk was adapted (green check). */
+/** components §28 `WalkInfoPlate`, craft: how the walk was adapted (green check disc). */
 @Composable
 internal fun WalkInfoPlate(text: String, tag: String) {
-    PlateFrame(C.info.border, C.info.fill, tag) {
-        Box(Modifier.size(18.dp).clip(CircleShape).background(C.info.mark), contentAlignment = Alignment.Center) {
-            GlyphIcon(Glyph.CHECK, C.text.onLight, 12.dp)
-        }
-        Txt(text, T.body.md, C.text.primary, Modifier.weight(1f))
+    PlateFrame(tag) {
+        Box(
+            Modifier.size(22.dp).clip(CircleShape).background(C.camper.green).border(CraftDefaults.BadgeBorder, C.camper.border, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) { GlyphIcon(Glyph.CHECK, C.camper.onOrange, 12.dp) }
+        Txt(text, CraftType.body, C.camper.ink, Modifier.weight(1f))
     }
 }
 
+/** The plate of the warnings and notes: white paper, 2 dp brown border, radius 14, no shadow. */
 @Composable
-private fun PlateFrame(border: Color, fill: Color, tag: String, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
-    val shape = RoundedCornerShape(DesignTokens.radius.r10)
+internal fun PlateFrame(tag: String, content: @Composable RowScope.() -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clip(shape).background(fill).border(DesignTokens.stroke.w1, border, shape)
+        Modifier.fillMaxWidth()
+            .craftSurface(C.camper.field, radius = 14.dp, border = CraftDefaults.BorderThin, shadow = null)
             .padding(horizontal = 12.dp, vertical = 10.dp).testTag(tag),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) { content() }
 }
 
 /**
- * 5.10 / 5.11 §10.5 «Для 8 ч рядом мало мест»: one button per **engine** suggestion (each verified to work);
- * the app never invents one. Without suggestions (an older engine) the plate only says what to change.
+ * 5.10 / 5.11 §10.5 «Для 8 ч рядом мало мест»: a craft card, one tile per **engine** suggestion (each verified to
+ * work); the app never invents one. Without suggestions (an older engine) the plate only says what to change.
  */
 @Composable
 internal fun FewPlate(few: WalkFew, preset: String, excludedCount: Int, onSuggestion: (WalkSuggestion) -> Unit) {
-    val shape = RoundedCornerShape(DesignTokens.radius.r10)
     Column(
-        Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.dash.outline, shape).padding(12.dp).testTag("walk.few"),
+        Modifier.fillMaxWidth().craftSurface().testTag("walk.few").padding(CraftDefaults.CardPadding),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (few.noData) {
             // CEO 29.10: no data of this kind here is a gap of our base — the engine's sentence, not «мало мест»
-            Txt(few.messageRu ?: stringResource(R.string.walk_few_no_data_fallback), T.title.sm, C.text.primary, Modifier.testTag("walk.few.nodata"))
-            if (few.suggestions.isEmpty()) Txt(stringResource(R.string.walk_few_no_data_none), T.body.md, C.text.secondary)
+            Txt(few.messageRu ?: stringResource(R.string.walk_few_no_data_fallback), CraftType.cardTitle, C.camper.ink, Modifier.testTag("walk.few.nodata"))
+            if (few.suggestions.isEmpty()) Txt(stringResource(R.string.walk_few_no_data_none), CraftType.body, C.camper.inkSoft)
         } else {
             val what = if (few.unlimited) presetName(preset, preset) else durationLabel(few.durationMin)
-            Txt(stringResource(R.string.walk_few_title, what), T.title.sm, C.text.primary)
+            Txt(stringResource(R.string.walk_few_title, what), CraftType.cardTitle, C.camper.ink)
             if (few.suggestions.isEmpty()) {
-                Txt(stringResource(R.string.walk_other_none_note), T.body.md, C.text.secondary)
+                Txt(stringResource(R.string.walk_other_none_note), CraftType.body, C.camper.inkSoft)
             }
         }
         few.suggestions.forEachIndexed { i, sg ->
@@ -385,20 +419,26 @@ internal fun FewPlate(few: WalkFew, preset: String, excludedCount: Int, onSugges
                 sg.preset == "custom" && sg.titleRu != null -> sg.titleRu!! to places?.let { stringResource(R.string.walk_few_preset_sub, it) }
                 else -> stringResource(R.string.walk_few_preset, presetName(sg.preset ?: "", sg.preset ?: "")) to places?.let { stringResource(R.string.walk_few_preset_sub, it) }
             }
-            Column(
-                Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp).clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.dash.control)
-                    .border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r10))
+            Row(
+                Modifier.fillMaxWidth().padding(end = CraftDefaults.TileShadow, bottom = CraftDefaults.TileShadow).defaultMinSize(minHeight = 52.dp)
+                    .craftSurface(
+                        C.camper.field, radius = CraftDefaults.FieldRadius, border = CraftDefaults.BorderThin,
+                        shadow = C.camper.border, shadowX = CraftDefaults.TileShadow, shadowY = CraftDefaults.TileShadow,
+                    )
                     .clickable(role = Role.Button) { onSuggestion(sg) }.testTag("walk.few.$i").padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Txt(title, T.title.sm, C.text.primary, maxLines = 1)
-                if (sub != null) Txt(sub, T.body.sm, C.text.muted, maxLines = 1)
+                Column(Modifier.weight(1f)) {
+                    Txt(title, CraftType.chip, C.camper.ink, maxLines = 1)
+                    if (sub != null) Txt(sub, CraftType.caption, C.camper.inkSoft, maxLines = 1)
+                }
+                Icon(R.drawable.ic_ui_chevron_right, C.camper.border, 16.dp)
             }
         }
     }
 }
 
-/** The picker sheets (5.10 prefs; 5.11 filter bar): duration, preset, crew, budget, pace. */
+/** The picker sheets (5.10 prefs; 5.11 filter bar): duration, preset, crew, budget, pace; «Готово» below. */
 @Composable
 internal fun BoxScope.CityPickerSheet(picker: CityPicker, ui: PickerUi, windowH: Dp, a: PickerActions) {
     val title = when (picker) {
@@ -409,7 +449,7 @@ internal fun BoxScope.CityPickerSheet(picker: CityPicker, ui: PickerUi, windowH:
         CityPicker.PACE -> stringResource(R.string.city_pref_pace)
     }
     BottomSheet(title.lowercase().replaceFirstChar { it.uppercase() }, a::closePicker, "city.picker", windowH) {
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(4.dp))
         when (picker) {
             CityPicker.DURATION -> DurationChips(ui.durationMin, { a.duration(it) })
             CityPicker.PRESET -> PresetGrid(ui.presets, ui.selected) { a.preset(it) }
@@ -418,12 +458,7 @@ internal fun BoxScope.CityPickerSheet(picker: CityPicker, ui: PickerUi, windowH:
             CityPicker.PACE -> PaceChips(ui.pace) { a.pace(it) }
         }
         Spacer(Modifier.height(16.dp))
-        Box(
-            Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.dash.control)
-                .border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r12))
-                .clickable(role = Role.Button, onClick = a::closePicker).testTag("city.picker.done"),
-            contentAlignment = Alignment.Center,
-        ) { Txt(stringResource(R.string.settings_done), T.button.md, C.text.primary, maxLines = 1, align = TextAlign.Center) }
+        CraftSecondaryButton(stringResource(R.string.settings_done), a::closePicker, Modifier.fillMaxWidth().testTag("city.picker.done"))
     }
 }
 
@@ -453,17 +488,17 @@ internal fun budgetLabel(budget: Int?): String =
 @Composable
 internal fun paceLabel(pace: String): String = stringResource(Paces.firstOrNull { it.first == pace }?.second ?: R.string.city_pace_normal)
 
-/** A settings-plate row «Бюджет на всех · до 5 000 ₽ ›» (5.10 §10 step 7). */
+/** A settings row «Бюджет на всех · до 5 000 ₽ ›» (5.10 §10 step 7): label left, the value in orange, chevron. */
 @Composable
 internal fun PrefRow(label: String, value: String, tag: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).clickable(role = Role.Button, onClick = onClick).testTag(tag).padding(horizontal = 12.dp),
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).clickable(role = Role.Button, onClick = onClick).testTag(tag),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Txt(label, T.body.mdStrong, C.text.primary, Modifier.weight(1f), maxLines = 1)
-        Txt(value, T.body.md, C.text.secondary, maxLines = 1)
+        Txt(label, CraftType.chip, C.camper.ink, Modifier.weight(1f), maxLines = 1)
+        Txt(value, DesignTokens.type.body.smStrong, C.camper.orangeText, maxLines = 1)
         Spacer(Modifier.width(6.dp))
-        GlyphIcon(Glyph.RIGHT, C.text.muted, 14.dp)
+        Icon(R.drawable.ic_ui_chevron_right, C.camper.border, 16.dp)
     }
 }
 

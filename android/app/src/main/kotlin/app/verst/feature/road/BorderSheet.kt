@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -32,12 +34,20 @@ import app.verst.core.ui.R
 import app.verst.core.ui.components.BORDER_SIGN
 import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.GlyphIcon
+import app.verst.core.ui.components.CraftBadge
+import app.verst.core.ui.components.CraftBadgeColor
+import app.verst.core.ui.components.CraftButton
+import app.verst.core.ui.components.CraftDefaults
+import app.verst.core.ui.components.CraftType
+import app.verst.core.ui.components.DashedDivider
+import app.verst.core.ui.components.Icon
 import app.verst.core.ui.components.RoadSign
-import app.verst.core.ui.components.SecondaryButton
 import app.verst.core.ui.components.Txt
+import app.verst.core.ui.components.craftSurface
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
 import app.verst.feature.common.OpenDataRing
+import app.verst.feature.common.scaled
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
@@ -70,40 +80,62 @@ internal fun borderWaitLine(b: BorderDto): String {
     }
 }
 
+/** The amber tint of the border card (mockup `bg-amber-50`; opaque, the hard shadow must not show through). */
+private val BorderTint = lerp(C.camper.paper, C.camper.amber, 0.16f)
+
+/**
+ * Fork camper-ui (mockup screen 7 «Шторка «Граница»»): the sheet's facts on one amber-tinted craft card — the blue
+ * title with the passport, the crossing's name in a blue badge and the «граница» sign, the route, the wait, then the
+ * bullet facts, each with «не проверено» and its sources — and the orange «Понятно».
+ */
 @Composable
 internal fun BoxScope.BorderSheet(s: StopDto, windowH: Dp, onClose: () -> Unit) {
     val b = s.border ?: return
     val uri = LocalUriHandler.current
     val open: (String) -> Unit = { url -> runCatching { uri.openUri(url) } }
     BottomSheet(s.name, onClose, "border", windowH) {
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            RoadSign(BORDER_SIGN, s.name, emptyList())
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Txt(stringResource(R.string.border_label), T.label.md, C.text.muted, maxLines = 1)
-                val route = listOfNotNull(b.fromRu, b.toRu).joinToString(" → ")
-                if (route.isNotBlank()) Txt(route, T.title.sm, C.text.primary, Modifier.testTag("border.route"))
-                if (b.unverified) Unverified("border.unverified")
+        Column(
+            Modifier.fillMaxWidth().padding(top = 4.dp, end = CraftDefaults.ShadowX, bottom = CraftDefaults.ShadowY)
+                .craftSurface(fill = BorderTint).padding(14.dp),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(Modifier.semantics(mergeDescendants = true) { heading() }, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(R.drawable.ic_ui_passport, C.camper.blue, 18.dp)
+                        Spacer(Modifier.width(6.dp))
+                        Txt(stringResource(R.string.border_label), CraftType.overline, C.camper.blue, maxLines = 1)
+                    }
+                    CraftBadge(s.name, color = CraftBadgeColor.BLUE)
+                    val route = listOfNotNull(b.fromRu, b.toRu).joinToString(" → ")
+                    if (route.isNotBlank()) Txt(route, CraftType.cardTitle, C.camper.ink, Modifier.testTag("border.route"))
+                    if (b.unverified) Unverified("border.unverified")
+                }
+                RoadSign(BORDER_SIGN, s.name, emptyList(), Modifier.scaled(0.8f))
             }
+            DashedDivider(Modifier.padding(top = 10.dp))
+            Txt(borderWaitLine(b), T.body.md, C.camper.ink, Modifier.padding(top = 10.dp).testTag("border.wait"))
+            Sources(b.waitSources, "border.wait", open)
+            b.coordsNoteRu?.let { Txt(it, T.body.sm, C.camper.inkMuted, Modifier.padding(top = 6.dp).testTag("border.coords")) }
+            Facts(stringResource(R.string.border_documents), b.documents, "border.doc", open)
+            if (b.fees.isNotEmpty()) {
+                SectionTitle(stringResource(R.string.border_fees))
+                b.fees.forEachIndexed { i, f -> Fee(f, "border.fee.$i", open) }
+            }
+            Facts(stringResource(R.string.border_facts), b.facts, "border.fact", open)
+            Facts(stringResource(R.string.border_risks), b.risks, "border.risk", open)
+            Facts(stringResource(R.string.border_rules), b.rules, "border.rule", open)
+            b.noteRu?.let { Txt(it, T.body.smRelaxed, C.camper.inkSoft, Modifier.padding(top = 12.dp).testTag("border.note")) }
         }
-        Txt(borderWaitLine(b), T.body.md, C.navi.text, Modifier.padding(top = 12.dp).testTag("border.wait"))
-        Sources(b.waitSources, "border.wait", open)
-        b.coordsNoteRu?.let { Txt(it, T.body.sm, C.text.muted, Modifier.padding(top = 6.dp).testTag("border.coords")) }
-        Facts(stringResource(R.string.border_documents), b.documents, "border.doc", open)
-        if (b.fees.isNotEmpty()) {
-            SectionTitle(stringResource(R.string.border_fees))
-            b.fees.forEachIndexed { i, f -> Fee(f, "border.fee.$i", open) }
-        }
-        Facts(stringResource(R.string.border_facts), b.facts, "border.fact", open)
-        Facts(stringResource(R.string.border_risks), b.risks, "border.risk", open)
-        Facts(stringResource(R.string.border_rules), b.rules, "border.rule", open)
-        b.noteRu?.let { Txt(it, T.body.smRelaxed, C.text.muted, Modifier.padding(top = 12.dp).testTag("border.note")) }
-        SecondaryButton(stringResource(R.string.road_parking_ok), onClose, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("border.ok"))
+        CraftButton(
+            stringResource(R.string.road_parking_ok), onClose,
+            Modifier.padding(top = 14.dp, end = CraftDefaults.ShadowX, bottom = CraftDefaults.ShadowY).fillMaxWidth().testTag("border.ok"),
+        )
     }
 }
 
 @Composable
 private fun SectionTitle(title: String) {
-    Txt(title, T.title.sm, C.text.primary, Modifier.padding(top = 16.dp, bottom = 2.dp).semantics { heading() })
+    Txt(title, CraftType.cardTitle, C.camper.ink, Modifier.padding(top = 14.dp, bottom = 2.dp).semantics { heading() })
 }
 
 @Composable
@@ -126,14 +158,17 @@ private fun Fee(f: AbroadFeeDto, tag: String, open: (String) -> Unit) {
     Item(f.textRu, line, (f.sources + f.ruleSources).distinctBy { it.url }, tag, open)
 }
 
-/** One fact: the text, an optional accent line, «не проверено» and its sources (each opens in the browser). */
+/** One bullet fact: «•», the text, an optional accent line, «не проверено» and its sources (each opens in the browser). */
 @Composable
 private fun Item(text: String, extra: String?, sources: List<SourceDto>, tag: String, open: (String) -> Unit) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 6.dp).testTag(tag), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Txt(text, T.body.md, C.text.primary)
-        if (extra != null) Txt(extra, T.body.smStrong, C.accent.yellowText, Modifier.testTag("$tag.extra"))
-        Unverified("$tag.unverified")
-        Sources(sources, tag, open)
+    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp).testTag(tag)) {
+        Txt("•", T.body.md, C.camper.border, Modifier.width(14.dp).clearAndSetSemantics {})
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Txt(text, T.body.md, C.camper.ink)
+            if (extra != null) Txt(extra, T.body.smStrong, C.camper.orangeText, Modifier.testTag("$tag.extra"))
+            Unverified("$tag.unverified")
+            Sources(sources, tag, open)
+        }
     }
 }
 
@@ -143,7 +178,7 @@ private fun Unverified(tag: String) {
     Row(Modifier.testTag(tag), verticalAlignment = Alignment.CenterVertically) {
         OpenDataRing()
         Spacer(Modifier.width(6.dp))
-        Txt(stringResource(R.string.common_unverified), T.body.sm, C.text.muted, maxLines = 1)
+        Txt(stringResource(R.string.common_unverified), T.body.sm, C.camper.inkMuted, maxLines = 1)
     }
 }
 
@@ -160,8 +195,8 @@ private fun Sources(sources: List<SourceDto>, tag: String, open: (String) -> Uni
                 .testTag("$tag.source.$j"),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Txt(label, T.body.smStrong, C.navi.label, Modifier.weight(1f, fill = false), maxLines = 1)
-            GlyphIcon(Glyph.UP_RIGHT, C.text.secondary, 14.dp, Modifier.padding(start = 4.dp))
+            Txt(label, T.body.smStrong, C.camper.orangeText, Modifier.weight(1f, fill = false), maxLines = 1)
+            GlyphIcon(Glyph.UP_RIGHT, C.camper.inkSoft, 14.dp, Modifier.padding(start = 4.dp))
         }
     }
 }

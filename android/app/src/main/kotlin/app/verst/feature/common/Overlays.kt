@@ -1,7 +1,6 @@
 package app.verst.feature.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -45,7 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -59,15 +57,22 @@ import androidx.compose.ui.unit.dp
 import app.verst.core.ui.R
 import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.GlyphIcon
+import app.verst.core.ui.components.CraftBadge
+import app.verst.core.ui.components.CraftBadgeColor
+import app.verst.core.ui.components.CraftButton
+import app.verst.core.ui.components.CraftDefaults
+import app.verst.core.ui.components.CraftSecondaryButton
+import app.verst.core.ui.components.CraftType
 import app.verst.core.ui.components.Txt
-import app.verst.core.ui.components.naviPanel
+import app.verst.core.ui.components.craftSurface
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
 /**
- * components §16 `BottomSheet`, static (no drag; the enter/exit motion is DEV-131 polish): scrim, top radius 16,
- * 2 dp rim, handle, title row with a 44 dp «Закрыть», content padding 8 20 24, ≤ 88 % of the window.
+ * components §16 `BottomSheet`; camper fork: a paper sheet with the brown 2.5 dp rim and the card radius on top
+ * (no rim at the bottom edge), handle, title row (optional leading sign and overline) with a 44 dp «Закрыть» tile,
+ * a thin rule, content padding 8 18 20, ≤ 88 % of the window. Scrim; slides in; drag down to dismiss.
  */
 @Composable
 fun BoxScope.BottomSheet(
@@ -78,8 +83,10 @@ fun BoxScope.BottomSheet(
     badge: String? = null,
     /** TalkBack pane title when it differs from the visible title (D-13 `cd_mock_partner`). */
     pane: String = title,
-    /** 5.9 C2: the mini RoadSign before the title (cards). */
+    /** 5.9 C2: the mini sign before the title (cards). */
     leading: (@Composable () -> Unit)? = null,
+    /** Camper fork: a line above the title (the card's kind overline). */
+    overline: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val close = stringResource(R.string.common_close)
@@ -96,7 +103,7 @@ fun BoxScope.BottomSheet(
         Modifier.matchParentSize().graphicsLayer { alpha = enter.value }.background(C.overlay.scrim)
             .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onClose),
     )
-    val shape = RoundedCornerShape(topStart = DesignTokens.radius.r16, topEnd = DesignTokens.radius.r16)
+    val shape = RoundedCornerShape(topStart = CraftDefaults.CardRadius, topEnd = CraftDefaults.CardRadius)
     Column(
         Modifier
             .align(Alignment.BottomCenter)
@@ -113,43 +120,56 @@ fun BoxScope.BottomSheet(
                     if (drag.value > sheetH * 0.25f || fling) onClose() else drag.animateTo(0f, spring(stiffness = 400f))
                 },
             )
+            // the brown rim on the top and the sides, then the paper
             .clip(shape)
-            .background(C.dash.control)
-            .padding(top = 2.dp)
+            .background(C.camper.border)
+            .padding(start = CraftDefaults.Border, top = CraftDefaults.Border, end = CraftDefaults.Border)
             .clip(shape)
-            .background(C.dash.raised)
+            .background(C.camper.paper)
             // Swallow taps so they do not reach the scrim (pointerInput, not clickable: no semantics merging).
             .pointerInput(Unit) { detectTapGestures { } }
             .semantics { paneTitle = pane }
             .testTag(tag)
-            .padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
+            .padding(start = 18.dp, end = 18.dp, top = 8.dp, bottom = 20.dp),
     ) {
         Box(
             Modifier.align(Alignment.CenterHorizontally).size(DesignTokens.size.sheetHandleW, DesignTokens.size.sheetHandleH)
-                .clip(RoundedCornerShape(2.dp)).background(C.dash.outline),
+                .clip(RoundedCornerShape(2.dp)).background(C.camper.border.copy(alpha = 0.35f)),
         )
         Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             if (leading != null) {
                 Box(Modifier.padding(end = 12.dp).testTag("$tag.sign")) { leading() }
             }
             // With a badge the title keeps its natural width (it is short) and the spacer takes the rest.
-            Txt(title, T.title.lg, C.text.primary, if (badge == null) Modifier.weight(1f) else Modifier, maxLines = 2)
+            Column(if (badge == null) Modifier.weight(1f) else Modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (overline != null) overline()
+                Txt(title, T.title.lg, C.camper.ink, maxLines = 2)
+            }
             if (badge != null) {
-                // D-13 «ДЕМО» badge: h 20, padding 0 6, radius 4, yellow outline and text.
-                Box(
-                    Modifier.padding(start = 8.dp).height(20.dp).border(DesignTokens.stroke.w1, C.accent.yellowText, RoundedCornerShape(DesignTokens.radius.r4))
-                        .padding(horizontal = 6.dp).testTag("$tag.badge"),
-                    contentAlignment = Alignment.Center,
-                ) { Txt(badge, T.label.md, C.accent.yellowText, maxLines = 1) }
+                // D-13 «ДЕМО» badge: the amber craft badge.
+                CraftBadge(badge, Modifier.padding(start = 8.dp).testTag("$tag.badge"), CraftBadgeColor.AMBER)
                 Spacer(Modifier.weight(1f))
             }
             Box(
                 Modifier.size(DesignTokens.size.touchMin).clip(RoundedCornerShape(DesignTokens.radius.r8))
                     .clickable(role = Role.Button, onClick = onClose).semantics { contentDescription = close }.testTag("$tag.close"),
                 contentAlignment = Alignment.Center,
-            ) { GlyphIcon(Glyph.CLOSE, C.text.secondary, 20.dp) }
+            ) {
+                Box(
+                    Modifier.size(32.dp).craftSurface(
+                        C.camper.field, radius = 10.dp, border = CraftDefaults.BorderThin, shadow = C.camper.border,
+                        shadowX = CraftDefaults.TileShadow, shadowY = CraftDefaults.TileShadow,
+                    ),
+                    contentAlignment = Alignment.Center,
+                ) { GlyphIcon(Glyph.CLOSE, C.camper.ink, 16.dp) }
+            }
         }
-        Column(Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(rememberScrollState()), content = content)
+        Box(Modifier.fillMaxWidth().padding(top = 8.dp).height(1.dp).background(C.camper.divider))
+        // bottom 4 dp: room for the hard shadow of a last craft button inside the scroll clip
+        Column(
+            Modifier.fillMaxWidth().weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(top = 8.dp, bottom = 4.dp),
+            content = content,
+        )
     }
 }
 
@@ -161,7 +181,7 @@ fun Modifier.scaled(k: Float): Modifier = layout { m, _ ->
     layout(w, h) { p.placeWithLayer((w - p.width) / 2, (h - p.height) / 2) { scaleX = k; scaleY = k } }
 }
 
-/** components §16 `PlateToast`: bottom-centred above [bottom], text + optional yellow action, polite live region. */
+/** components §16 `PlateToast`; camper fork: a paper craft plate, bottom-centred above [bottom], text + optional orange action, polite live region. */
 @Composable
 fun BoxScope.PlateToast(text: String, bottom: Dp, action: String? = null, onAction: () -> Unit = {}) {
     // Toast in: α 0 → 1, 8 dp → 0, 200 ms decelerate (motion.md §2.2), re-run for each new text.
@@ -174,21 +194,19 @@ fun BoxScope.PlateToast(text: String, bottom: Dp, action: String? = null, onActi
             .graphicsLayer { alpha = p.value; translationY = 8.dp.toPx() * (1 - p.value) }
             .padding(start = 16.dp, end = 16.dp, bottom = bottom)
             .defaultMinSize(minHeight = DesignTokens.size.touchMin)
-            .clip(RoundedCornerShape(DesignTokens.radius.r10))
-            .background(C.dash.control)
-            .border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r10))
+            .craftSurface(C.camper.paper, radius = 14.dp, border = CraftDefaults.BorderThin)
             .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
             .testTag("toast")
             .padding(horizontal = 16.dp), // F-02: one line + action = 44 dp (the action box is the 44 touch target)
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Txt(text, T.body.mdTight, C.text.primary, Modifier.weight(1f, fill = false).padding(vertical = 10.dp))
+        Txt(text, T.body.mdTight, C.camper.ink, Modifier.weight(1f, fill = false).padding(vertical = 10.dp))
         if (action != null) {
             Box(
                 Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button, onClick = onAction).testTag("toast.action"),
                 contentAlignment = Alignment.Center,
-            ) { Txt(action, T.body.mdStrong, C.accent.yellowText, maxLines = 1) }
+            ) { Txt(action, T.body.mdStrong, C.camper.orangeText, maxLines = 1) }
         }
     }
 }
@@ -209,7 +227,10 @@ fun FullOverlay(content: @Composable BoxScope.() -> Unit) {
     Box(Modifier.fillMaxSize(), content = content)
 }
 
-/** components §16 `NaviDialog`: centred card (window − 48), navi look, title, body, primary + secondary. */
+/**
+ * components §16 `NaviDialog`; camper fork: a centred craft card (window − 48), title, body, the orange
+ * [CraftButton] (primary) and the paper [CraftSecondaryButton] (secondary).
+ */
 @Composable
 fun BoxScope.NaviDialog(
     title: String,
@@ -219,62 +240,27 @@ fun BoxScope.NaviDialog(
     tag: String,
     onPrimary: () -> Unit,
     onSecondary: () -> Unit,
-    /** S4 `AgeGateDialog`: «Нет» / «Да» side by side, equal width («Да» yellow, right). */
+    /** S4 `AgeGateDialog`: «Нет» / «Да» side by side, equal width («Да» orange, right). */
     sideBySide: Boolean = false,
 ) {
     Box(Modifier.matchParentSize().background(C.overlay.scrim).clickable(remember { MutableInteractionSource() }, indication = null, onClick = onSecondary))
-    if (sideBySide) {
-        Column(
-            Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp).naviPanel().padding(6.dp).padding(18.dp)
-                .pointerInput(Unit) { detectTapGestures { } }
-                .semantics { paneTitle = title }.testTag(tag),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Txt(title, T.title.lg, C.text.primary)
-            if (body.isNotEmpty()) Txt(body, T.body.md, C.navi.text)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(
-                    Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.dash.control)
-                        .border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r12))
-                        .clickable(role = Role.Button, onClick = onSecondary).testTag("$tag.no"),
-                    contentAlignment = Alignment.Center,
-                ) { Txt(secondary, T.button.md, C.text.primary, maxLines = 1) }
-                Box(
-                    Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.accent.yellow)
-                        .clickable(role = Role.Button, onClick = onPrimary).testTag("$tag.yes"),
-                    contentAlignment = Alignment.Center,
-                ) { Txt(primary, T.cta.sm, C.text.onLight, maxLines = 1) }
-            }
-        }
-        return
-    }
     Column(
-        Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp).naviPanel().padding(6.dp).padding(18.dp)
+        Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp).craftSurface()
             .pointerInput(Unit) { detectTapGestures { } }
-            .semantics { paneTitle = title }.testTag(tag),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .semantics { paneTitle = title }.testTag(tag)
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(if (sideBySide) 16.dp else 12.dp),
     ) {
-        Txt(title, T.title.lg, C.text.primary)
-        Txt(body, T.body.md, C.navi.text)
-        Box(
-            Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.accent.yellow)
-                .clickable(role = Role.Button, onClick = onPrimary).testTag("$tag.yes"),
-            contentAlignment = Alignment.Center,
-        ) { Txt(primary, T.cta.sm, C.text.onLight, maxLines = 1) }
-        Box(
-            Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(DesignTokens.radius.r12))
-                .drawBehind {
-                    // F-08: `DashedButton` — dashed 1 dp outline.
-                    val w = DesignTokens.stroke.w1.toPx()
-                    drawRoundRect(
-                        C.dash.outlineDashed, androidx.compose.ui.geometry.Offset(w / 2, w / 2),
-                        androidx.compose.ui.geometry.Size(size.width - w, size.height - w),
-                        androidx.compose.ui.geometry.CornerRadius(DesignTokens.radius.r12.toPx()),
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(w, pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
-                    )
-                }
-                .clickable(role = Role.Button, onClick = onSecondary).testTag("$tag.no"),
-            contentAlignment = Alignment.Center,
-        ) { Txt(secondary, T.button.md, C.text.secondary, maxLines = 1) }
+        Txt(title, T.title.lg, C.camper.ink)
+        if (body.isNotEmpty()) Txt(body, CraftType.body, C.camper.inkSoft)
+        if (sideBySide) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                CraftSecondaryButton(secondary, onSecondary, Modifier.weight(1f).testTag("$tag.no"))
+                CraftButton(primary, onPrimary, Modifier.weight(1f).testTag("$tag.yes"))
+            }
+        } else {
+            CraftButton(primary, onPrimary, Modifier.fillMaxWidth().testTag("$tag.yes"))
+            CraftSecondaryButton(secondary, onSecondary, Modifier.fillMaxWidth().testTag("$tag.no"))
+        }
     }
 }

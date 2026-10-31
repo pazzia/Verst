@@ -2,7 +2,6 @@ package app.verst.feature.report
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -36,20 +36,20 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.verst.core.model.Reports
 import app.verst.core.ui.R
+import app.verst.core.ui.components.CraftButton
+import app.verst.core.ui.components.CraftDefaults
+import app.verst.core.ui.components.CraftType
 import app.verst.core.ui.components.Txt
-import app.verst.core.ui.theme.DesignTokens
+import app.verst.core.ui.components.craftField
 import app.verst.feature.common.BottomSheet
 import app.verst.core.ui.theme.DesignTokens.color as C
-import app.verst.core.ui.theme.DesignTokens.type as T
 
 /** What D-7 shows: the place (for TalkBack), the chosen reason, the comment. */
 data class ReportUi(val name: String, val reason: String? = null, val comment: String = "")
@@ -68,7 +68,7 @@ interface ReportActions {
 @Composable
 fun BoxScope.ReportSheet(ui: ReportUi, windowH: Dp, a: ReportActions) {
     BottomSheet(stringResource(R.string.report_title), a::close, "report", windowH, pane = stringResource(R.string.report_title)) {
-        Txt(ui.name, T.body.sm, C.text.muted, Modifier.testTag("report.place"), maxLines = 1)
+        Txt(ui.name, CraftType.caption, C.camper.inkSoft, Modifier.testTag("report.place"), maxLines = 1)
         Spacer(Modifier.height(12.dp))
         val labels = mapOf(
             "closed" to stringResource(R.string.report_closed),
@@ -95,68 +95,59 @@ fun BoxScope.ReportSheet(ui: ReportUi, windowH: Dp, a: ReportActions) {
         Column(Modifier.fillMaxWidth().bringIntoViewRequester(bring)) {
         CommentField(ui.comment, a::comment) { commentFocused = it }
         Spacer(Modifier.height(16.dp))
-        val enabled = ui.reason != null
-        val shape = RoundedCornerShape(DesignTokens.radius.r12)
-        Box(
-            Modifier.fillMaxWidth().height(DesignTokens.size.buttonH).clip(shape)
-                .background(if (enabled) C.accent.yellow else C.dash.controlAlt)
-                .clickable(enabled = enabled, role = Role.Button, onClick = a::send)
-                .semantics { if (!enabled) disabled() }
-                .testTag("report.send"),
-            contentAlignment = Alignment.Center,
-        ) {
-            Txt(stringResource(R.string.report_send).uppercase(), T.cta.sm, if (enabled) C.text.onLight else C.text.disabled, maxLines = 1, align = TextAlign.Center)
-        }
+        // the orange craft button, disabled (tan, no shadow) until a reason is chosen
+        CraftButton(
+            stringResource(R.string.report_send).uppercase(), a::send,
+            Modifier.fillMaxWidth().testTag("report.send"), enabled = ui.reason != null,
+        )
         }
     }
 }
 
-/** The D-6 radio look: min-h 52, `dash.controlAlt`, radius 10; selected = yellow ring + border. */
+/** The D-6 radio row, camper fork: a white-paper craft field (min-h 52); selected = orange 2.5 dp border + orange dot. */
 @Composable
 private fun ReasonRow(label: String, selected: Boolean, tag: String, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(DesignTokens.radius.r10)
+    val shape = RoundedCornerShape(CraftDefaults.FieldRadius)
     Row(
-        Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp).clip(shape).background(C.dash.controlAlt)
-            .then(if (selected) Modifier.border(DesignTokens.stroke.w1, C.accent.yellowText, shape) else Modifier)
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 52.dp).clip(shape).background(C.camper.field)
+            .border(if (selected) CraftDefaults.Border else CraftDefaults.BorderThin, if (selected) C.camper.orange else C.camper.border, shape)
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
             .testTag(tag)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            Modifier.size(18.dp).border(2.dp, if (selected) C.accent.yellowText else C.text.secondary, RoundedCornerShape(9.dp)),
+            Modifier.size(20.dp).clip(CircleShape).background(C.camper.paper).border(2.dp, C.camper.border, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            if (selected) Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(C.accent.yellow))
+            if (selected) Box(Modifier.size(10.dp).clip(CircleShape).background(C.camper.orange))
         }
         Spacer(Modifier.size(12.dp))
-        Txt(label, T.body.md, C.text.primary, Modifier.weight(1f), maxLines = 2)
+        Txt(label, CraftType.body, C.camper.ink, Modifier.weight(1f), maxLines = 2)
     }
 }
 
-/** NaviInput style (components §4): navi field, yellow border when focused, the placeholder `report_comment`. */
+/** The comment field, camper fork: [craftField] (white paper, brown border; orange while focused), the placeholder `report_comment`. */
 @Composable
 private fun CommentField(value: String, onChange: (String) -> Unit, onFocused: (Boolean) -> Unit = {}) {
     var focused by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(DesignTokens.radius.r10)
     val hint = stringResource(R.string.report_comment)
     Box(
-        Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp).clip(shape).background(C.navi.field)
-            .border(if (focused) DesignTokens.stroke.w2 else DesignTokens.stroke.w1, if (focused) C.accent.yellowText else C.navi.fieldBorder, shape)
+        Modifier.fillMaxWidth().defaultMinSize(minHeight = 56.dp).craftField(focused = focused)
             .padding(horizontal = 12.dp, vertical = 14.dp),
     ) {
         BasicTextField(
             value = value,
             onValueChange = { onChange(it.take(Reports.COMMENT_MAX)) },
-            textStyle = T.body.md.copy(color = C.text.primary),
-            cursorBrush = SolidColor(C.accent.yellowText),
+            textStyle = CraftType.field.copy(color = C.camper.ink),
+            cursorBrush = SolidColor(C.camper.orange),
             maxLines = 4,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Default),
             modifier = Modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused; onFocused(it.isFocused) }
                 .semantics { contentDescription = hint }.testTag("report.comment"),
             decorationBox = { inner ->
                 Box {
-                    if (value.isEmpty()) Txt(hint, T.body.md, C.navi.hint)
+                    if (value.isEmpty()) Txt(hint, CraftType.field, C.camper.inkMuted)
                     inner()
                 }
             },

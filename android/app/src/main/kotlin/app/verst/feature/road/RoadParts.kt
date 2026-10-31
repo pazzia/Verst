@@ -1,5 +1,7 @@
 package app.verst.feature.road
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,8 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -51,10 +56,16 @@ import app.verst.core.model.dto.ParkingDto
 import app.verst.core.model.dto.StopDto
 import app.verst.core.model.dto.TripDto
 import app.verst.core.ui.R
-import app.verst.core.ui.components.Glyph
-import app.verst.core.ui.components.GlyphIcon
-import app.verst.core.ui.components.SecondaryButton
+import app.verst.core.ui.components.CraftDefaults
+import app.verst.core.ui.components.CraftSecondaryButton
+import app.verst.core.ui.components.CraftType
+import app.verst.core.ui.components.DashedDivider
+import app.verst.core.ui.components.Icon
+import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.Txt
+import app.verst.core.ui.components.craftField
+import app.verst.core.ui.components.craftShadow
+import app.verst.core.ui.components.craftSurface
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
 import app.verst.feature.common.OpenDataRing
@@ -127,11 +138,54 @@ internal fun parkingTotalText(p: ParkingSum, rub: Int = p.rub): String = when (p
 }
 
 /**
- * components §26 `HandoffCta`: full width, min-h 60: navigator arrow 26, title 18/700, sub 12/600, chevron. Designer
- * В-5 (28.10): an outline, not the filled yellow — the plan is read and edited first, leaving for the navigator is
- * the second step. CEO 29.10: «Вести по картам» opens [maps] (the preferred Яндекс / Google Карты) with every point of
- * [day]; the sub-line names the app and says when it opens in the browser ([target] = Browser); a long-press opens
- * the sheet with the choice.
+ * Fork camper-ui: the face of a craft button (`CraftButton`'s look — 2.5 dp brown border, radius 16, the full-brown
+ * hard shadow, the face moves 2 dp right-down while [pressed]) for the actions `CraftButton` cannot carry: a
+ * long-press, a second line, a «disabled» look that still answers a tap. The caller puts the click, semantics and
+ * test tag on [modifier]; [raised] = false is the flat, dimmed plate (no shadow).
+ */
+@Composable
+internal fun CraftPlate(
+    modifier: Modifier = Modifier,
+    pressed: Boolean = false,
+    fill: Color = C.camper.orange,
+    pressedFill: Color = C.camper.orangePressed,
+    raised: Boolean = true,
+    minHeight: Dp = CraftDefaults.ButtonHeight,
+    horizontalPadding: Dp = 16.dp,
+    arrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    content: @Composable RowScope.() -> Unit,
+) {
+    val reduced = LocalReducedMotion.current
+    val shift by animateFloatAsState(
+        targetValue = if (pressed && raised) 1f else 0f,
+        animationSpec = tween(durationMillis = if (reduced) 0 else 120),
+        label = "craftPlate",
+    )
+    val radius = CraftDefaults.ButtonRadius
+    val shape = RoundedCornerShape(radius)
+    Row(
+        modifier
+            .defaultMinSize(minHeight = minHeight)
+            .then(if (raised) Modifier.craftShadow(radius, color = C.camper.border) else Modifier)
+            .graphicsLayer {
+                translationX = shift * CraftDefaults.PressShift.toPx()
+                translationY = shift * CraftDefaults.PressShift.toPx()
+            }
+            .clip(shape)
+            .background(if (pressed && raised) pressedFill else fill)
+            .border(CraftDefaults.Border, if (raised) C.camper.border else C.camper.border.copy(alpha = 0.4f), shape)
+            .padding(horizontal = horizontalPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = arrangement,
+        content = content,
+    )
+}
+
+/**
+ * components §26 `HandoffCta`, fork camper-ui: the orange craft button «Вести по картам» with the location arrow
+ * (mockup screen 6) and, under it, the line that names the app. CEO 29.10: it opens [maps] (the preferred Яндекс /
+ * Google Карты) with every point of [day]; the line says when it opens in the browser ([target] = Browser); a
+ * long-press opens the sheet with the choice. The plate and the line are one button (one TalkBack stop).
  */
 @Composable
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
@@ -145,51 +199,50 @@ internal fun HandoffCta(
 ) {
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
-    val shape = RoundedCornerShape(DesignTokens.radius.r12)
     val web = target == HandoffTarget.Browser || target == HandoffTarget.BrowserDryRun
     val sub = when (maps) {
         HandoffApp.GOOGLE -> stringResource(if (web) R.string.handoff_cta_sub_google_web else R.string.handoff_cta_sub_google, day)
         HandoffApp.MAPS, HandoffApp.NAVI -> stringResource(if (web) R.string.handoff_cta_sub_yandex_web else R.string.handoff_cta_sub_yandex, day)
     }
     val cd = stringResource(R.string.road_handoff_cta) + ". " + sub
-    Row(
-        modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.handoffCtaH).clip(shape)
-            .background(if (pressed) C.accent.yellow.copy(alpha = 0.12f) else androidx.compose.ui.graphics.Color.Transparent)
-            .border(DesignTokens.stroke.w2, C.accent.yellowText, shape)
+    Column(
+        modifier.fillMaxWidth()
             .combinedClickable(source, indication = null, role = Role.Button, onLongClick = onLongClick, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
-            .testTag("road.handoff")
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .testTag("road.handoff"),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        GlyphIcon(Glyph.NAVIGATOR, C.accent.yellowText, 26.dp, filled = true)
-        Column(Modifier.weight(1f)) {
-            Txt(stringResource(R.string.road_handoff_cta), T.cta.lg, C.accent.yellowText, maxLines = 1)
-            Txt(sub, T.body.smStrong, C.text.secondary, Modifier.testTag("road.handoff.sub"), maxLines = 1)
+        CraftPlate(Modifier.fillMaxWidth().padding(end = CraftDefaults.ShadowX), pressed = pressed) {
+            Icon(R.drawable.ic_ui_location_arrow, C.camper.onOrange, 18.dp)
+            Txt(stringResource(R.string.road_handoff_cta), CraftType.button, C.camper.onOrange, maxLines = 1)
         }
-        GlyphIcon(Glyph.RIGHT, C.accent.yellowText, 18.dp)
+        Txt(sub, T.body.smStrong, C.camper.inkSoft, Modifier.fillMaxWidth().testTag("road.handoff.sub"), maxLines = 1, align = TextAlign.Center)
     }
 }
 
-/** components §26 day «вести»: min-h 36, padding 0 10, radius 18, 1 dp yellow, 12/600 + arrow 12 (touch 44). */
+/** components §26 day «вести», fork camper-ui: a small paper key (h 32, 2 dp border, tile shadow) in a 44 dp touch box. */
 @Composable
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 internal fun DayGoButton(day: Int, onClick: () -> Unit, onLongClick: () -> Unit) {
     val cd = stringResource(R.string.cd_road_handoff_day, day)
     Box(
-        Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin)
+        Modifier.defaultMinSize(minWidth = DesignTokens.size.touchMin, minHeight = DesignTokens.size.touchMin)
             .combinedClickable(role = Role.Button, onLongClick = onLongClick, onClick = onClick)
             .semantics { contentDescription = cd }.testTag("road.day.$day.navigator"),
         contentAlignment = Alignment.Center,
     ) {
         Row(
-            Modifier.height(36.dp).border(DesignTokens.stroke.w1, C.accent.yellowText, RoundedCornerShape(18.dp)).padding(horizontal = 10.dp),
+            Modifier.height(32.dp)
+                .craftSurface(
+                    fill = C.camper.field, radius = 10.dp, border = CraftDefaults.BorderThin, shadow = C.camper.border,
+                    shadowX = CraftDefaults.TileShadow, shadowY = CraftDefaults.TileShadow,
+                )
+                .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp),
         ) {
-            GlyphIcon(Glyph.NAVIGATOR, C.accent.yellowText, 12.dp, filled = true)
-            Txt(stringResource(R.string.road_handoff_day), T.body.smStrong, C.accent.yellowText, maxLines = 1)
+            Icon(R.drawable.ic_ui_location_arrow, C.camper.orangeText, 12.dp)
+            Txt(stringResource(R.string.road_handoff_day), T.body.smStrong, C.camper.orangeText, maxLines = 1)
         }
     }
 }
@@ -252,14 +305,14 @@ internal fun CostsLine(price: String?, parking: ParkingDto?, showParking: Boolea
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             PGlyph(15.dp)
-            Txt(parkingInline(parking), T.body.mdStrong, if (unknown) C.text.muted else C.navi.text, maxLines = 1)
+            Txt(parkingInline(parking), T.body.mdStrong, if (unknown) C.camper.inkMuted else C.camper.ink, maxLines = 1)
         }
     }
     Row(Modifier.fillMaxWidth().defaultMinSize(minHeight = 36.dp), verticalAlignment = Alignment.Top) {
         androidx.compose.ui.layout.Layout(
             content = {
-                Box(Modifier.height(36.dp), contentAlignment = Alignment.CenterStart) { if (price != null) Txt(price, T.body.mdStrong, C.accent.yellowText, maxLines = 1) }
-                Box(Modifier.height(36.dp).padding(horizontal = 5.dp), contentAlignment = Alignment.Center) { Txt("·", T.body.mdStrong, C.interior.pole, maxLines = 1) }
+                Box(Modifier.height(36.dp), contentAlignment = Alignment.CenterStart) { if (price != null) Txt(price, T.body.mdStrong, C.camper.orangeText, maxLines = 1) }
+                Box(Modifier.height(36.dp).padding(horizontal = 5.dp), contentAlignment = Alignment.Center) { Txt("·", T.body.mdStrong, C.camper.inkMuted, maxLines = 1) }
                 Box(Modifier.height(36.dp), contentAlignment = Alignment.CenterStart) { if (showParking) pPart() }
             },
             modifier = Modifier.weight(1f),
@@ -300,7 +353,7 @@ internal fun Modifier.touchAt(height: Dp): Modifier = this.layout { m, c ->
 
 /** components §26.2 quiet action «заменить» (12/600 muted, no border, min-h 36, touch 44). */
 @Composable
-internal fun QuietAction(text: String, cd: String, tag: String, color: androidx.compose.ui.graphics.Color = C.text.muted, onClick: () -> Unit, trailing: @Composable () -> Unit = {}) {
+internal fun QuietAction(text: String, cd: String, tag: String, color: Color = C.camper.inkMuted, onClick: () -> Unit, trailing: @Composable () -> Unit = {}) {
     Row(
         Modifier.touch36().clickable(role = Role.Button, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }.testTag(tag).padding(start = 6.dp),
@@ -317,7 +370,7 @@ internal fun DayParking(day: DayDto) {
     val text = parkingTotalText(parkingOf(day))
     Row(Modifier.testTag("road.day.${day.day}.parking"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         PGlyph(16.dp)
-        Txt(text, T.body.smStrong, C.navi.text, maxLines = 1)
+        Txt(text, T.body.smStrong, C.camper.ink, maxLines = 1)
     }
 }
 
@@ -335,10 +388,10 @@ internal fun FooterParking(rub: Int, sum: ParkingSum = ParkingSum(rub, 0, 0)) {
     Column(Modifier.padding(start = 10.dp).testTag("road.total.parking"), horizontalAlignment = Alignment.End) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             PGlyph(14.dp)
-            Txt(stringResource(R.string.road_footer_parking), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+            Txt(stringResource(R.string.road_footer_parking), T.body.smStrong, C.camper.inkSoft, maxLines = 1)
         }
         Txt(
-            parkingTotalText(sum, rub), T.paper.total, C.text.onLight, Modifier.testTag("road.total.parking.value"), maxLines = 1, align = TextAlign.End,
+            parkingTotalText(sum, rub), CraftType.fieldMono, C.camper.ink, Modifier.testTag("road.total.parking.value"), maxLines = 1, align = TextAlign.End,
         )
     }
 }
@@ -348,81 +401,85 @@ private val KmNumber = TextStyle(
 )
 private val KmUnit = TextStyle(fontWeight = FontWeight.W700, fontSize = 8.sp, lineHeight = 9.sp)
 
-/** components §26.2 `KmPost`: plate 22 × 26 white, 1.5 dp black, radius 2; Plex Mono number + «км»; post 4 × 10. */
+/**
+ * components §26.2 `KmPost`, fork camper-ui: a white paper plate (min 22 × 26, 1.5 dp brown border, radius 4) with the
+ * Plex Mono number + «км» on a short brown post — a km post standing by the dashed road line.
+ */
 @Composable
 internal fun KmPost(km: Int, modifier: Modifier = Modifier) {
     Column(modifier.testTag("road.kmpost"), horizontalAlignment = Alignment.CenterHorizontally) {
         Column(
-            Modifier.size(22.dp, 26.dp).clip(RoundedCornerShape(2.dp)).background(C.sign.white)
-                .border(1.5.dp, C.sign.black, RoundedCornerShape(2.dp)),
+            Modifier.defaultMinSize(minWidth = 22.dp).height(26.dp).clip(RoundedCornerShape(4.dp)).background(C.camper.field)
+                .border(1.5.dp, C.camper.border, RoundedCornerShape(4.dp)).padding(horizontal = 2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Txt(km.toString(), KmNumber, C.text.onLight, maxLines = 1)
-            Txt(stringResource(R.string.common_km_unit), KmUnit, C.text.onLight, maxLines = 1)
+            Txt(km.toString(), KmNumber, C.camper.ink, maxLines = 1)
+            Txt(stringResource(R.string.common_km_unit), KmUnit, C.camper.inkSoft, maxLines = 1)
         }
-        Box(Modifier.size(4.dp, 10.dp).background(C.sign.black).padding(horizontal = 1.dp).background(C.sign.white))
+        Box(Modifier.size(3.dp, 8.dp).background(C.camper.border))
     }
 }
 
-/** The legends under the chips: the open-data ring (with «О данных») and the mini km post (5.5 §10.2, §10.8). */
+/** The legends under the intro: the open-data ring (with «О данных») and the mini km post (5.5 §10.2, §10.8). */
 @Composable
 internal fun Legends(openData: Boolean, posts: Boolean, onAbout: () -> Unit, about: Boolean = true) {
     if (openData) {
         Row(Modifier.fillMaxWidth().testTag("road.legend.opendata"), verticalAlignment = Alignment.CenterVertically) {
             OpenDataRing(Modifier.padding(end = 6.dp))
-            Txt(stringResource(R.string.road_open_data_legend), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false))
+            Txt(stringResource(R.string.road_open_data_legend), T.body.sm, C.camper.inkMuted, Modifier.weight(1f, fill = false))
             if (about) Box(
                 Modifier.padding(start = 4.dp).defaultMinSize(minHeight = DesignTokens.size.touchMin)
                     .clickable(role = Role.Button, onClick = onAbout).testTag("road.approx.more"),
                 contentAlignment = Alignment.Center,
-            ) { Txt("· " + stringResource(R.string.route_approx_more), T.body.smStrong, C.navi.label, maxLines = 1) }
+            ) { Txt("· " + stringResource(R.string.route_approx_more), T.body.smStrong, C.camper.orangeText, maxLines = 1) }
         }
     }
     if (posts) {
         Row(Modifier.fillMaxWidth().testTag("road.legend.kmpost"), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                Modifier.padding(end = 6.dp).size(18.dp, 16.dp).clip(RoundedCornerShape(2.dp)).background(C.sign.white)
-                    .border(DesignTokens.stroke.w1, C.sign.black, RoundedCornerShape(2.dp)).clearAndSetSemantics {},
+                Modifier.padding(end = 6.dp).size(18.dp, 16.dp).clip(RoundedCornerShape(3.dp)).background(C.camper.field)
+                    .border(DesignTokens.stroke.w1, C.camper.border, RoundedCornerShape(3.dp)).clearAndSetSemantics {},
                 contentAlignment = Alignment.Center,
-            ) { Txt("73", KmNumber.copy(fontSize = 8.sp, lineHeight = 9.sp), C.text.onLight, maxLines = 1) }
-            Txt(stringResource(R.string.road_km_post_legend), T.body.sm, C.text.muted, Modifier.weight(1f))
+            ) { Txt("73", KmNumber.copy(fontSize = 8.sp, lineHeight = 9.sp), C.camper.ink, maxLines = 1) }
+            Txt(stringResource(R.string.road_km_post_legend), T.body.sm, C.camper.inkMuted, Modifier.weight(1f))
         }
     }
 }
 
 /**
- * components §26.3 `CarMarker`: an 18 × 32 top-down car, front at the bottom (it drives down the list), in the car
- * lane x 13–31. CEO 29.10: it does not drive by itself — it stands still and moves only with the scroll, at
- * [progress] (0 = the list top, 1 = its end) of the visible road, so it is where the reader is in the trip.
+ * components §26.3 `CarMarker`: an 18 × 32 top-down car, front at the bottom (it drives down the list). Fork
+ * camper-ui: an orange van with a brown outline and a white-paper halo, centred on the dashed road line at [x] (its
+ * left edge). CEO 29.10: it does not drive by itself — it stands still and moves only with the scroll, at [progress]
+ * (0 = the list top, 1 = its end) of the visible road, so it is where the reader is in the trip.
  */
 @Composable
-internal fun BoxScope.CarMarker(top: Float, bottom: Float, progress: Float) {
+internal fun BoxScope.CarMarker(top: Float, bottom: Float, progress: Float, x: Dp = 13.dp) {
     val len = bottom - top - DesignTokens.size.carMarkerH.value
     if (len <= 0f) return
     val y = progress.coerceIn(0f, 1f) * len
     Canvas(
-        Modifier.offset(x = 13.dp, y = (top + y).dp).size(DesignTokens.size.carMarkerW, DesignTokens.size.carMarkerH)
+        Modifier.offset(x = x, y = (top + y).dp).size(DesignTokens.size.carMarkerW, DesignTokens.size.carMarkerH)
             .testTag("road.car").clearAndSetSemantics {},
     ) {
         val d = 1.dp.toPx()
-        // halo: a soft drop shadow, then the 1 dp light outline
-        drawRoundRect(C.sign.black.copy(alpha = 0.6f), Offset(1.75f * d, 4f * d), Size(14.5f * d, 30f * d), CornerRadius(5 * d))
-        drawRoundRect(C.text.primary, Offset(0.75f * d, 0f), Size(16.5f * d, 32f * d), CornerRadius(6 * d))
-        for ((x, yy) in listOf(0f to 6f, 15f to 6f, 0f to 20f, 15f to 20f)) {
-            drawRoundRect(C.text.onLight, Offset(x * d, yy * d), Size(3 * d, 6 * d), CornerRadius(d))
+        // the hard craft shadow (no blur), then the white-paper halo that lifts the van off the dashed line
+        drawRoundRect(C.camper.shadow, Offset(2.75f * d, 3f * d), Size(14.5f * d, 30f * d), CornerRadius(5 * d))
+        drawRoundRect(C.camper.field, Offset(0.75f * d, 0f), Size(16.5f * d, 32f * d), CornerRadius(6 * d))
+        for ((x0, yy) in listOf(0f to 6f, 15f to 6f, 0f to 20f, 15f to 20f)) {
+            drawRoundRect(C.camper.border, Offset(x0 * d, yy * d), Size(3 * d, 6 * d), CornerRadius(d))
         }
-        drawRoundRect(C.accent.yellow, Offset(1.75f * d, 1f * d), Size(14.5f * d, 30f * d), CornerRadius(5 * d))
-        drawRoundRect(C.text.onLight, Offset(1.75f * d, 1f * d), Size(14.5f * d, 30f * d), CornerRadius(5 * d), style = Stroke(1.5f * d))
-        drawRoundRect(C.text.onLight.copy(alpha = 0.85f), Offset(4.5f * d, 4.5f * d), Size(9 * d, 3.5f * d), CornerRadius(1.5f * d))
-        // the roof (#FFE27A has no token: the yellow lightened over white)
-        drawRoundRect(C.sign.white.copy(alpha = 0.35f), Offset(5 * d, 10 * d), Size(8 * d, 8 * d), CornerRadius(2 * d))
+        drawRoundRect(C.camper.orange, Offset(1.75f * d, 1f * d), Size(14.5f * d, 30f * d), CornerRadius(5 * d))
+        drawRoundRect(C.camper.border, Offset(1.75f * d, 1f * d), Size(14.5f * d, 30f * d), CornerRadius(5 * d), style = Stroke(1.5f * d))
+        drawRoundRect(C.camper.border.copy(alpha = 0.85f), Offset(4.5f * d, 4.5f * d), Size(9 * d, 3.5f * d), CornerRadius(1.5f * d))
+        // the roof: the van's white paper over the orange
+        drawRoundRect(C.camper.onOrange.copy(alpha = 0.35f), Offset(5 * d, 10 * d), Size(8 * d, 8 * d), CornerRadius(2 * d))
         drawPath(
             Path().apply { moveTo(4f * d, 26f * d); lineTo(14f * d, 26f * d); lineTo(12.5f * d, 21.5f * d); lineTo(5.5f * d, 21.5f * d); close() },
-            C.text.onLight.copy(alpha = 0.85f),
+            C.camper.border.copy(alpha = 0.85f),
         )
-        drawRoundRect(C.text.primary, Offset(3.5f * d, 28f * d), Size(3 * d, 1.6f * d), CornerRadius(0.8f * d))
-        drawRoundRect(C.text.primary, Offset(11.5f * d, 28f * d), Size(3 * d, 1.6f * d), CornerRadius(0.8f * d))
+        drawRoundRect(C.camper.amber, Offset(3.5f * d, 28f * d), Size(3 * d, 1.6f * d), CornerRadius(0.8f * d))
+        drawRoundRect(C.camper.amber, Offset(11.5f * d, 28f * d), Size(3 * d, 1.6f * d), CornerRadius(0.8f * d))
     }
 }
 
@@ -455,11 +512,11 @@ internal fun BoxScope.ParkingSheet(s: StopDto, windowH: Dp, onClose: () -> Unit)
                     Modifier.offset(y = (-1).dp).defaultMinSize(minWidth = 64.dp).height(24.dp).clip(RoundedCornerShape(3.dp)).background(C.sign.white)
                         .border(DesignTokens.stroke.w2, C.sign.black, RoundedCornerShape(3.dp)).padding(horizontal = 6.dp),
                     contentAlignment = Alignment.Center,
-                ) { Txt(parkingInline(p), T.paper.total, if (known) C.text.onLight else C.text.onLightMuted, maxLines = 1) }
+                ) { Txt(parkingInline(p), T.paper.total, if (known) C.camper.ink else C.camper.inkSoft, maxLines = 1) }
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Txt(stringResource(R.string.road_parking_sheet_label), T.label.md, C.text.muted, maxLines = 1)
-                Txt(detail, T.body.md, C.navi.text, Modifier.testTag("parking.detail"))
+                Txt(stringResource(R.string.road_parking_sheet_label), CraftType.overline, C.camper.blue, maxLines = 1)
+                Txt(detail, T.body.md, C.camper.ink, Modifier.testTag("parking.detail"))
             }
         }
         val rows = buildList {
@@ -472,27 +529,29 @@ internal fun BoxScope.ParkingSheet(s: StopDto, windowH: Dp, onClose: () -> Unit)
             p?.sundayRu?.let { add(stringResource(R.string.road_parking_row_sunday) to it) }
             p?.whereRu?.let { add(stringResource(R.string.road_parking_row_where) to it) }
         }
-        Column(
-            Modifier.padding(top = 14.dp).fillMaxWidth().clip(RoundedCornerShape(DesignTokens.radius.r12)).background(C.dash.face)
-                .border(DesignTokens.stroke.w1, C.dash.controlAlt, RoundedCornerShape(DesignTokens.radius.r12)),
-        ) {
+        // fork camper-ui: the facts on a white-paper field (craftField) with dashed rules between the rows
+        Column(Modifier.padding(top = 14.dp).fillMaxWidth().craftField()) {
             rows.forEachIndexed { i, (k, v) ->
-                if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(C.dash.controlAlt))
+                if (i > 0) DashedDivider(Modifier.padding(horizontal = 14.dp), thickness = 1.5.dp)
                 Row(
                     Modifier.fillMaxWidth().defaultMinSize(minHeight = 44.dp).semantics(mergeDescendants = true) {}.padding(horizontal = 14.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Txt(k, T.body.step, C.text.secondary, maxLines = 1)
+                    Txt(k, T.body.step, C.camper.inkSoft, maxLines = 1)
                     Spacer(Modifier.width(12.dp))
-                    Txt(v, T.body.step.copy(fontWeight = FontWeight.W600), C.text.primary, Modifier.weight(1f), align = TextAlign.End)
+                    Txt(v, T.body.step.copy(fontWeight = FontWeight.W600), C.camper.ink, Modifier.weight(1f), align = TextAlign.End)
                 }
             }
         }
         // S4-QA P1-04: an unknown tariff is not «уже в сумме»
         Txt(
             p?.noteRu ?: stringResource(if (known) R.string.road_parking_note else R.string.road_parking_note_unknown),
-            T.body.smRelaxed, C.text.muted, Modifier.padding(top = 10.dp).testTag("parking.note"),
+            T.body.smRelaxed, C.camper.inkMuted, Modifier.padding(top = 10.dp).testTag("parking.note"),
         )
-        SecondaryButton(stringResource(R.string.road_parking_ok), onClose, Modifier.padding(top = 14.dp).fillMaxWidth().testTag("parking.ok"))
+        // the bottom / end padding keep the hard shadow inside the sheet's scroll clip
+        CraftSecondaryButton(
+            stringResource(R.string.road_parking_ok), onClose,
+            Modifier.padding(top = 14.dp, bottom = CraftDefaults.ShadowY, end = CraftDefaults.ShadowX).fillMaxWidth().testTag("parking.ok"),
+        )
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,12 +32,20 @@ import androidx.compose.ui.unit.dp
 import app.verst.core.model.dto.HotelOptionDto
 import app.verst.core.model.dto.PoiDetailsDto
 import app.verst.core.ui.R
+import app.verst.core.ui.components.CraftButton
+import app.verst.core.ui.components.CraftDefaults
+import app.verst.core.ui.components.CraftSecondaryButton
+import app.verst.core.ui.components.CraftType
+import app.verst.core.ui.components.GlyphIcon
+import app.verst.core.ui.components.Icon
 import app.verst.core.ui.components.Txt
+import app.verst.core.ui.components.craftField
+import app.verst.core.ui.components.craftSurface
+import app.verst.core.ui.components.servicePictogram
+import app.verst.core.ui.components.touristPictogram
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
-import app.verst.feature.common.scaled
-import app.verst.feature.city.BarSign
-import app.verst.core.ui.components.RoadSign
+import app.verst.feature.city.walkSignGlyph
 import app.verst.feature.exit.tagLine
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
@@ -87,7 +96,12 @@ interface CardActions {
     fun report() = Unit
 }
 
-/** 5.9 card in a `BottomSheet` (components §19). */
+/**
+ * 5.9 card in a `BottomSheet` (components §19); camper fork (mockup screen 12 «Карточка места»): the paper sheet
+ * with the craft tile of the place, the kind line as the orange overline above the title, ✕; the photo in a brown
+ * frame, the address, «Почему здесь», the description with its source, the fact badges, the actions as craft
+ * buttons, «Сообщить об ошибке».
+ */
 @Composable
 fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
     val d = ui.details
@@ -95,22 +109,25 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
     // CEO 29.10: the address under the kind line, and in the card's TalkBack title
     val addressLine = ui.address?.let { cardAddressLine(it, d?.townName ?: ui.town) }
     val pane = if (addressLine != null) stringResource(R.string.cd_card_with_address, name, addressLine) else stringResource(R.string.cd_card, name)
-    BottomSheet(name, a::close, "card", windowH, pane = pane, leading = { CardMiniSign(ui) }) {
-        // 5.9 §9: the KindTag + the kind/place line; «Почему здесь: …» when the engine says why
+    val kind = kindLine(ui)
+    BottomSheet(
+        name, a::close, "card", windowH, pane = pane, leading = { CardMiniSign(ui) },
+        // 5.9 §9: the kind/place line as the orange overline («МУЗЕЙ · КОЛОМНА»)
+        overline = { Txt(kind.uppercase(), CraftType.overline, C.camper.orangeText, Modifier.testTag("card.kind"), maxLines = 1) },
+    ) {
+        // the kind word of the category illustration (the engine's label for sights)
         val tagWord = if (ui.kind == "sight") d?.poiKindRu?.uppercase() ?: app.verst.feature.common.kindWord(d?.poiKind) else null
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (tagWord != null) app.verst.feature.common.KindTag(tagWord)
-            Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("card.kind"), maxLines = 1)
-        }
         if (addressLine != null) {
             AddressLine(addressLine)
         } else if (ui.addressLoading) {
-            Txt(stringResource(R.string.card_address_loading), T.body.sm, C.text.muted, Modifier.padding(top = 2.dp).testTag("card.address.loading"), maxLines = 1)
+            Txt(stringResource(R.string.card_address_loading), CraftType.caption, C.camper.inkMuted, Modifier.padding(top = 2.dp).testTag("card.address.loading"), maxLines = 1)
         }
         d?.whyRu?.takeIf { it.isNotBlank() }?.let {
             // «Почему здесь: объект культурного наследия · …» (the engine starts each part with a capital)
             val why = it.split(" · ").joinToString(" · ") { p -> if (p.length > 1 && p[1].isLowerCase()) p.replaceFirstChar { c -> c.lowercase() } else p }
-            Txt(stringResource(R.string.card_why, why), T.body.sm, C.text.secondary, Modifier.padding(top = 4.dp).testTag("card.why"))
+            Box(Modifier.padding(top = 6.dp).fillMaxWidth().craftField(C.camper.header).padding(horizontal = 10.dp, vertical = 8.dp)) {
+                Txt(stringResource(R.string.card_why, why), CraftType.caption, C.camper.ink, Modifier.testTag("card.why"))
+            }
         }
         Spacer(Modifier.height(12.dp))
         val img = d?.image
@@ -128,8 +145,8 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
         }
         val town = d?.townName ?: ""
         var photoShown by remember(img?.card) { mutableStateOf(false) }
-        val descText = d?.textRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kindLine(ui), d?.townName) }
-        val illWord = if (!area && ui.kind != "bar") (tagWord ?: kindLine(ui).substringBefore(" · ").uppercase()) else null
+        val descText = d?.textRu?.takeUnless { d.isFictional }?.let { cleanDescription(it, kind, d?.townName) }
+        val illWord = if (!area && ui.kind != "bar") (tagWord ?: kind.substringBefore(" · ").uppercase()) else null
         PhotoFrame(
             url = if (ui.loading) null else img?.card,
             placeholder = if (area) Placeholder.CITY else placeholderFor(d?.poiKind, ui.kind),
@@ -147,18 +164,18 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             // 5.9 §3: «на фото район, а не она» only while the area photo is on screen
             Txt(
                 stringResource(if (photoShown) R.string.card_hotel_fictional else R.string.card_hotel_fictional_nophoto),
-                T.body.sm, C.text.secondary, Modifier.padding(top = 6.dp).testTag("card.fictional"),
+                CraftType.caption, C.camper.inkSoft, Modifier.padding(top = 6.dp).testTag("card.fictional"),
             )
         }
         // the fictional status is said once (S3-QA P1-05): no engine «Демо: вымышленная гостиница» line
         val desc = descText
         if (desc.isNullOrBlank() && ui.offline && ui.kind == "sight" && d?.wikidataId != null && d.textSource != "osm") {
             // ADR-0016 OR-4 / CEO S4: an online-only value is missing offline → the quiet line in its place
-            Txt(stringResource(R.string.online_later), T.body.md, C.text.muted, Modifier.padding(top = 12.dp).testTag("card.later"))
+            Txt(stringResource(R.string.online_later), CraftType.body, C.camper.inkMuted, Modifier.padding(top = 12.dp).testTag("card.later"))
         }
         if (!desc.isNullOrBlank()) {
             var more by remember(desc) { mutableStateOf(false) }
-            Txt(desc, T.body.md, C.text.note, Modifier.padding(top = 12.dp).clickable { more = !more }, maxLines = if (more) Int.MAX_VALUE else 6)
+            Txt(desc, CraftType.body, C.camper.ink, Modifier.padding(top = 12.dp).clickable { more = !more }, maxLines = if (more) Int.MAX_VALUE else 6)
             // the source line under the text (a link to the page when the engine has it)
             val src = when (d?.textSource) {
                 "wikipedia" -> stringResource(R.string.card_desc_wikipedia)
@@ -171,8 +188,9 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             val page = d?.extractSource?.url
             if (src != null) {
                 Txt(
-                    src, T.caption.md, C.text.muted,
-                    Modifier.padding(top = 4.dp).then(if (page != null) Modifier.clickable(role = Role.Button) { a.openPage(page) } else Modifier)
+                    src, T.caption.md, if (page != null) C.camper.orangeText else C.camper.inkMuted,
+                    Modifier.padding(top = 4.dp)
+                        .then(if (page != null) Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clickable(role = Role.Button) { a.openPage(page) } else Modifier)
                         .testTag("card.desc.source"),
                 )
             }
@@ -181,7 +199,7 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             val facts = facts(ui)
             if (facts.isNotEmpty()) {
                 Column(Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    facts.forEach { Txt(it, T.body.sm, C.text.secondary) }
+                    facts.forEach { Txt(it, CraftType.caption, C.camper.inkSoft) }
                 }
             }
         } else {
@@ -195,7 +213,16 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
         }
         if (action != null) {
             Spacer(Modifier.height(16.dp))
-            SecondaryButton(action.first, "card.action", action.second)
+            if (ui.kind == "hotel" && !ui.walkStop) {
+                // choosing the hotel is the card's purpose: the orange craft button
+                CraftButton(action.first, action.second, Modifier.fillMaxWidth().testTag("card.action"))
+            } else {
+                // mockup «Заменить» | «В маршрут»: the change as the paper button, «Готово» (the place stays) orange
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    CraftSecondaryButton(action.first, action.second, Modifier.weight(1.5f).testTag("card.action"))
+                    CraftButton(stringResource(R.string.settings_done), a::close, Modifier.weight(1f).testTag("card.done"))
+                }
+            }
         }
         // C10: text button «Сообщить об ошибке» (hug × 44) → D-7; not on hotels (the hotel is fictional)
         if (ui.kind != "hotel") {
@@ -203,13 +230,13 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
             Box(
                 Modifier.height(44.dp).clickable(role = Role.Button, onClick = a::report).testTag("card.report"),
                 contentAlignment = Alignment.CenterStart,
-            ) { Txt(stringResource(R.string.card_report), T.body.smStrong, C.text.muted, maxLines = 1) }
+            ) { Txt(stringResource(R.string.card_report), T.body.smStrong, C.camper.orangeText, maxLines = 1) }
         }
         // S4-QA P1-05 (ODbL): any place whose data comes from OSM says so, at every card level — unless the source
         // line under the text already did
         val osmShown = !desc.isNullOrBlank() && d?.textSource == "osm"
         if (osmData(ui) && !osmShown) {
-            Txt(d?.placeAttributionRu ?: stringResource(R.string.card_osm), T.caption.md, C.text.muted, Modifier.padding(top = 8.dp).testTag("card.osm"))
+            Txt(d?.placeAttributionRu ?: stringResource(R.string.card_osm), T.caption.md, C.camper.inkMuted, Modifier.padding(top = 8.dp).testTag("card.osm"))
         }
     }
 }
@@ -230,8 +257,8 @@ private fun AddressLine(text: String) {
         android.widget.Toast.makeText(ctx, copied, android.widget.Toast.LENGTH_SHORT).show()
     }
     Txt(
-        text, T.body.sm, C.text.secondary,
-        Modifier.padding(top = 2.dp).fillMaxWidth().defaultMinSize(minHeight = 24.dp)
+        text, CraftType.caption, C.camper.inkSoft,
+        Modifier.padding(top = 2.dp).fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.touchMin)
             .combinedClickable(onClickLabel = copyLabel, onLongClickLabel = copyLabel, onLongClick = copy, onClick = copy)
             .testTag("card.address"),
         maxLines = 2,
@@ -239,8 +266,9 @@ private fun AddressLine(text: String) {
 }
 
 /**
- * 5.9 §9 facts as chips (min-h 28, radius 14): hours (green open / red closed), ticket, dogs, parking (blue tint);
- * one open-data line with the dotted ring when any fact is open data. «не проверено» is never shown.
+ * 5.9 §9 facts as craft badges (min-h 28, radius 10, 1.5 dp brown border): hours (green open / red closed), ticket,
+ * dogs, parking (blue tint); one open-data line with the dotted ring when any fact is open data. «не проверено» is
+ * never shown.
  */
 @Composable
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
@@ -251,31 +279,31 @@ private fun FactChips(ui: CardUi) {
     if (h != null) {
         when {
             // ADR-0019 E-1: unknown hours are said, never left out as if the place were open
-            !h.known -> chips += Triple(stringResource(R.string.card_hours_unknown), C.text.secondary, C.dash.control)
+            !h.known -> chips += Triple(stringResource(R.string.card_hours_unknown), C.camper.ink, C.camper.field)
             h.allDay -> chips += Triple(stringResource(R.string.hours_24), C.hours.open, C.hours.openFill)
             h.openNow == true && h.todayRu != null -> chips += Triple(stringResource(R.string.hours_today_open, h.todayRu ?: ""), C.hours.open, C.hours.openFill)
             h.openNow == false -> chips += Triple(stringResource(R.string.hours_closed), C.hours.closed, C.hours.closedFill)
-            !h.textRu.isNullOrBlank() -> hoursRu(h.textRu!!)?.let { chips += Triple(it.replace("{24}", stringResource(R.string.hours_24)).replace("{daily}", stringResource(R.string.card_hours_daily)), C.text.secondary, C.dash.control) }
+            !h.textRu.isNullOrBlank() -> hoursRu(h.textRu!!)?.let { chips += Triple(it.replace("{24}", stringResource(R.string.hours_24)).replace("{daily}", stringResource(R.string.card_hours_daily)), C.camper.ink, C.camper.field) }
         }
     }
     val t = d.ticket
     if (t != null && !t.known) {
         // ADR-0019 E-2: an unknown price is not «вход свободный»
-        chips += Triple(stringResource(R.string.card_ticket_unknown), C.text.secondary, C.dash.control)
+        chips += Triple(stringResource(R.string.card_ticket_unknown), C.camper.ink, C.camper.field)
     } else if (t != null && (t.adultRub ?: 0) > 0) {
         var line = stringResource(R.string.card_ticket, app.verst.settings.AppPrefs.money(t.adultRub ?: 0), app.verst.settings.AppPrefs.money(t.childRub ?: 0))
         if (t.estimate) line += stringResource(R.string.common_join_dot) + stringResource(R.string.card_price_estimate)
-        chips += Triple(line, C.text.secondary, C.dash.control)
+        chips += Triple(line, C.camper.ink, C.camper.field)
     } else if (t != null && ui.kind == "sight") {
-        chips += Triple(stringResource(R.string.card_ticket_free), C.text.secondary, C.dash.control)
+        chips += Triple(stringResource(R.string.card_ticket_free), C.camper.ink, C.camper.field)
     }
-    d.dogsAllowed?.let { chips += Triple(stringResource(if (it) R.string.card_dogs_yes else R.string.card_dogs_no), C.text.secondary, C.dash.control) }
+    d.dogsAllowed?.let { chips += Triple(stringResource(if (it) R.string.card_dogs_yes else R.string.card_dogs_no), C.camper.ink, C.camper.field) }
     val p = d.parking
     if (p != null && p.known) {
         val text = if (p.free) stringResource(R.string.card_parking_free) else stringResource(R.string.card_parking_paid, app.verst.settings.AppPrefs.money(p.rubPerHour ?: 0))
-        chips += Triple(text, C.navi.text, C.sign.blue.copy(alpha = 0.25f))
+        chips += Triple(text, C.camper.blue, C.camper.blue.copy(alpha = 0.12f))
     }
-    if (d.heritage) chips += Triple(stringResource(R.string.card_heritage), C.text.secondary, C.dash.control)
+    if (d.heritage) chips += Triple(stringResource(R.string.card_heritage), C.camper.ink, C.camper.field)
     if (chips.isNotEmpty()) {
         androidx.compose.foundation.layout.FlowRow(
             Modifier.padding(top = 10.dp).fillMaxWidth().testTag("card.facts"),
@@ -283,8 +311,10 @@ private fun FactChips(ui: CardUi) {
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             chips.forEach { (text, fg, bg) ->
+                val shape = RoundedCornerShape(CraftDefaults.BadgeRadius)
                 Box(
-                    Modifier.defaultMinSize(minHeight = 28.dp).clip(RoundedCornerShape(14.dp)).background(bg).padding(horizontal = 10.dp, vertical = 4.dp),
+                    Modifier.defaultMinSize(minHeight = 28.dp).clip(shape).background(C.camper.field).background(bg)
+                        .border(CraftDefaults.BadgeBorder, C.camper.border, shape).padding(horizontal = 10.dp, vertical = 4.dp),
                     contentAlignment = Alignment.Center,
                 ) { Txt(text, T.body.smStrong, fg) }
             }
@@ -293,26 +323,30 @@ private fun FactChips(ui: CardUi) {
     if (!d.verified || (h?.verified == false && h?.known != false)) { // unknown hours have their own chip
         Row(Modifier.padding(top = 8.dp).testTag("card.opendata"), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             app.verst.feature.common.OpenDataRing()
-            Txt(stringResource(R.string.card_open_data), T.body.sm, C.text.muted)
+            Txt(stringResource(R.string.card_open_data), CraftType.caption, C.camper.inkMuted)
         }
     }
 }
 
-/** 5.9 C2: the row's RoadSign at 0.7 (tourist 39 × 39, hotel service 35 × 43); bars get the §21 bar sign. */
+/**
+ * 5.9 C2, camper fork: the place's craft icon tile in the title row — the tourist pictogram of a sight, the service
+ * one of a hotel, the bar / food glyph of a walk's bar or café (the §21 bar-sign pictograms).
+ */
 @Composable
 private fun CardMiniSign(ui: CardUi) {
-    if (ui.kind == "bar" || ui.kind == "food") BarSign(ui.tags.firstOrNull() ?: ui.kind)
-    else Box(Modifier.scaled(0.7f)) { RoadSign(ui.sign, ui.name, app.verst.feature.common.signTags(ui.details?.poiKind, ui.tags)) }
-}
-
-@Composable
-private fun SecondaryButton(text: String, tag: String, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(DesignTokens.radius.r12)
     Box(
-        Modifier.fillMaxWidth().height(56.dp).clip(shape).border(DesignTokens.stroke.w1, C.dash.outline, shape)
-            .background(C.dash.control).clickable(role = Role.Button, onClick = onClick).testTag(tag),
+        Modifier.size(36.dp).craftSurface(
+            C.camper.field, radius = 10.dp, border = CraftDefaults.BorderThin, shadow = C.camper.border,
+            shadowX = CraftDefaults.TileShadow, shadowY = CraftDefaults.TileShadow,
+        ),
         contentAlignment = Alignment.Center,
-    ) { Txt(text, T.button.md, C.text.primary, maxLines = 1) }
+    ) {
+        when {
+            ui.kind == "bar" || ui.kind == "food" -> GlyphIcon(walkSignGlyph(ui.tags.firstOrNull() ?: ui.kind), C.camper.border, 20.dp)
+            ui.sign == "tourist" -> Icon(touristPictogram(app.verst.feature.common.signTags(ui.details?.poiKind, ui.tags)), C.camper.border, 22.dp)
+            else -> Icon(servicePictogram(ui.sign), C.camper.border, 22.dp)
+        }
+    }
 }
 
 /**
