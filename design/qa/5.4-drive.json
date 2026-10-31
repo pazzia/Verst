@@ -1,0 +1,340 @@
+{
+ "screen": "5.4-drive",
+ "notes": "Road edges are measured on the asphalt run each side of the lane (|x| from lane/2 to W/2 − edge, scaled), so the filtered white lines never decide the result. Flying signs and posts move: no colour point is placed on their paths at t1500. D-13 point checks the «Отменить» back link is drawn.",
+ "points": [
+  {
+   "item": "D-01",
+   "state": "t1500",
+   "x": 60,
+   "y": 60,
+   "hex": "#2B2850",
+   "size": "390x844"
+  },
+  {
+   "item": "D-01",
+   "state": "t1500",
+   "x": 60,
+   "y": 150,
+   "hex": "#4E3768",
+   "size": "390x844"
+  },
+  {
+   "item": "D-01",
+   "state": "t1500",
+   "x": 60,
+   "y": 215,
+   "hex": "#8E4A6B",
+   "size": "390x844"
+  },
+  {
+   "item": "D-01",
+   "state": "t1500",
+   "x": 60,
+   "y": 258,
+   "hex": "#D9655A",
+   "size": "390x844"
+  },
+  {
+   "item": "D-01",
+   "state": "t1500",
+   "x": 60,
+   "y": 288,
+   "hex": "#F29A5E",
+   "size": "390x844"
+  },
+  {
+   "item": "D-01",
+   "state": "t1500",
+   "x": 195,
+   "y": 285,
+   "hex": "#FFD99A",
+   "size": "390x844"
+  },
+  {
+   "item": "D-02",
+   "state": "t1500",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 461.29,
+   "seed": 154.65,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    117.03,
+    null
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "D-02",
+   "state": "t1500",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 461.29,
+   "seed": 235.35,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    null,
+    272.97
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "D-02",
+   "state": "t1500",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 392.58,
+   "seed": 167.62,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    142.1,
+    null
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "D-02",
+   "state": "t1500",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 392.58,
+   "seed": 222.38,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    null,
+    247.9
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "D-05",
+   "state": "t1500",
+   "x": 195,
+   "y": 539,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "D-05",
+   "state": "t1500",
+   "x": 21,
+   "y": 650,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "D-05",
+   "state": "t1500",
+   "x": 30,
+   "y": 735,
+   "hex": "#0B1218",
+   "size": "390x844"
+  },
+  {
+   "item": "D-06",
+   "state": "t1500",
+   "kind": "text",
+   "region": [
+    38,
+    580,
+    150,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-07",
+   "state": "t1500",
+   "x": 345,
+   "y": 604,
+   "hex": "#1E2E3A",
+   "size": "390x844"
+  },
+  {
+   "item": "D-07",
+   "state": "t1500",
+   "x": 45,
+   "y": 604,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "D-08",
+   "state": "t1500",
+   "kind": "text",
+   "region": [
+    56,
+    616,
+    200,
+    42
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-09",
+   "state": "done",
+   "x": 26,
+   "y": 770,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "D-09",
+   "state": "done",
+   "kind": "text",
+   "region": [
+    36,
+    778,
+    250,
+    22
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-10",
+   "state": "slow",
+   "x": 26,
+   "y": 789,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "D-10",
+   "state": "slow",
+   "x": 205,
+   "y": 789,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "D-10",
+   "state": "slow",
+   "kind": "text",
+   "region": [
+    56,
+    616,
+    250,
+    90
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-11",
+   "state": "error-internal",
+   "kind": "text",
+   "region": [
+    38,
+    580,
+    150,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-11",
+   "state": "error-internal",
+   "x": 26,
+   "y": 789,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "D-11",
+   "state": "error-unreachable",
+   "kind": "text",
+   "region": [
+    38,
+    600,
+    300,
+    60
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-11",
+   "state": "error-too-short",
+   "kind": "text",
+   "region": [
+    38,
+    600,
+    300,
+    60
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-11",
+   "state": "error-invalid",
+   "kind": "text",
+   "region": [
+    38,
+    600,
+    300,
+    60
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-12",
+   "state": "offline",
+   "kind": "text",
+   "region": [
+    38,
+    580,
+    150,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-12",
+   "state": "offline",
+   "x": 26,
+   "y": 789,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "D-08",
+   "state": "no-lodging",
+   "kind": "text",
+   "region": [
+    56,
+    616,
+    250,
+    90
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "D-13",
+   "state": "t1500",
+   "kind": "text",
+   "region": [
+    16,
+    18,
+    90,
+    32
+   ],
+   "size": "390x844"
+  }
+ ],
+ "justified": {
+  "D-03": "motion: checked on the clock-sequence screenshots <state>-t<ms> (DES-11x step 5), not in a static frame",
+  "D-04": "motion: checked on the clock-sequence screenshots <state>-t<ms> (DES-11x step 5), not in a static frame (flying signs at t1500 / t4000)",
+  "D-13": "cancellation: network/engine log in the instrumented journey; the back link text is sampled",
+  "D-14": "semantics/touch: XScreenSemanticsTest (build/tests/failures.txt), not visual"
+ }
+}

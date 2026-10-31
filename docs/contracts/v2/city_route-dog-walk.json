@@ -1,0 +1,178 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-10",
+   "input_json": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "preset": "dog_walk",
+    "crew": {
+     "adults": 2,
+     "dog": true
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-10",
+   "titleRu": "Казань: прогулка с собакой",
+   "townId": "t_kazan",
+   "townName": "Казань",
+   "townPrep": "Казани",
+   "preset": "dog_walk",
+   "startAt": "2026-10-23T09:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T10:38",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 2.1,
+   "walkMin": 29,
+   "durationMin": 99,
+   "requestedDurationMin": 120,
+   "crewNotesRu": [
+    "С собакой: вода, пакеты и поводок; маршрут без закрытых мест."
+   ],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "finish": {
+    "lat": 55.7963,
+    "lon": 49.1088,
+    "label": "Казань, Кремлёвская ул."
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "osm_w702946071",
+     "kind": "park",
+     "nameRu": "Сквер имени Асгата Галимзянова",
+     "lat": 55.79867,
+     "lon": 49.10286,
+     "arriveAt": "2026-10-23T09:07",
+     "departAt": "2026-10-23T09:42",
+     "dwellMin": 35,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 8,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w02",
+     "poiId": "osm_w129285240",
+     "kind": "park",
+     "nameRu": "Дворцовая площадь",
+     "lat": 55.80133,
+     "lon": 49.11147,
+     "arriveAt": "2026-10-23T09:53",
+     "departAt": "2026-10-23T10:28",
+     "dwellMin": 35,
+     "walkKmFromPrev": 0.8,
+     "walkMinFromPrev": 11,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    }
+   ],
+   "cost": {
+    "totalRub": 0,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     55.7963,
+     49.1088
+    ],
+    [
+     55.79867,
+     49.10286
+    ],
+    [
+     55.80133,
+     49.11147
+    ],
+    [
+     55.7963,
+     49.1088
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 55.7963,
+     "lon": 49.1088,
+     "label": "Казань, Кремлёвская ул."
+    },
+    "townId": null,
+    "preset": "dog_walk",
+    "durationMin": 120,
+    "interests": [],
+    "pace": "normal",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T09:00",
+    "crew": {
+     "adults": 2,
+     "children": 0,
+     "dog": true
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   },
+   "requestKey": "3526300f881a981e"
+  },
+  "ms": 0
+ }
+}

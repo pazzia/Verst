@@ -1,0 +1,470 @@
+{
+  "_about": [
+    "DRAFT toll tariffs, vehicle category 1 (passenger car / motorcycle, height up to 2 m), researched 2026-10-27 for the Verst trip planner.",
+    "METHOD CAVEAT: from this sandbox every Russian site (avtodor-tr.ru, russianhighways.ru, m11-neva.ru, mos-spb.ru, ckad operator, news sites) and also web.archive.org / wikipedia were UNREACHABLE (DNS failure / proxy 403). No page was fetched. All numbers come from web-search result snippets/summaries; the source URL given is the page the snippet came from. Nothing has been checked against the official tariff PDF. Re-verify on avtodor-tr.ru/road/tariffs/ (Avtodor), m11-neva.ru (M-11 km 15-58), mos-spb.ru/tariffs (M-11 km 543-684), m-road.ru (Northern Odintsovo bypass) before shipping.",
+    "Main 2026 tariff event: Avtodor (Автодор - Платные дороги) annual indexation effective 2026-03-02 00:00 (order No. 56 of 2026-02-27 per RIA for CKAD). Increase 3.5-15% depending on section, average ~12.7% for cars per Kommersant (https://www.kommersant.ru/doc/8478445); some socially significant sections unchanged. In January 2026 Avtodor had denied an indexation (https://www.kommersant.ru/doc/8378259), so pages from Jan-Feb 2026 quote PRE-indexation prices.",
+    "M-11 km 15-58 is a separate concession (ООО «Северо-Западная концессионная компания», brand «М11 Подмосковье», m11-neva.ru): own indexation from 2026-01-12 (+3-9 %, +10..100 RUB/trip for cars) and a seasonal peak (Fri-Sun) surcharge valid 2026-04-24 .. 2026-11-01 (https://chehov-vid.ru/news/society/46872/sezonnoe-povyshenie-tsen-na-m-11/). After 2026-11-01 weekend prices on km 15-58 are expected to fall back; new values not found.",
+    "Seasonal 'winter tariffs from 1 November' existed on the Avtodor network in 2020 (https://www.interfax.ru/russia/734965); no evidence found that a 2026 winter tariff switch is planned.",
+    "Day-of-week rule (Avtodor, cat. 1): weekday tariff = Monday-Thursday; weekend tariff = Friday, Saturday, Sunday, public non-working holidays and pre-holiday days (https://avtodor-tr.ru/road/tariffs/ snippet + older Avtodor press release).",
+    "Transponder (T-Pass, Автодор-Платные дороги): on Avtodor closed/open systems the transponder price is often equal to cash for cat. 1 and the saving comes from the loyalty programme (up to ~15 %) and subscriptions (абонементы, up to 45 %). Where only a 'transponder discount' percentage is known, transponderRub is null. Snippets claiming flat 10-50 % transponder discounts are from unofficial calculators and were not used.",
+    "Free-flow (M-12, CKAD, also A-289): no barriers; plate recognised by cameras; pay by transponder or by plate (Avtodor app/site) within 5 calendar days after the trip. Non-payment -> Rostransnadzor ruling under КоАП 12.21.4 part 1: 1 500 RUB for a car (5 000 RUB truck/bus); fine is cancelled if the trip is paid within 20 days of the ruling (sources: https://bip.ru/info/shtraf-za-ezdu-po-platnym-dorogam-bez-oplaty , https://rostransnadzor.gov.ru/rostransnadzor/podrazdeleniya/mtucfo/deyatelnost-podrazdeleniya/2706 , https://parkomatica.ru/blog/tpost/oplata-m12).",
+    "km values are the published section boundaries; lengthKm = kmTo - kmFrom unless stated. Sections with derived values say so in 'note'. null = unknown; never fill nulls with invented numbers in the engine - use perKmApproxRub fallback instead.",
+    "Confidence: high = official operator page or >=2 independent consistent 2026 sources incl. operator; medium = 2026 post-indexation figure from >=2 media sources or one media source that cites Avtodor; low = single unofficial snippet, undated, or possibly pre-indexation."
+  ],
+  "researchedOn": "2026-10-27",
+  "currency": "RUB",
+  "vehicleClass": 1,
+  "weekdayRule": "weekday = Mon-Thu; weekend = Fri-Sun + public holidays + pre-holiday days (Avtodor cat. 1)",
+  "roads": [
+    {
+      "ref": "М-11",
+      "name": "«Нева» Москва — Санкт-Петербург",
+      "operator": "Госкомпания «Автодор» / ООО «Автодор - Платные дороги» (km 58-543); ООО «Северо-Западная концессионная компания» (km 15-58, m11-neva.ru); ООО «Магистраль двух столиц» (km 543-684, mos-spb.ru)",
+      "freeFlow": false,
+      "paymentNote": "Closed barrier system with ПВП; cash, bank card, transponder (T-Pass and interoperable). On closed system payment is taken at exit ПВП by distance actually driven; a maximum tariff applies if entry was not registered.",
+      "sections": [
+        {
+          "name": "Москва (МКАД) — Солнечногорск (Пешки)",
+          "kmFrom": 15, "kmTo": 58, "lengthKm": 43,
+          "cashRub": 950,
+          "cashRubWeekend": 1295,
+          "transponderRub": null,
+          "nightCashRub": 740,
+          "nightTransponderRub": 570,
+          "timeRule": "Time-of-day, day-of-week and direction dependent (concession tariff grid). Full section: weekday from 950, weekend (Fri-Sun peak) up to 1 295; night 01:00-06:00: 740 cash / 570 transponder. Seasonal peak (Fri-Sun) surcharge 2026-04-24..2026-11-01. Partial trips: Moscow-Sheremetyevo-2 ~470, -Sheremetyevo-1 ~645, -Zelenograd 575 weekday / 775 weekend (unclear if cash or transponder).",
+          "effectiveFrom": "2026-01-12",
+          "source": "https://msk1.ru/text/transport/2026/01/11/76210509/ ; https://m11-podmoskovye.ru/ ; https://m11-neva.ru/blog/indeksatsiya-tarifov-na-proezd-s-12-yanvarya-2026/",
+          "confidence": "low",
+          "note": "Not clear whether 950/1295 are cash or transponder; the snippet values may predate the seasonal surcharge. Concession transponder subscriptions kept 2025 prices."
+        },
+        {
+          "name": "Пешки — Клин (Ямуга)",
+          "kmFrom": 58, "kmTo": 97, "lengthKm": 39,
+          "cashRub": 240,
+          "cashRubWeekend": 300,
+          "transponderRub": null,
+          "timeRule": "weekday Mon-Thu / weekend Fri-Sun",
+          "effectiveFrom": null,
+          "source": "https://shtrafy-gibdd.ru/articles/stoimost-proezda-ot-moskvy-do-sankt-peterburga-po-platnoy-doroge",
+          "confidence": "low",
+          "note": "Article dated Jan 2026 -> probably PRE 2026-03-02 indexation. Avtodor tariff table snippet for 'д. Пешки – д. Ямуга' shows values 280/350/310/360 with unknown column mapping (https://avtodor-tr.ru/road/tariffs/) - possibly the current cat.1 values."
+        },
+        {
+          "name": "Клин (Ямуга) — Тверь",
+          "kmFrom": 97, "kmTo": 149, "lengthKm": 52,
+          "cashRub": null,
+          "transponderRub": null,
+          "timeRule": "weekday/weekend",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://110km.ru/art/skolko-stoit-proezd-po-platnym-dorogam-v-rossii-v-2026-godu-188106.html",
+          "confidence": "low",
+          "note": "No direct figure. Combined Пешки — Тверь (km 58-149, 91 km) = 610 weekday / 750 weekend per 110km.ru (2026). Derived 97-149 ≈ 610-240 = 370 / 750-300 = 450, but the 58-97 figure may be pre-indexation, so the derivation is unreliable."
+        },
+        {
+          "name": "Пешки — Тверь (combined, as published by media)",
+          "kmFrom": 58, "kmTo": 149, "lengthKm": 91,
+          "cashRub": 610,
+          "cashRubWeekend": 750,
+          "transponderRub": null,
+          "timeRule": "weekday Mon-Thu / weekend Fri-Sun",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://110km.ru/art/skolko-stoit-proezd-po-platnym-dorogam-v-rossii-v-2026-godu-188106.html",
+          "confidence": "low",
+          "note": "Aggregate trip price, overlaps the two rows above; use for routes Moscow->Tver instead of summing sections."
+        },
+        {
+          "name": "Тверь — Торжок",
+          "kmFrom": 149, "kmTo": 208, "lengthKm": 59,
+          "cashRub": null, "transponderRub": null,
+          "timeRule": null, "effectiveFrom": "2026-03-02",
+          "source": "https://avtodor-tr.ru/road/tariffs/",
+          "confidence": "low",
+          "note": "No 2026 figure found. Use perKmApproxRub."
+        },
+        {
+          "name": "Торжок — Вышний Волочёк",
+          "kmFrom": 208, "kmTo": 258, "lengthKm": 50,
+          "cashRub": null, "transponderRub": null,
+          "timeRule": null, "effectiveFrom": "2026-03-02",
+          "source": "https://avtodor-tr.ru/road/tariffs/",
+          "confidence": "low",
+          "note": "No 2026 figure found. Use perKmApproxRub."
+        },
+        {
+          "name": "Обход Вышнего Волочка",
+          "kmFrom": 258, "kmTo": 334, "lengthKm": 76,
+          "cashRub": null, "transponderRub": null,
+          "timeRule": "historically flat 24h tariff (200 RUB in 2016)",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://avtodor-tr.ru/press-center/news/tarify-na-proezd-po-uchastku-skorostnoy-avtomobilnoy-dorogi-m-11-moskva-sankt-peterburg-km-258-km-33/",
+          "confidence": "low",
+          "note": "Only 2016 tariff (200 RUB) found - obsolete. Use perKmApproxRub."
+        },
+        {
+          "name": "Вышний Волочёк — Великий Новгород (Мясной Бор)",
+          "kmFrom": 334, "kmTo": 543, "lengthKm": 209,
+          "cashRub": null, "transponderRub": null,
+          "timeRule": null, "effectiveFrom": "2026-03-02",
+          "source": "https://avtodor-tr.ru/road/tariffs/",
+          "confidence": "low",
+          "note": "No 2026 figure found. Residual estimate km 149-543 (394 km) ≈ 3900 - 610 - 870 = 2420 RUB weekday (≈6.1 RUB/km) using the full-route total and the low-confidence 543-684 figure."
+        },
+        {
+          "name": "Великий Новгород — Санкт-Петербург (7-й этап)",
+          "kmFrom": 543, "kmTo": 646, "lengthKm": 103,
+          "cashRub": 550, "transponderRub": null,
+          "timeRule": "unknown (night tariff exists on stage 8 historically)",
+          "effectiveFrom": null,
+          "source": "https://mos-spb.ru/tariffs",
+          "confidence": "low",
+          "note": "Operator table snippet, undated, no day/time split. Unofficial calculator platkicalc.ru gives 665 for km 543-648 ('2026')."
+        },
+        {
+          "name": "Санкт-Петербург (8-й этап, до КАД)",
+          "kmFrom": 646, "kmTo": 684, "lengthKm": 38,
+          "cashRub": 320, "transponderRub": null,
+          "timeRule": "day/night tariffs existed historically on this stage",
+          "effectiveFrom": null,
+          "source": "https://mos-spb.ru/tariffs",
+          "confidence": "low",
+          "note": "Operator table snippet, undated. platkicalc.ru gives 285 for km 648-684. Operator table also shows 543-684 combined = 760 (cheaper than 550+320), i.e. through-trip pricing."
+        },
+        {
+          "name": "Пешки — Санкт-Петербург (full Avtodor+МДС part, as published)",
+          "kmFrom": 58, "kmTo": 684, "lengthKm": 626,
+          "cashRub": 3900,
+          "cashRubWeekend": 4200,
+          "transponderRub": null,
+          "timeRule": "weekday Mon-Thu / weekend Fri-Sun+holidays; payment method not stated",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://m11-podmoskovye.ru/ ; https://onlinegibdd.ru/articles/view/m-11-neva/",
+          "confidence": "medium",
+          "note": "Two 2026 sources agree on 3 900 / 4 200. t-j.ru gives 3 550 / 3 800 for km 58-681 (possibly pre-indexation or transponder). Add km 15-58 (950-1295) for a Moscow (MKAD) start."
+        }
+      ],
+      "perKmApproxRub": {
+        "weekday": 6.2,
+        "weekend": 6.7,
+        "km15to58Weekday": 22.1,
+        "how": "km 58-684: 3900/626 = 6.23 (weekday), 4200/626 = 6.71 (weekend). km 15-58 is far pricier: 950/43 = 22.1 weekday day. Engine: use per-km only for the 58-684 part; treat 15-58 as a fixed 950 (weekday) / 1295 (weekend) / 740 (night 01-06) charge.",
+        "confidence": "medium"
+      }
+    },
+    {
+      "ref": "М-12",
+      "name": "«Восток» Москва — Владимир — (Нижний Новгород) — Казань — Екатеринбург",
+      "operator": "Госкомпания «Автодор» / ООО «Автодор - Платные дороги»",
+      "freeFlow": true,
+      "paymentNote": "Free-flow ('Свободный поток'): no barriers; pay by T-Pass transponder or by plate within 5 calendar days; fine 1 500 RUB (КоАП 12.21.4). Price by plate = price by transponder; transponder gives loyalty points. Price depends on day of week and time of day.",
+      "sections": [
+        {
+          "name": "Москва — Владимир", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 1737, "transponderRub": 1737,
+          "timeRule": "published 'from' price, weekday; varies by day/time",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://ufa1.ru/text/transport/2026/05/24/76400584/ ; https://116.ru/text/transport/2026/05/01/76398584/ ; https://parkomatica.ru/blog/tpost/oplata-m12",
+          "confidence": "medium",
+          "note": "'cashRub' here = pay-by-plate (no cash on free-flow)."
+        },
+        {
+          "name": "Москва — Муром", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 2629, "transponderRub": 2629,
+          "timeRule": "weekday 'from' price", "effectiveFrom": "2026-03-02",
+          "source": "https://ufa1.ru/text/transport/2026/05/24/76400584/",
+          "confidence": "medium"
+        },
+        {
+          "name": "Москва — Арзамас", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 3450, "transponderRub": 3450,
+          "timeRule": "weekday 'from' price", "effectiveFrom": "2026-03-02",
+          "source": "https://ufa1.ru/text/transport/2026/05/24/76400584/ ; https://parkomatica.ru/blog/tpost/oplata-m12",
+          "confidence": "medium",
+          "note": "Nizhny Novgorod exits lie between Murom and Arzamas branch; no separate Moscow—Nizhny Novgorod tariff found."
+        },
+        {
+          "name": "Владимир — Арзамас", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 1713, "transponderRub": 1713,
+          "timeRule": "weekday 'from' price", "effectiveFrom": "2026-03-02",
+          "source": "https://ufa1.ru/text/transport/2026/05/24/76400584/",
+          "confidence": "medium"
+        },
+        {
+          "name": "Муром — Арзамас", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 821, "transponderRub": 821,
+          "timeRule": "weekday 'from' price", "effectiveFrom": "2026-03-02",
+          "source": "https://ufa1.ru/text/transport/2026/05/24/76400584/",
+          "confidence": "medium"
+        },
+        {
+          "name": "Арзамас — Казань", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 2397, "transponderRub": 2397,
+          "timeRule": "weekday 'from' price", "effectiveFrom": "2026-03-02",
+          "source": "https://ufa1.ru/text/transport/2026/05/24/76400584/ ; https://parkomatica.ru/blog/tpost/oplata-m12",
+          "confidence": "medium",
+          "note": "Pre-indexation (Jan 2026) value was 2 159."
+        },
+        {
+          "name": "Казань — Шали", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 62, "transponderRub": 62,
+          "timeRule": null, "effectiveFrom": "2026-03-02",
+          "source": "https://ufa1.ru/text/transport/2026/05/24/76400584/",
+          "confidence": "low"
+        },
+        {
+          "name": "Москва — Казань (Шали), full",
+          "kmFrom": null, "kmTo": null, "lengthKm": 810,
+          "cashRub": 5909, "transponderRub": 5909,
+          "timeRule": "weekday 'from' price; depends on day/time",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://ufa1.ru/text/transport/2026/05/24/76400584/ ; https://www.cian.ru/stati-trassa-m-12-337066/",
+          "confidence": "medium",
+          "note": "Internally consistent: 3450 + 2397 + 62 = 5909. CONFLICT: TNV / ntr-24 report Moscow — first Kazan exit (Innopolis) = 5 250 (was 4 825), 4 463 with transponder (-15 %) (https://tnv.ru/news/tatarstan/532384-proezd-po-trasse-m-12-moskva-kazan-podorozhaet-do-5-250-rubley-/ , https://ntr-24.ru/news/society/139978-stoimost-proezda-po-trasse-m12-moskva-kazan-so-2-marta-sostavit-5-250-rublej.html). lengthKm = published Moscow-Kazan length of M-12 (810 km), approximate."
+        }
+      ],
+      "perKmApproxRub": {
+        "weekday": 7.2,
+        "how": "(3450 + 2397) / 810 km = 7.22 RUB/km (Moscow—Kazan sum vs published 810 km length). Using the alternative 5250 figure gives ~6.5. Section km markers not found, so sub-section lengths are null.",
+        "confidence": "low"
+      }
+    },
+    {
+      "ref": "ЦКАД (А-113)",
+      "name": "Центральная кольцевая автомобильная дорога",
+      "operator": "Госкомпания «Автодор» / ООО «Автодор - Платные дороги» (ckad.ru)",
+      "freeFlow": true,
+      "paymentNote": "Free-flow; pay by transponder or by plate within 5 days; fine 1 500 RUB. Per RIA 2026: tariffs set by order No. 56 of 2026-02-27, effective 2026-03-02; price by distance and category; NO time-of-day discounts (older night discounts no longer valid).",
+      "sections": [
+        {
+          "name": "ЦКАД-1 (ПК-1)", "kmFrom": null, "kmTo": null, "lengthKm": 49.5,
+          "cashRub": 436, "transponderRub": null,
+          "timeRule": "flat (no time-of-day differentiation per RIA)",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://t-j.ru/guide/tskad/",
+          "confidence": "low",
+          "note": "lengthKm from memory of the project spec (ПК-1 ≈ 49.5 km), not verified this session. platnayadoroga.ru shows 150 / 100 (transponder) for part km 7-22 - undated."
+        },
+        {
+          "name": "ЦКАД-3 (ПК-3)", "kmFrom": null, "kmTo": null, "lengthKm": 105.3,
+          "cashRub": 941, "transponderRub": null,
+          "timeRule": "flat", "effectiveFrom": "2026-03-02",
+          "source": "https://t-j.ru/guide/tskad/",
+          "confidence": "low",
+          "note": "lengthKm from memory (ПК-3 ≈ 105.3 km), not verified."
+        },
+        {
+          "name": "ЦКАД-4 (ПК-4)", "kmFrom": null, "kmTo": null, "lengthKm": 96.9,
+          "cashRub": 859, "transponderRub": null,
+          "timeRule": "flat", "effectiveFrom": "2026-03-02",
+          "source": "https://t-j.ru/guide/tskad/",
+          "confidence": "low",
+          "note": "lengthKm from memory (ПК-4 ≈ 96.9 km), not verified."
+        },
+        {
+          "name": "ЦКАД-3-5 (связка М-10 — М-11)", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 42, "transponderRub": null,
+          "timeRule": "flat (Mon-Sun)", "effectiveFrom": "2026-03-02",
+          "source": "https://t-j.ru/guide/tskad/",
+          "confidence": "low",
+          "note": "Another source gives 30 (likely 2025)."
+        },
+        {
+          "name": "ЦКАД-5 (ПК-5)", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 0, "transponderRub": 0,
+          "timeRule": null, "effectiveFrom": "2026-03-02",
+          "source": "https://ria.ru/avto/poezdka-po-ckad/",
+          "confidence": "low",
+          "note": "RIA snippet says ЦКАД-5 is free. Verify - could change."
+        },
+        {
+          "name": "Full ring (all toll sections)", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 2278, "transponderRub": null,
+          "timeRule": "flat", "effectiveFrom": "2026-03-02",
+          "source": "https://t-j.ru/guide/tskad/ ; https://onlinegibdd.ru/articles/view/platnye-trassy-na-skolko-vyrosli-tarify-i-shtrafy/",
+          "confidence": "medium",
+          "note": "t-j.ru sections sum exactly to 2 278 (436+941+859+42). onlinegibdd.ru gives 2 381 for the full ring - conflict unresolved."
+        }
+      ],
+      "perKmApproxRub": {
+        "flat": 8.9,
+        "how": "436/49.5 = 8.8; 941/105.3 = 8.9; 859/96.9 = 8.9 -> ~8.9 RUB/km (consistent across sections, which also supports the remembered lengths). Unofficial calculator nyam-nyam.online says 5.5 RUB/km - not used.",
+        "confidence": "low"
+      }
+    },
+    {
+      "ref": "М-4",
+      "name": "«Дон» Москва — Воронеж — Ростов-на-Дону — Краснодар — Новороссийск",
+      "operator": "Госкомпания «Автодор» / ООО «Автодор - Платные дороги»",
+      "freeFlow": false,
+      "paymentNote": "Barrier ПВП (open and closed segments); cash, card, transponder. Some segments (e.g. km 633-741) charge at entry ПВП. Weekday Mon-Thu / weekend Fri-Sun+holidays. Federal cap 6.95 RUB/km; actual < 5 RUB/km per Avtodor statement.",
+      "sections": [
+        {
+          "name": "Москва — Чекаевка (ПВП км 71)", "kmFrom": 21, "kmTo": 93, "lengthKm": 72,
+          "cashRub": 310, "cashRubWeekend": 400, "transponderRub": null,
+          "timeRule": "weekday Mon-Thu / weekend Fri-Sun",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://avtocod.ru/trassa-m-4-don-karta-platnyh-uchastkov-ceny-i-sovety-puteshestvennikam ; https://avtodor-tr.ru/road/tariffs/",
+          "confidence": "medium",
+          "note": "Avtocod table and Avtodor tariff-page snippet both show 310/400. shtrafy-gibdd gives 280/360 (older). Sub-segment km 21-62 = 220/220 (avtocod). Subscriptions available on ПВП 62/71."
+        },
+        {
+          "name": "км 93 — км 211 (as listed by avtocod)", "kmFrom": 93, "kmTo": 211, "lengthKm": 118,
+          "cashRub": 400, "cashRubWeekend": 500, "transponderRub": null,
+          "timeRule": "weekday/weekend", "effectiveFrom": null,
+          "source": "https://avtocod.ru/trassa-m-4-don-karta-platnyh-uchastkov-ceny-i-sovety-puteshestvennikam",
+          "confidence": "low",
+          "note": "Single unofficial snippet; existence/boundaries of this toll section not cross-checked."
+        },
+        {
+          "name": "Обход Богородицка и др. (км 211 — 266)", "kmFrom": 211, "kmTo": 266, "lengthKm": 55,
+          "cashRub": 260, "cashRubWeekend": 320, "transponderRub": null,
+          "timeRule": "weekday/weekend", "effectiveFrom": null,
+          "source": "https://avtocod.ru/trassa-m-4-don-karta-platnyh-uchastkov-ceny-i-sovety-puteshestvennikam",
+          "confidence": "low",
+          "note": "User's list says 211-330; avtocod splits at 266. Remainder 266-330 not found."
+        },
+        {
+          "name": "км 330 — 414 (Липецкая обл.)", "kmFrom": 330, "kmTo": 414, "lengthKm": 84,
+          "cashRub": null, "transponderRub": null, "timeRule": null, "effectiveFrom": "2026-03-02",
+          "source": "https://avtodor-tr.ru/road/tariffs/", "confidence": "low",
+          "note": "Not found; use perKmApproxRub."
+        },
+        {
+          "name": "Обход Задонска и Хлевного (км 401 — 464)", "kmFrom": 401, "kmTo": 464, "lengthKm": 63,
+          "cashRub": 230, "cashRubWeekend": 360, "transponderRub": null,
+          "timeRule": "weekday/weekend", "effectiveFrom": null,
+          "source": "https://avtocod.ru/trassa-m-4-don-karta-platnyh-uchastkov-ceny-i-sovety-puteshestvennikam",
+          "confidence": "low",
+          "note": "Overlaps the 330-414 range in the requested list; boundaries as published by avtocod."
+        },
+        {
+          "name": "Обход Новой Усмани и Рогачёвки (км 517 — 544)", "kmFrom": 517, "kmTo": 544, "lengthKm": 27,
+          "cashRub": null, "transponderRub": null, "timeRule": null, "effectiveFrom": "2026-03-02",
+          "source": "https://avtodor-tr.ru/press-center/news/rezhim-platnosti-vveden-na-uchastke-avtomobilnoy-dorogi-m-4-don-v-obkhod-sela-novaya-usman-i-sela-ro/",
+          "confidence": "low", "note": "Tariff not found."
+        },
+        {
+          "name": "Воронежская обл. total (Новоживотинное — Богучар)", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 2100, "transponderRub": null,
+          "timeRule": "weekday Mon-Thu", "effectiveFrom": null,
+          "source": "https://tv-gubernia.ru/novosti/obwestvo/kak-podorozhal-proezd-po-platnym-uchastkam-trassy-m-4-don-v-voronezhskoj-oblasti/",
+          "confidence": "low",
+          "note": "Aggregate for all Voronezh-region toll sections; may be the Feb-2025 value (article date ambiguous)."
+        },
+        {
+          "name": "км 633 — 715 / 715 — 777", "kmFrom": 633, "kmTo": 777, "lengthKm": 144,
+          "cashRub": null, "transponderRub": null, "timeRule": "km 633-741: paid at entry ПВП", "effectiveFrom": "2026-03-02",
+          "source": "https://avtocod.ru/trassa-m-4-don-karta-platnyh-uchastkov-ceny-i-sovety-puteshestvennikam",
+          "confidence": "low", "note": "Tariffs not found."
+        },
+        {
+          "name": "Дегтево — Каменск-Шахтинский", "kmFrom": null, "kmTo": null, "lengthKm": null,
+          "cashRub": 200, "transponderRub": null, "timeRule": "weekday (weekend unknown)", "effectiveFrom": "2026-03-02",
+          "source": "https://onlinegibdd.ru/articles/view/platnye-trassy-na-skolko-vyrosli-tarify-i-shtrafy/",
+          "confidence": "low", "note": "+~16 % weekday vs 2025."
+        },
+        {
+          "name": "Обход Аксая", "kmFrom": 1024, "kmTo": 1091, "lengthKm": 67,
+          "cashRub": 380, "cashRubWeekend": 450, "transponderRub": null,
+          "timeRule": "weekday/weekend", "effectiveFrom": "2026-03-02",
+          "source": "https://onlinegibdd.ru/articles/view/platnye-trassy-na-skolko-vyrosli-tarify-i-shtrafy/ ; https://www.donnews.ru/stala-izvestna-stoimost-proezda-po-obhodu-axaya-v-rostovskoy-oblasti",
+          "confidence": "medium",
+          "note": "Was 360/420 in 2025. km boundaries as given in the search snippet - verify."
+        },
+        {
+          "name": "Ростов-на-Дону — Цукерова Балка", "kmFrom": 1091, "kmTo": 1119, "lengthKm": 28,
+          "cashRub": 150, "cashRubWeekend": 150, "transponderRub": null,
+          "timeRule": "flat all days", "effectiveFrom": "2026-03-02",
+          "source": "https://onlinegibdd.ru/articles/view/platnye-trassy-na-skolko-vyrosli-tarify-i-shtrafy/",
+          "confidence": "medium"
+        },
+        {
+          "name": "Москва — Краснодар, all toll sections (as published)", "kmFrom": 21, "kmTo": null, "lengthKm": null,
+          "cashRub": 5040, "cashRubWeekend": 6090, "transponderRub": 4284,
+          "timeRule": "weekday Mon-Thu / weekend Fri-Sun+holidays; transponder figure = weekday with max loyalty discount (-15 %)",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://www.sravni.ru/text/trassa-m4/ ; https://t-j.ru/m4/ ; https://tv-gubernia.ru/novosti/obwestvo/kak-podorozhal-proezd-po-platnym-uchastkam-trassy-m-4-don-v-voronezhskoj-oblasti/",
+          "confidence": "medium",
+          "note": "3+ sources agree on 5 040 / 6 090 (2025: 4 610 weekday). Halvacard gives 5 620 weekend; shtrafy-gibdd 4 820/5 620 Moscow-Novorossiysk (older)."
+        }
+      ],
+      "perKmApproxRub": {
+        "weekday": 4.4,
+        "weekend": 5.4,
+        "how": "Mean of sections with both price and length: 21-93 310/72 = 4.3; 211-266 260/55 = 4.7; 401-464 230/63 = 3.7; Aksay 380/67 = 5.7; 1091-1119 150/28 = 5.4 -> ~4.4-4.8 weekday; weekend ≈ weekday × 1.21 (6090/5040). Consistent with Avtodor's statement that actual M-4 price is < 5 RUB/km. Total toll length Moscow-Krasnodar not found, so not derived from the 5 040 total.",
+        "confidence": "low"
+      }
+    },
+    {
+      "ref": "М-1",
+      "name": "«Беларусь» Москва — граница с Беларусью",
+      "operator": "Госкомпания «Автодор» / ООО «Автодор - Платные дороги» (km 33-66); Северный обход Одинцова — концессия «Главная дорога» (m-road.ru)",
+      "freeFlow": false,
+      "sections": [
+        {
+          "name": "Платный участок км 33 — 66 (ПВП км 46)", "kmFrom": 33, "kmTo": 66, "lengthKm": 33,
+          "cashRub": 230, "transponderRub": 230,
+          "timeRule": "flat: does not depend on day, time or payment method",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://avtodor-tr.ru/road/tariffs/ ; https://journal.sovcombank.ru/avtokrediti/kak-rasschitat-tarif-na-platnoi-doroge",
+          "confidence": "low",
+          "note": "Avtodor tariff-page snippet 'ПВП 46 км 230 250 320 500' (column mapping unclear; 230 assumed cat. 1). Older sources: 150 (t-j.ru 2025), 170 (undated)."
+        },
+        {
+          "name": "Северный обход Одинцова (концессия)", "kmFrom": null, "kmTo": null, "lengthKm": 18.5,
+          "cashRub": 280, "cashRubWeekend": 360, "transponderRub": null,
+          "timeRule": "weekday Mon-Thu / weekend Fri-Sun; operator also uses time-of-day tariffs (news.ru: weekend daytime 700 cash / 500 transponder - likely full-length or different period)",
+          "effectiveFrom": null,
+          "source": "https://radio1.ru/articles/obschestvo/shtraf-5-000-rublei-i-skidka-30-chto-nuzhno-znat-o-platnih-dorogah-moskovskoi-oblasti-v-2026-godu/ ; https://m-road.ru/",
+          "confidence": "low",
+          "note": "Length 18.5 km from OTR (https://otr-online.ru/news/elitnaya-trassa-voditeli-ppart-71598.html). Conflicting figures; verify on m-road.ru."
+        }
+      ],
+      "perKmApproxRub": {
+        "flat": 7.0,
+        "how": "km 33-66: 230/33 = 7.0 (low confidence). Odintsovo bypass 280/18.5 = 15.1 weekday - use fixed price, not per-km.",
+        "confidence": "low"
+      }
+    },
+    {
+      "ref": "М-3",
+      "name": "«Украина» Москва — Калуга — Брянск",
+      "operator": "Госкомпания «Автодор» / ООО «Автодор - Платные дороги»",
+      "freeFlow": false,
+      "sections": [
+        {
+          "name": "Малоярославец — Тимохино (ПВП км 136)", "kmFrom": 124, "kmTo": 150, "lengthKm": 26,
+          "cashRub": 190, "cashRubWeekend": 190, "transponderRub": 190,
+          "timeRule": "flat 190 all days, any payment method (weekday +72 %, weekend +35 % vs 2025)",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://nikatv.ru/news/situaciya/proezd-po-trasse-m-3-v-kaluzhskoy-oblasti-rezko-podorozhal ; https://www.kommersant.ru/doc/8478445 ; https://www.bragazeta.ru/news/2026/03/03/bryanskie-voditeli-budut-platit-na-73-bolshe-za-proezd-po-trasse-ukraina/",
+          "confidence": "medium",
+          "note": "Some sources give km 112-150. Was 110 (weekday) in 2025."
+        },
+        {
+          "name": "Тимохино — Бабынино", "kmFrom": 150, "kmTo": 194, "lengthKm": 44,
+          "cashRub": 190, "cashRubWeekend": 230, "transponderRub": null,
+          "timeRule": "weekday Mon-Thu 190 / weekend Fri-Sun 230",
+          "effectiveFrom": "2026-03-02",
+          "source": "https://nikatv.ru/news/situaciya/proezd-po-trasse-m-3-v-kaluzhskoy-oblasti-rezko-podorozhal",
+          "confidence": "low",
+          "note": "km 194 end assumed from the requested 124-194 range; source names only 'Тимохино — Бабынино'."
+        }
+      ],
+      "perKmApproxRub": {
+        "weekday": 5.4,
+        "weekend": 6.0,
+        "how": "(190 + 190) / 70 km = 5.4 weekday; (190 + 230) / 70 = 6.0 weekend (km 124-194).",
+        "confidence": "low"
+      }
+    }
+  ],
+  "gaps": [
+    "M-11 km 149-543 (Тверь — Великий Новгород) per-section tariffs: not found; only full-route total.",
+    "M-11 transponder prices (Avtodor part) and all night tariffs except km 15-58.",
+    "M-11 km 15-58 tariffs after the seasonal surcharge ends on 2026-11-01.",
+    "M-12 km markers and per-section lengths; weekend / night variants; Moscow—Nizhny Novgorod tariff; Moscow-Kazan 5 250 vs 5 909 conflict.",
+    "CKAD official per-section tariffs and lengths (lengths quoted from memory), ЦКАД-5 status, 2 278 vs 2 381 full-ring conflict.",
+    "M-4 km 266-330, 330-414, 517-544, 633-777 and all transponder/weekend prices per section; whether km 93-211 is tolled.",
+    "M-1 km 33-66 column mapping (230?) and Северный обход Одинцова current grid."
+  ]
+}

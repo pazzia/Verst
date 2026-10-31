@@ -1,0 +1,21 @@
+{
+ "request": {
+  "function": "load_catalogue",
+  "args": {}
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "version": "wd-20261029-osm2",
+   "builtAt": "2026-10-29",
+   "towns": 1114,
+   "pois": 10921,
+   "bars": 5625,
+   "food": 29906,
+   "world": "russia_v1",
+   "places": 16692,
+   "ms": 0
+  },
+  "ms": 0
+ }
+}

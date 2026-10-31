@@ -1,0 +1,152 @@
+# Sprint 3 (ADR-0012 §1): build the offline catalogue of Russian towns, POIs, bars and (CEO 2026-10-29) food
+# places from Wikidata, OSM (Geofabrik extract; Overpass fallback for bars only) and Wikimedia Commons.
+# The whole pipeline: re-fetches everything. To refresh only bars and food on top of the published raw
+# responses, run data-osm.yml instead. The sandbox has no internet, so this runs on Actions and pushes the result to
+# branch bot/data-<run_number> (also when a check fails, so the report can be read from the sandbox). The
+# Manager (or the Architect on arch/** for development) merges the bot branch.
+name: data
+on:
+  push:
+    branches: [data-request]   # trigger from the sandbox: git push origin HEAD:data-request --force
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash   # -eo pipefail, so `| tee` keeps the exit code
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      RAW: ${{ github.workspace }}/data-raw
+      OUT: ${{ github.workspace }}/backend/planner/verst_planner/resources
+      FIRST: ${{ github.workspace }}/data-first
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "pymorphy3==2.0.2" "pymorphy3-dicts-ru==2.4.417150.4580142"
+      - name: Wikidata class ids (ADR-0012 §1 check)
+        id: classes
+        continue-on-error: true
+        run: mkdir -p "$RAW" && python3 backend/planner/tools/data/fetch_wikidata.py classes "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Towns (Wikidata)
+        run: python3 backend/planner/tools/data/fetch_wikidata.py towns "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: POIs (Wikidata, one around-query per town)
+        run: python3 backend/planner/tools/data/fetch_wikidata.py pois "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Name forms (pymorphy3)
+        run: python3 backend/planner/tools/data/inflect.py "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Bars (Geofabrik extract + osmium)
+        id: extract
+        continue-on-error: true
+        timeout-minutes: 60
+        run: |
+          sudo apt-get install -y -qq osmium-tool >/dev/null
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/ru.osm.pbf" https://download.geofabrik.de/russia-latest.osm.pbf
+          ls -l "$RUNNER_TEMP/ru.osm.pbf" | tee -a "$RAW/log.txt"
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/amenity=bar,pub,biergarten nwr/craft=brewery \
+            -o "$RUNNER_TEMP/bars.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/bars.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/bars.geojsonseq" --overwrite
+          python3 backend/planner/tools/data/bars_from_extract.py "$RAW" "$RUNNER_TEMP/bars.geojsonseq" 2>&1 \
+            | tee -a "$RAW/log.txt"
+          # CEO 2026-10-29: restaurants, cafés, fast food, food courts (catalogue_food) from the same extract
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/amenity=restaurant,cafe,fast_food,food_court \
+            -o "$RUNNER_TEMP/food.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/food.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/food.geojsonseq" --overwrite
+          python3 backend/planner/tools/data/food_from_extract.py "$RAW" "$RUNNER_TEMP/food.geojsonseq" 2>&1 \
+            | tee -a "$RAW/log.txt"
+      - name: Parks (Geofabrik extract + osmium; CEO 29.10, raw parks.json for catalogue_parks)
+        id: parks
+        if: ${{ steps.extract.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" wr/leisure=park,garden -o "$RUNNER_TEMP/parks.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/parks.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/parks.geojsonseq" --overwrite
+          python3 backend/planner/tools/data/parks_from_extract.py "$RAW" "$RUNNER_TEMP/parks.geojsonseq" 2>&1 \
+            | tee -a "$RAW/log.txt"
+      - name: Bars (OSM Overpass, fallback)
+        if: ${{ steps.extract.outcome == 'failure' }}
+        run: python3 backend/planner/tools/data/fetch_overpass.py "$RAW" 2>&1 | tee -a "$RAW/log.txt"
+      - name: First build (to select the photos)
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime
+          json.dump({"wikidata": "query.wikidata.org", "osm": "download.geofabrik.de/russia-latest.osm.pbf (Overpass fallback)", "commons": "commons.wikimedia.org",
+                     "fetchedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+                     "run": os.environ["GITHUB_RUN_ID"]}, open(os.environ["RAW"] + "/sources.json", "w"))
+          PY
+          python3 backend/planner/tools/data/build_catalogue.py "$RAW" --out "$FIRST"
+      - name: Photo credits (Commons)
+        run: python3 backend/planner/tools/data/fetch_commons_meta.py "$RAW" "$FIRST" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Photo size, MIME and categories (Commons; 5.9 §3 area photos)
+        run: python3 backend/planner/tools/data/fetch_photo_meta.py "$RAW" "$FIRST" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Final build
+        run: |
+          python3 backend/planner/tools/data/build_catalogue.py "$RAW" --out "$OUT" \
+            --version "wd-$(date -u +%Y%m%d)-r${{ github.run_number }}" --built-at "$(date -u +%Y-%m-%d)"
+          python3 backend/planner/tools/data/write_lock.py "$RAW" "$OUT" backend/planner/tools/data/catalogue.lock
+          # catalogue_parks (a separate file; its town indices follow this build's towns, so it is rebuilt here)
+          if [ -f "$RAW/parks.json" ]; then
+            python3 backend/planner/tools/data/build_parks.py "$RAW" "$OUT" \
+              --lock backend/planner/tools/data/catalogue_parks.lock || echo "::warning::catalogue_parks not rebuilt"
+          fi
+      - name: Photo URLs resolve (50 random Special:FilePath URLs, >= 95 %)
+        id: photos
+        continue-on-error: true
+        run: |
+          python3 backend/planner/tools/data/check_photos.py "$OUT" "$RAW/photos_check.json" \
+            --n 50 --seed "${{ github.run_id }}" 2>&1 | tee -a "$RAW/log.txt"
+      - name: Archive the raw responses
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-raw
+          path: data-raw
+          retention-days: 30
+      - name: Push to bot/data-${{ github.run_number }}
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "verst-ci"
+          git config user.email "verst-ci@users.noreply.github.com"
+          git checkout -b "bot/data-${{ github.run_number }}"
+          mkdir -p backend/planner/tools/data/report
+          cp -f "$RAW"/class_check.json "$RAW"/forms_report.json "$RAW"/pois_failed.json "$RAW"/bars_failed.json \
+            "$RAW"/photos_check.json "$RAW"/log.txt \
+            backend/planner/tools/data/report/ 2>/dev/null || true
+          git add backend/planner/verst_planner/resources/catalogue_*.json.gz backend/planner/tools/data/report \
+                  backend/planner/tools/data/catalogue.lock 2>/dev/null || true
+          git add backend/planner/tools/data/catalogue_parks.lock 2>/dev/null || true
+          git add -A backend/planner/tools/data/report
+          git commit -m "data: catalogue from Wikidata/OSM/Commons, run ${{ github.run_id }}" \
+                     -m "Generated by .github/workflows/data.yml; see backend/planner/tools/data/catalogue.lock." || true
+          git push origin "bot/data-${{ github.run_number }}"
+          # The raw responses, for rebuilding in the sandbox (artifacts are not downloadable from there).
+          git checkout --orphan "bot/raw-${{ github.run_number }}"
+          git rm -rq --cached . && git clean -fdq -e data-raw
+          tar -C "$RAW" -czf data-raw.tar.gz --exclude log.txt .
+          git add data-raw.tar.gz
+          git commit -qm "data: raw responses of run ${{ github.run_id }}"
+          git push origin "bot/raw-${{ github.run_number }}"
+      - name: Fail when the photo check failed
+        if: ${{ steps.photos.outcome == 'failure' }}
+        run: |
+          cat "$RAW/photos_check.json"
+          exit 1
+      - name: Fail when the class check failed
+        if: ${{ steps.classes.outcome == 'failure' }}
+        run: |
+          cat "$RAW/class_check.json"
+          exit 1

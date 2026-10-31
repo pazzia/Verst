@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED from design/icons/crew-adult.svg by design/tools/gen_vectors.py. Do not edit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF141416"
+        android:fillType="nonZero"
+        android:pathData="M17.538 5.538A5.538 5.538 0 1 1 6.462 5.538A5.538 5.538 0 1 1 17.538 5.538ZM6.923 12L17.077 12A6 6 0 0 1 23.077 18L23.077 24L23.077 24L0.923 24L0.923 24L0.923 18A6 6 0 0 1 6.923 12Z" />
+</vector>

@@ -1,0 +1,49 @@
+{
+ "_meta": {
+  "source": "GraphHopper 11.0 server, synthetic mini map (infra/routing/dev/make_mini_osm.py)",
+  "recordedBy": "infra/routing/dev/record_fixtures.sh",
+  "note": "a profile the server does not have (configuration error)",
+  "schema": "https://github.com/graphhopper/graphhopper/blob/11.0/docs/web/api-doc.md",
+  "replaceWith": "real Russia responses from .github/workflows/routing.yml (artifact routing-recordings)"
+ },
+ "request": {
+  "profile": "bus",
+  "points": [
+   [
+    37.0,
+    56.0
+   ],
+   [
+    37.3,
+    56.0
+   ]
+  ],
+  "snap_preventions": [
+   "motorway",
+   "tunnel",
+   "bridge",
+   "ferry"
+  ],
+  "points_encoded": false,
+  "instructions": false,
+  "calc_points": true,
+  "details": [
+   "road_class",
+   "toll",
+   "street_ref",
+   "distance",
+   "time",
+   "leg_distance"
+  ]
+ },
+ "status": 400,
+ "body": {
+  "message": "The requested profile 'bus' does not exist.\nAvailable profiles: [car, car_avoid_tolls]",
+  "hints": [
+   {
+    "message": "The requested profile 'bus' does not exist.\nAvailable profiles: [car, car_avoid_tolls]",
+    "details": "java.lang.IllegalArgumentException"
+   }
+  ]
+ }
+}

@@ -1,0 +1,37 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-6",
+   "input_json": {
+    "start": {
+     "lat": 55.55,
+     "lon": 98.66667,
+     "label": "Алзамай"
+    },
+    "preset": "beer",
+    "adultConfirmed": true
+   }
+  }
+ },
+ "response": {
+  "ok": false,
+  "error": {
+   "code": "NOT_ENOUGH_POIS",
+   "message": "not enough places for preset 'beer'",
+   "field": "preset",
+   "reason": "no_data",
+   "pointIndex": null,
+   "roadKm": null,
+   "detail": null,
+   "suggestions": [],
+   "requestKey": "d4f3961dbc470576",
+   "noData": [
+    "beer"
+   ],
+   "messageRu": "У нас пока нет данных о пивных барах в этом городе — это пробел нашей базы, а не города."
+  },
+  "ms": 0
+ }
+}

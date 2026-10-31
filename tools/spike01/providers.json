@@ -1,0 +1,57 @@
+{
+  "_about": [
+    "SPIKE-01 provider manifest (ADR-0021 §2.2): data, not code. Keys come from environment variables named in",
+    "`envKey`; an entity requirement is met only if listed in `entities` of the deployment (spike: none).",
+    "Prices: Google from third-party summaries of the 2026 list (USD per call); Яндекс from its product page",
+    "(RUB per call beyond the free quota; the licence fee is listed separately). `usdRub` is an assumption."
+  ],
+  "deployment": {"entities": [], "usdRub": 85.0},
+  "providers": [
+    {
+      "id": "graphhopper_osm",
+      "capabilities": ["routing"],
+      "coverage": ["world"],
+      "licence": {"storable": "all", "display": "any_map", "attribution": "© OpenStreetMap contributors (ODbL)", "needsEntity": "none"},
+      "cost": {},
+      "envKey": "SPIKE_GH_URL_{COUNTRY}",
+      "priority": {"*": 10}
+    },
+    {
+      "id": "open_index",
+      "capabilities": ["place_search", "place_details"],
+      "coverage": ["world"],
+      "licence": {"storable": "all", "display": "any_map", "attribution": "© OpenStreetMap contributors (ODbL); Wikidata (CC0)", "needsEntity": "none"},
+      "cost": {},
+      "envKey": null,
+      "priority": {"*": 1}
+    },
+    {
+      "id": "yandex_geosearch",
+      "capabilities": ["place_search", "place_details"],
+      "coverage": ["RU"],
+      "licence": {"storable": "licence_only", "display": "own_map_only", "attribution": "© Яндекс", "needsEntity": "ru"},
+      "cost": {"currency": "RUB", "search": 0.39, "details": 0.39, "freePerDay": 500, "licencePerYear": 226200},
+      "envKey": "SPIKE_YANDEX_GEOSEARCH_KEY",
+      "priority": {"RU": 20}
+    },
+    {
+      "id": "twogis_places",
+      "capabilities": ["place_search", "place_details"],
+      "coverage": ["RU"],
+      "licence": {"storable": "unknown", "display": "unknown", "attribution": "© 2ГИС", "needsEntity": "ru"},
+      "cost": {"currency": "RUB", "search": null, "details": null},
+      "envKey": "SPIKE_2GIS_KEY",
+      "priority": {"RU": 15}
+    },
+    {
+      "id": "google_places",
+      "capabilities": ["place_search", "place_details"],
+      "coverage": ["world"],
+      "excluded": ["RU"],
+      "licence": {"storable": "place_id_only", "display": "own_map_only_or_ui_kit", "attribution": "Google Maps", "needsEntity": "foreign"},
+      "cost": {"currency": "USD", "search": 0.032, "details": 0.020, "freePerMonth": {"search": 5000, "details": 1000}},
+      "envKey": "SPIKE_GOOGLE_PLACES_KEY",
+      "priority": {"*": 20}
+    }
+  ]
+}

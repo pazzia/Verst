@@ -1,0 +1,38 @@
+[
+ {
+  "osm": "n7101",
+  "name": "სადილი",
+  "lat": 41.7011,
+  "lon": 44.8011,
+  "tags": {
+   "name": "სადილი",
+   "name:ru": "Тестовая столовая",
+   "amenity": "restaurant"
+  },
+  "townQid": "Q900201"
+ },
+ {
+  "osm": "n7102",
+  "name": "Test Cafe",
+  "lat": 41.7012,
+  "lon": 44.8012,
+  "tags": {
+   "name": "Test Cafe",
+   "amenity": "cafe",
+   "cuisine": "georgian"
+  },
+  "townQid": "Q900201"
+ },
+ {
+  "osm": "n7103",
+  "name": "ხაჭაპური",
+  "lat": 42.2712,
+  "lon": 42.7012,
+  "tags": {
+   "name": "ხაჭაპური",
+   "name:en": "Test Khachapuri",
+   "amenity": "fast_food"
+  },
+  "townQid": "Q900202"
+ }
+]

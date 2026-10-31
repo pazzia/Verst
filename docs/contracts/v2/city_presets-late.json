@@ -1,0 +1,108 @@
+{
+ "request": {
+  "function": "city_presets",
+  "args": {
+   "world": "russia_v1",
+   "lat": 57.6261,
+   "lon": 39.8845
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "town": {
+    "id": "t_yaroslavl",
+    "name": "Ярославль",
+    "nameGenRu": "Ярославля",
+    "namePrepRu": "Ярославле",
+    "regionRu": "Ярославская область",
+    "tz": "Europe/Moscow",
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "population": 570000
+   },
+   "now": "2026-10-23T22:45",
+   "presets": [
+    {
+     "preset": "overview",
+     "available": true,
+     "count": 60,
+     "startAt": "2026-10-24T09:00",
+     "startsTomorrow": true,
+     "defaultDurationMin": 240,
+     "defaultPace": "normal",
+     "adultOnly": false,
+     "titleRu": "Обзорный",
+     "noData": false,
+     "noDataRu": null
+    },
+    {
+     "preset": "museums",
+     "available": true,
+     "count": 8,
+     "startAt": "2026-10-24T10:00",
+     "startsTomorrow": true,
+     "defaultDurationMin": 360,
+     "defaultPace": "slow",
+     "adultOnly": false,
+     "titleRu": "Музейный",
+     "noData": false,
+     "noDataRu": null
+    },
+    {
+     "preset": "dog_walk",
+     "available": true,
+     "count": 19,
+     "startAt": "2026-10-24T09:00",
+     "startsTomorrow": true,
+     "defaultDurationMin": 120,
+     "defaultPace": "normal",
+     "adultOnly": false,
+     "titleRu": "Прогулка с собакой",
+     "noData": false,
+     "noDataRu": null
+    },
+    {
+     "preset": "ryumochnye",
+     "available": false,
+     "count": 2,
+     "startAt": "2026-10-24T18:00",
+     "startsTomorrow": true,
+     "defaultDurationMin": 240,
+     "defaultPace": "normal",
+     "adultOnly": true,
+     "titleRu": "По рюмочным",
+     "noData": false,
+     "noDataRu": null
+    },
+    {
+     "preset": "beer",
+     "available": true,
+     "count": 14,
+     "startAt": "2026-10-24T18:00",
+     "startsTomorrow": true,
+     "defaultDurationMin": 240,
+     "defaultPace": "normal",
+     "adultOnly": true,
+     "titleRu": "Пивной",
+     "noData": false,
+     "noDataRu": null
+    },
+    {
+     "preset": "custom",
+     "available": true,
+     "count": 60,
+     "startAt": "2026-10-24T09:00",
+     "startsTomorrow": true,
+     "defaultDurationMin": 240,
+     "defaultPace": "normal",
+     "adultOnly": false,
+     "titleRu": "Свой маршрут",
+     "noData": false,
+     "noDataRu": null
+    }
+   ]
+  },
+  "ms": 0
+ }
+}

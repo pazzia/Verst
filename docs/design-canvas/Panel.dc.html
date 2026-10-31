@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Приборы поездки</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE27A}
+.needle{transition:transform .5s cubic-bezier(.3,1.5,.5,1)}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(216,64,43,.55)}100%{box-shadow:0 0 0 16px rgba(216,64,43,0)}}
+.start{animation:ring 1.8s ease-out infinite}
+@keyframes wag{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.dog{animation:wag 1.2s ease-in-out infinite;transform-origin:50% 100%}
+.seat{transition:background .2s,border-color .2s}
+button:active{transform:translateY(1px)}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 120px; overflow: hidden">
+    <div style="position: absolute; inset: 0; background: #2B2850"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 60px; height: 30px; background: #8E4A6B"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 90px; height: 30px; background: #D9655A"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 14px; background: #0E0E10; border-radius: 0 0 50% 50% / 0 0 12px 12px"></div>
+  </div>
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 104px; height: 40px; background: #161618; border-radius: 50% 50% 0 0 / 30px 30px 0 0"></div>
+
+  <a href="Wind.dc.html" style="position: absolute; left: 16px; top: 10px; min-height: 32px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #E9E2F2; text-decoration: none; z-index: 2">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>
+    Золотое кольцо
+  </a>
+
+  <div style="position: absolute; left: 180px; top: 0; width: 30px; height: 58px; background: #2A2A2E"></div>
+  <div style="position: absolute; left: 20px; right: 20px; top: 54px; height: 164px; border-radius: 40px; border: 5px solid #2A2A2E; background: #0D0D0F; overflow: hidden; box-shadow: 0 10px 24px rgba(0,0,0,.45)">
+    <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 54px; background: #4E3768"></div>
+    <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 54px; height: 22px; background: #2C3A33"></div>
+    <div aria-hidden="true" style="position: absolute; left: 50%; top: 54px; width: 70px; height: 22px; margin-left: -35px; background: #3A3A3F; clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%)"></div>
+    <button type="button" aria-pressed="{{dog}}" aria-label="{{dogLabel}}" onClick="{{toggleDog}}" style="position: absolute; right: 26px; top: 26px; width: 56px; height: 52px; border: none; background: transparent; cursor: pointer; padding: 0">
+      <span class="dog" aria-hidden="true" style="{{dogStyle}}">
+        <span style="position: absolute; left: 6px; top: -6px; width: 9px; height: 14px; border-radius: 5px; background: inherit; transform: rotate(-18deg)"></span>
+        <span style="position: absolute; right: 6px; top: -6px; width: 9px; height: 14px; border-radius: 5px; background: inherit; transform: rotate(18deg)"></span>
+      </span>
+      <span style="{{dogLabelStyle}}">{{dogText}}</span>
+    </button>
+    <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: #2A2A30"></div>
+    <div style="position: absolute; left: 16px; right: 16px; bottom: 10px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <sc-for list="{{seats}}" as="s" hint-placeholder-count="3">
+        <button type="button" class="seat" aria-label="{{s.aria}}" onClick="{{s.cycle}}" style="{{s.style}}">
+          <sc-if value="{{s.filled}}" hint-placeholder-val="{{true}}">
+            <span aria-hidden="true" style="display: flex; flex-direction: column; align-items: center">
+              <span style="{{s.head}}"></span>
+              <span style="{{s.body}}"></span>
+            </span>
+          </sc-if>
+          <span style="font-size: 11px; font-weight: 600; color: {{s.labelColor}}">{{s.label}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="position: absolute; left: 20px; right: 20px; top: 226px; display: flex; justify-content: space-between; align-items: center; gap: 10px">
+    <span style="font-size: 13px; color: #B9B9C0">Нажимайте на кресла в зеркале</span>
+    <button type="button" aria-pressed="{{front}}" onClick="{{toggleFront}}" style="{{frontStyle}}">{{frontText}}</button>
+  </div>
+  <div aria-live="polite" style="position: absolute; left: 20px; right: 20px; top: 272px; font-weight: 700; font-size: 20px">{{summary}}</div>
+
+  <div style="position: absolute; left: 14px; right: 14px; top: 316px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+    <div style="background: #0F0F11; border: 4px solid #232327; border-radius: 24px; padding: 12px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: #8C8C93">ЗА ДЕНЬ, КМ</div>
+      <div aria-live="polite" aria-label="{{km}} километров в день" style="display: flex; gap: 3px; background: #000; padding: 4px; border-radius: 6px">
+        <sc-for list="{{digits}}" as="d" hint-placeholder-count="4">
+          <span style="{{d.style}}">{{d.v}}</span>
+        </sc-for>
+      </div>
+      <div style="font-size: 12px; color: #B9B9C0; text-align: center; line-height: 1.35">{{drive}}<br>{{days}}</div>
+      <div style="display: flex; gap: 8px">
+        <button type="button" aria-label="Меньше на 50 км" onClick="{{kmLess}}" style="width: 52px; height: 44px; border-radius: 10px; border: none; background: #2A2A2E; color: #F4F4F0; font-size: 20px; cursor: pointer; box-shadow: inset 0 -3px 0 #0E0E10">−</button>
+        <button type="button" aria-label="Больше на 50 км" onClick="{{kmMore}}" style="width: 52px; height: 44px; border-radius: 10px; border: none; background: #2A2A2E; color: #F4F4F0; font-size: 20px; cursor: pointer; box-shadow: inset 0 -3px 0 #0E0E10">+</button>
+      </div>
+    </div>
+
+    <div style="background: #0F0F11; border: 4px solid #232327; border-radius: 24px; padding: 12px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: #8C8C93">БЮДЖЕТ</div>
+      <div role="img" aria-label="Бюджет {{budget}}" style="position: relative; width: 130px; height: 62px">
+        <svg aria-hidden="true" width="130" height="62" viewBox="0 0 130 62" fill="none" style="position: absolute; inset: 0">
+          <path d="M 12 58 A 53 53 0 0 1 118 58" stroke="#2A2A2E" stroke-width="8"></path>
+          <path d="M 12 58 A 53 53 0 0 1 30 18" stroke="#D8402B" stroke-width="8"></path>
+          <text x="8" y="46" fill="#D8402B" font-family="IBM Plex Sans Condensed, sans-serif" font-size="11" font-weight="700">E</text>
+          <text x="114" y="46" fill="#F4F4F0" font-family="IBM Plex Sans Condensed, sans-serif" font-size="11" font-weight="700">F</text>
+        </svg>
+        <div class="needle" aria-hidden="true" style="position: absolute; left: 63px; top: 10px; width: 4px; height: 48px; border-radius: 2px; background: #FFD23F; transform-origin: 50% 100%; transform: {{needle}}"></div>
+        <div aria-hidden="true" style="position: absolute; left: 57px; top: 52px; width: 16px; height: 16px; border-radius: 50%; background: #F4F4F0"></div>
+      </div>
+      <div style="font-weight: 700; font-size: 20px; font-variant-numeric: tabular-nums">{{budget}}</div>
+      <div style="display: flex; gap: 8px">
+        <button type="button" aria-label="Уменьшить бюджет" onClick="{{bLess}}" style="width: 52px; height: 44px; border-radius: 10px; border: none; background: #2A2A2E; color: #F4F4F0; font-size: 20px; cursor: pointer; box-shadow: inset 0 -3px 0 #0E0E10">−</button>
+        <button type="button" aria-label="Увеличить бюджет" onClick="{{bMore}}" style="width: 52px; height: 44px; border-radius: 10px; border: none; background: #2A2A2E; color: #F4F4F0; font-size: 20px; cursor: pointer; box-shadow: inset 0 -3px 0 #0E0E10">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 24px; display: flex; align-items: center; gap: 14px">
+    <div style="flex: 1; min-width: 0">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #8C8C93">ВСЁ ГОТОВО К ВЫЕЗДУ</div>
+      <div style="font-weight: 700; font-size: 20px; line-height: 1.15">Золотое кольцо</div>
+      <div style="font-size: 13px; color: #B9B9C0">из Москвы · 745 км по кругу</div>
+    </div>
+    <a href="Drive.dc.html" class="start" aria-label="Поехали" style="width: 100px; height: 100px; border-radius: 50%; background: #232327; display: flex; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0">
+      <span style="width: 82px; height: 82px; border-radius: 50%; border: 3px solid #D8402B; background: #1C1C1F; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-sizing: border-box">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8M6.3 6.6a8 8 0 1 0 11.4 0"></path></svg>
+        <span style="font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #F4F4F0">ПОЕХАЛИ</span>
+      </span>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { l: 'adult', m: 'child', r: 'empty', front: true, dog: true, km: 300, b: 2 }; }
+  renderVals() {
+    const st = this.state;
+    const next = { empty: 'adult', adult: 'child', child: 'empty' };
+    const names = { empty: 'свободно', adult: 'взрослый', child: 'ребёнок' };
+    const seat = (k, pos) => {
+      const v = st[k];
+      const kid = v === 'child';
+      const hs = kid ? 16 : 22, bw = kid ? 32 : 44, bh = kid ? 16 : 22;
+      return {
+        filled: v !== 'empty', label: names[v],
+        labelColor: v === 'empty' ? '#8C8C93' : '#F4F4F0',
+        aria: pos + ' кресло: ' + names[v] + '. Нажмите, чтобы изменить',
+        cycle: () => this.setState({ [k]: next[v] }),
+        head: 'width:' + hs + 'px;height:' + hs + 'px;border-radius:50%;background:' + (kid ? '#FFD23F' : '#E9E2F2'),
+        body: 'width:' + bw + 'px;height:' + bh + 'px;border-radius:' + (bw / 2) + 'px ' + (bw / 2) + 'px 0 0;margin-top:2px;background:' + (kid ? '#FFD23F' : '#E9E2F2'),
+        style: 'height:68px;border-radius:14px 14px 6px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;padding:0 0 4px;font-family:inherit;background:' + (v === 'empty' ? 'transparent' : '#3A3A42') + ';border:2px ' + (v === 'empty' ? 'dashed #55555E' : 'solid #3A3A42')
+      };
+    };
+    const back = [st.l, st.m, st.r];
+    let adults = 1 + (st.front ? 1 : 0) + back.filter((x) => x === 'adult').length;
+    const kids = back.filter((x) => x === 'child').length;
+    const pl = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; if (m10 === 1 && m100 !== 11) return a; if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return b; return c; };
+    let summary = adults + ' ' + pl(adults, 'взрослый', 'взрослых', 'взрослых');
+    if (kids) summary += ' · ' + kids + ' ' + pl(kids, 'ребёнок', 'ребёнка', 'детей');
+    if (st.dog) summary += ' · собака';
+    const kmStr = String(st.km).padStart(4, '0');
+    const digits = kmStr.split('').map((v, i) => ({ v, style: 'width:24px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:3px;font-family:IBM Plex Mono,monospace;font-weight:600;font-size:22px;background:' + (i === 3 ? '#F4F4F0' : '#1C1C1F') + ';color:' + (i === 3 ? '#141416' : '#F4F4F0') }));
+    const mins = Math.round(st.km / 70 * 60 / 10) * 10;
+    const h = Math.floor(mins / 60), m = mins % 60;
+    const days = Math.max(1, Math.ceil(745 / st.km));
+    const budgets = [20000, 30000, 40000, 60000, 80000, 0];
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const deg = -90 + st.b * 36;
+    return {
+      seats: [seat('l', 'Левое'), seat('m', 'Среднее'), seat('r', 'Правое')],
+      dog: st.dog ? 'true' : 'false',
+      dogLabel: st.dog ? 'Собака едет. Нажмите, чтобы убрать' : 'Собаки нет. Нажмите, чтобы взять',
+      toggleDog: () => this.setState({ dog: !st.dog }),
+      dogText: st.dog ? 'пёс' : '+ пёс',
+      dogStyle: 'position:absolute;left:12px;top:14px;width:32px;height:26px;border-radius:14px 14px 10px 10px;display:block;background:' + (st.dog ? '#C99A5B' : 'transparent') + ';border:' + (st.dog ? 'none' : '2px dashed #8C8C93'),
+      dogLabelStyle: 'position:absolute;left:0;right:0;bottom:-2px;font-size:10px;font-weight:700;color:' + (st.dog ? '#F4F4F0' : '#B9B9C0'),
+      front: st.front ? 'true' : 'false',
+      frontText: st.front ? 'Рядом с вами: взрослый' : 'Рядом с вами: никого',
+      toggleFront: () => this.setState({ front: !st.front }),
+      frontStyle: 'min-height:40px;padding:0 12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;background:' + (st.front ? '#F4F4F0' : 'transparent') + ';color:' + (st.front ? '#141416' : '#B9B9C0') + ';border:1px solid ' + (st.front ? '#F4F4F0' : '#55555E'),
+      summary,
+      km: st.km, digits,
+      drive: '≈ ' + h + ' ч' + (m ? ' ' + m + ' мин' : '') + ' за рулём',
+      days: days + ' ' + pl(days, 'день', 'дня', 'дней') + ' на кольцо',
+      kmLess: () => this.setState({ km: Math.max(150, st.km - 50) }),
+      kmMore: () => this.setState({ km: Math.min(900, st.km + 50) }),
+      budget: budgets[st.b] ? 'до ' + fmt(budgets[st.b]) + ' ₽' : 'не важно',
+      needle: 'rotate(' + deg + 'deg)',
+      bLess: () => this.setState({ b: Math.max(0, st.b - 1) }),
+      bMore: () => this.setState({ b: Math.min(5, st.b + 1) })
+    };
+  }
+}
+</script>
+</body>
+</html>

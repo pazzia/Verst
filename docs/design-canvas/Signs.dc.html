@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Дорога впереди</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE27A}
+@keyframes roll{from{background-position:0 0}to{background-position:0 64px}}
+.lane{background:repeating-linear-gradient(to bottom,#F4F4F0 0 32px,transparent 32px 64px);animation:roll 2.2s linear infinite}
+@keyframes car{from{top:0}to{top:100%}}
+.car{animation:car 14s linear infinite}
+.row{transition:background .2s}
+.row:hover{background:#1C1C20}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 1980px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 132px; overflow: hidden">
+    <div style="position: absolute; inset: 0 0 auto 0; height: 50px; background: #2B2850"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 50px; height: 34px; background: #8E4A6B"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 84px; height: 26px; background: #D9655A"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 110px; height: 22px; background: #F29A5E"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 14px; background: #0E0E10; border-radius: 0 0 50% 50% / 0 0 12px 12px"></div>
+  </div>
+  <div style="position: absolute; left: 0; right: 0; top: 110px; height: 40px; background: #161618; border-radius: 50% 50% 0 0 / 30px 30px 0 0"></div>
+
+  <a href="Panel.dc.html" style="position: absolute; left: 16px; top: 18px; min-height: 32px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #E9E2F2; text-decoration: none">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>
+    Приборы
+  </a>
+  <div style="position: absolute; left: 20px; right: 20px; top: 56px; background: #1E4FA3; border-radius: 7px; padding: 3px; box-shadow: 0 6px 14px rgba(0,0,0,.35)">
+    <div style="border: 2px solid #F4F4F0; border-radius: 5px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center">
+      <span style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 20px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"></path></svg>Золотое кольцо</span>
+      <span style="font-weight: 700; font-size: 20px">745</span>
+    </div>
+  </div>
+
+  <div style="position: relative; padding-top: 150px">
+    <div style="padding: 0 20px 4px">
+      <h1 style="margin: 0; font-weight: 700; font-size: 28px; line-height: 1.05">Дорога впереди</h1>
+      <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 600">
+        <span style="padding: 4px 9px; border-radius: 12px; background: #2A2A2E">3 дня · 2 ночи</span>
+        <span style="padding: 4px 9px; border-radius: 12px; background: #2A2A2E">2 взр · 1 реб · пёс</span>
+        <span style="padding: 4px 9px; border-radius: 12px; background: #2A2A2E">до 300 км в день</span>
+      </div>
+      <p style="margin: 8px 0 0; font-size: 13px; color: #B9B9C0">Знаки по пути — как увидите их на трассе. Любой можно заменить.</p>
+    </div>
+
+    <div style="position: relative; margin-top: 14px">
+      <div aria-hidden="true" style="position: absolute; left: 14px; top: 0; bottom: 0; width: 46px; background: #3A3A3F; border-left: 3px solid #F4F4F0; border-right: 3px solid #F4F4F0; box-sizing: border-box">
+        <div class="lane" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px"></div>
+        <div class="car" style="position: absolute; left: 50%; margin-left: 2px; width: 14px; height: 22px; border-radius: 5px 5px 3px 3px; background: #FFD23F; border: 2px solid #141416; box-sizing: border-box"></div>
+      </div>
+
+      <sc-for list="{{days}}" as="d" hint-placeholder-count="3">
+        <div>
+          <div style="margin: 6px 0 10px 72px; display: flex; align-items: baseline; gap: 8px">
+            <span style="font-weight: 700; font-size: 15px; color: #FFD23F">{{d.name}}</span>
+            <span style="font-size: 12px; color: #8C8C93">{{d.meta}}</span>
+          </div>
+          <sc-for list="{{d.rows}}" as="r" hint-placeholder-count="4">
+            <div class="row" style="display: grid; grid-template-columns: 72px 68px minmax(0, 1fr); align-items: start; padding: 8px 16px 12px 0">
+              <div aria-hidden="true" style="position: relative; height: 100%">
+                <span style="position: absolute; left: 60px; top: 30px; width: 14px; height: 3px; background: #55565C"></span>
+              </div>
+              <div aria-hidden="true" style="display: flex; justify-content: center">
+                <sc-if value="{{r.isCity}}" hint-placeholder-val="{{false}}">
+                  <span style="width: 64px; min-height: 40px; background: #F4F4F0; color: #141416; border: 3px solid #141416; outline: 2px solid #F4F4F0; border-radius: 4px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 700; font-size: 11px; line-height: 1.05; padding: 3px 2px; box-sizing: border-box">{{r.signText}}</span>
+                </sc-if>
+                <sc-if value="{{r.isBrown}}" hint-placeholder-val="{{false}}">
+                  <span style="width: 56px; height: 56px; background: #6B3E26; border-radius: 5px; padding: 3px; box-sizing: border-box; display: block">
+                    <span style="width: 100%; height: 100%; border: 2px solid #F4F4F0; border-radius: 3px; box-sizing: border-box; display: flex; align-items: center; justify-content: center">
+                      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3M10.5 3.5h3M8 21V12l4-4 4 4v9M5 21h14M10 21v-4a2 2 0 0 1 4 0v4"></path></svg>
+                    </span>
+                  </span>
+                </sc-if>
+                <sc-if value="{{r.isService}}" hint-placeholder-val="{{true}}">
+                  <span style="width: 50px; height: 62px; background: #1E4FA3; border-radius: 4px; padding: 5px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 4px">
+                    <span style="width: 40px; height: 40px; background: #F4F4F0; border-radius: 2px; display: flex; align-items: center; justify-content: center">
+                      <sc-if value="{{r.isFuel}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v15M3 20h11M5 9h7M13 8l3 2v7a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg></sc-if>
+                      <sc-if value="{{r.isFood}}" hint-placeholder-val="{{true}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8a2 2 0 0 0 2 2v8M5 3v5M9 3v5M16 21V3c2.5 1 4 3.5 4 7h-4"></path></svg></sc-if>
+                      <sc-if value="{{r.isRest}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l-5 8h3l-4 6h12l-4-6h3zM12 17v4"></path></svg></sc-if>
+                      <sc-if value="{{r.isHotel}}" hint-placeholder-val="{{false}}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"></path><circle cx="7" cy="11" r="2"></circle></svg></sc-if>
+                    </span>
+                    <span style="width: 22px; height: 3px; background: #F4F4F0; border-radius: 2px"></span>
+                  </span>
+                </sc-if>
+              </div>
+              <div style="min-width: 0; padding-left: 4px; display: flex; flex-direction: column; gap: 3px">
+                <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #8C8C93">
+                  <span>{{r.ahead}}</span><span style="font-variant-numeric: tabular-nums">{{r.time}}</span>
+                </div>
+                <div style="font-weight: 700; font-size: 17px; line-height: 1.15">{{r.name}}</div>
+                <div style="font-size: 13px; line-height: 1.4; color: #C4C4CA">{{r.note}}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px">
+                  <span style="font-weight: 600; font-size: 13px; color: #FFD23F">{{r.cost}}</span>
+                  <sc-if value="{{r.isHotel}}" hint-placeholder-val="{{false}}">
+                    <a href="Exit.dc.html" style="min-height: 36px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 8px; background: #1E4FA3; color: #F4F4F0; font-weight: 600; font-size: 13px; text-decoration: none">Выбрать отель →</a>
+                  </sc-if>
+                  <sc-if value="{{r.canSwap}}" hint-placeholder-val="{{true}}">
+                    <button type="button" aria-label="Заменить: {{r.name}}" style="min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #3A3A42; background: transparent; color: #B9B9C0; font-family: inherit; font-weight: 600; font-size: 12px; cursor: pointer">заменить</button>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <a href="Waybill.dc.html" style="position: absolute; left: 16px; right: 16px; bottom: 24px; height: 64px; border-radius: 12px; background: #F4F4F0; color: #141416; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; text-decoration: none">
+    <span style="display: flex; flex-direction: column">
+      <span style="font-size: 12px; font-weight: 600; color: #55565C">ПУТЕВОЙ ЛИСТ · СКОЛЬКО СТОИТ</span>
+      <span style="font-weight: 700; font-size: 22px">≈ 30 500 ₽</span>
+    </span>
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M13 5l7 7-7 7"></path></svg>
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const r = (type, ahead, time, name, note, cost, signText) => ({
+      ahead, time, name, note, cost, signText: signText || '',
+      isCity: type === 'city', isBrown: type === 'brown',
+      isService: ['fuel', 'food', 'rest', 'hotel'].indexOf(type) >= 0,
+      isFuel: type === 'fuel', isFood: type === 'food', isRest: type === 'rest', isHotel: type === 'hotel',
+      canSwap: type !== 'city' && type !== 'hotel'
+    });
+    const days = [
+      { name: 'День 1', meta: '265 км · ≈ 4 ч за рулём', rows: [
+        r('city', 'старт', '08:00', 'Москва', 'Выезд по Ярославскому шоссе, до пробок.', '', 'МОСКВА'),
+        r('brown', 'через 70 км', '09:15', 'Троице-Сергиева лавра', 'Сергиев Посад, полтора часа. Собака ждёт с одним из взрослых.', 'вход свободный'),
+        r('food', 'через 70 км', '12:00', 'Обед · Переславль-Залесский', 'Кафе у Плещеева озера, есть детское меню.', '≈ 1 800 ₽'),
+        r('brown', 'через 70 км', '14:30', 'Ростовский кремль', 'Ростов Великий, прогулка по стенам и у озера Неро.', '≈ 900 ₽'),
+        r('fuel', 'через 40 км', '15:50', 'АЗС перед Ярославлем', 'Заправиться вечером, чтобы утром сразу ехать.', '≈ 2 000 ₽'),
+        r('hotel', 'через 15 км', '16:30', 'Ночёвка · Ярославль', 'Отель, где можно с собакой. Вечером — Стрелка.', '≈ 6 000 ₽')
+      ] },
+      { name: 'День 2', meta: '260 км · ≈ 4 ч', rows: [
+        r('brown', 'через 80 км', '11:00', 'Ипатьевский монастырь', 'Кострома, а после — торговые ряды.', '≈ 900 ₽'),
+        r('rest', 'через 50 км', '12:15', 'Место отдыха', 'Разминка 20 минут: ребёнку побегать, собаке погулять.', '0 ₽'),
+        r('food', 'через 55 км', '13:30', 'Обед · Иваново', 'Кафе с парковкой у входа.', '≈ 1 800 ₽'),
+        r('hotel', 'через 75 км', '15:30', 'Ночёвка · Суздаль', 'Гостевой дом в центре, ужин рядом.', '≈ 6 000 ₽')
+      ] },
+      { name: 'День 3', meta: '220 км · домой', rows: [
+        r('brown', 'через 35 км', '10:00', 'Золотые ворота', 'Владимир: ворота и Успенский собор.', '≈ 600 ₽'),
+        r('fuel', 'через 60 км', '11:30', 'АЗС на М-7', 'Последняя заправка до дома.', '≈ 1 700 ₽'),
+        r('city', 'через 125 км', '15:30', 'Москва', 'Дома к вечеру, без ночной трассы.', '', 'МОСКВА')
+      ] }
+    ];
+    return { days };
+  }
+}
+</script>
+</body>
+</html>

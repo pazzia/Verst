@@ -1,0 +1,52 @@
+bars.json
+bars_failed.json
+candidates.json
+class_check.json
+class_tree.json
+classes_resolved.json
+credits.json
+credits_extra.json
+forms.json
+forms_report.json
+geosearch.json
+log.txt
+osm_pois.json
+parking.json
+photo_meta.json
+photo_meta_extra.json
+photos_check.json
+pois.json
+pois_failed.json
+sources.json
+towns.json
+voyage.json
+wd_extra.json
+wiki.json
+russia-latest.osm.pbf: 4192127002 bytes, md5 01682de9736e8fcda96ea6f47963958e
+/home/runner/work/_temp/ru.osm.pbf: OK
+-rw-r--r-- 1 runner runner 4192127002 Oct 31 13:40 /home/runner/work/_temp/ru.osm.pbf
+bars: 6786 rows from 9041 named features, 1142 towns (extract)
+food: 55281 rows from 81156 named features, 1142 towns (extract)
+{
+ "towns": 1114,
+ "pois": 10921,
+ "bars": 5635,
+ "food": 29930,
+ "links": 79,
+ "credits": 3632,
+ "bytes": {
+  "catalogue_meta.json.gz": 98447,
+  "catalogue_towns.json.gz": 52995,
+  "catalogue_pois.json.gz": 629360,
+  "catalogue_bars.json.gz": 119961,
+  "catalogue_food.json.gz": 595462
+ },
+ "totalBytes": 1496225
+}
+-rw-r--r-- 1 runner runner 119961 Oct 31 13:43 /home/runner/work/Verst/Verst/backend/planner/verst_planner/resources/catalogue_bars.json.gz
+-rw-r--r-- 1 runner runner 595462 Oct 31 13:43 /home/runner/work/Verst/Verst/backend/planner/verst_planner/resources/catalogue_food.json.gz
+-rw-r--r-- 1 runner runner  98447 Oct 31 13:43 /home/runner/work/Verst/Verst/backend/planner/verst_planner/resources/catalogue_meta.json.gz
+-rw-r--r-- 1 runner runner  87598 Oct 31 13:39 /home/runner/work/Verst/Verst/backend/planner/verst_planner/resources/catalogue_parks.json.gz
+-rw-r--r-- 1 runner runner 629360 Oct 31 13:43 /home/runner/work/Verst/Verst/backend/planner/verst_planner/resources/catalogue_pois.json.gz
+-rw-r--r-- 1 runner runner  52995 Oct 31 13:43 /home/runner/work/Verst/Verst/backend/planner/verst_planner/resources/catalogue_towns.json.gz
+catalogue total: 1583823 bytes

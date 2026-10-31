@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Навигатор</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE27A}
+@keyframes rush{from{background-position:0 0}to{background-position:0 160px}}
+.lane{background:repeating-linear-gradient(to bottom,#F4F4F0 0 70px,transparent 70px 160px);animation:rush 1.4s linear infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.caret{animation:blink 1s steps(1) infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(216,64,43,.55)}100%{box-shadow:0 0 0 14px rgba(216,64,43,0)}}
+.start{animation:ring 1.8s ease-out infinite}
+input::placeholder{color:#5F7487}
+input:focus{outline:none}
+.field:focus-within{border-color:#FFD23F !important}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #141416; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 150px; overflow: hidden">
+    <div style="position: absolute; inset: 0 0 auto 0; height: 46px; background: #2B2850"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 46px; height: 30px; background: #8E4A6B"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 76px; height: 18px; background: #D9655A"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 94px; height: 10px; background: #F29A5E"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 104px; bottom: 0; background: #2C3A33"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 104px; height: 46px; overflow: hidden; perspective: 120px; perspective-origin: 50% 0%">
+      <div style="position: absolute; left: 50%; bottom: 0; width: 160px; height: 600px; margin-left: -80px; background: #3A3A3F; border-left: 4px solid #F4F4F0; border-right: 4px solid #F4F4F0; box-sizing: border-box; transform-origin: 50% 100%; transform: rotateX(80deg)">
+        <div class="lane" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 6px; margin-left: -3px"></div>
+      </div>
+    </div>
+    <div style="position: absolute; left: 0; right: 0; top: 0; height: 14px; background: #0E0E10; border-radius: 0 0 50% 50% / 0 0 12px 12px"></div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 132px; bottom: 0; background: #161618; border-radius: 50% 50% 0 0 / 30px 30px 0 0; box-shadow: 0 -2px 0 #232327">
+    <a href="Wind.dc.html" style="position: absolute; left: 20px; top: 16px; min-height: 32px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #8C8C93; text-decoration: none">
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8C8C93" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>
+      К лобовому
+    </a>
+
+    <div style="position: absolute; left: 14px; right: 14px; top: 56px; bottom: 140px; background: #0B1218; border: 7px solid #232327; border-radius: 18px; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; overflow: hidden">
+      <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #7FA6D9">
+        <span>НАВИГАТОР · ВСЯ РОССИЯ</span><span>GPS ●</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px; border-radius: 10px; background: #16222C; border: 1px solid #2B3D4D">
+        <span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 50%; border: 3px solid #7FA6D9; box-sizing: border-box; flex-shrink: 0"></span>
+        <span style="flex: 1; display: flex; flex-direction: column">
+          <span style="font-size: 11px; color: #8FA4B8">ОТКУДА</span>
+          <span style="font-weight: 600; font-size: 16px">Москва · вы здесь</span>
+        </span>
+        <button type="button" style="min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #2B3D4D; background: transparent; color: #7FA6D9; font-family: inherit; font-weight: 600; font-size: 12px; cursor: pointer">изменить</button>
+      </div>
+
+      <div class="field" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; border-radius: 10px; background: #16222C; border: 2px solid #2B3D4D">
+        <span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 3px; background: #FFD23F; flex-shrink: 0"></span>
+        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+          <label for="q" style="font-size: 11px; color: #8FA4B8">КУДА — город, адрес, место</label>
+          <input id="q" type="text" value="{{q}}" onChange="{{onQ}}" placeholder="Начните вводить" autocomplete="off" style="width: 100%; background: transparent; border: none; color: #F4F4F0; font-family: inherit; font-weight: 600; font-size: 18px; padding: 0; min-height: 26px">
+        </span>
+      </div>
+
+      <ul role="listbox" aria-label="Подсказки" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; border: 1px solid #1E2E3A">
+        <sc-for list="{{sugg}}" as="s" hint-placeholder-count="4">
+          <li>
+            <button type="button" role="option" aria-selected="{{s.on}}" onClick="{{s.pick}}" style="{{s.style}}">
+              <span aria-hidden="true" style="{{s.iconStyle}}">{{s.mark}}</span>
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; text-align: left">
+                <span style="font-weight: 600; font-size: 15px">{{s.name}}</span>
+                <span style="font-size: 12px; color: #8FA4B8">{{s.where}}</span>
+              </span>
+              <span style="font-size: 13px; color: #B9C6D3; white-space: nowrap; font-variant-numeric: tabular-nums">{{s.km}}</span>
+            </button>
+          </li>
+        </sc-for>
+      </ul>
+
+      <div style="display: flex; gap: 6px">
+        <button type="button" style="flex: 1; min-height: 44px; border-radius: 10px; border: 1px dashed #3A5266; background: transparent; color: #FFD23F; font-family: inherit; font-weight: 600; font-size: 13px; cursor: pointer">+ заехать по пути</button>
+        <button type="button" style="flex: 1; min-height: 44px; border-radius: 10px; border: 1px dashed #3A5266; background: transparent; color: #7FA6D9; font-family: inherit; font-weight: 600; font-size: 13px; cursor: pointer">точка на карте</button>
+      </div>
+
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #5F7487">НЕДАВНО ИСКАЛИ ДРУГИЕ</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px">
+        <sc-for list="{{others}}" as="o" hint-placeholder-count="3">
+          <span style="padding: 5px 10px; border-radius: 14px; background: #16222C; font-size: 12px; color: #B9C6D3">{{o}}</span>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="position: absolute; left: 22px; right: 20px; bottom: 26px; display: flex; align-items: center; gap: 14px">
+      <div style="flex: 1; min-width: 0" aria-live="polite">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #8C8C93">МАРШРУТ</div>
+        <div style="font-weight: 700; font-size: 20px; line-height: 1.15">Москва → {{toName}}</div>
+        <div style="font-size: 13px; color: #B9B9C0">{{toMeta}}</div>
+      </div>
+      <a href="Panel.dc.html" class="start" aria-label="Поехали" style="width: 86px; height: 86px; border-radius: 50%; background: #232327; display: flex; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0">
+        <span style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid #D8402B; background: #1C1C1F; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-sizing: border-box">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v8M6.3 6.6a8 8 0 1 0 11.4 0"></path></svg>
+          <span style="font-weight: 700; font-size: 11px; letter-spacing: 0.06em; color: #F4F4F0">ПОЕХАЛИ</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { q: 'Яро', to: 0 }; }
+  renderVals() {
+    const all = [
+      { name: 'Ярославль', where: 'город · Ярославская область', km: '265 км', type: 'city' },
+      { name: 'Ярославское шоссе', where: 'улица · Москва', km: '18 км', type: 'street' },
+      { name: 'Ярославская улица', where: 'улица · Казань', km: '820 км', type: 'street' },
+      { name: 'Ярославский вокзал', where: 'место · Москва', km: '6 км', type: 'place' },
+      { name: 'Казань', where: 'город · Татарстан', km: '820 км', type: 'city' },
+      { name: 'Калининград', where: 'город · Калининградская область', km: '1 230 км', type: 'city' },
+      { name: 'Карелия, Рускеала', where: 'горный парк · Карелия', km: '1 050 км', type: 'place' },
+      { name: 'Екатеринбург', where: 'город · Свердловская область', km: '1 780 км', type: 'city' },
+      { name: 'Выборг', where: 'город · Ленинградская область', km: '850 км', type: 'city' },
+      { name: 'Абрау-Дюрсо', where: 'посёлок · Краснодарский край', km: '1 480 км', type: 'place' },
+      { name: 'Суздаль', where: 'город · Владимирская область', km: '220 км', type: 'city' }
+    ];
+    const q = (this.state.q || '').trim().toLowerCase();
+    let found = q ? all.filter((a) => a.name.toLowerCase().indexOf(q) >= 0 || a.where.toLowerCase().indexOf(q) >= 0) : all;
+    found = found.slice(0, 4);
+    const toItem = all[this.state.to] || all[0];
+    const marks = { city: 'Г', street: 'У', place: 'М' };
+    const sugg = found.map((a) => {
+      const on = a.name === toItem.name;
+      return {
+        name: a.name, where: a.where, km: a.km, mark: marks[a.type], on: on ? 'true' : 'false',
+        pick: () => this.setState({ to: all.indexOf(a), q: a.name }),
+        iconStyle: 'width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;background:' + (a.type === 'city' ? '#1E4FA3' : (a.type === 'place' ? '#6B3E26' : '#2B3D4D')) + ';color:#F4F4F0',
+        style: 'width:100%;min-height:52px;display:flex;align-items:center;gap:10px;padding:6px 12px;border:none;border-bottom:1px solid #1E2E3A;cursor:pointer;font-family:inherit;color:#F4F4F0;background:' + (on ? '#1A2C3B' : '#0F1A22')
+      };
+    });
+    return {
+      q: this.state.q,
+      onQ: (e) => this.setState({ q: e.target.value }),
+      sugg,
+      toName: toItem.name,
+      toMeta: toItem.km + ' · ' + toItem.where,
+      others: ['Петербург → Выборг', 'Екатеринбург → Пермь', 'Краснодар → Абрау-Дюрсо']
+    };
+  }
+}
+</script>
+</body>
+</html>

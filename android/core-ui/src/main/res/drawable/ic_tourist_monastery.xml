@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED from design/icons/tourist-monastery.svg by design/tools/gen_vectors.py. Do not edit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF141416"
+        android:fillType="nonZero"
+        android:pathData="M13 2L13 5L11 5L11 2ZM10.5 2.5L13.5 2.5L13.5 4.5L10.5 4.5ZM7 21L7 12L9 12L9 21ZM7.293 11.293L11.293 7.293L12.707 8.707L8.707 12.707ZM12.707 7.293L16.707 11.293L15.293 12.707L11.293 8.707ZM17 12L17 21L15 21L15 12ZM5 20L19 20L19 22L5 22ZM9 21L9 17L11 17L11 21ZM9 17A3 3 0 0 1 15 17L13 17A1 1 0 0 0 11 17ZM15 17L15 21L13 21L13 17ZM13 2A1 1 0 1 1 11 2A1 1 0 1 1 13 2ZM13 5A1 1 0 1 1 11 5A1 1 0 1 1 13 5ZM11.5 3.5A1 1 0 1 1 9.5 3.5A1 1 0 1 1 11.5 3.5ZM14.5 3.5A1 1 0 1 1 12.5 3.5A1 1 0 1 1 14.5 3.5ZM9 21A1 1 0 1 1 7 21A1 1 0 1 1 9 21ZM9 12A1 1 0 1 1 7 12A1 1 0 1 1 9 12ZM13 8A1 1 0 1 1 11 8A1 1 0 1 1 13 8ZM17 12A1 1 0 1 1 15 12A1 1 0 1 1 17 12ZM17 21A1 1 0 1 1 15 21A1 1 0 1 1 17 21ZM6 21A1 1 0 1 1 4 21A1 1 0 1 1 6 21ZM20 21A1 1 0 1 1 18 21A1 1 0 1 1 20 21ZM11 21A1 1 0 1 1 9 21A1 1 0 1 1 11 21ZM11 17A1 1 0 1 1 9 17A1 1 0 1 1 11 17ZM15 17A1 1 0 1 1 13 17A1 1 0 1 1 15 17ZM15 21A1 1 0 1 1 13 21A1 1 0 1 1 15 21Z" />
+</vector>

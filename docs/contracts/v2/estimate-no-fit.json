@@ -1,0 +1,35 @@
+{
+ "request": {
+  "function": "estimate",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-fit-4",
+   "input_json": {
+    "origin": {
+     "lat": 55.7558,
+     "lon": 37.6173,
+     "label": "Москва"
+    },
+    "readyRouteId": "rr_golden_ring",
+    "crew": {
+     "adults": 4,
+     "children": 1,
+     "dog": true
+    },
+    "dailyKm": 300,
+    "budget": 20000
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "km": 544,
+   "days": 2,
+   "outcome": "no_fit",
+   "totalRub": 28300,
+   "budgetStatus": null
+  },
+  "ms": 0
+ }
+}

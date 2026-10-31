@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C · Простой контроль · Приборы</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+/* Variant C: a plain settings form. No mirror, odometer or gauge; derived numbers sit under the control they depend on. */
+.phone { background: var(--raised); }
+.bands { flex-shrink: 0; display: flex; flex-direction: column; }
+.bands i { display: block; height: 3px; }
+.bar { flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 6px 16px 4px 6px; }
+.back { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: var(--text); flex-shrink: 0; }
+.bar h1 { margin: 0; display: flex; flex-direction: column; min-width: 0; }
+.bar h1 b { font-weight: 700; font-size: 20px; line-height: 24px; }
+.bar h1 small { font-size: 14px; line-height: 18px; font-weight: 400; color: var(--text-2); }
+.scroll .sect:first-child { margin-top: 10px; }
+.pace { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; }
+.pace .v b { font-weight: 700; font-size: 22px; line-height: 26px; font-variant-numeric: tabular-nums; }
+.pace .v span { font-size: 16px; color: var(--text-2); }
+.gear { color: var(--text-2); }
+@media (max-height: 700px) { .sect { margin-top: 16px; } }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="bands" aria-hidden="true"><i style="background:var(--sky1)"></i><i style="background:var(--sky2)"></i><i style="background:var(--sky3)"></i><i style="background:var(--sky4)"></i><i style="background:var(--sky5)"></i></div>
+  <div class="bar">
+    <button class="back" aria-label="Назад к готовым поездкам">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4M11 5l-7 7 7 7"/></svg>
+    </button>
+    <h1><b>Золотое кольцо</b><small>из Москвы · 761 км по кругу</small></h1>
+  </div>
+
+  <div class="scroll">
+    <section class="sect" aria-labelledby="h-crew">
+      <h2 id="h-crew">Кто едет</h2>
+      <div class="row">
+        <span class="lbl"><b>Взрослые</b><small>вместе с вами</small></span>
+        <span class="stepper" role="group" aria-label="Взрослые: 2">
+          <button class="key" aria-label="Меньше взрослых"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <span class="val">2</span>
+          <button class="key" aria-label="Больше взрослых"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+        </span>
+      </div>
+      <div class="row">
+        <span class="lbl"><b>Дети</b></span>
+        <span class="stepper" role="group" aria-label="Дети: 1">
+          <button class="key" aria-label="Меньше детей"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <span class="val">1</span>
+          <button class="key" aria-label="Больше детей"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+        </span>
+      </div>
+      <div class="row">
+        <span class="lbl"><b>Собака</b></span>
+        <span class="seg" role="radiogroup" aria-label="Собака">
+          <button class="chip" role="radio" aria-checked="false">не едет</button>
+          <button class="chip" role="radio" aria-checked="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>едет</button>
+        </span>
+      </div>
+    </section>
+
+    <section class="sect" aria-labelledby="h-pace">
+      <h2 id="h-pace">Сколько проезжать за день</h2>
+      <div class="pace" role="group" aria-label="300 километров в день">
+        <button class="key" aria-label="Меньше на 50 км"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+        <span class="v"><b>300 км</b> <span>в день</span></span>
+        <button class="key" aria-label="Больше на 50 км"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+      </div>
+      <p class="hint" aria-live="polite">≈ 4 ч 20 мин за рулём · <b>3 дня на кольцо</b></p>
+    </section>
+
+    <section class="sect" aria-labelledby="h-budget">
+      <h2 id="h-budget">Бюджет на всю поездку</h2>
+      <div class="chips num" role="radiogroup" aria-labelledby="h-budget">
+        <button class="chip" role="radio" aria-checked="false">20 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="false">30 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>40 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="false">60 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="false">80 000 ₽</button>
+        <button class="chip" role="radio" aria-checked="false">не важно</button>
+      </div>
+      <p class="hint" aria-live="polite">Оценка поездки <b>≈ 37 200 ₽</b> — в бюджете</p>
+    </section>
+
+    <section class="sect" aria-labelledby="h-mood">
+      <h2 id="h-mood">Как едем</h2>
+      <div role="radiogroup" aria-labelledby="h-mood">
+        <button class="radio" role="radio" aria-checked="true"><span class="dot" aria-hidden="true"></span><span class="t"><b>Спокойно</b><small>короче перегоны, длинные перерывы</small></span></button>
+        <button class="radio" role="radio" aria-checked="false"><span class="dot" aria-hidden="true"></span><span class="t"><b>Весело и познавательно</b><small>каждые полтора часа — интересное место у трассы</small></span></button>
+        <button class="radio" role="radio" aria-checked="false"><span class="dot" aria-hidden="true"></span><span class="t"><b>Только доехать</b><small>заправки, еда и ночёвки</small></span></button>
+      </div>
+    </section>
+
+    <section class="sect">
+      <button class="plate-row" aria-label="Машина и выезд: АИ-95, расход 8 литров, выезд в субботу в 8:00. Изменить">
+        <svg class="gear" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span class="t"><b>Машина и выезд</b><small>АИ-95 · 8,0 л на 100 км · сб 08:00</small></span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+  </div>
+
+  <div class="go">
+    <div class="sum" aria-live="polite"><span>761 км · 3 дня</span><span><b>≈ 37 200 ₽</b> — в бюджете</span></div>
+    <button class="cta"><span>Построить маршрут</span></button>
+  </div>
+</div>
+</body>
+</html>

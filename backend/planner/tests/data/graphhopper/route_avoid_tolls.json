@@ -1,0 +1,259 @@
+{
+ "_meta": {
+  "source": "GraphHopper 11.0 server, synthetic mini map (infra/routing/dev/make_mini_osm.py)",
+  "recordedBy": "infra/routing/dev/record_fixtures.sh",
+  "note": "W -> E avoiding tolls: trunk М-10 with refs 'М-10;Е105' and Latin 'M-10'",
+  "schema": "https://github.com/graphhopper/graphhopper/blob/11.0/docs/web/api-doc.md",
+  "replaceWith": "real Russia responses from .github/workflows/routing.yml (artifact routing-recordings)"
+ },
+ "request": {
+  "profile": "car_avoid_tolls",
+  "points": [
+   [
+    37.0,
+    56.0
+   ],
+   [
+    37.3,
+    56.0
+   ]
+  ],
+  "snap_preventions": [
+   "motorway",
+   "tunnel",
+   "bridge",
+   "ferry"
+  ],
+  "points_encoded": false,
+  "instructions": false,
+  "calc_points": true,
+  "details": [
+   "road_class",
+   "toll",
+   "street_ref",
+   "distance",
+   "time",
+   "leg_distance"
+  ]
+ },
+ "status": 200,
+ "body": {
+  "hints": {
+   "visited_nodes.sum": 7,
+   "visited_nodes.average": 7.0
+  },
+  "info": {
+   "copyrights": [
+    "GraphHopper",
+    "OpenStreetMap contributors"
+   ],
+   "took": 3
+  },
+  "paths": [
+   {
+    "distance": 20988.739,
+    "weight": 2932.736018,
+    "time": 1043748,
+    "transfers": 0,
+    "legs": [],
+    "points_encoded": false,
+    "bbox": [
+     37.0,
+     55.985,
+     37.3,
+     56.0
+    ],
+    "points": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       37.0,
+       56.0
+      ],
+      [
+       37.01,
+       56.0
+      ],
+      [
+       37.015,
+       55.99
+      ],
+      [
+       37.02,
+       55.985
+      ],
+      [
+       37.15,
+       55.985
+      ],
+      [
+       37.28,
+       55.985
+      ],
+      [
+       37.287,
+       55.995
+      ],
+      [
+       37.29,
+       56.0
+      ],
+      [
+       37.3,
+       56.0
+      ]
+     ]
+    },
+    "details": {
+     "street_ref": [
+      [
+       0,
+       1,
+       null
+      ],
+      [
+       1,
+       3,
+       "46К-1150"
+      ],
+      [
+       3,
+       4,
+       "М-10, Е105"
+      ],
+      [
+       4,
+       5,
+       "M-10"
+      ],
+      [
+       5,
+       8,
+       null
+      ]
+     ],
+     "distance": [
+      [
+       0,
+       1,
+       621.794
+      ],
+      [
+       1,
+       3,
+       1791.651
+      ],
+      [
+       3,
+       4,
+       8086.46
+      ],
+      [
+       4,
+       5,
+       8086.46
+      ],
+      [
+       5,
+       7,
+       1780.58
+      ],
+      [
+       7,
+       8,
+       621.794
+      ]
+     ],
+     "leg_distance": [
+      [
+       0,
+       8,
+       20988.739
+      ]
+     ],
+     "road_class": [
+      [
+       0,
+       1,
+       "residential"
+      ],
+      [
+       1,
+       3,
+       "secondary"
+      ],
+      [
+       3,
+       5,
+       "trunk"
+      ],
+      [
+       5,
+       7,
+       "secondary"
+      ],
+      [
+       7,
+       8,
+       "tertiary"
+      ]
+     ],
+     "time": [
+      [
+       0,
+       1,
+       74615
+      ],
+      [
+       1,
+       3,
+       107499
+      ],
+      [
+       3,
+       4,
+       355015
+      ],
+      [
+       4,
+       5,
+       355015
+      ],
+      [
+       5,
+       7,
+       106835
+      ],
+      [
+       7,
+       8,
+       44769
+      ]
+     ],
+     "toll": [
+      [
+       0,
+       8,
+       "no"
+      ]
+     ]
+    },
+    "ascend": 0.0,
+    "descend": 0.0,
+    "snapped_waypoints": {
+     "type": "LineString",
+     "coordinates": [
+      [
+       37.0,
+       56.0
+      ],
+      [
+       37.3,
+       56.0
+      ]
+     ]
+    }
+   }
+  ]
+ }
+}

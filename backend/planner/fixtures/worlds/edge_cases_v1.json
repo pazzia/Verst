@@ -1,0 +1,1399 @@
+{
+ "id": "edge_cases_v1",
+ "asOf": "2026-10-01",
+ "regions": [
+  {
+   "code": "RU",
+   "nameRu": "Россия",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-TST",
+   "nameRu": "Тестовая область",
+   "tz": "Europe/Moscow"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "E0",
+   "lat": 58.0,
+   "lon": 50.0,
+   "region": "RU-TST"
+  },
+  {
+   "id": "E100",
+   "lat": 58.0,
+   "lon": 51.69518,
+   "region": "RU-TST"
+  },
+  {
+   "id": "E200",
+   "lat": 58.0,
+   "lon": 53.39037,
+   "region": "RU-TST"
+  },
+  {
+   "id": "E300",
+   "lat": 58.0,
+   "lon": 55.08555,
+   "region": "RU-TST"
+  },
+  {
+   "id": "E400",
+   "lat": 58.0,
+   "lon": 56.78074,
+   "region": "RU-TST"
+  },
+  {
+   "id": "E500",
+   "lat": 58.0,
+   "lon": 58.47592,
+   "region": "RU-TST"
+  },
+  {
+   "id": "E600",
+   "lat": 58.0,
+   "lon": 60.17111,
+   "region": "RU-TST"
+  },
+  {
+   "id": "N100",
+   "lat": 58.90437,
+   "lon": 50.0,
+   "region": "RU-TST"
+  },
+  {
+   "id": "N200",
+   "lat": 59.80874,
+   "lon": 50.0,
+   "region": "RU-TST"
+  },
+  {
+   "id": "N300",
+   "lat": 60.71312,
+   "lon": 50.0,
+   "region": "RU-TST"
+  },
+  {
+   "id": "N400",
+   "lat": 61.61749,
+   "lon": 50.0,
+   "region": "RU-TST"
+  },
+  {
+   "id": "N450",
+   "lat": 62.06967,
+   "lon": 50.0,
+   "region": "RU-TST"
+  },
+  {
+   "id": "BLZ",
+   "lat": 57.89148,
+   "lon": 50.0,
+   "region": "RU-TST"
+  },
+  {
+   "id": "OFF",
+   "lat": 57.97739,
+   "lon": 50.84759,
+   "region": "RU-TST"
+  }
+ ],
+ "edges": [
+  {
+   "from": "E0",
+   "to": "E100",
+   "km": 99.9,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-999",
+   "toll": false
+  },
+  {
+   "from": "E100",
+   "to": "E200",
+   "km": 99.9,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-999",
+   "toll": false
+  },
+  {
+   "from": "E200",
+   "to": "E300",
+   "km": 99.9,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-999",
+   "toll": false
+  },
+  {
+   "from": "E300",
+   "to": "E400",
+   "km": 99.9,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-999",
+   "toll": false
+  },
+  {
+   "from": "E400",
+   "to": "E500",
+   "km": 99.9,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-999",
+   "toll": false
+  },
+  {
+   "from": "E500",
+   "to": "E600",
+   "km": 99.9,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-999",
+   "toll": false
+  },
+  {
+   "from": "E0",
+   "to": "N100",
+   "km": 100.6,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-998",
+   "toll": false
+  },
+  {
+   "from": "N100",
+   "to": "N200",
+   "km": 100.6,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-998",
+   "toll": false
+  },
+  {
+   "from": "N200",
+   "to": "N300",
+   "km": 100.6,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-998",
+   "toll": false
+  },
+  {
+   "from": "N300",
+   "to": "N400",
+   "km": 100.6,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-998",
+   "toll": false
+  },
+  {
+   "from": "N400",
+   "to": "N450",
+   "km": 50.3,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-998",
+   "toll": false
+  },
+  {
+   "from": "E0",
+   "to": "BLZ",
+   "km": 12.1,
+   "speedKmh": 60,
+   "roadClass": "secondary",
+   "ref": null,
+   "toll": false
+  }
+ ],
+ "towns": [
+  {
+   "id": "t_tst_testovsk",
+   "nameRu": "Тестовск",
+   "namePrepRu": "Тестовске",
+   "nameGenRu": "Тестовска",
+   "node": "E0",
+   "population": 200000,
+   "quality": 2,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_tst_srednii",
+   "nameRu": "Средний",
+   "namePrepRu": "Среднем",
+   "nameGenRu": "Среднего",
+   "node": "E200",
+   "population": 40000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_tst_seredinsk",
+   "nameRu": "Серединск",
+   "namePrepRu": "Серединске",
+   "nameGenRu": "Серединска",
+   "node": "E300",
+   "population": 30000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_tst_konechny",
+   "nameRu": "Конечный",
+   "namePrepRu": "Конечном",
+   "nameGenRu": "Конечного",
+   "node": "E600",
+   "population": 100000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_tst_pustosh",
+   "nameRu": "Пустошь",
+   "namePrepRu": "Пустоши",
+   "nameGenRu": "Пустоши",
+   "node": "N450",
+   "population": 5000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_tst_blizhny",
+   "nameRu": "Ближний",
+   "namePrepRu": "Ближнем",
+   "nameGenRu": "Ближнего",
+   "node": "BLZ",
+   "population": 8000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_tst_glukhovo",
+   "nameRu": "Глухово",
+   "namePrepRu": "Глухове",
+   "nameGenRu": "Глухова",
+   "node": "OFF",
+   "population": 1000,
+   "quality": 0,
+   "eveningWalk": false
+  }
+ ],
+ "places": [
+  {
+   "id": "pl_tst_hotel_nodog",
+   "type": "lodging",
+   "nameRu": "Гостиница «Серединская»",
+   "anchor": {
+    "node": "E300",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_tst_seredinsk",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 3500,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_museum_long",
+   "type": "sight",
+   "nameRu": "Большой краеведческий музей",
+   "anchor": {
+    "edge": [
+     "E0",
+     "E100"
+    ],
+    "km": 80.0,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 240,
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_park_long",
+   "type": "sight",
+   "nameRu": "Парк-усадьба «Долгая»",
+   "anchor": {
+    "edge": [
+     "E100",
+     "E200"
+    ],
+    "km": 60.1,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 240,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_viewpoint",
+   "type": "sight",
+   "nameRu": "Смотровая на Тесте",
+   "anchor": {
+    "edge": [
+     "E400",
+     "E500"
+    ],
+    "km": 50.4,
+    "lateralKm": 0.5
+   },
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_030",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 30 км",
+   "anchor": {
+    "edge": [
+     "E0",
+     "E100"
+    ],
+    "km": 30.0,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_070",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 70 км",
+   "anchor": {
+    "edge": [
+     "E0",
+     "E100"
+    ],
+    "km": 70.0,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_110",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 110 км",
+   "anchor": {
+    "edge": [
+     "E100",
+     "E200"
+    ],
+    "km": 10.1,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_150",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 150 км",
+   "anchor": {
+    "edge": [
+     "E100",
+     "E200"
+    ],
+    "km": 50.1,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_190",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 190 км",
+   "anchor": {
+    "edge": [
+     "E100",
+     "E200"
+    ],
+    "km": 90.1,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_230",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 230 км",
+   "anchor": {
+    "edge": [
+     "E200",
+     "E300"
+    ],
+    "km": 30.2,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_270",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 270 км",
+   "anchor": {
+    "edge": [
+     "E200",
+     "E300"
+    ],
+    "km": 70.2,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_310",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 310 км",
+   "anchor": {
+    "edge": [
+     "E300",
+     "E400"
+    ],
+    "km": 10.3,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_350",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 350 км",
+   "anchor": {
+    "edge": [
+     "E300",
+     "E400"
+    ],
+    "km": 50.3,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_390",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 390 км",
+   "anchor": {
+    "edge": [
+     "E300",
+     "E400"
+    ],
+    "km": 90.3,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_430",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 430 км",
+   "anchor": {
+    "edge": [
+     "E400",
+     "E500"
+    ],
+    "km": 30.4,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_470",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 470 км",
+   "anchor": {
+    "edge": [
+     "E400",
+     "E500"
+    ],
+    "km": 70.4,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_510",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 510 км",
+   "anchor": {
+    "edge": [
+     "E500",
+     "E600"
+    ],
+    "km": 10.5,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_550",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 550 км",
+   "anchor": {
+    "edge": [
+     "E500",
+     "E600"
+    ],
+    "km": 50.5,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_fuel_590",
+   "type": "fuel",
+   "nameRu": "АЗС «Тест», Р-999, 590 км",
+   "anchor": {
+    "edge": [
+     "E500",
+     "E600"
+    ],
+    "km": 90.5,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_040",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 40 км",
+   "anchor": {
+    "edge": [
+     "E0",
+     "E100"
+    ],
+    "km": 40.0,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_090",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 90 км",
+   "anchor": {
+    "edge": [
+     "E0",
+     "E100"
+    ],
+    "km": 90.0,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc",
+    "walk"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_140",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 140 км",
+   "anchor": {
+    "edge": [
+     "E100",
+     "E200"
+    ],
+    "km": 40.1,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_190",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 190 км",
+   "anchor": {
+    "edge": [
+     "E100",
+     "E200"
+    ],
+    "km": 90.1,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc",
+    "walk"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_240",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 240 км",
+   "anchor": {
+    "edge": [
+     "E200",
+     "E300"
+    ],
+    "km": 40.2,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_290",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 290 км",
+   "anchor": {
+    "edge": [
+     "E200",
+     "E300"
+    ],
+    "km": 90.2,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc",
+    "walk"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_340",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 340 км",
+   "anchor": {
+    "edge": [
+     "E300",
+     "E400"
+    ],
+    "km": 40.3,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_390",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 390 км",
+   "anchor": {
+    "edge": [
+     "E300",
+     "E400"
+    ],
+    "km": 90.3,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc",
+    "walk"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_440",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 440 км",
+   "anchor": {
+    "edge": [
+     "E400",
+     "E500"
+    ],
+    "km": 40.4,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_490",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 490 км",
+   "anchor": {
+    "edge": [
+     "E400",
+     "E500"
+    ],
+    "km": 90.4,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc",
+    "walk"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_540",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 540 км",
+   "anchor": {
+    "edge": [
+     "E500",
+     "E600"
+    ],
+    "km": 40.5,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_rest_590",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-999, 590 км",
+   "anchor": {
+    "edge": [
+     "E500",
+     "E600"
+    ],
+    "km": 90.5,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc",
+    "walk"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_055",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 55 км",
+   "anchor": {
+    "edge": [
+     "E0",
+     "E100"
+    ],
+    "km": 55.0,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_115",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 115 км",
+   "anchor": {
+    "edge": [
+     "E100",
+     "E200"
+    ],
+    "km": 15.1,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_175",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 175 км",
+   "anchor": {
+    "edge": [
+     "E100",
+     "E200"
+    ],
+    "km": 75.1,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_235",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 235 км",
+   "anchor": {
+    "edge": [
+     "E200",
+     "E300"
+    ],
+    "km": 35.2,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_295",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 295 км",
+   "anchor": {
+    "edge": [
+     "E200",
+     "E300"
+    ],
+    "km": 95.2,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_355",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 355 км",
+   "anchor": {
+    "edge": [
+     "E300",
+     "E400"
+    ],
+    "km": 55.3,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_415",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 415 км",
+   "anchor": {
+    "edge": [
+     "E400",
+     "E500"
+    ],
+    "km": 15.4,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_475",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 475 км",
+   "anchor": {
+    "edge": [
+     "E400",
+     "E500"
+    ],
+    "km": 75.4,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_535",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 535 км",
+   "anchor": {
+    "edge": [
+     "E500",
+     "E600"
+    ],
+    "km": 35.5,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_cafe_595",
+   "type": "food",
+   "nameRu": "Кафе «Тестовое», Р-999, 595 км",
+   "anchor": {
+    "edge": [
+     "E500",
+     "E600"
+    ],
+    "km": 95.5,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_fuel_040",
+   "type": "fuel",
+   "nameRu": "АЗС «Север», Р-998, 40 км",
+   "anchor": {
+    "edge": [
+     "E0",
+     "N100"
+    ],
+    "km": 40.0,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_fuel_080",
+   "type": "fuel",
+   "nameRu": "АЗС «Север», Р-998, 80 км",
+   "anchor": {
+    "edge": [
+     "E0",
+     "N100"
+    ],
+    "km": 80.0,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_fuel_420",
+   "type": "fuel",
+   "nameRu": "АЗС «Север», Р-998, 420 км",
+   "anchor": {
+    "edge": [
+     "N400",
+     "N450"
+    ],
+    "km": 17.6,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_rest_060",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-998, 60 км",
+   "anchor": {
+    "edge": [
+     "E0",
+     "N100"
+    ],
+    "km": 60.0,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_rest_160",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-998, 160 км",
+   "anchor": {
+    "edge": [
+     "N100",
+     "N200"
+    ],
+    "km": 59.4,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_rest_260",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-998, 260 км",
+   "anchor": {
+    "edge": [
+     "N200",
+     "N300"
+    ],
+    "km": 58.8,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_rest_360",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-998, 360 км",
+   "anchor": {
+    "edge": [
+     "N300",
+     "N400"
+    ],
+    "km": 58.2,
+    "lateralKm": -0.2
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_cafe_120",
+   "type": "food",
+   "nameRu": "Кафе «Северное», Р-998, 120 км",
+   "anchor": {
+    "edge": [
+     "N100",
+     "N200"
+    ],
+    "km": 19.4,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_cafe_240",
+   "type": "food",
+   "nameRu": "Кафе «Северное», Р-998, 240 км",
+   "anchor": {
+    "edge": [
+     "N200",
+     "N300"
+    ],
+    "km": 38.8,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tst_n_cafe_330",
+   "type": "food",
+   "nameRu": "Кафе «Северное», Р-998, 330 км",
+   "anchor": {
+    "edge": [
+     "N300",
+     "N400"
+    ],
+    "km": 28.2,
+    "lateralKm": 0.2
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  }
+ ],
+ "regionPrices": [
+  {
+   "region": "RU",
+   "fuelType": "ai95",
+   "priceRub": "61.00",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU",
+   "fuelType": "ai92",
+   "priceRub": "56.50",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU",
+   "fuelType": "dt",
+   "priceRub": "70.00",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TST",
+   "fuelType": "ai95",
+   "priceRub": "61.00",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TST",
+   "fuelType": "ai92",
+   "priceRub": "56.50",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TST",
+   "fuelType": "dt",
+   "priceRub": "70.00",
+   "asOf": "2026-10-01"
+  }
+ ],
+ "tollSegments": [],
+ "readyRoutes": [
+  {
+   "id": "rr_tst_marathon",
+   "hubTownId": "t_tst_testovsk",
+   "titleRu": "Тестовый марафон",
+   "subtitleRu": "1 день · два долгих места",
+   "kmTotal": 200,
+   "kmSign": 200,
+   "ring": "weekend",
+   "roundTrip": false,
+   "daysMin": 1,
+   "daysMax": 1,
+   "tags": [],
+   "coverKey": null,
+   "sort": 10,
+   "points": [
+    {
+     "seq": 1,
+     "role": "stop",
+     "placeId": "pl_tst_museum_long"
+    },
+    {
+     "seq": 2,
+     "role": "stop",
+     "placeId": "pl_tst_park_long"
+    },
+    {
+     "seq": 3,
+     "role": "via",
+     "townId": "t_tst_srednii"
+    }
+   ],
+   "suggestedNights": []
+  }
+ ],
+ "defaults": {
+  "foodCheckByPopulation": [
+   [
+    1000000,
+    900
+   ],
+   [
+    100000,
+    650
+   ],
+   [
+    0,
+    550
+   ]
+  ],
+  "lodgingNightByPopulation": [
+   [
+    1000000,
+    6000
+   ],
+   [
+    100000,
+    4500
+   ],
+   [
+    0,
+    3500
+   ]
+  ]
+ }
+}

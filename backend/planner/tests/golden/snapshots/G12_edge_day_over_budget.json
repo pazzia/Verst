@@ -1,0 +1,370 @@
+{
+  "id": "trp_golden",
+  "title": "Тестовый марафон",
+  "km": 201,
+  "days": 1,
+  "nights": 0,
+  "roundTrip": false,
+  "daysList": [
+    {
+      "day": 1,
+      "km": 201,
+      "driveMin": 147,
+      "tz": "Europe/Moscow",
+      "startAt": "2026-10-24T08:00",
+      "endAt": "2026-10-24T19:27",
+      "overBudget": true,
+      "stops": [
+        {
+          "id": "d1s01",
+          "seq": 1,
+          "day": 1,
+          "kind": "start",
+          "sign": "city",
+          "placeId": null,
+          "townId": null,
+          "name": "Тестовск",
+          "note": null,
+          "lat": 58.0,
+          "lon": 50.0,
+          "arriveAt": null,
+          "departAt": "2026-10-24T08:00",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 0,
+          "kmAt": 0,
+          "dwellMin": 0,
+          "tags": [],
+          "costRub": 0,
+          "reason": "Выезд в 08:00.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s02",
+          "seq": 2,
+          "day": 1,
+          "kind": "sight",
+          "sign": "tourist",
+          "placeId": "pl_tst_museum_long",
+          "townId": null,
+          "name": "Большой краеведческий музей",
+          "note": null,
+          "lat": 58.001808743465915,
+          "lon": 51.3575015015015,
+          "arriveAt": "2026-10-24T08:59",
+          "departAt": "2026-10-24T12:59",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 80,
+          "kmAt": 80,
+          "dwellMin": 240,
+          "tags": [
+            "museum"
+          ],
+          "costRub": 400,
+          "reason": "4 ч на осмотр.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours"
+          ],
+          "unknownRu": "Часы не известны — уточните"
+        },
+        {
+          "id": "d1s03",
+          "seq": 3,
+          "day": 1,
+          "kind": "food",
+          "sign": "food",
+          "placeId": "pl_tst_cafe_115",
+          "townId": null,
+          "name": "Кафе «Тестовое», Р-999, 115 км",
+          "note": null,
+          "lat": 58.001808743465915,
+          "lon": 51.95140991991992,
+          "arriveAt": "2026-10-24T13:24",
+          "departAt": "2026-10-24T14:24",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 36,
+          "kmAt": 115,
+          "dwellMin": 60,
+          "tags": [
+            "parking"
+          ],
+          "costRub": 1100,
+          "reason": "Обед, парковка у входа.",
+          "verified": true,
+          "replaceable": true,
+          "alternatives": [],
+          "alternativesNote": "Других вариантов в это время поблизости нет.",
+          "hotelOptions": [],
+          "selectedHotelId": null
+        },
+        {
+          "id": "d1s04",
+          "seq": 4,
+          "day": 1,
+          "kind": "sight",
+          "sign": "tourist",
+          "placeId": "pl_tst_park_long",
+          "townId": null,
+          "name": "Парк-усадьба «Долгая»",
+          "note": null,
+          "lat": 58.001808743465915,
+          "lon": 52.715009019019014,
+          "arriveAt": "2026-10-24T14:57",
+          "departAt": "2026-10-24T18:57",
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 46,
+          "kmAt": 160,
+          "dwellMin": 240,
+          "tags": [
+            "view",
+            "walk",
+            "free_entry"
+          ],
+          "costRub": 0,
+          "reason": "4 ч на осмотр.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null,
+          "unknownFacts": [
+            "hours"
+          ],
+          "unknownRu": "Часы не известны — уточните"
+        },
+        {
+          "id": "d1s05",
+          "seq": 5,
+          "day": 1,
+          "kind": "finish",
+          "sign": "city",
+          "placeId": null,
+          "townId": "t_tst_srednii",
+          "name": "Средний",
+          "note": null,
+          "lat": 58.0,
+          "lon": 53.39037,
+          "arriveAt": "2026-10-24T19:27",
+          "departAt": null,
+          "tz": "Europe/Moscow",
+          "kmFromPrev": 40,
+          "kmAt": 200,
+          "dwellMin": 0,
+          "tags": [],
+          "costRub": 0,
+          "reason": "Финиш.",
+          "verified": true,
+          "replaceable": false,
+          "alternatives": [],
+          "alternativesNote": null,
+          "hotelOptions": [],
+          "selectedHotelId": null
+        }
+      ]
+    }
+  ],
+  "cost": {
+    "lines": [
+      {
+        "key": "fuel",
+        "title": "Бензин АИ-95",
+        "rub": 980,
+        "formula": "201 км × 8 л/100 × 61,00 ₽",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "Тестовая область",
+            "formula": "201 км × 8 л/100 × 61,00 ₽ = 980 ₽",
+            "rub": 980
+          }
+        ]
+      },
+      {
+        "key": "tolls",
+        "title": "Платные дороги",
+        "rub": 0,
+        "formula": "платных дорог нет",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": []
+      },
+      {
+        "key": "lodging",
+        "title": "Ночёвки",
+        "rub": 0,
+        "formula": "без ночёвок",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": []
+      },
+      {
+        "key": "food",
+        "title": "Питание",
+        "rub": 2200,
+        "formula": "2 чел. × 2 приёма × 550",
+        "asOf": "2026-09",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "День 1",
+            "formula": "обед 550 + ужин 550",
+            "rub": 2200
+          }
+        ]
+      },
+      {
+        "key": "tickets",
+        "title": "Билеты",
+        "rub": 400,
+        "formula": "1 место × 2 взр.",
+        "asOf": "2026-09",
+        "enabled": true,
+        "breakdown": [
+          {
+            "label": "Большой краеведческий музей",
+            "formula": "2 × 200",
+            "rub": 400
+          }
+        ]
+      },
+      {
+        "key": "reserve",
+        "title": "Резерв 10%",
+        "rub": 360,
+        "formula": "на пробки и «давай заедем»",
+        "asOf": "2026-10",
+        "enabled": true,
+        "breakdown": []
+      }
+    ],
+    "reserveOn": true,
+    "subtotalRub": 3580,
+    "totalRub": 3900,
+    "perPersonRub": 2000,
+    "budgetRub": null,
+    "remainingRub": null,
+    "overBudget": false,
+    "hints": [],
+    "hintKeys": [],
+    "pricesAsOf": "2026-10",
+    "units": {
+      "fuel": {
+        "consumption": 8.0,
+        "fuelType": "ai95",
+        "regions": [
+          {
+            "regionCode": "RU-TST",
+            "regionName": "Тестовая область",
+            "km": 201.36,
+            "priceRub": "61.00"
+          }
+        ],
+        "asOf": "2026-10",
+        "tripKm": 201
+      },
+      "tolls": [],
+      "nights": [],
+      "meals": [
+        {
+          "day": 1,
+          "meal": "lunch",
+          "stopId": "d1s03",
+          "checkRub": 550
+        },
+        {
+          "day": 1,
+          "meal": "dinner",
+          "stopId": null,
+          "checkRub": 550
+        }
+      ],
+      "tickets": [
+        {
+          "stopId": "d1s02",
+          "placeId": "pl_tst_museum_long",
+          "name": "Большой краеведческий музей",
+          "adultRub": 200,
+          "childRub": 100
+        },
+        {
+          "stopId": "d1s04",
+          "placeId": "pl_tst_park_long",
+          "name": "Парк-усадьба «Долгая»",
+          "adultRub": 0,
+          "childRub": 0
+        }
+      ],
+      "reserveFrac": "0.10",
+      "lineStep": 10,
+      "totalStep": 100,
+      "childAges": null,
+      "assumedChildAge": 8,
+      "childFoodWeightUnder7": "0.50",
+      "asOf": {
+        "fuel": "2026-10",
+        "tolls": "2026-10",
+        "lodging": "2026-10",
+        "food": "2026-09",
+        "tickets": "2026-09",
+        "reserve": "2026-10"
+      },
+      "moodJustDrive": false
+    }
+  },
+  "reasons": {
+    "overnights": []
+  },
+  "warnings": [
+    {
+      "code": "DAY_OVER_BUDGET",
+      "day": 1,
+      "message": "День 1 получился длинным — можно убрать остановку",
+      "detail": "minutes=687"
+    }
+  ],
+  "input": {
+    "origin": {
+      "lat": 58.0,
+      "lon": 50.0,
+      "label": "Тестовск",
+      "placeId": null,
+      "townId": null
+    },
+    "destination": null,
+    "vias": [],
+    "readyRouteId": "rr_tst_marathon",
+    "roundTrip": false,
+    "crew": {
+      "adults": 2,
+      "children": 0,
+      "dog": false,
+      "childAges": null
+    },
+    "dailyKm": 300,
+    "budget": null,
+    "vehicle": {
+      "consumption": 8.0,
+      "fuelType": "ai95",
+      "tankL": 50.0
+    },
+    "startAt": "2026-10-24T08:00",
+    "tz": "Europe/Moscow",
+    "mood": "calm",
+    "avoidTolls": false,
+    "reserveOn": true,
+    "simplify": false
+  },
+  "engineVersion": "0.1.0"
+}

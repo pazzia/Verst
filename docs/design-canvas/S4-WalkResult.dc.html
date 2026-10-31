@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Прогулка · Спринт 4</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button,a{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD23F;outline-offset:2px}
+@keyframes steps{from{transform:translateY(0)}to{transform:translateY(48px)}}
+.steps{animation:steps 1.8s linear infinite}
+.rebuild{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:.6}}
+</style>
+</helmet>
+<!-- Sprint 4 · 5.11 Walk result (design/screens/5.11-walk-result.md §10). The filter bar is live: tap a filter chip to change it —
+     the walk rebuilds in place («Пересобираем…», the previous walk stays dimmed underneath). Tap «Другой вариант» up to 3 times;
+     the 3rd attempt shows the «нет других вариантов» end state. States: timed (4 ч) / untimed (без ограничения, opening hours
+     come first) / few (8 ч in a quiet area: suggestions with different values) / err (rebuild failed: the last walk stays). -->
+<div style="width: 390px; min-height: 844px; position: relative; overflow: hidden; background: #161618; color: #F4F4F0; font-family: 'IBM Plex Sans Condensed', sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 135px; overflow: hidden; background: #2B2850">
+    <svg width="390" height="132" viewBox="0 68 390 132" style="position: absolute; left: 0; top: 0">
+      <path d="M0 112 L34 112 L34 96 L80 96 L80 106 L128 106 L128 88 L150 80 L172 88 L172 104 L230 104 L230 92 L270 92 L270 108 L318 108 L318 94 L390 94 V200 H0 Z" fill="#2E2939"></path>
+      <rect x="0" y="124" width="70" height="76" fill="#4A3B55"></rect><rect x="70" y="132" width="80" height="68" fill="#4A3B55"></rect><rect x="150" y="124" width="86" height="76" fill="#4A3B55"></rect><rect x="236" y="132" width="82" height="68" fill="#4A3B55"></rect><rect x="318" y="124" width="72" height="76" fill="#4A3B55"></rect>
+      <rect x="0" y="140" width="390" height="60" fill="#3B3046"></rect>
+      <g fill="#FFD99A"><rect x="8" y="150" width="10" height="14"></rect><rect x="74" y="150" width="10" height="14"></rect><rect x="162" y="150" width="10" height="14"></rect><rect x="250" y="150" width="10" height="14"></rect><rect x="338" y="150" width="10" height="14"></rect><rect x="30" y="172" width="10" height="14"></rect><rect x="140" y="172" width="10" height="14"></rect><rect x="228" y="172" width="10" height="14"></rect><rect x="316" y="172" width="10" height="14"></rect></g>
+      <g fill="#231F2D"><rect x="52" y="150" width="10" height="14"></rect><rect x="118" y="150" width="10" height="14"></rect><rect x="206" y="150" width="10" height="14"></rect><rect x="294" y="150" width="10" height="14"></rect><rect x="96" y="172" width="10" height="14"></rect><rect x="184" y="172" width="10" height="14"></rect><rect x="272" y="172" width="10" height="14"></rect><rect x="360" y="172" width="10" height="14"></rect></g>
+      <g fill="#FFE7A8"><rect x="50" y="130" width="14" height="6" rx="2"></rect><rect x="330" y="130" width="14" height="6" rx="2"></rect></g>
+    </svg>
+    <div style="position: absolute; left: 0; right: 0; top: 132px; height: 3px; background: #8C8C93"></div>
+  </div>
+  <a href="S4-CityStart.dc.html" style="position: absolute; left: 16px; top: 12px; height: 32px; display: flex; align-items: center; gap: 6px; color: #E9E2F2; text-decoration: none; font-size: 13px">
+    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M11 5l-7 7 7 7"></path></svg>По городу</a>
+  <div style="position: absolute; right: 12px; top: 6px; display: flex">
+    <button type="button" aria-label="Сохранить офлайн" style="width: 44px; height: 44px; border: none; background: transparent"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg></button>
+    <button type="button" aria-label="Поделиться" style="width: 44px; height: 44px; border: none; background: transparent"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E9E2F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"></path></svg></button>
+  </div>
+  <button type="button" aria-label="{{titleCd}}" style="position: absolute; left: 20px; right: 20px; top: 56px; min-height: 49px; background: #1E4FA3; border: none; border-radius: 7px; padding: 3px; box-sizing: border-box; cursor: pointer; color: #F4F4F0; box-shadow: 0 6px 14px rgba(0,0,0,.4)">
+    <span style="min-height: 43px; border: 2px solid #F4F4F0; border-radius: 5px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 2px 10px">
+      <span aria-hidden="true" style="width: 28px; height: 28px; background: #F4F4F0; border-radius: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#141416" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="2" fill="#141416"></circle><path d="M9.5 21l2.5-6.5 2.5 2V21M12 14.5l1-5-3.5 1.5L8 14M13 9.5l2.5 3 3 1"></path></svg></span>
+      <span style="flex: 1; min-width: 0; text-align: left; font-weight: 700; font-size: 20px; line-height: 21px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden">{{title}}</span>
+      <span style="font-weight: 700; font-size: 20px; white-space: nowrap">{{km}}</span>
+    </span>
+  </button>
+
+  <div style="position: relative; padding-top: 135px">
+    <div style="padding: 12px 20px 0">
+      <h1 style="margin: 0; font-size: 28px; line-height: 29.4px; font-weight: 700">Прогулка</h1>
+      <div role="toolbar" aria-label="Условия прогулки" style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="3">
+          <button type="button" onClick="{{f.go}}" aria-label="{{f.cd}}" style="height: 36px; padding: 0 10px 0 12px; border-radius: 18px; border: 1px solid #55555E; background: #1C1C1F; color: #F4F4F0; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; cursor: pointer">{{f.t}}<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8C8C93" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button>
+        </sc-for>
+      </div>
+      <div style="margin-top: 8px; font-size: 12px; color: #8C8C93">{{facts}}</div>
+      <sc-for list="{{warns}}" as="x" hint-placeholder-count="1">
+        <div role="note" style="margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid #FFD23F; font-size: 13px; line-height: 18.2px; display: flex; gap: 10px">
+          <span aria-hidden="true" style="width: 18px; height: 18px; border-radius: 50%; background: #FFD23F; color: #141416; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px">!</span>
+          <span style="display: flex; flex-direction: column; gap: 8px"><span>{{x.text}}</span><span style="{{x.act}}"><button type="button" onClick="{{x.go}}" style="height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #3A3A42; background: #232327; color: #F4F4F0; font-weight: 600; font-size: 12px; cursor: pointer">{{x.btn}}</button></span></span>
+        </div>
+      </sc-for>
+      <button type="button" style="{{handoffStyle}}">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFD23F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="2" fill="#FFD23F"></circle><path d="M9.5 21l2.5-6.5 2.5 2V21M12 14.5l1-5-3.5 1.5L8 14M13 9.5l2.5 3 3 1"></path></svg>Вести пешком в Яндекс Картах</button>
+    </div>
+
+    <div style="{{fewStyle}}">
+      <div style="font-weight: 700; font-size: 17px">Для 8 ч рядом мало мест</div>
+      <div style="margin-top: 4px; font-size: 13px; line-height: 18.2px; color: #B9B9C0">Нашли 4 места — это часа на 3. Проверили, что сработает:</div>
+      <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{fewOpts}}" as="o" hint-placeholder-count="3">
+          <button type="button" onClick="{{o.go}}" style="min-height: 52px; padding: 8px 12px; border-radius: 10px; background: #232327; border: 1px solid #3A3A42; color: #F4F4F0; text-align: left; display: flex; flex-direction: column; gap: 2px; cursor: pointer"><span style="font-weight: 700; font-size: 15px">{{o.t}}</span><span style="font-size: 12px; color: #8C8C93">{{o.sub}}</span></button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="{{colStyle}}">
+      <div aria-hidden="true" style="position: absolute; left: 14px; top: 0; bottom: 0; width: 46px; background: #4A4A50; border-left: 2px solid #8C8C93; border-right: 2px solid #8C8C93; box-sizing: border-box; overflow: hidden">
+        <div style="position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0 23px, #3B3B41 23px 24px)"></div>
+        <div style="position: absolute; left: 21px; top: 0; bottom: 0; width: 1px; background: #3B3B41"></div>
+      </div>
+      <div style="{{dimStyle}}">
+        <div style="margin-left: 72px; padding-right: 16px; font-weight: 700; font-size: 15px; color: #FFD23F; min-height: 19.5px">{{header}}</div>
+        <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+          <div style="display: flex; padding: 10px 16px 12px 0; position: relative">
+            <span aria-hidden="true" style="width: 72px; flex-shrink: 0"></span>
+            <span aria-hidden="true" style="width: 60px; display: flex; justify-content: center; flex-shrink: 0"><span style="{{r.sign}}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{r.path}}"></path></svg><span style="{{r.cityText}}">{{r.city}}</span></span></span>
+            <span style="flex: 1; min-width: 0; padding-left: 8px; display: flex; flex-direction: column; gap: 3px">
+              <span style="display: flex; justify-content: space-between; font-size: 12px; color: #8C8C93"><span>{{r.line}}</span><span style="font-variant-numeric: tabular-nums">{{r.time}}</span></span>
+              <span style="font-weight: 700; font-size: 17px; line-height: 19.55px">{{r.name}}</span>
+              <span style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+                <span style="{{r.tagStyle}}">{{r.tag}}</span>
+                <span style="{{r.hoursStyle}}"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>{{r.hours}}</span>
+              </span>
+              <span style="font-size: 13px; line-height: 18.2px; color: #C4C4CA">{{r.note}}</span>
+              <span style="font-size: 13px; font-weight: 600; color: #FFD23F">{{r.cost}}</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+      <div role="status" style="{{rebuildStyle}}"><span class="rebuild" aria-hidden="true" style="width: 10px; height: 10px; border-radius: 50%; background: #FFD23F"></span>Пересобираем прогулку…</div>
+    </div>
+
+    <div style="{{otherWrap}}">
+      <button type="button" onClick="{{other}}" style="{{otherStyle}}">{{otherText}}</button>
+      <span style="font-size: 12px; color: #8C8C93; text-align: center">{{otherNote}}</span>
+    </div>
+    <div style="margin: 16px 16px 24px; min-height: 64px; border-radius: 12px; background: #F4F4F0; color: #141416; display: flex; align-items: center; justify-content: space-between; padding: 8px 18px; box-sizing: border-box; {{footHide}}">
+      <span style="display: flex; flex-direction: column"><span style="font-size: 12px; font-weight: 600; color: #55565C">СКОЛЬКО СТОИТ ПРОГУЛКА</span><span style="font-size: 22px; font-weight: 700">{{total}}</span></span>
+      <span style="font-size: 12px; font-weight: 600; color: #55565C">{{perPerson}}</span>
+    </div>
+  </div>
+  <div role="status" style="{{errStyle}}"><span style="flex: 1">Не получилось пересобрать — оставили прежний вариант</span><button type="button" onClick="{{retry}}" style="border: none; background: none; color: #FFD23F; font-weight: 700; font-size: 13px; cursor: pointer; min-height: 44px">Повторить</button></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { dur: 4, dog: true, busy: false, err: false, variant: 0 }; }
+  renderVals() {
+    const st = this.state, n = '\u00a0', t = '\u202f', hide = 'display:none';
+    const untimed = st.dur === 0, few = st.dur === 8;
+    const P = {
+      church: 'M12 2v3M10.5 3.5h3M8 21V12l4-4 4 4v9M5 21h14M10 21v-4a2 2 0 0 1 4 0v4',
+      museum: 'M3 9l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18',
+      park: 'M12 3l-5 8h3l-4 6h12l-4-6h3zM12 17v4',
+      square: 'M4 20h16M6 20V10M18 20V10M4 10l8-6 8 6M10 20v-5h4v5',
+      view: 'M3 18l5-7 4 5 3-3 6 5M3 21h18'
+    };
+    const brown = 'width:56px;height:56px;border-radius:5px;background:#6B3E26;box-shadow:inset 0 0 0 3px #6B3E26,inset 0 0 0 5px #F4F4F0;display:flex;align-items:center;justify-content:center';
+    const city = 'min-width:60px;min-height:40px;padding:3px 4px;box-sizing:border-box;border-radius:4px;background:#F4F4F0;border:3px solid #141416;box-shadow:0 0 0 2px #F4F4F0;display:flex;align-items:center;justify-content:center';
+    const tagS = 'height:20px;padding:0 6px;border-radius:4px;background:#2A1E17;border:1px solid #6B3E26;color:#E0B48F;font-size:11px;font-weight:700;letter-spacing:.06em;display:flex;align-items:center';
+    const hoursS = (state) => {
+      const c = state === 'open' ? '#7FD38A' : state === 'closed' ? '#E6604A' : '#B9B9C0';
+      const big = untimed;
+      return 'display:flex;align-items:center;gap:4px;color:' + c + ';font-weight:' + (big ? 700 : 600) + ';font-size:' + (big ? 14 : 12) + 'px;' + (big ? 'height:24px;padding:0 8px;border-radius:12px;background:' + (state === 'open' ? 'rgba(127,211,138,.12)' : state === 'closed' ? 'rgba(230,96,74,.14)' : '#232327') : '');
+    };
+    const row = (kind, path, line, time, name, tag, hours, hstate, note, cost) => ({
+      sign: kind === 'city' ? city : brown, stroke: kind === 'city' ? '#141416' : '#F4F4F0', path: kind === 'city' ? '' : path,
+      cityText: kind === 'city' ? 'font-size:10px;font-weight:700;color:#141416;text-align:center;line-height:11.5px' : hide, city: kind === 'city' ? 'ТВЕРСКАЯ' : '',
+      line, time: untimed ? '' : time, name, tag, tagStyle: tag ? tagS : hide,
+      hours, hoursStyle: hours ? hoursS(hstate) : hide, note, cost
+    });
+    const sets = [
+      [
+        row('city', '', 'старт', '11:00', 'Тверская ул., 7', '', '', '', 'Отсюда и вернёмся.', ''),
+        row('b', P.square, 'через 600' + n + 'м · 8' + n + 'мин пешком', '11:08', 'Красная площадь', 'ПЛОЩАДЬ', untimed ? 'круглосуточно' : '', 'open', 'Главная площадь страны и ГУМ рядом.', 'вход свободный'),
+        row('b', P.park, 'через 500' + n + 'м · 7' + n + 'мин пешком', '11:45', 'Парк «Зарядье»', 'ПАРК', untimed ? 'круглосуточно' : '', 'open', 'Парящий мост над Москвой-рекой. С собакой можно.', 'вход свободный'),
+        row('b', P.museum, 'через 1,2' + n + 'км · 16' + n + 'мин пешком', '12:40', 'Пушкинский музей', 'МУЗЕЙ', untimed ? 'сегодня 11:00–20:00 · открыто' : 'открыто до 20:00', 'open', 'Импрессионисты и греческий двор. С собакой внутрь нельзя.', '≈' + n + '1' + t + '200' + n + '₽ на взрослого'),
+        row('b', P.church, 'через 700' + n + 'м · 10' + n + 'мин пешком', '14:20', 'Храм Христа Спасителя', 'ХРАМ', untimed ? 'сегодня 10:00–17:00 · открыто' : 'открыто до 17:00', 'open', 'Смотровая площадка на колокольне.', 'вход свободный'),
+        row('b', P.view, 'через 1,4' + n + 'км · 19' + n + 'мин пешком', '15:10', 'Патриаршие пруды', 'ПАРК', untimed ? 'часы не указаны' : '', 'unknown', 'Тихий пруд и бульвары.', 'вход свободный')
+      ],
+      [
+        row('city', '', 'старт', '11:00', 'Тверская ул., 7', '', '', '', 'Отсюда и вернёмся.', ''),
+        row('b', P.museum, 'через 900' + n + 'м · 12' + n + 'мин пешком', '11:12', 'Исторический музей', 'МУЗЕЙ', untimed ? 'сегодня закрыто · вторник' : 'сегодня закрыто', 'closed', 'Откроется завтра в 10:00 — заглянем снаружи.', 'вход свободный'),
+        row('b', P.park, 'через 1,1' + n + 'км · 15' + n + 'мин пешком', '11:45', 'Александровский сад', 'ПАРК', untimed ? 'круглосуточно' : '', 'open', 'Вечный огонь и смена караула.', 'вход свободный'),
+        row('b', P.view, 'через 800' + n + 'м · 11' + n + 'мин пешком', '12:30', 'Кремлёвская набережная', 'НАБЕРЕЖНАЯ', untimed ? 'круглосуточно' : '', 'open', 'Вид на Кремль и реку.', 'вход свободный')
+      ]
+    ];
+    const rows = sets[st.variant % 2];
+    const later = (patch) => { this.setState(Object.assign({ busy: true, err: false })); setTimeout(() => this.setState(Object.assign({ busy: false }, patch)), 1200); };
+    const durs = [2, 4, 6, 8, 0];
+    const nextDur = durs[(durs.indexOf(st.dur) + 1) % durs.length];
+    const warns = st.dog ? [{ text: 'С собакой в музеи и бары обычно нельзя — на маршруте 1 такое место.', act: 'display:flex', btn: 'Прогулка с собакой', go: () => later({ dog: false }) }] : [];
+    const endVariants = st.variant >= 3;
+    return {
+      title: 'Москва: обзорная прогулка', km: '≈' + n + '5,6' + n + 'км',
+      filters: [
+        { t: st.dur ? st.dur + n + 'ч' : 'без ограничения', cd: 'Сколько гуляем: ' + (st.dur ? st.dur + ' часа' : 'без ограничения') + '. Изменить', go: () => later({ dur: nextDur, variant: 0 }) },
+        { t: 'Обзорный', cd: 'Прогулка: обзорная. Изменить', go: () => later({ variant: st.variant + 1 }) },
+        { t: st.dog ? '2 взр · собака' : '2 взр', cd: 'Кто идёт. Изменить', go: () => later({ dog: !st.dog }) }
+      ],
+      facts: (untimed ? 'Без расписания · ' + (rows.length - 1) + ' мест по пути · ≈' + n + '5,6' + n + 'км' : 'с возвратом к старту · ≈' + n + '5,6' + n + 'км пешком') + ' · расстояния ±15' + n + '%',
+      warns: few ? [] : warns,
+      handoffStyle: few ? hide : 'margin-top:10px;width:100%;height:48px;border-radius:12px;background:#232327;border:1px solid #3A3A42;color:#F4F4F0;font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer',
+      fewStyle: few ? 'margin:14px 20px 0;padding:14px;border-radius:12px;border:1px solid #3A3A42;background:#1C1C1F' : hide,
+      fewOpts: [
+        { t: 'Гулять 4' + n + 'ч', sub: 'хватит на все 4 места', go: () => later({ dur: 4 }) },
+        { t: 'Без ограничения', sub: 'все 4 места без расписания', go: () => later({ dur: 0 }) },
+        { t: 'Обзорная вместо музейной', sub: '12 мест рядом — на 8' + n + 'ч хватит', go: () => later({ dur: 6 }) },
+        { t: 'Вернуть убранные места', sub: 'вы убрали 3 места — вернём их в подбор', go: () => later({ dur: 6 }) }
+      ],
+      colStyle: few ? hide : 'position:relative;margin-top:14px',
+      dimStyle: st.busy ? 'opacity:.35' : '',
+      rebuildStyle: st.busy ? 'position:absolute;left:72px;right:16px;top:30px;height:44px;border-radius:22px;background:#232327;border:1px solid #3A3A42;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:14px' : hide,
+      header: untimed ? 'Порядок по пути · заходите, куда открыто' : 'Старт 11:00 · финиш ≈ 15:30',
+      rows,
+      other: () => endVariants ? null : later({ variant: st.variant + 1 }),
+      otherText: endVariants ? 'Других вариантов нет' : 'Другой вариант',
+      otherNote: endVariants ? 'С этими условиями показали все варианты. Поменяйте время или прогулку выше.' : '',
+      otherStyle: 'min-height:44px;padding:0 16px;border-radius:22px;background:none;font-weight:600;font-size:14px;cursor:pointer;' + (endVariants ? 'border:1px dashed #3A3A42;color:#55565C' : 'border:1px dashed #55555E;color:#B9B9C0'),
+      otherWrap: few ? hide : 'padding:4px 20px 0;display:flex;flex-direction:column;align-items:center;gap:4px',
+      footHide: few ? 'display:none;' : '',
+      total: st.variant % 2 ? 'Бесплатно' : '≈' + n + '2' + t + '400' + n + '₽ на всех', perPerson: st.variant % 2 ? 'вход везде свободный' : '≈' + n + '1' + t + '200' + n + '₽ на человека',
+      errStyle: st.err ? 'position:absolute;left:16px;right:16px;bottom:104px;min-height:44px;padding:0 4px 0 16px;box-sizing:border-box;border-radius:10px;background:#232327;border:1px solid #3A3A42;font-size:13px;display:flex;align-items:center;gap:8px' : hide,
+      retry: () => later({ err: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

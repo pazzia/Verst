@@ -1,0 +1,307 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-2",
+   "input_json": {
+    "start": {
+     "lat": 59.9386,
+     "lon": 30.3141,
+     "label": "Санкт-Петербург, Дворцовая площадь"
+    },
+    "preset": "museums",
+    "durationMin": 360,
+    "crew": {
+     "adults": 2,
+     "children": 1
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-2",
+   "titleRu": "Санкт-Петербург: музейный маршрут",
+   "townId": "Q656",
+   "townName": "Санкт-Петербург",
+   "townPrep": "Санкт-Петербурге",
+   "preset": "museums",
+   "startAt": "2026-10-23T10:00",
+   "startsTomorrow": false,
+   "startNoteRu": null,
+   "endAt": "2026-10-23T15:58",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 3.4,
+   "walkMin": 59,
+   "durationMin": 359,
+   "requestedDurationMin": 360,
+   "crewNotesRu": [
+    "С ребёнком: берите воду и перекус, на длинных отрезках — пауза."
+   ],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 59.9386,
+    "lon": 30.3141,
+    "label": "Санкт-Петербург, Дворцовая площадь"
+   },
+   "finish": {
+    "lat": 59.9386,
+    "lon": 30.3141,
+    "label": "Санкт-Петербург, Дворцовая площадь"
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "Q907366",
+     "kind": "monument",
+     "nameRu": "Александровская колонна",
+     "lat": 59.93917,
+     "lon": 30.31583,
+     "arriveAt": "2026-10-23T10:02",
+     "departAt": "2026-10-23T10:14",
+     "dwellMin": 12,
+     "walkKmFromPrev": 0.1,
+     "walkMinFromPrev": 3,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w02",
+     "poiId": "Q132783",
+     "kind": "museum",
+     "nameRu": "Государственный Эрмитаж",
+     "lat": 59.94056,
+     "lon": 30.31361,
+     "arriveAt": "2026-10-23T10:18",
+     "departAt": "2026-10-23T11:48",
+     "dwellMin": 90,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 4,
+     "costRub": 1000,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Большой музей: за 1 ч 30 мин — только главное · Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w03",
+     "poiId": "Q2025062",
+     "kind": "museum",
+     "nameRu": "Зоологический музей Зоологического института РАН",
+     "lat": 59.9426,
+     "lon": 30.3056,
+     "arriveAt": "2026-10-23T12:00",
+     "departAt": "2026-10-23T13:02",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 11,
+     "costRub": 1000,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w04",
+     "poiId": "Q1277585",
+     "kind": "museum",
+     "nameRu": "Кунсткамера",
+     "lat": 59.94167,
+     "lon": 30.30444,
+     "arriveAt": "2026-10-23T13:04",
+     "departAt": "2026-10-23T14:06",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.2,
+     "walkMinFromPrev": 3,
+     "costRub": 1000,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "10:00–18:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "museum",
+     "poiKindRu": "Музей",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w05",
+     "poiId": "Q975426",
+     "kind": "museum",
+     "nameRu": "Меншиковский дворец",
+     "lat": 59.93889,
+     "lon": 30.29583,
+     "arriveAt": "2026-10-23T14:19",
+     "departAt": "2026-10-23T15:21",
+     "dwellMin": 62,
+     "walkKmFromPrev": 0.7,
+     "walkMinFromPrev": 13,
+     "costRub": 1000,
+     "hoursVerified": true,
+     "hours": {
+      "todayRu": "11:00–18:00",
+      "openNow": true,
+      "source": "osm"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "attraction",
+     "poiKindRu": "Достопримечательность",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w06",
+     "poiId": "Q672444",
+     "kind": "monument",
+     "nameRu": "Медный всадник",
+     "lat": 59.93656,
+     "lon": 30.30217,
+     "arriveAt": "2026-10-23T15:31",
+     "departAt": "2026-10-23T15:43",
+     "dwellMin": 12,
+     "walkKmFromPrev": 0.6,
+     "walkMinFromPrev": 10,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    }
+   ],
+   "cost": {
+    "totalRub": 4000,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 4000
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     59.9386,
+     30.3141
+    ],
+    [
+     59.93917,
+     30.31583
+    ],
+    [
+     59.94056,
+     30.31361
+    ],
+    [
+     59.9426,
+     30.3056
+    ],
+    [
+     59.94167,
+     30.30444
+    ],
+    [
+     59.93889,
+     30.29583
+    ],
+    [
+     59.93656,
+     30.30217
+    ],
+    [
+     59.9386,
+     30.3141
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 59.9386,
+     "lon": 30.3141,
+     "label": "Санкт-Петербург, Дворцовая площадь"
+    },
+    "townId": null,
+    "preset": "museums",
+    "durationMin": 360,
+    "interests": [],
+    "pace": "slow",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-23T10:00",
+    "crew": {
+     "adults": 2,
+     "children": 1,
+     "dog": false
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   },
+   "requestKey": "007b8f9ee17efa50"
+  },
+  "ms": 0
+ }
+}

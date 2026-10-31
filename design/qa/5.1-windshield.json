@@ -1,0 +1,486 @@
+{
+ "screen": "5.1-windshield",
+ "notes": "Road edges are measured on the asphalt runs left and right of the lane (|x| from lane/2 to W/2 − edge, scaled by the projection). Bands 2–5 are hidden behind the sign and the A-pillars in the default state; bands 4–5 are sampled on no-routes, where the sign is shorter; bands 2–3 stay inside the sign shadow (0 8 18 black 35 %) in every state and are checked by the overlay (step 3). Thin (≤ 1 dp) borders are not sampled (< 2 px inside).",
+ "points": [
+  {
+   "item": "W-01",
+   "state": "default",
+   "x": 60,
+   "y": 50,
+   "hex": "#2B2850",
+   "size": "390x844"
+  },
+  {
+   "item": "W-01",
+   "state": "no-routes",
+   "x": 60,
+   "y": 255,
+   "hex": "#D9655A",
+   "size": "390x844"
+  },
+  {
+   "item": "W-01",
+   "state": "no-routes",
+   "x": 60,
+   "y": 284,
+   "hex": "#F29A5E",
+   "size": "390x844"
+  },
+  {
+   "item": "W-02",
+   "state": "no-routes",
+   "x": 130,
+   "y": 292,
+   "hex": "#3C3346",
+   "size": "390x844"
+  },
+  {
+   "item": "W-02",
+   "state": "no-routes",
+   "x": 270,
+   "y": 280,
+   "hex": "#FFD99A",
+   "size": "390x844"
+  },
+  {
+   "item": "W-02",
+   "state": "default",
+   "x": 60,
+   "y": 370,
+   "hex": "#2C3A33",
+   "size": "390x844"
+  },
+  {
+   "item": "W-03",
+   "state": "default",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 447.61,
+   "seed": 156.36,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    120.45,
+    null
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "W-03",
+   "state": "default",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 447.61,
+   "seed": 233.64,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    null,
+    269.55
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "W-03",
+   "state": "default",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 383.3,
+   "seed": 168.78,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    144.42,
+    null
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "W-03",
+   "state": "default",
+   "size": "390x844",
+   "kind": "edge",
+   "y": 383.3,
+   "seed": 221.22,
+   "match": [
+    "#3A3A3F"
+   ],
+   "match_tol": 4,
+   "expect": [
+    null,
+    245.58
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "W-06",
+   "state": "default",
+   "x": 38,
+   "y": 350,
+   "hex": "#55565C",
+   "size": "390x844"
+  },
+  {
+   "item": "W-06",
+   "state": "default",
+   "x": 352,
+   "y": 350,
+   "hex": "#55565C",
+   "size": "390x844"
+  },
+  {
+   "item": "W-07",
+   "state": "default",
+   "x": 195,
+   "y": 4,
+   "hex": "#0E0E10",
+   "size": "390x844"
+  },
+  {
+   "item": "W-07",
+   "state": "default",
+   "x": 5,
+   "y": 450,
+   "hex": "#0E0E10",
+   "size": "390x844"
+  },
+  {
+   "item": "W-08",
+   "state": "default",
+   "x": 121.5,
+   "y": 40,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "W-08",
+   "state": "default",
+   "x": 195,
+   "y": 12,
+   "hex": "#2A2A2E",
+   "size": "390x844"
+  },
+  {
+   "item": "W-08",
+   "state": "default",
+   "x": 205,
+   "y": 26,
+   "hex": "#4E3768",
+   "size": "390x844"
+  },
+  {
+   "item": "W-08",
+   "state": "default",
+   "x": 176,
+   "y": 55,
+   "hex": "#2C3A33",
+   "size": "390x844"
+  },
+  {
+   "item": "W-08",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    148,
+    65,
+    94,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-10",
+   "state": "default",
+   "x": 22,
+   "y": 150,
+   "hex": "#1E4FA3",
+   "size": "390x844"
+  },
+  {
+   "item": "W-10",
+   "state": "default",
+   "x": 25,
+   "y": 150,
+   "hex": "#F4F4F0",
+   "size": "390x844"
+  },
+  {
+   "item": "W-10",
+   "state": "default",
+   "x": 29,
+   "y": 105,
+   "hex": "#1E4FA3",
+   "size": "390x844"
+  },
+  {
+   "item": "W-11",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    38,
+    96,
+    170,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-12",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    70,
+    124,
+    150,
+    22
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-13",
+   "state": "default",
+   "x": 200,
+   "y": 116,
+   "hex": "#163B7A",
+   "size": "390x844"
+  },
+  {
+   "item": "W-13",
+   "state": "default",
+   "x": 200,
+   "y": 160,
+   "hex": "#1E4FA3",
+   "size": "390x844"
+  },
+  {
+   "item": "W-13",
+   "state": "row2-selected",
+   "x": 200,
+   "y": 116,
+   "hex": "#1E4FA3",
+   "size": "390x844"
+  },
+  {
+   "item": "W-13",
+   "state": "row2-selected",
+   "x": 200,
+   "y": 160,
+   "hex": "#163B7A",
+   "size": "390x844"
+  },
+  {
+   "item": "W-14",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    38,
+    290,
+    200,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-16",
+   "state": "default",
+   "x": 100,
+   "y": 830,
+   "hex": "#161618",
+   "size": "390x844"
+  },
+  {
+   "item": "W-16",
+   "state": "default",
+   "x": 195,
+   "y": 519,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "W-17",
+   "state": "default",
+   "x": 21,
+   "y": 600,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "W-17",
+   "state": "default",
+   "x": 30,
+   "y": 665,
+   "hex": "#0B1218",
+   "size": "390x844"
+  },
+  {
+   "item": "W-19",
+   "state": "default",
+   "x": 300,
+   "y": 592,
+   "hex": "#16222C",
+   "size": "390x844"
+  },
+  {
+   "item": "W-20",
+   "state": "default",
+   "kind": "text",
+   "region": [
+    22,
+    727,
+    150,
+    24
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-21",
+   "state": "default",
+   "x": 282,
+   "y": 742,
+   "hex": "#232327",
+   "size": "390x844"
+  },
+  {
+   "item": "W-21",
+   "state": "default",
+   "x": 298,
+   "y": 735,
+   "hex": "#1C1C1F",
+   "size": "390x844"
+  },
+  {
+   "item": "W-21",
+   "state": "default",
+   "x": 324,
+   "y": 705.5,
+   "hex": "#D8402B",
+   "size": "390x844"
+  },
+  {
+   "item": "W-22",
+   "state": "loading",
+   "x": 324,
+   "y": 705.5,
+   "hex": "#55555E",
+   "size": "390x844"
+  },
+  {
+   "item": "W-24",
+   "state": "offline-empty",
+   "x": 324,
+   "y": 705.5,
+   "hex": "#55555E",
+   "size": "390x844"
+  },
+  {
+   "item": "W-23",
+   "state": "offline-cached",
+   "kind": "text",
+   "region": [
+    36,
+    558,
+    200,
+    14
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-24",
+   "state": "offline-empty",
+   "kind": "text",
+   "region": [
+    32,
+    96,
+    320,
+    60
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-25",
+   "state": "no-routes",
+   "x": 37,
+   "y": 610,
+   "hex": "#FFD23F",
+   "size": "390x844"
+  },
+  {
+   "item": "W-26",
+   "state": "error",
+   "kind": "text",
+   "region": [
+    32,
+    96,
+    320,
+    60
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-27",
+   "state": "trips-plate",
+   "kind": "text",
+   "region": [
+    22,
+    753,
+    140,
+    44
+   ],
+   "size": "390x844"
+  },
+  {
+   "item": "W-30",
+   "state": "default",
+   "size": "360x640",
+   "kind": "edge",
+   "x": 250,
+   "seed": 240,
+   "match": [
+    "#1E4FA3",
+    "#163B7A",
+    "#F4F4F0"
+   ],
+   "expect": [
+    null,
+    256
+   ],
+   "tol_dp": 1
+  },
+  {
+   "item": "W-22",
+   "state": "engine-starting",
+   "x": 324,
+   "y": 705.5,
+   "hex": "#55555E",
+   "size": "390x844"
+  },
+  {
+   "item": "W-26",
+   "state": "engine-failed",
+   "kind": "text",
+   "region": [
+    32,
+    96,
+    320,
+    90
+   ],
+   "size": "390x844"
+  }
+ ],
+ "justified": {
+  "W-04": "motion: checked on the clock-sequence screenshots <state>-t<ms> (DES-11x step 5), not in a static frame",
+  "W-05": "motion: checked on the clock-sequence screenshots <state>-t<ms> (DES-11x step 5), not in a static frame",
+  "W-09": "silhouette slots use the glass colour #0D0D0F; checked by reading the default and crew-variant screenshots (DES-11x step 4)",
+  "W-15": "arrow direction = data mapping; checked by reading (step 4) and the bearing unit test",
+  "W-18": "semantics/touch: XScreenSemanticsTest (build/tests/failures.txt), not visual",
+  "W-28": "not in the mock build (open-issues D-16: location is not requested)",
+  "W-29": "sheet content height is data-driven; checked by the overlay against the canvas (step 3)",
+  "W-31": "semantics/touch: XScreenSemanticsTest (build/tests/failures.txt), not visual"
+ }
+}

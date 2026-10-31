@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED from design/icons/tourist-museum.svg by design/tools/gen_vectors.py. Do not edit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF141416"
+        android:fillType="nonZero"
+        android:pathData="M3 20L21 20L21 22L3 22ZM4 9L20 9L20 11L4 11ZM12.486 2.126L21.486 7.126L20.514 8.874L11.514 3.874ZM21 9L3 9L3 7L21 7ZM2.514 7.126L11.514 2.126L12.486 3.874L3.486 8.874ZM7 10L7 18L5 18L5 10ZM11 10L11 18L9 18L9 10ZM15 10L15 18L13 18L13 10ZM19 10L19 18L17 18L17 10ZM4 17L20 17L20 19L4 19ZM4 21A1 1 0 1 1 2 21A1 1 0 1 1 4 21ZM22 21A1 1 0 1 1 20 21A1 1 0 1 1 22 21ZM5 10A1 1 0 1 1 3 10A1 1 0 1 1 5 10ZM21 10A1 1 0 1 1 19 10A1 1 0 1 1 21 10ZM13 3A1 1 0 1 1 11 3A1 1 0 1 1 13 3ZM22 8A1 1 0 1 1 20 8A1 1 0 1 1 22 8ZM4 8A1 1 0 1 1 2 8A1 1 0 1 1 4 8ZM7 10A1 1 0 1 1 5 10A1 1 0 1 1 7 10ZM7 18A1 1 0 1 1 5 18A1 1 0 1 1 7 18ZM11 10A1 1 0 1 1 9 10A1 1 0 1 1 11 10ZM11 18A1 1 0 1 1 9 18A1 1 0 1 1 11 18ZM15 10A1 1 0 1 1 13 10A1 1 0 1 1 15 10ZM15 18A1 1 0 1 1 13 18A1 1 0 1 1 15 18ZM19 10A1 1 0 1 1 17 10A1 1 0 1 1 19 10ZM19 18A1 1 0 1 1 17 18A1 1 0 1 1 19 18ZM5 18A1 1 0 1 1 3 18A1 1 0 1 1 5 18ZM21 18A1 1 0 1 1 19 18A1 1 0 1 1 21 18Z" />
+</vector>

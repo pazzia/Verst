@@ -1,0 +1,10361 @@
+{
+ "id": "central_russia_v1",
+ "asOf": "2026-10-01",
+ "regions": [
+  {
+   "code": "RU",
+   "nameRu": "Россия",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-MOW",
+   "nameRu": "Москва",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-MOS",
+   "nameRu": "Московская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-YAR",
+   "nameRu": "Ярославская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-KOS",
+   "nameRu": "Костромская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-IVA",
+   "nameRu": "Ивановская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-VLA",
+   "nameRu": "Владимирская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-NIZ",
+   "nameRu": "Нижегородская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-CU",
+   "nameRu": "Чувашская Республика",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-TA",
+   "nameRu": "Республика Татарстан",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-TUL",
+   "nameRu": "Тульская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-RYA",
+   "nameRu": "Рязанская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-LIP",
+   "nameRu": "Липецкая область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-TAM",
+   "nameRu": "Тамбовская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-VOR",
+   "nameRu": "Воронежская область",
+   "tz": "Europe/Moscow"
+  },
+  {
+   "code": "RU-VGG",
+   "nameRu": "Волгоградская область",
+   "tz": "Europe/Volgograd"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "MSK",
+   "lat": 55.7558,
+   "lon": 37.6173,
+   "region": "RU-MOW"
+  },
+  {
+   "id": "PUS",
+   "lat": 56.0104,
+   "lon": 37.8471,
+   "region": "RU-MOS"
+  },
+  {
+   "id": "SPS",
+   "lat": 56.3153,
+   "lon": 38.1358,
+   "region": "RU-MOS"
+  },
+  {
+   "id": "PRS",
+   "lat": 56.7361,
+   "lon": 38.8543,
+   "region": "RU-YAR"
+  },
+  {
+   "id": "RST",
+   "lat": 57.1853,
+   "lon": 39.4146,
+   "region": "RU-YAR"
+  },
+  {
+   "id": "YAR",
+   "lat": 57.6261,
+   "lon": 39.8845,
+   "region": "RU-YAR"
+  },
+  {
+   "id": "KOS",
+   "lat": 57.7677,
+   "lon": 40.9264,
+   "region": "RU-KOS"
+  },
+  {
+   "id": "IVA",
+   "lat": 57.0004,
+   "lon": 40.9739,
+   "region": "RU-IVA"
+  },
+  {
+   "id": "SUZ",
+   "lat": 56.4197,
+   "lon": 40.4434,
+   "region": "RU-VLA"
+  },
+  {
+   "id": "VLA",
+   "lat": 56.129,
+   "lon": 40.4066,
+   "region": "RU-VLA"
+  },
+  {
+   "id": "NOG",
+   "lat": 55.8522,
+   "lon": 38.4386,
+   "region": "RU-MOS"
+  },
+  {
+   "id": "POK",
+   "lat": 55.9178,
+   "lon": 39.1755,
+   "region": "RU-VLA"
+  },
+  {
+   "id": "PET",
+   "lat": 55.9298,
+   "lon": 39.4592,
+   "region": "RU-VLA"
+  },
+  {
+   "id": "VYZ",
+   "lat": 56.2486,
+   "lon": 42.1584,
+   "region": "RU-VLA"
+  },
+  {
+   "id": "GOR",
+   "lat": 56.202,
+   "lon": 42.6926,
+   "region": "RU-VLA"
+  },
+  {
+   "id": "DZE",
+   "lat": 56.2414,
+   "lon": 43.4554,
+   "region": "RU-NIZ"
+  },
+  {
+   "id": "NNV",
+   "lat": 56.3269,
+   "lon": 44.0059,
+   "region": "RU-NIZ"
+  },
+  {
+   "id": "KST",
+   "lat": 56.1508,
+   "lon": 44.1956,
+   "region": "RU-NIZ"
+  },
+  {
+   "id": "LYS",
+   "lat": 56.027,
+   "lon": 45.0353,
+   "region": "RU-NIZ"
+  },
+  {
+   "id": "VOR",
+   "lat": 56.0656,
+   "lon": 46.3436,
+   "region": "RU-NIZ"
+  },
+  {
+   "id": "CHB",
+   "lat": 56.1439,
+   "lon": 47.2489,
+   "region": "RU-CU"
+  },
+  {
+   "id": "CIV",
+   "lat": 55.865,
+   "lon": 47.4729,
+   "region": "RU-CU"
+  },
+  {
+   "id": "ZEL",
+   "lat": 55.8466,
+   "lon": 48.501,
+   "region": "RU-TA"
+  },
+  {
+   "id": "KAZ",
+   "lat": 55.7963,
+   "lon": 49.1088,
+   "region": "RU-TA"
+  },
+  {
+   "id": "M12_MKAD",
+   "lat": 55.8,
+   "lon": 37.85,
+   "region": "RU-MOS"
+  },
+  {
+   "id": "M12_BOG",
+   "lat": 56.2,
+   "lon": 40.55,
+   "region": "RU-VLA"
+  },
+  {
+   "id": "M12_DZE",
+   "lat": 56.1,
+   "lon": 43.4,
+   "region": "RU-NIZ"
+  },
+  {
+   "id": "M12_CU",
+   "lat": 55.85,
+   "lon": 47.0,
+   "region": "RU-CU"
+  },
+  {
+   "id": "DOM",
+   "lat": 55.44,
+   "lon": 37.7682,
+   "region": "RU-MOS"
+  },
+  {
+   "id": "KSH",
+   "lat": 54.8337,
+   "lon": 38.1517,
+   "region": "RU-MOS"
+  },
+  {
+   "id": "MIH",
+   "lat": 54.2297,
+   "lon": 39.0089,
+   "region": "RU-RYA"
+  },
+  {
+   "id": "SKP",
+   "lat": 53.8236,
+   "lon": 39.5494,
+   "region": "RU-RYA"
+  },
+  {
+   "id": "RZH",
+   "lat": 53.7067,
+   "lon": 40.0517,
+   "region": "RU-RYA"
+  },
+  {
+   "id": "CHA",
+   "lat": 53.2405,
+   "lon": 39.967,
+   "region": "RU-LIP"
+  },
+  {
+   "id": "MCH",
+   "lat": 52.8946,
+   "lon": 40.4908,
+   "region": "RU-TAM"
+  },
+  {
+   "id": "TAM",
+   "lat": 52.7212,
+   "lon": 41.4523,
+   "region": "RU-TAM"
+  },
+  {
+   "id": "KOT",
+   "lat": 52.5927,
+   "lon": 41.5081,
+   "region": "RU-TAM"
+  },
+  {
+   "id": "BOR",
+   "lat": 51.3687,
+   "lon": 42.0887,
+   "region": "RU-VOR"
+  },
+  {
+   "id": "NAN",
+   "lat": 50.5296,
+   "lon": 42.6666,
+   "region": "RU-VGG"
+  },
+  {
+   "id": "FRO",
+   "lat": 49.765,
+   "lon": 43.661,
+   "region": "RU-VGG"
+  },
+  {
+   "id": "VGG",
+   "lat": 48.708,
+   "lon": 44.5133,
+   "region": "RU-VGG"
+  },
+  {
+   "id": "POD",
+   "lat": 55.4312,
+   "lon": 37.5458,
+   "region": "RU-MOS"
+  },
+  {
+   "id": "SER",
+   "lat": 54.9158,
+   "lon": 37.4111,
+   "region": "RU-MOS"
+  },
+  {
+   "id": "TUL",
+   "lat": 54.1931,
+   "lon": 37.6173,
+   "region": "RU-TUL"
+  },
+  {
+   "id": "YAP",
+   "lat": 54.075,
+   "lon": 37.55,
+   "region": "RU-TUL"
+  },
+  {
+   "id": "SHC",
+   "lat": 54.0039,
+   "lon": 37.5186,
+   "region": "RU-TUL"
+  }
+ ],
+ "edges": [
+  {
+   "from": "MSK",
+   "to": "PUS",
+   "km": 33,
+   "speedKmh": 60,
+   "roadClass": "trunk",
+   "ref": "М-8",
+   "toll": false
+  },
+  {
+   "from": "PUS",
+   "to": "SPS",
+   "km": 39,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "М-8",
+   "toll": false
+  },
+  {
+   "from": "SPS",
+   "to": "PRS",
+   "km": 68,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-8",
+   "toll": false
+  },
+  {
+   "from": "PRS",
+   "to": "RST",
+   "km": 64,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-8",
+   "toll": false
+  },
+  {
+   "from": "RST",
+   "to": "YAR",
+   "km": 59,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-8",
+   "toll": false
+  },
+  {
+   "from": "YAR",
+   "to": "KOS",
+   "km": 79,
+   "speedKmh": 70,
+   "roadClass": "primary",
+   "ref": "Р-132",
+   "toll": false
+  },
+  {
+   "from": "KOS",
+   "to": "IVA",
+   "km": 104,
+   "speedKmh": 70,
+   "roadClass": "primary",
+   "ref": "Р-600",
+   "toll": false
+  },
+  {
+   "from": "IVA",
+   "to": "SUZ",
+   "km": 77,
+   "speedKmh": 70,
+   "roadClass": "primary",
+   "ref": "Р-132",
+   "toll": false
+  },
+  {
+   "from": "SUZ",
+   "to": "VLA",
+   "km": 35,
+   "speedKmh": 70,
+   "roadClass": "primary",
+   "ref": "Р-132",
+   "toll": false
+  },
+  {
+   "from": "MSK",
+   "to": "NOG",
+   "km": 53,
+   "speedKmh": 70,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "NOG",
+   "to": "POK",
+   "km": 49,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "POK",
+   "to": "PET",
+   "km": 19,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "PET",
+   "to": "VLA",
+   "km": 66,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "VLA",
+   "to": "VYZ",
+   "km": 114,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "VYZ",
+   "to": "GOR",
+   "km": 35,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "GOR",
+   "to": "DZE",
+   "km": 50,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "DZE",
+   "to": "NNV",
+   "km": 38,
+   "speedKmh": 60,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "NNV",
+   "to": "KST",
+   "km": 25,
+   "speedKmh": 60,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "KST",
+   "to": "LYS",
+   "km": 57,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "LYS",
+   "to": "VOR",
+   "km": 86,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "VOR",
+   "to": "CHB",
+   "km": 72,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "CHB",
+   "to": "CIV",
+   "km": 38,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "CIV",
+   "to": "ZEL",
+   "km": 72,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "ZEL",
+   "to": "KAZ",
+   "km": 40,
+   "speedKmh": 70,
+   "roadClass": "trunk",
+   "ref": "М-7",
+   "toll": false
+  },
+  {
+   "from": "MSK",
+   "to": "M12_MKAD",
+   "km": 18,
+   "speedKmh": 60,
+   "roadClass": "motorway",
+   "ref": "М-12",
+   "toll": false
+  },
+  {
+   "from": "M12_MKAD",
+   "to": "M12_BOG",
+   "km": 182,
+   "speedKmh": 110,
+   "roadClass": "motorway",
+   "ref": "М-12",
+   "toll": true
+  },
+  {
+   "from": "M12_BOG",
+   "to": "M12_DZE",
+   "km": 196,
+   "speedKmh": 110,
+   "roadClass": "motorway",
+   "ref": "М-12",
+   "toll": true
+  },
+  {
+   "from": "M12_DZE",
+   "to": "M12_CU",
+   "km": 250,
+   "speedKmh": 110,
+   "roadClass": "motorway",
+   "ref": "М-12",
+   "toll": true
+  },
+  {
+   "from": "M12_CU",
+   "to": "KAZ",
+   "km": 144,
+   "speedKmh": 110,
+   "roadClass": "motorway",
+   "ref": "М-12",
+   "toll": true
+  },
+  {
+   "from": "MSK",
+   "to": "DOM",
+   "km": 37,
+   "speedKmh": 70,
+   "roadClass": "motorway",
+   "ref": "М-4",
+   "toll": false
+  },
+  {
+   "from": "DOM",
+   "to": "KSH",
+   "km": 71,
+   "speedKmh": 110,
+   "roadClass": "motorway",
+   "ref": "М-4",
+   "toll": true
+  },
+  {
+   "from": "KSH",
+   "to": "MIH",
+   "km": 88,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "MIH",
+   "to": "SKP",
+   "km": 58,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "SKP",
+   "to": "RZH",
+   "km": 37,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "RZH",
+   "to": "CHA",
+   "km": 53,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "CHA",
+   "to": "MCH",
+   "km": 54,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "MCH",
+   "to": "TAM",
+   "km": 69,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "TAM",
+   "to": "KOT",
+   "km": 16,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "KOT",
+   "to": "BOR",
+   "km": 146,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "BOR",
+   "to": "NAN",
+   "km": 104,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "NAN",
+   "to": "FRO",
+   "km": 113,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "FRO",
+   "to": "VGG",
+   "km": 134,
+   "speedKmh": 90,
+   "roadClass": "trunk",
+   "ref": "Р-22",
+   "toll": false
+  },
+  {
+   "from": "MSK",
+   "to": "POD",
+   "km": 40,
+   "speedKmh": 70,
+   "roadClass": "trunk",
+   "ref": "М-2",
+   "toll": false
+  },
+  {
+   "from": "POD",
+   "to": "SER",
+   "km": 60,
+   "speedKmh": 110,
+   "roadClass": "motorway",
+   "ref": "М-2",
+   "toll": false
+  },
+  {
+   "from": "SER",
+   "to": "TUL",
+   "km": 83,
+   "speedKmh": 100,
+   "roadClass": "motorway",
+   "ref": "М-2",
+   "toll": false
+  },
+  {
+   "from": "TUL",
+   "to": "YAP",
+   "km": 15,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-2",
+   "toll": false
+  },
+  {
+   "from": "YAP",
+   "to": "SHC",
+   "km": 9,
+   "speedKmh": 80,
+   "roadClass": "trunk",
+   "ref": "М-2",
+   "toll": false
+  }
+ ],
+ "towns": [
+  {
+   "id": "t_moscow",
+   "nameRu": "Москва",
+   "namePrepRu": "Москве",
+   "nameGenRu": "Москвы",
+   "node": "MSK",
+   "population": 13000000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_pushkino",
+   "nameRu": "Пушкино",
+   "namePrepRu": "Пушкино",
+   "nameGenRu": "Пушкино",
+   "node": "PUS",
+   "population": 110000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_sergiev_posad",
+   "nameRu": "Сергиев Посад",
+   "namePrepRu": "Сергиевом Посаде",
+   "nameGenRu": "Сергиева Посада",
+   "node": "SPS",
+   "population": 100000,
+   "quality": 3,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_pereslavl",
+   "nameRu": "Переславль-Залесский",
+   "namePrepRu": "Переславле-Залесском",
+   "nameGenRu": "Переславля-Залесского",
+   "node": "PRS",
+   "population": 38000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_rostov",
+   "nameRu": "Ростов",
+   "namePrepRu": "Ростове",
+   "nameGenRu": "Ростова",
+   "node": "RST",
+   "population": 30000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_yaroslavl",
+   "nameRu": "Ярославль",
+   "namePrepRu": "Ярославле",
+   "nameGenRu": "Ярославля",
+   "node": "YAR",
+   "population": 570000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_kostroma",
+   "nameRu": "Кострома",
+   "namePrepRu": "Костроме",
+   "nameGenRu": "Костромы",
+   "node": "KOS",
+   "population": 270000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_ivanovo",
+   "nameRu": "Иваново",
+   "namePrepRu": "Иванове",
+   "nameGenRu": "Иванова",
+   "node": "IVA",
+   "population": 360000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_suzdal",
+   "nameRu": "Суздаль",
+   "namePrepRu": "Суздале",
+   "nameGenRu": "Суздаля",
+   "node": "SUZ",
+   "population": 9000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_vladimir",
+   "nameRu": "Владимир",
+   "namePrepRu": "Владимире",
+   "nameGenRu": "Владимира",
+   "node": "VLA",
+   "population": 350000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_noginsk",
+   "nameRu": "Ногинск",
+   "namePrepRu": "Ногинске",
+   "nameGenRu": "Ногинска",
+   "node": "NOG",
+   "population": 100000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_pokrov",
+   "nameRu": "Покров",
+   "namePrepRu": "Покрове",
+   "nameGenRu": "Покрова",
+   "node": "POK",
+   "population": 17000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_petushki",
+   "nameRu": "Петушки",
+   "namePrepRu": "Петушках",
+   "nameGenRu": "Петушков",
+   "node": "PET",
+   "population": 13000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_vyazniki",
+   "nameRu": "Вязники",
+   "namePrepRu": "Вязниках",
+   "nameGenRu": "Вязников",
+   "node": "VYZ",
+   "population": 35000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_gorokhovets",
+   "nameRu": "Гороховец",
+   "namePrepRu": "Гороховце",
+   "nameGenRu": "Гороховца",
+   "node": "GOR",
+   "population": 12000,
+   "quality": 2,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_dzerzhinsk",
+   "nameRu": "Дзержинск",
+   "namePrepRu": "Дзержинске",
+   "nameGenRu": "Дзержинска",
+   "node": "DZE",
+   "population": 225000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_nizhny",
+   "nameRu": "Нижний Новгород",
+   "namePrepRu": "Нижнем Новгороде",
+   "nameGenRu": "Нижнего Новгорода",
+   "node": "NNV",
+   "population": 1200000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_kstovo",
+   "nameRu": "Кстово",
+   "namePrepRu": "Кстове",
+   "nameGenRu": "Кстова",
+   "node": "KST",
+   "population": 65000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_lyskovo",
+   "nameRu": "Лысково",
+   "namePrepRu": "Лыскове",
+   "nameGenRu": "Лыскова",
+   "node": "LYS",
+   "population": 21000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_vorotynets",
+   "nameRu": "Воротынец",
+   "namePrepRu": "Воротынце",
+   "nameGenRu": "Воротынца",
+   "node": "VOR",
+   "population": 7000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_cheboksary",
+   "nameRu": "Чебоксары",
+   "namePrepRu": "Чебоксарах",
+   "nameGenRu": "Чебоксар",
+   "node": "CHB",
+   "population": 500000,
+   "quality": 2,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_tsivilsk",
+   "nameRu": "Цивильск",
+   "namePrepRu": "Цивильске",
+   "nameGenRu": "Цивильска",
+   "node": "CIV",
+   "population": 13000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_zelenodolsk",
+   "nameRu": "Зеленодольск",
+   "namePrepRu": "Зеленодольске",
+   "nameGenRu": "Зеленодольска",
+   "node": "ZEL",
+   "population": 100000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_kazan",
+   "nameRu": "Казань",
+   "namePrepRu": "Казани",
+   "nameGenRu": "Казани",
+   "node": "KAZ",
+   "population": 1300000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_domodedovo",
+   "nameRu": "Домодедово",
+   "namePrepRu": "Домодедове",
+   "nameGenRu": "Домодедова",
+   "node": "DOM",
+   "population": 140000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_kashira",
+   "nameRu": "Кашира",
+   "namePrepRu": "Кашире",
+   "nameGenRu": "Каширы",
+   "node": "KSH",
+   "population": 48000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_mikhailov",
+   "nameRu": "Михайлов",
+   "namePrepRu": "Михайлове",
+   "nameGenRu": "Михайлова",
+   "node": "MIH",
+   "population": 11000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_skopin",
+   "nameRu": "Скопин",
+   "namePrepRu": "Скопине",
+   "nameGenRu": "Скопина",
+   "node": "SKP",
+   "population": 28000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_ryazhsk",
+   "nameRu": "Ряжск",
+   "namePrepRu": "Ряжске",
+   "nameGenRu": "Ряжска",
+   "node": "RZH",
+   "population": 20000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_chaplygin",
+   "nameRu": "Чаплыгин",
+   "namePrepRu": "Чаплыгине",
+   "nameGenRu": "Чаплыгина",
+   "node": "CHA",
+   "population": 12000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_michurinsk",
+   "nameRu": "Мичуринск",
+   "namePrepRu": "Мичуринске",
+   "nameGenRu": "Мичуринска",
+   "node": "MCH",
+   "population": 90000,
+   "quality": 2,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_tambov",
+   "nameRu": "Тамбов",
+   "namePrepRu": "Тамбове",
+   "nameGenRu": "Тамбова",
+   "node": "TAM",
+   "population": 290000,
+   "quality": 2,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_kotovsk",
+   "nameRu": "Котовск",
+   "namePrepRu": "Котовске",
+   "nameGenRu": "Котовска",
+   "node": "KOT",
+   "population": 29000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_borisoglebsk",
+   "nameRu": "Борисоглебск",
+   "namePrepRu": "Борисоглебске",
+   "nameGenRu": "Борисоглебска",
+   "node": "BOR",
+   "population": 62000,
+   "quality": 1,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_novoanninsky",
+   "nameRu": "Новоаннинский",
+   "namePrepRu": "Новоаннинском",
+   "nameGenRu": "Новоаннинского",
+   "node": "NAN",
+   "population": 17000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_frolovo",
+   "nameRu": "Фролово",
+   "namePrepRu": "Фролове",
+   "nameGenRu": "Фролова",
+   "node": "FRO",
+   "population": 37000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_volgograd",
+   "nameRu": "Волгоград",
+   "namePrepRu": "Волгограде",
+   "nameGenRu": "Волгограда",
+   "node": "VGG",
+   "population": 1000000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_podolsk",
+   "nameRu": "Подольск",
+   "namePrepRu": "Подольске",
+   "nameGenRu": "Подольска",
+   "node": "POD",
+   "population": 300000,
+   "quality": 0,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_serpukhov",
+   "nameRu": "Серпухов",
+   "namePrepRu": "Серпухове",
+   "nameGenRu": "Серпухова",
+   "node": "SER",
+   "population": 125000,
+   "quality": 2,
+   "eveningWalk": false
+  },
+  {
+   "id": "t_tula",
+   "nameRu": "Тула",
+   "namePrepRu": "Туле",
+   "nameGenRu": "Тулы",
+   "node": "TUL",
+   "population": 470000,
+   "quality": 3,
+   "eveningWalk": true
+  },
+  {
+   "id": "t_shchekino",
+   "nameRu": "Щёкино",
+   "namePrepRu": "Щёкине",
+   "nameGenRu": "Щёкина",
+   "node": "SHC",
+   "population": 55000,
+   "quality": 0,
+   "eveningWalk": false
+  }
+ ],
+ "places": [
+  {
+   "id": "pl_yar_hotel_strelka",
+   "type": "lodging",
+   "nameRu": "У Стрелки, в центре",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 1.2,
+    "dyKm": 0.6
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "dogs_allowed",
+    "family_room",
+    "parking"
+   ],
+   "priceNightRub": 6000,
+   "rating": 4.6,
+   "partner": {
+    "yandexTravelId": "yt_yar_1"
+   },
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_hotel_volga",
+   "type": "lodging",
+   "nameRu": "Волжская набережная",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.8,
+    "dyKm": -0.4
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "dogs_allowed",
+    "family_room"
+   ],
+   "priceNightRub": 7000,
+   "rating": 4.5,
+   "partner": {
+    "yandexTravelId": "yt_yar_2"
+   },
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_hotel_kotorosl",
+   "type": "lodging",
+   "nameRu": "Которосль",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": -1.0,
+    "dyKm": -1.2
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 4800,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_hostel_center",
+   "type": "lodging",
+   "nameRu": "Хостел «Центральный»",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.4,
+    "dyKm": 0.9
+   },
+   "townId": "t_yaroslavl",
+   "tags": [],
+   "priceNightRub": 2500,
+   "rating": 3.6,
+   "breakfastIncluded": false,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_hotel_kremlin",
+   "type": "lodging",
+   "nameRu": "Гостиница у кремля",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "dogs_allowed",
+    "parking"
+   ],
+   "priceNightRub": 4500,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_guest_nero",
+   "type": "lodging",
+   "nameRu": "Гостевой дом «Неро»",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.9,
+    "dyKm": -0.5
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "family_room",
+    "parking"
+   ],
+   "priceNightRub": 3800,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_hotel_lake",
+   "type": "lodging",
+   "nameRu": "Отель на Плещеевом",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": -0.6,
+    "dyKm": 0.8
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "family_room",
+    "parking",
+    "view"
+   ],
+   "priceNightRub": 5200,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_guest_goritsy",
+   "type": "lodging",
+   "nameRu": "Гостевой дом у Горицкого",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 1.1,
+    "dyKm": -0.7
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 3900,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_hotel_lavra",
+   "type": "lodging",
+   "nameRu": "Гостиница у Лавры",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.7,
+    "dyKm": 0.3
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 5000,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_hotel_posad",
+   "type": "lodging",
+   "nameRu": "Посадский двор",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": -0.8,
+    "dyKm": 0.5
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 4200,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_hotel_volga",
+   "type": "lodging",
+   "nameRu": "Волга-отель",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.5,
+    "dyKm": -0.6
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 5000,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_guest_snegurochka",
+   "type": "lodging",
+   "nameRu": "Терем Снегурочки",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": -0.9,
+    "dyKm": 0.4
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "dogs_allowed"
+   ],
+   "priceNightRub": 4200,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_hotel_sitets",
+   "type": "lodging",
+   "nameRu": "Ситец",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 4000,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_hotel_center",
+   "type": "lodging",
+   "nameRu": "Шереметьевский",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": -0.5,
+    "dyKm": -0.2
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 4600,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_hotel_pushkarskaya",
+   "type": "lodging",
+   "nameRu": "Пушкарская слобода",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.6,
+    "dyKm": -0.8
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "dogs_allowed",
+    "family_room",
+    "parking"
+   ],
+   "priceNightRub": 6000,
+   "rating": 4.7,
+   "partner": {
+    "yandexTravelId": "yt_suz_1"
+   },
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_guest_kamenka",
+   "type": "lodging",
+   "nameRu": "Гостевой дом у Каменки",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": -0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "family_room"
+   ],
+   "priceNightRub": 4500,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_hotel_nikolaevsky",
+   "type": "lodging",
+   "nameRu": "Николаевский посад",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.2,
+    "dyKm": 0.9
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "parking_guarded"
+   ],
+   "priceNightRub": 5500,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_hotel_zolotye",
+   "type": "lodging",
+   "nameRu": "У Золотых ворот",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "parking",
+    "dogs_allowed"
+   ],
+   "priceNightRub": 5200,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_hotel_klyazma",
+   "type": "lodging",
+   "nameRu": "Клязьма",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": -1.2,
+    "dyKm": -0.6
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 4300,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_dze_hotel_oka",
+   "type": "lodging",
+   "nameRu": "Ока",
+   "anchor": {
+    "node": "DZE",
+    "dxKm": 0.5,
+    "dyKm": 0.4
+   },
+   "townId": "t_dzerzhinsk",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 3600,
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_dze_hotel_center",
+   "type": "lodging",
+   "nameRu": "Центральная",
+   "anchor": {
+    "node": "DZE",
+    "dxKm": -0.4,
+    "dyKm": -0.3
+   },
+   "townId": "t_dzerzhinsk",
+   "tags": [],
+   "priceNightRub": 3200,
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_hotel_kremlin",
+   "type": "lodging",
+   "nameRu": "Отель у кремля",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.6,
+    "dyKm": 0.4
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "parking",
+    "family_room",
+    "dogs_allowed"
+   ],
+   "priceNightRub": 6500,
+   "rating": 4.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_hotel_volga",
+   "type": "lodging",
+   "nameRu": "Волжский откос",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 1.1,
+    "dyKm": 0.8
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "parking_guarded",
+    "view"
+   ],
+   "priceNightRub": 7200,
+   "rating": 4.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_hotel_pokrovka",
+   "type": "lodging",
+   "nameRu": "Покровка",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.2,
+    "dyKm": -0.6
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 5000,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_hostel",
+   "type": "lodging",
+   "nameRu": "Хостел «Набережная»",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": -0.7,
+    "dyKm": 0.2
+   },
+   "townId": "t_nizhny",
+   "tags": [],
+   "priceNightRub": 2200,
+   "rating": 3.7,
+   "breakfastIncluded": false,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_hotel_bay",
+   "type": "lodging",
+   "nameRu": "Залив",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "parking",
+    "view"
+   ],
+   "priceNightRub": 4800,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_hotel_center",
+   "type": "lodging",
+   "nameRu": "Чувашия",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": -0.3,
+    "dyKm": -0.4
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "parking",
+    "dogs_allowed"
+   ],
+   "priceNightRub": 4200,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kaz_hotel_kremlin",
+   "type": "lodging",
+   "nameRu": "Кремлёвская",
+   "anchor": {
+    "node": "KAZ",
+    "dxKm": 0.5,
+    "dyKm": 0.6
+   },
+   "townId": "t_kazan",
+   "tags": [
+    "parking_guarded",
+    "family_room"
+   ],
+   "priceNightRub": 7500,
+   "rating": 4.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kaz_hotel_bauman",
+   "type": "lodging",
+   "nameRu": "На Баумана",
+   "anchor": {
+    "node": "KAZ",
+    "dxKm": -0.3,
+    "dyKm": -0.2
+   },
+   "townId": "t_kazan",
+   "tags": [
+    "parking",
+    "dogs_allowed"
+   ],
+   "priceNightRub": 6000,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_hotel_oka",
+   "type": "lodging",
+   "nameRu": "Приокская",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": 0.5,
+    "dyKm": 0.3
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 3500,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_hotel_kolomna",
+   "type": "lodging",
+   "nameRu": "Каширский двор",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": -0.6,
+    "dyKm": 0.2
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 3900,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_hotel_michurin",
+   "type": "lodging",
+   "nameRu": "Мичуринская",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 3400,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_hotel_sad",
+   "type": "lodging",
+   "nameRu": "Яблоневый сад",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": -0.5,
+    "dyKm": 0.4
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 3800,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_hotel_tambov",
+   "type": "lodging",
+   "nameRu": "Гостиница «Тамбов»",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "dogs_allowed",
+    "family_room",
+    "parking"
+   ],
+   "priceNightRub": 4500,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_hotel_derzhavinskaya",
+   "type": "lodging",
+   "nameRu": "Державинская",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": -0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "dogs_allowed",
+    "family_room",
+    "parking_guarded"
+   ],
+   "priceNightRub": 5200,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_hotel_solnechnaya",
+   "type": "lodging",
+   "nameRu": "Солнечная",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.9,
+    "dyKm": -0.7
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 3800,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kotovsk_hotel_1",
+   "type": "lodging",
+   "nameRu": "Котовск-отель",
+   "anchor": {
+    "node": "KOT",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_kotovsk",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 3200,
+   "rating": 4.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kotovsk_hotel_2",
+   "type": "lodging",
+   "nameRu": "Гостиница «Цна»",
+   "anchor": {
+    "node": "KOT",
+    "dxKm": -0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_kotovsk",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 3000,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kotovsk_hotel_3",
+   "type": "lodging",
+   "nameRu": "Придорожная",
+   "anchor": {
+    "node": "KOT",
+    "dxKm": 0.5,
+    "dyKm": -0.4
+   },
+   "townId": "t_kotovsk",
+   "tags": [
+    "parking_guarded",
+    "family_room"
+   ],
+   "priceNightRub": 3500,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_bor_hotel_center",
+   "type": "lodging",
+   "nameRu": "Борисоглебская",
+   "anchor": {
+    "node": "BOR",
+    "dxKm": 0.3,
+    "dyKm": 0.3
+   },
+   "townId": "t_borisoglebsk",
+   "tags": [
+    "parking",
+    "dogs_allowed"
+   ],
+   "priceNightRub": 3600,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_bor_hotel_vorona",
+   "type": "lodging",
+   "nameRu": "Ворона",
+   "anchor": {
+    "node": "BOR",
+    "dxKm": -0.5,
+    "dyKm": 0.2
+   },
+   "townId": "t_borisoglebsk",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 3300,
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vgg_hotel_volga",
+   "type": "lodging",
+   "nameRu": "Волгоград-отель",
+   "anchor": {
+    "node": "VGG",
+    "dxKm": 0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_volgograd",
+   "tags": [
+    "parking",
+    "family_room",
+    "dogs_allowed"
+   ],
+   "priceNightRub": 6000,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vgg_hotel_alley",
+   "type": "lodging",
+   "nameRu": "На Аллее Героев",
+   "anchor": {
+    "node": "VGG",
+    "dxKm": -0.4,
+    "dyKm": 0.8
+   },
+   "townId": "t_volgograd",
+   "tags": [
+    "parking_guarded"
+   ],
+   "priceNightRub": 6800,
+   "rating": 4.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_hotel_oka",
+   "type": "lodging",
+   "nameRu": "Серпуховская",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.4,
+    "dyKm": 0.2
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "parking"
+   ],
+   "priceNightRub": 4000,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_hotel_vysotsky",
+   "type": "lodging",
+   "nameRu": "У Высоцкого монастыря",
+   "anchor": {
+    "node": "SER",
+    "dxKm": -0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 4400,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_hotel_kremlin",
+   "type": "lodging",
+   "nameRu": "Тульский кремль-отель",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_tula",
+   "tags": [
+    "parking",
+    "family_room",
+    "dogs_allowed"
+   ],
+   "priceNightRub": 5500,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_hotel_pryanik",
+   "type": "lodging",
+   "nameRu": "Пряничный двор",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": -0.7,
+    "dyKm": 0.4
+   },
+   "townId": "t_tula",
+   "tags": [
+    "parking",
+    "family_room"
+   ],
+   "priceNightRub": 4800,
+   "rating": 4.35,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_hotel_station",
+   "type": "lodging",
+   "nameRu": "Вокзальная",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.9,
+    "dyKm": -0.8
+   },
+   "townId": "t_tula",
+   "tags": [],
+   "priceNightRub": 3000,
+   "rating": 3.7,
+   "breakfastIncluded": false,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_lavra",
+   "type": "sight",
+   "nameRu": "Троице-Сергиева лавра",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.5,
+    "dyKm": 0.2
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "walk"
+   ],
+   "openingHours": "Mo-Su 05:00-21:00",
+   "dwellMin": 90,
+   "rating": 4.9,
+   "descriptionRu": "Главный монастырь России, собор XV века.",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_goritsky",
+   "type": "sight",
+   "nameRu": "Горицкий монастырь",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 1.0,
+    "dyKm": -0.9
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "monastery",
+    "museum"
+   ],
+   "openingHours": "We-Su 10:00-17:00",
+   "dwellMin": 60,
+   "ticketAdultRub": 300,
+   "ticketChildRub": 150,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_pleshcheevo",
+   "type": "sight",
+   "nameRu": "Плещеево озеро",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": -1.2,
+    "dyKm": 1.0
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry",
+    "playground"
+   ],
+   "dwellMin": 30,
+   "rating": 4.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_kremlin",
+   "type": "sight",
+   "nameRu": "Ростовский кремль",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "kremlin",
+    "museum"
+   ],
+   "openingHours": "Mo-Su 10:00-17:00",
+   "dwellMin": 90,
+   "ticketAdultRub": 400,
+   "ticketChildRub": 200,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_spaso",
+   "type": "sight",
+   "nameRu": "Спасо-Преображенский монастырь",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.6,
+    "dyKm": -0.8
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "monastery",
+    "museum"
+   ],
+   "openingHours": "Tu-Su 10:00-18:00",
+   "dwellMin": 90,
+   "ticketAdultRub": 500,
+   "ticketChildRub": 250,
+   "rating": 4.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_strelka",
+   "type": "sight",
+   "nameRu": "Стрелка и Волжская набережная",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 1.5,
+    "dyKm": 0.8
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "view",
+    "walk",
+    "evening",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_ipatiev",
+   "type": "sight",
+   "nameRu": "Ипатьевский монастырь",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": -2.0,
+    "dyKm": -0.3
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "monastery",
+    "museum"
+   ],
+   "openingHours": "Mo-Su 09:00-18:00",
+   "dwellMin": 90,
+   "ticketAdultRub": 500,
+   "ticketChildRub": 250,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_sloboda",
+   "type": "sight",
+   "nameRu": "Костромская слобода",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": -2.4,
+    "dyKm": 0.4
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "museum",
+    "walk",
+    "playground"
+   ],
+   "openingHours": "Mo-Su 09:00-17:00",
+   "dwellMin": 60,
+   "ticketAdultRub": 300,
+   "ticketChildRub": 150,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_sitets",
+   "type": "sight",
+   "nameRu": "Музей ивановского ситца",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": 0.3,
+    "dyKm": -0.2
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "museum"
+   ],
+   "openingHours": "We-Su 10:00-18:00",
+   "dwellMin": 60,
+   "ticketAdultRub": 250,
+   "ticketChildRub": 120,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_kremlin",
+   "type": "sight",
+   "nameRu": "Суздальский кремль",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.3,
+    "dyKm": -1.0
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "kremlin",
+    "museum"
+   ],
+   "openingHours": "We-Mo 10:00-18:00",
+   "dwellMin": 60,
+   "ticketAdultRub": 400,
+   "ticketChildRub": 200,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_evfimiev",
+   "type": "sight",
+   "nameRu": "Спасо-Евфимиев монастырь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": -0.3,
+    "dyKm": 1.2
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "monastery",
+    "museum"
+   ],
+   "openingHours": "Mo-Su 10:00-18:00",
+   "dwellMin": 90,
+   "ticketAdultRub": 400,
+   "ticketChildRub": 200,
+   "rating": 4.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_wooden",
+   "type": "sight",
+   "nameRu": "Музей деревянного зодчества",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 1.2,
+    "dyKm": -0.5
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "museum",
+    "walk"
+   ],
+   "openingHours": "Mo-Su 09:00-19:00",
+   "dwellMin": 60,
+   "ticketAdultRub": 300,
+   "ticketChildRub": 150,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_golden_gate",
+   "type": "sight",
+   "nameRu": "Золотые ворота",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.4,
+    "dyKm": 0.1
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "museum",
+    "view"
+   ],
+   "openingHours": "Tu-Su 10:00-18:00",
+   "dwellMin": 30,
+   "ticketAdultRub": 250,
+   "ticketChildRub": 120,
+   "rating": 4.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_assumption",
+   "type": "sight",
+   "nameRu": "Успенский собор",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.9,
+    "dyKm": -0.3
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "view"
+   ],
+   "openingHours": "Mo-Su 13:00-17:00",
+   "dwellMin": 45,
+   "ticketAdultRub": 300,
+   "ticketChildRub": 150,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_nerl",
+   "type": "sight",
+   "nameRu": "Церковь Покрова на Нерли",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 9.5,
+    "dyKm": 1.5
+   },
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 60,
+   "rating": 4.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_pok_chocolate",
+   "type": "sight",
+   "nameRu": "Музей шоколада",
+   "anchor": {
+    "node": "POK",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_pokrov",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "openingHours": "Mo-Su 10:00-18:00",
+   "dwellMin": 45,
+   "ticketAdultRub": 350,
+   "ticketChildRub": 250,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gor_old_town",
+   "type": "sight",
+   "nameRu": "Старый Гороховец",
+   "anchor": {
+    "node": "GOR",
+    "dxKm": 0.5,
+    "dyKm": 0.6
+   },
+   "townId": "t_gorokhovets",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_kremlin",
+   "type": "sight",
+   "nameRu": "Нижегородский кремль",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.8,
+    "dyKm": 0.6
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "kremlin",
+    "walk",
+    "view",
+    "free_entry",
+    "evening"
+   ],
+   "openingHours": "Mo-Su 06:00-22:00",
+   "dwellMin": 60,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_chkalov",
+   "type": "sight",
+   "nameRu": "Чкаловская лестница",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 1.2,
+    "dyKm": 0.9
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry",
+    "evening"
+   ],
+   "dwellMin": 30,
+   "rating": 4.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_bay",
+   "type": "sight",
+   "nameRu": "Чебоксарский залив",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.5,
+    "dyKm": 0.5
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry",
+    "evening",
+    "playground"
+   ],
+   "dwellMin": 45,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kaz_kremlin",
+   "type": "sight",
+   "nameRu": "Казанский кремль",
+   "anchor": {
+    "node": "KAZ",
+    "dxKm": 0.7,
+    "dyKm": 0.8
+   },
+   "townId": "t_kazan",
+   "tags": [
+    "kremlin",
+    "museum",
+    "free_entry",
+    "evening"
+   ],
+   "openingHours": "Mo-Su 08:00-22:00",
+   "dwellMin": 90,
+   "rating": 4.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_zel_sviyazhsk",
+   "type": "sight",
+   "nameRu": "Остров-град Свияжск",
+   "anchor": {
+    "node": "ZEL",
+    "dxKm": 2.0,
+    "dyKm": -6.0
+   },
+   "tags": [
+    "monastery",
+    "museum",
+    "walk"
+   ],
+   "openingHours": "Mo-Su 09:00-18:00",
+   "dwellMin": 120,
+   "ticketAdultRub": 400,
+   "ticketChildRub": 200,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_michurin",
+   "type": "sight",
+   "nameRu": "Дом-музей Мичурина",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "museum"
+   ],
+   "openingHours": "Tu-Sa 09:00-17:00",
+   "dwellMin": 45,
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_aseev",
+   "type": "sight",
+   "nameRu": "Усадьба Асеевых",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.8,
+    "dyKm": 0.9
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "museum"
+   ],
+   "openingHours": "Tu-Su 10:00-18:00",
+   "dwellMin": 60,
+   "ticketAdultRub": 300,
+   "ticketChildRub": 150,
+   "rating": 4.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_tsna",
+   "type": "sight",
+   "nameRu": "Набережная Цны",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 1.0,
+    "dyKm": 0.2
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "walk",
+    "view",
+    "evening",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vgg_mamaev",
+   "type": "sight",
+   "nameRu": "Мамаев курган",
+   "anchor": {
+    "node": "VGG",
+    "dxKm": -1.0,
+    "dyKm": 2.5
+   },
+   "townId": "t_volgograd",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry",
+    "museum"
+   ],
+   "openingHours": "24/7",
+   "dwellMin": 90,
+   "rating": 4.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vgg_panorama",
+   "type": "sight",
+   "nameRu": "Музей-панорама «Сталинградская битва»",
+   "anchor": {
+    "node": "VGG",
+    "dxKm": 0.8,
+    "dyKm": 0.4
+   },
+   "townId": "t_volgograd",
+   "tags": [
+    "museum"
+   ],
+   "openingHours": "Tu-Su 10:00-18:00",
+   "dwellMin": 90,
+   "ticketAdultRub": 400,
+   "ticketChildRub": 200,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_vysotsky",
+   "type": "sight",
+   "nameRu": "Высоцкий монастырь",
+   "anchor": {
+    "node": "SER",
+    "dxKm": -0.5,
+    "dyKm": -0.6
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "openingHours": "Mo-Su 07:00-19:00",
+   "dwellMin": 45,
+   "rating": 4.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_prioksky",
+   "type": "sight",
+   "nameRu": "Приокско-Террасный заповедник",
+   "anchor": {
+    "edge": [
+     "POD",
+     "SER"
+    ],
+    "km": 48.0,
+    "lateralKm": 9.0
+   },
+   "tags": [
+    "walk",
+    "playground",
+    "view"
+   ],
+   "openingHours": "Mo-Su 09:00-17:00",
+   "dwellMin": 90,
+   "ticketAdultRub": 400,
+   "ticketChildRub": 200,
+   "rating": 4.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_kremlin",
+   "type": "sight",
+   "nameRu": "Тульский кремль",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.5,
+    "dyKm": 0.4
+   },
+   "townId": "t_tula",
+   "tags": [
+    "kremlin",
+    "museum",
+    "walk"
+   ],
+   "openingHours": "Mo-Su 10:00-22:00",
+   "dwellMin": 60,
+   "ticketAdultRub": 300,
+   "ticketChildRub": 150,
+   "rating": 4.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_weapons",
+   "type": "sight",
+   "nameRu": "Музей оружия",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.7,
+    "dyKm": 0.6
+   },
+   "townId": "t_tula",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "openingHours": "We-Su 10:00-18:00",
+   "dwellMin": 90,
+   "ticketAdultRub": 400,
+   "ticketChildRub": 200,
+   "rating": 4.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_yasnaya",
+   "type": "sight",
+   "nameRu": "Ясная Поляна",
+   "anchor": {
+    "node": "YAP",
+    "dxKm": -1.5,
+    "dyKm": 0.0
+   },
+   "tags": [
+    "museum",
+    "walk"
+   ],
+   "openingHours": "Tu-Su 09:00-17:00",
+   "dwellMin": 120,
+   "ticketAdultRub": 500,
+   "ticketChildRub": 250,
+   "rating": 4.9,
+   "descriptionRu": "Усадьба Льва Толстого.",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_lake",
+   "type": "sight",
+   "nameRu": "Скопинское городище",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.6,
+    "dyKm": 0.4
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_cafe_posad",
+   "type": "food",
+   "nameRu": "Трапезная «Посадская»",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.6,
+    "dyKm": 0.0
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 750,
+   "rating": 4.5,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_cafe_lake",
+   "type": "food",
+   "nameRu": "Ресторан «Плещеево»",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": -0.5,
+    "dyKm": 0.4
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "view",
+    "parking"
+   ],
+   "avgCheckRub": 850,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 11:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_cafe_kids",
+   "type": "food",
+   "nameRu": "Кафе «Ботик»",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "kids_menu",
+    "playground"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 10:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_cafe_kremlin",
+   "type": "food",
+   "nameRu": "Трапезная у кремля",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.3,
+    "dyKm": 0.1
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.5,
+   "openingHours": "Mo-Su 10:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_rest_strelka",
+   "type": "food",
+   "nameRu": "Ресторан «Стрелка»",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 1.3,
+    "dyKm": 0.7
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "view"
+   ],
+   "avgCheckRub": 950,
+   "rating": 4.6,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_cafe_pelmen",
+   "type": "food",
+   "nameRu": "Пельменная на Кирова",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.5,
+    "dyKm": 0.2
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 09:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_cafe_volga",
+   "type": "food",
+   "nameRu": "Кафе «Волжанка»",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": -0.6,
+    "dyKm": -0.5
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_cafe_sbiten",
+   "type": "food",
+   "nameRu": "Сбитенная",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.2,
+    "dyKm": 0.2
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_cafe_syr",
+   "type": "food",
+   "nameRu": "Сырная лавка",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": -0.3,
+    "dyKm": 0.1
+   },
+   "townId": "t_kostroma",
+   "tags": [],
+   "avgCheckRub": 650,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 09:00-20:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_cafe_center",
+   "type": "food",
+   "nameRu": "Кафе «Текстиль»",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": 0.2,
+    "dyKm": 0.1
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_rest_trapeznaya",
+   "type": "food",
+   "nameRu": "Трапезная в кремле",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.3,
+    "dyKm": -0.9
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.6,
+   "openingHours": "Mo-Su 11:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_medovushi",
+   "type": "food",
+   "nameRu": "Дегустационный зал медовухи",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.1,
+    "dyKm": 0.2
+   },
+   "townId": "t_suzdal",
+   "tags": [],
+   "avgCheckRub": 700,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 10:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_cafe_gate",
+   "type": "food",
+   "nameRu": "Кафе у Золотых ворот",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.5,
+    "dyKm": 0.2
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 09:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_rest_klyazma",
+   "type": "food",
+   "nameRu": "Ресторан «Клязьма»",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": -0.8,
+    "dyKm": -0.4
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "view"
+   ],
+   "avgCheckRub": 900,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_pok_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Покровское»",
+   "anchor": {
+    "node": "POK",
+    "dxKm": 0.3,
+    "dyKm": 0.1
+   },
+   "townId": "t_pokrov",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gor_cafe",
+   "type": "food",
+   "nameRu": "Трапезная Гороховца",
+   "anchor": {
+    "node": "GOR",
+    "dxKm": 0.4,
+    "dyKm": 0.4
+   },
+   "townId": "t_gorokhovets",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_rest_kremlin",
+   "type": "food",
+   "nameRu": "Ресторан на Рождественской",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.7,
+    "dyKm": 0.5
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "view"
+   ],
+   "avgCheckRub": 1000,
+   "rating": 4.6,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_cafe_kids",
+   "type": "food",
+   "nameRu": "Кафе «Волжский пряник»",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.3,
+    "dyKm": -0.2
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 09:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_cafe",
+   "type": "food",
+   "nameRu": "Чувашская кухня",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kaz_rest_tatar",
+   "type": "food",
+   "nameRu": "Дом татарской кулинарии",
+   "anchor": {
+    "node": "KAZ",
+    "dxKm": 0.4,
+    "dyKm": 0.5
+   },
+   "townId": "t_kazan",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 900,
+   "rating": 4.7,
+   "openingHours": "Mo-Su 10:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Антоновка»",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.2,
+    "dyKm": 0.1
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_cafe",
+   "type": "food",
+   "nameRu": "Тамбовская трапезная",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.5,
+    "dyKm": 0.4
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_rest",
+   "type": "food",
+   "nameRu": "Ресторан «Державин»",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": -0.4,
+    "dyKm": 0.6
+   },
+   "townId": "t_tambov",
+   "tags": [],
+   "avgCheckRub": 850,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_bor_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Хопёр»",
+   "anchor": {
+    "node": "BOR",
+    "dxKm": 0.2,
+    "dyKm": 0.2
+   },
+   "townId": "t_borisoglebsk",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vgg_rest",
+   "type": "food",
+   "nameRu": "Ресторан «Волжский»",
+   "anchor": {
+    "node": "VGG",
+    "dxKm": 0.5,
+    "dyKm": 0.6
+   },
+   "townId": "t_volgograd",
+   "tags": [
+    "view",
+    "kids_menu"
+   ],
+   "avgCheckRub": 900,
+   "rating": 4.5,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vgg_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Сталинградское»",
+   "anchor": {
+    "node": "VGG",
+    "dxKm": -0.3,
+    "dyKm": 0.3
+   },
+   "townId": "t_volgograd",
+   "tags": [],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 09:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Ока»",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.3,
+    "dyKm": 0.1
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 09:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_cafe_pryanik",
+   "type": "food",
+   "nameRu": "Пряничная",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.4,
+    "dyKm": 0.2
+   },
+   "townId": "t_tula",
+   "tags": [
+    "kids_menu",
+    "playground"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.5,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_rest_kremlin",
+   "type": "food",
+   "nameRu": "Ресторан «Тульский»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_tula",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 850,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yap_cafe",
+   "type": "food",
+   "nameRu": "Кафе у Ясной Поляны",
+   "anchor": {
+    "node": "YAP",
+    "dxKm": -1.2,
+    "dyKm": 0.2
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 10:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Каширское»",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": 0.2,
+    "dyKm": 0.2
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_pyatnitskoe",
+   "type": "sight",
+   "nameRu": "Пятницкое подворье",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": -0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_toys",
+   "type": "sight",
+   "nameRu": "Музей игрушки",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.9,
+    "dyKm": -0.4
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "dwellMin": 60,
+   "rating": 4.3,
+   "openingHours": "Tu-Su 10:00-17:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 150,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_gremyachiy",
+   "type": "sight",
+   "nameRu": "Гремячий ключ",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 1.6,
+    "dyKm": 1.1
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_nikitsky",
+   "type": "sight",
+   "nameRu": "Никитский монастырь",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.8,
+    "dyKm": 1.4
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_botik",
+   "type": "sight",
+   "nameRu": "Музей-усадьба «Ботик Петра Первого»",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": -1.6,
+    "dyKm": -1.2
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "museum",
+    "view"
+   ],
+   "dwellMin": 60,
+   "rating": 4.1,
+   "openingHours": "We-Su 10:00-17:00",
+   "ticketAdultRub": 350,
+   "ticketChildRub": 150,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_blue_stone",
+   "type": "sight",
+   "nameRu": "Синий камень",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": -1.8,
+    "dyKm": 0.9
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_yakovlevsky",
+   "type": "sight",
+   "nameRu": "Спасо-Яковлевский монастырь",
+   "anchor": {
+    "node": "RST",
+    "dxKm": -1.1,
+    "dyKm": -0.8
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 60,
+   "rating": 4.4,
+   "openingHours": "Mo-Su 08:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_nero",
+   "type": "sight",
+   "nameRu": "Набережная озера Неро",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.3,
+    "dyKm": -0.6
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_finift",
+   "type": "sight",
+   "nameRu": "Музей ростовской финифти",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-17:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_ilya",
+   "type": "sight",
+   "nameRu": "Церковь Ильи Пророка",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.5,
+    "dyKm": 0.4
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.4,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_embankment",
+   "type": "sight",
+   "nameRu": "Волжская набережная",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.9,
+    "dyKm": 0.2
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_tolchkovo",
+   "type": "sight",
+   "nameRu": "Церковь Иоанна Предтечи в Толчкове",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": -1.4,
+    "dyKm": 1.2
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "We-Su 10:00-17:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_rows",
+   "type": "sight",
+   "nameRu": "Торговые ряды",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.4,
+    "dyKm": -0.3
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_jewel",
+   "type": "sight",
+   "nameRu": "Музей ювелирного искусства",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.7,
+    "dyKm": 0.3
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 150,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_snow",
+   "type": "sight",
+   "nameRu": "Терем Снегурочки",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": -0.5,
+    "dyKm": 0.6
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-18:00",
+   "ticketAdultRub": 300,
+   "ticketChildRub": 250,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_chintz",
+   "type": "sight",
+   "nameRu": "Музей ивановского ситца",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": 0.4,
+    "dyKm": 0.5
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_ship",
+   "type": "sight",
+   "nameRu": "Дом-корабль",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": -0.6,
+    "dyKm": 0.3
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_trade",
+   "type": "sight",
+   "nameRu": "Торговая площадь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_rizopolozhensky",
+   "type": "sight",
+   "nameRu": "Ризоположенский монастырь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.5,
+    "dyKm": -0.6
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 08:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_pokrovsky",
+   "type": "sight",
+   "nameRu": "Покровский монастырь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": -0.9,
+    "dyKm": 1.0
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 08:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_dmitrievsky",
+   "type": "sight",
+   "nameRu": "Дмитриевский собор",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.5,
+    "dyKm": -0.3
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.5,
+   "openingHours": "Mo-Su 10:00-17:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_view",
+   "type": "sight",
+   "nameRu": "Смотровая у Успенского собора",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.3,
+    "dyKm": -0.5
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_chambers",
+   "type": "sight",
+   "nameRu": "Палаты",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.7,
+    "dyKm": -0.4
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "dwellMin": 60,
+   "rating": 4.3,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_pok_park",
+   "type": "sight",
+   "nameRu": "Покровский парк",
+   "anchor": {
+    "node": "POK",
+    "dxKm": 0.4,
+    "dyKm": -0.5
+   },
+   "townId": "t_pokrov",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_pok_monastery",
+   "type": "sight",
+   "nameRu": "Свято-Введенский монастырь",
+   "anchor": {
+    "node": "POK",
+    "dxKm": -1.0,
+    "dyKm": 1.2
+   },
+   "townId": "t_pokrov",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gor_houses",
+   "type": "sight",
+   "nameRu": "Купеческие дома Гороховца",
+   "anchor": {
+    "node": "GOR",
+    "dxKm": 0.3,
+    "dyKm": 0.6
+   },
+   "townId": "t_gorokhovets",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gor_nikolsky",
+   "type": "sight",
+   "nameRu": "Никольский монастырь",
+   "anchor": {
+    "node": "GOR",
+    "dxKm": -0.6,
+    "dyKm": 0.8
+   },
+   "townId": "t_gorokhovets",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_pokrovka",
+   "type": "sight",
+   "nameRu": "Большая Покровская",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.4,
+    "dyKm": -0.6
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 60,
+   "rating": 4.3,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_museum",
+   "type": "sight",
+   "nameRu": "Художественный музей",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.8,
+    "dyKm": 0.2
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 60,
+   "rating": 4.2,
+   "openingHours": "Tu-Su 11:00-19:00",
+   "ticketAdultRub": 300,
+   "ticketChildRub": 150,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_monument",
+   "type": "sight",
+   "nameRu": "Монумент Матери-покровительнице",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.6,
+    "dyKm": 0.5
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_embankment",
+   "type": "sight",
+   "nameRu": "Красная площадь и набережная",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_nikitsky",
+   "type": "sight",
+   "nameRu": "Никитский монастырь Каширы",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": 0.5,
+    "dyKm": 0.6
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_oka_view",
+   "type": "sight",
+   "nameRu": "Смотровая на Оку",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": -0.4,
+    "dyKm": -0.7
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mih_museum",
+   "type": "sight",
+   "nameRu": "Михайловский краеведческий музей",
+   "anchor": {
+    "node": "MIH",
+    "dxKm": 0.3,
+    "dyKm": 0.4
+   },
+   "townId": "t_mikhailov",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 3.8,
+   "openingHours": "Tu-Su 09:00-17:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_ceramics",
+   "type": "sight",
+   "nameRu": "Музей скопинской керамики",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.4,
+    "dyKm": -0.3
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Tu-Su 09:00-17:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_cathedral",
+   "type": "sight",
+   "nameRu": "Никольский собор Скопина",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": -0.3,
+    "dyKm": 0.5
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 30,
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_garden",
+   "type": "sight",
+   "nameRu": "Сад Мичурина",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.8,
+    "dyKm": 0.6
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_bogolyubsky",
+   "type": "sight",
+   "nameRu": "Боголюбский собор",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": -0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_embankment",
+   "type": "sight",
+   "nameRu": "Набережная Тамбова",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.6,
+    "dyKm": -0.4
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_vladychny",
+   "type": "sight",
+   "nameRu": "Владычный монастырь",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.6,
+    "dyKm": 0.4
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_kremlin",
+   "type": "sight",
+   "nameRu": "Соборная гора",
+   "anchor": {
+    "node": "SER",
+    "dxKm": -0.4,
+    "dyKm": 0.5
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_museum",
+   "type": "sight",
+   "nameRu": "Серпуховский историко-художественный музей",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.3,
+    "dyKm": -0.4
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 60,
+   "rating": 4.2,
+   "openingHours": "We-Su 10:00-17:00",
+   "ticketAdultRub": 250,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_gingerbread",
+   "type": "sight",
+   "nameRu": "Музей «Тульский пряник»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_tula",
+   "tags": [
+    "museum",
+    "playground"
+   ],
+   "dwellMin": 45,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_belousov",
+   "type": "sight",
+   "nameRu": "Белоусовский парк",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": -0.8,
+    "dyKm": -0.6
+   },
+   "townId": "t_tula",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_samovar",
+   "type": "sight",
+   "nameRu": "Музей «Тульские самовары»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.3,
+    "dyKm": 0.4
+   },
+   "townId": "t_tula",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.2,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_chapel",
+   "type": "sight",
+   "nameRu": "Часовня Пятницкого колодца",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.4,
+    "dyKm": 0.6
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_fedorovsky",
+   "type": "sight",
+   "nameRu": "Фёдоровский монастырь",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.9,
+    "dyKm": -1.3
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_rampart",
+   "type": "sight",
+   "nameRu": "Земляной вал Переславля",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_iron",
+   "type": "sight",
+   "nameRu": "Музей утюга",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.4,
+    "dyKm": 0.2
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_gostiny",
+   "type": "sight",
+   "nameRu": "Гостиный двор Ростова",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_avraamiev",
+   "type": "sight",
+   "nameRu": "Авраамиев монастырь",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.8,
+    "dyKm": -0.5
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "monastery",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 07:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_tower",
+   "type": "sight",
+   "nameRu": "Власьевская башня",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_fire_tower",
+   "type": "sight",
+   "nameRu": "Пожарная каланча",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.3,
+    "dyKm": -0.4
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_park",
+   "type": "sight",
+   "nameRu": "Центральный парк Костромы",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.1,
+    "dyKm": -0.2
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_alexandrovsky",
+   "type": "sight",
+   "nameRu": "Александровский монастырь",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": -0.4,
+    "dyKm": 0.8
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "monastery",
+    "free_entry",
+    "view"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-19:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_kamenka",
+   "type": "sight",
+   "nameRu": "Набережная Каменки",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.1,
+    "dyKm": 0.2
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_cathedral_square",
+   "type": "sight",
+   "nameRu": "Соборная площадь Владимира",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.4,
+    "dyKm": -0.4
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_water_tower",
+   "type": "sight",
+   "nameRu": "Старая водонапорная башня",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.6,
+    "dyKm": -0.3
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "museum",
+    "view"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "openingHours": "Tu-Su 10:00-17:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_rozhdestvenskaya",
+   "type": "sight",
+   "nameRu": "Рождественская улица",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.5,
+    "dyKm": -0.2
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_fedorovsky",
+   "type": "sight",
+   "nameRu": "Набережная Фёдоровского",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.6,
+    "dyKm": 0.3
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "view",
+    "walk",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_park",
+   "type": "sight",
+   "nameRu": "Парк Победы Чебоксар",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.4,
+    "dyKm": 0.6
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_park",
+   "type": "sight",
+   "nameRu": "Городской парк Скопина",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.2,
+    "dyKm": 0.2
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_station",
+   "type": "sight",
+   "nameRu": "Вокзал Мичуринска",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.3,
+    "dyKm": -0.2
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_park",
+   "type": "sight",
+   "nameRu": "Парк культуры Тамбова",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.3,
+    "dyKm": 0.4
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 45,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_museum",
+   "type": "sight",
+   "nameRu": "Тамбовский краеведческий музей",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.4,
+    "dyKm": -0.2
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 45,
+   "rating": 4.0,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 200,
+   "ticketChildRub": 100,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_park",
+   "type": "sight",
+   "nameRu": "Парк «Питомник»",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "walk",
+    "playground",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_embankment",
+   "type": "sight",
+   "nameRu": "Набережная Упы",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_tula",
+   "tags": [
+    "walk",
+    "view",
+    "free_entry"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_lefty",
+   "type": "sight",
+   "nameRu": "Музей «Тульский левша»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_tula",
+   "tags": [
+    "museum"
+   ],
+   "dwellMin": 30,
+   "rating": 4.0,
+   "openingHours": "Tu-Su 10:00-18:00",
+   "ticketAdultRub": 150,
+   "ticketChildRub": 80,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_cafe_dvorik",
+   "type": "food",
+   "nameRu": "Кафе «Русский дворик»",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": -0.4,
+    "dyKm": 0.3
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_sps_cafe_bliny",
+   "type": "food",
+   "nameRu": "Блинная у лавры",
+   "anchor": {
+    "node": "SPS",
+    "dxKm": 0.7,
+    "dyKm": 0.3
+   },
+   "townId": "t_sergiev_posad",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 550,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_cafe_sloboda",
+   "type": "food",
+   "nameRu": "Кафе «Переславская слобода»",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.6,
+    "dyKm": -0.5
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_prs_cafe_yam",
+   "type": "food",
+   "nameRu": "Трактир «Ямской двор»",
+   "anchor": {
+    "node": "PRS",
+    "dxKm": 0.3,
+    "dyKm": 0.6
+   },
+   "townId": "t_pereslavl",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_cafe_podvorie",
+   "type": "food",
+   "nameRu": "Кафе «Русское подворье»",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.5,
+    "dyKm": -0.2
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_cafe_veliky",
+   "type": "food",
+   "nameRu": "Трапезная «Ростов Великий»",
+   "anchor": {
+    "node": "RST",
+    "dxKm": -0.4,
+    "dyKm": 0.4
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 750,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_rst_cafe_nero",
+   "type": "food",
+   "nameRu": "Кафе «Неро»",
+   "anchor": {
+    "node": "RST",
+    "dxKm": 0.2,
+    "dyKm": -0.7
+   },
+   "townId": "t_rostov",
+   "tags": [
+    "view",
+    "kids_menu"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_cafe_terrace",
+   "type": "food",
+   "nameRu": "Кафе «Волжская терраса»",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.8,
+    "dyKm": 0.1
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "view",
+    "kids_menu"
+   ],
+   "avgCheckRub": 900,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_yar_cafe_sobranie",
+   "type": "food",
+   "nameRu": "Ресторан «Собрание»",
+   "anchor": {
+    "node": "YAR",
+    "dxKm": 0.4,
+    "dyKm": 0.5
+   },
+   "townId": "t_yaroslavl",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 1000,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_cafe_sloboda",
+   "type": "food",
+   "nameRu": "Кафе «Ипатьевская слобода»",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": -0.7,
+    "dyKm": 0.4
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_kos_cafe_rows",
+   "type": "food",
+   "nameRu": "Кафе в Торговых рядах",
+   "anchor": {
+    "node": "KOS",
+    "dxKm": 0.4,
+    "dyKm": -0.2
+   },
+   "townId": "t_kostroma",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_cafe_sitets",
+   "type": "food",
+   "nameRu": "Кафе «Ситец»",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": 0.3,
+    "dyKm": 0.4
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_iva_cafe_station",
+   "type": "food",
+   "nameRu": "Столовая «Текстиль»",
+   "anchor": {
+    "node": "IVA",
+    "dxKm": -0.4,
+    "dyKm": 0.2
+   },
+   "townId": "t_ivanovo",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 08:00-20:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_kremlin",
+   "type": "food",
+   "nameRu": "Трапезная «Кремлёвская»",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.2,
+    "dyKm": -0.3
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 900,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 11:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_pushkarka",
+   "type": "food",
+   "nameRu": "Кафе «Пушкарская слобода»",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.6,
+    "dyKm": 0.3
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "parking",
+    "view"
+   ],
+   "avgCheckRub": 1000,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_cafe_dmitrievsky",
+   "type": "food",
+   "nameRu": "Кафе «Дмитриевское»",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.4,
+    "dyKm": -0.3
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_vla_cafe_georgievskaya",
+   "type": "food",
+   "nameRu": "Кафе на Георгиевской",
+   "anchor": {
+    "node": "VLA",
+    "dxKm": 0.6,
+    "dyKm": -0.5
+   },
+   "townId": "t_vladimir",
+   "tags": [
+    "view"
+   ],
+   "avgCheckRub": 750,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 11:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_pok_cafe_park",
+   "type": "food",
+   "nameRu": "Кафе «Покровское подворье»",
+   "anchor": {
+    "node": "POK",
+    "dxKm": 0.3,
+    "dyKm": -0.3
+   },
+   "townId": "t_pokrov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gor_cafe_kupets",
+   "type": "food",
+   "nameRu": "Кафе «Купеческое»",
+   "anchor": {
+    "node": "GOR",
+    "dxKm": 0.2,
+    "dyKm": 0.4
+   },
+   "townId": "t_gorokhovets",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_cafe_pokrovka",
+   "type": "food",
+   "nameRu": "Кафе на Покровке",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.4,
+    "dyKm": -0.5
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_nnv_cafe_volga",
+   "type": "food",
+   "nameRu": "Ресторан «Волжский откос»",
+   "anchor": {
+    "node": "NNV",
+    "dxKm": 0.6,
+    "dyKm": 0.4
+   },
+   "townId": "t_nizhny",
+   "tags": [
+    "view",
+    "parking"
+   ],
+   "avgCheckRub": 1000,
+   "rating": 4.3,
+   "openingHours": "Mo-Su 12:00-23:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_cafe_bay",
+   "type": "food",
+   "nameRu": "Кафе у залива",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.5,
+    "dyKm": 0.3
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "view",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_chb_cafe_chuvash",
+   "type": "food",
+   "nameRu": "Кафе «Чувашское подворье»",
+   "anchor": {
+    "node": "CHB",
+    "dxKm": 0.2,
+    "dyKm": 0.4
+   },
+   "townId": "t_cheboksary",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ksh_cafe_oka",
+   "type": "food",
+   "nameRu": "Кафе «Ока»",
+   "anchor": {
+    "node": "KSH",
+    "dxKm": -0.3,
+    "dyKm": -0.4
+   },
+   "townId": "t_kashira",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mih_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Михайловская застава»",
+   "anchor": {
+    "node": "MIH",
+    "dxKm": 0.3,
+    "dyKm": 0.2
+   },
+   "townId": "t_mikhailov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_cafe",
+   "type": "food",
+   "nameRu": "Кафе «Скопинское»",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.2,
+    "dyKm": 0.3
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 550,
+   "rating": 3.9,
+   "openingHours": "Mo-Su 09:00-21:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_skp_cafe_lake",
+   "type": "food",
+   "nameRu": "Столовая «Городище»",
+   "anchor": {
+    "node": "SKP",
+    "dxKm": 0.5,
+    "dyKm": 0.2
+   },
+   "townId": "t_skopin",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-20:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_cafe_garden",
+   "type": "food",
+   "nameRu": "Кафе «Яблоневый сад»",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.6,
+    "dyKm": 0.4
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 600,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tam_cafe_tsna",
+   "type": "food",
+   "nameRu": "Кафе на Цне",
+   "anchor": {
+    "node": "TAM",
+    "dxKm": 0.5,
+    "dyKm": -0.3
+   },
+   "townId": "t_tambov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_cafe_vladychny",
+   "type": "food",
+   "nameRu": "Кафе «Владычное»",
+   "anchor": {
+    "node": "SER",
+    "dxKm": 0.5,
+    "dyKm": 0.3
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_ser_cafe_oka",
+   "type": "food",
+   "nameRu": "Кафе «Окская пристань»",
+   "anchor": {
+    "node": "SER",
+    "dxKm": -0.3,
+    "dyKm": -0.5
+   },
+   "townId": "t_serpukhov",
+   "tags": [
+    "view",
+    "parking"
+   ],
+   "avgCheckRub": 750,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 11:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_cafe_samovar",
+   "type": "food",
+   "nameRu": "Кафе «Самовар»",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.3,
+    "dyKm": 0.3
+   },
+   "townId": "t_tula",
+   "tags": [
+    "parking",
+    "kids_menu"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.2,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_tul_cafe_kremlin",
+   "type": "food",
+   "nameRu": "Кафе у кремля",
+   "anchor": {
+    "node": "TUL",
+    "dxKm": 0.4,
+    "dyKm": 0.2
+   },
+   "townId": "t_tula",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 650,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_ogurets",
+   "type": "food",
+   "nameRu": "Кафе «Огурец»",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.1,
+    "dyKm": -0.2
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "kids_menu"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_suz_cafe_gostiny",
+   "type": "food",
+   "nameRu": "Кафе в Гостином дворе",
+   "anchor": {
+    "node": "SUZ",
+    "dxKm": 0.2,
+    "dyKm": 0.1
+   },
+   "townId": "t_suzdal",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 850,
+   "rating": 4.0,
+   "openingHours": "Mo-Su 10:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_mch_cafe_station",
+   "type": "food",
+   "nameRu": "Кафе «Вокзальное»",
+   "anchor": {
+    "node": "MCH",
+    "dxKm": 0.3,
+    "dyKm": -0.1
+   },
+   "townId": "t_michurinsk",
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_fuel_022",
+   "type": "fuel",
+   "nameRu": "АЗС, М-8, 22 км",
+   "anchor": {
+    "edge": [
+     "MSK",
+     "PUS"
+    ],
+    "km": 22.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_fuel_054",
+   "type": "fuel",
+   "nameRu": "АЗС, М-8, 54 км",
+   "anchor": {
+    "edge": [
+     "PUS",
+     "SPS"
+    ],
+    "km": 21.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_fuel_086",
+   "type": "fuel",
+   "nameRu": "АЗС, М-8, 86 км",
+   "anchor": {
+    "edge": [
+     "SPS",
+     "PRS"
+    ],
+    "km": 14.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_fuel_118",
+   "type": "fuel",
+   "nameRu": "АЗС, М-8, 118 км",
+   "anchor": {
+    "edge": [
+     "SPS",
+     "PRS"
+    ],
+    "km": 46.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_fuel_150",
+   "type": "fuel",
+   "nameRu": "АЗС, М-8, 150 км",
+   "anchor": {
+    "edge": [
+     "PRS",
+     "RST"
+    ],
+    "km": 10.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_fuel_182",
+   "type": "fuel",
+   "nameRu": "АЗС, М-8, 182 км",
+   "anchor": {
+    "edge": [
+     "PRS",
+     "RST"
+    ],
+    "km": 42.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_fuel_214",
+   "type": "fuel",
+   "nameRu": "АЗС, М-8, 214 км",
+   "anchor": {
+    "edge": [
+     "RST",
+     "YAR"
+    ],
+    "km": 10.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_fuel_246",
+   "type": "fuel",
+   "nameRu": "АЗС, М-8, 246 км",
+   "anchor": {
+    "edge": [
+     "RST",
+     "YAR"
+    ],
+    "km": 42.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_rest_040",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-8, 40 км",
+   "anchor": {
+    "edge": [
+     "PUS",
+     "SPS"
+    ],
+    "km": 7.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_rest_085",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-8, 85 км",
+   "anchor": {
+    "edge": [
+     "SPS",
+     "PRS"
+    ],
+    "km": 13.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_rest_130",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-8, 130 км",
+   "anchor": {
+    "edge": [
+     "SPS",
+     "PRS"
+    ],
+    "km": 58.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_rest_175",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-8, 175 км",
+   "anchor": {
+    "edge": [
+     "PRS",
+     "RST"
+    ],
+    "km": 35.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m8_rest_220",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-8, 220 км",
+   "anchor": {
+    "edge": [
+     "RST",
+     "YAR"
+    ],
+    "km": 16.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_fuel_025",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-132, 25 км",
+   "anchor": {
+    "edge": [
+     "YAR",
+     "KOS"
+    ],
+    "km": 25.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_fuel_063",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-132, 63 км",
+   "anchor": {
+    "edge": [
+     "YAR",
+     "KOS"
+    ],
+    "km": 63.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_fuel_101",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-600, 101 км",
+   "anchor": {
+    "edge": [
+     "KOS",
+     "IVA"
+    ],
+    "km": 22.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_fuel_139",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-600, 139 км",
+   "anchor": {
+    "edge": [
+     "KOS",
+     "IVA"
+    ],
+    "km": 60.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_fuel_177",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-600, 177 км",
+   "anchor": {
+    "edge": [
+     "KOS",
+     "IVA"
+    ],
+    "km": 98.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_fuel_215",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-132, 215 км",
+   "anchor": {
+    "edge": [
+     "IVA",
+     "SUZ"
+    ],
+    "km": 32.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_fuel_253",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-132, 253 км",
+   "anchor": {
+    "edge": [
+     "IVA",
+     "SUZ"
+    ],
+    "km": 70.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_rest_030",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-132, 30 км",
+   "anchor": {
+    "edge": [
+     "YAR",
+     "KOS"
+    ],
+    "km": 30.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_rest_075",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-132, 75 км",
+   "anchor": {
+    "edge": [
+     "YAR",
+     "KOS"
+    ],
+    "km": 75.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_rest_120",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-600, 120 км",
+   "anchor": {
+    "edge": [
+     "KOS",
+     "IVA"
+    ],
+    "km": 41.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_rest_165",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-600, 165 км",
+   "anchor": {
+    "edge": [
+     "KOS",
+     "IVA"
+    ],
+    "km": 86.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_rest_210",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-132, 210 км",
+   "anchor": {
+    "edge": [
+     "IVA",
+     "SUZ"
+    ],
+    "km": 27.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_rest_255",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-132, 255 км",
+   "anchor": {
+    "edge": [
+     "IVA",
+     "SUZ"
+    ],
+    "km": 72.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_cafe_040",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», Р-132",
+   "anchor": {
+    "edge": [
+     "YAR",
+     "KOS"
+    ],
+    "km": 40.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_cafe_100",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», Р-600",
+   "anchor": {
+    "edge": [
+     "KOS",
+     "IVA"
+    ],
+    "km": 21.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_cafe_160",
+   "type": "food",
+   "nameRu": "Кафе «Привал», Р-600",
+   "anchor": {
+    "edge": [
+     "KOS",
+     "IVA"
+    ],
+    "km": 81.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_cafe_220",
+   "type": "food",
+   "nameRu": "Кафе «Обжорка», Р-132",
+   "anchor": {
+    "edge": [
+     "IVA",
+     "SUZ"
+    ],
+    "km": 37.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_gr_cafe_280",
+   "type": "food",
+   "nameRu": "Кафе «Домашняя кухня», Р-132",
+   "anchor": {
+    "edge": [
+     "SUZ",
+     "VLA"
+    ],
+    "km": 20.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_fuel_030",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 30 км",
+   "anchor": {
+    "edge": [
+     "MSK",
+     "NOG"
+    ],
+    "km": 30.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_fuel_065",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 65 км",
+   "anchor": {
+    "edge": [
+     "NOG",
+     "POK"
+    ],
+    "km": 12.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_fuel_100",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 100 км",
+   "anchor": {
+    "edge": [
+     "NOG",
+     "POK"
+    ],
+    "km": 47.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_fuel_135",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 135 км",
+   "anchor": {
+    "edge": [
+     "PET",
+     "VLA"
+    ],
+    "km": 14.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_fuel_170",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 170 км",
+   "anchor": {
+    "edge": [
+     "PET",
+     "VLA"
+    ],
+    "km": 49.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_rest_035",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 35 км",
+   "anchor": {
+    "edge": [
+     "MSK",
+     "NOG"
+    ],
+    "km": 35.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_rest_080",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 80 км",
+   "anchor": {
+    "edge": [
+     "NOG",
+     "POK"
+    ],
+    "km": 27.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_rest_125",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 125 км",
+   "anchor": {
+    "edge": [
+     "PET",
+     "VLA"
+    ],
+    "km": 4.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_rest_170",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 170 км",
+   "anchor": {
+    "edge": [
+     "PET",
+     "VLA"
+    ],
+    "km": 49.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_cafe_060",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», М-7",
+   "anchor": {
+    "edge": [
+     "NOG",
+     "POK"
+    ],
+    "km": 7.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7w_cafe_130",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», М-7",
+   "anchor": {
+    "edge": [
+     "PET",
+     "VLA"
+    ],
+    "km": 9.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_020",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 20 км",
+   "anchor": {
+    "edge": [
+     "VLA",
+     "VYZ"
+    ],
+    "km": 20.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_060",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 60 км",
+   "anchor": {
+    "edge": [
+     "VLA",
+     "VYZ"
+    ],
+    "km": 60.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_100",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 100 км",
+   "anchor": {
+    "edge": [
+     "VLA",
+     "VYZ"
+    ],
+    "km": 100.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_140",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 140 км",
+   "anchor": {
+    "edge": [
+     "VYZ",
+     "GOR"
+    ],
+    "km": 26.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_180",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 180 км",
+   "anchor": {
+    "edge": [
+     "GOR",
+     "DZE"
+    ],
+    "km": 31.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_220",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 220 км",
+   "anchor": {
+    "edge": [
+     "DZE",
+     "NNV"
+    ],
+    "km": 21.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_260",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 260 км",
+   "anchor": {
+    "edge": [
+     "NNV",
+     "KST"
+    ],
+    "km": 23.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_300",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 300 км",
+   "anchor": {
+    "edge": [
+     "KST",
+     "LYS"
+    ],
+    "km": 38.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_340",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 340 км",
+   "anchor": {
+    "edge": [
+     "LYS",
+     "VOR"
+    ],
+    "km": 21.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_380",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 380 км",
+   "anchor": {
+    "edge": [
+     "LYS",
+     "VOR"
+    ],
+    "km": 61.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_420",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 420 км",
+   "anchor": {
+    "edge": [
+     "VOR",
+     "CHB"
+    ],
+    "km": 15.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_460",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 460 км",
+   "anchor": {
+    "edge": [
+     "VOR",
+     "CHB"
+    ],
+    "km": 55.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_500",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 500 км",
+   "anchor": {
+    "edge": [
+     "CHB",
+     "CIV"
+    ],
+    "km": 23.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_540",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 540 км",
+   "anchor": {
+    "edge": [
+     "CIV",
+     "ZEL"
+    ],
+    "km": 25.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_580",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 580 км",
+   "anchor": {
+    "edge": [
+     "CIV",
+     "ZEL"
+    ],
+    "km": 65.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_fuel_620",
+   "type": "fuel",
+   "nameRu": "АЗС, М-7, 620 км",
+   "anchor": {
+    "edge": [
+     "ZEL",
+     "KAZ"
+    ],
+    "km": 33.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_030",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 30 км",
+   "anchor": {
+    "edge": [
+     "VLA",
+     "VYZ"
+    ],
+    "km": 30.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_075",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 75 км",
+   "anchor": {
+    "edge": [
+     "VLA",
+     "VYZ"
+    ],
+    "km": 75.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_120",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 120 км",
+   "anchor": {
+    "edge": [
+     "VYZ",
+     "GOR"
+    ],
+    "km": 6.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_165",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 165 км",
+   "anchor": {
+    "edge": [
+     "GOR",
+     "DZE"
+    ],
+    "km": 16.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_210",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 210 км",
+   "anchor": {
+    "edge": [
+     "DZE",
+     "NNV"
+    ],
+    "km": 11.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_255",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 255 км",
+   "anchor": {
+    "edge": [
+     "NNV",
+     "KST"
+    ],
+    "km": 18.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_300",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 300 км",
+   "anchor": {
+    "edge": [
+     "KST",
+     "LYS"
+    ],
+    "km": 38.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_345",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 345 км",
+   "anchor": {
+    "edge": [
+     "LYS",
+     "VOR"
+    ],
+    "km": 26.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_390",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 390 км",
+   "anchor": {
+    "edge": [
+     "LYS",
+     "VOR"
+    ],
+    "km": 71.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_435",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 435 км",
+   "anchor": {
+    "edge": [
+     "VOR",
+     "CHB"
+    ],
+    "km": 30.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_480",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 480 км",
+   "anchor": {
+    "edge": [
+     "CHB",
+     "CIV"
+    ],
+    "km": 3.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_525",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 525 км",
+   "anchor": {
+    "edge": [
+     "CIV",
+     "ZEL"
+    ],
+    "km": 10.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_570",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 570 км",
+   "anchor": {
+    "edge": [
+     "CIV",
+     "ZEL"
+    ],
+    "km": 55.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_rest_615",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-7, 615 км",
+   "anchor": {
+    "edge": [
+     "ZEL",
+     "KAZ"
+    ],
+    "km": 28.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_025",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», М-7",
+   "anchor": {
+    "edge": [
+     "VLA",
+     "VYZ"
+    ],
+    "km": 25.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_080",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», М-7",
+   "anchor": {
+    "edge": [
+     "VLA",
+     "VYZ"
+    ],
+    "km": 80.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_135",
+   "type": "food",
+   "nameRu": "Кафе «Привал», М-7",
+   "anchor": {
+    "edge": [
+     "VYZ",
+     "GOR"
+    ],
+    "km": 21.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_190",
+   "type": "food",
+   "nameRu": "Кафе «Обжорка», М-7",
+   "anchor": {
+    "edge": [
+     "GOR",
+     "DZE"
+    ],
+    "km": 41.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_245",
+   "type": "food",
+   "nameRu": "Кафе «Домашняя кухня», М-7",
+   "anchor": {
+    "edge": [
+     "NNV",
+     "KST"
+    ],
+    "km": 8.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_300",
+   "type": "food",
+   "nameRu": "Кафе «Блинная», М-7",
+   "anchor": {
+    "edge": [
+     "KST",
+     "LYS"
+    ],
+    "km": 38.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_355",
+   "type": "food",
+   "nameRu": "Кафе «Ямщик», М-7",
+   "anchor": {
+    "edge": [
+     "LYS",
+     "VOR"
+    ],
+    "km": 36.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_410",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», М-7",
+   "anchor": {
+    "edge": [
+     "VOR",
+     "CHB"
+    ],
+    "km": 5.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_465",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», М-7",
+   "anchor": {
+    "edge": [
+     "VOR",
+     "CHB"
+    ],
+    "km": 60.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_520",
+   "type": "food",
+   "nameRu": "Кафе «Привал», М-7",
+   "anchor": {
+    "edge": [
+     "CIV",
+     "ZEL"
+    ],
+    "km": 5.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m7e_cafe_575",
+   "type": "food",
+   "nameRu": "Кафе «Обжорка», М-7",
+   "anchor": {
+    "edge": [
+     "CIV",
+     "ZEL"
+    ],
+    "km": 60.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_040",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 40 км",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 22.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_085",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 85 км",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 67.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_130",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 130 км",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 112.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_175",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 175 км",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 157.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_220",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 220 км",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 20.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_265",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 265 км",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 65.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_310",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 310 км",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 110.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_355",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 355 км",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 155.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_400",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 400 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 4.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_445",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 445 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 49.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_490",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 490 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 94.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_535",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 535 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 139.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_580",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 580 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 184.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_625",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 625 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 229.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_670",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 670 км",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 24.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_715",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 715 км",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 69.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_fuel_760",
+   "type": "fuel",
+   "nameRu": "АЗС, М-12, 760 км",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 114.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_030",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 30 км",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 12.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_080",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 80 км",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 62.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_130",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 130 км",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 112.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_180",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 180 км",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 162.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_230",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 230 км",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 30.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_280",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 280 км",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 80.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_330",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 330 км",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 130.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_380",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 380 км",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 180.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_430",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 430 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 34.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_480",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 480 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 84.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_530",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 530 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 134.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_580",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 580 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 184.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_630",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 630 км",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 234.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_680",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 680 км",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 34.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_730",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 730 км",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 84.0,
+    "lateralKm": -0.4
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_rest_780",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-12, 780 км",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 134.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_055",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», М-12",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 37.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_115",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», М-12",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 97.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_175",
+   "type": "food",
+   "nameRu": "Кафе «Привал», М-12",
+   "anchor": {
+    "edge": [
+     "M12_MKAD",
+     "M12_BOG"
+    ],
+    "km": 157.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_235",
+   "type": "food",
+   "nameRu": "Кафе «Обжорка», М-12",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 35.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_295",
+   "type": "food",
+   "nameRu": "Кафе «Домашняя кухня», М-12",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 95.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_355",
+   "type": "food",
+   "nameRu": "Кафе «Блинная», М-12",
+   "anchor": {
+    "edge": [
+     "M12_BOG",
+     "M12_DZE"
+    ],
+    "km": 155.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_415",
+   "type": "food",
+   "nameRu": "Кафе «Ямщик», М-12",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 19.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_475",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», М-12",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 79.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_535",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», М-12",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 139.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_595",
+   "type": "food",
+   "nameRu": "Кафе «Привал», М-12",
+   "anchor": {
+    "edge": [
+     "M12_DZE",
+     "M12_CU"
+    ],
+    "km": 199.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_655",
+   "type": "food",
+   "nameRu": "Кафе «Обжорка», М-12",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 9.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_715",
+   "type": "food",
+   "nameRu": "Кафе «Домашняя кухня», М-12",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 69.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m12_cafe_775",
+   "type": "food",
+   "nameRu": "Кафе «Блинная», М-12",
+   "anchor": {
+    "edge": [
+     "M12_CU",
+     "KAZ"
+    ],
+    "km": 129.0,
+    "lateralKm": 0.4
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_025",
+   "type": "fuel",
+   "nameRu": "АЗС, М-4, 25 км",
+   "anchor": {
+    "edge": [
+     "MSK",
+     "DOM"
+    ],
+    "km": 25.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_065",
+   "type": "fuel",
+   "nameRu": "АЗС, М-4, 65 км",
+   "anchor": {
+    "edge": [
+     "DOM",
+     "KSH"
+    ],
+    "km": 28.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_105",
+   "type": "fuel",
+   "nameRu": "АЗС, М-4, 105 км",
+   "anchor": {
+    "edge": [
+     "DOM",
+     "KSH"
+    ],
+    "km": 68.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_145",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 145 км",
+   "anchor": {
+    "edge": [
+     "KSH",
+     "MIH"
+    ],
+    "km": 37.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_185",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 185 км",
+   "anchor": {
+    "edge": [
+     "KSH",
+     "MIH"
+    ],
+    "km": 77.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_225",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 225 км",
+   "anchor": {
+    "edge": [
+     "MIH",
+     "SKP"
+    ],
+    "km": 29.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_265",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 265 км",
+   "anchor": {
+    "edge": [
+     "SKP",
+     "RZH"
+    ],
+    "km": 11.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_305",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 305 км",
+   "anchor": {
+    "edge": [
+     "RZH",
+     "CHA"
+    ],
+    "km": 14.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_345",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 345 км",
+   "anchor": {
+    "edge": [
+     "CHA",
+     "MCH"
+    ],
+    "km": 1.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_385",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 385 км",
+   "anchor": {
+    "edge": [
+     "CHA",
+     "MCH"
+    ],
+    "km": 41.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_457",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 457 км",
+   "anchor": {
+    "edge": [
+     "MCH",
+     "TAM"
+    ],
+    "km": 59.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_505",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 505 км",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 22.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_545",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 545 км",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 62.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_585",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 585 км",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 102.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_625",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 625 км",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 142.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_665",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 665 км",
+   "anchor": {
+    "edge": [
+     "BOR",
+     "NAN"
+    ],
+    "km": 36.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_705",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 705 км",
+   "anchor": {
+    "edge": [
+     "BOR",
+     "NAN"
+    ],
+    "km": 76.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_745",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 745 км",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 12.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_785",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 785 км",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 52.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_825",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 825 км",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 92.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_865",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 865 км",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 19.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_905",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 905 км",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 59.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_fuel_945",
+   "type": "fuel",
+   "nameRu": "АЗС, Р-22, 945 км",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 99.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_020",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-4, 20 км",
+   "anchor": {
+    "edge": [
+     "MSK",
+     "DOM"
+    ],
+    "km": 20.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_055",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-4, 55 км",
+   "anchor": {
+    "edge": [
+     "DOM",
+     "KSH"
+    ],
+    "km": 18.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_090",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-4, 90 км",
+   "anchor": {
+    "edge": [
+     "DOM",
+     "KSH"
+    ],
+    "km": 53.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_125",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 125 км",
+   "anchor": {
+    "edge": [
+     "KSH",
+     "MIH"
+    ],
+    "km": 17.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_160",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 160 км",
+   "anchor": {
+    "edge": [
+     "KSH",
+     "MIH"
+    ],
+    "km": 52.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_195",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 195 км",
+   "anchor": {
+    "edge": [
+     "KSH",
+     "MIH"
+    ],
+    "km": 87.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_230",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 230 км",
+   "anchor": {
+    "edge": [
+     "MIH",
+     "SKP"
+    ],
+    "km": 34.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_265",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 265 км",
+   "anchor": {
+    "edge": [
+     "SKP",
+     "RZH"
+    ],
+    "km": 11.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_300",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 300 км",
+   "anchor": {
+    "edge": [
+     "RZH",
+     "CHA"
+    ],
+    "km": 9.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_335",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 335 км",
+   "anchor": {
+    "edge": [
+     "RZH",
+     "CHA"
+    ],
+    "km": 44.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_370",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 370 км",
+   "anchor": {
+    "edge": [
+     "CHA",
+     "MCH"
+    ],
+    "km": 26.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_405",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 405 км",
+   "anchor": {
+    "edge": [
+     "MCH",
+     "TAM"
+    ],
+    "km": 7.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_440",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 440 км",
+   "anchor": {
+    "edge": [
+     "MCH",
+     "TAM"
+    ],
+    "km": 42.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_475",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 475 км",
+   "anchor": {
+    "edge": [
+     "TAM",
+     "KOT"
+    ],
+    "km": 8.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_510",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 510 км",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 27.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_545",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 545 км",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 62.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_580",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 580 км",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 97.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_615",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 615 км",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 132.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_650",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 650 км",
+   "anchor": {
+    "edge": [
+     "BOR",
+     "NAN"
+    ],
+    "km": 21.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_685",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 685 км",
+   "anchor": {
+    "edge": [
+     "BOR",
+     "NAN"
+    ],
+    "km": 56.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_720",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 720 км",
+   "anchor": {
+    "edge": [
+     "BOR",
+     "NAN"
+    ],
+    "km": 91.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_755",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 755 км",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 22.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_790",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 790 км",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 57.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_825",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 825 км",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 92.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_860",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 860 км",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 14.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_895",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 895 км",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 49.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_930",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 930 км",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 84.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_rest_965",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, Р-22, 965 км",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 119.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "playground",
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_045",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», М-4",
+   "anchor": {
+    "edge": [
+     "DOM",
+     "KSH"
+    ],
+    "km": 8.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_095",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», М-4",
+   "anchor": {
+    "edge": [
+     "DOM",
+     "KSH"
+    ],
+    "km": 58.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_145",
+   "type": "food",
+   "nameRu": "Кафе «Привал», Р-22",
+   "anchor": {
+    "edge": [
+     "KSH",
+     "MIH"
+    ],
+    "km": 37.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_195",
+   "type": "food",
+   "nameRu": "Кафе «Обжорка», Р-22",
+   "anchor": {
+    "edge": [
+     "KSH",
+     "MIH"
+    ],
+    "km": 87.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_245",
+   "type": "food",
+   "nameRu": "Кафе «Домашняя кухня», Р-22",
+   "anchor": {
+    "edge": [
+     "MIH",
+     "SKP"
+    ],
+    "km": 49.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_295",
+   "type": "food",
+   "nameRu": "Кафе «Блинная», Р-22",
+   "anchor": {
+    "edge": [
+     "RZH",
+     "CHA"
+    ],
+    "km": 4.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_345",
+   "type": "food",
+   "nameRu": "Кафе «Ямщик», Р-22",
+   "anchor": {
+    "edge": [
+     "CHA",
+     "MCH"
+    ],
+    "km": 1.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_395",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», Р-22",
+   "anchor": {
+    "edge": [
+     "CHA",
+     "MCH"
+    ],
+    "km": 51.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_445",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», Р-22",
+   "anchor": {
+    "edge": [
+     "MCH",
+     "TAM"
+    ],
+    "km": 47.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_495",
+   "type": "food",
+   "nameRu": "Кафе «Привал», Р-22",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 12.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_545",
+   "type": "food",
+   "nameRu": "Кафе «Обжорка», Р-22",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 62.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_595",
+   "type": "food",
+   "nameRu": "Кафе «Домашняя кухня», Р-22",
+   "anchor": {
+    "edge": [
+     "KOT",
+     "BOR"
+    ],
+    "km": 112.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_645",
+   "type": "food",
+   "nameRu": "Кафе «Блинная», Р-22",
+   "anchor": {
+    "edge": [
+     "BOR",
+     "NAN"
+    ],
+    "km": 16.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_695",
+   "type": "food",
+   "nameRu": "Кафе «Ямщик», Р-22",
+   "anchor": {
+    "edge": [
+     "BOR",
+     "NAN"
+    ],
+    "km": 66.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_745",
+   "type": "food",
+   "nameRu": "Кафе «Придорожное», Р-22",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 12.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_795",
+   "type": "food",
+   "nameRu": "Кафе «У дороги», Р-22",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 62.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 800,
+   "rating": 4.25,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_845",
+   "type": "food",
+   "nameRu": "Кафе «Привал», Р-22",
+   "anchor": {
+    "edge": [
+     "NAN",
+     "FRO"
+    ],
+    "km": 112.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 500,
+   "rating": 3.8,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_895",
+   "type": "food",
+   "nameRu": "Кафе «Обжорка», Р-22",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 49.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "parking"
+   ],
+   "avgCheckRub": 600,
+   "rating": 3.95,
+   "openingHours": "Mo-Su 08:00-22:00",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_r22_cafe_945",
+   "type": "food",
+   "nameRu": "Кафе «Домашняя кухня», Р-22",
+   "anchor": {
+    "edge": [
+     "FRO",
+     "VGG"
+    ],
+    "km": 99.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "kids_menu",
+    "parking"
+   ],
+   "avgCheckRub": 700,
+   "rating": 4.1,
+   "openingHours": "24/7",
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_fuel_020",
+   "type": "fuel",
+   "nameRu": "АЗС, М-2, 20 км",
+   "anchor": {
+    "edge": [
+     "MSK",
+     "POD"
+    ],
+    "km": 20.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_fuel_055",
+   "type": "fuel",
+   "nameRu": "АЗС, М-2, 55 км",
+   "anchor": {
+    "edge": [
+     "POD",
+     "SER"
+    ],
+    "km": 15.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 3.8,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_fuel_090",
+   "type": "fuel",
+   "nameRu": "АЗС, М-2, 90 км",
+   "anchor": {
+    "edge": [
+     "POD",
+     "SER"
+    ],
+    "km": 50.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h"
+   ],
+   "rating": 4.0,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_fuel_125",
+   "type": "fuel",
+   "nameRu": "АЗС, М-2, 125 км",
+   "anchor": {
+    "edge": [
+     "SER",
+     "TUL"
+    ],
+    "km": 25.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 4.2,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_fuel_160",
+   "type": "fuel",
+   "nameRu": "АЗС, М-2, 160 км",
+   "anchor": {
+    "edge": [
+     "SER",
+     "TUL"
+    ],
+    "km": 60.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "24h",
+    "cafe_at_fuel",
+    "wc"
+   ],
+   "rating": 4.4,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_fuel_195",
+   "type": "fuel",
+   "nameRu": "АЗС, М-2, 195 км",
+   "anchor": {
+    "edge": [
+     "TUL",
+     "YAP"
+    ],
+    "km": 12.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "wc"
+   ],
+   "rating": 3.6,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_rest_030",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-2, 30 км",
+   "anchor": {
+    "edge": [
+     "MSK",
+     "POD"
+    ],
+    "km": 30.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_rest_070",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-2, 70 км",
+   "anchor": {
+    "edge": [
+     "POD",
+     "SER"
+    ],
+    "km": 30.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 3.7,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_rest_110",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-2, 110 км",
+   "anchor": {
+    "edge": [
+     "SER",
+     "TUL"
+    ],
+    "km": 10.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "view",
+    "wc"
+   ],
+   "rating": 3.9,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_rest_150",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-2, 150 км",
+   "anchor": {
+    "edge": [
+     "SER",
+     "TUL"
+    ],
+    "km": 50.0,
+    "lateralKm": 0.3
+   },
+   "tags": [
+    "walk",
+    "wc"
+   ],
+   "rating": 4.1,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  },
+  {
+   "id": "pl_m2_rest_190",
+   "type": "rest",
+   "nameRu": "Площадка отдыха, М-2, 190 км",
+   "anchor": {
+    "edge": [
+     "TUL",
+     "YAP"
+    ],
+    "km": 7.0,
+    "lateralKm": -0.3
+   },
+   "tags": [
+    "playground",
+    "wc"
+   ],
+   "rating": 3.5,
+   "source": "curated",
+   "verifiedAt": "2026-09-15"
+  }
+ ],
+ "regionPrices": [
+  {
+   "region": "RU",
+   "fuelType": "ai95",
+   "priceRub": "61.50",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU",
+   "fuelType": "ai92",
+   "priceRub": "57.00",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU",
+   "fuelType": "dt",
+   "priceRub": "70.50",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-MOW",
+   "fuelType": "ai95",
+   "priceRub": "62.50",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-MOW",
+   "fuelType": "ai92",
+   "priceRub": "57.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-MOW",
+   "fuelType": "dt",
+   "priceRub": "71.20",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-MOS",
+   "fuelType": "ai95",
+   "priceRub": "61.80",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-MOS",
+   "fuelType": "ai92",
+   "priceRub": "57.30",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-MOS",
+   "fuelType": "dt",
+   "priceRub": "70.80",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-YAR",
+   "fuelType": "ai95",
+   "priceRub": "61.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-YAR",
+   "fuelType": "ai92",
+   "priceRub": "57.40",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-YAR",
+   "fuelType": "dt",
+   "priceRub": "70.60",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-KOS",
+   "fuelType": "ai95",
+   "priceRub": "62.20",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-KOS",
+   "fuelType": "ai92",
+   "priceRub": "57.70",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-KOS",
+   "fuelType": "dt",
+   "priceRub": "70.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-IVA",
+   "fuelType": "ai95",
+   "priceRub": "61.60",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-IVA",
+   "fuelType": "ai92",
+   "priceRub": "57.10",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-IVA",
+   "fuelType": "dt",
+   "priceRub": "70.40",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VLA",
+   "fuelType": "ai95",
+   "priceRub": "61.40",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VLA",
+   "fuelType": "ai92",
+   "priceRub": "56.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VLA",
+   "fuelType": "dt",
+   "priceRub": "70.30",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-NIZ",
+   "fuelType": "ai95",
+   "priceRub": "60.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-NIZ",
+   "fuelType": "ai92",
+   "priceRub": "56.40",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-NIZ",
+   "fuelType": "dt",
+   "priceRub": "69.80",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-CU",
+   "fuelType": "ai95",
+   "priceRub": "59.80",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-CU",
+   "fuelType": "ai92",
+   "priceRub": "55.60",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-CU",
+   "fuelType": "dt",
+   "priceRub": "68.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TA",
+   "fuelType": "ai95",
+   "priceRub": "58.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TA",
+   "fuelType": "ai92",
+   "priceRub": "54.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TA",
+   "fuelType": "dt",
+   "priceRub": "67.80",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TUL",
+   "fuelType": "ai95",
+   "priceRub": "61.70",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TUL",
+   "fuelType": "ai92",
+   "priceRub": "57.20",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TUL",
+   "fuelType": "dt",
+   "priceRub": "70.70",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-RYA",
+   "fuelType": "ai95",
+   "priceRub": "61.20",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-RYA",
+   "fuelType": "ai92",
+   "priceRub": "56.80",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-RYA",
+   "fuelType": "dt",
+   "priceRub": "70.10",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-LIP",
+   "fuelType": "ai95",
+   "priceRub": "60.80",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-LIP",
+   "fuelType": "ai92",
+   "priceRub": "56.30",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-LIP",
+   "fuelType": "dt",
+   "priceRub": "69.60",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TAM",
+   "fuelType": "ai95",
+   "priceRub": "60.50",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TAM",
+   "fuelType": "ai92",
+   "priceRub": "56.00",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-TAM",
+   "fuelType": "dt",
+   "priceRub": "69.40",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VOR",
+   "fuelType": "ai95",
+   "priceRub": "61.00",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VOR",
+   "fuelType": "ai92",
+   "priceRub": "56.60",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VOR",
+   "fuelType": "dt",
+   "priceRub": "69.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VGG",
+   "fuelType": "ai95",
+   "priceRub": "61.30",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VGG",
+   "fuelType": "ai92",
+   "priceRub": "56.90",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-VGG",
+   "fuelType": "dt",
+   "priceRub": "70.20",
+   "asOf": "2026-10-01"
+  },
+  {
+   "region": "RU-YAR",
+   "fuelType": "ai95",
+   "priceRub": "60.70",
+   "asOf": "2026-09-01"
+  }
+ ],
+ "tollSegments": [
+  {
+   "id": "ts_m12_1",
+   "roadRef": "М-12",
+   "nameRu": "М-12 Москва — Владимир",
+   "edge": [
+    "M12_MKAD",
+    "M12_BOG"
+   ],
+   "fromKm": 0,
+   "toKm": 182,
+   "tariffDayRub": "1737",
+   "tariffNightRub": "1737",
+   "asOf": "2026-03-02"
+  },
+  {
+   "id": "ts_m12_2",
+   "roadRef": "М-12",
+   "nameRu": "М-12 Владимир — Нижний Новгород",
+   "edge": [
+    "M12_BOG",
+    "M12_DZE"
+   ],
+   "fromKm": 0,
+   "toKm": 196,
+   "tariffDayRub": "1713",
+   "tariffNightRub": "1713",
+   "asOf": "2026-03-02"
+  },
+  {
+   "id": "ts_m12_3",
+   "roadRef": "М-12",
+   "nameRu": "М-12 Нижний Новгород — Чебоксары",
+   "edge": [
+    "M12_DZE",
+    "M12_CU"
+   ],
+   "fromKm": 0,
+   "toKm": 250,
+   "tariffDayRub": "1521",
+   "tariffNightRub": "1521",
+   "asOf": "2026-03-02"
+  },
+  {
+   "id": "ts_m12_4",
+   "roadRef": "М-12",
+   "nameRu": "М-12 Чебоксары — Казань",
+   "edge": [
+    "M12_CU",
+    "KAZ"
+   ],
+   "fromKm": 0,
+   "toKm": 144,
+   "tariffDayRub": "876",
+   "tariffNightRub": "876",
+   "asOf": "2026-03-02"
+  },
+  {
+   "id": "ts_m4_1",
+   "roadRef": "М-4",
+   "nameRu": "М-4 Москва — Чекаевка (ПВП км 71)",
+   "edge": [
+    "DOM",
+    "KSH"
+   ],
+   "fromKm": 0,
+   "toKm": 56,
+   "tariffDayRub": "310",
+   "tariffNightRub": "310",
+   "tariffWeekendRub": "400",
+   "asOf": "2026-03-02"
+  }
+ ],
+ "readyRoutes": [
+  {
+   "id": "rr_golden_ring",
+   "hubTownId": "t_moscow",
+   "titleRu": "Золотое кольцо",
+   "subtitleRu": "3 дня · 8 городов · по кругу",
+   "kmTotal": 745,
+   "kmSign": 745,
+   "ring": "long",
+   "roundTrip": true,
+   "daysMin": 3,
+   "daysMax": 4,
+   "tags": [
+    "history",
+    "family"
+   ],
+   "coverKey": "golden_ring",
+   "sort": 10,
+   "points": [
+    {
+     "seq": 1,
+     "role": "via",
+     "townId": "t_sergiev_posad"
+    },
+    {
+     "seq": 2,
+     "role": "stop",
+     "placeId": "pl_sps_lavra"
+    },
+    {
+     "seq": 3,
+     "role": "via",
+     "townId": "t_pereslavl"
+    },
+    {
+     "seq": 4,
+     "role": "via",
+     "townId": "t_rostov"
+    },
+    {
+     "seq": 5,
+     "role": "via",
+     "townId": "t_yaroslavl"
+    },
+    {
+     "seq": 6,
+     "role": "stop",
+     "placeId": "pl_kos_ipatiev"
+    },
+    {
+     "seq": 7,
+     "role": "via",
+     "townId": "t_kostroma"
+    },
+    {
+     "seq": 8,
+     "role": "via",
+     "townId": "t_ivanovo"
+    },
+    {
+     "seq": 9,
+     "role": "via",
+     "townId": "t_suzdal"
+    },
+    {
+     "seq": 10,
+     "role": "via",
+     "townId": "t_vladimir"
+    }
+   ],
+   "suggestedNights": [
+    "t_yaroslavl",
+    "t_suzdal"
+   ]
+  },
+  {
+   "id": "rr_yaroslavl",
+   "hubTownId": "t_moscow",
+   "titleRu": "Ярославль",
+   "subtitleRu": "2 дня · по М-8",
+   "kmTotal": 526,
+   "kmSign": 263,
+   "ring": "weekend",
+   "roundTrip": true,
+   "daysMin": 2,
+   "daysMax": 2,
+   "tags": [
+    "weekend"
+   ],
+   "coverKey": "yaroslavl",
+   "sort": 20,
+   "points": [
+    {
+     "seq": 1,
+     "role": "via",
+     "townId": "t_rostov"
+    },
+    {
+     "seq": 2,
+     "role": "via",
+     "townId": "t_yaroslavl"
+    }
+   ],
+   "suggestedNights": [
+    "t_yaroslavl"
+   ]
+  },
+  {
+   "id": "rr_tula_yasnaya",
+   "hubTownId": "t_moscow",
+   "titleRu": "Тула · Ясная Поляна",
+   "subtitleRu": "2 дня · Толстой и пряники",
+   "kmTotal": 414,
+   "kmSign": 207,
+   "ring": "weekend",
+   "roundTrip": true,
+   "daysMin": 2,
+   "daysMax": 2,
+   "tags": [
+    "weekend",
+    "family"
+   ],
+   "coverKey": "tula",
+   "sort": 30,
+   "points": [
+    {
+     "seq": 1,
+     "role": "via",
+     "townId": "t_tula"
+    },
+    {
+     "seq": 2,
+     "role": "stop",
+     "placeId": "pl_tul_yasnaya"
+    },
+    {
+     "seq": 3,
+     "role": "via",
+     "townId": "t_shchekino"
+    }
+   ],
+   "suggestedNights": [
+    "t_tula"
+   ]
+  },
+  {
+   "id": "rr_golden_ring_short",
+   "parentId": "rr_golden_ring",
+   "hubTownId": "t_moscow",
+   "titleRu": "Золотое кольцо · коротко",
+   "subtitleRu": "2 дня · Сергиев Посад, Переславль, Ростов, Ярославль",
+   "kmTotal": 530,
+   "kmSign": 265,
+   "ring": "weekend",
+   "roundTrip": true,
+   "daysMin": 2,
+   "daysMax": 2,
+   "tags": [
+    "history",
+    "family"
+   ],
+   "coverKey": "golden_ring",
+   "sort": 11,
+   "points": [
+    {
+     "seq": 1,
+     "role": "via",
+     "townId": "t_sergiev_posad"
+    },
+    {
+     "seq": 2,
+     "role": "stop",
+     "placeId": "pl_sps_lavra"
+    },
+    {
+     "seq": 3,
+     "role": "via",
+     "townId": "t_pereslavl"
+    },
+    {
+     "seq": 4,
+     "role": "via",
+     "townId": "t_rostov"
+    },
+    {
+     "seq": 5,
+     "role": "via",
+     "townId": "t_yaroslavl"
+    }
+   ],
+   "suggestedNights": [
+    "t_yaroslavl"
+   ]
+  }
+ ],
+ "defaults": {
+  "foodCheckByPopulation": [
+   [
+    1000000,
+    900
+   ],
+   [
+    100000,
+    700
+   ],
+   [
+    0,
+    550
+   ]
+  ],
+  "lodgingNightByPopulation": [
+   [
+    1000000,
+    7000
+   ],
+   [
+    100000,
+    5000
+   ],
+   [
+    0,
+    4000
+   ]
+  ]
+ }
+}

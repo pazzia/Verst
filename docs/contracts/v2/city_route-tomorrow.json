@@ -1,0 +1,400 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-9",
+   "input_json": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "preset": "overview",
+    "durationMin": 240,
+    "crew": {
+     "adults": 2
+    }
+   }
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": {
+   "kind": "walk",
+   "engineVersion": "0.1.0",
+   "id": "wlk_c-walk-9",
+   "titleRu": "Ярославль: обзорная прогулка",
+   "townId": "t_yaroslavl",
+   "townName": "Ярославль",
+   "townPrep": "Ярославле",
+   "preset": "overview",
+   "startAt": "2026-10-24T09:00",
+   "startsTomorrow": true,
+   "startNoteRu": "Сегодня уже поздно — старт завтра в 09:00",
+   "endAt": "2026-10-24T12:59",
+   "unlimited": false,
+   "tz": "Europe/Moscow",
+   "walkKm": 5.6,
+   "walkMin": 74,
+   "durationMin": 239,
+   "requestedDurationMin": 240,
+   "crewNotesRu": [],
+   "interestsWidened": false,
+   "shorter": null,
+   "returnToStart": true,
+   "start": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "finish": {
+    "lat": 57.6261,
+    "lon": 39.8845,
+    "label": "Ярославль, Советская площадь"
+   },
+   "stops": [
+    {
+     "id": "w01",
+     "poiId": "Q4438830",
+     "kind": "church",
+     "nameRu": "Церковь Сретения Господня в Ярославле",
+     "lat": 57.62516,
+     "lon": 39.88876,
+     "arriveAt": "2026-10-24T09:04",
+     "departAt": "2026-10-24T09:24",
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.4,
+     "walkMinFromPrev": 5,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "08:00–20:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w02",
+     "poiId": "Q122225387",
+     "kind": "attraction",
+     "nameRu": "Дом призрения ближнего",
+     "lat": 57.62633,
+     "lon": 39.89013,
+     "arriveAt": "2026-10-24T09:27",
+     "departAt": "2026-10-24T09:47",
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.2,
+     "walkMinFromPrev": 3,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "attraction",
+     "poiKindRu": "Достопримечательность",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w03",
+     "poiId": "Q4151348",
+     "kind": "attraction",
+     "nameRu": "Губернаторский дом",
+     "lat": 57.62792,
+     "lon": 39.8963,
+     "arriveAt": "2026-10-24T09:54",
+     "departAt": "2026-10-24T10:14",
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 7,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "attraction",
+     "poiKindRu": "Достопримечательность",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w04",
+     "poiId": "pl_yar_embankment",
+     "kind": "viewpoint",
+     "nameRu": "Волжская набережная",
+     "lat": 57.627909,
+     "lon": 39.899599,
+     "arriveAt": "2026-10-24T10:17",
+     "departAt": "2026-10-24T10:32",
+     "dwellMin": 15,
+     "walkKmFromPrev": 0.3,
+     "walkMinFromPrev": 3,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "curated",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w05",
+     "poiId": "pl_yar_strelka",
+     "kind": "viewpoint",
+     "nameRu": "Стрелка и Волжская набережная",
+     "lat": 57.633335,
+     "lon": 39.909665,
+     "arriveAt": "2026-10-24T10:47",
+     "departAt": "2026-10-24T11:02",
+     "dwellMin": 15,
+     "walkKmFromPrev": 1.1,
+     "walkMinFromPrev": 15,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": null,
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "embankment",
+     "poiKindRu": "Набережная",
+     "placeSource": "curated",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w06",
+     "poiId": "Q4343284",
+     "kind": "monument",
+     "nameRu": "Памятник Николаю Некрасову",
+     "lat": 57.63253,
+     "lon": 39.89291,
+     "arriveAt": "2026-10-24T11:19",
+     "departAt": "2026-10-24T11:29",
+     "dwellMin": 10,
+     "walkKmFromPrev": 1.3,
+     "walkMinFromPrev": 17,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "monument",
+     "poiKindRu": "Памятник",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w07",
+     "poiId": "Q4085572",
+     "kind": "monument",
+     "nameRu": "Беседка на Волжской набережной",
+     "lat": 57.62994,
+     "lon": 39.89631,
+     "arriveAt": "2026-10-24T11:36",
+     "departAt": "2026-10-24T11:46",
+     "dwellMin": 10,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 6,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": null,
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "attraction",
+     "poiKindRu": "Достопримечательность",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w08",
+     "poiId": "Q4504840",
+     "kind": "church",
+     "nameRu": "Церковь Николая Чудотворца Надеинская",
+     "lat": 57.62889,
+     "lon": 39.89583,
+     "arriveAt": "2026-10-24T11:48",
+     "departAt": "2026-10-24T12:08",
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.2,
+     "walkMinFromPrev": 2,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": "08:00–20:00",
+      "openNow": true,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w09",
+     "poiId": "osm_r2036118",
+     "kind": "park",
+     "nameRu": "Власьевский сквер",
+     "lat": 57.62647,
+     "lon": 39.88277,
+     "arriveAt": "2026-10-24T12:22",
+     "departAt": "2026-10-24T12:57",
+     "dwellMin": 35,
+     "walkKmFromPrev": 1.1,
+     "walkMinFromPrev": 14,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    }
+   ],
+   "cost": {
+    "totalRub": 0,
+    "lines": [
+     {
+      "key": "tickets",
+      "rub": 0
+     }
+    ],
+    "budgetRub": null
+   },
+   "warnings": [
+    {
+     "code": "HOURS_UNVERIFIED",
+     "messageRu": "Часы работы части мест взяты по умолчанию — уточняйте перед визитом."
+    }
+   ],
+   "responsibleNoteRu": null,
+   "polyline": [
+    [
+     57.6261,
+     39.8845
+    ],
+    [
+     57.62516,
+     39.88876
+    ],
+    [
+     57.62633,
+     39.89013
+    ],
+    [
+     57.62792,
+     39.8963
+    ],
+    [
+     57.627909,
+     39.899599
+    ],
+    [
+     57.633335,
+     39.909665
+    ],
+    [
+     57.63253,
+     39.89291
+    ],
+    [
+     57.62994,
+     39.89631
+    ],
+    [
+     57.62889,
+     39.89583
+    ],
+    [
+     57.62647,
+     39.88277
+    ],
+    [
+     57.6261,
+     39.8845
+    ]
+   ],
+   "approxDistances": true,
+   "input": {
+    "start": {
+     "lat": 57.6261,
+     "lon": 39.8845,
+     "label": "Ярославль, Советская площадь"
+    },
+    "townId": null,
+    "preset": "overview",
+    "durationMin": 240,
+    "interests": [],
+    "pace": "normal",
+    "budgetRub": null,
+    "returnToStart": true,
+    "startAt": "2026-10-24T09:00",
+    "crew": {
+     "adults": 2,
+     "children": 0,
+     "dog": false
+    },
+    "adultConfirmed": false,
+    "exclude": []
+   },
+   "requestKey": "997509fbdd1e4970"
+  },
+  "ms": 0
+ }
+}

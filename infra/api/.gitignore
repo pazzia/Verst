@@ -1,0 +1,2 @@
+# The real configuration of a VM holds secrets (POSTGRES_PASSWORD, VERST_RATE_KEY_SECRET): never commit it.
+.env

@@ -1,0 +1,83 @@
+{
+  "id": "G04",
+  "slug": "msk_kazan_just_drive",
+  "titleRu": "Москва → Казань по М-12, «Просто доехать», один водитель, 900 км/день",
+  "world": "central_russia_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва"
+    },
+    "destination": {
+      "lat": 55.7963,
+      "lon": 49.1088,
+      "label": "Казань"
+    },
+    "avoidTolls": false,
+    "crew": {
+      "adults": 1,
+      "children": 0,
+      "dog": false
+    },
+    "dailyKm": 900,
+    "mood": "just_drive",
+    "startAt": "2026-10-24T06:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 1,
+    "nights": 0,
+    "kmRange": [
+      790,
+      810
+    ],
+    "stopKindsPerDay": {
+      "1": {
+        "sight": [
+          0,
+          0
+        ],
+        "fuel": [
+          1,
+          3
+        ],
+        "rest": [
+          1,
+          3
+        ]
+      }
+    },
+    "roadRefs": [
+      "М-12"
+    ],
+    "costLinesRub": {
+      "tolls": {
+        "value": 5850,
+        "tolerancePct": 0
+      }
+    },
+    "costBreakdownContains": {
+      "tolls": [
+        "М-12, днём"
+      ]
+    },
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "route: Москва → Казань on М-12 790 km + detours of 4 motorway stops (≈ 1 km each) → ≈ 794 km; one 10-h day: 790 > 600 min of budget, but duration ≤ mandatory_min (driving + auto stops) → no DAY_OVER_BUDGET (A§16.5)",
+      "fuel by region (8 l/100): Владимирская 289 + 1 = 290 km × 61.40 = 1 424; Нижегородская 247 + 1 = 248 km × 60.90 = 1 208; Чувашия 96 + 2 = 98 km × 59.80 = 469; Татарстан 77 km × 58.90 = 363; Московская 72 km × 61.80 = 356; Москва 9 km × 62.50 = 45 → Σ 3 866 → 3 870 (±5 %)",
+      "tolls (ENG-02, tariffs from 2026-03-02, no night discount on М-12): Москва — Владимир 1 737 + Владимир — Арзамас 1 713 + Арзамас — Казань 2 397 split by length 250 : 144 = 1 521 + 876 → Σ 5 847 → 5 850",
+      "food: 1 adult; lunch at a М-12 roadside café in the window (≈ 14:00, check 500–800, Кафе «Обжорка» 700); finish 16:30 < 19:00 → no dinner → 700",
+      "subtotal 3 870 + 5 850 + 0 + 700 + 0 = 10 420; reserve 1 040 (1 042); total round_to(11 460, 100) = 11 500"
+    ],
+    "costTotalRub": {
+      "value": 11500,
+      "tolerancePct": 5
+    },
+    "warnings": []
+  }
+}

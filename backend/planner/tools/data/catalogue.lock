@@ -1,0 +1,95 @@
+{
+ "version": "wd-20261031-osm3",
+ "builtAt": "2026-10-31",
+ "counts": {
+  "towns": 1114,
+  "pois": 10921,
+  "bars": 5635,
+  "food": 29930,
+  "links": 79,
+  "credits": 3632
+ },
+ "totalBytes": 1496225,
+ "files": {
+  "catalogue_meta.json.gz": {
+   "bytes": 98447,
+   "sha256": "0cc2929ca4928f816d16ac1d3d84d882a1db0c7dd7ccb478b9bc3b74150d4e46"
+  },
+  "catalogue_towns.json.gz": {
+   "bytes": 52995,
+   "sha256": "9ff68f042d50dc7c803c8725493f94efc82e7e5d5452889a850c9c91b460f22f"
+  },
+  "catalogue_pois.json.gz": {
+   "bytes": 629360,
+   "sha256": "2c546bc5a88f52cb8a7b9e0b1e32c01f81a66cf837b45666726987258c45ddc6"
+  },
+  "catalogue_bars.json.gz": {
+   "bytes": 119961,
+   "sha256": "330c1bc5a81e1aa0644dacb51071d0c9403db1a432c9ec9f176b281df294d457"
+  },
+  "catalogue_food.json.gz": {
+   "bytes": 595462,
+   "sha256": "28241645c88d8062788f474822a969dc8cdbc9ceff918ce977856e177d3afc74"
+  }
+ },
+ "sources": {
+  "wikidata": "query.wikidata.org",
+  "osm": "download.geofabrik.de/russia-latest.osm.pbf",
+  "commons": "commons.wikimedia.org",
+  "fetchedAt": "2026-10-25T02:46:58+00:00",
+  "run": "40151703225",
+  "rebuilt": "data-osm.yml: bars and food from the Geofabrik extract of osmFetchedAt; towns and POIs from bot/raw-7, extras from bot/extras-1, photo meta from bot/photos-1",
+  "osmFetchedAt": "2026-10-31T13:43:00+00:00",
+  "osmRun": "41206532375"
+ },
+ "classCheck": {
+  "labels": {
+   "Q159": "Russia",
+   "Q2977": "cathedral",
+   "Q16970": "church building",
+   "Q22698": "park",
+   "Q44613": "monastery",
+   "Q23413": "castle",
+   "Q179700": "statue",
+   "Q33506": "museum",
+   "Q174782": "square",
+   "Q183342": "federal city of Russia",
+   "Q57821": "fortification",
+   "Q570116": "tourist attraction",
+   "Q1107656": "garden",
+   "Q263274": "kremlin",
+   "Q2319498": "architectural landmark",
+   "Q4989906": "monument",
+   "Q1851368": "waterfront",
+   "Q5003624": "memorial",
+   "Q6017969": "scenic viewpoint",
+   "Q7930989": "city or town"
+  },
+  "mismatches": {},
+  "ok": true,
+  "resolved": {},
+  "unresolved": []
+ },
+ "forms": {
+  "total": 48,
+  "match": 47,
+  "misses": [
+   {
+    "name": "Пушкино",
+    "got": {
+     "gen": "Пушкина",
+     "prep": "Пушкине"
+    },
+    "want": [
+     "Пушкино",
+     "Пушкино"
+    ]
+   }
+  ],
+  "pymorphy3": "2.0.2"
+ },
+ "failedTowns": {
+  "pois": [],
+  "bars": []
+ }
+}

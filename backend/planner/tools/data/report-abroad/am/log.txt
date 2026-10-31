@@ -1,0 +1,66 @@
+{"labels": {"Q399": "Armenia"}, "capitals": ["Q1953"], "currencies": ["AMD"], "tz": ["UTC+04:00"], "ok": true}
+{"mismatches": {}, "resolved": {}}
+town classes: 547
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 60 items failed (<HTTPError 504: 'Gateway Timeout'>); halving
+retry 1/2 in 41s: HTTP Error 429: Too Many Requests
+query of 30 items failed (<HTTPError 504: 'Gateway Timeout'>); halving
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+towns: 56 candidates from 547 classes
+towns: 55; missing must-have: []
+pois: 0/55 towns, 316 rows, 0 failed
+retry 1/4 in 120s: HTTP Error 429: Too Many Requests
+pois: 50/55 towns, 546 rows, 0 failed
+pois: 569 rows, 0 towns failed
+forms: 53 towns; fixture oracle 47/48
+classes: 10052 ids; resolved {}; unresolved []
+wikidata: 0/542
+wikidata: 542 items, 151 with ru Wikipedia
+wikipedia: 0/151
+wikipedia: 151 pages, 151 with an extract
+voyage: 136 Q-ids in listings
+extract: https://download.geofabrik.de/asia/armenia-latest.osm.pbf
+-rw-r--r-- 1 runner runner 53458362 Oct 30 02:26 /home/runner/work/_temp/c.osm.pbf
+bars: 180 rows from 186 named features, 47 towns (extract)
+food: 1668 rows from 1925 named features, 47 towns (extract)
+parks: 90 rows from 100 named parks and gardens, 55 towns (extract)
+osm: 2694 POI candidates, 79 paid parking places
+geosearch: 0/1102
+geosearch: 500/1102
+geosearch: 1000/1102
+geosearch: 193 of 1102 POIs have nearby files
+candidates: 650 photo files
+credits: 50/650
+credits: 649 of 650 files
+photo meta: 50/650
+photo meta: 649 of 650 files
+credits: 50/328
+credits: 328 of 328 files
+photo meta: 50/328
+photo meta: 328 of 328 files
+{
+ "towns": 47,
+ "pois": 323,
+ "bars": 116,
+ "food": 771,
+ "links": 0,
+ "credits": 149,
+ "bytes": {
+  "catalogue_meta.json.gz": 5087,
+  "catalogue_towns.json.gz": 2256,
+  "catalogue_pois.json.gz": 23217,
+  "catalogue_bars.json.gz": 3240,
+  "catalogue_food.json.gz": 19645
+ },
+ "totalBytes": 53445
+}
+{
+ "version": "wd-20261030-abroad2",
+ "count": 80,
+ "townsSha256": "090a6ea982977480f32b685bb1ed68a0d104e27e835f803661699c09e3e42f5b",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 3210,
+ "sha256": "e187d0d7b795ce7e127a632cf651a6e60f6e91d476a7f2b6bf27d9f3499a81d9"
+}
+tzCheck: {"checked": true, "ok": true, "mismatches": []}
+regions: [{"code": "AM-AG", "nameRu": "Арагацотнская область", "tz": "Asia/Yerevan"}, {"code": "AM-AR", "nameRu": "Араратская область", "tz": "Asia/Yerevan"}, {"code": "AM-AV", "nameRu": "Армавирская область", "tz": "Asia/Yerevan"}, {"code": "AM-ER", "nameRu": "Ереван", "tz": "Asia/Yerevan"}, {"code": "AM-GR", "nameRu": "Гегаркуникская область", "tz": "Asia/Yerevan"}, {"code": "AM-KT", "nameRu": "Котайкская область", "tz": "Asia/Yerevan"}, {"code": "AM-LO", "nameRu": "Лорийская область", "tz": "Asia/Yerevan"}, {"code": "AM-SH", "nameRu": "Ширакская область", "tz": "Asia/Yerevan"}, {"code": "AM-SU", "nameRu": "Сюникская область", "tz": "Asia/Yerevan"}, {"code": "AM-TV", "nameRu": "Тавушская область", "tz": "Asia/Yerevan"}, {"code": "AM-VD", "nameRu": "Вайоцдзорская область", "tz": "Asia/Yerevan"}]

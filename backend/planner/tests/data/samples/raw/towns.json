@@ -1,0 +1,172 @@
+[
+ {
+  "qid": "Q649",
+  "name": "Москва",
+  "lat": 55.7558,
+  "lon": 37.6173,
+  "population": 13010112,
+  "regionIso": "RU-MOW",
+  "regionName": "Москва",
+  "image": "Moscow July 2011-16.jpg"
+ },
+ {
+  "qid": "Q900002",
+  "name": "Ярославль",
+  "lat": 57.6261,
+  "lon": 39.8845,
+  "population": 570824,
+  "regionIso": "RU-YAR",
+  "regionName": "Ярославская область",
+  "image": "Yaroslavl Strelka.jpg"
+ },
+ {
+  "qid": "Q900003",
+  "name": "Суздаль",
+  "lat": 56.4197,
+  "lon": 40.4434,
+  "population": 9286,
+  "regionIso": "RU-VLA",
+  "regionName": "Владимирская область",
+  "image": null
+ },
+ {
+  "qid": "Q900004",
+  "name": "Владимир",
+  "lat": 56.129,
+  "lon": 40.4066,
+  "population": 349951,
+  "regionIso": "RU-VLA",
+  "regionName": "Владимирская область",
+  "image": null
+ },
+ {
+  "qid": "Q656",
+  "name": "Санкт-Петербург",
+  "lat": 59.9386,
+  "lon": 30.3141,
+  "population": 5600044,
+  "regionIso": "RU-SPE",
+  "regionName": "Санкт-Петербург",
+  "image": "Saint Petersburg sample.jpg"
+ },
+ {
+  "qid": "Q900006",
+  "name": "Пермь",
+  "lat": 58.0105,
+  "lon": 56.2502,
+  "population": 1034002,
+  "regionIso": "RU-PER",
+  "regionName": "Пермский край",
+  "image": null
+ },
+ {
+  "qid": "Q900007",
+  "name": "Екатеринбург",
+  "lat": 56.8389,
+  "lon": 60.6057,
+  "population": 1544376,
+  "regionIso": "RU-SVE",
+  "regionName": "Свердловская область",
+  "image": null
+ },
+ {
+  "qid": "Q900008",
+  "name": "Тюмень",
+  "lat": 57.153,
+  "lon": 65.5343,
+  "population": 847488,
+  "regionIso": "RU-TYU",
+  "regionName": "Тюменская область",
+  "image": null
+ },
+ {
+  "qid": "Q900009",
+  "name": "Тверь",
+  "lat": 56.8587,
+  "lon": 35.9176,
+  "population": 416219,
+  "regionIso": "RU-TVE",
+  "regionName": "Тверская область",
+  "image": null
+ },
+ {
+  "qid": "Q900010",
+  "name": "Великий Новгород",
+  "lat": 58.5228,
+  "lon": 31.2698,
+  "population": 224286,
+  "regionIso": "RU-NGR",
+  "regionName": "Новгородская область",
+  "image": null
+ },
+ {
+  "qid": "Q900011",
+  "name": "Сочи",
+  "lat": 43.5855,
+  "lon": 39.7231,
+  "population": 466078,
+  "regionIso": "RU-KDA",
+  "regionName": "Краснодарский край",
+  "image": null
+ },
+ {
+  "qid": "Q900012",
+  "name": "Вышний Волочёк",
+  "lat": 57.5913,
+  "lon": 34.5645,
+  "population": 44000,
+  "regionIso": "RU-TVE",
+  "regionName": "Тверская область",
+  "image": null
+ },
+ {
+  "qid": "Q900013",
+  "name": "Валдай",
+  "lat": 57.98,
+  "lon": 33.24,
+  "population": 15000,
+  "regionIso": "RU-NGR",
+  "regionName": "Новгородская область",
+  "image": null
+ },
+ {
+  "qid": "Q900014",
+  "name": "Киров",
+  "lat": 58.6035,
+  "lon": 49.668,
+  "population": 468212,
+  "regionIso": "RU-KIR",
+  "regionName": "Кировская область",
+  "image": null
+ },
+ {
+  "qid": "Q900015",
+  "name": "Казань",
+  "lat": 55.7963,
+  "lon": 49.1088,
+  "population": 1308660,
+  "regionIso": "RU-TA",
+  "regionName": "Татарстан",
+  "image": null
+ },
+ {
+  "qid": "Q900016",
+  "name": "Ижевск",
+  "lat": 56.8526,
+  "lon": 53.2045,
+  "population": 623424,
+  "regionIso": "RU-UD",
+  "regionName": "Удмуртия",
+  "image": null
+ },
+ {
+  "qid": "Q900099",
+  "name": "Пример вне списка",
+  "lat": 45.0,
+  "lon": 34.0,
+  "population": 100000,
+  "regionIso": "UA-43",
+  "regionName": "—",
+  "image": null
+ }
+]

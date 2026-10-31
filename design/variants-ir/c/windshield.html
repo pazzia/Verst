@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C · Простой контроль · Главный</title>
+<link rel="stylesheet" href="../shared/base.css">
+<style>
+/* Variant C: a plain, calm list. The road metaphor survives only as branding:
+   the sunset strip with the wordmark, and road-sign plates as list icons. */
+.brand { position: relative; flex-shrink: 0; height: 72px; background: var(--sky1); overflow: hidden; }
+.brand .bands { position: absolute; left: 0; right: 0; bottom: 0; height: 18px; }
+.brand .bands i { display: block; height: 3px; }
+.brand .sun { position: absolute; right: 64px; bottom: 4px; width: 30px; height: 30px; border-radius: 50%; background: var(--sun); }
+.brand .word { position: absolute; left: 20px; top: 12px; font-weight: 700; font-size: 22px; line-height: 28px; letter-spacing: .01em; color: var(--text); }
+.main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 18px 20px 14px; }
+.q { display: flex; margin-bottom: 2px; align-items: center; justify-content: space-between; gap: 8px; }
+.q h1 { margin: 0; font-weight: 700; font-size: 28px; line-height: 34px; }
+.origin { display: flex; align-items: center; gap: 6px; min-height: 48px; padding-left: 10px; font-weight: 600; font-size: 15px; color: var(--navi-label); }
+.promise { margin: 0 0 14px; font-size: 15px; line-height: 20px; color: var(--text-2); }
+.list-h { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 0 4px; }
+.list-h h2 { margin: 0; font-weight: 700; font-size: 17px; line-height: 22px; }
+.item { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto 16px; grid-template-rows: auto auto; column-gap: 12px; align-items: center; width: 100%; min-height: 72px; padding: 10px 0; color: var(--text); }
+.item + .item { box-shadow: inset 0 1px 0 var(--divider); }
+.item .plate { grid-row: 1 / 3; width: 40px; height: 40px; border-radius: 6px; background: var(--sign); box-shadow: inset 0 0 0 2px var(--sign), inset 0 0 0 4px var(--sign-white); display: flex; align-items: center; justify-content: center; color: var(--sign-white); }
+.item .nm { grid-column: 2; font-weight: 600; font-size: 18px; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item .km { grid-column: 3; font-weight: 600; font-size: 17px; line-height: 22px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.item .km small { font-size: 14px; }
+.item .mt { grid-column: 2 / 4; grid-row: 2; font-size: 14px; line-height: 18px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item > svg:last-child { grid-column: 4; grid-row: 1 / 3; color: var(--text-2); }
+.note { margin: 2px 0 0; font-size: 14px; line-height: 18px; color: var(--muted); }
+.own { margin-top: auto; padding-top: 18px; }
+.own-h { margin: 0 0 8px; font-weight: 600; font-size: 15px; line-height: 20px; color: var(--text-2); }
+.bottom { margin-top: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+@media (max-height: 700px) {
+  .brand { height: 60px; }
+  .brand .word { top: 8px; }
+  .main { padding-top: 10px; }
+  .promise { margin-bottom: 0; }
+  .own { padding-top: 12px; }
+  .q { margin-bottom: 8px; }
+  .list-h { margin-top: 14px; }
+  .item { min-height: 64px; padding: 7px 0; }
+  .bottom { margin-top: 8px; flex-direction: row; justify-content: space-between; align-items: center; }
+  .bottom .demo { text-align: right; max-width: 130px; }
+}
+</style>
+</head>
+<body>
+<div class="phone">
+  <header class="brand">
+    <span class="word">Верста</span>
+    <span class="sun" aria-hidden="true"></span>
+    <span class="bands" aria-hidden="true"><i style="background:var(--sky2)"></i><i style="background:var(--sky3)"></i><i style="background:var(--sky4)"></i><i style="background:var(--sky5)"></i><i style="background:var(--hills)"></i><i style="background:var(--ground)"></i></span>
+  </header>
+
+  <main class="main">
+    <div class="q">
+      <h1>Куда едем?</h1>
+      <button class="origin" aria-label="Старт: Москва. Изменить">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8z"/></svg>
+        из Москвы
+      </button>
+    </div>
+    <p class="promise">Соберём маршрут по дням, ночёвки и смету</p>
+
+    <div class="list-h"><h2>Готовые поездки</h2></div>
+    <nav aria-label="Готовые поездки из Москвы">
+      <button class="item" aria-label="Тула · Ясная Поляна: 425 километров, туда и обратно, 2 дня, примерно 19 600 рублей. Открыть">
+        <span class="plate" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M5 13l7 7 7-7"/></svg></span>
+        <span class="nm">Тула · Ясная Поляна</span>
+        <span class="km">425 <small>км</small></span>
+        <span class="mt">2 дня · туда и обратно · ≈ 19 600 ₽</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="item" aria-label="Ярославль: 536 километров, туда и обратно, 2 дня, примерно 19 100 рублей. Открыть">
+        <span class="plate" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
+        <span class="nm">Ярославль</span>
+        <span class="km">536 <small>км</small></span>
+        <span class="mt">2 дня · туда и обратно · ≈ 19 100 ₽</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <button class="item" aria-label="Золотое кольцо: 761 километр по кругу, 3 дня, примерно 37 200 рублей. Открыть">
+        <span class="plate" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
+        <span class="nm">Золотое кольцо</span>
+        <span class="km">761 <small>км</small></span>
+        <span class="mt">3 дня · по кругу · ≈ 37 200 ₽</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </nav>
+    <p class="note">≈ ₽ — бензин, ночёвки, еда, билеты и запас&nbsp;10&nbsp;%</p>
+
+    <div class="own">
+      <p class="own-h">Или свой маршрут</p>
+      <button class="field" aria-label="Город, адрес или точка на карте. Открыть поиск">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <span class="t"><b>Город или адрес</b><small>или точка на карте — по всей России</small></span>
+      </button>
+    </div>
+
+    <div class="bottom">
+      <button class="quiet" aria-label="По городу пешком: отдельный режим прогулки. Открыть">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4.5" r="2" fill="currentColor"/><path d="M9.5 21l2.5-6.5 2.5 2V21M12 14.5l1-5-3.5 1.5L8 14M13 9.5l2.5 3 3 1"/></svg>
+        По городу пешком
+      </button>
+      <p class="demo" style="margin:0">Демо-версия: цены примерные</p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

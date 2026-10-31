@@ -1,0 +1,77 @@
+{
+  "id": "G06",
+  "slug": "msk_kazan_no_tolls",
+  "titleRu": "Москва → Казань без платных дорог, 450 км/день",
+  "world": "central_russia_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва"
+    },
+    "destination": {
+      "lat": 55.7963,
+      "lon": 49.1088,
+      "label": "Казань"
+    },
+    "avoidTolls": true,
+    "crew": {
+      "adults": 2,
+      "children": 0,
+      "dog": false
+    },
+    "dailyKm": 450,
+    "startAt": "2026-10-24T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 2,
+    "nights": 1,
+    "kmRange": [
+      814,
+      840
+    ],
+    "maxDayKm": 472.5,
+    "overnightTownIds": [
+      "t_nizhny"
+    ],
+    "overnightFallbacks": [
+      "none"
+    ],
+    "warnings": [],
+    "roadRefs": [
+      "М-7"
+    ],
+    "mustIncludePlaceIds": [
+      "pl_nnv_hotel_volga",
+      "pl_m7e_cafe_135"
+    ],
+    "costLinesRub": {
+      "tolls": {
+        "value": 0,
+        "tolerancePct": 0
+      },
+      "lodging": {
+        "value": 7200,
+        "tolerancePct": 0
+      }
+    },
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "route: Москва → Казань on М-7 814 km (avoid tolls) + detours ≈ 18 km → ≈ 832 km ∈ [814, 840]; the М-12 coffee 6.4 km off the route (27 min) is no longer a rest (rest.max_detour_min = 10)",
+      "fuel by region (8 l/100): Владимирская 284 + 5 = 289 km × 61.40 = 1 419; Нижегородская 267 + 8 = 275 km × 60.90 = 1 338; Чувашия 110 + 5 = 115 km × 59.80 = 549; Татарстан 76 + 1 = 77 km × 58.90 = 362; Московская 69 km × 61.80 = 341; Москва 8 km × 62.50 = 40 → Σ 4 049 → 4 050 (±5 %)",
+      "lodging (2 adults, no filters): Нижний Новгород «Волга» 4.7 + 0.5 + 0.3 − 0.72 = 4.78 > Кремлёвская 4.25 → 7 200",
+      "food (2 people): day 1 lunch picked by stage 8 on the bare day; feasible candidates at their ETA (lunch_score = rating + 1·parking + 0.5·view + 0.5·[12:30–13:30] − detour/5): Кафе «Привал», М-7 (12:25) 4.1 + 1 + 0 + 0 − 0 = 5.1; Трапезная Гороховца (12:39) 4.1 + 1 + 0.5 − 3/5 = 5.0; «Купеческое» (12:38) 4.0 + 1 + 0.5 − 3/5 = 4.9; «Блинная», М-12 (13:01) 3.95 + 1 + 0.5 − 38/5 = −2.15; «Домашняя кухня», М-12 (12:12) 3.8 + 1 − 35/5 = −2.2 → Кафе «Привал» 700 (margin 0.1; the fixture rating of Трапезная Гороховца was 4.2 → an exact tie, changed for S2-01); dinner Нижний median_low(700, 800, 1000, 1000) = 800; «Волга» has no confirmed breakfast (ADR-0019 E-3) → day 2 breakfast 0.6 × 800 = 480; day 2 lunch Чебоксары Чувашская кухня 650; finish 18:49 < 19:00 → no dinner → 2 × 2 630 = 5 260",
+      "tickets: Золотые ворота 2 × 250 = 500 and Дмитриевский собор 2 × 250 = 500 (Старый Гороховец, Набережная Фёдоровского, Чебоксарский залив, Монумент are free) → 1 000",
+      "subtotal 4 050 + 0 + 7 200 + 5 260 + 1 000 = 17 510; reserve 1 750 (1 751); total round_to(19 260, 100) = 19 300"
+    ],
+    "costTotalRub": {
+      "value": 19300,
+      "tolerancePct": 5
+    }
+  }
+}

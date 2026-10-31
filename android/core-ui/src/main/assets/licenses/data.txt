@@ -1,0 +1,105 @@
+Верста — данные о местах и их лицензии
+Verst — place data and its licences
+(the English text follows the Russian one)
+
+=====================================================================
+РУССКИЙ
+=====================================================================
+
+Каталог мест в приложении — это файлы catalogue_meta, catalogue_towns,
+catalogue_pois, catalogue_bars и catalogue_food (сжатый JSON). Он собран
+из открытых источников. Номер сборки и это же уведомление записаны в самом
+каталоге (catalogue_meta, поле licence).
+
+Что в каталоге и откуда
+
+1. OpenStreetMap — © участники OpenStreetMap, данные доступны по лицензии
+   Open Database License (ODbL) 1.0.
+   Бары, пабы и пивоварни (catalogue_bars); рестораны и кафе, фастфуд и
+   фуд-корты (catalogue_food); места только из OpenStreetMap (музеи, парки,
+   зоопарки, детские площадки и другие); платные парковки и их тарифы;
+   часы работы, плата за вход, сайты и часть описаний мест Wikidata.
+   Поиск адреса в приложении тоже работает на данных OpenStreetMap.
+   Текст лицензии: https://opendatacommons.org/licenses/odbl/1-0/
+   Об авторских правах OpenStreetMap: https://www.openstreetmap.org/copyright
+
+2. Wikidata (Викиданные) — CC0 1.0, без ограничений.
+   Города (название, координаты, население, регион) и достопримечательности
+   (название, координаты, тип, краткое описание, имя файла фото).
+   https://creativecommons.org/publicdomain/zero/1.0/
+
+3. Википедия и Викигид (ru) — CC BY-SA 4.0.
+   Описания мест: первая фраза статьи Википедии или листинга Викигида,
+   тексты сокращены. Ссылка на статью — в карточке места; авторы текста —
+   в истории правок статьи.
+   https://creativecommons.org/licenses/by-sa/4.0/
+
+4. Wikimedia Commons (Викисклад) — у каждого фото своя лицензия.
+   В каталоге только имена файлов, автор и лицензия; сами фото приложение
+   загружает по сети. Автор и лицензия указаны в подписи под фото, по
+   нажатию на подпись открывается страница файла. Файлы, доступные только
+   по лицензии GFDL, не используются.
+
+Лицензия каталога
+
+Каталог — производная база данных OpenStreetMap. Он распространяется по
+лицензии ODbL 1.0 как база данных целиком. Права на отдельное содержимое
+(тексты, фото) — по лицензиям источников, перечисленным выше.
+
+Бесплатная копия
+
+Машиночитаемая копия каталога (те же файлы, что в приложении), полный текст
+ODbL 1.0 и описание сборки (скрипты в открытом репозитории, сборка
+повторяема):
+https://github.com/pazzia/Verst/tree/main/data/catalogue
+
+=====================================================================
+ENGLISH
+=====================================================================
+
+The app's place catalogue is the files catalogue_meta, catalogue_towns,
+catalogue_pois, catalogue_bars and catalogue_food (gzipped JSON), built from
+open data. The build id and this notice are also stored in the catalogue
+itself (catalogue_meta, key "licence").
+
+What it contains, by source
+
+1. OpenStreetMap — © OpenStreetMap contributors, made available under the
+   Open Database License (ODbL) 1.0.
+   Bars, pubs and breweries (catalogue_bars); restaurants and cafés, fast
+   food and food courts (catalogue_food); places taken from OpenStreetMap
+   only (museums, parks, zoos, playgrounds and others); paid parking and
+   its tariffs; opening hours, entry fees, websites and some descriptions
+   of Wikidata places. The app's address search also uses OpenStreetMap data.
+   Licence: https://opendatacommons.org/licenses/odbl/1-0/
+   Copyright and licence: https://www.openstreetmap.org/copyright
+
+2. Wikidata — CC0 1.0 (no restrictions).
+   Towns (name, coordinates, population, region) and sights (name,
+   coordinates, class, short description, photo file name).
+   https://creativecommons.org/publicdomain/zero/1.0/
+
+3. Wikipedia and Wikivoyage (Russian) — CC BY-SA 4.0.
+   Place descriptions: the first sentence of the Wikipedia article or the
+   Wikivoyage listing; the texts are abridged. The place card links the
+   article; its authors are in the article's history.
+   https://creativecommons.org/licenses/by-sa/4.0/
+
+4. Wikimedia Commons — a licence per photo.
+   The catalogue holds file names, authors and licences only; the app loads
+   the photos over the network. The caption under a photo names its author
+   and licence and opens the file page. Files available under the GFDL only
+   are not used.
+
+The catalogue's licence
+
+This catalogue is a Derivative Database of OpenStreetMap and is licensed
+under ODbL 1.0 as a database as a whole. Rights in individual contents
+(texts, photos) follow the source licences listed above.
+
+A free copy
+
+A free machine-readable copy of the catalogue (the same files the app
+ships), the full ODbL 1.0 text and how the catalogue is built (the scripts
+are in the public repository; the build is reproducible):
+https://github.com/pazzia/Verst/tree/main/data/catalogue

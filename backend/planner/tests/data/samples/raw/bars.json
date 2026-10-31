@@ -1,0 +1,128 @@
+[
+ {
+  "osm": "n9001",
+  "name": "Рюмочная (пример) на Советской",
+  "lat": 57.6262,
+  "lon": 39.889,
+  "tags": {
+   "amenity": "bar",
+   "opening_hours": "Mo-Su 12:00-24:00"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9002",
+  "name": "Рюмочная (пример) у Волги",
+  "lat": 57.629,
+  "lon": 39.896,
+  "tags": {
+   "amenity": "bar"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9003",
+  "name": "Рюмочная (пример) на Кирова",
+  "lat": 57.627,
+  "lon": 39.893,
+  "tags": {
+   "amenity": "bar",
+   "opening_hours": "Mo-Su 14:00-02:00"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9004",
+  "name": "Паб (пример) «Старый мост»",
+  "lat": 57.624,
+  "lon": 39.887,
+  "tags": {
+   "amenity": "pub"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "w9005",
+  "name": "Пивоварня (пример) «Волжская»",
+  "lat": 57.623,
+  "lon": 39.885,
+  "tags": {
+   "craft": "brewery",
+   "amenity": "pub"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9006",
+  "name": "Сетевой бар (пример)",
+  "lat": 57.625,
+  "lon": 39.888,
+  "tags": {
+   "amenity": "bar",
+   "brand": "Сеть"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9007",
+  "name": "Рюмочная (пример) на Невском",
+  "lat": 59.9345,
+  "lon": 30.33,
+  "tags": {
+   "amenity": "bar",
+   "opening_hours": "Mo-Su 12:00-04:00"
+  },
+  "townQid": "Q656"
+ },
+ {
+  "osm": "n9008",
+  "name": "Рюмочная (пример) на Гороховой",
+  "lat": 59.932,
+  "lon": 30.318,
+  "tags": {
+   "amenity": "bar",
+   "opening_hours": "bad hours text"
+  },
+  "townQid": "Q656"
+ },
+ {
+  "osm": "n9009",
+  "name": "Рюмочная (пример) у Сенной",
+  "lat": 59.927,
+  "lon": 30.32,
+  "tags": {
+   "amenity": "bar"
+  },
+  "townQid": "Q656"
+ },
+ {
+  "osm": "n9010",
+  "name": "Паб (пример) «Мост»",
+  "lat": 59.936,
+  "lon": 30.325,
+  "tags": {
+   "amenity": "pub"
+  },
+  "townQid": "Q656"
+ },
+ {
+  "osm": "n9011",
+  "name": "Бар (пример) «Угол»",
+  "lat": 59.937,
+  "lon": 30.327,
+  "tags": {
+   "amenity": "bar"
+  },
+  "townQid": "Q656"
+ },
+ {
+  "osm": "n9012",
+  "name": "Пивоварня (пример) «Нева»",
+  "lat": 59.938,
+  "lon": 30.329,
+  "tags": {
+   "craft": "brewery"
+  },
+  "townQid": "Q656"
+ }
+]

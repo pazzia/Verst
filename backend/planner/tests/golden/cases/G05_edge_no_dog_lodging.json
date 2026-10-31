@@ -1,0 +1,78 @@
+{
+  "id": "G05",
+  "slug": "edge_no_dog_lodging",
+  "titleRu": "Тестовск → Конечный, с собакой, единственная гостиница без собак",
+  "world": "edge_cases_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 58.0,
+      "lon": 50.0,
+      "label": "Тестовск"
+    },
+    "destination": {
+      "lat": 58.0,
+      "lon": 60.17111,
+      "label": "Конечный"
+    },
+    "crew": {
+      "adults": 2,
+      "children": 0,
+      "dog": true
+    },
+    "dailyKm": 300,
+    "startAt": "2026-10-24T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 2,
+    "nights": 1,
+    "kmRange": [
+      595,
+      615
+    ],
+    "overnightTownIds": [
+      "t_tst_seredinsk"
+    ],
+    "overnightFallbacks": [
+      "no_hotel"
+    ],
+    "mustExcludePlaceIds": [
+      "pl_tst_hotel_nodog"
+    ],
+    "costLinesRub": {
+      "lodging": {
+        "value": 3500,
+        "tolerancePct": 0
+      }
+    },
+    "costFormulaContains": {
+      "lodging": "(средняя цена)"
+    },
+    "costBreakdownContains": {
+      "lodging": [
+        "(средняя цена)"
+      ]
+    },
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "route: Тестовск → Конечный 599 km on Р-999 (more_stops, dog → R = 90), night at Серединск km 300",
+      "fuel (one region): Тестовая область 599 + 4 = 603.9 km × 0.08 × 61.00 = 2 947 → 2 950",
+      "lodging: the only lodging (Гостиница «Серединская») has no dogs_allowed → NO_HOTEL, lodging_default_night(population < 100 000) = 3 500; warning NO_LODGING (exact list [NO_LODGING])",
+      "breaks: day 1 rest km 90 (66 min), Парк-усадьба «Долгая» 4 h, lunch km 175 at 14:28, overnight 92 min after the lunch; day 2 rest km 390 (66 min), Смотровая km 450, fuel 10 min (no break), lunch km 595: 109 min of driving since the sight — x = R lies 3 min before the finish, drive(x → day end) < 30 min, so no stop is added and 109 ≤ R + 30 = 120 holds",
+      "food (2 people): day 1 lunch Кафе «Тестовое» 550 + dinner at Серединск (no food place → food_default_check = 550); breakfast after a NO_HOTEL night 0.6 × 550 = 330; day 2 lunch 550; finish 14:44 → no dinner → 2 × 1 980 = 3 960",
+      "tickets: Парк-усадьба «Долгая» and Смотровая на Тесте are free → 0",
+      "subtotal 2 950 + 0 + 3 500 + 3 960 + 0 = 10 410; reserve 1 040 (1 041); total round_to(11 450, 100) = 11 500"
+    ],
+    "warnings": [
+      "NO_LODGING"
+    ],
+    "costTotalRub": {
+      "value": 11500,
+      "tolerancePct": 5
+    }
+  }
+}

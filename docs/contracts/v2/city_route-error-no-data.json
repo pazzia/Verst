@@ -1,0 +1,48 @@
+{
+ "request": {
+  "function": "city_route",
+  "args": {
+   "world": "russia_v1",
+   "request_id": "c-walk-15",
+   "input_json": {
+    "start": {
+     "lat": 56.20278,
+     "lon": 42.6925,
+     "label": "Гороховец"
+    },
+    "preset": "beer",
+    "adultConfirmed": true
+   }
+  }
+ },
+ "response": {
+  "ok": false,
+  "error": {
+   "code": "NOT_ENOUGH_POIS",
+   "message": "not enough places for preset 'beer'",
+   "field": "preset",
+   "reason": "no_data",
+   "pointIndex": null,
+   "roadKm": null,
+   "detail": null,
+   "suggestions": [
+    {
+     "preset": "overview",
+     "stops": 7,
+     "titleRu": "Обзорная прогулка"
+    },
+    {
+     "preset": "custom",
+     "stops": 7,
+     "titleRu": "История, архитектура, парки и виды"
+    }
+   ],
+   "requestKey": "01ba6f07692a4ae3",
+   "noData": [
+    "beer"
+   ],
+   "messageRu": "У нас пока нет данных о пивных барах в этом городе — это пробел нашей базы, а не города."
+  },
+  "ms": 0
+ }
+}

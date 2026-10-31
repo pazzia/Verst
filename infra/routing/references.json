@@ -1,0 +1,91 @@
+{
+  "_about": [
+    "ENG-01 acceptance: road km within 3 % of Яндекс Карты for these trips (docs/backlog-investor-readiness.md).",
+    "referenceKm is a published figure for the trip (sources below), NOT a Яндекс Карты measurement: city-centre",
+    "points, the exact entry into a city and the year of the source shift it by a few per cent. Until a human",
+    "builds the same trip in Яндекс Карты from the same points and fills yandexKm/yandexCheckedOn, check_routes.py",
+    "gates on plausibility only (unconfirmedTolerancePct). With yandexKm set it gates on tolerancePct (3 %).",
+    "Points are [lat, lon] of the town centres used by the fixture world central_russia_v1 (Москва = Красная площадь)."
+  ],
+  "tolerancePct": 3.0,
+  "unconfirmedTolerancePct": 7.0,
+  "routes": [
+    {
+      "id": "msk_yar",
+      "titleRu": "Москва → Ярославль",
+      "points": [[55.7558, 37.6173], [57.6261, 39.8845]],
+      "avoidTolls": false,
+      "referenceKm": 265,
+      "referenceNote": "по М-8 «Холмогоры» 265–270 км",
+      "sources": ["https://tonkosti.ru/Журнал/Расстояние_между_Москвой_и_Ярославлем"],
+      "expect": {"refsInclude": ["М-8"], "tollKmMax": 1.0},
+      "yandexKm": null,
+      "yandexCheckedOn": null
+    },
+    {
+      "id": "msk_kzn",
+      "titleRu": "Москва → Казань",
+      "points": [[55.7558, 37.6173], [55.7963, 49.1088]],
+      "avoidTolls": false,
+      "referenceKm": 810,
+      "referenceNote": "длина М-12 «Восток» Москва — Казань 810 км (ГК «Автодор» в пересказе РТ, Яндекс Карты в пересказе Циан); от центра до центра чуть длиннее: М-12 не заходит в Казань",
+      "sources": [
+        "https://www.cian.ru/stati-trassa-m-12-337066/",
+        "https://rt-online.ru/wp-content/uploads/2024/05/rt-060-01c.pdf"
+      ],
+      "expect": {"refsInclude": ["М-12"], "tollKmMin": 200.0},
+      "yandexKm": null,
+      "yandexCheckedOn": null
+    },
+    {
+      "id": "msk_kzn_free",
+      "titleRu": "Москва → Казань без платных дорог",
+      "points": [[55.7558, 37.6173], [55.7963, 49.1088]],
+      "avoidTolls": true,
+      "referenceKm": 820,
+      "referenceNote": "по М-7 через Владимир, Нижний Новгород и Чебоксары 815–825 км",
+      "sources": ["https://tonkosti.ru/Журнал/Расстояние_между_Москвой_и_Казанью"],
+      "expect": {"refsInclude": ["М-7"], "tollKmMax": 5.0},
+      "yandexKm": null,
+      "yandexCheckedOn": null
+    },
+    {
+      "id": "golden_ring",
+      "titleRu": "Золотое кольцо: Москва → Сергиев Посад → Переславль-Залесский → Ростов → Ярославль → Кострома → Иваново → Суздаль → Владимир → Москва",
+      "points": [
+        [55.7558, 37.6173], [56.3153, 38.1358], [56.7361, 38.8543], [57.1853, 39.4146], [57.6261, 39.8845],
+        [57.7677, 40.9264], [57.0004, 40.9739], [56.4197, 40.4434], [56.129, 40.4066], [55.7558, 37.6173]
+      ],
+      "avoidTolls": false,
+      "referenceKm": 775,
+      "referenceNote": "по участкам 75 + 75 + 65 + 60 + 85 + 105 + 95 + 35 + 180 = 775 км; другие источники 770–780 км",
+      "sources": [
+        "https://auto.mail.ru/article/97700-poyezdka-po-zolotomu-koltsu-na-mashine/",
+        "https://www.kp.ru/russia/goroda-zolotogo-koltsa-rossii/poezdka-na-mashine/"
+      ],
+      "expect": {"refsInclude": ["М-8", "Р-132"]},
+      "yandexKm": null,
+      "yandexCheckedOn": null
+    }
+  ],
+  "plans": [
+    {
+      "id": "plan_msk_yar",
+      "input": {"origin": {"lat": 55.7558, "lon": 37.6173, "label": "Москва"},
+                "destination": {"lat": 57.6261, "lon": 39.8845, "label": "Ярославль"},
+                "crew": {"adults": 2, "children": 0, "dog": false}, "dailyKm": 300, "startAt": "2026-11-07T08:00"}
+    },
+    {
+      "id": "plan_msk_kzn",
+      "input": {"origin": {"lat": 55.7558, "lon": 37.6173, "label": "Москва"},
+                "destination": {"lat": 55.7963, "lon": 49.1088, "label": "Казань"},
+                "crew": {"adults": 2, "children": 1, "dog": false}, "dailyKm": 500, "startAt": "2026-11-07T08:00"}
+    },
+    {
+      "id": "plan_golden_ring",
+      "input": {"origin": {"lat": 55.7558, "lon": 37.6173, "label": "Москва"}, "readyRouteId": "rr_golden_ring",
+                "crew": {"adults": 2, "children": 1, "dog": true}, "dailyKm": 300, "budget": 40000,
+                "startAt": "2026-11-07T08:00"}
+    }
+  ]
+}

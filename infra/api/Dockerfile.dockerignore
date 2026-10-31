@@ -1,0 +1,11 @@
+# BuildKit reads this file for infra/api/Dockerfile (context = repository root): send only what the image needs.
+*
+!backend/api/requirements.lock
+!backend/api/verst_api
+!backend/api/migrations
+!backend/planner/verst_planner
+!backend/planner/fixtures/worlds/central_russia_v1.json
+!backend/planner/abroad
+!infra/api/entrypoint.sh
+**/__pycache__
+**/*.pyc

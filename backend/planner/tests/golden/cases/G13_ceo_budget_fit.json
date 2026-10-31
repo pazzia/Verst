@@ -1,0 +1,51 @@
+{
+  "id": "G13",
+  "slug": "ceo_budget_fit",
+  "titleRu": "Золотое кольцо, 4 взрослых + ребёнок + собака, 300 км/день, бюджет 30 000 (CEO, Sprint 3)",
+  "world": "central_russia_v1",
+  "clock": "2026-10-23T09:00:00+03:00",
+  "config": {},
+  "input": {
+    "origin": {
+      "lat": 55.7558,
+      "lon": 37.6173,
+      "label": "Москва"
+    },
+    "readyRouteId": "rr_golden_ring",
+    "crew": {
+      "adults": 4,
+      "children": 1,
+      "dog": true
+    },
+    "dailyKm": 300,
+    "budget": 30000,
+    "startAt": "2026-11-07T08:00"
+  },
+  "expect": {
+    "error": null,
+    "days": 2,
+    "nights": 1,
+    "budgetFit": {
+      "status": "fits",
+      "totalMax": 31500,
+      "levers": [
+        "food_economy",
+        "variant"
+      ],
+      "variantOf": "rr_golden_ring"
+    },
+    "overnightTownIds": [
+      "t_yaroslavl"
+    ],
+    "mustIncludePlaceIds": [
+      "pl_sps_lavra"
+    ],
+    "remainingIsBudgetMinusTotal": true,
+    "invariants": [
+      "all"
+    ],
+    "costWorkings": [
+      "CEO mvp-mock-37: 61 100 ₽ for this crew; plain plan on the golden clock 64 000 ₽ (lodging 24 000, food 23 850 with the unconfirmed breakfasts costed — ADR-0019 E-3, tickets 6 600). Acceptance 2026-10-28 (K3): with the dog no museum is an added stop any more, so the plain plan is 58 400 ₽ and «бесплатные места» saves nothing (not listed). Ladder (ADR-0011): cheaper hotels/family rooms save 0 (one dog-friendly family hotel per town, 2 standard rooms beat ceil(5/4) = 2 family rooms), economy food, then the 2-day variant «Золотое кольцо · коротко» → within 30 000 ₽ (29 400)."
+    ]
+  }
+}

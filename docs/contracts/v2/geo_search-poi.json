@@ -1,0 +1,89 @@
+{
+ "request": {
+  "function": "geo_search",
+  "args": {
+   "world": "russia_v1",
+   "q": "Эрми",
+   "lat": 59.93,
+   "lon": 30.31,
+   "limit": 5,
+   "kinds": "[\"poi\", \"place\"]"
+  }
+ },
+ "response": {
+  "ok": true,
+  "result": [
+   {
+    "kind": "poi",
+    "name": "Эрмитаж-Выборг",
+    "subtitle": "место · Ленинградская область",
+    "lat": 60.70833,
+    "lon": 28.7375,
+    "id": "Q4357088",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Ленинградская область",
+    "poiKind": "museum",
+    "hasPhoto": true
+   },
+   {
+    "kind": "poi",
+    "name": "Эрмитаж-Казань",
+    "subtitle": "место · Республика Татарстан",
+    "lat": 55.79848,
+    "lon": 49.10606,
+    "id": "Q20592524",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Республика Татарстан",
+    "poiKind": "museum",
+    "hasPhoto": true
+   },
+   {
+    "kind": "poi",
+    "name": "Эрмитаж (гостиница, Екатеринбург)",
+    "subtitle": "место · Свердловская область",
+    "lat": 56.83452,
+    "lon": 60.60629,
+    "id": "Q55462853",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Свердловская область",
+    "poiKind": "monument",
+    "hasPhoto": true
+   },
+   {
+    "kind": "poi",
+    "name": "Эрмитаж Кусково",
+    "subtitle": "место · Московская область",
+    "lat": 55.73731,
+    "lon": 37.80777,
+    "id": "Q116691114",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Московская область",
+    "poiKind": "attraction",
+    "hasPhoto": true
+   },
+   {
+    "kind": "poi",
+    "name": "Государственный Эрмитаж",
+    "subtitle": "место · Санкт-Петербург",
+    "lat": 59.94056,
+    "lon": 30.31361,
+    "id": "Q132783",
+    "nameGenRu": null,
+    "namePrepRu": null,
+    "population": null,
+    "regionRu": "Санкт-Петербург",
+    "poiKind": "museum",
+    "hasPhoto": true
+   }
+  ],
+  "ms": 0
+ }
+}
