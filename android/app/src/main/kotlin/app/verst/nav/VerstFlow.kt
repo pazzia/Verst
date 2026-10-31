@@ -1804,7 +1804,7 @@ data class ReportTarget(val name: String, val placeId: String?, val stopId: Stri
 data class CardState(val source: CardSource, val rowId: String, val poiId: String?, val ui: app.verst.feature.card.CardUi)
 
 /** 5.10 18+ dialog: the alcohol preset or the «бары» interest waiting for the answer. */
-data class AgeGate(val preset: String? = null, val interest: String? = null)
+data class AgeGate(val preset: String? = null, val interest: String? = null, val thenBuild: Boolean = false)
 
 /** 5.12 §2 address search state under the ОТКУДА / КУДА field. */
 /**

@@ -117,7 +117,16 @@ fun VerstFlow.selectCityPreset(preset: String) {
 fun VerstFlow.answerAge(yes: Boolean) {
     val g = ageGate ?: return
     ageGate = null
-    if (!yes) return
+    if (!yes) {
+        if (g.thenBuild) {
+            // CEO 31.10: «Нет» on ПОШЛИ of a custom walk with bars → the walk without bars, not silence
+            cityInterests -= "bars"
+            if (cityInterests.isEmpty()) cityInterests += "history"
+            onWalkInputChanged()
+            buildWalk()
+        }
+        return
+    }
     adultConfirmed = true
     if (g.preset != null) {
         cityPresets?.presets?.firstOrNull { it.preset == g.preset }?.let { selectDefaults(it) }
@@ -125,6 +134,7 @@ fun VerstFlow.answerAge(yes: Boolean) {
         cityInterests += g.interest
     }
     onWalkInputChanged()
+    if (g.thenBuild) buildWalk()
 }
 
 /** null = «без ограничения». */
@@ -248,6 +258,12 @@ fun VerstFlow.buildWalk(mode: WalkBuild = WalkBuild.GO) {
     val p = cityPresets?.presets?.firstOrNull { it.preset == cityPreset }
     if (p?.adultOnly == true && !adultConfirmed) {
         ageGate = AgeGate(preset = cityPreset)
+        return
+    }
+    if (cityPreset == "custom" && "bars" in cityInterests && !adultConfirmed) {
+        // CEO 31.10: bars kept from an earlier choice without the 18+ answer → the engine refused and the
+        // button looked dead; ask now and build with the answer
+        ageGate = AgeGate(interest = "bars", thenBuild = true)
         return
     }
     walkJob?.cancel()

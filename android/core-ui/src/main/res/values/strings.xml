@@ -666,6 +666,8 @@
     <string name="handoff_from_stop">Вести по картам отсюда</string>
     <string name="handoff_truncated">Карты принимают до 8 промежуточных точек — взяли главные</string>
     <string name="handoff_part">Часть %1$d из %2$d</string>
+    <string name="handoff_part_to">Часть %1$d из %2$d · до %3$s</string>
+    <string name="handoff_part_back">Часть %1$d из %2$d · обратно к старту</string>
     <string name="handoff_toast_web">Яндекс Карты не установлены — открыли маршрут в браузере</string>
     <string name="handoff_toast_web_walk">Яндекс Карты не установлены — открыли карту в браузере</string>
     <string name="handoff_offline">Нужен интернет, чтобы открыть карту в браузере</string>

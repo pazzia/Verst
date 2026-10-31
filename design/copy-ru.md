@@ -951,6 +951,8 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `handoff_from_stop` | Вести по картам отсюда | stop-menu item (replaces `stopmenu_navigator` text) |
 | `handoff_truncated` | Карты принимают до 8 промежуточных точек — взяли главные | note under the item when `truncated` |
 | `handoff_part` | Часть {k} из {n} | walk split into parts |
+| `handoff_part_to` | Часть {k} из {n} · до {name} | CEO 31.10: where the part ends (its last point) |
+| `handoff_part_back` | Часть {k} из {n} · обратно к старту | CEO 31.10: the last part of a walk with return |
 | `handoff_toast_web` | Яндекс Карты не установлены — открыли маршрут в браузере | after the fallback |
 | `handoff_toast_web_walk` | Яндекс Карты не установлены — открыли карту в браузере | |
 | `handoff_offline` | Нужен интернет, чтобы открыть карту в браузере | |

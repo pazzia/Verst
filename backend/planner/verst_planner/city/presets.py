@@ -45,6 +45,8 @@ WALK_FACTOR = 1.30
 MAX_LEG_KM = 2.5
 RADIUS_MAX_KM = {120: 3.0, 240: 4.0, 360: 5.0, 480: 6.0}
 POOL_MAX = 60
+POOL_PER_CAP = 3  # CEO 31.10: food / drinks keep at most 3 candidates per allowed stop, so they cannot crowd
+# the sights out of the pool (СПб, all interests: 56 cafés of 60 → «мало мест» in the city centre)
 NO_CITY_KM = 15.0
 DIVERSITY = 0.6
 

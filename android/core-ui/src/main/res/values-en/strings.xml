@@ -703,6 +703,8 @@
     <string name="handoff_from_stop">Navigate with maps from here</string>
     <string name="handoff_truncated">Maps take up to 8 waypoints — we kept the main ones</string>
     <string name="handoff_part">Part %1$d of %2$d</string>
+    <string name="handoff_part_to">Part %1$d of %2$d · to %3$s</string>
+    <string name="handoff_part_back">Part %1$d of %2$d · back to the start</string>
     <string name="handoff_toast_web">Yandex Maps isn\'t installed — opened the route in the browser</string>
     <string name="handoff_toast_web_walk">Yandex Maps isn\'t installed — opened the map in the browser</string>
     <string name="handoff_offline">You need the internet to open the map in the browser</string>

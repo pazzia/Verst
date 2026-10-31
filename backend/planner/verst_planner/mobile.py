@@ -57,6 +57,7 @@ from verst_planner.city.walk import (
     Candidate,
     WalkInput,
     bar_hours,
+    caps_for,
     dwell_for,
     long_visit,
     parse_input,
@@ -1384,7 +1385,30 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                 )
             )
     out.sort(key=lambda c: (-round(c.base_score, 9), c.id))
-    return out[: city_presets_mod.POOL_MAX]
+    return pool_mix(out, caps_for(inp))
+
+
+def pool_mix(ranked: list[Candidate], caps: dict[str, int]) -> list[Candidate]:
+    """The best `POOL_MAX` candidates, food and drinks at most `POOL_PER_CAP` x their stop caps; the room they
+    leave goes to the sights (and back to food and drinks when there are not enough sights). Ranked order."""
+    eat, drink = city_presets_mod.EAT_KINDS, city_presets_mod.DRINK_KINDS
+    limit = {"food": caps.get("food", 0) * city_presets_mod.POOL_PER_CAP,
+             "drinks": caps.get("drinks", 0) * city_presets_mod.POOL_PER_CAP}  # fmt: skip
+    taken = {"food": 0, "drinks": 0}
+    first: list[Candidate] = []
+    rest: list[Candidate] = []
+    for c in ranked:
+        group = "food" if c.kind in eat else "drinks" if c.kind in drink else None
+        if group is not None and taken[group] >= limit[group]:
+            rest.append(c)
+            continue
+        if group is not None:
+            taken[group] += 1
+        first.append(c)
+    pool = first[: city_presets_mod.POOL_MAX]
+    pool += rest[: city_presets_mod.POOL_MAX - len(pool)]
+    order = {id(c): i for i, c in enumerate(ranked)}
+    return sorted(pool, key=lambda c: order[id(c)])
 
 
 def park_popularity(area_m2: int) -> float:

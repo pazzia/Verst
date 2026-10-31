@@ -69,3 +69,30 @@ class ParksTest(unittest.TestCase):
         self.assertEqual((p.kind, p.town, p.point, p.area_m2), ("garden", "Q1", LatLon(55.0, 37.0), 12000))
         with self.assertRaises(CatalogueError):
             parks_from_doc({"v": 2}, towns)
+
+
+class AllInterestsTest(unittest.TestCase):
+    """CEO 31.10: СПб, every interest, no time limit gave «мало мест»: 56 of the 60 pool places were cafés."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        load_worlds()
+        call(mobile.set_clock("golden"))
+        if "russia_v1" not in call(mobile.selfcheck())["worlds"]:
+            call(mobile.load_catalogue())
+
+    def test_spb_all_interests(self) -> None:
+        every = ["history", "architecture", "museums", "parks", "food", "bars", "views"]
+        for duration in (None, 240):
+            inp = {
+                "start": {"lat": 59.95, "lon": 30.3166, "label": "Петропавловская крепость"},
+                "preset": "custom",
+                "interests": every,
+                "durationMin": duration,
+                "adultConfirmed": True,
+            }
+            r = call(mobile.city_route("russia_v1", "spb", json.dumps(inp)))
+            kinds = [s["kind"] for s in r["stops"]]
+            self.assertGreaterEqual(len(kinds), 5, duration)
+            eat = ("cafe", "restaurant", "fast_food", "food_court")
+            self.assertGreaterEqual(sum(k not in eat for k in kinds), 3)

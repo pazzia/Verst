@@ -363,8 +363,15 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         }
         if (parts.size > 1) {
             parts.forEach { p ->
-                // the part on its own line: «Открыть Яндекс Карты в браузере» / «Часть 1 из 2» (never clipped)
-                WideButton(label, "walk.handoff.${p.index}", walker = true, height = 60.dp, sub = stringResource(R.string.handoff_part, p.index, parts.size), onClick = { a.handoff(p.index) })
+                // the part on its own line: «Открыть Яндекс Карты в браузере» / «Часть 1 из 2 · до …» (never clipped);
+                // CEO 31.10: the part names where it ends, the last one of a round walk «обратно к старту»
+                val end = p.points.lastOrNull()
+                val sub = when {
+                    end?.role == "destination" && w.returnToStart -> stringResource(R.string.handoff_part_back, p.index, parts.size)
+                    !end?.nameRu.isNullOrBlank() -> stringResource(R.string.handoff_part_to, p.index, parts.size, end?.nameRu.orEmpty())
+                    else -> stringResource(R.string.handoff_part, p.index, parts.size)
+                }
+                WideButton(label, "walk.handoff.${p.index}", walker = true, height = 60.dp, sub = sub, onClick = { a.handoff(p.index) })
             }
         } else {
             WideButton(label, "walk.handoff", walker = true, enabled = true, onClick = { a.handoff(1) })

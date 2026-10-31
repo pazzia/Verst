@@ -1299,6 +1299,51 @@ class VerstFlowTest {
      * screen sends nothing; an answer whose key is not the key of the request sent is dropped as stale.
      */
     @Test
+    fun customWalkWithBarsAsksTheAgeBeforeBuilding() = runTest {
+        // CEO 31.10: bars kept in the custom interests after another preset reset the 18+ answer → the engine
+        // refused (adultConfirmed: required) and «Собрать прогулку» looked dead. Now the app asks first.
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val presets = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                return EngineResult.Ok(oneWalk)
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        flow.selectCityPreset("custom")
+        flow.toggleCityInterest("bars")
+        flow.answerAge(true)
+        flow.selectCityPreset("overview") // resets the 18+ answer; the custom interests keep «bars»
+        flow.selectCityPreset("custom")
+        assertTrue("bars" in flow.cityInterests)
+        flow.buildCustomWalk()
+        settle()
+        assertTrue("asked, nothing sent", requests.isEmpty())
+        assertEquals(AgeGate(interest = "bars", thenBuild = true), flow.ageGate)
+        flow.answerAge(false)
+        settle()
+        assertFalse("«Нет»: the walk without bars", "bars" in requests.single().interests)
+        flow.buildWalk()
+        settle()
+        flow.toggleCityInterest("bars")
+        flow.answerAge(true)
+        flow.buildWalk()
+        settle()
+        assertTrue(requests.last().adultConfirmed)
+        assertTrue("bars" in requests.last().interests)
+    }
+
+    @Test
     fun walkRequestKeyDropsStaleAnswersAndSkipsSameRequests() = runTest {
         val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
         val resp = { f: String -> app.verst.core.model.EngineJson.json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
