@@ -342,7 +342,7 @@ jobs:
           done
           [ -f "$KEEP/$ABROAD/.gitkeep" ] && rm -f "$KEEP/$ABROAD/.gitkeep"
           git checkout -q --orphan "bot/data-abroad-${{ github.run_number }}"
-          git rm -rq --cached . && git clean -fdq -e dl
+          git read-tree --empty && git clean -fdq -e dl
           cp -a "$KEEP"/. .
           git add -f backend   # every kept path is under backend/planner (dl/ stays out)
           git commit -m "data: catalogues abroad (wave 1) and Russian parks, run ${{ github.run_id }}" \
@@ -350,7 +350,7 @@ jobs:
           git push origin "bot/data-abroad-${{ github.run_number }}"
           # The raw responses per country (OpenStreetMap parts: ODbL 1.0), to rebuild the same catalogues anywhere.
           git checkout -q --orphan "bot/raw-abroad-${{ github.run_number }}"
-          git rm -rq --cached . && git clean -fdq -e dl
+          git read-tree --empty && git clean -fdq -e dl
           mkdir -p raw
           cp dl/raw-*.tar.gz raw/ 2>/dev/null || true
           cp dl/ru-parks/parks.json.gz raw/ru-parks.json.gz 2>/dev/null || true

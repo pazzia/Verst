@@ -130,7 +130,7 @@ jobs:
           cp -a backend/planner/verst_planner/resources/catalogue_*.json.gz "$KEEP/backend/planner/verst_planner/resources/"
           cp -a $T/catalogue.lock $T/report "$KEEP/$T/"
           git checkout -q --orphan "bot/data-osm-${{ github.run_number }}"
-          git rm -rq --cached . && git clean -fdq -e data-raw
+          git read-tree --empty && git clean -fdq -e data-raw
           cp -a "$KEEP"/. .
           git add -f backend
           git commit -m "data: bars and food from the OSM extract, run ${{ github.run_id }}" \
@@ -138,7 +138,7 @@ jobs:
           git push origin "bot/data-osm-${{ github.run_number }}"
           # The raw OSM rows, to rebuild the same catalogue from the sandbox (artifacts are not reachable there).
           git checkout -q --orphan "bot/raw-osm-${{ github.run_number }}"
-          git rm -rq --cached . && git clean -fdq -e data-raw
+          git read-tree --empty && git clean -fdq -e data-raw
           tar -C "$RAW" -czf osm-raw.tar.gz bars.json food.json sources.json
           git add osm-raw.tar.gz
           git commit -qm "data: OSM bars and food rows of run ${{ github.run_id }} (ODbL 1.0)"

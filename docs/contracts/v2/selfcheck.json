@@ -41,12 +41,12 @@
     "russia_v1"
    ],
    "catalogue": {
-    "version": "wd-20261029-osm2",
-    "builtAt": "2026-10-29",
+    "version": "wd-20261031-osm3",
+    "builtAt": "2026-10-31",
     "towns": 1114,
     "pois": 10921,
-    "bars": 5625,
-    "food": 29906
+    "bars": 5635,
+    "food": 29930
    }
   },
   "ms": 0

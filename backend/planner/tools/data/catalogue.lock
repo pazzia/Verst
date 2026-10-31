@@ -1,19 +1,19 @@
 {
- "version": "wd-20261029-osm2",
- "builtAt": "2026-10-29",
+ "version": "wd-20261031-osm3",
+ "builtAt": "2026-10-31",
  "counts": {
   "towns": 1114,
   "pois": 10921,
-  "bars": 5625,
-  "food": 29906,
+  "bars": 5635,
+  "food": 29930,
   "links": 79,
   "credits": 3632
  },
- "totalBytes": 1495447,
+ "totalBytes": 1496225,
  "files": {
   "catalogue_meta.json.gz": {
-   "bytes": 98442,
-   "sha256": "886f3e42b0e25eca186f7d6e52651eef898ba14925f5aa9ddd08fb7992102abe"
+   "bytes": 98447,
+   "sha256": "0cc2929ca4928f816d16ac1d3d84d882a1db0c7dd7ccb478b9bc3b74150d4e46"
   },
   "catalogue_towns.json.gz": {
    "bytes": 52995,
@@ -24,12 +24,12 @@
    "sha256": "2c546bc5a88f52cb8a7b9e0b1e32c01f81a66cf837b45666726987258c45ddc6"
   },
   "catalogue_bars.json.gz": {
-   "bytes": 119763,
-   "sha256": "f2518894be3ec2ad55a4210c724f73db5f88991318d8f9ebcf7fdebe8073dcc9"
+   "bytes": 119961,
+   "sha256": "330c1bc5a81e1aa0644dacb51071d0c9403db1a432c9ec9f176b281df294d457"
   },
   "catalogue_food.json.gz": {
-   "bytes": 594887,
-   "sha256": "c1b5ffb4e841438715e74b24cde7535da9023c0aec09dde009319b3344348c9b"
+   "bytes": 595462,
+   "sha256": "28241645c88d8062788f474822a969dc8cdbc9ceff918ce977856e177d3afc74"
   }
  },
  "sources": {
@@ -39,8 +39,8 @@
   "fetchedAt": "2026-10-25T02:46:58+00:00",
   "run": "40151703225",
   "rebuilt": "data-osm.yml: bars and food from the Geofabrik extract of osmFetchedAt; towns and POIs from bot/raw-7, extras from bot/extras-1, photo meta from bot/photos-1",
-  "osmFetchedAt": "2026-10-29T00:02:34+00:00",
-  "osmRun": "40790614431"
+  "osmFetchedAt": "2026-10-31T13:43:00+00:00",
+  "osmRun": "41206532375"
  },
  "classCheck": {
   "labels": {
