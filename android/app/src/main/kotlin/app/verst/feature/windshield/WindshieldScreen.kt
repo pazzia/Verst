@@ -165,26 +165,25 @@ fun WindshieldScreen(
  */
 @Composable
 private fun CrewCard(adults: Int, children: Int, dog: Boolean, onEdit: (() -> Unit)?, onSettings: () -> Unit) {
-    val cd = stringResource(R.string.cd_windshield_mirror, crewShort(adults, children, dog))
     val settingsCd = stringResource(R.string.settings_entry_cd)
-    CraftCard(
-        Modifier.fillMaxWidth().semantics(mergeDescendants = true) { if (onEdit != null) contentDescription = cd },
-        onClick = onEdit,
-    ) {
+    // clickable: the card merges into one button read as the crew summary (the gear stays its own button)
+    CraftCard(Modifier.fillMaxWidth(), onClick = onEdit) {
+        // one compact row (the ready routes below should stay in view): van, crew in words + one tile per traveller, gear
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            CraftIconTile(R.drawable.ic_ui_van, active = false, fill = C.camper.amber, tint = C.camper.border)
-            Txt(crewSummary(adults, children, dog), CraftType.cardTitle, C.camper.ink, Modifier.weight(1f), maxLines = 2)
+            CraftIconTile(R.drawable.ic_ui_van, active = false, size = 36.dp, fill = C.camper.amber, tint = C.camper.border)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Txt(crewSummary(adults, children, dog), CraftType.cardTitle, C.camper.ink, maxLines = 1)
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    repeat(adults.coerceAtLeast(0)) { CraftIconTile(R.drawable.ic_crew_adult, active = false, size = 22.dp, fill = C.camper.amber, tint = C.camper.border) }
+                    repeat(children.coerceAtLeast(0)) { CraftIconTile(R.drawable.ic_crew_child, active = true, size = 22.dp) }
+                    if (dog) CraftIconTile(R.drawable.ic_ui_dog, active = false, size = 22.dp, fill = C.camper.green, tint = C.camper.onOrange)
+                }
+            }
             // D-IR-20: the settings entry of the windshield (was the round gear in the corner of the scene)
             CraftIconTile(
                 R.drawable.ic_ui_gear, active = false, onClick = onSettings, size = 30.dp, cd = settingsCd,
                 modifier = Modifier.testTag("windshield.settings"),
             )
-        }
-        DashedDivider()
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            repeat(adults.coerceAtLeast(0)) { CraftIconTile(R.drawable.ic_crew_adult, active = false, size = 28.dp, fill = C.camper.amber, tint = C.camper.border) }
-            repeat(children.coerceAtLeast(0)) { CraftIconTile(R.drawable.ic_crew_child, active = true, size = 28.dp) }
-            if (dog) CraftIconTile(R.drawable.ic_ui_dog, active = false, size = 28.dp, fill = C.camper.green, tint = C.camper.onOrange)
         }
     }
 }
