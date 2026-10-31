@@ -258,7 +258,7 @@ class Sprint4DataTest {
     fun s4dWalks() {
         // Фрязино: «Свой маршрут» 4 h
         from("Фрязино", 55.9606, 38.0456)
-        compose.onNodeWithTag("windshield.city").performClick()
+        compose.onNodeWithTag("windshield.city").performScrollTo().performClick()
         compose.waitUntil(20_000) { !flow.cityLoading && flow.cityPresets != null }
         compose.runOnUiThread {
             flow.selectCityPreset("custom")
@@ -272,7 +272,7 @@ class Sprint4DataTest {
         if (flow.top == Route.Walk) assertTrue("Фрязино custom walk has places", flow.walk!!.stops.size >= 5)
         // Казань: «без ограничения», then the dog walk
         from("Казань", 55.7963, 49.1088)
-        compose.onNodeWithTag("windshield.city").performClick()
+        compose.onNodeWithTag("windshield.city").performScrollTo().performClick()
         compose.waitUntil(20_000) { !flow.cityLoading && flow.cityPresets?.town?.name == "Казань" }
         compose.runOnUiThread {
             flow.selectCityPreset("overview")
