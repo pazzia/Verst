@@ -160,6 +160,7 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
         category=POI_CATEGORY.get(p.kind, p.kind),
         quality=p.quality,
         heritage=p.heritage,
+        card_level=p.level,
     )
 
 

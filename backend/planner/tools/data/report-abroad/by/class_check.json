@@ -1,0 +1,32 @@
+{
+ "labels": {
+  "Q2977": "cathedral",
+  "Q16970": "church building",
+  "Q184": "Belarus",
+  "Q162875": "mausoleum",
+  "Q22698": "park",
+  "Q183342": "federal city of Russia",
+  "Q179700": "statue",
+  "Q23413": "castle",
+  "Q263274": "kremlin",
+  "Q570116": "tourist attraction",
+  "Q174782": "square",
+  "Q32815": "mosque",
+  "Q1107656": "garden",
+  "Q33506": "museum",
+  "Q44613": "monastery",
+  "Q1851368": "waterfront",
+  "Q132834": "madrasa",
+  "Q57821": "fortification",
+  "Q2319498": "architectural landmark",
+  "Q4989906": "monument",
+  "Q839954": "archaeological site",
+  "Q5003624": "memorial",
+  "Q6017969": "scenic viewpoint",
+  "Q7930989": "city or town"
+ },
+ "mismatches": {},
+ "ok": true,
+ "resolved": {},
+ "unresolved": []
+}

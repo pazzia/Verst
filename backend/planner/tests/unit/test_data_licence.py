@@ -77,7 +77,8 @@ class DataLicenceTest(unittest.TestCase):
         for link in links:
             with self.subTest(link=link):
                 self.assertTrue((COPY_DIR / link).resolve().exists(), link)
-        for name in ("catalogue_meta", "catalogue_towns", "catalogue_pois", "catalogue_bars"):
+        for key in ("meta", "towns", "pois", "bars", "food"):
+            name = f"catalogue_{key}"
             self.assertIn(f"backend/planner/verst_planner/resources/{name}.json.gz", readme)
         for needle in (self.b.ODBL_URI, self.b.OSM_COPYRIGHT_URI, "тексты сокращены", "abridged", "GFDL"):
             self.assertIn(needle, readme)

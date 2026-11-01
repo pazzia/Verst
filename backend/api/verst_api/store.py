@@ -85,6 +85,12 @@ async def device_by_token(pool: AsyncConnectionPool, token: str) -> Device | Non
     return Device(str(row[0]), str(row[1]))
 
 
+async def forget_device(pool: AsyncConnectionPool, device_id: str) -> None:
+    """«Отвязать от сервера»: the device, its saved trips and its feedback go (ON DELETE CASCADE)."""
+    async with pool.connection() as conn:
+        await conn.execute("DELETE FROM api.device WHERE id = %s", (device_id,))
+
+
 # ---------------------------------------------------------------------------------------------- rate limits
 
 

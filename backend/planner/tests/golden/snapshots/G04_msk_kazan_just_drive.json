@@ -1042,9 +1042,103 @@
                   "kmFromPrev": 196
                 }
               ]
+            },
+            {
+              "id": "alt_d1s05_pl_m7e_cafe_520",
+              "placeId": "pl_m7e_cafe_520",
+              "name": "Кафе «Привал», М-7",
+              "deltaMin": 11,
+              "deltaRub": -60,
+              "shiftMin": 11,
+              "units": {
+                "deltaKm": 7.662,
+                "regionCode": "RU-CU",
+                "checkRub": 600,
+                "adultRub": null,
+                "childRub": null,
+                "name": "Кафе «Привал», М-7",
+                "placeId": "pl_m7e_cafe_520",
+                "priceRub": "59.80",
+                "regionName": "Чувашская Республика",
+                "tripKmDelta": 8
+              },
+              "stop": {
+                "id": "d1s05",
+                "seq": 5,
+                "day": 1,
+                "kind": "food",
+                "sign": "food",
+                "placeId": "pl_m7e_cafe_520",
+                "townId": null,
+                "name": "Кафе «Привал», М-7",
+                "note": null,
+                "lat": 55.86643397760319,
+                "lon": 47.54444783108501,
+                "arriveAt": "2026-10-24T14:26",
+                "departAt": "2026-10-24T15:26",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 153,
+                "kmAt": 683,
+                "dwellMin": 60,
+                "tags": [
+                  "parking"
+                ],
+                "costRub": 600,
+                "reason": "Обед, парковка у входа.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-10-24T06:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-10-24T08:32",
+                  "departAt": "2026-10-24T08:52",
+                  "kmFromPrev": 231
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-10-24T11:31",
+                  "departAt": "2026-10-24T11:51",
+                  "kmFromPrev": 251
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-10-24T12:33",
+                  "departAt": "2026-10-24T12:43",
+                  "kmFromPrev": 56
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-10-24T14:26",
+                  "departAt": "2026-10-24T15:26",
+                  "kmFromPrev": 153
+                },
+                {
+                  "stopId": "d1s06",
+                  "seq": 6,
+                  "arriveAt": "2026-10-24T16:40",
+                  "departAt": null,
+                  "kmFromPrev": 111
+                }
+              ]
             }
           ],
-          "alternativesNote": "Нашли только один вариант в это время.",
+          "alternativesNote": null,
           "hotelOptions": [],
           "selectedHotelId": null
         },

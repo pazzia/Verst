@@ -1,6 +1,7 @@
 package app.verst.feature.city
 
 import androidx.compose.foundation.Canvas
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -102,6 +103,8 @@ data class CityUi(
     val few: WalkFew? = null,
     val picker: CityPicker? = null,
     val excludedCount: Int = 0,
+    /** CEO 29.10: presets our catalogue has no places for here (`noData`), shown disabled with `noDataRu`. */
+    val noDataPresets: List<CityPresetDto> = emptyList(),
 ) {
     val pickerUi: PickerUi get() = PickerUi(durationMin, presets, selected, adults, children, dog, pace, budget)
 }
@@ -129,6 +132,7 @@ interface CityActions : PickerActions {
 /** 5.10 «По городу» (S4 §10): a fresh walk setup — start, who goes, which walk, how long, wishes. */
 @Composable
 fun CityScreen(ui: CityUi, a: CityActions) {
+    if (Palette.camper) return CityScreenCamper(ui = ui, a = a)
     ScreenRoot(C.city.sky, statusBar = C.city.sky) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val windowH = maxHeight
@@ -158,7 +162,10 @@ fun CityScreen(ui: CityUi, a: CityActions) {
                             PlaceholderPlate(170.dp, DesignTokens.size.presetH, C.dash.controlAlt)
                             PlaceholderPlate(170.dp, DesignTokens.size.presetH, C.dash.controlAlt)
                         }
-                        else -> PresetGrid(ui.presets, ui.selected, a::preset)
+                        else -> {
+                            PresetGrid(ui.presets, ui.selected, a::preset)
+                            if (ui.noDataPresets.isNotEmpty()) NoDataPresets(ui.noDataPresets)
+                        }
                     }
                     // 5. warnings (informative: ПОШЛИ stays on)
                     CityWarnings(ui, a)

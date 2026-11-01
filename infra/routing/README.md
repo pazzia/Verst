@@ -32,6 +32,18 @@ infra/routing/dev/record_fixtures.sh ./graphhopper-web-11.0.jar /tmp/gh-fixtures
 `record_fixtures.sh` with no second argument rewrites `backend/planner/tests/data/graphhopper/`; the request
 bodies come from the adapter (`request_body`), so the fixtures always match what it sends.
 
+## The test VM: download the graph built in CI (D-IR-21, CEO 31.10)
+
+1. Actions → routing → Run workflow with `publish: true` (region `russia`): the checked graph becomes the public
+   release `routing-graph-latest` (`graph.tar.gz.partNN` ≤ 1.9 GB, `SHA256SUMS`, `build.json`).
+2. On the VM: `sudo infra/routing/fetch_graph.sh` → `/srv/verst/routing/current` (sha256-checked, the previous
+   graph kept as `previous`).
+3. `docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml --profile routing build graphhopper`,
+   then `… up -d graphhopper`: the host-nginx override serves it with `config-mmap.yml` and `-Xmx1g`.
+4. `.env`: `VERST_ROUTING=graphhopper`, `VERST_GRAPHHOPPER_URL=http://graphhopper:8989`,
+   `VERST_SYNTHETIC_FALLBACK=true`; restart `api`. A point the graph does not cover goes to the road model
+   (`VERST_GRAPH_COVERAGE_FALLBACK`, on by default), flagged `approxDistances` like on the phone.
+
 ## Run it on the maps VM
 
 ```bash
@@ -55,6 +67,29 @@ curl -fs http://<private IP>:8989/health      # "OK"; then point verst-api at VE
   file holds it flat), so change other keys in `config.yml`.
 
 ## Sizing
+
+### Measured: the graph on disk (MMAP) instead of the heap — routing.yml runs 4 and 5, 27.10.2026
+
+The same Central + Volga graph (822 MB of files), the same load (`load_test.py`: 400 random town pairs, 8
+threads, 4 vCPU) and the same route/plan checks (`check_routes.py`):
+
+| Server | Memory | Routes/s | Latency p50 / p95 / p99 | Checks |
+| --- | --- | ---: | ---: | --- |
+| `RAM_STORE`, `-Xmx6g` (the heap holds the graph) | RSS 1.77 GB (anon 1.8 GB) | 65.8 | 124 / 223 / 251 ms | all pass |
+| `MMAP`, `-Xmx1g`, whole process capped at 1.5 GB, cold start after `drop_caches` | RSS 0.82 GB (anon 438 MB + mapped files 406 MB); cgroup peak **960 MB** with the page cache (file 515 MB) | 59.8 | 137 / 232 / 301 ms | all pass |
+
+MMAP costs 8–9 % of throughput and needs a third of the memory; the kernel keeps the hot part of the graph in
+the page cache and reads the rest from the SSD, so a small VM degrades on rare routes instead of failing.
+**Decision (D-IR-21):** the VMs serve with `graph.dataaccess.default_type: MMAP` and a 1 GB heap; the graph is
+built in CI (16 GB runner) and copied to the VM, never imported there. For the whole of Russia expect ~3× the
+files (PBF 4.2 GB vs 1.66 GB): ~2.5 GB on disk, ~1 GB heap + whatever page cache the VM has.
+
+The memory does not grow with users: one graph serves every request. Users cost CPU: ~60 routes/s per 4 vCPU
+(≈ 5 M routes a day), and a plan needs one route; the planner itself (~1 s CPU per plan) is the first thing to
+scale out, by running more API processes against the same GraphHopper.
+
+### Import (unchanged: CI only)
+
 
 What is known:
 

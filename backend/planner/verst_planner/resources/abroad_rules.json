@@ -1,0 +1,374 @@
+{
+  "_about": [
+    "CEO 29.10 (trips abroad, wave 1, server only): fuel prices, tolls, fees, documents and rules per country, copied from docs/plan/abroad-wave1-sources.md. Nothing here is a new figure: each value has the URL and the source type the sources doc gives.",
+    "Every fact was read from the text of search results on 2026-10-29, not from the opened page (sources doc §0): the engine marks all of it «не проверено».",
+    "Source types (sources doc §0): official = a state body, regulator or toll operator; primary = media quoting an official decision; secondary = blogs, insurers, aggregators.",
+    "Fuel: `values` is one price or a [lowest, highest] pair from the source; the engine budgets the highest. A fuel without a price here (AB, AM, TR ai92) is unknown, never a guess.",
+    "Fees: a fee is counted in the trip's money only when its amount comes from an official or primary source, it is mandatory, unconditional and not contradicted (`conflict`). Otherwise it is shown with «по данным …» and not counted (sources doc §12).",
+    "`variants`: a fee per period; the engine takes the shortest period that covers the trip's days and says which one."
+  ],
+  "checkedAt": "2026-10-29",
+  "countries": {
+    "BY": {
+      "nameRu": "Беларусь",
+      "currency": "BYN",
+      "fuel": {
+        "ai92": {"values": ["2.57"], "validFrom": "2026-04-04"},
+        "ai95": {"values": ["2.67"], "validFrom": "2026-04-04"},
+        "dt": {"values": ["2.67"], "validFrom": "2026-04-04"}
+      },
+      "fuelSources": [
+        {"url": "https://reform.news/en/retail-prices-for-motor-fuel-in-belarus-raised-again", "type": "primary"},
+        {"url": "https://reform.news/en/motor-fuel-prices-to-rise-in-belarus-from-july-8/amp", "type": "primary"}
+      ],
+      "fuelNoteRu": "Предельные розничные цены концерна «Белнефтехим» с 04.04.2026 (по reform.news). Более поздние объявления о повышении в выдаче без указания года — не учтены; АЗС могут продавать дешевле.",
+      "tolls": {
+        "status": "zero",
+        "textRu": "Платные дороги BelToll: с машин, зарегистрированных в ЕАЭС (в том числе в России), плата не берётся. Электронная виньетка нужна только машинам вне ЕАЭС. Список освобождённых на beltoll.by не сверен.",
+        "sources": [
+          {"url": "https://beltoll.by/ru/pay", "type": "official"},
+          {"url": "https://trans.info/ru/belarus-menyaet-pravila-oplatyi-proezda-po-dorogam-313979", "type": "primary"},
+          {"url": "https://abw.by/news/rb/2026/08/26/s-1-sentyabrya-izmenyatsya-tarify-beltoll-i-pravila-proezda-v-minsk", "type": "primary"}
+        ]
+      },
+      "fees": [
+        {
+          "key": "insurance",
+          "textRu": "Страховка: российское ОСАГО действует в Беларуси при допсоглашении (435-ФЗ, с 01.01.2025). Альтернатива — белорусская погранстраховка, её статус в 2026 году в источниках противоречив. «Зелёная карта» для России и Беларуси не действует с 30.06.2023.",
+          "mandatory": true,
+          "sources": [
+            {"url": "https://www.interfax.ru/russia/995325", "type": "primary"},
+            {"url": "https://ppt.ru/news/osago/s-2025-goda-osago-budet-deystvovat-i-v-belorussii", "type": "primary"},
+            {"url": "https://www.wigo.by/blog/27/strahovanie-zelenaya-karta", "type": "secondary"}
+          ]
+        }
+      ],
+      "documents": [
+        {"textRu": "Внутренний паспорт РФ; детям до 14 лет с 20.01.2026 — загранпаспорт", "sources": [{"url": "https://polis812.ru/blog/dokumenty-dlya-vezda-v-belarus/", "type": "secondary"}]},
+        {"textRu": "Водительское удостоверение и СТС", "sources": [{"url": "https://polis812.ru/blog/dokumenty-dlya-vezda-v-belarus/", "type": "secondary"}]}
+      ],
+      "rules": [
+        {"textRu": "Вне населённых пунктов — 90 км/ч, на автомагистралях — 120 км/ч", "sources": [{"url": "https://pravo.by/novosti/obshchestvenno-politicheskie-i-v-oblasti-prava/2022/april/69681/", "type": "official"}]}
+      ]
+    },
+    "KZ": {
+      "nameRu": "Казахстан",
+      "currency": "KZT",
+      "fuel": {
+        "ai92": {"values": ["253"], "validFrom": "2026-10-01"},
+        "ai95": {"values": ["322"], "validFrom": "2026-10-01"},
+        "dt": {"values": ["348", "351"], "validFrom": "2026-10-01"}
+      },
+      "fuelSources": [
+        {"url": "https://digitalbusiness.kz/2026-10-01/ne-proshlo-i-nedeli-benzin-i-dizel-snova-podorozhali-na-azs/", "type": "primary"}
+      ],
+      "fuelNoteRu": "Ориентировочные цены на АЗС на 01.10.2026 по сообщению СМИ; официального ежедневного прайса нет.",
+      "tolls": {
+        "status": "unknown",
+        "textRu": "Платные участки дорог I категории: плата по госномеру без шлагбаумов через kaztoll.kz, оплатить можно до 30 дней после проезда, предоплата дешевле. Официальной таблицы тарифов для легковых нет — не учтено.",
+        "sources": [
+          {"url": "https://en.orda.kz/kazakhstan-proposes-differentiated-toll-rates-for-transit-foreign-drivers-9658/", "type": "primary"},
+          {"url": "https://kazpravda.kz/n/kak-postavit-na-uchet-inostrannye-avtomobili-v-kazahstane/", "type": "primary"},
+          {"url": "https://tengrinews.kz/autonews/kakie-dorogi-stanut-platnyimi-v-kazahstane-v-2026-godu-587923/", "type": "primary"}
+        ]
+      },
+      "fees": [
+        {
+          "key": "insurance",
+          "textRu": "Нужен местный полис ОС ГПО ВТС; порядок покупки и цена для нерезидента в 2026 году — нет надёжного источника.",
+          "mandatory": true,
+          "sources": [{"url": "https://www.zakon.kz/redaktsiia-zakonkz/4867325-kak-ezdit-v-kazahstane-na-avto-s.html", "type": "secondary"}]
+        }
+      ],
+      "documents": [
+        {"textRu": "Водительское удостоверение и СТС; если водитель не собственник — доверенность", "sources": [{"url": "https://polis812.ru/blog/otkryty-li-graniczy-kazahstana-vezd-dlya-rossiyan-na-mashine/", "type": "secondary"}]}
+      ],
+      "rules": [
+        {"textRu": "Легковые вне населённых пунктов — 110 км/ч, на автомагистралях — 140 км/ч (п. 10.3 ПДД РК); в СМИ встречается 100 км/ч на дорогах II–III категорий", "sources": [{"url": "https://kodeksy-kz.com/pdd/10.3.htm", "type": "secondary"}, {"url": "https://newtimes.kz/obshchestvo/174593-kakaya-skorost-razreshena-na-kazahstanskih-trassah", "type": "primary"}]}
+      ]
+    },
+    "GE": {
+      "nameRu": "Грузия",
+      "currency": "GEL",
+      "fuel": {
+        "ai92": {"values": ["3.88", "4.02"], "validFrom": "2026-10-07"},
+        "ai95": {"values": ["4.16", "4.29"], "validFrom": "2026-10-07"},
+        "dt": {"values": ["4.89", "4.95"], "validFrom": "2026-10-07"}
+      },
+      "fuelSources": [{"url": "https://amindi.org/en/fuel-prices", "type": "secondary"}],
+      "fuelNoteRu": "Цены сетей Rompetrol и Wissol на 07.10.2026 по агрегатору amindi.org (вторичный источник; госрегулятора цен нет). Считаем по верхней. Соответствие марок Regular — АИ-92 и Premium — АИ-95 — наше допущение, не проверено.",
+      "tolls": {
+        "status": "unknown",
+        "textRu": "Платных дорог для легковых не найдено, но и официального подтверждения, что их нет, тоже нет — не учтено.",
+        "sources": []
+      },
+      "fees": [
+        {
+          "key": "tpl",
+          "textRu": "Обязательная страховка гражданской ответственности (TPL) с 01.03.2018: на tpl.ge или на границе; штраф без полиса 100–200 GEL. Цены по вторичному источнику: 15 дней — 30 GEL, месяц — 50 GEL, 3 месяца — 85 GEL, год — 130 GEL.",
+          "mandatory": true,
+          "currency": "GEL",
+          "variants": [{"amount": "30", "days": 15}, {"amount": "50", "days": 30}, {"amount": "85", "days": 90}, {"amount": "130", "days": 365}],
+          "sources": [{"url": "https://sakhva-travel.com/en/blog/travel-insurance-georgia-2026/", "type": "secondary"}],
+          "ruleSources": [{"url": "https://tpl.ge/en/terms-and-conditions", "type": "official"}, {"url": "https://www.tpl.ge/en/faq", "type": "official"}]
+        },
+        {
+          "key": "medical",
+          "textRu": "Медицинская страховка обязательна с 01.01.2026: покрытие не меньше 30 000 GEL; штраф 300 GEL (по другому источнику — от 100 GEL). Цена полиса не найдена.",
+          "mandatory": true,
+          "sources": [{"url": "https://lenta.ru/articles/2026/06/11/pravila-vezda-v-gruziyu-2026/", "type": "primary"}, {"url": "https://cover.ge/ru/from-russia", "type": "secondary"}]
+        }
+      ],
+      "documents": [
+        {"textRu": "Загранпаспорт", "sources": [{"url": "https://www.kommersant.ru/doc/8691138", "type": "primary"}]},
+        {"textRu": "Водительское удостоверение и оригинал СТС", "sources": [{"url": "https://www.kommersant.ru/doc/8691138", "type": "primary"}]},
+        {"textRu": "Если водитель не собственник — нотариальная доверенность с правом выезда за границу", "sources": [{"url": "https://www.kommersant.ru/doc/8691138", "type": "primary"}]},
+        {"textRu": "Машина с иностранными номерами — не дольше 90 дней", "sources": [{"url": "https://www.kommersant.ru/doc/8691138", "type": "primary"}]}
+      ],
+      "rules": [
+        {"textRu": "Город — 60, за городом — 90, магистраль — 110 км/ч", "sources": [{"url": "https://madloba.info/faq/cars-and-driving/speeding-fines-in-georgia/", "type": "secondary"}]},
+        {"textRu": "С российскими правами можно водить год после последнего въезда, с оригиналом удостоверения; нужно ли международное — спорно", "sources": [{"url": "https://madloba.info/en/faq/cars-and-driving/driving-in-georgia-with-a-foreign-licence/", "type": "secondary"}]}
+      ]
+    },
+    "AB": {
+      "nameRu": "Абхазия",
+      "currency": "RUB",
+      "fuel": {},
+      "fuelSources": [
+        {"url": "https://www.caucasianknot.org/articles/78111", "type": "primary"},
+        {"url": "https://360.ru/tekst/obschestvo/na-zapravkah-v-abhazii/", "type": "primary"}
+      ],
+      "fuelNoteRu": "Надёжного источника цен нет: только сообщения водителей за август 2026 (АИ-92 — 74–100 ₽, бывают перебои и лимит 20 л) — не учтено.",
+      "tolls": {"status": "unknown", "textRu": "Данных о платных дорогах нет — не учтено.", "sources": []},
+      "fees": [
+        {
+          "key": "insurance",
+          "textRu": "Российское ОСАГО не действует — нужна местная страховка. Цена по источникам расходится: 1 000 ₽ за 15 дней или 1 500 ₽ за месяц, по другому — около 3 000 ₽ за 15 дней; штраф 600 или 3 000 ₽.",
+          "mandatory": true,
+          "conflict": true,
+          "currency": "RUB",
+          "sources": [
+            {"url": "https://nashaplaneta.net/vopros-otvet/7201-nuzhna-li-strahovka-dlya-vezda-v-abhaziyu-na-mashine-v-2026-godu", "type": "secondary"},
+            {"url": "https://edemgagra.ru/kak-dobratsya-do-abhazii/granitsa-rossiya-abhaziya/", "type": "secondary"}
+          ]
+        },
+        {
+          "key": "entry",
+          "textRu": "В соцсетях пишут о «пошлине 200 ₽» за въезд — не подтверждено.",
+          "mandatory": false,
+          "sources": [{"url": "https://www.vokrugsveta.ru/articles/v-socsetyakh-pishut-pro-poshlinu-za-vezd-v-abkhaziyu-razbiraemsya-kto-dolzhen-platit-po-200-rublei-id5631591", "type": "secondary"}]
+        }
+      ],
+      "documents": [
+        {"textRu": "Паспорт РФ (внутренний или заграничный)", "sources": [{"url": "https://rai-da.ru/article/psou-border", "type": "secondary"}, {"url": "https://nashaplaneta.net/blog/otdyh-v-abhazii-na-avtomobile-2026", "type": "secondary"}]},
+        {"textRu": "Водительское удостоверение и СТС; если водитель не собственник — доверенность с правом выезда", "sources": [{"url": "https://rai-da.ru/article/psou-border", "type": "secondary"}]}
+      ],
+      "rules": [
+        {"textRu": "Ограничений скорости в источниках нет; штрафы за превышение — 600–3 000 ₽", "sources": [{"url": "https://nashaplaneta.net/vopros-otvet/7222-kakie-shtrafy-v-abhazii-za-prevyshenie-skorosti-i-drugie-narusheniya-pdd", "type": "secondary"}]},
+        {"textRu": "Грузия считает въезд в Абхазию через Псоу незаконным пересечением своей границы — общеизвестно, отдельным источником не проверено. Абхазия — Грузия планируем только через Россию", "sources": []}
+      ]
+    },
+    "AM": {
+      "nameRu": "Армения",
+      "currency": "AMD",
+      "fuel": {},
+      "fuelSources": [
+        {"url": "https://www.dailyfuels.com/armenia/", "type": "secondary"},
+        {"url": "https://arka.am/en/news/economy/gasoline-prices-in-armenia-fell-by-1-5-in-october-while-diesel-fuel-prices-fell-by-0-6", "type": "primary"}
+      ],
+      "fuelNoteRu": "Абсолютные цены есть только у агрегатора с данными GlobalPetrolPrices (лицензия CC BY-NC-ND — для коммерческого продукта без договора непригодны); Armstat публикует только изменения в процентах — не учтено.",
+      "tolls": {"status": "none_found", "textRu": "Платных дорог не найдено.", "sources": []},
+      "fees": [
+        {
+          "key": "road",
+          "textRu": "Дорожный сбор для иностранных машин: 10 000 AMD за 15 дней или 20 000 AMD за месяц.",
+          "mandatory": true,
+          "currency": "AMD",
+          "variants": [{"amount": "10000", "days": 15}, {"amount": "20000", "days": 30}],
+          "sources": [{"url": "https://www.kdmid.ru/docs/armenia/information-about-the-country/", "type": "official"}]
+        },
+        {
+          "key": "eco",
+          "textRu": "Экологический сбор для легкового — 3 750 AMD; по другому источнику — 3 750–30 000 AMD за каждые 15 дней. Источники расходятся, сверить с КГД Армении (src.am).",
+          "mandatory": true,
+          "conflict": true,
+          "currency": "AMD",
+          "amount": "3750",
+          "sources": [{"url": "https://www.kdmid.ru/docs/armenia/information-about-the-country/", "type": "official"}, {"url": "https://www.golosarmenii.am/", "type": "primary"}]
+        },
+        {
+          "key": "insurance",
+          "textRu": "Армянское ОСАГО обязательно («Зелёная карта» не подходит): полис ≈ 4 000 AMD, штраф без полиса 10 000 AMD. Официальных тарифов (appa.am) не найдено.",
+          "mandatory": true,
+          "currency": "AMD",
+          "amount": "4000",
+          "sources": [{"url": "https://polis812.ru/blog/nuzhna-li-viza-v-armeniyu-dokumenty-i-pravila-vezda/", "type": "secondary"}]
+        }
+      ],
+      "documents": [
+        {"textRu": "Загранпаспорт: путь лежит через Грузию", "sources": [{"url": "https://visasam.ru/oformlenie/sng/peresechenie-granicy-gruzii-i-armenii.html", "type": "secondary"}, {"url": "https://docrocket.ru/articles/granica-rossiya-armeniya", "type": "secondary"}]},
+        {"textRu": "Нужны страховки на обе страны: грузинский TPL и армянское ОСАГО", "sources": [{"url": "https://polis812.ru/blog/nuzhna-li-viza-v-armeniyu-dokumenty-i-pravila-vezda/", "type": "secondary"}]}
+      ],
+      "rules": [
+        {"textRu": "Город — 60, за городом — 90, трасса — 110 км/ч", "sources": [{"url": "https://tonkosti.ru/Аренда_авто_в_Армении", "type": "secondary"}]}
+      ]
+    },
+    "AZ": {
+      "nameRu": "Азербайджан",
+      "currency": "AZN",
+      "closed": {
+        "untilLocal": "2027-01-02T06:00",
+        "tz": "Asia/Baku",
+        "until": "2027-01-02",
+        "messageRu": "Граница закрыта для легковых до 2 января 2027: сухопутные границы Азербайджана закрыты для легковых машин и пассажиров до 06:00 02.01.2027 (особый карантинный режим, постановление Кабмина опубликовано 17.09.2026). Не проверено.",
+        "noteRu": "Часовой пояс времени 06:00 в источнике не указан — считаем по бакинскому.",
+        "sources": [
+          {"url": "https://1news.az/news/20260917120845853-V-Azerbaidzhane-prodlen-osobyi-karantinnyi-rezhim", "type": "primary"},
+          {"url": "https://news.am/ru/news/1062673", "type": "primary"},
+          {"url": "https://www.inform.kz/ru/kovidniy-karantin-prodlili-v-azerbaydzhane-do-yanvarya-2027-goda-9f3d0e04", "type": "primary"}
+        ]
+      },
+      "fuel": {
+        "ai92": {"values": ["1.15"], "validFrom": "2026-01-01"},
+        "dt": {"values": ["1.10"], "validFrom": "2026-01-01"}
+      },
+      "fuelSources": [{"url": "https://api.report.az/en/energy/azerbaijan-raises-gasoline-price-by-5-gapiks-from-january-2026", "type": "primary"}],
+      "fuelNoteRu": "Регулируемые цены Тарифного совета с 01.01.2026; АИ-95 не регулируется, актуальной цены нет.",
+      "tolls": {"status": "unknown", "textRu": "Платная трасса Баку — Губа (M1); тарифы не найдены — не учтено.", "sources": [{"url": "https://operativmm.az/en/post/azerbaijan-sets-130-kmh-speed-limit-for-toll-roads/70324", "type": "primary"}]},
+      "fees": [],
+      "documents": [],
+      "rules": [
+        {"textRu": "За городом — 90, магистраль — 110 км/ч; иностранцам рекомендуют международное удостоверение", "sources": [{"url": "https://www.localrent.com/en/journal/azerbaijan/articles/traffic-rules", "type": "secondary"}]}
+      ]
+    },
+    "UZ": {
+      "nameRu": "Узбекистан",
+      "currency": "UZS",
+      "fuel": {
+        "ai92": {"values": ["13500"], "validFrom": "2026-08-14"},
+        "ai95": {"values": ["17000"], "validFrom": "2026-08-14"},
+        "dt": {"values": ["14500"], "validFrom": "2026-08-14"}
+      },
+      "fuelSources": [{"url": "https://www.goldenpages.uz/en/benzin-cena/", "type": "secondary"}],
+      "fuelNoteRu": "Цены одной сети в Ташкенте на 14.08.2026 (АИ-92 — импортный); официального прайса нет.",
+      "tolls": {
+        "status": "zero",
+        "textRu": "Действующих платных дорог нет: первые запланированы на 2027 год.",
+        "sources": [
+          {"url": "https://economist.kg/transport/2026/07/24/uzbekistan-platnaya-trassa-tashkent-samarkand-2-2-mlrd/", "type": "primary"},
+          {"url": "https://anhor.uz/news/way-12/", "type": "primary"}
+        ]
+      },
+      "fees": [
+        {
+          "key": "entry",
+          "textRu": "Пошлина за въезд легкового с иностранными номерами — 15 USD (на консульском портале МИД РФ, без даты; сверить с приложением № 10 к ЗРУ-1105).",
+          "mandatory": true,
+          "currency": "USD",
+          "amount": "15",
+          "sources": [{"url": "https://www.kdmid.ru/docs/uzbekistan/information-about-the-country/", "type": "official"}]
+        },
+        {
+          "key": "insurance",
+          "textRu": "Обязательное ОСГО для иностранных машин при въезде с 01.07.2025 (ПП-122): без полиса таможню не пройти. Тариф для временно ввезённых машин — 320 000 сум (≈ январь 2026).",
+          "mandatory": true,
+          "currency": "UZS",
+          "amount": "320000",
+          "sources": [{"url": "https://avtoelon.uz/yangiliklar/articles/avtostrahovanie-v-uzbekistane-stalo-doroze-naskol-ko/", "type": "primary"}],
+          "ruleSources": [{"url": "https://www.autostrada.uz/osago-uzbekistan/", "type": "primary"}]
+        },
+        {
+          "key": "tint",
+          "textRu": "Сбор за тонировку передних боковых стёкол — 15 USD, только если они тонированы.",
+          "mandatory": false,
+          "currency": "USD",
+          "amount": "15",
+          "sources": [{"url": "https://www.gazeta.uz/ru/2026/03/05/tinting/", "type": "primary"}]
+        }
+      ],
+      "documents": [
+        {"textRu": "Обязательство о вывозе машины оформляется на таможне", "sources": [{"url": "https://atb.uz/2022/10/01/na-kakoj-srok-inostrantsy-mogut-vvozit-svoj-avtomobil-v-uzbekistan/", "type": "primary"}]}
+      ],
+      "rules": [
+        {"textRu": "Скорость за городом — 90 или 100 км/ч (источники расходятся); на ряде участков Ташкентской области — 80", "sources": [{"url": "https://ad.kun.uz/en/news/2025/05/08/speed-limit-reduced-to-80-kmh-on-37-risk-prone-road-sections-in-tashkent-region", "type": "primary"}]}
+      ]
+    },
+    "KG": {
+      "nameRu": "Киргизия",
+      "currency": "KGS",
+      "fuel": {
+        "ai92": {"values": ["88.4"], "validFrom": "2026-10-26", "noteRu": "средняя по стране"},
+        "ai95": {"values": ["84.4"], "validFrom": "2026-05-14", "noteRu": "Бишкек; с 07.07.2026 АИ-95 вне госрегулирования — цена могла устареть"},
+        "dt": {"values": ["100.6"], "validFrom": "2026-10-07", "noteRu": "по стране"}
+      },
+      "fuelSources": [
+        {"url": "https://economist.kg/ekonomika/2026/10/26/ceny-produktov-topliva-26-10-2026/", "type": "primary"},
+        {"url": "https://economist.kg/ekonomika/2026/10/07/tseny-produkty-toplivo-kyrgyzstan/", "type": "primary"},
+        {"url": "https://economist.kg/transport/2026/05/14/zapasov-gsm-v-kyrgyzstane-khvatit-na-poltora-mesiatsa-obzor-rynka-ot-gosantimonopolii/", "type": "primary"}
+      ],
+      "fuelNoteRu": "Мониторинг Госантимонополии КР по сообщениям СМИ.",
+      "tolls": {
+        "status": "unknown",
+        "textRu": "Проезд тоннелей на трассах Бишкек — Ош и Север — Юг: для иностранных номеров — 200 сом за легковой (ПКМ № 134 от 25.02.2026). Неясно, за каждый тоннель или за проезд, и проходит ли маршрут через них — не учтено.",
+        "sources": [
+          {"url": "https://economist.kg/transport/2026/03/10/utvierzhdieny-tarify-za-proiezd-chieriez-tonnieli-skolko-budut-platit-voditieli-na-trassakh-bishkiek-osh-i-sievier-iugh/", "type": "primary"},
+          {"url": "https://mts.kg/en/politika/23266-kabmin-utverdil-platnyj-proezd-cherez-tonneli-na-dvuh-trassah-kyrgyzstana-prajs.html", "type": "primary"}
+        ]
+      },
+      "fees": [
+        {
+          "key": "eco",
+          "textRu": "Экологический сбор при въезде иностранных машин отменён в 2019 году; действующих сборов не найдено.",
+          "mandatory": false,
+          "sources": [{"url": "https://bizexpert.kg/kyrgyzstan-otmenil-ekologicheskie-sbory-dlya-inostrannyx-avtomashin/", "type": "primary"}]
+        },
+        {
+          "key": "insurance",
+          "textRu": "ОСАГО КР обязательно с 01.07.2025; порядок для иностранных машин на границе не найден.",
+          "mandatory": true,
+          "sources": [{"url": "https://economist.kg/transport/2025/05/15/osago-staniet-obiazatielnym-v-kr-s-1-iiulia-chto-budiet-iesli-nie-oformit-polis/", "type": "primary"}]
+        }
+      ],
+      "documents": [
+        {"textRu": "Правила для машин с иностранной регистрацией — ПКМ № 688 от 12.10.2026; срок пребывания машины в выдаче не виден", "sources": [{"url": "https://economist.kg/transport/2026/10/13/avto-inostrannye-nomera-pravila/", "type": "primary"}]}
+      ],
+      "rules": [
+        {"textRu": "Ограничения скорости и признание российских прав — нет источника", "sources": []}
+      ]
+    },
+    "TR": {
+      "nameRu": "Турция",
+      "currency": "TRY",
+      "fuel": {
+        "ai95": {"values": ["76.10", "77.30"], "validFrom": "2026-10-26"},
+        "dt": {"values": ["96.60", "97.90"], "validFrom": "2026-10-26"}
+      },
+      "fuelSources": [{"url": "https://tr.motor1.com/news/813195/akaryakit-fiyatlari-26-ekim-2026/", "type": "secondary"}],
+      "fuelNoteRu": "Цены Petrol Ofisi в Стамбуле и Анкаре на 23–26.10.2026 (вторичный источник; бюллетень EPDK не открывался). Считаем по верхней. Benzin считаем как АИ-95 — допущение, не проверено; цены АИ-92 нет.",
+      "tolls": {
+        "status": "unknown",
+        "textRu": "Платные автомагистрали и мосты — только электронно (HGS); для иностранных машин HGS обязателен (Регламент, Resmî Gazete 29.07.2026). Без штрафа — в течение 15 дней; с долгом выезд из страны запрещён. Тарифы KGM не открывались, проходит ли маршрут по платным участкам — неизвестно: не учтено.",
+        "sources": [
+          {"url": "https://www.dunya.com/gundem/yabanci-plakali-araclar-icin-yeni-donem-gecis-kurallari-degisti-haberi-834074", "type": "primary"},
+          {"url": "https://www.haberturk.com/ekonomi/yabanci-plakali-araclara-yonelik-yeni-duzenleme-3901807", "type": "primary"},
+          {"url": "https://www.takvim.com.tr/guncel/2026/07/28/resmi-gazetede-yayimlandi-yabanci-plakali-araclara-hgs-duzenlemesi", "type": "primary"}
+        ]
+      },
+      "fees": [
+        {
+          "key": "insurance",
+          "textRu": "Без действующей в Турции «Зелёной карты» на границе оформляется обязательная страховка ответственности (российские «Зелёные карты» не оформляются с 2023 года). Цена не найдена.",
+          "mandatory": true,
+          "sources": [{"url": "https://www.lires.com.tr/post/yabanc%C4%B1-plakal%C4%B1-ara%C3%A7-rehberi-2026", "type": "secondary"}]
+        }
+      ],
+      "documents": [
+        {"textRu": "Паром Сочи — Трабзон для машин не работает: путь только через Грузию", "sources": [{"url": "https://www.bfm.ru/news/588168", "type": "primary"}, {"url": "https://profile.ru/news/abroad/iz-za-opasnosti-plavaniya-v-chjornom-more-perenesena-povtornaya-popytka-zapustit-parom-trabzon-sochi-1789094/", "type": "primary"}]}
+      ],
+      "rules": [
+        {"textRu": "Город — 50; за городом — 90 (двухполосная) и 110 (раздельная); автомагистраль — 120 по Регламенту, по знакам 130–140", "sources": [{"url": "https://www.allianz.com.tr/tr_TR/seninle-guzel/otoban-ve-otoyol-hiz-sinirlari.html", "type": "secondary"}, {"url": "https://www.hesapkurdu.com/trafik-sigortasi/rehber/hiz-siniri-cezalari", "type": "secondary"}]},
+        {"textRu": "Российские права, по вторичному источнику, действуют первые 6 месяцев — официального подтверждения нет", "sources": []}
+      ]
+    }
+  }
+}

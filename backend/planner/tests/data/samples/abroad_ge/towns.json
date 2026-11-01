@@ -1,0 +1,58 @@
+[
+ {
+  "qid": "Q900201",
+  "name": "Тестовый город",
+  "lat": 41.7,
+  "lon": 44.8,
+  "population": 1000000,
+  "regionIso": "GE-TB",
+  "regionName": "Тестовый регион",
+  "image": null,
+  "nameLang": "ru",
+  "countries": [
+   "Q230"
+  ]
+ },
+ {
+  "qid": "Q900202",
+  "name": "Testkalaki",
+  "lat": 42.27,
+  "lon": 42.7,
+  "population": 50000,
+  "regionIso": "GE-IM",
+  "regionName": "Test Region",
+  "image": null,
+  "nameLang": "en",
+  "countries": [
+   "Q230"
+  ]
+ },
+ {
+  "qid": "Q900203",
+  "name": "Sopeli",
+  "lat": 42.0,
+  "lon": 43.0,
+  "population": 500,
+  "regionIso": "GE-IM",
+  "regionName": "Test Region",
+  "image": null,
+  "nameLang": "en",
+  "countries": [
+   "Q230"
+  ]
+ },
+ {
+  "qid": "Q900204",
+  "name": "Без региона",
+  "lat": 41.5,
+  "lon": 44.0,
+  "population": 20000,
+  "regionIso": null,
+  "regionName": null,
+  "image": null,
+  "nameLang": "ru",
+  "countries": [
+   "Q230"
+  ]
+ }
+]

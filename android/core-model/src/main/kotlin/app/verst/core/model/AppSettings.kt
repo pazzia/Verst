@@ -11,6 +11,10 @@ enum class AppLanguage(val tag: String) { RU("ru-RU"), EN("en-US") }
 @Serializable
 enum class AppTheme { NIGHT, DAY, SYSTEM }
 
+/** CEO 01.11: the look of the app; CAMPER is «Кемпер-гид» (paper, Craft components), CLASSIC the original dashboard. */
+@Serializable
+enum class AppDesign { CAMPER, CLASSIC }
+
 /** Where saved trips live. CLOUD needs accounts and the server; it is shown, not selectable yet. */
 @Serializable
 enum class TripStorage { DEVICE, FOLDER, CLOUD }
@@ -26,9 +30,22 @@ data class AppSettings(
     val folderUri: String? = null,
     /** The folder's display name, for the settings row. */
     val folderName: String? = null,
+    /** SRV-01: build the trip on the server (`POST /v1/trips/plan`) when online; the phone engine otherwise. */
+    val planOnServer: Boolean = false,
+    /** Security review 28.10 (В-1): the user read what goes to the server and agreed; asked once, before the switch. */
+    val serverConsent: Boolean = false,
+    /** The car (traveller К4): litres per 100 km (engine range 4–20), fuel `ai92` / `ai95` / `dt`, tank 20–150 l. */
+    val consumption: Double = Car.DEFAULT_CONSUMPTION,
+    val fuelType: String = Car.DEFAULT_FUEL,
+    val tankL: Int = Car.DEFAULT_TANK,
+    val avoidTolls: Boolean = false,
+    /** CEO 29.10 «Навигация»: which maps app gets the day's route (automatic = by the country the phone is in). */
+    val mapsApp: MapsChoice = MapsChoice.AUTO,
+    /** CEO 01.11: both designs stay; the camper one is the default. The classic theme applies to CLASSIC only. */
+    val design: AppDesign = AppDesign.CAMPER,
 ) {
     /** A setting that only takes effect after the app restarts (the palette is read once per process). */
-    fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme
+    fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme || design != old.design
 
     companion object {
         fun decode(text: String?): AppSettings = try {
@@ -43,9 +60,27 @@ data class AppSettings(
     /** An unknown currency (an older build's list) falls back to roubles; a folder without a URI to the device. */
     fun sanitized(): AppSettings = copy(
         currency = currency.takeIf { it in Money.SUPPORTED } ?: Money.RUB,
+        consumption = consumption.coerceIn(Car.CONSUMPTION_MIN, Car.CONSUMPTION_MAX),
+        fuelType = fuelType.takeIf { it in Car.FUELS } ?: Car.DEFAULT_FUEL,
+        tankL = tankL.coerceIn(Car.TANK_MIN, Car.TANK_MAX),
+        planOnServer = planOnServer && serverConsent,
         storage = if (storage == TripStorage.FOLDER && folderUri == null) TripStorage.DEVICE
         else if (storage == TripStorage.CLOUD) TripStorage.DEVICE else storage,
     )
+}
+
+/** The car of the cost (engine `Vehicle`: consumption 4–20 l/100 km, tank 20–150 l). */
+object Car {
+    const val DEFAULT_CONSUMPTION = 8.0
+    const val DEFAULT_FUEL = "ai95"
+    const val DEFAULT_TANK = 50
+    const val CONSUMPTION_MIN = 4.0
+    const val CONSUMPTION_MAX = 20.0
+    const val CONSUMPTION_STEP = 0.5
+    const val TANK_MIN = 20
+    const val TANK_MAX = 150
+    const val TANK_STEP = 5
+    val FUELS = listOf("ai92", "ai95", "dt")
 }
 
 /** Central Bank of Russia rates, fetched at build time (tools/ci/fetch_rates.py → assets/rates.json). */

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GENERATED from design/icons/ui-chevron-right.svg by design/tools/gen_vectors.py. Do not edit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF141416"
+        android:fillType="nonZero"
+        android:pathData="M9.99 4.01L16.99 11.01L15.01 12.99L8.01 5.99ZM16.99 12.99L9.99 19.99L8.01 18.01L15.01 11.01ZM10.4 5A1.4 1.4 0 1 1 7.6 5A1.4 1.4 0 1 1 10.4 5ZM17.4 12A1.4 1.4 0 1 1 14.6 12A1.4 1.4 0 1 1 17.4 12ZM10.4 19A1.4 1.4 0 1 1 7.6 19A1.4 1.4 0 1 1 10.4 19Z" />
+</vector>

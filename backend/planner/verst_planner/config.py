@@ -41,6 +41,10 @@ class CorridorKm:
     rest_motorway: float
     town: float
     lodging_from_town: float
+    town_big: float
+    """Acceptance 2026-10-28 (K2): the overnight-town search radius for an anchor town (population ≥
+    `overnight_score.big_town_population`) when `overnight_score.anchors` is on: Нижний Новгород lies 30 km
+    off the M-12 and Чебоксары 33 km, outside the plain `town` radius."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,6 +81,16 @@ class OvernightScoreCfg:
     h_cap: int
     h_no_parking_weight: float
     family_room_min_people: int
+    town_interest: MoodInts = MoodInts(1, 1, 1, 1)
+    """CEO 2026-10-29: 1 = the town terms (`w_q` quality, `w_e` evening) count for this mood. «Только доехать»
+    (0) does not stop earlier for a more interesting town or its evening: hotels and the day's km decide."""
+    anchors: int = 0
+    """Acceptance 2026-10-28 (K2, V1): «anchor towns» (1 = on: the open-data world). A town of at least
+    `big_town_population` is searched within `corridor_km.town_big`, may end a day anywhere from the window's
+    start up to `split.hard_cap x dailyKm`, and scores `w_big_town` more — so the M-12 sleeps in
+    Нижний Новгород, not in Кстово. Off for the fixture worlds (G01-G13 keep their bytes)."""
+    big_town_population: int = 200_000
+    w_big_town: float = 6.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,23 +119,75 @@ class RestCfg:
 
 
 @dataclass(frozen=True, slots=True)
+class BorderCfg:
+    """CEO 29.10 (trips abroad): the time planned at a border checkpoint. No source gives a wait time for the
+    crossings of wave 1, so this is a planning buffer — the stop says so — not a fact."""
+
+    buffer_min: int
+
+
+@dataclass(frozen=True, slots=True)
 class DwellCfg:
     coffee: int
     fuel: int
     fuel_coffee: int
-    rest: int
     lunch: int
     sight_default: int
     via: int
 
 
 @dataclass(frozen=True, slots=True)
+class FunSightsCfg:
+    """CEO 2026-10-29 «Как едем»: «Весело и познавательно» admits more stage-9 sights than the other moods.
+
+    In the open-data world a sight of quality ≥ `min_quality` may take a detour of up to `detour_min` (the
+    other moods: the tiered 45 / 25 min / 10 km budget), `long_per_day` such long detours a day (others: 1),
+    with a stage-9 score of at least `min_score` (others: `sights.min_score`); the kinds the crew's «Весело»
+    copy promises (`rest.FUN_PREFER`) rank `kind_bonus` higher on the 0..1 quality scale."""
+
+    detour_min: int
+    min_quality: float
+    min_score: float
+    long_per_day: int
+    kind_bonus: float
+
+
+@dataclass(frozen=True, slots=True)
 class SightsCfg:
     max_per_day: MoodInts
     min_score: float
+    fun: FunSightsCfg
     diversity: int = 0
     """ADR-0015 §2 diversity rules (1 = on): on for the open-data world `russia_v1`, off for the curated
     fixture worlds (their sights were picked by hand; G01-G13 keep their bytes)."""
+    home_zone_km: float = 30.0
+    """Acceptance 2026-10-28 (K1): no added sight this close to the trip's start (home) — and, for open-data
+    sights, to the day's start or overnight town — unless it is near the destination or a via."""
+    short_dwell_max_min: int = 15
+    """K1: an open-data sight of at most this dwell (a monument, a theatre building, a square) is a
+    «15-minute» stop: worth its detour only at `short_min_quality`."""
+    short_min_quality: float = 0.70
+    kid_bonus: float = 0.15
+    """K1 (d): with a child, a zoo, playground, interactive museum or park ranks this much higher (open data
+    quality scale 0..1) — the kinds the «Весело и познавательно» copy promises."""
+
+
+@dataclass(frozen=True, slots=True)
+class TownVisitCfg:
+    """Acceptance 2026-10-28 (V1): an evening (or a morning) in the overnight town.
+
+    A day that reaches its overnight town before `arrive_before` gets up to `evening_max` of the town's own
+    sights (within `radius_km` of its centre) before the hotel; a later arrival gets up to `morning_max` the
+    next morning. `on` = 1 in the open-data world only (the fixture worlds keep their bytes)."""
+
+    on: int
+    arrive_before: time
+    evening_late_min: MoodInts
+    """CEO 2026-10-29: minutes after `arrive_before` a mood may still start its evening («Весело»: 90)."""
+    evening_max: MoodInts
+    """CEO 2026-10-29: per mood — «Только доехать» and «Спокойно» have no evening sightseeing run."""
+    morning_max: MoodInts
+    radius_km: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -158,14 +224,18 @@ class PlannerConfig:
     overnight_eta_allowance_min: MoodInts
     fuel: FuelCfg
     rest_interval_min: MoodInts
+    rest_dwell_min: MoodInts
+    """CEO 2026-10-29: the dwell of a rest-area break per mood («Спокойно»: long, «Только доехать»: short)."""
     rest: RestCfg
     dwell_min: DwellCfg
     lunch_window: tuple[time, time]
     lunch_sweet_spot: tuple[time, time]
     sights: SightsCfg
+    town_visit: TownVisitCfg
     alternatives: AlternativesCfg
     cost: CostCfg
     toll_night: tuple[time, time]
+    border: BorderCfg
 
     @classmethod
     def default(cls) -> PlannerConfig:

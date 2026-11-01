@@ -13,6 +13,7 @@ import json
 import math
 import sys
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,10 @@ PER_TOWN_BUDGET_S = 45 * 60
 MIN_POPULATION = 100_000
 TOURIST_TOP = 60
 RADIUS_M = ((1_000_000, 9000), (300_000, 6000), (0, 4000))
+# CEO 2026-10-29: every catalogue town gets its bars and food places from the extract (a walk can start in
+# Фрязино, 60 000 people): a smaller radius for small towns, so a village café is not a town's
+MIN_TOWN_POPULATION = 800  # = build_catalogue.MIN_TOWN_POPULATION
+RADIUS_ALL_M = ((1_000_000, 9000), (300_000, 6000), (20_000, 4000), (0, 2500))
 
 QUERY = """[out:json][timeout:90];
 (
@@ -59,6 +64,16 @@ def towns_to_query(towns: list[dict[str, Any]], pois: list[dict[str, Any]]) -> l
 
 def radius_m(t: dict[str, Any]) -> int:
     return next(r for threshold, r in RADIUS_M if (t.get("population") or 0) >= threshold)
+
+
+def all_towns(towns: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Every town of at least MIN_TOWN_POPULATION people, biggest first (the extract path, CEO 2026-10-29)."""
+    pick = [t for t in towns if (t.get("population") or 0) >= MIN_TOWN_POPULATION]
+    return sorted(pick, key=lambda t: (-(t.get("population") or 0), t["qid"]))
+
+
+def radius_all_m(t: dict[str, Any]) -> int:
+    return next(r for threshold, r in RADIUS_ALL_M if (t.get("population") or 0) >= threshold)
 
 
 def bars_from_elements(elements: list[dict[str, Any]], town_qid: str) -> list[dict[str, Any]]:
@@ -95,8 +110,12 @@ def _km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 12742.0 * math.asin(min(1.0, math.sqrt(a)))
 
 
-def assign(elements: list[dict[str, Any]], towns: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Country-wide elements → bars of the nearest picked town whose radius covers them (others dropped)."""
+def assign(
+    elements: list[dict[str, Any]],
+    towns: list[dict[str, Any]],
+    radius: Callable[[dict[str, Any]], int] = radius_m,
+) -> list[dict[str, Any]]:
+    """Country-wide elements → rows of the nearest picked town whose radius covers them (others dropped)."""
     cell = 0.2  # degrees; the largest radius is 9 km < 0.2° of latitude
     grid: dict[tuple[int, int], list[dict[str, Any]]] = {}
     for t in towns:
@@ -109,7 +128,7 @@ def assign(elements: list[dict[str, Any]], towns: list[dict[str, Any]]) -> list[
             for dj in (-1, 0, 1):
                 for t in grid.get((ci + di, cj + dj), ()):
                     d = _km(b["lat"], b["lon"], t["lat"], t["lon"])
-                    if d * 1000 <= radius_m(t) and (best is None or (d, t["qid"]) < best):
+                    if d * 1000 <= radius(t) and (best is None or (d, t["qid"]) < best):
                         best = (d, t["qid"])
         if best is not None:
             out.append({**b, "townQid": best[1]})

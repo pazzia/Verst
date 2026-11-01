@@ -5,6 +5,7 @@ from verst_planner.explain.templates import RESOURCES, TEMPLATE_KEYS, ReasonTemp
 
 # Documented params per key (A§8.1)
 DOC_PARAMS: dict[str, dict[str, str | int | float]] = {
+    "border.checkpoint": {"buffer": "два часа"},
     "overnight.shift.hotels": {
         "shift": "Не в Ростове, а на 55 км дальше",
         "crew_suffix": ", куда пускают с собакой",
@@ -12,6 +13,9 @@ DOC_PARAMS: dict[str, dict[str, str | int | float]] = {
     "overnight.shift.quality": {"shift": "На 30 км раньше вашего предела"},
     "overnight.shift.evening": {"shift": "На 30 км раньше вашего предела"},
     "overnight.cap_ok": {"daily_km": 300},
+    "overnight.cap_raised": {"daily_km": 350},
+    "town.evening": {"dwell": "час"},
+    "town.morning": {"dwell": "полчаса"},
     "overnight.shift.later": {"other_prep": "Ростове", "dkm": 55},
     "overnight.shift.earlier": {"other_prep": "Ростове", "dkm": 20},
     "overnight.shift.limit": {"dkm": 30},
@@ -36,6 +40,8 @@ DOC_PARAMS: dict[str, dict[str, str | int | float]] = {
     "warning.FUEL_GAP": {"km": 300},
     "warning.DAY_OVER_BUDGET": {"day": 2},
     "warning.STOP_CLOSED": {"name": "Ясная Поляна"},
+    "warning.TIME_ZONE": {"day": 1},
+    "tz.local": {"time": "11:35", "shift": "+1"},
 }
 
 EMPTY_ALLOWED = {"crew_suffix.none"}

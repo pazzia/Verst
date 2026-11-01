@@ -1,6 +1,7 @@
 package app.verst.feature.exit
 
 import androidx.compose.animation.core.Animatable
+import app.verst.core.ui.theme.Palette
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -114,6 +115,7 @@ private val MinSceneTop = 240.dp
 /** 5.7 «Съезд к ночёвке»: night scene with the exit sign, the night's hotels, booking through the mock partner. */
 @Composable
 fun ExitScreen(ui: ExitUi, a: ExitActions) {
+    if (Palette.camper) return ExitScreenCamper(ui = ui, a = a)
     ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val dashTop = maxOf(maxHeight - DashH, MinSceneTop)

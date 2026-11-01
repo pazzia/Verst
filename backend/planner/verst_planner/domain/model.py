@@ -11,7 +11,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 
 from verst_planner.domain.enums import (
     CostKey,
@@ -194,6 +194,9 @@ class Place:
     """ADR-0015 §2 quality score 0..1 of an open-data sight; None = curated (no threshold)."""
     heritage: bool = False
     """An open-data sight with a heritage designation (Wikidata P1435)."""
+    card_level: int | None = None
+    """ADR-0015 §3 card level of an open-data sight: 4 photo + text + hours, 3 photo + text, 2 photo or
+    text, 1 a bare name; None = curated (always a full card)."""
     tags_no: frozenset[Tag] = frozenset()
     """Tags confirmed absent (DB `core.place_tag.state = 'no'`, ADR-0019 E-6)."""
     fuel_kinds: frozenset[FuelType] = frozenset()
@@ -252,6 +255,9 @@ class TollSegment:
     as_of: date
     tariff_weekend_rub: Decimal | None = None
     """[ENG-02] Day tariff Friday to Sunday (Автодор category 1); None = the weekday tariff every day."""
+    approx: bool = False
+    """Acceptance 2026-10-28 (QA B-1): a share of a whole-road price on an approximate route (the road model
+    knows no road refs), shown as «{road} (примерно)» in the waybill."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -511,6 +517,9 @@ class CostUnits:
     """Mood is already «Только доехать» (then the `just_drive` overspend hint is not offered)."""
     parking: tuple[ParkingUnit, ...] = ()
     """ADR-0015 §4 per-stop parking; empty = no parking data (no «Парковки» line, fixture worlds)."""
+    tolls_unknown: bool = False
+    """Acceptance 2026-10-28 (QA B-1): the route is approximate and follows no known toll corridor, so the
+    tolls line says «не учтены» instead of «платных дорог нет». False with `avoidTolls` (the free roads)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -591,6 +600,35 @@ class ScheduledStop:
     unknown_ru: str | None = None
     """ADR-0019: one line for the row («Часы не известны — уточните»); None for open-data places, whose
     open-data marker already says «уточняйте», and for the ticket, which the cost texts name."""
+    local_tz: str | None = None
+    """Acceptance 2026-10-28 (QA B-4): the stop's own time zone when it differs from `tz`. A day's times are
+    all on the clock of the day's start (`tz` = the day's zone), so they never go backwards at a zone
+    border; the local time is said in `local_time_ru` and, on the day's first stop in the new zone, in the
+    reason («По местному времени — 11:35 (+1 ч).»)."""
+    local_time_ru: str | None = None
+    border: Mapping[str, Any] | None = None
+    """CEO 29.10 (trips abroad, server only): a `BORDER` stop's crossing — documents, insurance, fees, the
+    wait (known or not), each with its sources and the «не проверено» flag (JSON `border`, else absent)."""
+
+
+@dataclass(frozen=True, slots=True)
+class BorderPoint:
+    """CEO 29.10: a state border crossing inserted between two waypoints of different countries.
+
+    `point` is the crossing's own coordinates when a source gives them, else (`coords_approx`) the nearest
+    catalogue town on the `from_country` side. `marker`: a border without a checkpoint (Russia — Belarus),
+    a «граница» row without a dwell."""
+
+    id: str
+    name_ru: str
+    point: LatLon
+    from_country: str
+    to_country: str
+    marker: bool = False
+    coords_approx: bool = True
+    town_id: str | None = None
+    coords_note_ru: str = ""
+    """Where the point comes from when it is approximate («ближайший город каталога: Владикавказ»)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -756,6 +794,10 @@ class FitKnobs:
     family_rooms: bool = False
     food_economy: bool = False
     sights_free: bool = False
+    norm_from_km: int | None = None
+    """`fewer_nights` (acceptance 2026-10-28, traveller V2): the user's own daily km when the lever planned
+    this run with a raised norm, so the overnight reasons say the norm was raised instead of «Ваши N км в
+    день не превышены» with the raised N. None = the norm is the user's."""
 
     @property
     def any(self) -> bool:
@@ -766,6 +808,8 @@ class FitKnobs:
 class BudgetLever:
     code: str
     saved_rub: int
+    daily_km: int | None = None
+    """`fewer_nights`: the raised daily km the fitted trip is planned with (V2); None for other levers."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -798,6 +842,10 @@ class TripPlan:
     """The route is synthetic (ADR-0012 §4): distances and times are estimates («≈»)."""
     budget_fit: BudgetFit | None = None
     """ADR-0011: set when the first plan exceeded the budget and the fitter changed the trip."""
+    abroad: Mapping[str, Any] | None = None
+    """CEO 29.10 (server only): the part of the trip outside Russia — km, fuel and fees in the local currency
+    (dated, sourced, «не проверено»), what is unknown, and whether the rouble total is incomplete. JSON
+    `abroad`, absent on a trip inside Russia (the golden snapshots keep their bytes)."""
 
 
 class _Unset:

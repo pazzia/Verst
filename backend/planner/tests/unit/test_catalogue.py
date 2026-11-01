@@ -62,6 +62,8 @@ class FormatTest(unittest.TestCase):
         self.assertTrue(all(t.region in c.regions for t in c.towns))
         self.assertTrue(all(p.town in c.town_by_id for p in c.pois))
         self.assertTrue(all(b.kind in cat.BAR_KINDS for b in c.bars))
+        self.assertTrue(all(f.kind in cat.FOOD_KINDS and f.town in c.town_by_id for f in c.food))
+        self.assertEqual(c.info()["food"], len(c.food))
 
     def test_credits_are_short_names(self) -> None:
         """Release S3: every shipped photo credit is a short name: no sentence, URL, e-mail or licence."""
@@ -237,8 +239,13 @@ class BuilderTest(unittest.TestCase):
     def test_deterministic_and_loadable(self) -> None:
         again = self.b.build(SAMPLES, "sample", "2026-10-25")
         self.assertEqual(json.dumps(again, ensure_ascii=False), json.dumps(self.docs, ensure_ascii=False))
-        c = cat.from_docs(self.docs["meta"], self.docs["towns"], self.docs["pois"], self.docs["bars"])
+        c = cat.from_docs(
+            self.docs["meta"], self.docs["towns"], self.docs["pois"], self.docs["bars"], self.docs["food"]
+        )
         self.assertEqual(c.version, "sample")
+        self.assertEqual(len(c.food), self.docs["food"]["n"])
+        old = cat.from_docs(self.docs["meta"], self.docs["towns"], self.docs["pois"], self.docs["bars"])
+        self.assertEqual(old.food, [])  # a catalogue built before the food data: no food, «no data yet»
         with tempfile.TemporaryDirectory() as tmp:
             sizes = self.b.write(self.docs, Path(tmp))
             self.assertEqual(set(sizes), set(cat.FILES.values()))
@@ -306,6 +313,88 @@ class BuilderTest(unittest.TestCase):
         self.assertEqual(kinds["Паб (пример) «Старый мост»"], "pub")
         self.assertEqual(kinds["Бар (пример) «Угол»"], "bar")
         self.assertEqual(kinds["Рюмочная (пример) на Советской"], "ryumochnaya")
+
+    def test_bar_kinds_by_name_and_tags(self) -> None:
+        """CEO 2026-10-29: «По рюмочным» = strong spirits and shots, «Пивной» = beer places, by a name word
+        beginning or the OSM tags; anything else is a generic bar."""
+        k = self.b.bar_kind
+        bar = {"amenity": "bar"}
+        for name, tags, kind in (
+            ("Рюмка", bar, "ryumochnaya"),
+            ("Советская рюмочная", bar, "ryumochnaya"),
+            ("Наливайка Под Мостом", bar, "ryumochnaya"),
+            ("Настоечная (812)", {"amenity": "pub"}, "ryumochnaya"),  # the name wins over amenity=pub
+            ("Стопка", bar, "ryumochnaya"),
+            ("Икра и водки", bar, "ryumochnaya"),
+            ("Угол", {"amenity": "bar", "bar": "shot_bar"}, "ryumochnaya"),
+            ("Brewmen taproom", bar, "craft"),
+            ("Крафтовый бар", bar, "craft"),
+            ("Tap 22", bar, "craft"),
+            ("Угол", {"amenity": "bar", "microbrewery": "yes"}, "craft"),
+            ("Угол", {"amenity": "bar", "craft_beer": "yes"}, "craft"),
+            ("Угол", {"craft": "brewery"}, "craft"),
+            ("Beerhead", bar, "pub"),
+            ("BeerHere", bar, "pub"),
+            ("Пивная № 1", bar, "pub"),
+            ("Эль и Вино", bar, "pub"),
+            ("Tower Pub", bar, "pub"),
+            ("Культура", {"amenity": "bar", "brewery": "various"}, "pub"),  # the beers on tap
+            ("Угол", {"amenity": "bar", "drink:beer": "yes"}, "pub"),
+            ("Ирландец", {"amenity": "pub"}, "pub"),
+            ("Шотландский паб", bar, "pub"),  # «шот» is not a shot bar here
+            ("Lovecraft", bar, "bar"),  # «craft» does not begin a word
+            ("Пабло", bar, "bar"),
+            ("Белый налив", bar, "bar"),
+            ("Угол", {"amenity": "bar", "brewery": "no", "drink:beer": "served"}, "bar"),
+            ("Mixo", bar, "bar"),
+        ):
+            with self.subTest(name=name, tags=tags):
+                self.assertEqual(k(name, tags), kind)
+
+    def test_caps_grow_with_the_town(self) -> None:
+        b = self.b
+        self.assertEqual((b.bar_cap(5_652_922), b.bar_cap(13_274_285)), (b.BAR_CAP_MAX, b.BAR_CAP_MAX))
+        self.assertEqual(b.bar_cap(60_000), b.BAR_CAP_MIN)
+        self.assertGreater(b.bar_cap(5_652_922), 60)
+        self.assertEqual(b.food_cap(60_000), 24)  # Фрязино
+        self.assertEqual(b.food_cap(900), b.FOOD_CAP_MIN)
+        self.assertEqual(b.food_cap(13_274_285), b.FOOD_CAP_MAX)
+        self.assertEqual(b.cuisine({"cuisine": "Russian; georgian;russian"}), "russian;georgian")
+        self.assertIsNone(b.cuisine({}))
+        self.assertLessEqual(len(b.cuisine({"cuisine": ";".join(["x" * 15] * 5)}) or ""), b.CUISINE_MAX)
+
+    def test_food_filters(self) -> None:
+        """CEO 2026-10-29: named OSM restaurants, cafés, fast food of a catalogue town; deny-listed and
+        unnamed places dropped, unparseable hours dropped, `cuisine` kept; over the cap chain fast food
+        goes first, then other chains."""
+        food = {f["name"]: f for f in self.table("food", cat.FOOD_COLS)}
+        kinds = {n: cat.FOOD_KINDS[f["kind"]] for n, f in food.items()}
+        self.assertEqual(kinds["Ресторан (пример) «Волжский»"], "restaurant")
+        self.assertEqual(kinds["Кафе (пример) «Пирожковая»"], "cafe")
+        self.assertEqual(kinds["Чебуречная (пример)"], "fast_food")
+        self.assertEqual(food["Ресторан (пример) «Волжский»"]["cuisine"], "russian;regional")
+        self.assertEqual(food["Ресторан (пример) «Волжский»"]["hours"], "Mo-Su 12:00-23:00")
+        self.assertNotIn("Кафе Лукойл", food)  # deny-list
+        self.assertNotIn("", food)  # unnamed
+        self.assertNotIn("Ресторан (пример) без города", food)  # not a catalogue town
+        self.assertNotIn("Бар не еда (пример)", food)  # not a food amenity
+        self.assertIn("Сетевой фастфуд (пример)", food)  # a chain stays while the town is under its cap
+        self.assertEqual(self.docs["meta"]["foodKinds"], list(cat.FOOD_KINDS))
+        towns = cat.decode_table(self.docs["towns"], cat.TOWN_COLS, "towns")
+        yar = next(i for i, t in enumerate(towns) if t["name"] == "Ярославль")
+        raw = json.loads((SAMPLES / "food.json").read_text("utf-8"))
+        town_pos = {t["id"]: i for i, t in enumerate(towns)}
+        old = self.b.FOOD_CAP_MIN
+        self.b.FOOD_CAP_MIN = 4  # population 0 below → a cap of 4 places per town
+        try:
+            pops = [{"population": 0}] * len(towns)
+            capped = self.b.food_rows(raw, town_pos, pops, self.b.denylist(), None)
+        finally:
+            self.b.FOOD_CAP_MIN = old
+        names = [r["name"] for r in capped if r["town"] == yar]
+        self.assertEqual(len(names), 4)
+        self.assertNotIn("Сетевой фастфуд (пример)", names)  # chain fast food goes first
+        self.assertNotIn("Сетевая кофейня (пример)", names)  # then the other chains
 
     def test_links_are_one_to_one(self) -> None:
         links = self.docs["meta"]["links"]

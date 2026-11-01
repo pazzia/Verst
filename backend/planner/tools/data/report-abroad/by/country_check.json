@@ -1,0 +1,57 @@
+{
+ "country": "BY",
+ "labels": {
+  "Q184": "Belarus"
+ },
+ "labelOk": true,
+ "capitals": [
+  "Q2280"
+ ],
+ "currencies": [
+  "BYN"
+ ],
+ "currency": "BYN",
+ "currencyOk": true,
+ "tz": [
+  "Europe/Minsk",
+  "UTC+03:00"
+ ],
+ "regions": {
+  "BY-BR": {
+   "qid": "Q173822",
+   "name": "Брестская область",
+   "tz": []
+  },
+  "BY-HM": {
+   "qid": "Q2280",
+   "name": "Минск",
+   "tz": []
+  },
+  "BY-HO": {
+   "qid": "Q188732",
+   "name": "Гомельская область",
+   "tz": []
+  },
+  "BY-HR": {
+   "qid": "Q191061",
+   "name": "Гродненская область",
+   "tz": []
+  },
+  "BY-MA": {
+   "qid": "Q189822",
+   "name": "Могилёвская область",
+   "tz": []
+  },
+  "BY-MI": {
+   "qid": "Q192959",
+   "name": "Минская область",
+   "tz": []
+  },
+  "BY-VI": {
+   "qid": "Q185700",
+   "name": "Витебская область",
+   "tz": []
+  }
+ },
+ "ok": true
+}

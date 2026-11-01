@@ -31,4 +31,10 @@ def read_bytes(name: str) -> bytes:
         return (Path(__file__).parent / name).read_bytes()
 
 
-__all__ = ["DIR", "read_bytes", "read_text"]
+def read_file(path: Path) -> bytes:
+    """The raw bytes of a data file outside the package (CEO 29.10: the server-only catalogues abroad under
+    `backend/planner/abroad/` and the Bank of Russia rates file). Never used on the phone."""
+    return path.read_bytes()
+
+
+__all__ = ["DIR", "read_bytes", "read_file", "read_text"]

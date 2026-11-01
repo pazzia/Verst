@@ -77,11 +77,15 @@ fun touristPictogram(tags: List<String>): Int = when {
     else -> R.drawable.ic_tourist_generic
 }
 
+/** CEO 29.10 (trips abroad): the `sign` the app gives a `kind: "border"` stop (the engine sends `city`). */
+const val BORDER_SIGN = "border"
+
 /** components §2.1 RoadSign (Road ahead size). Decorative: the row speaks for it. */
 @Composable
 fun RoadSign(sign: String, cityName: String, tags: List<String>, modifier: Modifier = Modifier) {
     when (sign) {
         "city" -> CityPlate(cityName, modifier)
+        BORDER_SIGN -> BorderSign(modifier)
         "tourist" -> Box(
             modifier
                 .size(DesignTokens.size.touristSign)
@@ -108,6 +112,56 @@ fun RoadSign(sign: String, cityName: String, tags: List<String>, modifier: Modif
             ) { Icon(servicePictogram(sign), C.sign.black, 28.dp) }
             Box(Modifier.size(22.dp, 3.dp).clip(RoundedCornerShape(DesignTokens.radius.r2)).background(C.sign.white))
         }
+    }
+}
+
+/**
+ * CEO 29.10 (trips abroad): the «граница» sign in the city plate's chrome (white outline, white face, black border;
+ * the same minimum width), a barrier pictogram — black post, a bar striped `accent.red` / `sign.white` — over
+ * «ГРАНИЦА» in the city-sign type. Colours, strokes and type are the sign tokens only.
+ */
+@Composable
+private fun BorderSign(modifier: Modifier) {
+    val label = androidx.compose.ui.res.stringResource(R.string.sign_border)
+    Column(
+        modifier
+            .width(CITY_MIN_W)
+            .border(DesignTokens.stroke.w2, C.sign.white, RoundedCornerShape(DesignTokens.radius.r6))
+            .padding(DesignTokens.stroke.w2)
+            .clip(RoundedCornerShape(DesignTokens.radius.r4))
+            .background(C.sign.white)
+            .border(DesignTokens.stroke.w3, C.sign.black, RoundedCornerShape(DesignTokens.radius.r4))
+            .padding(horizontal = 5.dp, vertical = 7.dp)
+            .clearAndSetSemantics {},
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Canvas(Modifier.size(44.dp, 20.dp)) {
+            val d = 1.dp.toPx()
+            // the post and its foot
+            drawRect(C.sign.black, Offset(3 * d, 4 * d), Size(4 * d, 15 * d))
+            drawRect(C.sign.black, Offset(0f, 18 * d), Size(10 * d, 2 * d))
+            // the bar: red and white stripes in a black outline, hinged on the post
+            val top = 5 * d
+            val h = 5 * d
+            val x0 = 7 * d
+            val x1 = size.width - d
+            var x = x0
+            var i = 0
+            while (x < x1) {
+                val w = minOf(6 * d, x1 - x)
+                drawRect(if (i % 2 == 0) C.accent.red else C.sign.white, Offset(x, top), Size(w, h))
+                x += 6 * d
+                i++
+            }
+            drawRect(C.sign.black, Offset(x0, top), Size(x1 - x0, h), style = Stroke(d))
+            drawCircle(C.sign.black, 2.5f * d, Offset(5 * d, top + h / 2))
+        }
+        BasicText(
+            text = label,
+            style = T.sign.city.copy(color = C.text.onLight, textAlign = TextAlign.Center),
+            maxLines = 1,
+        )
     }
 }
 

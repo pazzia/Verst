@@ -564,111 +564,6 @@
             "replaceable": true,
             "alternatives": [
               {
-                "id": "alt_d1s04_pl_mch_michurin",
-                "placeId": "pl_mch_michurin",
-                "name": "Дом-музей Мичурина",
-                "deltaMin": -1,
-                "deltaRub": 370,
-                "shiftMin": -1,
-                "units": {
-                  "deltaKm": -1.044,
-                  "regionCode": "RU-TAM",
-                  "checkRub": null,
-                  "adultRub": 150,
-                  "childRub": 80,
-                  "name": "Дом-музей Мичурина",
-                  "placeId": "pl_mch_michurin",
-                  "priceRub": "60.50",
-                  "regionName": "Тамбовская область",
-                  "tripKmDelta": -1
-                },
-                "stop": {
-                  "id": "d1s04",
-                  "seq": 4,
-                  "day": 1,
-                  "kind": "sight",
-                  "sign": "tourist",
-                  "placeId": "pl_mch_michurin",
-                  "townId": "t_michurinsk",
-                  "name": "Дом-музей Мичурина",
-                  "note": null,
-                  "lat": 52.89731311519887,
-                  "lon": 40.49675614955718,
-                  "arriveAt": "2026-10-24T12:53",
-                  "departAt": "2026-10-24T13:38",
-                  "tz": "Europe/Moscow",
-                  "kmFromPrev": 145,
-                  "kmAt": 398,
-                  "dwellMin": 45,
-                  "tags": [
-                    "museum"
-                  ],
-                  "costRub": 380,
-                  "reason": "45 мин на осмотр.",
-                  "verified": true,
-                  "replaceable": true,
-                  "alternatives": [],
-                  "alternativesNote": null,
-                  "hotelOptions": [],
-                  "selectedHotelId": null,
-                  "unknownFacts": [
-                    "dogs"
-                  ],
-                  "unknownRu": "Пускают ли с собакой — не проверено"
-                },
-                "dayPatch": [
-                  {
-                    "stopId": "d1s01",
-                    "seq": 1,
-                    "arriveAt": null,
-                    "departAt": "2026-10-24T07:00",
-                    "kmFromPrev": 0
-                  },
-                  {
-                    "stopId": "d1s02",
-                    "seq": 2,
-                    "arriveAt": "2026-10-24T08:31",
-                    "departAt": "2026-10-24T08:51",
-                    "kmFromPrev": 125
-                  },
-                  {
-                    "stopId": "d1s03",
-                    "seq": 3,
-                    "arriveAt": "2026-10-24T10:30",
-                    "departAt": "2026-10-24T11:00",
-                    "kmFromPrev": 131
-                  },
-                  {
-                    "stopId": "d1s04",
-                    "seq": 4,
-                    "arriveAt": "2026-10-24T12:53",
-                    "departAt": "2026-10-24T13:38",
-                    "kmFromPrev": 145
-                  },
-                  {
-                    "stopId": "d1s05",
-                    "seq": 5,
-                    "arriveAt": "2026-10-24T14:20",
-                    "departAt": "2026-10-24T15:20",
-                    "kmFromPrev": 48
-                  },
-                  {
-                    "stopId": "d1s06",
-                    "seq": 6,
-                    "arriveAt": "2026-10-24T15:33",
-                    "departAt": "2026-10-24T15:43",
-                    "kmFromPrev": 13
-                  },
-                  {
-                    "stopId": "d1s07",
-                    "seq": 7,
-                    "arriveAt": "2026-10-24T15:54",
-                    "departAt": null,
-                    "kmFromPrev": 11
-                  }
-                ]
-              },
-              {
                 "id": "alt_d1s04_pl_mch_station",
                 "placeId": "pl_mch_station",
                 "name": "Вокзал Мичуринска",
@@ -1329,7 +1224,7 @@
             "lon": 42.77542167927936,
             "arriveAt": "2026-10-25T13:34",
             "departAt": "2026-10-25T14:34",
-            "tz": "Europe/Volgograd",
+            "tz": "Europe/Moscow",
             "kmFromPrev": 131,
             "kmAt": 745,
             "dwellMin": 60,
@@ -1375,7 +1270,7 @@
                   "lon": 42.459364162681815,
                   "arriveAt": "2026-10-25T12:59",
                   "departAt": "2026-10-25T13:59",
-                  "tz": "Europe/Volgograd",
+                  "tz": "Europe/Moscow",
                   "kmFromPrev": 81,
                   "kmAt": 695,
                   "dwellMin": 60,
@@ -1469,7 +1364,7 @@
                   "lon": 43.21542167927936,
                   "arriveAt": "2026-10-25T14:13",
                   "departAt": "2026-10-25T15:13",
-                  "tz": "Europe/Volgograd",
+                  "tz": "Europe/Moscow",
                   "kmFromPrev": 181,
                   "kmAt": 795,
                   "dwellMin": 60,
@@ -1549,7 +1444,7 @@
             "lon": 43.97630873159323,
             "arriveAt": "2026-10-25T16:24",
             "departAt": "2026-10-25T16:44",
-            "tz": "Europe/Volgograd",
+            "tz": "Europe/Moscow",
             "kmFromPrev": 151,
             "kmAt": 895,
             "dwellMin": 20,
@@ -1596,7 +1491,7 @@
                   "lon": 44.19163082064558,
                   "arriveAt": "2026-10-25T16:50",
                   "departAt": "2026-10-25T17:10",
-                  "tz": "Europe/Volgograd",
+                  "tz": "Europe/Moscow",
                   "kmFromPrev": 186,
                   "kmAt": 930,
                   "dwellMin": 20,
@@ -1692,7 +1587,7 @@
                   "lon": 43.746399477362,
                   "arriveAt": "2026-10-25T15:59",
                   "departAt": "2026-10-25T16:19",
-                  "tz": "Europe/Volgograd",
+                  "tz": "Europe/Moscow",
                   "kmFromPrev": 116,
                   "kmAt": 860,
                   "dwellMin": 20,
@@ -1773,7 +1668,7 @@
             "lon": 44.5133,
             "arriveAt": "2026-10-25T17:47",
             "departAt": null,
-            "tz": "Europe/Volgograd",
+            "tz": "Europe/Moscow",
             "kmFromPrev": 85,
             "kmAt": 980,
             "dwellMin": 0,
@@ -1840,11 +1735,17 @@
         {
           "key": "tolls",
           "title": "Платные дороги",
-          "rub": 0,
-          "formula": "платных дорог нет",
-          "asOf": "2026-10",
+          "rub": 400,
+          "formula": "М-4: 400 ₽",
+          "asOf": "2026-03",
           "enabled": true,
-          "breakdown": []
+          "breakdown": [
+            {
+              "label": "М-4",
+              "formula": "М-4, в выходные",
+              "rub": 400
+            }
+          ]
         },
         {
           "key": "lodging",
@@ -1877,7 +1778,7 @@
             {
               "label": "День 2",
               "formula": "завтрак 390 + обед 700",
-              "rub": 2730
+              "rub": 2720
             }
           ]
         },
@@ -1893,7 +1794,7 @@
         {
           "key": "reserve",
           "title": "Резерв 10%",
-          "rub": 1570,
+          "rub": 1610,
           "formula": "на пробки и «давай заедем»",
           "asOf": "2026-09",
           "enabled": true,
@@ -1901,11 +1802,11 @@
         }
       ],
       "reserveOn": true,
-      "subtotalRub": 15650,
-      "totalRub": 17200,
-      "perPersonRub": 5700,
+      "subtotalRub": 16050,
+      "totalRub": 17700,
+      "perPersonRub": 5900,
       "budgetRub": 60000,
-      "remainingRub": 42800,
+      "remainingRub": 42300,
       "overBudget": false,
       "hints": [],
       "hintKeys": [],
@@ -1961,7 +1862,16 @@
           "asOf": "2026-10",
           "tripKm": 991
         },
-        "tolls": [],
+        "tolls": [
+          {
+            "segmentId": "ts_m4_1",
+            "roadRef": "М-4",
+            "rub": 400,
+            "night": false,
+            "asOf": "2026-03",
+            "weekend": true
+          }
+        ],
         "nights": [
           {
             "stopId": "d1s07",
@@ -2039,7 +1949,7 @@
         "childFoodWeightUnder7": "0.50",
         "asOf": {
           "fuel": "2026-10",
-          "tolls": "2026-10",
+          "tolls": "2026-03",
           "lodging": "2026-09",
           "food": "2026-09",
           "tickets": "2026-10",
@@ -2105,5 +2015,5 @@
     },
     "engineVersion": "0.1.0"
   },
-  "text": "Москва → Волгоград · 991 км · 2 дня\nДень 1 · 474 км\n07:00 Москва\n08:31 Площадка отдыха, Р-22, 125 км\n10:30 Скопинское городище\n12:54 Сад Мичурина\n14:21 Кафе «У дороги», Р-22\n15:34 АЗС, Р-22, 457 км\n15:55 Тамбов\nДень 2 · 517 км\n09:00 Тамбов\n09:02 Набережная Тамбова\n11:39 Площадка отдыха, Р-22, 615 км\n13:34 Кафе «Придорожное», Р-22\n16:24 Площадка отдыха, Р-22, 895 км\n17:47 Волгоград\nИтого ≈ 17 200 ₽ на 3 чел."
+  "text": "Москва → Волгоград · 991 км · 2 дня\nДень 1 · 474 км\n07:00 Москва\n08:31 Площадка отдыха, Р-22, 125 км\n10:30 Скопинское городище\n12:54 Сад Мичурина\n14:21 Кафе «У дороги», Р-22\n15:34 АЗС, Р-22, 457 км\n15:55 Тамбов\nДень 2 · 517 км\n09:00 Тамбов\n09:02 Набережная Тамбова\n11:39 Площадка отдыха, Р-22, 615 км\n13:34 Кафе «Придорожное», Р-22\n16:24 Площадка отдыха, Р-22, 895 км\n17:47 Волгоград\nИтого ≈ 17 700 ₽ на 3 чел."
 }

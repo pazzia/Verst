@@ -16,7 +16,7 @@ import itertools
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 
-from verst_planner.domain.enums import Meal, StopKind, Tag, WarningCode
+from verst_planner.domain.enums import Meal, Mood, PlaceType, StopKind, Tag, WarningCode
 from verst_planner.domain.facts import ticket_known, ticket_prices
 from verst_planner.domain.model import (
     Alternative,
@@ -189,8 +189,8 @@ def day_patch(trial: Trial, ids: list[str], i: int, seq0: int, ctx: PlanContext)
     order.insert(trial.index, ids[i])
     row = km_from_prev_row(trial.plan.stops)
     out = []
-    for k, (s, slot, sid) in enumerate(zip(trial.plan.stops, trial.slots, order, strict=True)):
-        tz = ctx.tz_of(s.region_code, s.point)
+    tz = trial.plan.tz  # QA B-4: the day's clock, as the rendered day
+    for k, (slot, sid) in enumerate(zip(trial.slots, order, strict=True)):
         out.append(
             StopTime(
                 sid,
@@ -360,6 +360,8 @@ def alternatives_for_day(
                 continue
             if fam == "sight" and sight_score(c, inp) < ctx.cfg.sights.min_score:
                 continue
+            if fam == "rest" and inp.mood is Mood.JUST_DRIVE and c.place.type is PlaceType.SIGHT:
+                continue  # CEO 2026-10-29: «Только доехать» — a break is a break, never a sight
             trial = trial_day(day, i, c, inp, ctx, profile, towns or [])
             new = trial.stop
             arrive = trial.slots[trial.index].arrive
@@ -407,6 +409,7 @@ def alternatives_for_day(
                 inp,
                 ctx,
                 sid=ids[i],
+                day_tz=day.tz,
             )
             park = _parking_at(t.stop, t.slots[t.index], ids[i], day, ctx)
             units = dataclasses.replace(

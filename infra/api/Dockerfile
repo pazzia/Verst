@@ -18,6 +18,10 @@ RUN pip install --require-hashes --no-deps -r /srv/verst/api/requirements.lock
 # The engine (stdlib only) with its packaged catalogue, and the one fixture world it composes with.
 COPY backend/planner/verst_planner /srv/verst/planner/verst_planner
 COPY backend/planner/fixtures/worlds/central_russia_v1.json /srv/verst/planner/fixtures/worlds/
+# CEO 29.10 (trips abroad, server only): the catalogues abroad, backend/planner/abroad/<cc>/catalogue_*.json.gz
+# and abroad.lock, built by CI on bot/data-abroad-<N>. The folder is in git with only a .gitkeep, so this COPY
+# never fails; without catalogues the server's world_v1 is Russia only (VERST_ABROAD_DIR overrides the path).
+COPY backend/planner/abroad /srv/verst/planner/abroad
 COPY backend/api/verst_api /srv/verst/api/verst_api
 COPY backend/api/migrations /srv/verst/api/migrations
 COPY --chmod=0755 infra/api/entrypoint.sh /usr/local/bin/verst-api

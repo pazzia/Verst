@@ -71,7 +71,7 @@ class ApiError(Exception):
 def from_engine(e: PlannerError) -> ApiError:
     """A planner exception → the HTTP error (the same codes the phone's bridge reports, §10.6)."""
     if isinstance(e, InvalidInput):
-        return ApiError("INVALID_INPUT", {"field": e.field, "reason": e.reason})
+        return _invalid(e.field, e.reason, e.country, e.message_ru, e.until)
     if isinstance(e, Unreachable):
         return ApiError("UNREACHABLE", {"pointIndex": e.point_index})
     if isinstance(e, TooShort):
@@ -85,11 +85,22 @@ def from_engine(e: PlannerError) -> ApiError:
     return ApiError("INTERNAL")
 
 
+def _invalid(field: Any, reason: Any, country: Any, message_ru: Any, until: Any) -> ApiError:
+    """`INVALID_INPUT` with `field`/`reason`, plus (CEO 29.10, trips abroad) `country` and `until` when the
+    engine names them; the engine's Russian sentence (a closed border, a point it cannot place) is the
+    message."""
+    details: dict[str, Any] = {"field": field, "reason": reason}
+    details.update({k: v for k, v in (("country", country), ("until", until)) if v is not None})
+    message = message_ru if isinstance(message_ru, str) and message_ru else None
+    return ApiError("INVALID_INPUT", details, message=message)
+
+
 def from_envelope(error: dict[str, Any]) -> ApiError:
     """An error from a `verst_planner.mobile` envelope (`{"code", "field", "reason", "pointIndex", …}`)."""
     code = str(error.get("code"))
     if code == "INVALID_INPUT":
-        return ApiError("INVALID_INPUT", {"field": error.get("field"), "reason": error.get("reason")})
+        get = error.get
+        return _invalid(get("field"), get("reason"), get("country"), get("messageRu"), get("until"))
     if code == "TRIP_INCOMPATIBLE":
         return ApiError("INVALID_INPUT", {"field": "engineVersion", "reason": "incompatible"})
     if code == "NOT_FOUND":

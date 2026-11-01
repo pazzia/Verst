@@ -87,6 +87,22 @@ RULES: dict[str, tuple[str, ...]] = {
         "verst_planner.city",
     ),
     "verst_planner.handoff": (),
+    # CEO 29.10 (trips abroad, server only): an extension of the engine — everything but the bridges
+    "verst_planner.foreign": (
+        "verst_planner.domain",
+        "verst_planner.geo",
+        "verst_planner.ports",
+        "verst_planner.config",
+        "verst_planner.cost",
+        "verst_planner.events",
+        "verst_planner.explain",
+        "verst_planner.pipeline",
+        "verst_planner.adapters",
+        "verst_planner.catalogue",
+        "verst_planner.resources",
+        "verst_planner.engine",
+        "verst_planner.foreign",
+    ),
 }
 
 

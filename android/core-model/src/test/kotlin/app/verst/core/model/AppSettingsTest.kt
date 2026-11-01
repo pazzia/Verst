@@ -26,9 +26,10 @@ class AppSettingsTest {
     }
 
     @Test
-    fun onlyTheThemeNeedsARestart() {
+    fun onlyTheThemeAndTheDesignNeedARestart() {
         val a = AppSettings()
         assertTrue(a.copy(theme = AppTheme.DAY).needsRestartComparedTo(a))
+        assertTrue(a.copy(design = AppDesign.CLASSIC).needsRestartComparedTo(a))
         assertFalse(a.copy(language = AppLanguage.EN, currency = "EUR").needsRestartComparedTo(a))
     }
 

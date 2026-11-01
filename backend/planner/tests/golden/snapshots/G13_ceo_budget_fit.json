@@ -109,23 +109,23 @@
           "replaceable": true,
           "alternatives": [
             {
-              "id": "alt_d1s03_pl_prs_goritsky",
-              "placeId": "pl_prs_goritsky",
-              "name": "Горицкий монастырь",
-              "deltaMin": 29,
-              "deltaRub": 1350,
-              "shiftMin": 29,
+              "id": "alt_d1s03_pl_prs_blue_stone",
+              "placeId": "pl_prs_blue_stone",
+              "name": "Синий камень",
+              "deltaMin": 2,
+              "deltaRub": 0,
+              "shiftMin": 2,
               "units": {
-                "deltaKm": -0.541,
+                "deltaKm": 0.997,
                 "regionCode": "RU-YAR",
                 "checkRub": null,
-                "adultRub": 300,
-                "childRub": 150,
-                "name": "Горицкий монастырь",
-                "placeId": "pl_prs_goritsky",
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Синий камень",
+                "placeId": "pl_prs_blue_stone",
                 "priceRub": "61.90",
                 "regionName": "Ярославская область",
-                "tripKmDelta": -1
+                "tripKmDelta": 1
               },
               "stop": {
                 "id": "d1s03",
@@ -133,24 +133,118 @@
                 "day": 1,
                 "kind": "sight",
                 "sign": "tourist",
-                "placeId": "pl_prs_goritsky",
+                "placeId": "pl_prs_blue_stone",
                 "townId": "t_pereslavl",
-                "name": "Горицкий монастырь",
+                "name": "Синий камень",
                 "note": null,
-                "lat": 56.72796065440339,
-                "lon": 38.870677713165705,
+                "lat": 56.74423934559661,
+                "lon": 38.82482011630174,
                 "arriveAt": "2026-11-07T11:35",
-                "departAt": "2026-11-07T12:35",
+                "departAt": "2026-11-07T12:05",
                 "tz": "Europe/Moscow",
                 "kmFromPrev": 70,
-                "kmAt": 140,
-                "dwellMin": 60,
+                "kmAt": 139,
+                "dwellMin": 30,
                 "tags": [
-                  "museum",
-                  "monastery"
+                  "view",
+                  "walk",
+                  "free_entry"
                 ],
-                "costRub": 1350,
-                "reason": "Час на осмотр.",
+                "costRub": 0,
+                "reason": "Полчаса на осмотр.",
+                "verified": true,
+                "replaceable": true,
+                "alternatives": [],
+                "alternativesNote": null,
+                "hotelOptions": [],
+                "selectedHotelId": null,
+                "unknownFacts": [
+                  "hours",
+                  "dogs"
+                ],
+                "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
+              },
+              "dayPatch": [
+                {
+                  "stopId": "d1s01",
+                  "seq": 1,
+                  "arriveAt": null,
+                  "departAt": "2026-11-07T08:00",
+                  "kmFromPrev": 0
+                },
+                {
+                  "stopId": "d1s02",
+                  "seq": 2,
+                  "arriveAt": "2026-11-07T09:05",
+                  "departAt": "2026-11-07T10:35",
+                  "kmFromPrev": 73
+                },
+                {
+                  "stopId": "d1s03",
+                  "seq": 3,
+                  "arriveAt": "2026-11-07T11:35",
+                  "departAt": "2026-11-07T12:05",
+                  "kmFromPrev": 70
+                },
+                {
+                  "stopId": "d1s04",
+                  "seq": 4,
+                  "arriveAt": "2026-11-07T13:04",
+                  "departAt": "2026-11-07T14:04",
+                  "kmFromPrev": 68
+                },
+                {
+                  "stopId": "d1s05",
+                  "seq": 5,
+                  "arriveAt": "2026-11-07T14:56",
+                  "departAt": null,
+                  "kmFromPrev": 61
+                }
+              ]
+            },
+            {
+              "id": "alt_d1s03_pl_prs_fedorovsky",
+              "placeId": "pl_prs_fedorovsky",
+              "name": "Фёдоровский монастырь",
+              "deltaMin": 15,
+              "deltaRub": 0,
+              "shiftMin": 15,
+              "units": {
+                "deltaKm": 0.005,
+                "regionCode": "RU-YAR",
+                "checkRub": null,
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Фёдоровский монастырь",
+                "placeId": "pl_prs_fedorovsky",
+                "priceRub": "61.90",
+                "regionName": "Ярославская область",
+                "tripKmDelta": 0
+              },
+              "stop": {
+                "id": "d1s03",
+                "seq": 3,
+                "day": 1,
+                "kind": "sight",
+                "sign": "tourist",
+                "placeId": "pl_prs_fedorovsky",
+                "townId": "t_pereslavl",
+                "name": "Фёдоровский монастырь",
+                "note": null,
+                "lat": 56.72434316747156,
+                "lon": 38.86903994184913,
+                "arriveAt": "2026-11-07T11:35",
+                "departAt": "2026-11-07T12:20",
+                "tz": "Europe/Moscow",
+                "kmFromPrev": 69,
+                "kmAt": 140,
+                "dwellMin": 45,
+                "tags": [
+                  "monastery",
+                  "free_entry"
+                ],
+                "costRub": 0,
+                "reason": "45 мин на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
@@ -181,203 +275,20 @@
                   "stopId": "d1s03",
                   "seq": 3,
                   "arriveAt": "2026-11-07T11:35",
-                  "departAt": "2026-11-07T12:35",
-                  "kmFromPrev": 70
+                  "departAt": "2026-11-07T12:20",
+                  "kmFromPrev": 69
                 },
                 {
                   "stopId": "d1s04",
                   "seq": 4,
-                  "arriveAt": "2026-11-07T13:31",
-                  "departAt": "2026-11-07T14:31",
-                  "kmFromPrev": 66
-                },
-                {
-                  "stopId": "d1s05",
-                  "seq": 5,
-                  "arriveAt": "2026-11-07T15:23",
-                  "departAt": null,
-                  "kmFromPrev": 61
-                }
-              ]
-            },
-            {
-              "id": "alt_d1s03_pl_prs_botik",
-              "placeId": "pl_prs_botik",
-              "name": "Музей-усадьба «Ботик Петра Первого»",
-              "deltaMin": 25,
-              "deltaRub": 1530,
-              "shiftMin": 25,
-              "units": {
-                "deltaKm": -3.139,
-                "regionCode": "RU-YAR",
-                "checkRub": null,
-                "adultRub": 350,
-                "childRub": 150,
-                "name": "Музей-усадьба «Ботик Петра Первого»",
-                "placeId": "pl_prs_botik",
-                "priceRub": "61.90",
-                "regionName": "Ярославская область",
-                "tripKmDelta": -3
-              },
-              "stop": {
-                "id": "d1s03",
-                "seq": 3,
-                "day": 1,
-                "kind": "sight",
-                "sign": "tourist",
-                "placeId": "pl_prs_botik",
-                "townId": "t_pereslavl",
-                "name": "Музей-усадьба «Ботик Петра Первого»",
-                "note": null,
-                "lat": 56.72524753920452,
-                "lon": 38.82809565893488,
-                "arriveAt": "2026-11-07T11:31",
-                "departAt": "2026-11-07T12:31",
-                "tz": "Europe/Moscow",
-                "kmFromPrev": 66,
-                "kmAt": 138,
-                "dwellMin": 60,
-                "tags": [
-                  "view",
-                  "museum"
-                ],
-                "costRub": 1550,
-                "reason": "Час на осмотр.",
-                "verified": true,
-                "replaceable": true,
-                "alternatives": [],
-                "alternativesNote": null,
-                "hotelOptions": [],
-                "selectedHotelId": null,
-                "unknownFacts": [
-                  "dogs"
-                ],
-                "unknownRu": "Пускают ли с собакой — не проверено"
-              },
-              "dayPatch": [
-                {
-                  "stopId": "d1s01",
-                  "seq": 1,
-                  "arriveAt": null,
-                  "departAt": "2026-11-07T08:00",
-                  "kmFromPrev": 0
-                },
-                {
-                  "stopId": "d1s02",
-                  "seq": 2,
-                  "arriveAt": "2026-11-07T09:05",
-                  "departAt": "2026-11-07T10:35",
-                  "kmFromPrev": 73
-                },
-                {
-                  "stopId": "d1s03",
-                  "seq": 3,
-                  "arriveAt": "2026-11-07T11:31",
-                  "departAt": "2026-11-07T12:31",
-                  "kmFromPrev": 66
-                },
-                {
-                  "stopId": "d1s04",
-                  "seq": 4,
-                  "arriveAt": "2026-11-07T13:27",
-                  "departAt": "2026-11-07T14:27",
+                  "arriveAt": "2026-11-07T13:17",
+                  "departAt": "2026-11-07T14:17",
                   "kmFromPrev": 67
                 },
                 {
                   "stopId": "d1s05",
                   "seq": 5,
-                  "arriveAt": "2026-11-07T15:19",
-                  "departAt": null,
-                  "kmFromPrev": 61
-                }
-              ]
-            },
-            {
-              "id": "alt_d1s03_pl_prs_iron",
-              "placeId": "pl_prs_iron",
-              "name": "Музей утюга",
-              "deltaMin": -8,
-              "deltaRub": 880,
-              "shiftMin": -8,
-              "units": {
-                "deltaKm": -3.469,
-                "regionCode": "RU-YAR",
-                "checkRub": null,
-                "adultRub": 200,
-                "childRub": 100,
-                "name": "Музей утюга",
-                "placeId": "pl_prs_iron",
-                "priceRub": "61.90",
-                "regionName": "Ярославская область",
-                "tripKmDelta": -4
-              },
-              "stop": {
-                "id": "d1s03",
-                "seq": 3,
-                "day": 1,
-                "kind": "sight",
-                "sign": "tourist",
-                "placeId": "pl_prs_iron",
-                "townId": "t_pereslavl",
-                "name": "Музей утюга",
-                "note": null,
-                "lat": 56.737908743465916,
-                "lon": 38.86085108526628,
-                "arriveAt": "2026-11-07T11:31",
-                "departAt": "2026-11-07T12:01",
-                "tz": "Europe/Moscow",
-                "kmFromPrev": 68,
-                "kmAt": 140,
-                "dwellMin": 30,
-                "tags": [
-                  "museum"
-                ],
-                "costRub": 900,
-                "reason": "Полчаса на осмотр.",
-                "verified": true,
-                "replaceable": true,
-                "alternatives": [],
-                "alternativesNote": null,
-                "hotelOptions": [],
-                "selectedHotelId": null,
-                "unknownFacts": [
-                  "dogs"
-                ],
-                "unknownRu": "Пускают ли с собакой — не проверено"
-              },
-              "dayPatch": [
-                {
-                  "stopId": "d1s01",
-                  "seq": 1,
-                  "arriveAt": null,
-                  "departAt": "2026-11-07T08:00",
-                  "kmFromPrev": 0
-                },
-                {
-                  "stopId": "d1s02",
-                  "seq": 2,
-                  "arriveAt": "2026-11-07T09:05",
-                  "departAt": "2026-11-07T10:35",
-                  "kmFromPrev": 73
-                },
-                {
-                  "stopId": "d1s03",
-                  "seq": 3,
-                  "arriveAt": "2026-11-07T11:31",
-                  "departAt": "2026-11-07T12:01",
-                  "kmFromPrev": 68
-                },
-                {
-                  "stopId": "d1s04",
-                  "seq": 4,
-                  "arriveAt": "2026-11-07T12:54",
-                  "departAt": "2026-11-07T13:54",
-                  "kmFromPrev": 64
-                },
-                {
-                  "stopId": "d1s05",
-                  "seq": 5,
-                  "arriveAt": "2026-11-07T14:46",
+                  "arriveAt": "2026-11-07T15:09",
                   "departAt": null,
                   "kmFromPrev": 61
                 }
@@ -815,138 +726,48 @@
           "replaceable": true,
           "alternatives": [
             {
-              "id": "alt_d2s02_pl_prs_goritsky",
-              "placeId": "pl_prs_goritsky",
-              "name": "Горицкий монастырь",
-              "deltaMin": 22,
-              "deltaRub": 1370,
-              "shiftMin": 22,
+              "id": "alt_d2s02_pl_prs_blue_stone",
+              "placeId": "pl_prs_blue_stone",
+              "name": "Синий камень",
+              "deltaMin": -5,
+              "deltaRub": 20,
+              "shiftMin": -5,
               "units": {
-                "deltaKm": 3.136,
+                "deltaKm": 4.675,
                 "regionCode": "RU-YAR",
                 "checkRub": null,
-                "adultRub": 300,
-                "childRub": 150,
-                "name": "Горицкий монастырь",
-                "placeId": "pl_prs_goritsky",
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Синий камень",
+                "placeId": "pl_prs_blue_stone",
                 "priceRub": "61.90",
                 "regionName": "Ярославская область",
-                "tripKmDelta": 4
+                "tripKmDelta": 5
               },
               "stop": {
                 "id": "d2s02",
-                "seq": 7,
+                "seq": 8,
                 "day": 2,
                 "kind": "sight",
                 "sign": "tourist",
-                "placeId": "pl_prs_goritsky",
+                "placeId": "pl_prs_blue_stone",
                 "townId": "t_pereslavl",
-                "name": "Горицкий монастырь",
+                "name": "Синий камень",
                 "note": null,
-                "lat": 56.72796065440339,
-                "lon": 38.870677713165705,
-                "arriveAt": "2026-11-08T10:45",
-                "departAt": "2026-11-08T11:45",
+                "lat": 56.74423934559661,
+                "lon": 38.82482011630174,
+                "arriveAt": "2026-11-08T11:17",
+                "departAt": "2026-11-08T11:47",
                 "tz": "Europe/Moscow",
-                "kmFromPrev": 124,
-                "kmAt": 386,
-                "dwellMin": 60,
-                "tags": [
-                  "museum",
-                  "monastery"
-                ],
-                "costRub": 1350,
-                "reason": "Час на осмотр.",
-                "verified": true,
-                "replaceable": true,
-                "alternatives": [],
-                "alternativesNote": null,
-                "hotelOptions": [],
-                "selectedHotelId": null,
-                "unknownFacts": [
-                  "dogs"
-                ],
-                "unknownRu": "Пускают ли с собакой — не проверено"
-              },
-              "dayPatch": [
-                {
-                  "stopId": "d2s01",
-                  "seq": 6,
-                  "arriveAt": null,
-                  "departAt": "2026-11-08T09:00",
-                  "kmFromPrev": 0
-                },
-                {
-                  "stopId": "d2s02",
-                  "seq": 7,
-                  "arriveAt": "2026-11-08T10:45",
-                  "departAt": "2026-11-08T11:45",
-                  "kmFromPrev": 124
-                },
-                {
-                  "stopId": "d2s03",
-                  "seq": 8,
-                  "arriveAt": "2026-11-08T11:48",
-                  "departAt": "2026-11-08T12:18",
-                  "kmFromPrev": 2
-                },
-                {
-                  "stopId": "d2s04",
-                  "seq": 9,
-                  "arriveAt": "2026-11-08T13:16",
-                  "departAt": "2026-11-08T14:16",
-                  "kmFromPrev": 69
-                },
-                {
-                  "stopId": "d2s05",
-                  "seq": 10,
-                  "arriveAt": "2026-11-08T15:23",
-                  "departAt": null,
-                  "kmFromPrev": 73
-                }
-              ]
-            },
-            {
-              "id": "alt_d2s02_pl_prs_iron",
-              "placeId": "pl_prs_iron",
-              "name": "Музей утюга",
-              "deltaMin": -15,
-              "deltaRub": 900,
-              "shiftMin": -15,
-              "units": {
-                "deltaKm": 0.209,
-                "regionCode": "RU-YAR",
-                "checkRub": null,
-                "adultRub": 200,
-                "childRub": 100,
-                "name": "Музей утюга",
-                "placeId": "pl_prs_iron",
-                "priceRub": "61.90",
-                "regionName": "Ярославская область",
-                "tripKmDelta": 1
-              },
-              "stop": {
-                "id": "d2s02",
-                "seq": 7,
-                "day": 2,
-                "kind": "sight",
-                "sign": "tourist",
-                "placeId": "pl_prs_iron",
-                "townId": "t_pereslavl",
-                "name": "Музей утюга",
-                "note": null,
-                "lat": 56.737908743465916,
-                "lon": 38.86085108526628,
-                "arriveAt": "2026-11-08T10:41",
-                "departAt": "2026-11-08T11:11",
-                "tz": "Europe/Moscow",
-                "kmFromPrev": 123,
-                "kmAt": 386,
+                "kmFromPrev": 4,
+                "kmAt": 387,
                 "dwellMin": 30,
                 "tags": [
-                  "museum"
+                  "view",
+                  "walk",
+                  "free_entry"
                 ],
-                "costRub": 900,
+                "costRub": 0,
                 "reason": "Полчаса на осмотр.",
                 "verified": true,
                 "replaceable": true,
@@ -955,9 +776,10 @@
                 "hotelOptions": [],
                 "selectedHotelId": null,
                 "unknownFacts": [
+                  "hours",
                   "dogs"
                 ],
-                "unknownRu": "Пускают ли с собакой — не проверено"
+                "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
               },
               "dayPatch": [
                 {
@@ -968,53 +790,53 @@
                   "kmFromPrev": 0
                 },
                 {
-                  "stopId": "d2s02",
+                  "stopId": "d2s03",
                   "seq": 7,
                   "arriveAt": "2026-11-08T10:41",
                   "departAt": "2026-11-08T11:11",
                   "kmFromPrev": 123
                 },
                 {
-                  "stopId": "d2s03",
+                  "stopId": "d2s02",
                   "seq": 8,
-                  "arriveAt": "2026-11-08T11:11",
-                  "departAt": "2026-11-08T11:41",
-                  "kmFromPrev": 0
+                  "arriveAt": "2026-11-08T11:17",
+                  "departAt": "2026-11-08T11:47",
+                  "kmFromPrev": 4
                 },
                 {
                   "stopId": "d2s04",
                   "seq": 9,
-                  "arriveAt": "2026-11-08T12:39",
-                  "departAt": "2026-11-08T13:39",
-                  "kmFromPrev": 69
+                  "arriveAt": "2026-11-08T12:49",
+                  "departAt": "2026-11-08T13:49",
+                  "kmFromPrev": 70
                 },
                 {
                   "stopId": "d2s05",
                   "seq": 10,
-                  "arriveAt": "2026-11-08T14:46",
+                  "arriveAt": "2026-11-08T14:56",
                   "departAt": null,
                   "kmFromPrev": 73
                 }
               ]
             },
             {
-              "id": "alt_d2s02_pl_prs_botik",
-              "placeId": "pl_prs_botik",
-              "name": "Музей-усадьба «Ботик Петра Первого»",
-              "deltaMin": 18,
-              "deltaRub": 1550,
-              "shiftMin": 18,
+              "id": "alt_d2s02_pl_prs_fedorovsky",
+              "placeId": "pl_prs_fedorovsky",
+              "name": "Фёдоровский монастырь",
+              "deltaMin": 8,
+              "deltaRub": 20,
+              "shiftMin": 8,
               "units": {
-                "deltaKm": 0.539,
+                "deltaKm": 3.683,
                 "regionCode": "RU-YAR",
                 "checkRub": null,
-                "adultRub": 350,
-                "childRub": 150,
-                "name": "Музей-усадьба «Ботик Петра Первого»",
-                "placeId": "pl_prs_botik",
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Фёдоровский монастырь",
+                "placeId": "pl_prs_fedorovsky",
                 "priceRub": "61.90",
                 "regionName": "Ярославская область",
-                "tripKmDelta": 1
+                "tripKmDelta": 4
               },
               "stop": {
                 "id": "d2s02",
@@ -1022,24 +844,24 @@
                 "day": 2,
                 "kind": "sight",
                 "sign": "tourist",
-                "placeId": "pl_prs_botik",
+                "placeId": "pl_prs_fedorovsky",
                 "townId": "t_pereslavl",
-                "name": "Музей-усадьба «Ботик Петра Первого»",
+                "name": "Фёдоровский монастырь",
                 "note": null,
-                "lat": 56.72524753920452,
-                "lon": 38.82809565893488,
-                "arriveAt": "2026-11-08T11:15",
-                "departAt": "2026-11-08T12:15",
+                "lat": 56.72434316747156,
+                "lon": 38.86903994184913,
+                "arriveAt": "2026-11-08T11:16",
+                "departAt": "2026-11-08T12:01",
                 "tz": "Europe/Moscow",
                 "kmFromPrev": 3,
-                "kmAt": 388,
-                "dwellMin": 60,
+                "kmAt": 386,
+                "dwellMin": 45,
                 "tags": [
-                  "view",
-                  "museum"
+                  "monastery",
+                  "free_entry"
                 ],
-                "costRub": 1550,
-                "reason": "Час на осмотр.",
+                "costRub": 0,
+                "reason": "45 мин на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
@@ -1069,21 +891,21 @@
                 {
                   "stopId": "d2s02",
                   "seq": 8,
-                  "arriveAt": "2026-11-08T11:15",
-                  "departAt": "2026-11-08T12:15",
+                  "arriveAt": "2026-11-08T11:16",
+                  "departAt": "2026-11-08T12:01",
                   "kmFromPrev": 3
                 },
                 {
                   "stopId": "d2s04",
                   "seq": 9,
-                  "arriveAt": "2026-11-08T13:12",
-                  "departAt": "2026-11-08T14:12",
-                  "kmFromPrev": 66
+                  "arriveAt": "2026-11-08T13:02",
+                  "departAt": "2026-11-08T14:02",
+                  "kmFromPrev": 70
                 },
                 {
                   "stopId": "d2s05",
                   "seq": 10,
-                  "arriveAt": "2026-11-08T15:19",
+                  "arriveAt": "2026-11-08T15:09",
                   "departAt": null,
                   "kmFromPrev": 73
                 }
@@ -1127,23 +949,23 @@
           "replaceable": true,
           "alternatives": [
             {
-              "id": "alt_d2s03_pl_prs_goritsky",
-              "placeId": "pl_prs_goritsky",
-              "name": "Горицкий монастырь",
-              "deltaMin": 37,
-              "deltaRub": 1370,
-              "shiftMin": 37,
+              "id": "alt_d2s03_pl_prs_blue_stone",
+              "placeId": "pl_prs_blue_stone",
+              "name": "Синий камень",
+              "deltaMin": 10,
+              "deltaRub": 20,
+              "shiftMin": 10,
               "units": {
-                "deltaKm": 3.472,
+                "deltaKm": 5.011,
                 "regionCode": "RU-YAR",
                 "checkRub": null,
-                "adultRub": 300,
-                "childRub": 150,
-                "name": "Горицкий монастырь",
-                "placeId": "pl_prs_goritsky",
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Синий камень",
+                "placeId": "pl_prs_blue_stone",
                 "priceRub": "61.90",
                 "regionName": "Ярославская область",
-                "tripKmDelta": 4
+                "tripKmDelta": 6
               },
               "stop": {
                 "id": "d2s03",
@@ -1151,114 +973,24 @@
                 "day": 2,
                 "kind": "sight",
                 "sign": "tourist",
-                "placeId": "pl_prs_goritsky",
+                "placeId": "pl_prs_blue_stone",
                 "townId": "t_pereslavl",
-                "name": "Горицкий монастырь",
+                "name": "Синий камень",
                 "note": null,
-                "lat": 56.72796065440339,
-                "lon": 38.870677713165705,
-                "arriveAt": "2026-11-08T11:30",
-                "departAt": "2026-11-08T12:30",
+                "lat": 56.74423934559661,
+                "lon": 38.82482011630174,
+                "arriveAt": "2026-11-08T11:32",
+                "departAt": "2026-11-08T12:02",
                 "tz": "Europe/Moscow",
-                "kmFromPrev": 4,
-                "kmAt": 386,
-                "dwellMin": 60,
-                "tags": [
-                  "museum",
-                  "monastery"
-                ],
-                "costRub": 1350,
-                "reason": "Час на осмотр.",
-                "verified": true,
-                "replaceable": true,
-                "alternatives": [],
-                "alternativesNote": null,
-                "hotelOptions": [],
-                "selectedHotelId": null,
-                "unknownFacts": [
-                  "dogs"
-                ],
-                "unknownRu": "Пускают ли с собакой — не проверено"
-              },
-              "dayPatch": [
-                {
-                  "stopId": "d2s01",
-                  "seq": 6,
-                  "arriveAt": null,
-                  "departAt": "2026-11-08T09:00",
-                  "kmFromPrev": 0
-                },
-                {
-                  "stopId": "d2s02",
-                  "seq": 7,
-                  "arriveAt": "2026-11-08T10:40",
-                  "departAt": "2026-11-08T11:25",
-                  "kmFromPrev": 121
-                },
-                {
-                  "stopId": "d2s03",
-                  "seq": 8,
-                  "arriveAt": "2026-11-08T11:30",
-                  "departAt": "2026-11-08T12:30",
-                  "kmFromPrev": 4
-                },
-                {
-                  "stopId": "d2s04",
-                  "seq": 9,
-                  "arriveAt": "2026-11-08T13:31",
-                  "departAt": "2026-11-08T14:31",
-                  "kmFromPrev": 70
-                },
-                {
-                  "stopId": "d2s05",
-                  "seq": 10,
-                  "arriveAt": "2026-11-08T15:38",
-                  "departAt": null,
-                  "kmFromPrev": 73
-                }
-              ]
-            },
-            {
-              "id": "alt_d2s03_pl_prs_iron",
-              "placeId": "pl_prs_iron",
-              "name": "Музей утюга",
-              "deltaMin": 0,
-              "deltaRub": 900,
-              "shiftMin": 0,
-              "units": {
-                "deltaKm": 0.545,
-                "regionCode": "RU-YAR",
-                "checkRub": null,
-                "adultRub": 200,
-                "childRub": 100,
-                "name": "Музей утюга",
-                "placeId": "pl_prs_iron",
-                "priceRub": "61.90",
-                "regionName": "Ярославская область",
-                "tripKmDelta": 1
-              },
-              "stop": {
-                "id": "d2s03",
-                "seq": 8,
-                "day": 2,
-                "kind": "sight",
-                "sign": "tourist",
-                "placeId": "pl_prs_iron",
-                "townId": "t_pereslavl",
-                "name": "Музей утюга",
-                "note": null,
-                "lat": 56.737908743465916,
-                "lon": 38.86085108526628,
-                "arriveAt": "2026-11-08T11:26",
-                "departAt": "2026-11-08T11:56",
-                "tz": "Europe/Moscow",
-                "kmFromPrev": 2,
-                "kmAt": 386,
+                "kmFromPrev": 5,
+                "kmAt": 387,
                 "dwellMin": 30,
                 "tags": [
-                  "museum"
+                  "view",
+                  "walk",
+                  "free_entry"
                 ],
-                "costRub": 900,
+                "costRub": 0,
                 "reason": "Полчаса на осмотр.",
                 "verified": true,
                 "replaceable": true,
@@ -1267,9 +999,10 @@
                 "hotelOptions": [],
                 "selectedHotelId": null,
                 "unknownFacts": [
+                  "hours",
                   "dogs"
                 ],
-                "unknownRu": "Пускают ли с собакой — не проверено"
+                "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните"
               },
               "dayPatch": [
                 {
@@ -1289,44 +1022,44 @@
                 {
                   "stopId": "d2s03",
                   "seq": 8,
-                  "arriveAt": "2026-11-08T11:26",
-                  "departAt": "2026-11-08T11:56",
-                  "kmFromPrev": 2
+                  "arriveAt": "2026-11-08T11:32",
+                  "departAt": "2026-11-08T12:02",
+                  "kmFromPrev": 5
                 },
                 {
                   "stopId": "d2s04",
                   "seq": 9,
-                  "arriveAt": "2026-11-08T12:54",
-                  "departAt": "2026-11-08T13:54",
-                  "kmFromPrev": 69
+                  "arriveAt": "2026-11-08T13:04",
+                  "departAt": "2026-11-08T14:04",
+                  "kmFromPrev": 70
                 },
                 {
                   "stopId": "d2s05",
                   "seq": 10,
-                  "arriveAt": "2026-11-08T15:01",
+                  "arriveAt": "2026-11-08T15:11",
                   "departAt": null,
                   "kmFromPrev": 73
                 }
               ]
             },
             {
-              "id": "alt_d2s03_pl_prs_botik",
-              "placeId": "pl_prs_botik",
-              "name": "Музей-усадьба «Ботик Петра Первого»",
-              "deltaMin": 33,
-              "deltaRub": 1550,
-              "shiftMin": 33,
+              "id": "alt_d2s03_pl_prs_fedorovsky",
+              "placeId": "pl_prs_fedorovsky",
+              "name": "Фёдоровский монастырь",
+              "deltaMin": 23,
+              "deltaRub": 20,
+              "shiftMin": 23,
               "units": {
-                "deltaKm": 0.875,
+                "deltaKm": 4.019,
                 "regionCode": "RU-YAR",
                 "checkRub": null,
-                "adultRub": 350,
-                "childRub": 150,
-                "name": "Музей-усадьба «Ботик Петра Первого»",
-                "placeId": "pl_prs_botik",
+                "adultRub": 0,
+                "childRub": 0,
+                "name": "Фёдоровский монастырь",
+                "placeId": "pl_prs_fedorovsky",
                 "priceRub": "61.90",
                 "regionName": "Ярославская область",
-                "tripKmDelta": 1
+                "tripKmDelta": 5
               },
               "stop": {
                 "id": "d2s03",
@@ -1334,24 +1067,24 @@
                 "day": 2,
                 "kind": "sight",
                 "sign": "tourist",
-                "placeId": "pl_prs_botik",
+                "placeId": "pl_prs_fedorovsky",
                 "townId": "t_pereslavl",
-                "name": "Музей-усадьба «Ботик Петра Первого»",
+                "name": "Фёдоровский монастырь",
                 "note": null,
-                "lat": 56.72524753920452,
-                "lon": 38.82809565893488,
-                "arriveAt": "2026-11-08T11:30",
-                "departAt": "2026-11-08T12:30",
+                "lat": 56.72434316747156,
+                "lon": 38.86903994184913,
+                "arriveAt": "2026-11-08T11:31",
+                "departAt": "2026-11-08T12:16",
                 "tz": "Europe/Moscow",
                 "kmFromPrev": 4,
-                "kmAt": 388,
-                "dwellMin": 60,
+                "kmAt": 386,
+                "dwellMin": 45,
                 "tags": [
-                  "view",
-                  "museum"
+                  "monastery",
+                  "free_entry"
                 ],
-                "costRub": 1550,
-                "reason": "Час на осмотр.",
+                "costRub": 0,
+                "reason": "45 мин на осмотр.",
                 "verified": true,
                 "replaceable": true,
                 "alternatives": [],
@@ -1381,21 +1114,21 @@
                 {
                   "stopId": "d2s03",
                   "seq": 8,
-                  "arriveAt": "2026-11-08T11:30",
-                  "departAt": "2026-11-08T12:30",
+                  "arriveAt": "2026-11-08T11:31",
+                  "departAt": "2026-11-08T12:16",
                   "kmFromPrev": 4
                 },
                 {
                   "stopId": "d2s04",
                   "seq": 9,
-                  "arriveAt": "2026-11-08T13:27",
-                  "departAt": "2026-11-08T14:27",
-                  "kmFromPrev": 66
+                  "arriveAt": "2026-11-08T13:17",
+                  "departAt": "2026-11-08T14:17",
+                  "kmFromPrev": 70
                 },
                 {
                   "stopId": "d2s05",
                   "seq": 10,
-                  "arriveAt": "2026-11-08T15:34",
+                  "arriveAt": "2026-11-08T15:24",
                   "departAt": null,
                   "kmFromPrev": 73
                 }
@@ -1671,8 +1404,8 @@
           },
           {
             "label": "Ярославская область",
-            "formula": "318 км × 8 л/100 × 61,90 ₽ = 1 580 ₽",
-            "rub": 1580
+            "formula": "318 км × 8 л/100 × 61,90 ₽ = 1 570 ₽",
+            "rub": 1570
           }
         ]
       },
@@ -1920,23 +1653,19 @@
     "status": "fits",
     "budgetRub": 30000,
     "allowedRub": 31500,
-    "initialTotalRub": 64000,
+    "initialTotalRub": 58400,
     "totalRub": 29400,
     "levers": [
       {
         "code": "food_economy",
-        "savedRub": 4000
-      },
-      {
-        "code": "sights_free",
-        "savedRub": 5700
+        "savedRub": 4100
       },
       {
         "code": "variant",
         "savedRub": 24900
       }
     ],
-    "textRu": "Подогнали под бюджет 30 000 ₽: кафе попроще, бесплатные места, короткий вариант маршрута.",
+    "textRu": "Подогнали под бюджет 30 000 ₽: кафе попроще, короткий вариант маршрута.",
     "variantOf": "rr_golden_ring"
   }
 }

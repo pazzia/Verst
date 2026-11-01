@@ -1,6 +1,7 @@
 package app.verst.feature.instruments
 
 import androidx.compose.foundation.Canvas
+import app.verst.core.ui.theme.Palette
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -114,6 +115,10 @@ data class InstrumentsUi(
     val budgetOutcome: String? = null,
     val budgetTotal: Int? = null,
     val budgetStatus: String? = null,
+    /** CEO 29.10 (trips abroad): КУДА is abroad — the server plans it; the caption says so in one line. */
+    val abroad: Boolean = false,
+    /** ПОЕХАЛИ can plan (false: a trip abroad offline or without a server). */
+    val goEnabled: Boolean = true,
 )
 
 interface InstrumentsActions {
@@ -130,6 +135,7 @@ interface InstrumentsActions {
 /** 5.3 Instruments, simplified: crew in the mirror, km per day, budget presets, mood; ПОЕХАЛИ. */
 @Composable
 fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
+    if (Palette.camper) return InstrumentsScreenCamper(ui = ui, a = a)
     ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxWidth().height(232.dp)) {
@@ -210,7 +216,12 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                     // 5.3 §9: the meta ends with the preset name in lower case («… · весело и познавательно»)
                     val moodWord = ui.mood?.let { moodTitle(it).lowercase() }
                     val metaLine = if (km != null && moodWord != null) meta + stringResource(R.string.common_join_dot) + moodWord else meta
-                    Txt(metaLine, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp).testTag("instruments.meta"), maxLines = 2)
+                    if (ui.abroad && km == null) {
+                        // CEO 29.10: no estimate abroad (the server plans it at ПОЕХАЛИ) — the line says who plans and what it needs
+                        Txt(stringResource(R.string.abroad_server_line), T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp).testTag("instruments.abroad"), maxLines = 2)
+                    } else {
+                        Txt(metaLine, T.body.mdTight, C.text.secondary, Modifier.padding(top = 2.dp).testTag("instruments.meta"), maxLines = 2)
+                    }
                     if (suffix != null) {
                         Txt(
                             suffix, T.body.mdTight, if (ui.budgetOutcome == "no_fit") C.accent.redText else C.text.secondary,
@@ -219,7 +230,7 @@ fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
                     }
                 }
                 val go = stringResource(R.string.common_go)
-                StartButton(StartSize.L, go, enabled = true, cd = go, onClick = a::go, modifier = Modifier.testTag("instruments.start"))
+                StartButton(StartSize.L, go, enabled = ui.goEnabled, cd = go, onClick = a::go, modifier = Modifier.testTag("instruments.start"))
             }
         }
     }
@@ -568,4 +579,4 @@ private fun Gauge(angle: Float, modifier: Modifier) {
 }
 
 /** Sky of the 5.3 strip (S1–S3): band 1 0–60, band 3 60–90, band 4 90–120. */
-private val InstrumentsSky = listOf(Band(0f, 60f, C.sky.band1), Band(60f, 30f, C.sky.band3), Band(90f, 30f, C.sky.band4))
+private val InstrumentsSky: List<Band> get() = listOf(Band(0f, 60f, C.sky.band1), Band(60f, 30f, C.sky.band3), Band(90f, 30f, C.sky.band4))

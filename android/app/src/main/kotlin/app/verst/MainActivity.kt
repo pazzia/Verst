@@ -19,8 +19,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Box
 import app.verst.feature.report.ReportSheet
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.ui.platform.LocalDensity
+import app.verst.core.ui.theme.DesignTokens
+import app.verst.core.ui.theme.Palette
+import app.verst.feature.common.AppHeader
+import app.verst.feature.common.AppTabBar
+import app.verst.nav.activeTab
+import app.verst.nav.openSettingsFromHeader
+import app.verst.nav.selectTab
+import app.verst.nav.tabEnabled
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -73,6 +91,9 @@ import app.verst.nav.buildCustomWalk
 import app.verst.nav.buildWalk
 import app.verst.nav.canUndo
 import app.verst.nav.carTarget
+import app.verst.nav.mapsChosen
+import app.verst.nav.preferredMaps
+import app.verst.nav.abroadHandoff
 import app.verst.nav.cardPickHotel
 import app.verst.nav.cardRemoveWalkStop
 import app.verst.nav.cardReplace
@@ -83,6 +104,7 @@ import app.verst.nav.closeCityCustom
 import app.verst.nav.closeDayMenu
 import app.verst.nav.closeHandoffSheet
 import app.verst.nav.closeParking
+import app.verst.nav.closeBorder
 import app.verst.nav.closePartner
 import app.verst.nav.closeReplace
 import app.verst.nav.closeReport
@@ -96,6 +118,7 @@ import app.verst.nav.handoffInstall
 import app.verst.nav.handoffPick
 import app.verst.nav.handoffScope
 import app.verst.nav.isBooked
+import app.verst.nav.addressOffered
 import app.verst.nav.looksLikeAddress
 import app.verst.nav.manualLocation
 import app.verst.nav.navigatorFromStop
@@ -144,6 +167,7 @@ import app.verst.nav.undo
 import app.verst.nav.undoBooking
 import app.verst.nav.useMyLocation
 import app.verst.nav.visibleCityPresets
+import app.verst.nav.noDataCityPresets
 import app.verst.nav.walkFocusShown
 import app.verst.nav.walkHandoffGo
 import app.verst.nav.walkShareText
@@ -190,11 +214,14 @@ class MainActivity : ComponentActivity() {
     fun pickTripsFolder() = folderPicker.launch(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // S-02: transparent bars with light icons on the dark UI (the scene/dashboard draw behind them).
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
-        )
+        // S-02: transparent bars; light icons on the classic dark UI (the scene/dashboard draw behind them), dark icons
+        // on the camper paper UI (the header and the tab bar draw behind them).
+        val bar = if (Palette.camper) {
+            SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+        } else {
+            SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+        }
+        enableEdgeToEdge(statusBarStyle = bar, navigationBarStyle = bar)
         super.onCreate(savedInstanceState)
         // ENG-05: AppMetrica only when this build has a key, else the no-op (once per process; app-scoped like the flow).
         flow.analytics = VerstAnalytics.install(application)
@@ -241,27 +268,80 @@ class MainActivity : ComponentActivity() {
 fun mockShareText(context: Context, engineText: String): String =
     engineText.trimEnd() + "\n\n" + context.getString(app.verst.core.ui.R.string.mock_share_note)
 
+/**
+ * The engine's share text of [r]; CEO 29.10: «без расходов за границей» on the total line when the rouble total leaves
+ * the costs abroad out (`trip.abroad.roubleTotalIncomplete`).
+ */
+fun shareText(context: Context, r: app.verst.core.model.dto.PlanResultDto): String = app.verst.core.model.ShareText.withAbroad(
+    r.shareText, r.trip.abroad?.roubleTotalIncomplete == true, context.getString(app.verst.core.ui.R.string.share_abroad_incomplete),
+)
+
 /** Android share sheet with the engine's share text (5.5 T2, 5.6 K2), marked as demo data. */
 private fun share(context: Context, text: String) {
     val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, mockShareText(context, text))
     context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
+/**
+ * The classic design: the screen fills the window (it draws behind the system bars), the dialogs over it.
+ * The camper design (CEO 31.10, selectable since 01.11): the paper page with the app header above and the tab bar below every screen; the screen
+ * gets the height between them. The bars consume the status / navigation bar insets, so a screen's `ScreenRoot`
+ * adds no second inset band. Drive (the planning progress) and Debug run full screen without the bars; the tab
+ * bar also steps aside while the keyboard is up (the Navigator's IME handling then works as before).
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun VerstRoot(flow: VerstFlow) {
     val context = LocalContext.current
     val reduced = remember { reducedMotion(context) }
     CompositionLocalProvider(LocalReducedMotion provides reduced) {
-        Box(Modifier.fillMaxSize()) {
-            Screens(flow, context)
+        if (!Palette.camper) {
+            Box(Modifier.fillMaxSize()) {
+                Screens(flow, context)
+                ScreenToasts(flow)
+                Overlays(flow)
+            }
+            return@CompositionLocalProvider
+        }
+        val top = flow.top
+        val chrome = top != Route.Drive && top != Route.Debug
+        val imeUp = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+        val tabs = chrome && !imeUp
+        // a sheet of the screen is open: the bars are dimmed with it and a tap on them closes it (system back);
+        // the root dialogs below draw their own scrim over the whole window
+        val rootDialog = flow.report != null || flow.deleteAsk != null || flow.abroadConsentAsk || flow.limitDialog
+        val closeSheet: () -> Unit = { flow.back() }
+        val onScrim: (() -> Unit)? = if (overlayOpen(flow) && !rootDialog) closeSheet else null
+        Box(Modifier.fillMaxSize().background(DesignTokens.color.camper.page)) {
+            Column(Modifier.fillMaxSize()) {
+                if (chrome) AppHeader(top == Route.Settings, flow::openSettingsFromHeader, onScrim)
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .then(if (chrome) Modifier.consumeWindowInsets(WindowInsets.statusBars) else Modifier)
+                        .then(if (tabs) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier),
+                ) {
+                    Screens(flow, context)
+                    ScreenToasts(flow)
+                }
+                if (tabs) AppTabBar(flow.activeTab, flow::tabEnabled, flow::selectTab, onScrim)
+            }
             Overlays(flow)
         }
     }
 }
 
-/** Dialogs and the Windshield toast that are not owned by one screen (D-1 delete, 5.5 §4 limit). */
+/** Any sheet or dialog open (system back closes it first). */
+private fun overlayOpen(flow: VerstFlow): Boolean =
+    flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
+        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
+        flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null ||
+        flow.roadBorder != null || flow.abroadConsentAsk
+
+/** The toasts that are not owned by one screen, inside the screen area (between the header and the tab bar). */
 @Composable
-private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow) {
+private fun androidx.compose.foundation.layout.BoxScope.ScreenToasts(flow: VerstFlow) {
     val t = flow.toast
     if (flow.top == Route.Windshield && t != null) {
         // F-02: above the dashboard crest (324 dp dashboard + 16), never over the caption or ПОЕХАЛИ.
@@ -271,6 +351,11 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
         // 5.12 location / address toasts above the caption row (start button + 16).
         PlateToast(toastText(t), bottom = 150.dp, action = app.verst.feature.common.toastAction(t), onAction = flow::toastAction)
     }
+}
+
+/** Dialogs that are not owned by one screen (D-1 delete, 5.5 §4 limit, D-7 report), over the whole window. */
+@Composable
+private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow) {
     flow.report?.let { r ->
         // D-7 over Road ahead or the walk (the screens draw the toast after «Отправить»)
         // the comment field raises the IME: the sheet sits above it
@@ -296,6 +381,15 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
             flow::confirmDelete, flow::cancelDelete,
         )
     }
+    if (flow.abroadConsentAsk) {
+        // CEO 29.10 / security review В-1: a trip abroad is planned on the server — the settings' consent dialog first,
+        // its body without «без связи — на телефоне» (abroad there is no phone fallback)
+        NaviDialog(
+            stringResource(UiR.string.settings_server_consent_title), stringResource(UiR.string.abroad_consent_body),
+            stringResource(UiR.string.settings_server_consent_yes), stringResource(UiR.string.settings_server_consent_no),
+            "abroad.consent", { flow.answerAbroadConsent(true) }, { flow.answerAbroadConsent(false) },
+        )
+    }
     if (flow.limitDialog) {
         NaviDialog(
             stringResource(UiR.string.common_storage_full_title), stringResource(UiR.string.common_storage_full_body),
@@ -307,10 +401,7 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
 
 @Composable
 private fun Screens(flow: VerstFlow, context: Context) {
-    val overlayOpen = flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
-        flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
-        flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null
-    BackHandler(enabled = flow.stack.size > 1 || overlayOpen) { flow.back() }
+    BackHandler(enabled = flow.stack.size > 1 || overlayOpen(flow)) { flow.back() }
     when (flow.top) {
         Route.Windshield -> WindshieldScreen(
             WindshieldUi(
@@ -348,10 +439,15 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 originAddress = flow.originAddress,
                 outsideRussia = flow.outsideRussia,
                 online = flow.connectivity.online,
-                addressQuery = flow.looksLikeAddress(flow.query),
+                addressQuery = flow.addressOffered(flow.query),
+                addressFirst = flow.looksLikeAddress(flow.query) || (!flow.searching && flow.suggestions.isEmpty()),
                 addressState = flow.addressState,
                 focusTo = flow.focusToField,
                 addressResults = flow.addressResults,
+                abroad = flow.abroadBlocked,
+                abroadMaps = flow.preferredMaps,
+                abroadServer = flow.abroadOnServer,
+                abroadNoServer = !flow.serverConfigured(),
             ),
             onBack = { flow.back() },
             onQuery = flow::updateQuery,
@@ -369,6 +465,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                     flow.back()
                 }
             },
+            onAbroadMaps = { flow.abroadHandoff() },
         )
         Route.Instruments -> InstrumentsScreen(
             InstrumentsUi(
@@ -390,6 +487,8 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 budgetOutcome = flow.budgetEstimate?.outcome,
                 budgetTotal = flow.budgetEstimate?.totalRub,
                 budgetStatus = flow.budgetEstimate?.budgetStatus,
+                abroad = flow.destinationAbroad,
+                goEnabled = !flow.abroadBlocked,
             ),
             object : InstrumentsActions {
                 override fun back() {
@@ -408,7 +507,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
             flow.drive,
             // The engine figure of this request (estimate = plan); «—» only if ПОЕХАЛИ beat the first estimate.
             kmLabel = flow.figures?.figures?.km?.let { RuFormat.thousands(it) } ?: "—",
-            action = { flow.driveAction(it.code) },
+            action = { flow.driveAction(it) },
             onCancel = { flow.back() },
             onDone = { if (flow.drive.noFit) flow.openNoFit() else flow.openRoad() },
             onErrorAction = flow::onDriveError,
@@ -424,17 +523,20 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         r.trip.daysList.flatMap { it.stops }.filter { flow.isBooked(it.id) }.map { it.id }.toSet(), r.townPrepRu,
                         online = flow.connectivity.online,
                         stopMenu = flow.stopMenu, navigatorInstalled = flow.navigatorInstalled, stopHandoff = flow.stopHandoff,
-                        dayMenu = flow.dayMenu, dayHandoff = flow.dayHandoff, carTarget = flow.carTarget,
+                        dayMenu = flow.dayMenu, dayHandoff = flow.dayHandoff, carTarget = flow.carTarget, maps = flow.preferredMaps,
                         focus = RoadFocus(flow.roadFocusId, flow.roadTopId, flow.roadFocusSeq, flow.roadScrollY),
                         card = flow.card?.takeIf { it.source == app.verst.nav.CardSource.ROAD }?.ui,
                         aboutData = flow.aboutData,
                         minimum = flow.showingMinimum,
                         tappable = flow::tappable,
                         parking = flow.roadParking,
+                        border = flow.roadBorder,
                         handoffDay = flow.handoffDay(r.trip),
                         handoff = flow.handoffSheet?.let {
                             app.verst.feature.road.HandoffSheetUi(
-                                it, flow.handoffLauncher?.mapsInstalled() == true, flow.navigatorInstalled, flow.handoffSigned, flow.handoffRemember,
+                                it, flow.handoffLauncher?.mapsInstalled() == true, flow.navigatorInstalled, flow.handoffRemember,
+                                preferred = flow.preferredMaps, googleInstalled = flow.handoffLauncher?.googleInstalled() == true,
+                                chosen = flow.mapsChosen,
                             )
                         },
                     ),
@@ -446,7 +548,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun save() = flow.save()
                         override fun share() {
                             flow.tripShared()
-                            share(context, r.shareText)
+                            share(context, shareText(context, r))
                         }
                         override fun replace(stop: StopDto) = flow.openReplace(stop)
                         override fun pick(altId: String?) = flow.pickAlternative(altId)
@@ -471,6 +573,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun focusShown() = flow.roadFocusShown()
                         override fun parking(stop: StopDto) = flow.openParking(stop)
                         override fun closeParking() = flow.closeParking()
+                        override fun closeBorder() = flow.closeBorder()
                         override fun handoff(day: Int) = flow.handoff(day)
                         override fun handoffSheet(day: Int) = flow.openHandoffSheet(day)
                         override fun handoffSheet(): app.verst.feature.road.HandoffSheetActions = object : app.verst.feature.road.HandoffSheetActions {
@@ -533,7 +636,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun save() = flow.save()
                         override fun share() {
                             flow.tripShared()
-                            share(context, r.shareText)
+                            share(context, shareText(context, r))
                         }
                         override fun refit() = flow.refit()
                     },
@@ -581,6 +684,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                 startTomorrow = walkStart(flow).tomorrow,
                 few = flow.walkFew,
                 picker = flow.cityPicker,
+                noDataPresets = flow.noDataCityPresets(),
             ),
             object : app.verst.feature.city.CityActions {
                 override fun back() {
@@ -620,6 +724,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                             flow.cityAdults, flow.cityChildren, flow.cityDog, flow.cityPace, flow.cityBudget,
                         ),
                         picker = flow.cityPicker, otherNone = flow.walkOtherNone, few = flow.walkFew,
+                        maps = flow.preferredMaps,
                     ),
                     object : app.verst.feature.city.WalkActions {
                         override fun back() {

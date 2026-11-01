@@ -16,9 +16,17 @@ on:
         description: "Ignore the cached graph and import the latest extract"
         type: boolean
         default: false
+      mmap_cap:
+        description: "Memory cap for the second server run with the graph on disk (MMAP), like a small VM"
+        type: string
+        default: "2G"
+      publish:
+        description: "Publish the checked graph as the public release routing-graph-latest (infra/routing/fetch_graph.sh)"
+        type: boolean
+        default: false
 
 permissions:
-  contents: read
+  contents: write   # publish: the release routing-graph-latest (read-only otherwise)
 
 concurrency:
   group: routing
@@ -35,6 +43,7 @@ env:
   REGION: ${{ inputs.region }}
   # Inside the workspace, not hidden (upload-artifact@v4 skips dot-directories by default), never committed.
   DATA: ${{ github.workspace }}/_routing/data
+  FETCH_PBF: ${{ github.workspace }}/tools/ci/fetch_pbf.sh   # build_graph.sh: 8 ranged parts + md5
   OUT: ${{ github.workspace }}/_routing/out
 
 jobs:
@@ -156,16 +165,93 @@ jobs:
           python3 infra/routing/check_routes.py --url http://127.0.0.1:8989 --out "$OUT" \
             --source "GraphHopper $GH_VERSION, Geofabrik $REGION extract $stamp"
 
+      - name: Load test (graph in RAM)
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/planner
+        run: python3 infra/routing/load_test.py --url http://127.0.0.1:8989 --out "$OUT/ram" --label "RAM_STORE -Xmx$SERVER_XMX"
+
       - name: Server memory (for VM sizing)
         if: always()
         run: |
           pid=$(cat "$OUT/server.pid" 2>/dev/null) || exit 0
           ps -o rss=,vsz= -p "$pid" | awk '{printf "server RSS %.2f GB, VSZ %.2f GB\n", $1/1048576, $2/1048576}' | tee "$OUT/memory.txt"
+          grep -E '^(RssAnon|RssFile)' "/proc/$pid/status" | tee -a "$OUT/memory.txt"
           du -sh "$DATA/graph-cache" | tee -a "$OUT/memory.txt"
           cp "$DATA/build.json" "$OUT/" 2>/dev/null || true
           cp "$DATA/import.log" "$OUT/" 2>/dev/null || true
           { echo '```'; cat "$OUT/memory.txt" "$OUT/build.json" 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           kill "$pid" || true
+
+      - name: Graph on disk (MMAP) under a memory cap
+        # The same graph files, read through the OS page cache instead of the Java heap
+        # (graph.dataaccess.default_type: MMAP); the server JVM gets 1 GB and the whole process, page cache included,
+        # is capped (systemd scope, cgroup v2) like a small VM. Caches are dropped first: a cold start from SSD.
+        if: always() && steps.build.outcome != 'failure'
+        env:
+          PYTHONPATH: ${{ github.workspace }}/backend/planner
+          CAP: ${{ inputs.mmap_cap }}
+        run: |
+          cd infra/routing
+          sed 's/^  graph.dataaccess.default_type: RAM_STORE$/  graph.dataaccess.default_type: MMAP/' config.yml > config-mmap.yml
+          grep -q 'default_type: MMAP' config-mmap.yml
+          sync && echo 3 | sudo tee /proc/sys/vm/drop_caches > /dev/null
+          M="$OUT/mmap"; mkdir -p "$M"
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:8989/health > /dev/null || break; sleep 1; done  # RAM server gone
+          JAVA=$(command -v java)   # sudo resets PATH; keep the Temurin 21 from setup-java
+          sudo systemd-run --scope --quiet -p "MemoryMax=$CAP" -p MemorySwapMax=0 \
+            "$JAVA" -Xmx1g -Xms1g \
+            "-Ddw.graphhopper.datareader.file=$DATA/osm/absent.osm.pbf" \
+            "-Ddw.graphhopper.graph.location=$DATA/graph-cache" \
+            "-Ddw.server.application_connectors[0].bind_host=127.0.0.1" \
+            "-Ddw.server.admin_connectors[0].bind_host=127.0.0.1" \
+            -jar "$JAR" server config-mmap.yml > "$M/server.log" 2>&1 &
+          t0=$(date +%s)
+          for i in $(seq 1 120); do
+            if curl -fs http://127.0.0.1:8989/health > /dev/null; then echo "MMAP server up after $(( $(date +%s) - t0 )) s"; break; fi
+            pgrep -f config-mmap.yml > /dev/null || { tail -80 "$M/server.log"; exit 1; }
+            sleep 5
+          done
+          grep -i -m3 'mmap\|dataaccess' "$M/server.log" || true
+          cd "$GITHUB_WORKSPACE"
+          python3 infra/routing/load_test.py --url http://127.0.0.1:8989 --out "$M" --label "MMAP -Xmx1g, cap $CAP, cold start"
+          python3 infra/routing/check_routes.py --url http://127.0.0.1:8989 --out "$M/check" \
+            --source "MMAP check" > "$M/check.txt" 2>&1 && echo "MMAP: all route and plan checks pass" | tee -a "$GITHUB_STEP_SUMMARY" \
+            || { echo "MMAP: route/plan checks failed (see mmap/check.txt)" | tee -a "$GITHUB_STEP_SUMMARY"; tail -40 "$M/check.txt"; }
+          pid=$(pgrep -n -x java)   # the java process itself, not the sudo/systemd-run wrapper that carries the same cmdline
+          scope=$(sudo cat "/proc/$pid/cgroup" | sed 's/^0:://')
+          { ps -o rss=,vsz= -p "$pid" | awk '{printf "MMAP server RSS %.2f GB, VSZ %.2f GB\n", $1/1048576, $2/1048576}'
+            grep -E '^(RssAnon|RssFile)' "/proc/$pid/status"
+            echo "scope $scope: memory.max $(sudo cat /sys/fs/cgroup$scope/memory.max), memory.current $(( $(sudo cat /sys/fs/cgroup$scope/memory.current) / 1048576 )) MB, memory.peak $(( $(sudo cat /sys/fs/cgroup$scope/memory.peak) / 1048576 )) MB (heap + page cache of the graph files)"
+            sudo grep -E '^(anon|file) ' /sys/fs/cgroup$scope/memory.stat | awk '{printf "  %s %d MB\n", $1, $2/1048576}'; } | tee "$M/memory.txt"
+          { echo '```'; cat "$M/memory.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          sudo kill "$pid" || true
+
+      - name: Publish the graph (release routing-graph-latest)
+        # CEO 31.10 / D-IR-21: the VM downloads the checked graph without a GitHub login (fetch_graph.sh) and
+        # serves it with MMAP. Parts ≤ 1.9 GB (GitHub's 2 GB per file). The tag sits on the default branch:
+        # GITHUB_TOKEN may not create refs on a history with workflow changes; the notes name the commit.
+        if: success() && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: routing-graph-latest
+        run: |
+          P="$RUNNER_TEMP/publish"; mkdir -p "$P"
+          tar -C "$DATA" -czf - graph-cache build.json | split -b 1900m -d -a 2 - "$P/graph.tar.gz.part"
+          cp "$DATA/build.json" "$P/"
+          (cd "$P" && sha256sum graph.tar.gz.part* > SHA256SUMS && cat SHA256SUMS && du -sh .)
+          {
+            echo "Граф дорог для GraphHopper $GH_VERSION, регион \`$REGION\`, проверен маршрутами и планами (routing.yml)."
+            echo
+            echo "На ВМ: \`sudo infra/routing/fetch_graph.sh\` (скачает части, проверит sha256, положит в /srv/verst/routing/current)."
+            echo "Собрано из коммита ${{ github.sha }}; данные © участники OpenStreetMap, ODbL 1.0."
+            echo
+            echo '```'; cat "$DATA/build.json"; echo; echo '```'
+          } > "$P/notes.md"
+          gh release delete "$TAG" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" "$P"/graph.tar.gz.part* "$P/SHA256SUMS" "$P/build.json" \
+            --repo "${{ github.repository }}" --target "${{ github.event.repository.default_branch }}" --prerelease \
+            --title "Граф дорог · $REGION" --notes-file "$P/notes.md"
+          echo "::notice title=Graph::https://github.com/${{ github.repository }}/releases/tag/$TAG"
 
       - uses: actions/upload-artifact@v4
         if: always()

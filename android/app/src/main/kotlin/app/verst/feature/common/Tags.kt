@@ -50,7 +50,76 @@ fun kindWord(kind: String?): String? = when (kind) {
     "interactive" -> stringResource(R.string.kind_interactive)
     "playground" -> stringResource(R.string.kind_playground)
     "monument", "memorial" -> stringResource(R.string.kind_monument)
+    // CEO 29.10: walk food places (OSM) and the bar kinds, for walks without the engine's `poiKindRu`
+    "restaurant" -> stringResource(R.string.kind_restaurant)
+    "cafe" -> stringResource(R.string.kind_cafe)
+    "fast_food" -> stringResource(R.string.kind_fast_food)
+    "food_court" -> stringResource(R.string.kind_food_court)
+    "ryumochnaya" -> stringResource(R.string.kind_ryumochnaya)
+    "pub", "beer" -> stringResource(R.string.kind_pub)
+    "craft" -> stringResource(R.string.kind_craft)
+    "bar" -> stringResource(R.string.kind_bar)
     else -> null
+}
+
+/** CEO 29.10: an OSM `cuisine` tag → its word («georgian» → «грузинская кухня»); null = no word (never shown raw). */
+fun cuisineRes(tag: String): Int? = when (tag) {
+    "russian" -> R.string.cuisine_russian
+    "georgian" -> R.string.cuisine_georgian
+    "armenian" -> R.string.cuisine_armenian
+    "azerbaijani" -> R.string.cuisine_azerbaijani
+    "uzbek" -> R.string.cuisine_uzbek
+    "caucasian" -> R.string.cuisine_caucasian
+    "ukrainian" -> R.string.cuisine_ukrainian
+    "italian" -> R.string.cuisine_italian
+    "pizza" -> R.string.cuisine_pizza
+    "japanese" -> R.string.cuisine_japanese
+    "sushi" -> R.string.cuisine_sushi
+    "chinese" -> R.string.cuisine_chinese
+    "asian" -> R.string.cuisine_asian
+    "korean" -> R.string.cuisine_korean
+    "vietnamese" -> R.string.cuisine_vietnamese
+    "thai" -> R.string.cuisine_thai
+    "indian" -> R.string.cuisine_indian
+    "french" -> R.string.cuisine_french
+    "european" -> R.string.cuisine_european
+    "mediterranean" -> R.string.cuisine_mediterranean
+    "greek" -> R.string.cuisine_greek
+    "turkish" -> R.string.cuisine_turkish
+    "mexican" -> R.string.cuisine_mexican
+    "american" -> R.string.cuisine_american
+    "burger" -> R.string.cuisine_burger
+    "steak_house", "steak" -> R.string.cuisine_steak_house
+    "seafood" -> R.string.cuisine_seafood
+    "fish" -> R.string.cuisine_fish
+    "kebab" -> R.string.cuisine_kebab
+    "shawarma" -> R.string.cuisine_shawarma
+    "regional", "local" -> R.string.cuisine_regional
+    "coffee_shop", "coffee" -> R.string.cuisine_coffee_shop
+    "bakery", "pastry" -> R.string.cuisine_bakery
+    "cake", "dessert" -> R.string.cuisine_cake
+    "pancake", "crepe" -> R.string.cuisine_pancake
+    "ice_cream" -> R.string.cuisine_ice_cream
+    "sandwich" -> R.string.cuisine_sandwich
+    "chicken" -> R.string.cuisine_chicken
+    "vegetarian" -> R.string.cuisine_vegetarian
+    "vegan" -> R.string.cuisine_vegan
+    else -> null
+}
+
+/**
+ * CEO 29.10: the words for a food place's OSM `cuisine` («georgian;pizza» → «грузинская кухня, пицца»), at most
+ * [max] of them; null when the app has a word for none of the tags.
+ */
+@Composable
+fun cuisineWords(cuisine: String?, max: Int = 2): String? {
+    val words = mutableListOf<String>()
+    for (tag in app.verst.core.model.dto.cuisineTags(cuisine)) {
+        if (words.size >= max) break
+        val res = cuisineRes(tag) ?: continue
+        words += stringResource(res)
+    }
+    return words.takeIf { it.isNotEmpty() }?.joinToString(", ")
 }
 
 /**

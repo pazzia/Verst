@@ -32,6 +32,7 @@ import argparse
 import dataclasses
 import gc
 import json
+import math
 import sys
 import threading
 import time
@@ -48,7 +49,7 @@ from verst_planner import handoff as handoff_mod
 from verst_planner.adapters.catalogue import CataloguePorts, CatalogueWorld, build_catalogue_ports, compose
 from verst_planner.adapters.catalogue.world import WORLD_ID as CATALOGUE_WORLD
 from verst_planner.adapters.fake import GOLDEN_CLOCK, FakePorts, FakeWorld, build_fakes
-from verst_planner.catalogue import Catalogue, CatalogueError, load_packaged
+from verst_planner.catalogue import Catalogue, CatalogueError, CatPark, load_packaged, load_packaged_parks
 from verst_planner.catalogue.photos import image_urls
 from verst_planner.city import presets as city_presets_mod
 from verst_planner.city.route import NotEnoughPois, WalkTown, build_walk, request_key
@@ -56,6 +57,7 @@ from verst_planner.city.walk import (
     Candidate,
     WalkInput,
     bar_hours,
+    caps_for,
     dwell_for,
     long_visit,
     parse_input,
@@ -130,10 +132,14 @@ class _World:
     planner: Planner
     catalogue: CatalogueWorld | None = None
     bars: GridIndex[str] | None = None
+    food: GridIndex[str] | None = None
+    parks: GridIndex[str] | None = None
 
 
 _WORLDS: dict[str, _World] = {}
 _CATALOGUE: list[Catalogue] = []  # the loaded catalogue (0 or 1 element)
+_PARKS: dict[str, CatPark] = {}  # CEO 30.10: named OSM parks of the catalogue's towns (walk «парки»)
+PARK_KIND = "park"  # a garden walks like a park
 _CLOCK: SystemClock | _Fixed = SystemClock()
 _CANCELS: dict[str, CancelToken] = {}
 _TOMBSTONES: dict[str, None] = {}  # insertion-ordered set of ids cancelled before their plan started
@@ -177,7 +183,13 @@ def _envelope(fn: Callable[[], Any]) -> str:
         try:
             body: dict[str, Any] = {"ok": True, "result": fn()}
         except InvalidInput as e:
-            body = {"ok": False, "error": _error(e.code, str(e), field=e.field, reason=e.reason)}
+            # CEO 29.10 (trips abroad): `country`, `messageRu`, `until` only when set (others keep bytes)
+            extra = {
+                k: v
+                for k, v in (("country", e.country), ("messageRu", e.message_ru), ("until", e.until))
+                if v is not None
+            }
+            body = {"ok": False, "error": _error(e.code, str(e), field=e.field, reason=e.reason, **extra)}
         except Unreachable as e:
             body = {"ok": False, "error": _error(e.code, str(e), pointIndex=e.point_index)}
         except TooShort as e:
@@ -186,7 +198,14 @@ def _envelope(fn: Callable[[], Any]) -> str:
             body = {
                 "ok": False,
                 "error": _error(
-                    e.code, str(e), field=e.field, suggestions=e.suggestions, requestKey=e.request_key
+                    e.code,
+                    str(e),
+                    field=e.field,
+                    reason="no_data" if e.no_data else "few_places",
+                    suggestions=e.suggestions,
+                    requestKey=e.request_key,
+                    noData=e.no_data,
+                    messageRu=e.message_ru,
                 ),
             }
         except PlannerError as e:
@@ -210,7 +229,7 @@ class _BadInput(Exception):
 def _decode(text: Any, what: str) -> Any:
     try:
         return json.loads(text)
-    except (TypeError, ValueError) as e:
+    except (TypeError, ValueError, RecursionError) as e:  # QA B-8: «[» x 100 000 is not JSON for us either
         raise _BadInput(f"{what}: not JSON") from e
 
 
@@ -219,7 +238,7 @@ def _parse(what: str, fn: Callable[[], Any]) -> Any:
         return fn()
     except PlannerError:
         raise
-    except (KeyError, TypeError, ValueError, AttributeError) as e:
+    except (KeyError, TypeError, ValueError, AttributeError, OverflowError, RecursionError) as e:
         raise _BadInput(f"{what}: {e!r}") from e
 
 
@@ -265,8 +284,14 @@ def _num(v: Any, what: str) -> float:
 # ---------------------------------------------------------------------------------------------- planners
 
 
-# ADR-0015 §2 rules and the M9 ready-route template rule for russia_v1
-OPEN_DATA_CONFIG: dict[str, Any] = {"sights": {"diversity": 1}, "split": {"honour_template": 1}}
+# ADR-0015 §2 rules, the M9 ready-route template rule and the acceptance 2026-10-28 anchor towns and evening
+# in the overnight town (K2, V1) for russia_v1
+OPEN_DATA_CONFIG: dict[str, Any] = {
+    "sights": {"diversity": 1},
+    "split": {"honour_template": 1},
+    "overnight_score": {"anchors": 1},
+    "town_visit": {"on": 1},
+}
 
 
 def _planner(fakes: FakePorts | CataloguePorts, clock: Any, config: dict[str, Any] | None = None) -> Planner:
@@ -548,7 +573,9 @@ def place_source(w: _World, place_id: str) -> dict[str, Any]:
     p = w.world.places.get(place_id)
     if p is not None and p.source is Source.CURATED:
         return {"placeSource": "curated", "placeAttributionRu": None}
-    osm = place_id.startswith("osm_") or (bool(_CATALOGUE) and place_id in _CATALOGUE[0].bar_by_id)
+    osm = place_id.startswith("osm_") or (
+        bool(_CATALOGUE) and (place_id in _CATALOGUE[0].bar_by_id or place_id in _CATALOGUE[0].food_by_id)
+    )
     if osm:
         return {"placeSource": "osm", "placeAttributionRu": ru.text(OSM_PLACE_ATTRIBUTION)}
     return {"placeSource": "wikidata", "placeAttributionRu": None}
@@ -761,7 +788,7 @@ def _no_fit_result(nf: NoFit, w: _World) -> dict[str, Any]:
         "allowedRub": nf.allowed,
         "minimum": {
             "totalRub": nf.minimum.cost.total_rub,
-            "levers": [{"code": x.code, "savedRub": x.saved_rub} for x in nf.levers],
+            "levers": [codec.lever_to_json(x) for x in nf.levers],
             **_trip_result(nf.minimum, w),
         },
         "options": options,
@@ -997,12 +1024,22 @@ def _load_catalogue() -> dict[str, Any]:
         bars: GridIndex[str] = GridIndex(0.05)
         for b in cat.bars:
             bars.add(b.point, b.id)
+        food: GridIndex[str] = GridIndex(0.05)
+        for f in cat.food:
+            food.add(f.point, f.id)
+        park_list = load_packaged_parks(cat)
+        parks: GridIndex[str] = GridIndex(0.05)
+        for pk in park_list:
+            parks.add(pk.point, pk.id)
     finally:
         if was_enabled:
             gc.enable()
     gc.freeze()
-    _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, _planner(ports, _CLOCK, OPEN_DATA_CONFIG), cw, bars)
+    planner = _planner(ports, _CLOCK, OPEN_DATA_CONFIG)
+    _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, planner, cw, bars, food, parks if park_list else None)
     _CATALOGUE[:] = [cat]
+    _PARKS.clear()
+    _PARKS.update((pk.id, pk) for pk in park_list)
     return {
         **cat.info(),
         "world": CATALOGUE_WORLD,
@@ -1014,6 +1051,61 @@ def _load_catalogue() -> dict[str, Any]:
 def load_catalogue() -> str:
     """Compose `russia_v1` from `central_russia_v1` and the packaged catalogue (ADR-0012 §4)."""
     return _envelope(_load_catalogue)
+
+
+# ---------------------------------------------------------------------- trips abroad (CEO 29.10, server)
+
+ABROAD_WORLD = "world_v1"
+ABROAD_DIR_ENV = "VERST_ABROAD_DIR"
+RATES_FILE_ENV = "VERST_RATES_FILE"
+
+
+def default_abroad_dir() -> Path:
+    """`backend/planner/abroad` next to the package (never inside it: the APK packs only the package)."""
+    return Path(__file__).resolve().parents[1] / "abroad"
+
+
+def _load_abroad(path: Any = None, rates_path: Any = None) -> dict[str, Any]:
+    import os
+
+    from verst_planner.adapters.catalogue import road_model
+    from verst_planner.foreign import catalogues as abroad_catalogues
+    from verst_planner.foreign import world as abroad_world
+    from verst_planner.foreign.planner import AbroadPlanner
+    from verst_planner.foreign.rates import Rates
+
+    base = _WORLDS.get(CATALOGUE_WORLD)
+    if base is None or base.catalogue is None or not isinstance(base.fakes, CataloguePorts):
+        raise EngineFailure("NO_WORLD", f"{CATALOGUE_WORLD} must be loaded before the world abroad")
+    raw_dir = str(path or "") or os.environ.get(ABROAD_DIR_ENV, "")
+    root = Path(raw_dir) if raw_dir else default_abroad_dir()
+    raw_rates = str(rates_path or "") or os.environ.get(RATES_FILE_ENV, "")
+    t0 = time.perf_counter()
+    try:
+        cats = abroad_catalogues.load_dir(root)
+    except CatalogueError as e:
+        raise EngineFailure("NO_CATALOGUE", str(e)) from e
+    rates = Rates.load(Path(raw_rates)) if raw_rates else None
+    aw = abroad_world.build(base.catalogue, base.fakes, cats, rates, loaded_from=root)
+    planner = AbroadPlanner(
+        russian=base.planner,
+        world=aw,
+        routing=base.fakes.routing,
+        model=road_model(),
+        clock=_CLOCK,
+        config=PlannerConfig.from_dict(OPEN_DATA_CONFIG),
+        templates=ReasonTemplates.default(),
+        parking=base.fakes.parking,
+    )
+    _WORLDS[ABROAD_WORLD] = _World(aw.world, aw.ports, planner, aw.cw, base.bars, base.food, base.parks)
+    return {**aw.info(), "ms": round((time.perf_counter() - t0) * 1000)}
+
+
+def load_abroad(path: str = "", rates_path: str = "") -> str:
+    """Server only: compose `world_v1` = `russia_v1` + the catalogues under `path` (default
+    `$VERST_ABROAD_DIR`, else `backend/planner/abroad`); a missing folder gives a world that is Russia only.
+    `rates_path` (default `$VERST_RATES_FILE`): the Bank of Russia rates file of `tools/ci/fetch_rates.py`."""
+    return _envelope(lambda: _load_abroad(path, rates_path))
 
 
 def _town_json(w: _World, t: Town) -> dict[str, Any]:
@@ -1242,8 +1334,134 @@ def _candidates(w: _World, inp: WalkInput, radius: float) -> list[Candidate]:
                     weight=weight,
                 )
             )
+    if w.food is not None and _CATALOGUE and any(weights.get(k, 0.0) > 0 for k in city_presets_mod.EAT_KINDS):
+        cat = _CATALOGUE[0]
+        for _d, fid in w.food.within(inp.start, radius):
+            f = cat.food_by_id[fid]
+            weight = weights.get(f.kind, 0.0)
+            if fid in inp.exclude or weight <= 0:
+                continue
+            hours = _safe_hours(f.hours)
+            out.append(
+                Candidate(
+                    id=f.id,
+                    name=f.name,
+                    kind=f.kind,
+                    point=f.point,
+                    popularity=0.5 + (0.2 if hours is not None else 0.0) + (0.1 if f.cuisine else 0.0),
+                    heritage=False,
+                    hours=hours,  # None = unknown («часы не указаны»), never a made-up default
+                    hours_verified=hours is not None,
+                    hours_source="osm" if hours is not None else "default",
+                    cost_rub=0,  # OSM has no prices: the stop says «цена не указана» (ADR-0019 E-2)
+                    dwell_min=dwell_for(f.kind, 0, inp),
+                    has_photo=False,
+                    weight=weight,
+                    price_known=False,
+                )
+            )
+    park_weight = weights.get(PARK_KIND, 0.0)
+    if w.parks is not None and park_weight > 0:
+        for _d, pkid in w.parks.within(inp.start, radius):
+            pk = _PARKS[pkid]
+            if pkid in inp.exclude or pk.poi is not None:
+                continue  # a park with a `catalogue_pois` twin is already a sight candidate
+            hours = _safe_hours(pk.hours)
+            out.append(
+                Candidate(
+                    id=pk.id,
+                    name=pk.name,
+                    kind=PARK_KIND,
+                    point=pk.point,
+                    popularity=park_popularity(pk.area_m2),
+                    heritage=False,
+                    hours=hours,
+                    hours_verified=hours is not None,
+                    hours_source="osm" if hours is not None else "default",
+                    cost_rub=0,
+                    dwell_min=dwell_for(PARK_KIND, 0, inp),
+                    has_photo=False,
+                    weight=park_weight,
+                )
+            )
     out.sort(key=lambda c: (-round(c.base_score, 9), c.id))
-    return out[: city_presets_mod.POOL_MAX]
+    return pool_mix(out, caps_for(inp))
+
+
+def pool_mix(ranked: list[Candidate], caps: dict[str, int]) -> list[Candidate]:
+    """The best `POOL_MAX` candidates, food and drinks at most `POOL_PER_CAP` x their stop caps; the room they
+    leave goes to the sights (and back to food and drinks when there are not enough sights). Ranked order."""
+    eat, drink = city_presets_mod.EAT_KINDS, city_presets_mod.DRINK_KINDS
+    limit = {"food": caps.get("food", 0) * city_presets_mod.POOL_PER_CAP,
+             "drinks": caps.get("drinks", 0) * city_presets_mod.POOL_PER_CAP}  # fmt: skip
+    taken = {"food": 0, "drinks": 0}
+    first: list[Candidate] = []
+    rest: list[Candidate] = []
+    for c in ranked:
+        group = "food" if c.kind in eat else "drinks" if c.kind in drink else None
+        if group is not None and taken[group] >= limit[group]:
+            rest.append(c)
+            continue
+        if group is not None:
+            taken[group] += 1
+        first.append(c)
+    pool = first[: city_presets_mod.POOL_MAX]
+    pool += rest[: city_presets_mod.POOL_MAX - len(pool)]
+    order = {id(c): i for i, c in enumerate(ranked)}
+    return sorted(pool, key=lambda c: order[id(c)])
+
+
+def park_popularity(area_m2: int) -> float:
+    """A bigger park is the likelier walk: 0.3 for a square of 100 m², 0.9 from 1 km² (log scale)."""
+    return max(0.3, min(0.9, 0.3 + 0.15 * (math.log10(max(area_m2, 1)) - 2)))
+
+
+def _kinds_near(w: _World, start: LatLon, kinds: frozenset[str], town_id: str | None) -> bool:
+    """Has the catalogue any place of these kinds for the walk's town (bars and food: the town the data build
+    assigned them to; sights: within NO_CITY_KM of the start)? CEO 2026-10-29: «no data» is not «few»."""
+    km = city_presets_mod.NO_CITY_KM
+    data_kinds = kinds & (city_presets_mod.DRINK_KINDS | city_presets_mod.EAT_KINDS)
+    if data_kinds and _CATALOGUE:
+        cat = _CATALOGUE[0]
+        if town_id is not None and w.catalogue is not None:
+            qid = w.catalogue.qid_of_place.get(town_id, town_id)
+            if data_kinds & cat.kinds_by_town.get(qid, frozenset()):
+                return True
+        else:
+            near = {cat.bar_by_id[b].kind for _d, b in w.bars.within(start, km)} if w.bars else set()
+            near |= {cat.food_by_id[f].kind for _d, f in w.food.within(start, km)} if w.food else set()
+            if data_kinds & near:
+                return True
+    if PARK_KIND in kinds and w.parks is not None and w.parks.within(start, km):
+        return True
+    if kinds & frozenset(city_presets_mod.SIGHT_KINDS):
+        for p in w.fakes.places.places_near(start, km, frozenset({PlaceType.SIGHT})):
+            if _poi_kind(w, p) in kinds:
+                return True
+    return False
+
+
+def _no_data(w: _World, inp: WalkInput, town_id: str | None) -> list[str]:
+    """CEO 2026-10-29: the interests (custom walk) or the preset whose kinds the catalogue has no place of for
+    this town — we never loaded them, so the walk must not say the town has few such places."""
+    if inp.preset == "custom":
+        kinds = city_presets_mod.INTEREST_KINDS
+
+        def missing(i: str) -> bool:
+            return bool(kinds[i]) and not _kinds_near(w, inp.start, frozenset(kinds[i]), town_id)
+
+        return [i for i in inp.interests if missing(i)]
+    preset = city_presets_mod.PRESET_TABLE.get(inp.preset)
+    if preset is None or _kinds_near(w, inp.start, preset.gate_kinds, town_id):
+        return []
+    return [inp.preset]
+
+
+def _no_data_ru(keys: list[str]) -> str | None:
+    if not keys:
+        return None
+    what = ru.join_and([ru.text(f"walk.no_data.what.{k}") for k in keys])
+    return ru.text("walk.no_data", what=what)
 
 
 DEFAULT_TZ = "Europe/Moscow"
@@ -1285,6 +1503,8 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
         except NotEnoughPois as e:
             e.suggestions = _walk_suggestions(w, inp, wt, now_local, token)
             e.request_key = key
+            e.no_data = _no_data(w, inp, wt.id)
+            e.message_ru = _no_data_ru(e.no_data)
             raise
     finally:
         with _LOCK:
@@ -1295,12 +1515,22 @@ def _city_route(world: Any, request_id: Any, input_json: Any) -> dict[str, Any]:
 def _walk_details(w: _World, result: dict[str, Any]) -> dict[str, Any]:
     """M9: walk stops carry the same `poiKind` / `poiKindRu` and place source as trip stops (`kind` stays
     the walk solver's kind)."""
+    cat = _CATALOGUE[0] if _CATALOGUE else None
     for s in result.get("stops", []):
         pid = s.get("poiId") or ""
         p = w.world.places.get(pid)
         if p is not None:
             s["poiKind"] = card_kind(w, p)
             s["poiKindRu"] = ru.kind_label(s["poiKind"])
+        elif cat is not None and (pid in cat.bar_by_id or pid in cat.food_by_id):
+            s["poiKind"] = s["kind"]  # CEO 2026-10-29: a bar or food place carries its own category label
+            s["poiKindRu"] = ru.kind_label(s["kind"])
+            food = cat.food_by_id.get(pid)
+            if food is not None:
+                s["cuisine"] = food.cuisine
+        elif pid in _PARKS:
+            s["poiKind"] = PARK_KIND
+            s["poiKindRu"] = ru.kind_label(PARK_KIND)
         s.update(place_source(w, pid))
     return result
 
@@ -1321,6 +1551,8 @@ def _solve_walk(
     w: _World, inp: WalkInput, wt: WalkTown, now_local: datetime, route_id: str, token: CancelToken
 ) -> dict[str, Any]:
     inp, cands = _walk_candidates(w, inp)
+    if inp.preset == "custom":
+        inp = dataclasses.replace(inp, no_data_ru=_no_data_ru(_no_data(w, inp, wt.id)))
     if inp.start_at is not None:
         start_dt, tomorrow = inp.start_at, inp.start_at.date() > now_local.date()
     else:
@@ -1418,9 +1650,11 @@ def _city_presets(world: Any, lat: Any, lon: Any) -> dict[str, Any]:
             exclude=frozenset(),
         )
         cands = _candidates(w, probe, city_presets_mod.radius_km(duration, city_presets_mod.PACES[pace][0]))
+        no_data = False
         if preset is not None:
             count = sum(1 for c in cands if c.kind in preset.gate_kinds)
             available = count >= preset.gate_min
+            no_data = count == 0 and not _kinds_near(w, p, preset.gate_kinds, town.id)
         else:
             count = len(cands)
             available = count >= 2
@@ -1436,6 +1670,9 @@ def _city_presets(world: Any, lat: Any, lon: Any) -> dict[str, Any]:
                 "defaultPace": pace,
                 "adultOnly": key in city_presets_mod.ADULT_PRESETS,
                 "titleRu": ru.text(f"walk.preset.{key}"),
+                # CEO 2026-10-29: not available because our catalogue has no such places here (not the town)
+                "noData": no_data,
+                "noDataRu": _no_data_ru([key]) if no_data else None,
             }
         )
     return {"town": _town_json(w, town), "now": now_local.strftime("%Y-%m-%dT%H:%M"), "presets": out}
@@ -1650,6 +1887,28 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
             "lon": b.point.lon,
             "image": None,
             "hours": {"textRu": b.hours or ru.text("poi.hours_default"), "verified": False},
+            "ticket": None,
+            "isFictional": False,
+            "attributionRu": [ru.text("poi.osm")],
+            "wikidataId": None,
+            "placeSource": "osm",
+            "placeAttributionRu": ru.text(OSM_PLACE_ATTRIBUTION),
+        }
+    if pid in _PARKS:
+        pk = _PARKS[pid]
+        town_id = w.catalogue.town_of_qid.get(pk.town) if w.catalogue else None
+        town = w.world.towns.get(town_id or "")
+        return {
+            "id": pk.id,
+            "kind": "sight",
+            "poiKind": PARK_KIND,
+            "nameRu": pk.name,
+            "descriptionRu": None,
+            "townName": town.name_ru if town else None,
+            "lat": pk.point.lat,
+            "lon": pk.point.lon,
+            "image": None,
+            "hours": {"textRu": pk.hours, "verified": True} if pk.hours else None,
             "ticket": None,
             "isFictional": False,
             "attributionRu": [ru.text("poi.osm")],

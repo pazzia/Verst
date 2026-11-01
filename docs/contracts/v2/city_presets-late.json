@@ -26,13 +26,15 @@
     {
      "preset": "overview",
      "available": true,
-     "count": 51,
+     "count": 60,
      "startAt": "2026-10-24T09:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
      "defaultPace": "normal",
      "adultOnly": false,
-     "titleRu": "Обзорный"
+     "titleRu": "Обзорный",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "museums",
@@ -43,51 +45,61 @@
      "defaultDurationMin": 360,
      "defaultPace": "slow",
      "adultOnly": false,
-     "titleRu": "Музейный"
+     "titleRu": "Музейный",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "dog_walk",
      "available": true,
-     "count": 4,
+     "count": 19,
      "startAt": "2026-10-24T09:00",
      "startsTomorrow": true,
      "defaultDurationMin": 120,
      "defaultPace": "normal",
      "adultOnly": false,
-     "titleRu": "Прогулка с собакой"
+     "titleRu": "Прогулка с собакой",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "ryumochnye",
      "available": false,
-     "count": 1,
+     "count": 2,
      "startAt": "2026-10-24T18:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
      "defaultPace": "normal",
      "adultOnly": true,
-     "titleRu": "По рюмочным"
+     "titleRu": "По рюмочным",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "beer",
      "available": true,
-     "count": 3,
+     "count": 14,
      "startAt": "2026-10-24T18:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
      "defaultPace": "normal",
      "adultOnly": true,
-     "titleRu": "Пивной"
+     "titleRu": "Пивной",
+     "noData": false,
+     "noDataRu": null
     },
     {
      "preset": "custom",
      "available": true,
-     "count": 54,
+     "count": 60,
      "startAt": "2026-10-24T09:00",
      "startsTomorrow": true,
      "defaultDurationMin": 240,
      "defaultPace": "normal",
      "adultOnly": false,
-     "titleRu": "Свой маршрут"
+     "titleRu": "Свой маршрут",
+     "noData": false,
+     "noDataRu": null
     }
    ]
   },

@@ -3,6 +3,7 @@ package app.verst.feature.card
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -46,7 +47,7 @@ data class CardUi(
     /** RoadSign kind of the mini sign (tourist / hotel / service). */
     val sign: String,
     val tags: List<String> = emptyList(),
-    val kind: String, // sight | hotel | bar
+    val kind: String, // sight | hotel | bar | food (CEO 29.10: an OSM restaurant / café of a walk)
     val details: PoiDetailsDto? = null,
     val loading: Boolean = false,
     val offline: Boolean = false,
@@ -55,7 +56,26 @@ data class CardUi(
     val booked: Boolean = false,
     val canReplace: Boolean = false,
     val walkStop: Boolean = false,
+    /** CEO 29.10: the town the row knows (a walk's town, a night's town) until `poi_details` names one. */
+    val town: String? = null,
+    /**
+     * CEO 29.10: the place's street address («ул. Ленина, 5»), reverse-geocoded from its coordinates when the card
+     * opened online (Nominatim, else the phone's geocoder); null = not known (offline, not found).
+     */
+    val address: String? = null,
+    /** The address lookup runs: «Адрес уточняется…». */
+    val addressLoading: Boolean = false,
 )
+
+/**
+ * CEO 29.10: the card's address line — the street address, and « · <town>» when it does not name the town itself
+ * («ул. Ленина, 5 · Фрязино»).
+ */
+internal fun cardAddressLine(address: String, town: String?): String {
+    val a = address.trim()
+    val t = town?.trim()?.takeIf { it.isNotEmpty() } ?: return a
+    return if (a.contains(t, ignoreCase = true)) a else "$a · $t"
+}
 
 interface CardActions {
     fun close()
@@ -72,12 +92,20 @@ interface CardActions {
 fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
     val d = ui.details
     val name = d?.nameRu ?: ui.name
-    BottomSheet(name, a::close, "card", windowH, pane = stringResource(R.string.cd_card, name), leading = { CardMiniSign(ui) }) {
+    // CEO 29.10: the address under the kind line, and in the card's TalkBack title
+    val addressLine = ui.address?.let { cardAddressLine(it, d?.townName ?: ui.town) }
+    val pane = if (addressLine != null) stringResource(R.string.cd_card_with_address, name, addressLine) else stringResource(R.string.cd_card, name)
+    BottomSheet(name, a::close, "card", windowH, pane = pane, leading = { CardMiniSign(ui) }) {
         // 5.9 §9: the KindTag + the kind/place line; «Почему здесь: …» when the engine says why
         val tagWord = if (ui.kind == "sight") d?.poiKindRu?.uppercase() ?: app.verst.feature.common.kindWord(d?.poiKind) else null
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (tagWord != null) app.verst.feature.common.KindTag(tagWord)
             Txt(kindLine(ui), T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("card.kind"), maxLines = 1)
+        }
+        if (addressLine != null) {
+            AddressLine(addressLine)
+        } else if (ui.addressLoading) {
+            Txt(stringResource(R.string.card_address_loading), T.body.sm, C.text.muted, Modifier.padding(top = 2.dp).testTag("card.address.loading"), maxLines = 1)
         }
         d?.whyRu?.takeIf { it.isNotBlank() }?.let {
             // «Почему здесь: объект культурного наследия · …» (the engine starts each part with a capital)
@@ -187,6 +215,30 @@ fun BoxScope.CardSheet(ui: CardUi, windowH: Dp, a: CardActions) {
 }
 
 /**
+ * CEO 29.10: the address line under the kind line; a tap or a long press copies it to the clipboard with the toast
+ * «Адрес скопирован» (a system toast: it shows above the sheet).
+ */
+@Composable
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+private fun AddressLine(text: String) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val copied = stringResource(R.string.card_address_copied)
+    val copyLabel = stringResource(R.string.cd_card_address_copy)
+    val copy = {
+        (ctx.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager)
+            ?.setPrimaryClip(android.content.ClipData.newPlainText("Verst address", text))
+        android.widget.Toast.makeText(ctx, copied, android.widget.Toast.LENGTH_SHORT).show()
+    }
+    Txt(
+        text, T.body.sm, C.text.secondary,
+        Modifier.padding(top = 2.dp).fillMaxWidth().defaultMinSize(minHeight = 24.dp)
+            .combinedClickable(onClickLabel = copyLabel, onLongClickLabel = copyLabel, onLongClick = copy, onClick = copy)
+            .testTag("card.address"),
+        maxLines = 2,
+    )
+}
+
+/**
  * 5.9 §9 facts as chips (min-h 28, radius 14): hours (green open / red closed), ticket, dogs, parking (blue tint);
  * one open-data line with the dotted ring when any fact is open data. «не проверено» is never shown.
  */
@@ -249,7 +301,7 @@ private fun FactChips(ui: CardUi) {
 /** 5.9 C2: the row's RoadSign at 0.7 (tourist 39 × 39, hotel service 35 × 43); bars get the §21 bar sign. */
 @Composable
 private fun CardMiniSign(ui: CardUi) {
-    if (ui.kind == "bar") BarSign(ui.tags.firstOrNull() ?: "bar")
+    if (ui.kind == "bar" || ui.kind == "food") BarSign(ui.tags.firstOrNull() ?: ui.kind)
     else Box(Modifier.scaled(0.7f)) { RoadSign(ui.sign, ui.name, app.verst.feature.common.signTags(ui.details?.poiKind, ui.tags)) }
 }
 
@@ -269,7 +321,7 @@ private fun SecondaryButton(text: String, tag: String, onClick: () -> Unit) {
  */
 internal fun osmData(ui: CardUi): Boolean {
     val d = ui.details
-    return ui.kind == "bar" || d?.osmSource == true || d?.placeSource == "osm" || d?.placeAttributionRu != null || d?.attributionRu?.any { it.contains("OpenStreetMap") } == true || d?.textSource == "osm" ||
+    return ui.kind == "bar" || ui.kind == "food" || d?.osmSource == true || d?.placeSource == "osm" || d?.placeAttributionRu != null || d?.attributionRu?.any { it.contains("OpenStreetMap") } == true || d?.textSource == "osm" ||
         d?.image?.source == "osm" || (ui.kind == "sight" && d != null && d.wikidataId == null && !d.id.startsWith("pl_"))
 }
 
@@ -295,7 +347,7 @@ internal fun hoursRu(text: String): String? {
  * Иваново») — hidden; others start with a capital letter and end with a full stop.
  */
 internal fun cleanDescription(text: String, kindLine: String, town: String?): String? {
-    val t = text.trim()
+    val t = wholeText(text.replace(STRESS_MARKS, "").trim())
     if (t.isEmpty()) return null
     val filler = setOf("в", "г", "г.", "городе", "города", "на", "у", "близ", "·", "-", "—", ",")
     val known = (kindLine.lowercase().split(' ', '·', ',') + (town ?: "").lowercase().split(' ', '-'))
@@ -306,6 +358,38 @@ internal fun cleanDescription(text: String, kindLine: String, town: String?): St
     return if (cap.last() in ".!?…»)") cap else "$cap."
 }
 
+/** Wikipedia's stress marks (combining acute and grave): «Вы́ставка» reads as broken text (designer В-1). */
+private val STRESS_MARKS = Regex("[\u0300\u0301]")
+
+/**
+ * Designer В-1: a description cut by its source («… выставочный комплекс в…») ends at its last whole sentence,
+ * or, with none, at its last whole word; a bracket left without its pair is dropped.
+ */
+internal fun wholeText(text: String): String {
+    var t = text
+    val cut = t.endsWith("…") || t.endsWith("...")
+    if (cut) {
+        t = t.trimEnd('…', '.', ' ')
+        val end = Regex("""[.!?»](?=\s)""").findAll(t).lastOrNull()?.range?.last
+        t = if (end != null && end >= 20) {
+            t.substring(0, end + 1)
+        } else {
+            val words = t.split(' ').toMutableList()
+            if (words.size > 1) words.removeAt(words.lastIndex) // the word the source cut
+            while (words.size > 1 && words.last().trimEnd(',', '—', '-').length <= 2) words.removeAt(words.lastIndex)
+            words.joinToString(" ").trimEnd(',', ' ', '—', '-') + "…"
+        }
+    }
+    val open = ArrayDeque<Int>()
+    val drop = mutableSetOf<Int>()
+    t.forEachIndexed { i, c ->
+        if (c == '(') open.addLast(i)
+        if (c == ')') { if (open.isEmpty()) drop += i else open.removeLast() }
+    }
+    if (open.isNotEmpty()) t = t.substring(0, open.first()).trimEnd(',', ' ', '—', '-').let { if (cut) "$it…" else it }
+    return t.filterIndexed { i, _ -> i !in drop }.replace(Regex(" {2,}"), " ").replace(" )", ")").trim()
+}
+
 @Composable
 private fun kindLine(ui: CardUi): String {
     val d = ui.details
@@ -314,7 +398,8 @@ private fun kindLine(ui: CardUi): String {
     // M9: the engine's label as given for sights («музей · Коломна»); the local words for bars and old data
     val label = d?.poiKindRu?.takeIf { ui.kind == "sight" }?.lowercase()
     if (label != null) return if (town.isNullOrBlank()) label else stringResource(R.string.card_kind_line, label, town)
-    val word = when (d?.poiKind) {
+    // CEO 29.10: a food place has no engine card yet — its kind comes from the walk stop
+    val word = when (d?.poiKind ?: ui.tags.firstOrNull()?.takeIf { ui.kind == "food" }) {
         "museum" -> stringResource(R.string.card_kind_museum)
         "church" -> stringResource(R.string.card_kind_church)
         "monastery" -> stringResource(R.string.card_kind_monastery)
@@ -328,6 +413,10 @@ private fun kindLine(ui: CardUi): String {
         "pub" -> stringResource(R.string.card_kind_pub)
         "craft" -> stringResource(R.string.card_kind_craft)
         "bar", "beer" -> stringResource(R.string.card_kind_bar)
+        "restaurant" -> stringResource(R.string.card_kind_restaurant)
+        "cafe" -> stringResource(R.string.card_kind_cafe)
+        "fast_food" -> stringResource(R.string.card_kind_fast_food)
+        "food_court" -> stringResource(R.string.card_kind_food_court)
         // S4 kinds without a card word (playground, zoo, interactive, nature, theatre, temple…): the tag word
         else -> if (ui.kind == "bar") stringResource(R.string.card_kind_bar)
         else app.verst.feature.common.kindWord(d?.poiKind)?.lowercase() ?: stringResource(R.string.card_kind_sight)

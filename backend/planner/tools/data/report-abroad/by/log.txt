@@ -1,0 +1,68 @@
+{"labels": {"Q184": "Belarus"}, "capitals": ["Q2280"], "currencies": ["BYN"], "tz": ["Europe/Minsk", "UTC+03:00"], "ok": true}
+{"mismatches": {}, "resolved": {}}
+town classes: 547
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 60 items failed (<HTTPError 504: 'Gateway Timeout'>); halving
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 30 items failed (<HTTPError 504: 'Gateway Timeout'>); halving
+towns: 119 candidates from 547 classes
+towns: 119; missing must-have: []
+pois: 0/119 towns, 338 rows, 0 failed
+pois: 50/119 towns, 1710 rows, 0 failed
+retry 1/4 in 5s: HTTP Error 502: Bad Gateway
+retry 1/4 in 5s: HTTP Error 502: Bad Gateway
+pois: 100/119 towns, 2130 rows, 0 failed
+pois: 2318 rows, 0 towns failed
+forms: 117 towns; fixture oracle 47/48
+classes: 10052 ids; resolved {}; unresolved []
+wikidata: 0/2267
+wikidata: 2267 items, 577 with ru Wikipedia
+wikipedia: 0/577
+wikipedia: 577 pages, 577 with an extract
+voyage: 136 Q-ids in listings
+extract: https://download.geofabrik.de/europe/belarus-latest.osm.pbf
+-rw-r--r-- 1 runner runner 351230789 Oct 30 00:46 /home/runner/work/_temp/c.osm.pbf
+bars: 651 rows from 772 named features, 116 towns (extract)
+food: 5191 rows from 6532 named features, 116 towns (extract)
+parks: 350 rows from 579 named parks and gardens, 119 towns (extract)
+osm: 21615 POI candidates, 626 paid parking places
+geosearch: 0/1500
+geosearch: 500/1500
+geosearch: 1000/1500
+candidates: 1520 photo files
+credits: 50/1520
+credits: 1050/1520
+credits: 1515 of 1520 files
+photo meta: 50/1520
+photo meta: 1050/1520
+photo meta: 1515 of 1520 files
+credits: 50/886
+credits: 886 of 886 files
+photo meta: 50/886
+photo meta: 886 of 886 files
+{
+ "towns": 116,
+ "pois": 1147,
+ "bars": 550,
+ "food": 2712,
+ "links": 0,
+ "credits": 361,
+ "bytes": {
+  "catalogue_meta.json.gz": 12968,
+  "catalogue_towns.json.gz": 6299,
+  "catalogue_pois.json.gz": 77956,
+  "catalogue_bars.json.gz": 14147,
+  "catalogue_food.json.gz": 62315
+ },
+ "totalBytes": 173685
+}
+{
+ "version": "wd-20261030-abroad2",
+ "count": 282,
+ "townsSha256": "598ec1da59f4085220e8ae66e1b06df9180997b294220ad6c8156ff0eb3c69ed",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 8786,
+ "sha256": "5ff28e35aba0140994e43affa3fa03576ae7ca968f264d9efd9b597b86dff313"
+}
+tzCheck: {"checked": true, "ok": true, "mismatches": []}
+regions: [{"code": "BY-BR", "nameRu": "Брестская область", "tz": "Europe/Minsk"}, {"code": "BY-HM", "nameRu": "Минск", "tz": "Europe/Minsk"}, {"code": "BY-HO", "nameRu": "Гомельская область", "tz": "Europe/Minsk"}, {"code": "BY-HR", "nameRu": "Гродненская область", "tz": "Europe/Minsk"}, {"code": "BY-MA", "nameRu": "Могилёвская область", "tz": "Europe/Minsk"}, {"code": "BY-MI", "nameRu": "Минская область", "tz": "Europe/Minsk"}, {"code": "BY-VI", "nameRu": "Витебская область", "tz": "Europe/Minsk"}]

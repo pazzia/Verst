@@ -115,7 +115,9 @@ class MobileV2Test(unittest.TestCase):
         self.assertEqual(json.dumps(r, ensure_ascii=False), json.dumps(again, ensure_ascii=False))
         other = call(mobile.city_route(R, "v2-w2", walk(preset="overview", exclude=[r["stops"][0]["poiId"]])))
         self.assertNotIn(r["stops"][0]["poiId"], [s["poiId"] for s in other["stops"]])
-        bars = call(mobile.city_route(R, "v2-w3", walk(preset="ryumochnye", adultConfirmed=True)))
+        # CEO 2026-10-29: «По рюмочным» is strict (Ярославль has one рюмочная in the catalogue:
+        # NOT_ENOUGH_POIS); the beer places make the evening walk here
+        bars = call(mobile.city_route(R, "v2-w3", walk(preset="beer", adultConfirmed=True)))
         self.assertTrue(bars["startAt"].endswith("18:00"))
         self.assertIsNotNone(bars["responsibleNoteRu"])
 

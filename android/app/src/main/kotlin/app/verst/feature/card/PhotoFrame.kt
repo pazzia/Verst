@@ -1,6 +1,7 @@
 package app.verst.feature.card
 
 import android.graphics.drawable.BitmapDrawable
+import app.verst.core.ui.theme.Palette
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -166,6 +167,7 @@ fun PhotoFrameContent(
     plate: String? = null,
     illustration: Illustration? = null,
 ) {
+    if (Palette.camper) return PhotoFrameContentCamper(state = state, placeholder = placeholder, credit = credit, area = area, contentDescription = contentDescription, modifier = modifier, onCredit = onCredit, plate = plate, illustration = illustration)
     val shape = RoundedCornerShape(DesignTokens.radius.r12)
     val loaded = state as? PhotoState.Loaded
     val crop = loaded != null && !loaded.contain

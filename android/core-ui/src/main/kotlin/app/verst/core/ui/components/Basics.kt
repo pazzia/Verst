@@ -1,6 +1,7 @@
 package app.verst.core.ui.components
 
 import androidx.annotation.DrawableRes
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -90,6 +91,7 @@ private val BackLabelMax = 150.dp
 /** components §13 `InfoChip`. */
 @Composable
 fun InfoChip(text: String, modifier: Modifier = Modifier) {
+    if (Palette.camper) return InfoChipCamper(text = text, modifier = modifier)
     Box(
         modifier
             .clip(RoundedCornerShape(DesignTokens.radius.r12))
@@ -101,6 +103,7 @@ fun InfoChip(text: String, modifier: Modifier = Modifier) {
 /** components §13 `MoodChip` / `FrontSeatChip`: white when on, dashed outline when off. */
 @Composable
 fun ToggleChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, role: Role = Role.RadioButton) {
+    if (Palette.camper) return ToggleChipCamper(text = text, selected = selected, onClick = onClick, modifier = modifier, role = role)
     val shape = RoundedCornerShape(22.dp)
     Box(
         modifier
@@ -116,6 +119,7 @@ fun ToggleChip(text: String, selected: Boolean, onClick: () -> Unit, modifier: M
 /** components §5 `StepperKey` (− / +). */
 @Composable
 fun StepperKey(glyph: String, enabled: Boolean, cd: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    if (Palette.camper) return StepperKeyCamper(glyph = glyph, enabled = enabled, cd = cd, onClick = onClick, modifier = modifier)
     Box(
         modifier
             .size(DesignTokens.size.keyW, DesignTokens.size.keyH)
@@ -132,6 +136,7 @@ fun StepperKey(glyph: String, enabled: Boolean, cd: String, onClick: () -> Unit,
 /** components §15 `PrimaryCta`: yellow, 58 high, label + arrow. */
 @Composable
 fun PrimaryCta(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    if (Palette.camper) return PrimaryCtaCamper(text = text, onClick = onClick, modifier = modifier)
     Row(
         modifier
             .fillMaxWidth()
@@ -150,6 +155,7 @@ fun PrimaryCta(text: String, onClick: () -> Unit, modifier: Modifier = Modifier)
 /** components §15 `SecondaryButton`. */
 @Composable
 fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    if (Palette.camper) return SecondaryButtonCamper(text = text, onClick = onClick, modifier = modifier)
     val shape = RoundedCornerShape(DesignTokens.radius.r12)
     Box(
         modifier

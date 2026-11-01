@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -9,6 +10,7 @@ from zoneinfo import ZoneInfo
 from verst_planner.domain.enums import Mood, StopKind
 from verst_planner.domain.errors import InvalidInput, NotFound
 from verst_planner.domain.model import (
+    BorderPoint,
     LatLon,
     NormalizedInput,
     PlannedStop,
@@ -18,6 +20,7 @@ from verst_planner.domain.model import (
 )
 from verst_planner.explain import ru
 from verst_planner.pipeline import PlanContext
+from verst_planner.ports import BorderPort
 
 MAX_VIAS = 3
 MAX_PEOPLE = 8  # Manager decision OI-07: adults + children ≤ 8 seats incl. the driver
@@ -30,8 +33,14 @@ def in_russia(p: LatLon) -> bool:
     return 41.0 <= p.lat <= 82.0 and (19.0 <= p.lon <= 180.0 or -180.0 <= p.lon <= -168.0)
 
 
-def _check_point(p: PointInput | None, name: str) -> None:
-    if p is not None and not in_russia(p.point):
+def _check_point(p: PointInput | None, name: str, ctx: PlanContext) -> None:
+    """The Russia box of A§6.2, or (CEO 29.10, the server's `world_v1`) the world's supported countries."""
+    if p is None:
+        return
+    borders = ctx.ports.borders
+    if borders is not None:
+        borders.check_point(p.point, name)
+    elif not in_russia(p.point):
         raise InvalidInput(name, "outside_russia")
 
 
@@ -55,10 +64,10 @@ def get_template(raw: TripInput, ctx: PlanContext) -> ReadyRoute | None:
 def normalize_input(raw: TripInput, ctx: PlanContext) -> NormalizedInput:
     """Stage 0: validate (`InvalidInput(field, reason)`) and resolve every default."""
     cfg = ctx.cfg
-    _check_point(raw.origin, "origin")
-    _check_point(raw.destination, "destination")
+    _check_point(raw.origin, "origin", ctx)
+    _check_point(raw.destination, "destination", ctx)
     for i, v in enumerate(raw.vias):
-        _check_point(v, f"vias[{i}]")
+        _check_point(v, f"vias[{i}]", ctx)
     if not (150 <= raw.daily_km <= 900 and raw.daily_km % 50 == 0):
         raise InvalidInput("dailyKm", "out_of_range")
     if raw.crew.adults + raw.crew.children > MAX_PEOPLE:
@@ -115,6 +124,8 @@ class Waypoint:
     label: str
     town_id: str | None = None
     place_id: str | None = None
+    border: BorderPoint | None = None
+    """CEO 29.10: a border crossing inserted by `BorderPort.crossings` (a `BORDER` stop, not a user via)."""
 
 
 @dataclass(slots=True)
@@ -131,6 +142,15 @@ class ResolvedPoints:
     template: ReadyRoute | None
     waypoints: list[Waypoint] = field(default_factory=list)
     fixed_after: list[int] = field(default_factory=list)
+
+
+def with_crossings(wps: list[Waypoint], borders: BorderPort) -> list[Waypoint]:
+    """CEO 29.10: the waypoints with a `border` waypoint at every state border between two of them."""
+    out = [wps[0]]
+    for a, b in itertools.pairwise(wps):
+        out += [Waypoint(c.point, c.name_ru, c.town_id, None, c) for c in borders.crossings(a.point, b.point)]
+        out.append(b)
+    return out
 
 
 def _label(p: PointInput, ctx: PlanContext) -> str:
@@ -185,9 +205,16 @@ def resolve_points(inp: NormalizedInput, ctx: PlanContext) -> ResolvedPoints:
         wps.append(Waypoint(d.point, _label(d, ctx), d.town_id, d.place_id))
     if inp.round_trip:
         wps.append(Waypoint(wps[0].point, wps[0].label, wps[0].town_id, wps[0].place_id))
+    borders = ctx.ports.borders
+    if borders is not None:
+        if template is not None:  # a ready route is Russian; its start must be too (hub within 50 km)
+            if any(borders.crossings(a.point, b.point) for a, b in itertools.pairwise(wps)):
+                raise InvalidInput("origin", "ready_route_abroad")
+        else:
+            wps = with_crossings(wps, borders)
     return ResolvedPoints(
         points=tuple(w.point for w in wps),
-        labels=tuple(w.label for w in wps),
+        labels=tuple(w.label for w in wps if w.border is None),
         fixed_stops=fixed,
         template=template,
         waypoints=wps,

@@ -1,0 +1,34 @@
+{
+ "country": "GE",
+ "labels": {
+  "Q230": "Georgia",
+  "Q23334": "Abkhazia"
+ },
+ "labelOk": true,
+ "capitals": [
+  "Q900201"
+ ],
+ "currencies": [
+  "GEL"
+ ],
+ "currency": "GEL",
+ "currencyOk": true,
+ "tz": [
+  "UTC+04:00"
+ ],
+ "regions": {
+  "GE-TB": {
+   "qid": "Q900401",
+   "name": "Тестовый регион",
+   "tz": [
+    "UTC+04:00"
+   ]
+  },
+  "GE-IM": {
+   "qid": "Q900402",
+   "name": "Test Region",
+   "tz": []
+  }
+ },
+ "ok": true
+}

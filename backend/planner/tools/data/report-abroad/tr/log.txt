@@ -1,0 +1,112 @@
+{"labels": {"Q43": "Turkey"}, "capitals": ["Q3640"], "currencies": ["TRY"], "tz": ["Asia/Istanbul", "Europe/Istanbul", "UTC+03:00"], "ok": true}
+{"mismatches": {}, "resolved": {}}
+town classes: 547
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 60 items failed (<HTTPError 504: 'Gateway Timeout'>); halving
+towns: 2300 candidates from 547 classes
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+towns: 2293; missing must-have: []
+retry 1/4 in 5s: Expecting property name enclosed in double quotes: line 192111 column 3 (char 5643329)
+pois: 0/2293 towns, 3753 rows, 0 failed
+pois: 50/2293 towns, 12609 rows, 0 failed
+pois: 100/2293 towns, 15889 rows, 0 failed
+pois: 150/2293 towns, 18569 rows, 0 failed
+pois: 200/2293 towns, 19429 rows, 0 failed
+pois: 250/2293 towns, 20206 rows, 0 failed
+pois: 300/2293 towns, 20757 rows, 0 failed
+pois: 350/2293 towns, 21175 rows, 0 failed
+pois: 400/2293 towns, 21560 rows, 0 failed
+pois: 450/2293 towns, 21748 rows, 0 failed
+pois: 500/2293 towns, 21932 rows, 0 failed
+pois: 550/2293 towns, 22127 rows, 0 failed
+pois: 600/2293 towns, 22330 rows, 0 failed
+pois: 650/2293 towns, 22476 rows, 0 failed
+pois: 700/2293 towns, 22568 rows, 0 failed
+pois: 750/2293 towns, 22701 rows, 0 failed
+pois: 800/2293 towns, 22794 rows, 0 failed
+pois: 850/2293 towns, 22864 rows, 0 failed
+pois: 900/2293 towns, 22928 rows, 0 failed
+pois: 950/2293 towns, 23077 rows, 0 failed
+pois: 1000/2293 towns, 24231 rows, 0 failed
+pois: 1050/2293 towns, 24565 rows, 0 failed
+pois: 1100/2293 towns, 26227 rows, 0 failed
+pois: 1150/2293 towns, 26964 rows, 0 failed
+pois: 1200/2293 towns, 27243 rows, 0 failed
+pois: 1250/2293 towns, 27633 rows, 0 failed
+pois: 1300/2293 towns, 27847 rows, 0 failed
+pois: 1350/2293 towns, 28550 rows, 0 failed
+pois: 1400/2293 towns, 28758 rows, 0 failed
+pois: 1450/2293 towns, 30663 rows, 0 failed
+pois: 1500/2293 towns, 31789 rows, 0 failed
+pois: 1550/2293 towns, 32113 rows, 0 failed
+pois: 1600/2293 towns, 32304 rows, 0 failed
+pois: 1650/2293 towns, 35089 rows, 0 failed
+pois: 1700/2293 towns, 35972 rows, 0 failed
+pois: 1750/2293 towns, 36440 rows, 0 failed
+pois: 1800/2293 towns, 45864 rows, 0 failed
+pois: 1850/2293 towns, 46022 rows, 0 failed
+pois: 1900/2293 towns, 46222 rows, 0 failed
+pois: 1950/2293 towns, 47871 rows, 0 failed
+pois: 2000/2293 towns, 48456 rows, 0 failed
+pois: 2050/2293 towns, 50064 rows, 0 failed
+pois: 2100/2293 towns, 50188 rows, 0 failed
+pois: 2150/2293 towns, 50260 rows, 0 failed
+pois: 2200/2293 towns, 50348 rows, 0 failed
+pois: 2250/2293 towns, 50420 rows, 0 failed
+pois: 50659 rows, 0 towns failed
+forms: 925 towns; fixture oracle 47/48
+classes: 10053 ids; resolved {}; unresolved []
+wikidata: 0/15292
+wikidata: 4000/15292
+wikidata: 8000/15292
+wikidata: 12000/15292
+wikidata: 15292 items, 465 with ru Wikipedia
+wikipedia: 0/465
+wikipedia: 465 pages, 465 with an extract
+voyage: 136 Q-ids in listings
+extract: https://download.geofabrik.de/europe/turkey-latest.osm.pbf
+-rw-r--r-- 1 runner runner 651919591 Oct 30 06:00 /home/runner/work/_temp/c.osm.pbf
+bars: 956 rows from 1500 named features, 929 towns (extract)
+food: 22619 rows from 33305 named features, 929 towns (extract)
+parks: 3152 rows from 4311 named parks and gardens, 2293 towns (extract)
+osm: 36901 POI candidates, 1191 paid parking places
+geosearch: 0/1500
+geosearch: 500/1500
+geosearch: 1000/1500
+candidates: 833 photo files
+credits: 50/833
+credits: 830 of 833 files
+photo meta: 50/833
+photo meta: 830 of 833 files
+credits: 50/1732
+credits: 1050/1732
+credits: 1732 of 1732 files
+photo meta: 50/1732
+photo meta: 1050/1732
+photo meta: 1732 of 1732 files
+{
+ "towns": 908,
+ "pois": 2170,
+ "bars": 797,
+ "food": 12115,
+ "links": 0,
+ "credits": 825,
+ "bytes": {
+  "catalogue_meta.json.gz": 20714,
+  "catalogue_towns.json.gz": 35661,
+  "catalogue_pois.json.gz": 103838,
+  "catalogue_bars.json.gz": 17184,
+  "catalogue_food.json.gz": 237351
+ },
+ "totalBytes": 414748
+}
+{
+ "version": "wd-20261030-abroad2",
+ "count": 2044,
+ "townsSha256": "100411aef6edb2eae69af5e1675ec8e7a231ca1ccc60b88f6d0a5910439e891b",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 49284,
+ "sha256": "5574a9f5bf5eb04916205b84e35dd569095b3a11efd989d297013c4d50f72d3c"
+}
+tzCheck: {"checked": true, "ok": true, "mismatches": []}
+regions: [{"code": "TR-01", "nameRu": "Адана", "tz": "Europe/Istanbul"}, {"code": "TR-02", "nameRu": "Адыяман", "tz": "Europe/Istanbul"}, {"code": "TR-03", "nameRu": "Афьонкарахисар", "tz": "Europe/Istanbul"}, {"code": "TR-04", "nameRu": "Агры", "tz": "Europe/Istanbul"}, {"code": "TR-05", "nameRu": "Амасья", "tz": "Europe/Istanbul"}, {"code": "TR-06", "nameRu": "Анкара", "tz": "Europe/Istanbul"}, {"code": "TR-07", "nameRu": "Анталья", "tz": "Europe/Istanbul"}, {"code": "TR-08", "nameRu": "Артвин", "tz": "Europe/Istanbul"}, {"code": "TR-09", "nameRu": "Айдын", "tz": "Europe/Istanbul"}, {"code": "TR-10", "nameRu": "Балыкесир", "tz": "Europe/Istanbul"}, {"code": "TR-11", "nameRu": "Биледжик", "tz": "Europe/Istanbul"}, {"code": "TR-12", "nameRu": "Бингёль", "tz": "Europe/Istanbul"}, {"code": "TR-13", "nameRu": "Битлис", "tz": "Europe/Istanbul"}, {"code": "TR-14", "nameRu": "Болу", "tz": "Europe/Istanbul"}, {"code": "TR-15", "nameRu": "Бурдур", "tz": "Europe/Istanbul"}, {"code": "TR-16", "nameRu": "Бурса", "tz": "Europe/Istanbul"}, {"code": "TR-17", "nameRu": "Чанаккале", "tz": "Europe/Istanbul"}, {"code": "TR-18", "nameRu": "Чанкыры", "tz": "Europe/Istanbul"}, {"code": "TR-19", "nameRu": "Чорум", "tz": "Europe/Istanbul"}, {"code": "TR-20", "nameRu": "Денизли", "tz": "Europe/Istanbul"}, {"code": "TR-21", "nameRu": "Диярбакыр", "tz": "Europe/Istanbul"}, {"code": "TR-22", "nameRu": "Эдирне", "tz": "Europe/Istanbul"}, {"code": "TR-23", "nameRu": "Элязыг", "tz": "Europe/Istanbul"}, {"code": "TR-24", "nameRu": "Эрзинджан", "tz": "Europe/Istanbul"}, {"code": "TR-25", "nameRu": "Эрзурум", "tz": "Europe/Istanbul"}, {"code": "TR-26", "nameRu": "Эскишехир", "tz": "Europe/Istanbul"}, {"code": "TR-27", "nameRu": "Газиантеп", "tz": "Europe/Istanbul"}, {"code": "TR-28", "nameRu": "Гиресун", "tz": "Europe/Istanbul"}, {"code": "TR-29", "nameRu": "Гюмюшхане", "tz": "Europe/Istanbul"}, {"code": "TR-30", "nameRu": "Хаккяри", "tz": "Europe/Istanbul"}, {"code": "TR-31", "nameRu": "Хатай", "tz": "Europe/Istanbul"}, {"code": "TR-32", "nameRu": "Ыспарта", "tz": "Europe/Istanbul"}, {"code": "TR-33", "nameRu": "Мерсин", "tz": "Europe/Istanbul"}, {"code": "TR-34", "nameRu": "Стамбул", "tz": "Europe/Istanbul"}, {"code": "TR-35", "nameRu": "Измир", "tz": "Europe/Istanbul"}, {"code": "TR-36", "nameRu": "Карс", "tz": "Europe/Istanbul"}, {"code": "TR-37", "nameRu": "Кастамону", "tz": "Europe/Istanbul"}, {"code": "TR-38", "nameRu": "Кайсери", "tz": "Europe/Istanbul"}, {"code": "TR-39", "nameRu": "Кыркларели", "tz": "Europe/Istanbul"}, {"code": "TR-40", "nameRu": "Кыршехир", "tz": "Europe/Istanbul"}, {"code": "TR-41", "nameRu": "Коджаэли", "tz": "Europe/Istanbul"}, {"code": "TR-42", "nameRu": "Конья", "tz": "Europe/Istanbul"}, {"code": "TR-43", "nameRu": "Кютахья", "tz": "Europe/Istanbul"}, {"code": "TR-44", "nameRu": "Малатья", "tz": "Europe/Istanbul"}, {"code": "TR-45", "nameRu": "Маниса", "tz": "Europe/Istanbul"}, {"code": "TR-46", "nameRu": "Кахраманмараш", "tz": "Europe/Istanbul"}, {"code": "TR-47", "nameRu": "Мардин", "tz": "Europe/Istanbul"}, {"code": "TR-48", "nameRu": "Мугла", "tz": "Europe/Istanbul"}, {"code": "TR-49", "nameRu": "Муш", "tz": "Europe/Istanbul"}, {"code": "TR-50", "nameRu": "Невшехир", "tz": "Europe/Istanbul"}, {"code": "TR-51", "nameRu": "Нигде", "tz": "Europe/Istanbul"}, {"code": "TR-52", "nameRu": "Орду", "tz": "Europe/Istanbul"}, {"code": "TR-53", "nameRu": "Ризе", "tz": "Europe/Istanbul"}, {"code": "TR-54", "nameRu": "Сакарья", "tz": "Europe/Istanbul"}, {"code": "TR-55", "nameRu": "Самсун", "tz": "Europe/Istanbul"}, {"code": "TR-56", "nameRu": "Сиирт", "tz": "Europe/Istanbul"}, {"code": "TR-57", "nameRu": "Синоп", "tz": "Europe/Istanbul"}, {"code": "TR-58", "nameRu": "Сивас", "tz": "Europe/Istanbul"}, {"code": "TR-59", "nameRu": "Текирдаг", "tz": "Europe/Istanbul"}, {"code": "TR-60", "nameRu": "Токат", "tz": "Europe/Istanbul"}, {"code": "TR-61", "nameRu": "Трабзон", "tz": "Europe/Istanbul"}, {"code": "TR-62", "nameRu": "Тунджели", "tz": "Europe/Istanbul"}, {"code": "TR-63", "nameRu": "Шанлыурфа", "tz": "Europe/Istanbul"}, {"code": "TR-64", "nameRu": "Ушак", "tz": "Europe/Istanbul"}, {"code": "TR-65", "nameRu": "Ван", "tz": "Europe/Istanbul"}, {"code": "TR-66", "nameRu": "Йозгат", "tz": "Europe/Istanbul"}, {"code": "TR-67", "nameRu": "Зонгулдак", "tz": "Europe/Istanbul"}, {"code": "TR-68", "nameRu": "Аксарай", "tz": "Europe/Istanbul"}, {"code": "TR-69", "nameRu": "Байбурт", "tz": "Europe/Istanbul"}, {"code": "TR-70", "nameRu": "Караман", "tz": "Europe/Istanbul"}, {"code": "TR-71", "nameRu": "Кырыккале", "tz": "Europe/Istanbul"}, {"code": "TR-72", "nameRu": "Батман", "tz": "Europe/Istanbul"}, {"code": "TR-73", "nameRu": "Ширнак", "tz": "Europe/Istanbul"}, {"code": "TR-74", "nameRu": "Бартын", "tz": "Europe/Istanbul"}, {"code": "TR-75", "nameRu": "Ардахан", "tz": "Europe/Istanbul"}, {"code": "TR-76", "nameRu": "Ыгдыр", "tz": "Europe/Istanbul"}, {"code": "TR-77", "nameRu": "Ялова", "tz": "Europe/Istanbul"}, {"code": "TR-78", "nameRu": "Карабюк", "tz": "Europe/Istanbul"}, {"code": "TR-79", "nameRu": "Килис", "tz": "Europe/Istanbul"}, {"code": "TR-80", "nameRu": "Османие", "tz": "Europe/Istanbul"}, {"code": "TR-81", "nameRu": "Дюздже", "tz": "Europe/Istanbul"}]

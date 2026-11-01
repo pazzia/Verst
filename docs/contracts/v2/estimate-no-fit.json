@@ -24,7 +24,7 @@
  "response": {
   "ok": true,
   "result": {
-   "km": 548,
+   "km": 544,
    "days": 2,
    "outcome": "no_fit",
    "totalRub": 28300,

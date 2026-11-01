@@ -9,6 +9,7 @@ from typing import NamedTuple, Protocol
 
 from verst_planner.domain.enums import FuelType, PlaceType
 from verst_planner.domain.model import (
+    BorderPoint,
     GeoLabel,
     GeoSuggestion,
     LatLon,
@@ -95,6 +96,19 @@ class ParkingPort(Protocol):
     def unit(
         self, stop_id: str, name: str, point: LatLon, arrive_local: datetime, dwell_min: int
     ) -> ParkingUnit: ...
+
+
+class BorderPort(Protocol):
+    """CEO 29.10 (trips abroad, server only): which points the world supports and where the route crosses a
+    state border. Absent (None) in every world but the server's `world_v1`: those keep the Russia box."""
+
+    def check_point(self, point: LatLon, field: str) -> None:
+        """Raises `InvalidInput(field, "outside_supported" | "border_closed", country=…)`."""
+        ...
+
+    def crossings(self, a: LatLon, b: LatLon) -> list[BorderPoint]:
+        """The border crossings, in driving order, of a leg from `a` to `b` (empty inside one country)."""
+        ...
 
 
 class Clock(Protocol):

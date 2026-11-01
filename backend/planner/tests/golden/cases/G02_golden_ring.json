@@ -45,7 +45,7 @@
       "pl_suz_hotel_pushkarskaya"
     ],
     "costTotalRub": {
-      "value": 37200,
+      "value": 34000,
       "tolerancePct": 5
     },
     "costLinesRub": {
@@ -58,15 +58,15 @@
         "tolerancePct": 0
       },
       "fuel": {
-        "value": 3760,
+        "value": 3750,
         "tolerancePct": 5
       },
       "food": {
-        "value": 14310,
+        "value": 13860,
         "tolerancePct": 0
       },
       "tickets": {
-        "value": 3700,
+        "value": 1250,
         "tolerancePct": 0
       }
     },
@@ -79,12 +79,12 @@
       "all"
     ],
     "costWorkings": [
-      "route: template ring Москва → Сергиев Посад → … → Владимир → Москва, 745 km of edges + detours ≈ 16 km → ≈ 761 km",
-      "fuel by region (8 l/100): Ярославская 196 + 5 = 201 km × 61.90 = 997; Владимирская 183 + 7 = 190 km × 61.40 = 931; Московская 164 + 1 = 165 km × 61.80 = 814; Костромская 92 + 3 = 95 km × 62.20 = 473; Ивановская 91 + 1 = 92 km × 61.60 = 452; Москва 19 km × 62.50 = 95 → Σ 3 763 → 3 760 (±5 %)",
+      "route: template ring Москва → Сергиев Посад → … → Владимир → Москва, 745 km of edges + detours ≈ 15 km → ≈ 760 km (acceptance 2026-10-28 K3: the dog crew's added sights are open-air now, their detours differ)",
+      "fuel by region (8 l/100, units incl. detours): Владимирская 195.4 km × 61.40 = 959.7; Ярославская 196.4 km × 61.90 = 972.5; Московская 171.4 km × 61.80 = 847.2; Костромская 90.5 km × 62.20 = 450.4; Ивановская 90.8 km × 61.60 = 447.4; Москва 15 km × 62.50 = 75.0 → Σ 3 752.2 → 3 750 (rows by largest remainder, QA B-6: 70 + 850 + 970 + 450 + 450 + 960 = 3 750)",
       "lodging (2 adults + child + dog: dogs_allowed and family_room): Ярославль Стрелка 4.30 > Волга 4.10 → 6 000; Суздаль only Пушкарская passes → 6 000; 1 room each → 12 000",
-      "food: 3 people (child age unknown → 8 → weight 1). Day 1 lunch in Ростов ≈ 13:00: Трапезная у кремля 4.5 + 2 (kids) + 1 (parking) + 0.5 = 8.0 → 700; dinner Ярославль median_low = 900. Day 2: stage 8 runs before the sights, so the lunch is picked on the bare day (Кострома is passed ≈ 10:15, outside the window): first café reached in the window on Р-600 is Кафе «Привал» (kids + parking) → 700; after the sights it is reached ≈ 14:08, still in the window. Dinner Суздаль median_low(700, 800, 800, 850, 900, 1000) = 800. Day 3 lunch in Покров ≈ 12:35: Кафе «Покровское» 4.2 + 2 + 1 + 0.5 = 7.7 > Подворье 7.5 → 650. Neither hotel has a confirmed breakfast (ADR-0019 E-3): breakfast day 2 at 0.6 × 900 = 540, day 3 at 0.6 × 800 = 480; no last-day dinner (finish = origin) → 3 × (700 + 900 + 540 + 700 + 800 + 480 + 650) = 3 × 4 770 = 14 310",
-      "tickets (calm, ≤ 2 sights/day incl. the fixed ones): lavra free; Плещеево free; Костромская слобода 2 × 300 + 150 = 750; Ипатьевский (fixed) 2 × 500 + 250 = 1 250; Музей деревянного зодчества 2 × 300 + 150 = 750; Музей шоколада 2 × 350 + 250 = 950 → 3 700",
-      "subtotal 3 760 + 0 + 12 000 + 14 310 + 3 700 = 33 770; reserve 3 380 (3 377); total round_to(37 150, 100) = 37 200 (half up); remaining 40 000 − 37 200 = 2 800"
+      "food: 3 people (child age unknown → 8 → weight 1). Day 1 lunch in Ростов ≈ 13:00: Трапезная у кремля 4.5 + 2 (kids) + 1 (parking) + 0.5 = 8.0 → 700; dinner Ярославль median_low = 900. Day 2: stage 8 runs before the sights, so the lunch is picked on the bare day (Кострома is passed ≈ 10:15, outside the window): first café reached in the window on Р-600 is Кафе «Привал» (kids + parking) → 700; after the sights it is reached ≈ 13:51, still in the window. Dinner Суздаль median_low(700, 800, 800, 850, 900, 1000) = 800. Day 3: the dog crew's added sights are Смотровая у Успенского собора (Владимир) and Покровский парк (Покров, 11:17–11:47), so Покров is left ≈ 11:50, before the lunch window; the next café in the window is Кафе «Придорожное», М-7 ≈ 12:22 (kids menu) → 500. Neither hotel has a confirmed breakfast (ADR-0019 E-3): breakfast day 2 at 0.6 × 900 = 540, day 3 at 0.6 × 800 = 480; no last-day dinner (finish = origin) → 3 × (700 + 900 + 540 + 700 + 800 + 480 + 500) = 3 × 4 620 = 13 860",
+      "tickets (calm, ≤ 2 sights/day incl. the fixed ones; acceptance 2026-10-28 K3: with a dog no museum is an added stop — Костромская слобода, Музей деревянного зодчества and Музей шоколада are gone, the template's Ипатьевский stays): lavra free; Плещеево free; Стрелка free; Ипатьевский (fixed) 2 × 500 + 250 = 1 250; Смотровая у Успенского собора free; Покровский парк free → 1 250",
+      "subtotal 3 750 + 0 + 12 000 + 13 860 + 1 250 = 30 860; reserve 3 090 (3 086); total round_to(33 950, 100) = 34 000 (half up); remaining 40 000 − 34 000 = 6 000"
     ]
   }
 }

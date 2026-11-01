@@ -7,9 +7,13 @@ import app.verst.core.model.EngineArgs
 import app.verst.core.model.EngineJson
 import app.verst.core.model.EngineResult
 import app.verst.core.model.GeoPoint
+import app.verst.core.model.LatLon
+import app.verst.core.model.MapsChoice
+import app.verst.core.model.NaviLinks
 import app.verst.core.model.PlanRequest
 import app.verst.core.model.TripFigures
 import app.verst.core.model.dto.EstimateDto
+import app.verst.core.model.dto.HandoffLinksDto
 import app.verst.core.model.dto.PlanEventDto
 import app.verst.core.model.dto.PlaceNameDto
 import app.verst.core.model.dto.PlanResultDto
@@ -76,7 +80,10 @@ class VerstFlowTest {
             val rr = routes.firstOrNull { it.id == request.readyRouteId }
             return EngineResult.Ok(EstimateDto(rr?.let { it.kmTotal + 10 * request.adults + request.children } ?: estimateKm, 2))
         }
+        /** Plans asked (CEO 29.10: never one for a destination abroad). */
+        var plans = 0
         override suspend fun plan(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanResultDto> {
+            plans++
             onEvent(PlanEventDto("stage", text = "Прокладываем дорогу", progress = 0.1))
             return EngineResult.Ok(planned)
         }
@@ -214,10 +221,12 @@ class VerstFlowTest {
         assertEquals(1, gw.hotelPatches.size)
         assertTrue(gw.hotelPatches.single().contains(other.placeId))
 
-        // Booking: CTA → mock partner sheet → dismissal → «Забронировали?» → yes → booked + toast with undo.
+        // Booking (ENG-03): CTA → the hotel search for the night's town and date → «Забронировали?» → yes → booked.
         flow.book()
-        assertTrue(flow.partnerOpen)
-        flow.closePartner()
+        assertFalse(flow.partnerOpen)
+        val link = flow.lastBookingUrl!!
+        assertTrue(link, link.startsWith("https://travel.yandex.ru/hotels/search/?text="))
+        assertTrue(link, link.contains("checkinDate=") && link.contains("checkoutDate="))
         assertTrue(flow.bookedDialog)
         flow.answerBooked(true)
         val booked = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == night.id }
@@ -332,37 +341,58 @@ class VerstFlowTest {
     }
 
     /**
-     * 5.13 §5 (S4): the sheet on a day → Карты get the whole day (unsigned), «До след.» → the Навигатор gets the
-     * next point only; «Запомнить выбор» then opens the remembered app straight from «вести».
+     * CEO 29.10: «Вести по картам» opens the preferred maps app directly with the whole day (Яндекс Карты in Russia);
+     * in the sheet Google Карты get the same points (an https link), the Навигатор the next point only (both tabs);
+     * «Запомнить выбор» stores the maps app as the «Навигация» setting, never the Навигатор.
      */
     @Test
-    fun handoffSheetUnsignedRoutesAndRememberedChoice() = runTest {
+    fun handoffSheetRoutesAndRememberedChoice() = runTest {
         val gw = FakeGateway()
         val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        var choice = MapsChoice.AUTO
+        flow.mapsChoiceRead = { choice }
+        flow.mapsChoiceWrite = { choice = it }
+        flow.countrySource = CountrySource { "ru" }
         val opened = mutableListOf<Triple<HandoffApp, String?, String?>>()
         flow.handoffLauncher = object : HandoffLauncher {
             override fun navigatorInstalled() = true
             override fun mapsInstalled() = true
-            override fun open(links: app.verst.core.model.dto.HandoffLinksDto, walk: Boolean) = HandoffTarget.None
+            override fun googleInstalled() = true
+            override fun open(links: HandoffLinksDto, walk: Boolean) = HandoffTarget.None
             override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
                 opened += Triple(app, uri, web)
-                return if (app == HandoffApp.NAVI) HandoffTarget.Navigator else HandoffTarget.Maps
+                return when (app) {
+                    HandoffApp.NAVI -> HandoffTarget.Navigator
+                    HandoffApp.MAPS -> HandoffTarget.Maps
+                    HandoffApp.GOOGLE -> HandoffTarget.Google
+                }
             }
         }
         settle()
         flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
         settle(10_000)
         val day = flow.result!!.trip.daysList.first()
-        val local = app.verst.core.model.NaviLinks.day(day)!!
-        flow.handoff(day.day)
-        settle()
-        assertEquals(day.day, flow.handoffSheet!!.day)
-        assertNotNull(flow.handoffSheet!!.handoff)
-        flow.handoffPick(HandoffApp.MAPS)
+        val local = NaviLinks.day(day)!!
+        // «Вести по картам»: in Russia Яндекс Карты open directly with the whole day — no sheet, no Навигатор
+        assertEquals(HandoffApp.MAPS, flow.preferredMaps)
+        flow.handoff(day.day); settle()
         assertNull(flow.handoffSheet)
         assertEquals(Triple(HandoffApp.MAPS, local.mapsApp, local.web), opened.single())
-        assertEquals(Toast.HandoffOpen(navi = false), flow.toast)
-        // «До след.»: the Навигатор to the next point only (no vias)
+        assertEquals(HandoffTarget.Maps, flow.lastHandoff!!.second)
+        // the sheet (a day's «вести» / a long-press): Google Карты get the same points by https
+        flow.openHandoffSheet(day.day); settle()
+        assertEquals(day.day, flow.handoffSheet!!.day)
+        assertNotNull(flow.handoffSheet!!.handoff)
+        flow.handoffPick(HandoffApp.GOOGLE)
+        assertNull(flow.handoffSheet)
+        val g = opened.last()
+        assertEquals(HandoffApp.GOOGLE, g.first)
+        assertEquals(NaviLinks.googleRoute(local.points), g.second)
+        assertEquals(g.second, g.third) // without the app, the same link in the browser
+        assertTrue(g.second!!, g.second!!.endsWith("&travelmode=driving"))
+        assertEquals(Toast.HandoffOpen(HandoffApp.GOOGLE), flow.toast)
+        assertEquals(MapsChoice.AUTO, choice) // «Запомнить выбор» is off
+        // «До след.»: the Навигатор to the next point only (no vias) — and so is the day scope
         flow.openHandoffSheet(day.day); settle()
         flow.handoffScope(null)
         flow.handoffPick(HandoffApp.NAVI)
@@ -370,38 +400,54 @@ class VerstFlowTest {
         assertEquals(HandoffApp.NAVI, navi.first)
         assertTrue(navi.second!!.startsWith("yandexnavi://build_route_on_map?lat_to="))
         assertFalse(navi.second!!.contains("lat_via_0"))
-        // unsigned, even the day scope never sends the whole day to the Навигатор
         flow.openHandoffSheet(day.day); settle()
         flow.handoffPick(HandoffApp.NAVI)
         assertFalse(opened.last().second!!.contains("lat_via_0"))
-        // «Запомнить выбор»: the next «вести» opens Карты directly; a long-press still opens the sheet
+        // «Запомнить выбор» + Google Карты → the «Навигация» setting; «Вести по картам» then opens Google Карты
         flow.openHandoffSheet(day.day); settle()
         flow.toggleHandoffRemember()
-        flow.handoffPick(HandoffApp.MAPS)
+        flow.handoffPick(HandoffApp.GOOGLE)
+        assertEquals(MapsChoice.GOOGLE, choice)
+        assertEquals(HandoffApp.GOOGLE, flow.preferredMaps) // the user's choice wins over Russia
         val n = opened.size
         flow.handoff(day.day); settle()
         assertNull(flow.handoffSheet)
         assertEquals(n + 1, opened.size)
-        assertEquals(HandoffApp.MAPS, opened.last().first)
+        assertEquals(HandoffApp.GOOGLE, opened.last().first)
+        // the Навигатор is never remembered
+        flow.openHandoffSheet(day.day); settle()
+        flow.handoffPick(HandoffApp.NAVI)
+        assertEquals(MapsChoice.GOOGLE, choice)
         flow.openHandoffSheet(day.day); settle()
         assertNotNull(flow.handoffSheet)
         flow.back()
         assertNull(flow.handoffSheet)
     }
 
+    /**
+     * CEO 29.10: the day menu, the stop menu and walks open the preferred maps app — Яндекс Карты in Russia and when
+     * the country is unknown, Google Карты abroad, the user's choice over both; the browser and offline fallbacks.
+     */
     @Test
     fun handoffDayMenuStopMenuTargetsAndFallbacks() = runTest {
         val gw = FakeGateway()
         val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
-        val opened = mutableListOf<Pair<app.verst.core.model.dto.HandoffLinksDto, Boolean>>()
-        var navi = false
+        var choice = MapsChoice.AUTO
+        flow.mapsChoiceRead = { choice }
+        flow.mapsChoiceWrite = { choice = it }
+        var country: String? = "RU"
+        flow.countrySource = CountrySource { country }
+        val opened = mutableListOf<Triple<HandoffApp, String?, String?>>()
         var maps = false
+        var google = false
         var result = HandoffTarget.Browser
         flow.handoffLauncher = object : HandoffLauncher {
-            override fun navigatorInstalled() = navi
+            override fun navigatorInstalled() = true
             override fun mapsInstalled() = maps
-            override fun open(links: app.verst.core.model.dto.HandoffLinksDto, walk: Boolean): HandoffTarget {
-                opened += links to walk
+            override fun googleInstalled() = google
+            override fun open(links: HandoffLinksDto, walk: Boolean) = HandoffTarget.None
+            override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
+                opened += Triple(app, uri, web)
                 return result
             }
         }
@@ -409,40 +455,68 @@ class VerstFlowTest {
         flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
         settle(10_000)
         val day = flow.result!!.trip.daysList.first()
-        // The day menu: the engine has no `handoff` in the fake → the local ADR-0014 links of the day.
+        // The day menu: the engine has no `handoff` in the fake → the local links; Яндекс Карты missing → the browser.
         flow.openDayMenu(day.day)
         settle()
         assertEquals(day.day, flow.dayMenu)
         assertEquals(HandoffTarget.Browser, flow.carTarget)
         val links = flow.dayHandoff!!.parts.single().links
-        assertEquals(app.verst.core.model.NaviLinks.day(day)!!.navi, links.navigator)
         flow.dayMenuGo()
         assertNull(flow.dayMenu)
-        assertEquals(links to false, opened.single())
+        assertEquals(Triple(HandoffApp.MAPS, links.maps, links.web), opened.single()) // never the Навигатор, though installed
         assertEquals(Toast.HandoffWeb(walk = false), flow.toast) // the web fallback says so
-        // The stop menu with the navigator installed → no toast.
-        navi = true
-        result = HandoffTarget.Navigator
+        // The stop menu: from this stop to the end of its day, in Яндекс Карты.
+        maps = true
+        result = HandoffTarget.Maps
         flow.openStopMenu(day.stops[1])
         settle()
-        assertEquals(HandoffTarget.Navigator, flow.carTarget)
+        assertEquals(HandoffTarget.Maps, flow.carTarget)
         flow.navigatorFromStop()
         assertNull(flow.stopMenu)
-        assertEquals(HandoffTarget.Navigator, flow.lastHandoff!!.second)
-        assertTrue(opened.last().first.navigator!!.startsWith("yandexnavi://build_route_on_map?lat_from="))
-        // Offline without an app → «нужен интернет», nothing opens; all links failing → «не получилось».
-        navi = false
+        assertEquals(HandoffTarget.Maps, flow.lastHandoff!!.second)
+        assertEquals(NaviLinks.fromStop(flow.result!!.trip, day.stops[1].id)!!.mapsApp, opened.last().second)
+        // Abroad: Google Карты lead; not installed → the browser label, installed → the app.
+        country = "DE"
+        assertEquals(HandoffApp.GOOGLE, flow.preferredMaps)
+        assertEquals(HandoffTarget.Browser, flow.carTarget)
+        google = true
+        assertEquals(HandoffTarget.Google, flow.carTarget)
+        result = HandoffTarget.Google
+        flow.openDayMenu(day.day); settle(); flow.dayMenuGo()
+        val g = opened.last()
+        assertEquals(HandoffApp.GOOGLE, g.first)
+        assertTrue(g.second!!, g.second!!.startsWith("https://www.google.com/maps/dir/?api=1&origin="))
+        assertEquals(Toast.HandoffOpen(HandoffApp.GOOGLE), flow.toast)
+        // Walks: the same preference, in walking mode.
+        flow.walkHandoff = NaviLinks.walking(listOf(LatLon(57.62, 39.88), LatLon(57.625, 39.885), LatLon(57.63, 39.89))).toDto(null, mode = "walk")
+        flow.walkHandoffGo(1)
+        assertEquals(HandoffApp.GOOGLE, opened.last().first)
+        assertTrue(opened.last().second!!, opened.last().second!!.endsWith("&travelmode=walking"))
+        assertTrue(opened.last().second!!, opened.last().second!!.contains("origin=57.620000,39.880000"))
+        // the user's choice wins over the country
+        choice = MapsChoice.YANDEX
+        assertEquals(HandoffApp.MAPS, flow.preferredMaps)
+        flow.walkHandoffGo(1)
+        assertEquals(HandoffApp.MAPS, opened.last().first)
+        assertTrue(opened.last().second!!, opened.last().second!!.endsWith("&rtt=pd"))
+        // unknown country → Яндекс Карты
+        choice = MapsChoice.AUTO
+        country = null
+        assertEquals(HandoffApp.MAPS, flow.preferredMaps)
+        // Offline without the app → «нужен интернет», nothing opens; the launcher failing → «не получилось».
+        maps = false
+        val before = opened.size
         flow.setOffline(true)
         flow.openDayMenu(day.day); settle(); flow.dayMenuGo()
         assertEquals(Toast.HandoffOffline, flow.toast)
-        assertEquals(2, opened.size)
+        assertEquals(before, opened.size)
         flow.setOffline(false)
         result = HandoffTarget.None
         flow.openDayMenu(day.day); settle(); flow.dayMenuGo()
         assertEquals(Toast.HandoffFailed, flow.toast)
-        // Maps only: the car label names Яндекс Карты.
+        // the walk label follows the same app
+        assertEquals(HandoffTarget.Browser, flow.walkTarget)
         maps = true
-        assertEquals(HandoffTarget.Maps, flow.carTarget)
         assertEquals(HandoffTarget.Maps, flow.walkTarget)
     }
 
@@ -586,11 +660,24 @@ class VerstFlowTest {
     /** DEV-302 fake: no network in unit tests. */
     private class FakeAddress : app.verst.data.net.AddressSearch {
         var searches = 0
-        override suspend fun search(query: String): app.verst.data.net.AddressResult<List<SuggestionDto>> {
+        var near: app.verst.core.model.GeoPoint? = null
+        /** CEO 29.10: what `search` answers (a foreign row for the abroad tests). */
+        var rows = listOf(SuggestionDto("address", "ул. Советская, 1", "Ярославль", 57.6266, 39.8938))
+        /** CEO 29.10: the reverse lookups asked, and how long each answer takes / what it is (by the point). */
+        val reverses = mutableListOf<Pair<Double, Double>>()
+        var reverseDelayMs: (Double, Double) -> Long = { _, _ -> 0L }
+        var reverseAnswer: (Double, Double) -> String? = { _, _ -> "ул. Советская, 1" }
+        override suspend fun search(query: String, near: app.verst.core.model.GeoPoint?): app.verst.data.net.AddressResult<List<SuggestionDto>> {
             searches++
-            return app.verst.data.net.AddressResult.Ok(listOf(SuggestionDto("address", "ул. Советская, 1", "Ярославль", 57.6266, 39.8938)))
+            this.near = near
+            return app.verst.data.net.AddressResult.Ok(rows)
         }
-        override suspend fun reverse(lat: Double, lon: Double) = app.verst.data.net.AddressResult.Ok<String?>("ул. Советская, 1")
+        override suspend fun reverse(lat: Double, lon: Double): app.verst.data.net.AddressResult<String?> {
+            reverses += lat to lon
+            val wait = reverseDelayMs(lat, lon)
+            if (wait > 0) kotlinx.coroutines.delay(wait)
+            return app.verst.data.net.AddressResult.Ok(reverseAnswer(lat, lon))
+        }
     }
 
     @Test
@@ -609,6 +696,13 @@ class VerstFlowTest {
         assertEquals(1, address.searches)
         assertEquals(AddressState.Done, flow.addressState)
         assertEquals("ул. Советская, 1", flow.addressResults.single().name)
+        assertEquals("the user's place biases the search", flow.origin, address.near)
+        // CEO 29.10: a bare street is searchable too
+        assertTrue(flow.looksLikeAddress("улица Мира"))
+        assertTrue(flow.looksLikeAddress("проспект Мира"))
+        assertFalse(flow.looksLikeAddress("Ленина"))
+        assertTrue(flow.addressOffered("Ленина"))
+        assertFalse(flow.addressOffered("Ле"))
         flow.pick(flow.addressResults.single())
         assertEquals("ул. Советская, 1", flow.destination!!.name)
         flow.setOffline(true)
@@ -620,7 +714,7 @@ class VerstFlowTest {
 
     @Test
     fun cardsOnlyForSightsAndHotelsAndFocusComesBack() = runTest {
-        val flow = VerstFlow(FakeGateway(), backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        val flow = VerstFlow(FakeGateway(), backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, addressSearch = FakeAddress()) {}
         settle()
         flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
         settle(10_000)
@@ -643,6 +737,312 @@ class VerstFlowTest {
         flow.cardPickHotel()
         assertEquals(Route.Exit, flow.top)
         assertEquals(night.id, flow.exitStopId)
+    }
+
+    /**
+     * CEO 29.10: a card asks its street address online (Nominatim, else the phone's geocoder) and keeps it per place
+     * for the session; a late answer for a card that is no longer open never lands on the open one; offline: nothing.
+     */
+    @Test
+    fun cardAddressIsReverseGeocodedAndALateAnswerIsDropped() = runTest {
+        val address = FakeAddress()
+        val flow = VerstFlow(FakeGateway(), backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, addressSearch = address) {}
+        settle()
+        flow.openNavigator(); flow.pick(yar); flow.openInstrumentsFree(); flow.go()
+        settle(10_000)
+        val sights = flow.result!!.trip.daysList.flatMap { it.stops }.filter { it.kind == "sight" && it.lat != null }
+        val first = sights[0]
+        val second = sights[1]
+        // opening a card fills the address (the loading line meanwhile)
+        flow.openCard(first)
+        assertTrue(flow.card!!.ui.addressLoading)
+        assertNull(flow.card!!.ui.address)
+        settle()
+        assertEquals("ул. Советская, 1", flow.card!!.ui.address)
+        assertFalse(flow.card!!.ui.addressLoading)
+        assertEquals(listOf(first.lat!! to first.lon!!), address.reverses)
+        flow.closeCard()
+        // the first place answers slowly, the second at once: the first's late answer must not land on the second
+        address.reverseDelayMs = { lat, _ -> if (lat == sights[2].lat) 5_000L else 0L }
+        address.reverseAnswer = { lat, _ -> if (lat == sights[2].lat) "ул. Поздняя, 9" else "ул. Ленина, 5" }
+        val slow = sights[2]
+        flow.openCard(slow)
+        settle(100)
+        assertTrue(flow.card!!.ui.addressLoading)
+        flow.closeCard()
+        flow.openCard(second)
+        settle(100)
+        assertEquals("ул. Ленина, 5", flow.card!!.ui.address)
+        settle(10_000) // the slow answer arrives now
+        assertEquals(second.id, flow.card!!.rowId)
+        assertEquals("ул. Ленина, 5", flow.card!!.ui.address)
+        // the session cache: reopening the first card asks nothing
+        flow.closeCard()
+        val asked = address.reverses.size
+        flow.openCard(first)
+        assertEquals("ул. Советская, 1", flow.card!!.ui.address)
+        assertFalse(flow.card!!.ui.addressLoading)
+        assertEquals(asked, address.reverses.size)
+        // Nominatim knows nothing → the phone's geocoder answers
+        flow.closeCard()
+        address.reverseAnswer = { _, _ -> null }
+        flow.addressFallback = object : app.verst.data.net.AddressSearch {
+            override suspend fun search(query: String, near: GeoPoint?) = app.verst.data.net.AddressResult.Ok(emptyList<SuggestionDto>())
+            override suspend fun reverse(lat: Double, lon: Double) = app.verst.data.net.AddressResult.Ok<String?>("Соборная площадь, 1")
+        }
+        val third = sights.getOrNull(3) ?: sights.last()
+        flow.openCard(third)
+        settle()
+        assertEquals("Соборная площадь, 1", flow.card!!.ui.address)
+        // offline: no lookup, no loading line, no address
+        flow.closeCard()
+        flow.setOffline(true)
+        val before = address.reverses.size
+        val fresh = flow.result!!.trip.daysList.flatMap { it.stops }.last { it.kind == "sight" && it.lat != null && it.id !in setOf(first.id, second.id, slow.id, third.id) }
+        flow.openCard(fresh)
+        settle()
+        assertNull(flow.card!!.ui.address)
+        assertFalse(flow.card!!.ui.addressLoading)
+        assertEquals(before, address.reverses.size)
+        flow.setOffline(false)
+    }
+
+    /**
+     * CEO 29.10: an address abroad («Прага») is found, but the engine plans only in Russia: no estimate, no plan —
+     * the Navigator's plate, and its button opens the road in the preferred maps app with ОТКУДА and КУДА.
+     */
+    @Test
+    fun aForeignAddressIsNotPlannedAndHandsOffToTheMaps() = runTest {
+        val gw = FakeGateway()
+        val address = FakeAddress()
+        val prague = SuggestionDto("address", "Прага", "Прага · Чехия", 50.0874, 14.4213, countryCode = "cz")
+        address.rows = listOf(prague)
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, addressSearch = address) {}
+        flow.mapsChoiceRead = { MapsChoice.AUTO }
+        flow.countrySource = CountrySource { "ru" }
+        val opened = mutableListOf<Triple<HandoffApp, String?, String?>>()
+        flow.handoffLauncher = object : HandoffLauncher {
+            override fun navigatorInstalled() = true
+            override fun mapsInstalled() = true
+            override fun open(links: HandoffLinksDto, walk: Boolean) = HandoffTarget.None
+            override fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget {
+                opened += Triple(app, uri, web)
+                return HandoffTarget.Maps
+            }
+        }
+        settle()
+        flow.openNavigator()
+        settle()
+        val estimatesBefore = gw.estimates.size
+        flow.updateQuery("Прага")
+        flow.submitAddress()
+        settle()
+        assertEquals(listOf(prague), flow.addressResults)
+        assertFalse("no engine km for a row abroad", prague.pointKey in flow.rowKm)
+        flow.pick(flow.addressResults.single())
+        settle()
+        assertTrue(flow.destinationAbroad)
+        assertEquals(estimatesBefore, gw.estimates.size) // no doomed estimate
+        // ПОЕХАЛИ cannot plan: the Navigator stays, nothing goes to the engine
+        flow.openInstrumentsFree()
+        assertEquals(Route.Navigator, flow.top)
+        flow.go()
+        settle(10_000)
+        assertEquals(0, gw.plans)
+        assertEquals(Route.Navigator, flow.top)
+        assertNull(flow.result)
+        // the plate's button: Яндекс Карты (Russia) with two points, ОТКУДА → Прага
+        val points = listOf(LatLon(flow.origin.lat, flow.origin.lon), LatLon(prague.lat, prague.lon))
+        assertEquals(HandoffTarget.Maps, flow.abroadHandoff())
+        assertEquals(Triple(HandoffApp.MAPS, NaviLinks.mapsAppRoute(points), NaviLinks.webRoute(points)), opened.single())
+        // with Google Карты chosen: the Google directions link with the same two points
+        flow.mapsChoiceRead = { MapsChoice.GOOGLE }
+        flow.abroadHandoff()
+        val google = NaviLinks.googleRoute(points)
+        assertEquals(Triple(HandoffApp.GOOGLE, google, google), opened.last())
+        assertTrue(google.contains("origin=") && google.contains("destination=50.087400,14.421300"))
+        // a Russian destination plans again as before
+        flow.pick(yar)
+        assertFalse(flow.destinationAbroad)
+        assertNull(flow.abroadHandoff())
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        assertEquals(1, gw.plans)
+    }
+
+    // ---- CEO 29.10: trips abroad, wave 1 — only the server plans them
+
+    /** The server of the abroad tests (no network in unit tests): what it answers, what it was asked. */
+    private class FakeServer : app.verst.data.net.PlanServer {
+        var present = true
+        val inputs = mutableListOf<String>()
+        /** null: the server is unavailable (transport, 5xx). */
+        var answer: EngineResult<app.verst.core.model.dto.PlanOutcome>? = null
+        override val configured: Boolean get() = present
+        override suspend fun plan(inputJson: String, onEvent: (PlanEventDto) -> Unit): EngineResult<app.verst.core.model.dto.PlanOutcome> {
+            inputs += inputJson
+            return answer ?: throw app.verst.data.net.ServerUnavailable("HTTP 503")
+        }
+    }
+
+    /** Real engine output: Владикавказ → Тбилиси on the server's `world_v1` (core-model test resources). */
+    private val abroadPlan: EngineResult<app.verst.core.model.dto.PlanOutcome> by lazy {
+        val result = root.resolve("android/core-model/src/test/resources/abroad/plan-vladikavkaz-tbilisi.json").readText()
+        EngineJson.planOutcome("""{"ok":true,"result":$result}""")
+    }
+    private val tbilisi = SuggestionDto("address", "Тбилиси", "Тбилиси · Грузия", 41.7151, 44.8271, countryCode = "ge")
+    private val baku = SuggestionDto("address", "Баку", "Баку · Азербайджан", 40.4093, 49.8671, countryCode = "az")
+
+    /**
+     * «Где строить маршрут»: Телефон (`enabled = false`), yet a destination abroad goes to the server — after the
+     * tester's consent (the settings' dialog), and a Russian destination still plans on the phone.
+     */
+    @Test
+    fun aTripAbroadGoesToTheServerEvenWithThePhoneSettingAfterTheConsent() = runTest {
+        val phone = FakeGateway()
+        val server = FakeServer().apply { answer = abroadPlan }
+        val net = app.verst.engine.Connectivity()
+        var consent = false
+        val gw = app.verst.engine.ServerPlannerGateway(phone, server, enabled = { false }, online = { net.online }, consent = { consent })
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, connectivity = net) {}
+        flow.serverConsentRead = { consent }
+        flow.serverConsentWrite = { consent = true }
+        settle()
+        flow.openNavigator()
+        settle()
+        val estimatesBefore = phone.estimates.size
+        flow.pick(tbilisi)
+        settle()
+        assertTrue(flow.destinationAbroad)
+        assertTrue(flow.abroadOnServer)
+        assertFalse("no plate: the server plans it", flow.abroadBlocked)
+        assertEquals("no estimate abroad on the phone", estimatesBefore, phone.estimates.size)
+        flow.openInstrumentsFree()
+        assertEquals(Route.Instruments, flow.top)
+
+        // no consent yet: the dialog, nothing sent; «Не сейчас» (or back) keeps the Instruments
+        flow.go()
+        assertTrue(flow.abroadConsentAsk)
+        assertEquals(Route.Instruments, flow.top)
+        flow.answerAbroadConsent(false)
+        assertFalse(flow.abroadConsentAsk)
+        assertFalse(consent)
+        flow.go()
+        assertTrue(flow.abroadConsentAsk)
+        assertTrue(flow.back())
+        assertFalse(flow.abroadConsentAsk)
+        assertEquals(Route.Instruments, flow.top)
+        settle(10_000)
+        assertTrue(server.inputs.isEmpty())
+
+        // «Согласен»: the consent is kept and the trip is planned on the server
+        flow.go()
+        flow.answerAbroadConsent(true)
+        assertTrue(consent)
+        settle(10_000)
+        assertEquals(1, server.inputs.size)
+        assertTrue(server.inputs.single().contains("44.8271"))
+        assertFalse("routing only", server.inputs.single().contains("abroad"))
+        assertEquals(0, phone.plans)
+        assertTrue(flow.lastPlanRequest!!.abroad)
+        assertEquals(Route.Road, flow.top)
+        val trip = flow.result!!.trip
+        assertTrue(trip.abroad!!.roubleTotalIncomplete)
+        assertTrue(trip.daysList.flatMap { it.stops }.any { it.kind == "border" && it.border != null })
+        assertTrue(gw.lastPlan!!.server)
+
+        // the border row opens its sheet; back closes it
+        val border = trip.daysList.flatMap { it.stops }.first { it.kind == "border" }
+        assertTrue(flow.tappable(border))
+        flow.openCard(border)
+        assertEquals(border, flow.roadBorder)
+        assertNull(flow.card)
+        assertTrue(flow.back())
+        assertNull(flow.roadBorder)
+        assertEquals(Route.Road, flow.top)
+
+        // a Russian destination with the phone setting: the phone plans, as before
+        while (flow.back()) Unit
+        flow.openNavigator()
+        flow.pick(yar)
+        assertFalse(flow.destinationAbroad)
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        assertEquals(1, phone.plans)
+        assertEquals(1, server.inputs.size)
+        assertFalse(flow.lastPlanRequest!!.abroad)
+    }
+
+    /**
+     * Offline (or no server in the build): the plate with the maps hand-off, nothing planned. The server's verdict on
+     * a closed border is shown in its own words and goes back to the Navigator; neither it nor a server failure falls
+     * back to the phone.
+     */
+    @Test
+    fun aTripAbroadOfflineShowsThePlateAndTheServersVerdictIsShownWithoutThePhone() = runTest {
+        val phone = FakeGateway()
+        val server = FakeServer()
+        val net = app.verst.engine.Connectivity()
+        val gw = app.verst.engine.ServerPlannerGateway(phone, server, enabled = { true }, online = { net.online }, consent = { true })
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, connectivity = net) {}
+        flow.serverConsentRead = { true }
+        settle()
+        flow.openNavigator()
+        settle()
+        flow.pick(baku)
+
+        // offline: the honest plate, ПОЕХАЛИ does nothing
+        flow.setOffline(true)
+        assertTrue(flow.abroadBlocked)
+        assertFalse(flow.abroadOnServer)
+        flow.openInstrumentsFree()
+        assertEquals(Route.Navigator, flow.top)
+        flow.go()
+        settle(10_000)
+        assertEquals(Route.Navigator, flow.top)
+        assertTrue(server.inputs.isEmpty())
+        assertEquals(0, phone.plans)
+        // no server in the build: the plate too (its other reason)
+        flow.setOffline(false)
+        server.present = false
+        assertTrue(flow.abroadBlocked)
+        assertFalse(flow.serverConfigured())
+        server.present = true
+        assertTrue(flow.abroadOnServer)
+
+        // Азербайджан: the server's verdict, final — shown as is, «Изменить маршрут» back to the Navigator
+        val sentence = "Граница закрыта для легковых до 2 января 2027: сухопутные границы Азербайджана закрыты. Не проверено."
+        server.answer = EngineResult.Err(
+            app.verst.core.model.dto.EngineErrorDto(
+                "INVALID_INPUT", sentence, field = "destination", reason = "border_closed", country = "AZ", until = "2027-01-02T06:00:00+04:00",
+            ),
+        )
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        assertEquals(Route.Drive, flow.top)
+        val err = flow.drive.error!!
+        assertEquals("border_closed", err.reason)
+        assertEquals(sentence, err.abroadText)
+        assertEquals(DriveAction.CHANGE_ROUTE, flow.driveAction(err))
+        assertEquals(0, phone.plans)
+        flow.onDriveError(flow.driveAction(err), err.abroadText!!)
+        assertEquals(Route.Navigator, flow.top)
+        assertEquals(sentence, flow.routeError)
+
+        // server trouble for a trip abroad: an error to retry, never a phone plan (it would reject the point)
+        flow.pick(tbilisi)
+        assertNull(flow.routeError)
+        server.answer = null
+        flow.openInstrumentsFree()
+        flow.go()
+        settle(10_000)
+        assertEquals("UPSTREAM", flow.drive.error!!.code)
+        assertEquals(DriveAction.RETRY, flow.driveAction(flow.drive.error!!))
+        assertEquals(2, server.inputs.size)
+        assertEquals(0, phone.plans)
     }
 
     @Test
@@ -752,6 +1152,20 @@ class VerstFlowTest {
         assertNull(clean("монастырь в Костроме", "монастырь · Кострома", "Кострома"))
         assertEquals("Главный монастырь России, собор XV века.", clean("главный монастырь России, собор XV века", "монастырь · Сергиев Посад", "Сергиев Посад"))
         assertEquals("Музей под открытым небом.", clean("Музей под открытым небом.", "музей · Суздаль", "Суздаль"))
+        // designer В-1: no stress marks, no word cut in half, no lone bracket
+        assertEquals("Церковь Илии Пророка.", clean("Це\u0301рковь Или\u0301и Проро\u0301ка", "церковь · Ярославль", "Ярославль"))
+        assertEquals(
+            "Выставка достижений народного хозяйства … Всероссийский выставочный центр — выставочный комплекс…",
+            clean(
+                "Вы\u0301ставка достиже\u0301ний наро\u0301дного хозя\u0301йства … Всеросси\u0301йский вы\u0301ставочный центр) — выставочный комплекс в…",
+                "выставка · Москва", "Москва",
+            ),
+        )
+        assertEquals(
+            "Кремль XV века. Построен при Иване III.",
+            clean("Кремль XV века. Построен при Иване III. Стены из красного кирп…", "кремль · Коломна", "Коломна"),
+        )
+        assertEquals("Усадьба Шереметевых.", clean("усадьба Шереметевых (XVIII век, парк и пруд", "усадьба · Москва", "Москва"))
     }
 
     /** S4 card chips: raw OSM hours never show in English. */
@@ -887,6 +1301,51 @@ class VerstFlowTest {
      * screen sends nothing; an answer whose key is not the key of the request sent is dropped as stale.
      */
     @Test
+    fun customWalkWithBarsAsksTheAgeBeforeBuilding() = runTest {
+        // CEO 31.10: bars kept in the custom interests after another preset reset the 18+ answer → the engine
+        // refused (adultConfirmed: required) and «Собрать прогулку» looked dead. Now the app asks first.
+        val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val presets = (app.verst.core.model.EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        val oneWalk = (app.verst.core.model.EngineJson.walkRoute(resp("city_route-overview.json")) as EngineResult.Ok).value
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                return EngineResult.Ok(oneWalk)
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        flow.selectCityPreset("custom")
+        flow.toggleCityInterest("bars")
+        flow.answerAge(true)
+        flow.selectCityPreset("overview") // resets the 18+ answer; the custom interests keep «bars»
+        flow.selectCityPreset("custom")
+        assertTrue("bars" in flow.cityInterests)
+        flow.buildCustomWalk()
+        settle()
+        assertTrue("asked, nothing sent", requests.isEmpty())
+        assertEquals(AgeGate(interest = "bars", thenBuild = true), flow.ageGate)
+        flow.answerAge(false)
+        settle()
+        assertFalse("«Нет»: the walk without bars", "bars" in requests.single().interests)
+        flow.buildWalk()
+        settle()
+        flow.toggleCityInterest("bars")
+        flow.answerAge(true)
+        flow.buildWalk()
+        settle()
+        assertTrue(requests.last().adultConfirmed)
+        assertTrue("bars" in requests.last().interests)
+    }
+
+    @Test
     fun walkRequestKeyDropsStaleAnswersAndSkipsSameRequests() = runTest {
         val root = java.io.File(System.getProperty("verst.repoRoot") ?: "../..")
         val resp = { f: String -> app.verst.core.model.EngineJson.json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
@@ -969,5 +1428,68 @@ class VerstFlowTest {
         assertEquals(Route.Walk, flow.top)
         assertEquals(360, requests.last().durationMin)
         assertNull(flow.walkFew)
+    }
+
+    /**
+     * CEO 29.10: `NOT_ENOUGH_POIS` with `reason: "no_data"` (`city_route-error-no-data.json`, «Пивной» in Гороховец):
+     * the plate carries the engine's `messageRu` («у нас пока нет данных … это пробел нашей базы»), not «мало мест»,
+     * and offers only other walks — never a longer walk, as if the town were small. An unavailable preset with
+     * `noData` is listed with its reason; one that is merely unavailable stays hidden.
+     */
+    @Test
+    fun notEnoughNoDataCarriesTheEnginesMessage() = runTest {
+        fun resp(f: String) = kotlinx.serialization.json.Json.parseToJsonElement(root.resolve("docs/contracts/v2/$f").readText())
+            .let { (it as kotlinx.serialization.json.JsonObject)["response"].toString() }
+        val p0 = (EngineJson.cityPresets(resp("city_presets.json")) as EngineResult.Ok).value
+        val presets = p0.copy(
+            presets = p0.presets.map {
+                if (it.preset == "beer") it.copy(available = false, noData = true, noDataRu = "У нас пока нет данных о пивных барах в этом городе — это пробел нашей базы, а не города.") else it
+            },
+        )
+        val err = EngineJson.walkRoute(resp("city_route-error-no-data.json")) as EngineResult.Err
+        assertEquals("no_data", err.error.reason)
+        assertEquals(listOf("beer"), err.error.noData)
+        assertTrue(err.error.isNoData)
+        val message = err.error.messageRu!!
+        assertTrue(message, message.startsWith("У нас пока нет данных о пивных барах"))
+        // the engine's suggestions plus a duration one: a longer walk must not be offered for missing data
+        val withDuration = err.copy(
+            error = err.error.copy(
+                suggestions = kotlinx.serialization.json.buildJsonArray {
+                    add(kotlinx.serialization.json.buildJsonObject { put("durationMin", kotlinx.serialization.json.JsonPrimitive(480)); put("count", kotlinx.serialization.json.JsonPrimitive(3)) })
+                    err.error.suggestions.orEmpty().forEach { add(it) }
+                },
+            ),
+        )
+        val requests = mutableListOf<app.verst.core.model.WalkRequest>()
+        val gw = object : PlannerGateway by FakeGateway() {
+            override suspend fun cityPresets(point: GeoPoint) = EngineResult.Ok(presets)
+            override suspend fun cityRoute(requestId: String, request: app.verst.core.model.WalkRequest): EngineResult<app.verst.core.model.dto.WalkRouteDto> {
+                requests += request
+                return withDuration
+            }
+        }
+        val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }) {}
+        settle()
+        flow.debugLocationAnswered()
+        flow.openCity()
+        settle()
+        // «Пивной» has no data here: listed with the engine's reason, not selectable; «По рюмочным» (unavailable,
+        // data present) stays hidden
+        assertFalse(flow.visibleCityPresets().any { it.preset == "beer" })
+        assertEquals(listOf("beer"), flow.noDataCityPresets().map { it.preset })
+        assertEquals(presets.presets.first { it.preset == "beer" }.noDataRu, flow.noDataCityPresets().single().noDataRu)
+        assertFalse(flow.noDataCityPresets().any { it.preset == "ryumochnye" })
+        flow.buildWalk()
+        settle()
+        assertEquals(1, requests.size)
+        assertEquals(Route.City, flow.top)
+        assertEquals("NOT_ENOUGH_POIS", flow.cityError)
+        val few = flow.walkFew!!
+        assertTrue(few.noData)
+        assertEquals(message, few.messageRu)
+        // only the engine's other walks («Обзорная прогулка», «Свой маршрут»), no «Гулять 8 ч»
+        assertEquals(listOf("overview", "custom"), few.suggestions.map { it.preset })
+        assertTrue(few.suggestions.none { it.durationMin != null || it.unlimited || it.clearExclude })
     }
 }

@@ -3,6 +3,8 @@
 #   * check-run annotations  GET /repos/pazzia/Verst/check-runs/{job_id}/annotations
 #   * branch ci-logs         git fetch origin +ci-logs:refs/remotes/origin/ci-logs --depth=1
 name: android
+# The run's title in the Actions list: the version of its APK (keep «0.3» equal to VERST_VERSION below)
+run-name: "Верста 0.3.${{ github.run_number }}${{ github.ref_name != 'main' && ' · тест ветки' || '' }}"
 
 on:
   push:
@@ -28,7 +30,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: "Publish the GitHub pre-release mvp-mock-<run number> (main only)"
+        description: "Publish the GitHub pre-release verst-<run number> (main only)"
         type: boolean
         default: true
       run_e2e:
@@ -49,7 +51,12 @@ concurrency:
 
 env:
   VERST_BUILD_NUMBER: ${{ github.run_number }}
+  # versionName of the APK and the name of its file and artifact: «Верста 0.3.162», Verst-0.3.162.apk.
+  # 0.3 from 28.10.2026: the new signing key (a fresh install line after the 0.2 demo builds).
+  VERST_VERSION: 0.3.${{ github.run_number }}
   VERST_GIT_SHA: ${{ github.sha }}
+  # SRV-01: the CEO's test VM in the Netherlands (tests only, 152-FZ: the beta backend moves to Russia)
+  VERST_SERVER_URL: https://212-108-82-26.sslip.io
   JAVA_VERSION: "17"
   PYTHON_VERSION: "3.12"   # must equal chaquopy.defaultConfig.version (bytecode compiled at build time)
 
@@ -73,6 +80,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Strings are generated from design/copy-ru.md (a key added only to strings.xml is lost on regeneration)
+        run: python3 design/tools/gen_strings.py --check
 
       - name: python3 -m unittest discover
         working-directory: backend/planner
@@ -128,9 +138,44 @@ jobs:
         # D-IR-20 currency setting; on failure the placeholder stays and the app shows roubles only
         run: python3 tools/ci/fetch_rates.py android/app/src/main/assets/rates.json
 
+      - name: Signing key (GitHub Secrets)
+        # Security review 28.10 (К-1): the key is never in the repository. Without the secret the APK is signed
+        # with a throwaway debug key: it builds and tests, but does not install over an earlier CI build.
+        env:
+          KEYSTORE_B64: ${{ secrets.VERST_SIGNING_KEYSTORE_B64 }}
+          STOREPASS: ${{ secrets.VERST_SIGNING_STORE_PASSWORD }}
+          KEYPASS: ${{ secrets.VERST_SIGNING_KEY_PASSWORD }}
+          ALIAS: ${{ secrets.VERST_SIGNING_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::warning title=signing::VERST_SIGNING_KEYSTORE_B64 is not set: throwaway debug signature (will not install over earlier builds)"
+            exit 0
+          fi
+          umask 077
+          K="$RUNNER_TEMP/verst-demo.jks"
+          printf '%s' "$KEYSTORE_B64" | tr -d ' \r\n' | base64 -d > "$K"
+          # the file's own hash (not secret): compare with `sha256sum verst-demo.jks` where the key was made
+          echo "keystore file: $(stat -c %s "$K") bytes, sha256 $(sha256sum "$K" | cut -d' ' -f1)"
+          # name the secret that is wrong instead of Gradle's «Failed to read key … null»
+          export STOREPASS="${STOREPASS%$'\n'}" KEYPASS="${KEYPASS%$'\n'}" ALIAS="${ALIAS%$'\n'}"
+          if ! keytool -list -keystore "$K" -storetype PKCS12 -storepass:env STOREPASS >/dev/null 2>&1; then
+            echo "::error title=signing::VERST_SIGNING_STORE_PASSWORD does not open the keystore (or VERST_SIGNING_KEYSTORE_B64 is not the whole base64 line)"; exit 1
+          fi
+          if ! keytool -list -keystore "$K" -storetype PKCS12 -storepass:env STOREPASS -alias "$ALIAS" >/dev/null 2>&1; then
+            echo "::error title=signing::VERST_SIGNING_KEY_ALIAS is not in the keystore (expected verst-demo)"; exit 1
+          fi
+          if [ "$KEYPASS" != "$STOREPASS" ]; then
+            echo "::error title=signing::VERST_SIGNING_KEY_PASSWORD differs from VERST_SIGNING_STORE_PASSWORD (a PKCS12 key has one password)"; exit 1
+          fi
+          echo "VERST_SIGNING_KEYSTORE=$K" >> "$GITHUB_ENV"
+
       - name: Assemble demo APK + androidTest APK
         id: assemble
         working-directory: android
+        env:
+          VERST_SIGNING_STORE_PASSWORD: ${{ secrets.VERST_SIGNING_STORE_PASSWORD }}
+          VERST_SIGNING_KEY_ALIAS: ${{ secrets.VERST_SIGNING_KEY_ALIAS }}
+          VERST_SIGNING_KEY_PASSWORD: ${{ secrets.VERST_SIGNING_KEY_PASSWORD }}
         run: ./gradlew :app:assembleDemo :app:assembleDemoAndroidTest --console=plain --stacktrace 2>&1 | tee "$LOGS/assemble.log"
 
       - name: Demo manifest has no test activity (release review P2-4)
@@ -145,6 +190,8 @@ jobs:
           printf '%s\n' android.permission.ACCESS_COARSE_LOCATION android.permission.ACCESS_FINE_LOCATION android.permission.ACCESS_NETWORK_STATE android.permission.INTERNET > /tmp/expected-permissions.txt
           if ! diff -u /tmp/expected-permissions.txt "$DIAG/permissions.txt"; then echo "::error::merged manifest permissions differ from ADR-0012 §7"; exit 1; fi
           if grep -n 'usesCleartextTraffic' "$M"; then echo "::error::usesCleartextTraffic in the merged manifest"; exit 1; fi
+          # D-IR-22: the launcher icon is wired (until 29.10 it was drawn but not referenced: the system icon showed)
+          grep -q 'android:icon="@mipmap/ic_launcher"' "$M" || { echo "::error::the merged manifest has no android:icon=@mipmap/ic_launcher"; exit 1; }
       - name: Diagnose assemble
         if: ${{ !cancelled() && steps.assemble.outcome == 'failure' }}
         run: python3 tools/ci/diagnose.py --out "$DIAG" gradle --log "$LOGS/assemble.log" --step assemble
@@ -193,10 +240,36 @@ jobs:
               print(f"- `{r['artifact']}` {r['source']}: {r.get('licence') or r.get('firstLine')} {r.get('url', '')}")
           EOF
 
-      - name: APK size budget (warn 45 MB, fail 60 MB)
+      - name: APK size budget (warn 45 MB, fail 60 MB) and content (no server-only catalogue abroad)
         id: apk
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
         run: python3 tools/ci/diagnose.py --out "$DIAG" apk --apk android/app/build/outputs/apk/demo/app-demo.apk --warn-mb 45 --fail-mb 60
+
+      - name: APK signer
+        # Security review 28.10 (К-1): which key signed the APK. Its SHA-256 matches
+        # `keytool -list -v -keystore verst-demo.jks` on the key owner's machine; the debug key with the secret set fails.
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          SIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$SIGNER" verify --print-certs android/app/build/outputs/apk/demo/app-demo.apk | tee "$DIAG/apk-signer.txt"
+          { echo "### APK signer"; echo '```'; cat "$DIAG/apk-signer.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "${VERST_SIGNING_KEYSTORE:-}" ] && grep -q 'CN=Android Debug' "$DIAG/apk-signer.txt"; then
+            echo "::error title=signing::the signing secrets are set, but the APK is signed with the debug key"; exit 1
+          fi
+
+      - name: Upload Verst-${{ env.VERST_VERSION }}.apk
+        # the file to install, named by its version (the «apks» artifact below is for the emulator and release jobs)
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/demo/app-demo.apk "dist/Verst-$VERST_VERSION.apk"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
+        with:
+          name: Verst-${{ env.VERST_VERSION }}
+          path: dist/Verst-${{ env.VERST_VERSION }}.apk
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Upload APKs
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
@@ -326,7 +399,7 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
-      TAG: mvp-mock-${{ github.run_number }}
+      TAG: verst-${{ github.run_number }}
       OUT: ${{ github.workspace }}/ci-out/release
     steps:
       - uses: actions/checkout@v4
@@ -345,17 +418,18 @@ jobs:
         run: |
           mkdir -p "$OUT" dist
           APK=$(find apks -name app-demo.apk | head -1)
-          cp "$APK" "dist/verst-$TAG.apk"
-          cp "$APK" "dist/verst-mock-latest.apk"
-          (cd dist && sha256sum "verst-$TAG.apk" > "verst-$TAG.apk.sha256")
-          SIZE=$(du -m "dist/verst-$TAG.apk" | cut -f1)
+          F="Verst-$VERST_VERSION.apk"
+          cp "$APK" "dist/$F"
+          cp "$APK" "dist/Verst-latest.apk"
+          (cd dist && sha256sum "$F" > "$F.sha256")
+          SIZE=$(du -m "dist/$F" | cut -f1)
           {
-            echo "Демо-сборка Версты №${{ github.run_number }} — всё работает на телефоне без интернета, на тестовых данных (города центральной России)."
+            echo "Верста $VERST_VERSION — демо-сборка: всё работает на телефоне без интернета, на тестовых данных (города центральной России)."
             echo
             echo "**Как поставить:** откройте этот файл на телефоне → «Установить». Если Android спросит — разрешите установку из этого источника. Старую демо-сборку удалять не нужно: новая ставится поверх, сохранённые поездки остаются."
             echo
-            echo "- Файл: \`verst-$TAG.apk\` (≈ ${SIZE} МБ), sha256 в \`verst-$TAG.apk.sha256\`"
-            echo "- Постоянная ссылка на последнюю сборку: https://github.com/${{ github.repository }}/releases/download/mvp-mock-latest/verst-mock-latest.apk"
+            echo "- Файл: \`$F\` (≈ ${SIZE} МБ), sha256 в \`$F.sha256\`"
+            echo "- Постоянная ссылка на последнюю сборку: https://github.com/${{ github.repository }}/releases/download/verst-latest/Verst-latest.apk"
             echo "- Проверка на эмуляторе: ${E2E_RESULT}"
             echo "- Коммит: ${{ github.sha }}"
             echo "- Данные: каталог мест — производная база данных OpenStreetMap (© участники OpenStreetMap), лицензия ODbL 1.0. Бесплатная копия каталога этой сборки, лицензии и описание сборки: https://github.com/${{ github.repository }}/tree/${{ github.sha }}/data/catalogue"
@@ -367,22 +441,23 @@ jobs:
       - name: Create pre-release ${{ env.TAG }}
         id: create
         run: |
-          gh release create "$TAG" "dist/verst-$TAG.apk" "dist/verst-$TAG.apk.sha256" \
+          gh release create "$TAG" "dist/Verst-$VERST_VERSION.apk" "dist/Verst-$VERST_VERSION.apk.sha256" \
             --repo "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
-            --title "Верста · демо-сборка ${{ github.run_number }}" --notes-file dist/notes.md 2>&1 | tee "$OUT/create.log"
+            --title "Верста $VERST_VERSION" --notes-file dist/notes.md 2>&1 | tee "$OUT/create.log"
 
-      - name: Move mvp-mock-latest
+      - name: Move verst-latest
         id: latest
         run: |
-          gh release delete mvp-mock-latest --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
-          gh release create mvp-mock-latest dist/verst-mock-latest.apk \
+          # mvp-mock-latest: the 0.2 builds' link, signed with the old key — removed so nobody installs it
+          for t in verst-latest mvp-mock-latest; do gh release delete "$t" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true; done
+          gh release create verst-latest dist/Verst-latest.apk \
             --repo "${{ github.repository }}" --target "${{ github.sha }}" --prerelease \
-            --title "Верста · последняя демо-сборка (№${{ github.run_number }})" --notes-file dist/notes.md 2>&1 | tee "$OUT/latest.log"
+            --title "Верста $VERST_VERSION · последняя сборка" --notes-file dist/notes.md 2>&1 | tee "$OUT/latest.log"
 
       - name: Keep the newest 10 numbered pre-releases
         run: |
           gh release list --repo "${{ github.repository }}" --limit 200 --json tagName,createdAt \
-            --jq '[.[] | select(.tagName | test("^mvp-mock-[0-9]+$"))] | sort_by(.createdAt) | reverse | .[10:] | .[].tagName' \
+            --jq '[.[] | select(.tagName | test("^(verst|mvp-mock)-[0-9]+$"))] | sort_by(.createdAt) | reverse | .[10:] | .[].tagName' \
           | while read -r t; do gh release delete "$t" --repo "${{ github.repository }}" --yes --cleanup-tag; done
 
       - name: Record release
@@ -401,6 +476,54 @@ jobs:
           name: diag-release
           path: ci-out/
           retention-days: 14
+
+  test-release:
+    # CEO 31.10: every green build of a working branch at one permanent public link, no GitHub login, no zip:
+    # releases/download/verst-test-latest/Verst-test-latest.apk (main keeps verst-latest). The tag points at the
+    # default branch: a GITHUB_TOKEN may not create a ref on a branch history that changes workflow files; the
+    # notes name the branch commit the APK was built from.
+    name: Test build at a permanent link (working branches)
+    needs: [planner, build, e2e]
+    if: >-
+      ${{ !cancelled() && github.ref != 'refs/heads/main'
+          && needs.planner.result == 'success' && needs.build.result == 'success'
+          && (needs.e2e.result == 'success' || needs.e2e.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: verst-test-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: apks
+          path: apks
+      - name: Publish ${{ env.TAG }}
+        env:
+          E2E_RESULT: ${{ needs.e2e.result }}
+          HEAD_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          mkdir -p dist
+          APK=$(find apks -name app-demo.apk | head -1)
+          cp "$APK" "dist/Verst-test-latest.apk"
+          cp "$APK" "dist/Verst-$VERST_VERSION.apk"
+          (cd dist && sha256sum "Verst-$VERST_VERSION.apk" > "Verst-$VERST_VERSION.apk.sha256")
+          {
+            echo "Верста $VERST_VERSION — тестовая сборка ветки \`${{ github.ref_name }}\` (ещё не в main)."
+            echo
+            echo "- Постоянная ссылка на последнюю тестовую сборку: https://github.com/${{ github.repository }}/releases/download/$TAG/Verst-test-latest.apk"
+            echo "- Тот же файл с номером версии: \`Verst-$VERST_VERSION.apk\` (sha256 рядом)"
+            echo "- Проверка на эмуляторе: ${E2E_RESULT}"
+            echo "- Собрано из коммита ${{ github.sha }} (метка релиза стоит на main — так требует GitHub)"
+            echo
+            echo "Изменения: $(echo "${HEAD_MSG:-ручной запуск}" | head -1)"
+          } > dist/notes.md
+          gh release delete "$TAG" --repo "${{ github.repository }}" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" dist/Verst-test-latest.apk "dist/Verst-$VERST_VERSION.apk" \
+            "dist/Verst-$VERST_VERSION.apk.sha256" \
+            --repo "${{ github.repository }}" --target "${{ github.event.repository.default_branch }}" --prerelease \
+            --title "Верста $VERST_VERSION · тестовая сборка" --notes-file dist/notes.md
+          echo "::notice title=Test build::https://github.com/${{ github.repository }}/releases/download/$TAG/Verst-test-latest.apk"
 
   # --------------------------------------------------------------------------------------- ci-logs
   ci-logs:

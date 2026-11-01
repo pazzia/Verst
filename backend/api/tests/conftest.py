@@ -118,8 +118,14 @@ def _has_schema(url: str) -> bool:
         return bool(row and row[0])
 
 
+# The session engine plans with no catalogues abroad, whatever backend/planner/abroad holds (the CI data lands
+# there since 30.10); tests that need them build a fixture folder (test_abroad.py).
+NO_ABROAD_DIR = tempfile.mkdtemp(prefix="verst-no-abroad-")
+
+
 def settings_for(url: str, **overrides: Any) -> Settings:
     base: dict[str, Any] = {
+        "abroad_dir": NO_ABROAD_DIR,
         "env": "test",
         "database_url": url,
         "clock": "golden",

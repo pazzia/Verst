@@ -1,4 +1,4 @@
-"""The offline open-data catalogue (ADR-0012 §3): Russian towns, POIs (Wikidata) and bars (OSM).
+"""The offline open-data catalogue (ADR-0012 §3): Russian towns, POIs (Wikidata), bars and food places (OSM).
 
 The files are columnar gzip JSON in `verst_planner/resources/` (``catalogue_*.json.gz``), written by
 `backend/planner/tools/data/build_catalogue.py` in CI and read here with the zip-safe resource loader.
@@ -10,6 +10,7 @@ A table document is ``{"v": 1, "n": N, "cols": {"name": [v0, v1, …], …}}``; 
 from __future__ import annotations
 
 import gzip
+import hashlib
 import io
 import json
 from collections.abc import Sequence
@@ -41,6 +42,8 @@ POI_KINDS = (
     "playground",
 )
 BAR_KINDS = ("ryumochnaya", "pub", "craft", "bar")
+# CEO 2026-10-29: restaurants, cafés and fast food from the same OSM extract as the bars (`catalogue_food`)
+FOOD_KINDS = ("restaurant", "cafe", "fast_food", "food_court")
 
 TOWN_COLS = ("id", "name", "gen", "prep", "lat", "lon", "pop", "region", "image", "credit")
 POI_COLS = ("id", "name", "desc", "kind", "lat", "lon", "town", "sitelinks", "heritage", "image", "credit")
@@ -48,13 +51,26 @@ POI_COLS = ("id", "name", "desc", "kind", "lat", "lon", "town", "sitelinks", "he
 # source, OSM opening_hours/fee/website, the card level 1-4 and the photo source (ADR-0015 §2-§3)
 POI_OPT_COLS = ("quality", "extract", "extractSrc", "hours", "fee", "website", "level", "imageSrc")
 BAR_COLS = ("id", "name", "kind", "lat", "lon", "town", "hours")
+# OSM `cuisine` as tagged (e.g. "russian;georgian", ≤ 40 chars) or null; `hours` = OSM opening_hours or null
+FOOD_COLS = ("id", "name", "kind", "lat", "lon", "town", "hours", "cuisine")
 
 FILES = {
     "meta": "catalogue_meta.json.gz",
     "towns": "catalogue_towns.json.gz",
     "pois": "catalogue_pois.json.gz",
     "bars": "catalogue_bars.json.gz",
+    "food": "catalogue_food.json.gz",
 }
+OPTIONAL_FILES = frozenset({"food"})
+"""Files an older catalogue does not have (read as empty: the walk then says there is no such data yet)."""
+
+# CEO 29.10: named OSM parks and gardens with their area, for the walk «парки» (`tools/data/build_parks.py`).
+# A separate file, not in FILES: it ships on its own; `load_packaged_parks` reads it (CEO 30.10). `town`
+# indexes `catalogue_towns` of the build whose sha256 the document names (`townsSha256`); `area` is in m²;
+# `poi` is the `catalogue_pois` id of the same park or null.
+PARKS_FILE = "catalogue_parks.json.gz"
+PARK_KINDS = ("park", "garden")
+PARK_COLS = ("id", "name", "kind", "lat", "lon", "town", "area", "poi", "hours")
 
 
 class CatalogueError(Exception):
@@ -114,6 +130,33 @@ class CatBar:
 
 
 @dataclass(frozen=True, slots=True)
+class CatPark:
+    """A named OSM park or garden (`catalogue_parks`): a walk stop «park» when no POI is the same park."""
+
+    id: str
+    name: str
+    kind: str  # park | garden
+    point: LatLon
+    town: str  # the town's Wikidata id
+    area_m2: int
+    poi: str | None  # the `catalogue_pois` id of the same park, if any
+    hours: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class CatFood:
+    """An OSM restaurant, café, fast food place or food court (no prices: OSM has none)."""
+
+    id: str
+    name: str
+    kind: str
+    point: LatLon
+    town: str
+    hours: str | None
+    cuisine: str | None
+
+
+@dataclass(frozen=True, slots=True)
 class FixtureLink:
     """A fixture town/place matched to Wikidata in CI (id, image, credit index)."""
 
@@ -143,14 +186,24 @@ class Catalogue:
     """ADR-0015 §4: paid OSM parking places (fee=yes), with ₽/h when their `charge` parses."""
     area_blocked: frozenset[str] = frozenset()
     """Files that must not be shown as an area photo (5.9 §3: collages, maps, flags, small or very wide)."""
+    food: list[CatFood] = field(default_factory=list)
+    """CEO 2026-10-29: OSM restaurants, cafés, fast food (empty in a catalogue built before the food data)."""
     town_by_id: dict[str, CatTown] = field(default_factory=dict)
     poi_by_id: dict[str, CatPoi] = field(default_factory=dict)
     bar_by_id: dict[str, CatBar] = field(default_factory=dict)
+    food_by_id: dict[str, CatFood] = field(default_factory=dict)
+    kinds_by_town: dict[str, frozenset[str]] = field(default_factory=dict)
+    """Town id → the bar and food kinds the catalogue has for it (CEO 2026-10-29: «no data» vs «few»)."""
 
     def __post_init__(self) -> None:
         self.town_by_id = {t.id: t for t in self.towns}
         self.poi_by_id = {p.id: p for p in self.pois}
         self.bar_by_id = {b.id: b for b in self.bars}
+        self.food_by_id = {f.id: f for f in self.food}
+        kinds: dict[str, set[str]] = {}
+        for town, kind in [(b.town, b.kind) for b in self.bars] + [(f.town, f.kind) for f in self.food]:
+            kinds.setdefault(town, set()).add(kind)
+        self.kinds_by_town = {t: frozenset(k) for t, k in kinds.items()}
 
     def credit(self, idx: int | None) -> Credit | None:
         if idx is None or not 0 <= idx < len(self.credits):
@@ -164,6 +217,7 @@ class Catalogue:
             "towns": len(self.towns),
             "pois": len(self.pois),
             "bars": len(self.bars),
+            "food": len(self.food),
         }
 
 
@@ -234,8 +288,8 @@ def to_coord(x: float) -> int:
     return round(x * COORD_SCALE)
 
 
-def from_docs(meta: Any, towns: Any, pois: Any, bars: Any) -> Catalogue:
-    """Build the in-memory catalogue from the four decoded documents (validated)."""
+def from_docs(meta: Any, towns: Any, pois: Any, bars: Any, food: Any = None) -> Catalogue:
+    """Build the in-memory catalogue from the decoded documents (validated; `food` None = no food data)."""
     if not isinstance(meta, dict) or meta.get("v") != FORMAT_VERSION:
         raise CatalogueError("meta: unsupported format")
     regions = {
@@ -299,6 +353,21 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any) -> Catalogue:
         )
         for a, b, c, d, e, f, g in zip(*b_cols, strict=True)
     ]
+    out_food: list[CatFood] = []
+    if food is not None:
+        food_kinds = list(meta.get("foodKinds", FOOD_KINDS))
+        out_food = [
+            CatFood(
+                str(a),
+                str(b),
+                food_kinds[int(c)],
+                LatLon(d / COORD_SCALE, e / COORD_SCALE),
+                town_ids[int(f)],
+                g,
+                h,
+            )
+            for a, b, c, d, e, f, g, h in zip(*columns(food, FOOD_COLS, "food"), strict=True)
+        ]
     links = {
         str(k): FixtureLink(str(v["wikidata"]), v.get("image"), v.get("credit"))
         for k, v in meta.get("links", {}).items()
@@ -315,6 +384,7 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any) -> Catalogue:
         sources=dict(meta.get("sources", {})),
         area_blocked=frozenset(str(f) for f in meta.get("areaBlock", [])),
         parking=parking_points(meta.get("parking")),
+        food=out_food,
     )
 
 
@@ -331,17 +401,58 @@ def parking_points(doc: Any) -> list[CatParking]:
     ]
 
 
+def parks_from_doc(doc: Any, towns: Sequence[CatTown]) -> list[CatPark]:
+    """`catalogue_parks` decoded; `towns` = `catalogue_towns` in file order (the build of `townsSha256`)."""
+    if not isinstance(doc, dict) or doc.get("v") != 1:
+        raise CatalogueError("parks: unsupported format")
+    c, kinds = doc["cols"], doc["kinds"]
+    out = []
+    for i, pid in enumerate(c["id"]):
+        out.append(
+            CatPark(
+                id=str(pid),
+                name=str(c["name"][i]),
+                kind=str(kinds[c["kind"][i]]),
+                point=LatLon(c["lat"][i] / COORD_SCALE, c["lon"][i] / COORD_SCALE),
+                town=towns[c["town"][i]].id,
+                area_m2=int(c["area"][i]),
+                poi=c["poi"][i],
+                hours=c["hours"][i],
+            )
+        )
+    return out
+
+
+def load_packaged_parks(cat: Catalogue) -> list[CatPark]:
+    """The packaged parks of `cat`, or [] when the file is missing or was built from other towns (its
+    `townsSha256` is not the shipped `catalogue_towns`): the walk then says it has no park data."""
+    try:
+        raw = resources.read_bytes(PARKS_FILE)
+        towns_sha = hashlib.sha256(resources.read_bytes(FILES["towns"])).hexdigest()
+    except (FileNotFoundError, OSError):
+        return []
+    doc = load_gz(raw, PARKS_FILE)
+    if not isinstance(doc, dict) or doc.get("townsSha256") != towns_sha:
+        return []
+    try:
+        return parks_from_doc(doc, cat.towns)
+    except (KeyError, IndexError, TypeError, ValueError) as e:
+        raise CatalogueError(f"parks: malformed ({e!r})") from e
+
+
 def load_packaged() -> Catalogue:
     """The catalogue shipped in `verst_planner/resources` (raises `CatalogueError`)."""
-    docs = {}
+    docs: dict[str, Any] = {}
     for key, name in FILES.items():
         try:
             data = resources.read_bytes(name)
         except (FileNotFoundError, OSError) as e:
+            if key in OPTIONAL_FILES:
+                continue
             raise CatalogueError(f"{name}: missing") from e
         docs[key] = load_gz(data, name)
     try:
-        return from_docs(docs["meta"], docs["towns"], docs["pois"], docs["bars"])
+        return from_docs(docs["meta"], docs["towns"], docs["pois"], docs["bars"], docs.get("food"))
     except (KeyError, IndexError, TypeError, ValueError) as e:
         raise CatalogueError(f"catalogue: malformed ({e!r})") from e
 
@@ -350,10 +461,17 @@ __all__ = [
     "BAR_COLS",
     "BAR_KINDS",
     "FILES",
+    "FOOD_COLS",
+    "FOOD_KINDS",
+    "PARKS_FILE",
+    "PARK_COLS",
+    "PARK_KINDS",
     "POI_COLS",
     "POI_KINDS",
     "TOWN_COLS",
     "CatBar",
+    "CatFood",
+    "CatPark",
     "CatPoi",
     "CatTown",
     "Catalogue",
@@ -366,5 +484,7 @@ __all__ = [
     "from_docs",
     "load_gz",
     "load_packaged",
+    "load_packaged_parks",
+    "parks_from_doc",
     "to_coord",
 ]

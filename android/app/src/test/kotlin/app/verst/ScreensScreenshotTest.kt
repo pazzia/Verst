@@ -35,6 +35,8 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import app.verst.core.model.DefaultOrigin
 import app.verst.core.model.EngineJson
 import app.verst.core.model.EngineResult
@@ -97,6 +99,12 @@ class ScreensScreenshotTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
     private val root = File(System.getProperty("verst.repoRoot") ?: "../..")
+
+    /** CEO 01.11: these shots cover the classic design; the emulator journey runs the default (camper) one. */
+    @org.junit.Before
+    fun classicDesign() {
+        app.verst.core.ui.theme.Palette.camper = false
+    }
 
     private val routes = listOf(
         ReadyRouteDto("rr_tula_yasnaya", "Тула · Ясная Поляна", "2 дня · Толстой и пряники", 414, 207, "weekend", true, 2, 2, "t_moscow", "S"),
@@ -204,6 +212,50 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("≈", substring = true, useUnmergedTree = true).assertDoesNotExist()
     }
 
+    /**
+     * CEO 29.10: КУДА abroad offline — the honest plate (only the server plans trips abroad, it needs the internet)
+     * instead of a plan; its button opens the road in the maps app.
+     */
+    @Test
+    fun navigatorAbroadPlate() {
+        val prague = SuggestionDto("address", "Прага", "Прага · Чехия", 50.0874, 14.4213, countryCode = "cz")
+        var maps = 0
+        shot("navigator", "abroad") {
+            NavigatorScreen(navigator("Прага", emptyList(), prague).copy(abroad = true), {}, {}, {}, {}, {}, onAbroadMaps = { maps++ })
+        }
+        compose.onNodeWithTag("navigator.abroad", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Поездку за границу строит только сервер Версты", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Сейчас нет интернета", substring = true, useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("«Прага»", substring = true, useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("navigator.start").assertIsNotEnabled()
+        compose.onNodeWithTag("navigator.abroad.maps").performScrollTo().performClick()
+        compose.waitForIdle()
+        assertEquals(1, maps)
+    }
+
+    /** CEO 29.10: the same plate in a build without a server says that reason. */
+    @Test
+    fun navigatorAbroadPlateNoServer() {
+        val tbilisi = SuggestionDto("address", "Тбилиси", "Тбилиси · Грузия", 41.7151, 44.8271, countryCode = "ge")
+        shot("navigator", "abroad-no-server") {
+            NavigatorScreen(navigator("Тбилиси", emptyList(), tbilisi).copy(abroad = true, abroadNoServer = true), {}, {}, {}, {}, {})
+        }
+        compose.onNodeWithText("В этой сборке нет сервера", substring = true, useUnmergedTree = true).assertExists()
+    }
+
+    /** CEO 29.10 (wave 1): online with a server, КУДА abroad is planned there — one line, no plate, ПОЕХАЛИ works. */
+    @Test
+    fun navigatorAbroadOnTheServer() {
+        val tbilisi = SuggestionDto("address", "Тбилиси", "Тбилиси · Грузия", 41.7151, 44.8271, countryCode = "ge")
+        shot("navigator", "abroad-server") {
+            NavigatorScreen(navigator("Тбилиси", emptyList(), tbilisi).copy(abroadServer = true), {}, {}, {}, {}, {})
+        }
+        compose.onNodeWithTag("navigator.abroad", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("navigator.abroad.server", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Поездку за границу строит сервер Версты — нужен интернет.", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("navigator.start").assertIsEnabled()
+    }
+
     @Test
     fun navigatorTooShort() = shot("navigator", "error-too-short") {
         NavigatorScreen(navigator("Химки", emptyList(), yaroslavl.copy(name = "Химки")).copy(tripErrorCode = "TOO_SHORT"), {}, {}, {}, {}, {})
@@ -263,6 +315,19 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("весело и познавательно", substring = true).assertExists() // the caption meta suffix
     }
 
+    /** CEO 29.10: a trip abroad on the Instruments — no estimate, the one line about the server instead. */
+    @Test
+    fun instrumentsAbroad() {
+        shot("instruments", "abroad") {
+            InstrumentsScreen(
+                InstrumentsUi("Москва → Тбилиси", "Москва", false, null, true, listOf(Seat.EMPTY, Seat.EMPTY, Seat.EMPTY), false, 2, 0, 600, 2, Mood.CALM, originGen = "Москвы", abroad = true),
+                noActions,
+            )
+        }
+        compose.onNodeWithTag("instruments.abroad", useUnmergedTree = true).assertTextEquals("Поездку за границу строит сервер Версты — нужен интернет.")
+        compose.onNodeWithTag("instruments.start").assertIsEnabled()
+    }
+
     @Test
     fun instrumentsJustDriveAdults() {
         shot("instruments", "s4-mood-just-drive") {
@@ -297,6 +362,22 @@ class ScreensScreenshotTest {
         }
         compose.onNodeWithText("Не нашли дорогу на машине до этой точки").assertExists()
         compose.onNodeWithText("Изменить маршрут").assertExists()
+    }
+
+    /** CEO 29.10: the server's verdict on a closed border, in its own words, and «Изменить маршрут». */
+    @Test
+    fun driveErrorBorderClosed() {
+        val sentence = "Граница закрыта для легковых до 2 января 2027: сухопутные границы Азербайджана закрыты для легковых машин. Не проверено."
+        val err = EngineErrorDto("INVALID_INPUT", sentence, field = "destination", reason = "border_closed", country = "AZ")
+        var message: String? = null
+        shot("drive", "error-border-closed") {
+            DriveScreen(DriveUi(error = err), "—", { DriveAction.CHANGE_ROUTE }, {}, {}, { _, m -> message = m })
+        }
+        compose.onNodeWithTag("drive.error.message", useUnmergedTree = true).assertTextEquals(sentence)
+        compose.onNodeWithText("Параметры поездки сохранены", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Изменить маршрут").performClick()
+        compose.waitForIdle()
+        assertEquals(sentence, message) // the Navigator caption shows it
     }
 
     @Test
@@ -519,10 +600,27 @@ class ScreensScreenshotTest {
         if (p.sundayRu != null) assertTrue(compose.onAllNodesWithText("воскресенье", substring = true, ignoreCase = true).fetchSemanticsNodes().isNotEmpty())
     }
 
+    /** CEO 29.10: «Вести по картам» names the app it opens (and the browser when that app is missing). */
+    @Test
+    fun roadHandoffCtaGoogle() {
+        shot("road", "cta-google") {
+            RoadScreen(RoadUi(s4Trip(), "NE", carTarget = HandoffTarget.Google, maps = app.verst.nav.HandoffApp.GOOGLE), noRoad)
+        }
+        compose.onNodeWithText("Вести по картам", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.handoff.sub", useUnmergedTree = true).assertTextEquals("Google Карты · все точки дня 1")
+    }
+
+    @Test
+    fun roadHandoffCtaYandex() {
+        shot("road", "cta-yandex") { RoadScreen(RoadUi(s4Trip(), "NE", carTarget = HandoffTarget.Maps), noRoad) }
+        compose.onNodeWithTag("road.handoff.sub", useUnmergedTree = true).assertTextEquals("Яндекс Карты · все точки дня 1")
+    }
+
     @Test
     fun roadS4Top() {
         shot("road", "s4-top") { RoadScreen(RoadUi(s4Trip(), "NE"), noRoad) }
         compose.onNodeWithTag("road.handoff").assertExists()
+        compose.onNodeWithTag("road.handoff.sub", useUnmergedTree = true).assertTextContains("в браузере", substring = true) // no maps app
         compose.onNodeWithTag("road.day.1.navigator").assertExists()
         compose.onNodeWithTag("road.day.1.parking", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("road.total.parking", useUnmergedTree = true).assertExists()
@@ -628,22 +726,64 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("road.stop.${night.id}", useUnmergedTree = true).assertIsDisplayed()
     }
 
-    /** 5.13 §5 (S4) unsigned: day 1 → Карты first with «весь день», Навигатор the next point with the 5-a-day note. */
+    /**
+     * CEO 29.10, in Russia: day 1 → Яндекс Карты first with «рекомендуем здесь», Google Карты second (not installed →
+     * the browser), the Навигатор last, to the next point only, with the 5-a-day note.
+     */
     @Test
     fun handoffSheetDayUnsigned() {
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
-        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = true, naviInstalled = true, signed = false, remember = false)
+        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = true, naviInstalled = true, remember = false)
         shot("handoff", "s4-day-unsigned") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
         compose.onNodeWithTag("handoff.maps.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("рекомендуем здесь", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.google.badge", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("handoff.google.note", useUnmergedTree = true).assertTextContains("браузере", substring = true)
         compose.onNodeWithTag("handoff.navi.note", useUnmergedTree = true).assertTextContains("5 раз", substring = true)
+        compose.onNodeWithText("только до следующей точки", substring = true, useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("handoff.tab.1").assertIsSelected()
+        // the Яндекс Карты card is above the Google one, the Навигатор last
+        val y = { tag: String -> compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot.top }
+        assertTrue(y("handoff.maps") < y("handoff.google"))
+        assertTrue(y("handoff.google") < y("handoff.navi"))
+    }
+
+    /** CEO 29.10, abroad: Google Карты first with «рекомендуем здесь»; the user's own choice says «ваш выбор». */
+    @Test
+    fun handoffSheetGoogleFirstAbroad() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        val ui = app.verst.feature.road.HandoffSheetUi(
+            app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = false, naviInstalled = false, remember = false,
+            preferred = app.verst.nav.HandoffApp.GOOGLE, googleInstalled = true,
+        )
+        shot("handoff", "google-first") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
+        compose.onNodeWithTag("handoff.google.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("рекомендуем здесь", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.maps.badge", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("handoff.google.note", useUnmergedTree = true).assertDoesNotExist() // installed
+        compose.onNodeWithText("(до 9)", substring = true, useUnmergedTree = true).assertExists()
+        val y = { tag: String -> compose.onNodeWithTag(tag, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot.top }
+        assertTrue(y("handoff.google") < y("handoff.maps"))
+    }
+
+    @Test
+    fun handoffSheetUsersChoice() {
+        val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
+        val ui = app.verst.feature.road.HandoffSheetUi(
+            app.verst.nav.HandoffSheet(1, h, 1), mapsInstalled = true, naviInstalled = true, remember = true,
+            preferred = app.verst.nav.HandoffApp.GOOGLE, googleInstalled = false, chosen = true,
+        )
+        shot("handoff", "google-chosen") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
+        compose.onNodeWithTag("handoff.google.badge", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("ваш выбор", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("handoff.google.note", useUnmergedTree = true).assertTextContains("до 3", substring = true)
     }
 
     /** «До след.» with the Навигатор not installed: it dims with «Установить…»; Карты (web) keeps its place. */
     @Test
     fun handoffSheetNextNaviMissing() {
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
-        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(null, h, 1), mapsInstalled = false, naviInstalled = false, signed = false, remember = true)
+        val ui = app.verst.feature.road.HandoffSheetUi(app.verst.nav.HandoffSheet(null, h, 1), mapsInstalled = false, naviInstalled = false, remember = true)
         shot("handoff", "s4-next-missing") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", handoff = ui), noRoad) }
         compose.onNodeWithTag("handoff.navi.install", useUnmergedTree = true).assertExists()
         compose.onNodeWithTag("handoff.maps.note", useUnmergedTree = true).assertTextContains("браузере", substring = true)
@@ -655,7 +795,7 @@ class ScreensScreenshotTest {
     fun roadDayMenu() {
         val h = v2<app.verst.core.model.dto.HandoffDto>("handoff-car-day.json", EngineJson::handoff)
         shot("road", "day-menu") { RoadScreen(RoadUi(snapshot("G02_golden_ring"), "NE", dayMenu = 1, dayHandoff = h, carTarget = HandoffTarget.Maps), noRoad) }
-        compose.onNodeWithText("В навигатор: день 1").assertExists()
+        compose.onNodeWithText("По картам: день 1").assertExists()
         compose.onNodeWithText("Открыть в Яндекс Картах").assertExists()
     }
 
@@ -664,6 +804,103 @@ class ScreensScreenshotTest {
         val r = v2PlanTrip("plan-synthetic.json")
         shot("road", "approx-distances") { RoadScreen(RoadUi(r.trip, "E"), noRoad) }
         compose.onNodeWithTag("road.approx", useUnmergedTree = true).assertExists()
+    }
+
+    // ---------------------------------------------------------------------------------------- CEO 29.10: trips abroad
+
+    /** Real engine output from the server's `world_v1` (core-model test resources): Владикавказ → Тбилиси. */
+    private fun abroadTrip(): PlanResultDto {
+        val result = root.resolve("android/core-model/src/test/resources/abroad/plan-vladikavkaz-tbilisi.json").readText()
+        return (EngineJson.planOutcome("""{"ok":true,"result":$result}""") as EngineResult.Ok).value.let { it as app.verst.core.model.dto.PlanOutcome.Plan }.result
+    }
+
+    /**
+     * The border row: the «граница» sign, a tap opens its sheet («Документы и сборы»); the stops after it say the local
+     * time, the café abroad «цена не указана» (never 0 ₽); the approximate-distances notice; the footer says the total
+     * leaves the costs abroad out.
+     */
+    @Test
+    fun roadAbroadBorderRow() {
+        val r = abroadTrip()
+        val stops = r.trip.daysList.flatMap { it.stops }
+        val border = stops.first { it.kind == "border" }
+        val food = stops.first { it.kind == "food" }
+        val opened = mutableListOf<String>()
+        shot("road", "abroad-border-row") {
+            RoadScreen(
+                RoadUi(r.trip, "S"),
+                object : RoadActions by noRoad {
+                    override fun card(stop: StopDto) {
+                        opened += stop.id
+                    }
+                },
+            )
+        }
+        compose.onNodeWithTag("road.approx", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.abroad", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.stop.${border.id}").assertExists()
+        assertTrue("a border row opens its sheet", compose.onNodeWithTag("road.stop.${border.id}").fetchSemanticsNode().config.contains(SemanticsActions.OnClick))
+        compose.onNodeWithTag("road.border.${border.id}", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.border.${border.id}").performSemanticsAction(SemanticsActions.OnClick)
+        compose.waitForIdle()
+        assertEquals(listOf(border.id), opened)
+        compose.onNodeWithTag("road.localtime.${food.id}", useUnmergedTree = true).assertTextEquals(food.localTimeRu!!)
+        compose.onNodeWithText("цена не указана", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("road.abroad.incomplete", useUnmergedTree = true).assertTextEquals("Итог без расходов за границей")
+        assertTrue(r.trip.cost.totalRub > 0)
+    }
+
+    /**
+     * The border sheet: documents, fees (counted or why not), the wait — unknown, the margin is our estimate — and every
+     * fact with «не проверено» and its source, which opens in the browser.
+     */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1400dp-port-xxhdpi")
+    fun roadAbroadBorderSheet() {
+        val r = abroadTrip()
+        val border = r.trip.daysList.flatMap { it.stops }.first { it.kind == "border" }
+        val b = border.border!!
+        val opened = mutableListOf<String>()
+        shot("road", "abroad-border-sheet", 390, 1400) {
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.ui.platform.LocalUriHandler provides object : androidx.compose.ui.platform.UriHandler {
+                    override fun openUri(uri: String) {
+                        opened += uri
+                    }
+                },
+            ) { RoadScreen(RoadUi(r.trip, "S", border = border), noRoad) }
+        }
+        compose.onNodeWithTag("border.wait", useUnmergedTree = true)
+            .assertTextEquals("Время ожидания неизвестно · в плане заложен запас 2\u00A0ч (это наша оценка, не данные)")
+        compose.onNodeWithTag("border.route", useUnmergedTree = true).assertTextEquals("Россия → Грузия")
+        compose.onNodeWithTag("border.coords", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Загранпаспорт", useUnmergedTree = true).assertExists()
+        b.documents.indices.forEach { compose.onNodeWithTag("border.doc.$it.unverified", useUnmergedTree = true).assertExists() }
+        b.facts.indices.forEach { i ->
+            compose.onNodeWithTag("border.fact.$i.unverified", useUnmergedTree = true).assertExists()
+            compose.onNodeWithTag("border.fact.$i.source.0", useUnmergedTree = true).assertExists()
+        }
+        // the TPL price is from a secondary source: shown, not counted — the engine says why
+        val tpl = b.fees.indexOfFirst { it.key == "tpl" }
+        compose.onNodeWithTag("border.fee.$tpl.extra", useUnmergedTree = true).assertTextEquals(b.fees[tpl].notCountedRu!!)
+        compose.onNodeWithTag("border.fact.0.source.0").performSemanticsAction(SemanticsActions.OnClick)
+        compose.waitForIdle()
+        assertEquals(listOf(b.facts[0].sources[0].url), opened)
+        compose.onNodeWithTag("border.ok").assertExists()
+    }
+
+    /** The Waybill's «За границей»: the total without the costs abroad, what is left out, fuel in lari as such. */
+    @Test
+    @Config(qualifiers = "ru-rRU-w390dp-h1200dp-port-xxhdpi")
+    fun waybillAbroad() {
+        val trip = abroadTrip().trip
+        shot("waybill", "abroad", 390, 1200) { WaybillScreen(waybill(trip), noWaybill) }
+        compose.onNodeWithTag("waybill.abroad", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("waybill.abroad.incomplete", useUnmergedTree = true).assertTextEquals("Итог без расходов за границей")
+        trip.abroad!!.notInRoubleTotalRu.indices.forEach { compose.onNodeWithTag("waybill.abroad.missing.$it", useUnmergedTree = true).assertExists() }
+        compose.onNodeWithTag("waybill.abroad.fuel.GE", useUnmergedTree = true)
+            .assertTextEquals("Топливо: ≈ 40\u00A0GEL — в местной валюте, в итог в рублях не входит")
+        compose.onNodeWithTag("waybill.abroad.counted", useUnmergedTree = true).assertTextContains("GEL", substring = true)
     }
 
     @Test
@@ -752,6 +989,27 @@ class ScreensScreenshotTest {
         val source = compose.onNodeWithTag("card.desc.source", useUnmergedTree = true)
         source.assertTextEquals("Из статьи Википедии, текст сокращён · CC BY-SA 4.0")
         assertTrue(source.fetchSemanticsNode().config.contains(SemanticsActions.OnClick))
+    }
+
+    /**
+     * CEO 29.10: the address under the kind line, with the town the address does not name («ул. Ленина, 5 · Фрязино»);
+     * a tap copies it with «Адрес скопирован»; TalkBack reads it with the card's title.
+     */
+    @Test
+    fun cardAddressLineCopiesTheAddress() {
+        val d = v2<app.verst.core.model.dto.PoiDetailsDto>("poi_details-sight.json", EngineJson::poiDetails).copy(townName = "Фрязино")
+        shot("card", "address") { CardOverRoad(card(d.nameRu, "sight", "tourist", d).copy(address = "ул. Ленина, 5")) }
+        val line = compose.onNodeWithTag("card.address", useUnmergedTree = true)
+        line.assertTextEquals("ул. Ленина, 5 · Фрязино")
+        compose.onNodeWithTag("card.address.loading", useUnmergedTree = true).assertDoesNotExist()
+        line.performClick()
+        compose.waitForIdle()
+        val clipboard = compose.activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        assertEquals("ул. Ленина, 5 · Фрязино", clipboard.primaryClip!!.getItemAt(0).text.toString())
+        assertEquals("Адрес скопирован", org.robolectric.shadows.ShadowToast.getTextOfLatestToast())
+        assertEquals("ул. Ленина, 5 · Фрязино", app.verst.feature.card.cardAddressLine("ул. Ленина, 5", "Фрязино"))
+        assertEquals("Фрязино, ул. Ленина, 5", app.verst.feature.card.cardAddressLine("Фрязино, ул. Ленина, 5", "Фрязино"))
+        assertEquals("ул. Ленина, 5", app.verst.feature.card.cardAddressLine("ул. Ленина, 5", null))
     }
 
     /** «О данных» (ODbL package, CEO D-IR-07): sources and licences, the three links, the APK's full notice in place. */
@@ -1046,6 +1304,32 @@ class ScreensScreenshotTest {
         compose.onNodeWithText("Гулять", substring = true).assertDoesNotExist()
     }
 
+    @Test
+    fun cityNotEnoughNoData() {
+        // CEO 29.10: `reason: "no_data"` — the engine's sentence (a gap of our base), not «мало мест»; other walks only
+        val err = (EngineJson.walkRoute(root.resolve("docs/contracts/v2/city_route-error-no-data.json").readText().let {
+            Json.parseToJsonElement(it).jsonObject["response"].toString()
+        }) as EngineResult.Err).error
+        val few = app.verst.nav.WalkFew.of(480, false, err)
+        shot("city", "not-enough-no-data") { app.verst.feature.city.CityScreen(cityUi(error = "NOT_ENOUGH_POIS", duration = 480, few = few), noCity) }
+        compose.onNodeWithText(err.messageRu!!).assertExists()
+        compose.onNodeWithText("мало мест", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Гулять", substring = true).assertDoesNotExist()
+        compose.onNodeWithTag("walk.few.0", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun cityPresetWithoutData() {
+        // CEO 29.10: a preset our catalogue has no places for here is listed, disabled, with the engine's reason
+        val presets = v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets)
+        val reason = "У нас пока нет данных о рюмочных в этом городе — это пробел нашей базы, а не города."
+        val noData = presets.presets.filter { it.preset == "ryumochnye" }.map { it.copy(available = false, noData = true, noDataRu = reason) }
+        shot("city", "preset-no-data") { app.verst.feature.city.CityScreen(cityUi().copy(noDataPresets = noData), noCity) }
+        compose.onNodeWithTag("city.preset.nodata.ryumochnye", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText(reason).assertExists()
+        compose.onNodeWithTag("city.preset.ryumochnye", useUnmergedTree = true).assertDoesNotExist()
+    }
+
     private val noWalk = object : app.verst.feature.city.WalkActions {
         override fun back() = Unit
         override fun save() = Unit
@@ -1067,6 +1351,21 @@ class ScreensScreenshotTest {
 
     @Test
     fun walkOverview() = walkShot("city_route-overview.json", "overview")
+
+    /** CEO 29.10: a walker rides the walk column like the car on Road ahead — with the scroll, no TalkBack node. */
+    @Test
+    fun walkWalkerRidesTheColumn() {
+        val w = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        assertTrue("a walk with stops", w.stops.isNotEmpty())
+        shot("walk", "walker") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        compose.onNodeWithTag("walk.stop.${w.stops.first().id}").performScrollTo()
+        compose.waitForIdle()
+        compose.onNodeWithTag("walk.walker", useUnmergedTree = true).assertExists()
+        // decorative: cleared semantics (no text, no description for TalkBack)
+        val node = compose.onNodeWithTag("walk.walker", useUnmergedTree = true).fetchSemanticsNode()
+        assertTrue(node.children.isEmpty())
+        assertFalse(node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription))
+    }
 
     private fun walkFilters(dog: Boolean = false, children: Int = 0, duration: Int? = 240) = app.verst.feature.city.PickerUi(
         duration, v2<app.verst.core.model.dto.CityPresetsDto>("city_presets.json", EngineJson::cityPresets).presets.filter { it.available },
@@ -1135,6 +1434,38 @@ class ScreensScreenshotTest {
         shot("walk", "free") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(free, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
         compose.onNodeWithTag("walk.free", useUnmergedTree = true).assertExists()
         compose.onNodeWithText("вход везде свободный").assertExists()
+    }
+
+    @Test
+    fun walkFoodStopsWithUnknownPrices() {
+        // CEO 29.10: OSM restaurants and cafés — their own kind and sign, the cuisine in words (never the raw tag),
+        // «цена не указана» instead of 0 ₽, our PRICE_UNKNOWN plate, and never «Бесплатно» in the footer
+        val w0 = v2<app.verst.core.model.dto.WalkRouteDto>("city_route-overview.json", EngineJson::walkRoute)
+        val food = listOf(
+            Triple("restaurant", "Ресторан", "georgian;pizza;fusion"),
+            Triple("cafe", "Кафе", "coffee_shop"),
+            Triple("fast_food", "Фастфуд", "unknown_tag"),
+        )
+        val w = w0.copy(
+            stops = w0.stops.mapIndexed { i, st ->
+                val f = food.getOrNull(i) ?: return@mapIndexed st.copy(costRub = 0) // a free walk but for the cafés
+                st.copy(kind = f.first, poiKind = f.first, poiKindRu = f.second, cuisine = f.third, costRub = 0, unknownFacts = listOf("price"), placeSource = "osm")
+            },
+            cost = w0.cost.copy(totalRub = 0),
+            warnings = w0.warnings + app.verst.core.model.dto.WalkWarningDto("PRICE_UNKNOWN", "Цены в кафе и ресторанах в открытых данных не указаны — в сумму они не входят."),
+        )
+        shot("walk", "food") { app.verst.feature.city.WalkScreen(app.verst.feature.city.WalkUi(w, null, HandoffTarget.Browser, saved = false, building = false), noWalk) }
+        compose.onAllNodesWithText("цена не указана", useUnmergedTree = true).assertCountEquals(food.size)
+        compose.onNodeWithText("грузинская кухня, пицца", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("кофейня", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("unknown_tag", substring = true, useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithText("georgian", substring = true, useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("walk.warn.price", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("Цены в кафе и ресторанах не указаны — уточняйте на месте.", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("walk.free", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("walk.price.unknown", useUnmergedTree = true).assertExists()
+        assertEquals(listOf(app.verst.core.ui.components.Glyph.CUTLERY, app.verst.core.ui.components.Glyph.CUP, app.verst.core.ui.components.Glyph.CUTLERY, app.verst.core.ui.components.Glyph.MUG, app.verst.core.ui.components.Glyph.GLASS),
+            listOf("restaurant", "cafe", "food_court", "pub", "ryumochnaya").map { app.verst.feature.city.walkSignGlyph(it) })
     }
 
     @Test
@@ -1461,11 +1792,54 @@ class ScreensScreenshotTest {
         override fun currency(code: String) { calls += "currency:$code" }
         override fun theme(t: app.verst.core.model.AppTheme) { calls += "theme:$t" }
         override fun restart() { calls += "restart" }
+        override fun design(d: app.verst.core.model.AppDesign) { calls += "design:$d" }
         override fun storageDevice() { calls += "device" }
         override fun pickFolder() { calls += "folder" }
         override fun writeFolderNow() { calls += "now" }
         override fun copyBuild() { calls += "copy" }
         override fun developer() { calls += "dev" }
+        override fun planOnServer(on: Boolean) { calls += "server:$on" }
+        override fun checkServer() { calls += "check" }
+        override fun serverConsent(agree: Boolean) { calls += "consent:$agree" }
+        override fun openPrivacy() { calls += "privacy" }
+        override fun forgetServer() { calls += "forget" }
+        override fun consumption(steps: Int) { calls += "consumption:$steps" }
+        override fun tank(steps: Int) { calls += "tank:$steps" }
+        override fun fuel(type: String) { calls += "fuel:$type" }
+        override fun avoidTolls(on: Boolean) { calls += "tolls:$on" }
+        override fun mapsApp(choice: app.verst.core.model.MapsChoice) { calls += "maps:$choice" }
+    }
+
+    /** CEO 29.10 «Навигация»: the automatic choice says what it does where the phone is; the user can override it. */
+    @Test
+    fun settingsMapsInRussia() {
+        val spy = SettingsSpy()
+        shot("settings", "maps-russia") { app.verst.feature.settings.SettingsScreen(settingsUi.copy(country = "RU"), spy) }
+        compose.onNodeWithTag("settings.maps.AUTO").performScrollTo().assertIsSelected()
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextEquals("Сейчас вы в России — маршрут откроют Яндекс Карты")
+        compose.onNodeWithTag("settings.maps.GOOGLE").performScrollTo().performClick()
+        assertEquals(listOf("maps:GOOGLE"), spy.calls)
+    }
+
+    @Test
+    fun settingsMapsAbroad() {
+        shot("settings", "maps-abroad") { app.verst.feature.settings.SettingsScreen(settingsUi.copy(country = "DE"), SettingsSpy()) }
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextContains("за рубежом", substring = true)
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextContains("Google Карты", substring = true)
+    }
+
+    @Test
+    fun settingsMapsUsersChoiceWins() {
+        val chosen = settingsUi.copy(settings = settingsUi.settings.copy(mapsApp = app.verst.core.model.MapsChoice.YANDEX), country = "DE")
+        shot("settings", "maps-chosen") { app.verst.feature.settings.SettingsScreen(chosen, SettingsSpy()) }
+        compose.onNodeWithTag("settings.maps.YANDEX").performScrollTo().assertIsSelected()
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextEquals("Маршрут дня всегда откроют Яндекс Карты")
+    }
+
+    @Test
+    fun settingsMapsUnknownCountry() {
+        shot("settings", "maps-unknown") { app.verst.feature.settings.SettingsScreen(settingsUi, SettingsSpy()) }
+        compose.onNodeWithTag("settings.maps.line", useUnmergedTree = true).assertTextContains("откроем Яндекс Карты", substring = true)
     }
 
     @Test
@@ -1477,10 +1851,57 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("settings.language.RU").assertIsSelected()
         compose.onNodeWithTag("settings.storage.cloud").assertIsNotEnabled()
         assertTrue(compose.onAllNodesWithText("0.1.147", substring = true).fetchSemanticsNodes().isNotEmpty())
-        compose.onNodeWithTag("settings.currency.EUR").performClick()
-        compose.onNodeWithTag("settings.theme.DAY").performClick()
+        // the «Навигация» section pushed these below the fold: a click by semantics, not by the touch position
+        compose.onNodeWithTag("settings.currency.EUR").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        compose.onNodeWithTag("settings.theme.DAY").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         assertEquals(listOf("currency:EUR", "theme:DAY"), spy.calls)
         assertTrue(compose.onAllNodesWithTag("settings.restart").fetchSemanticsNodes().isEmpty())
+        // acceptance 28.10: the screen is «Настройки», the car is set here (traveller К4)
+        compose.onNodeWithText("Настройки").assertExists()
+        compose.onNodeWithTag("settings.consumption.value", useUnmergedTree = true).assertTextEquals("8\u00A0л на 100\u00A0км")
+        compose.onNodeWithTag("settings.fuel.ai95").assertIsSelected()
+        compose.onNodeWithTag("settings.tolls.false").assertIsSelected()
+        compose.onNodeWithTag("settings.consumption.more").performScrollTo().performClick()
+        compose.onNodeWithTag("settings.tolls.true").performScrollTo().performClick()
+        assertEquals(listOf("consumption:1", "tolls:true"), spy.calls.drop(2))
+    }
+
+    @Test
+    fun settingsDesignChoiceInTheClassicDesign() {
+        val spy = SettingsSpy()
+        shot("settings", "design-classic") { app.verst.feature.settings.SettingsScreen(settingsUi, spy) }
+        compose.onNodeWithTag("settings.design.CAMPER").performScrollTo().assertIsSelected()
+        compose.onNodeWithTag("settings.design.CLASSIC").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        assertEquals(listOf("design:CLASSIC"), spy.calls)
+    }
+
+    @Test
+    fun settingsDesignChoiceInTheCamperDesign() {
+        app.verst.core.ui.theme.Palette.camper = true
+        try {
+            val camperSpy = SettingsSpy()
+            val pending = settingsUi.copy(settings = settingsUi.settings.copy(design = app.verst.core.model.AppDesign.CLASSIC), themePending = true, designPending = true)
+            shot("settings", "design-camper") { app.verst.feature.settings.SettingsScreen(pending, camperSpy) }
+            compose.onNodeWithTag("settings.design.CLASSIC").performScrollTo().assertIsSelected()
+            compose.onNodeWithText("Дизайн применится после перезапуска приложения").performScrollTo().assertIsDisplayed()
+            assertTrue(compose.onAllNodesWithTag("settings.theme.DAY").fetchSemanticsNodes().isEmpty()) // one camper palette
+            compose.onNodeWithTag("settings.restart").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+            assertEquals(listOf("restart"), camperSpy.calls)
+        } finally {
+            app.verst.core.ui.theme.Palette.camper = false
+        }
+    }
+
+    @Test
+    fun settingsServerConsentAndForget() {
+        val spy = SettingsSpy()
+        val withServer = settingsUi.copy(serverUrl = "https://212-108-82-26.sslip.io", serverConsentAsk = true)
+        shot("settings", "server-consent") { app.verst.feature.settings.SettingsScreen(withServer, spy) }
+        compose.onNodeWithTag("settings.server.consent").assertIsDisplayed()
+        compose.onNodeWithText("Нидерландах", substring = true).assertExists()
+        compose.onNodeWithTag("settings.server.consent.yes").performClick()
+        assertEquals(listOf("consent:true"), spy.calls)
+        assertTrue(compose.onAllNodesWithTag("settings.server.forget").fetchSemanticsNodes().isEmpty()) // no consent yet
     }
 
     @Test
@@ -1489,7 +1910,7 @@ class ScreensScreenshotTest {
         app.verst.core.ui.theme.Palette.day = true
         try {
             shot("settings", "day") { app.verst.feature.settings.SettingsScreen(settingsUi.copy(themePending = true), SettingsSpy()) }
-            compose.onNodeWithTag("settings.restart").assertIsDisplayed()
+            compose.onNodeWithTag("settings.restart").performScrollTo().assertIsDisplayed()
         } finally {
             app.verst.core.ui.theme.Palette.day = day
         }

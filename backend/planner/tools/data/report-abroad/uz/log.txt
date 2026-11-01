@@ -1,0 +1,60 @@
+{"labels": {"Q265": "Uzbekistan"}, "capitals": ["Q269"], "currencies": ["UZS"], "tz": ["Asia/Samarkand", "Asia/Tashkent", "UTC+05:00"], "ok": true}
+{"mismatches": {}, "resolved": {}}
+retry 1/4 in 120s: HTTP Error 429: Too Many Requests
+town classes: 547
+towns: 95 candidates from 547 classes
+towns: 93; missing must-have: []
+pois: 0/93 towns, 334 rows, 0 failed
+pois: 50/93 towns, 922 rows, 0 failed
+pois: 1018 rows, 0 towns failed
+forms: 90 towns; fixture oracle 47/48
+classes: 10052 ids; resolved {}; unresolved []
+wikidata: 0/934
+wikidata: 934 items, 337 with ru Wikipedia
+wikipedia: 0/337
+wikipedia: 337 pages, 337 with an extract
+voyage: 136 Q-ids in listings
+extract: https://download.geofabrik.de/asia/uzbekistan-latest.osm.pbf
+-rw-r--r-- 1 runner runner 125212860 Oct 30 03:11 /home/runner/work/_temp/c.osm.pbf
+bars: 221 rows from 251 named features, 64 towns (extract)
+food: 4492 rows from 6306 named features, 64 towns (extract)
+parks: 141 rows from 228 named parks and gardens, 93 towns (extract)
+osm: 3740 POI candidates, 130 paid parking places
+geosearch: 0/1500
+geosearch: 500/1500
+geosearch: 1000/1500
+candidates: 861 photo files
+credits: 50/861
+credits: 848 of 861 files
+photo meta: 50/861
+photo meta: 848 of 861 files
+credits: 50/316
+credits: 316 of 316 files
+photo meta: 50/316
+photo meta: 316 of 316 files
+{
+ "towns": 64,
+ "pois": 376,
+ "bars": 221,
+ "food": 2359,
+ "links": 0,
+ "credits": 143,
+ "bytes": {
+  "catalogue_meta.json.gz": 4925,
+  "catalogue_towns.json.gz": 3178,
+  "catalogue_pois.json.gz": 28614,
+  "catalogue_bars.json.gz": 5556,
+  "catalogue_food.json.gz": 53123
+ },
+ "totalBytes": 95396
+}
+{
+ "version": "wd-20261030-abroad2",
+ "count": 141,
+ "townsSha256": "365d5f323426d6b3eef28334b2635772b2783a2ea903a1f49b80ac676e187b90",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 4941,
+ "sha256": "0033f8b28dba1fa5ac98cc90deaf2d0df5a5f3d1168e425354dbaf7b73238150"
+}
+tzCheck: {"checked": true, "ok": true, "mismatches": []}
+regions: [{"code": "UZ-AN", "nameRu": "Андижанская область", "tz": "Asia/Tashkent"}, {"code": "UZ-BU", "nameRu": "Бухарская область", "tz": "Asia/Tashkent"}, {"code": "UZ-FA", "nameRu": "Ферганская область", "tz": "Asia/Tashkent"}, {"code": "UZ-JI", "nameRu": "Джизакская область", "tz": "Asia/Tashkent"}, {"code": "UZ-NG", "nameRu": "Наманганская область", "tz": "Asia/Tashkent"}, {"code": "UZ-NW", "nameRu": "Навоийская область", "tz": "Asia/Tashkent"}, {"code": "UZ-QA", "nameRu": "Кашкадарьинская область", "tz": "Asia/Tashkent"}, {"code": "UZ-QR", "nameRu": "Каракалпакстан", "tz": "Asia/Tashkent"}, {"code": "UZ-SA", "nameRu": "Самаркандская область", "tz": "Asia/Tashkent"}, {"code": "UZ-SI", "nameRu": "Сырдарьинская область", "tz": "Asia/Tashkent"}, {"code": "UZ-SU", "nameRu": "Сурхандарьинская область", "tz": "Asia/Tashkent"}, {"code": "UZ-TK", "nameRu": "Ташкент", "tz": "Asia/Tashkent"}, {"code": "UZ-TO", "nameRu": "Ташкентская область", "tz": "Asia/Tashkent"}, {"code": "UZ-XO", "nameRu": "Хорезмская область", "tz": "Asia/Tashkent"}]

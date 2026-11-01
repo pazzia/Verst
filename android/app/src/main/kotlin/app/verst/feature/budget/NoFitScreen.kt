@@ -1,6 +1,7 @@
 package app.verst.feature.budget
 
 import androidx.compose.animation.core.Animatable
+import app.verst.core.ui.theme.Palette
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,6 +70,7 @@ interface NoFitActions {
  */
 @Composable
 fun NoFitScreen(nf: NoFitDto, a: NoFitActions) {
+    if (Palette.camper) return NoFitScreenCamper(nf = nf, a = a)
     val min = nf.minimumTotalRub
     val cd = stringResource(R.string.cd_budget_nofit, app.verst.settings.AppPrefs.money(nf.budgetRub), app.verst.settings.AppPrefs.money(min))
     ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
@@ -139,7 +141,7 @@ private fun LimitSign(budget: Int, modifier: Modifier) {
 private fun OptionRow(o: BudgetOptionDto, index: Int, budget: Int, onClick: () -> Unit) {
     val total = o.totalRub?.let { app.verst.settings.AppPrefs.money(it) } ?: ""
     val (title, sub) = when (o.kind) {
-        "shorten" -> stringResource(R.string.budget_option_shorten, o.days ?: 0, pluralStringResource(R.plurals.plural_day, o.days ?: 0)) to
+        "shorten" -> stringResource(R.string.budget_option_shorten, o.days ?: 0, pluralStringResource(R.plurals.plural_day_until, o.days ?: 0)) to // «до 2 дней»
             stringResource(R.string.budget_option_shorten_sub, o.titleRu ?: "", total)
         "cheaper_route" -> stringResource(R.string.budget_option_cheaper, o.titleRu ?: "") to
             // `fits = false` (ARCH-301): the cheapest candidate is still over the budget — never «помещается»

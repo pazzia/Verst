@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
+import itertools
+
 from verst_planner.domain.enums import PlaceType, RoadClass, StopKind
 from verst_planner.domain.errors import OpeningHoursParseError
 from verst_planner.domain.facts import Known, fuel_state, rank_rating
-from verst_planner.domain.model import Candidate, NormalizedInput, Place, PlannedStop, Route, TownCandidate
-from verst_planner.geo.distance import haversine_km
+from verst_planner.domain.model import (
+    Candidate,
+    LatLon,
+    NormalizedInput,
+    Place,
+    PlannedStop,
+    Route,
+    TownCandidate,
+)
+from verst_planner.explain import ru
+from verst_planner.geo.distance import haversine_km, point_segment_km
 from verst_planner.geo.index import PolylineIndex
 from verst_planner.geo.polyline import douglas_peucker
 from verst_planner.hours import parse
@@ -17,6 +28,12 @@ from verst_planner.ports import CorridorQuery
 PREFILTER_TOL_M = 200.0
 FIXED_SEARCH_KM = 50.0
 FIXED_SLACK_KM = 2.0
+
+
+def distance_to_line_km(p: LatLon, line: tuple[LatLon, ...]) -> float:
+    if len(line) == 1:
+        return haversine_km(p, line[0])
+    return min(point_segment_km(p, a, b) for a, b in itertools.pairwise(line))
 
 
 def _hours_ok(p: Place) -> bool:
@@ -108,7 +125,19 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
     radius = max(ck.sight, ck.food, ck.fuel, ck.rest)
     stop_types = frozenset({PlaceType.SIGHT, PlaceType.FOOD, PlaceType.FUEL, PlaceType.REST})
     roadside = places_port.places_in_corridor(CorridorQuery(line, radius, stop_types))
-    towns = places_port.towns_in_corridor(line, ck.town)
+    # acceptance 2026-10-28 (K2): an anchor town (≥ big_town_population) is searched farther off the road
+    anchors = bool(cfg.overnight_score.anchors)
+    big_pop = cfg.overnight_score.big_town_population
+    town_radius = max(ck.town, ck.town_big) if anchors else ck.town
+
+    def radius_of(population: int) -> float:
+        return ck.town_big if anchors and population >= big_pop else ck.town
+
+    towns = [
+        t
+        for t in places_port.towns_in_corridor(line, town_radius)
+        if town_radius == ck.town or distance_to_line_km(t.point, line) <= radius_of(t.population)
+    ]
     town_lodgings = places_port.lodgings_of_towns([t.id for t in towns])
     free_lodgings = places_port.places_in_corridor(
         CorridorQuery(line, ck.town, frozenset({PlaceType.LODGING}))
@@ -135,14 +164,14 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
             lodging_places[p.id] = p
     for p in free_lodgings:
         lodging_places.setdefault(p.id, p)
-    lodging_radius = ck.town + ck.lodging_from_town
+    lodging_radius = town_radius + ck.lodging_from_town
     lodgings: list[Candidate] = []
     for pid in sorted(lodging_places):
         lodgings.extend(_candidates(lodging_places[pid], index, lodging_radius, None, ctx))
 
     town_cands: list[TownCandidate] = []
     for t in towns:
-        for proj in index.project_all(t.point, ck.town):
+        for proj in index.project_all(t.point, radius_of(t.population)):
             _dkm, dmin = detour(proj.lateral_km, proj.road_class, cfg)
             own: dict[str, Candidate] = {}
             for c in lodgings:
@@ -172,6 +201,11 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
     )
 
 
+BORDER_AFTER_KM = 0.001
+"""CEO 29.10: a border stop sits a metre past its waypoint, so the stops of the town it is anchored to (a
+lunch, a park in Владикавказ) come before the crossing, not after it."""
+
+
 def place_fixed(
     pts: ResolvedPoints, corridor: Corridor, inp: NormalizedInput, ctx: PlanContext
 ) -> list[PlannedStop]:
@@ -189,6 +223,25 @@ def place_fixed(
     for i in user_vias:
         w = pts.waypoints[i]
         town = towns.get(w.town_id) if w.town_id else None
+        if w.border is not None:  # CEO 29.10: a state border (a checkpoint buffer, or a dwell-less marker)
+            out.append(
+                PlannedStop(
+                    kind=StopKind.BORDER,
+                    km_at=wp_km[i] + BORDER_AFTER_KM,
+                    name_ru=w.label,
+                    point=w.point,
+                    town=town,
+                    dwell_min=0 if w.border.marker else ctx.cfg.border.buffer_min,
+                    fixed=True,
+                    reason_key="border.marker" if w.border.marker else "border.checkpoint",
+                    reason_params={
+                        "crossing": w.border.id,
+                        "buffer": ru.duration_phrase(ctx.cfg.border.buffer_min),
+                    },
+                    region_code=town.region_code if town else ctx.region_at(w.point).code,
+                )
+            )
+            continue
         out.append(
             PlannedStop(
                 kind=StopKind.VIA,

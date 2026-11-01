@@ -192,5 +192,12 @@ def month_year_ru(as_of: str | date) -> str:
     return f"{words('months')[month - 1]} {year}"
 
 
+def join_and(items: list[str]) -> str:
+    """«a», «a и b», «a, b и c»."""
+    if len(items) <= 1:
+        return "".join(items)
+    return ", ".join(items[:-1]) + " и " + items[-1]
+
+
 def capitalize_first(s: str) -> str:
     return s[:1].upper() + s[1:] if s else s

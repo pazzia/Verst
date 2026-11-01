@@ -60,307 +60,352 @@ object DesignTokens {
     object color {
         object dash {
             /** App background; root of Windshield, Navigator, Drive, Exit */
-            val base: Color get() = if (Palette.day) Color(0xFFE4E7EA) else Color(0xFF141416)
+            val base: Color get() = if (Palette.camper) Color(0xFFF5EFEB) else if (Palette.day) Color(0xFFE4E7EA) else Color(0xFF141416)
             /** Dashboard surface; root of Instruments, Road ahead, Waybill */
-            val raised: Color get() = if (Palette.day) Color(0xFFEEF0F2) else Color(0xFF161618)
+            val raised: Color get() = if (Palette.camper) Color(0xFFFAF4EE) else if (Palette.day) Color(0xFFEEF0F2) else Color(0xFF161618)
             /** Bezels: navigator frame, start-button bezel, instrument-well border, dashboard rim line, secondary button fill */
-            val control: Color get() = if (Palette.day) Color(0xFFBFC5CC) else Color(0xFF232327)
+            val control: Color get() = if (Palette.camper) Color(0xFFE9DDD0) else if (Palette.day) Color(0xFFBFC5CC) else Color(0xFF232327)
             /** Keys (- / +), mirror bezel and stem, info chips */
-            val controlAlt: Color get() = if (Palette.day) Color(0xFFFFFFFF) else Color(0xFF2A2A2E)
+            val controlAlt: Color get() = if (Palette.camper) Color(0xFFFFFDF9) else if (Palette.day) Color(0xFFFFFFFF) else Color(0xFF2A2A2E)
             /** Instrument well (odometer, fuel gauge) background */
-            val well: Color get() = if (Palette.day) Color(0xFFFFFFFF) else Color(0xFF0F0F11)
+            val well: Color get() = if (Palette.camper) Color(0xFFFFFDF9) else if (Palette.day) Color(0xFFFFFFFF) else Color(0xFF0F0F11)
             /** Start-button face; odometer drums 1-3 */
-            val face: Color get() = if (Palette.day) Color(0xFFF8F9FA) else Color(0xFF1C1C1F)
+            val face: Color get() = if (Palette.camper) Color(0xFFFFF9F2) else if (Palette.day) Color(0xFFF8F9FA) else Color(0xFF1C1C1F)
             /** Inset bottom edge of keys (0 -3dp) */
-            val keyShadow: Color get() = if (Palette.day) Color(0xFFBFC5CC) else Color(0xFF0E0E10)
+            val keyShadow: Color get() = if (Palette.camper) Color(0xFFC2AC95) else if (Palette.day) Color(0xFFBFC5CC) else Color(0xFF0E0E10)
             /** Pressed row background on dashboard surfaces (mockup :hover) */
-            val pressed: Color get() = if (Palette.day) Color(0xFFDDE2E7) else Color(0xFF1C1C20)
+            val pressed: Color get() = if (Palette.camper) Color(0xFFF0E5D9) else if (Palette.day) Color(0xFFDDE2E7) else Color(0xFF1C1C20)
             /** Outline buttons (заменить, Сохранить офлайн); filled seat background */
-            val outline: Color get() = if (Palette.day) Color(0xFF7B838F) else Color(0xFF3A3A42)
+            val outline: Color get() = if (Palette.camper) Color(0xFFA08468) else if (Palette.day) Color(0xFF7B838F) else Color(0xFF3A3A42)
             /** Empty-seat dashed border; front-passenger chip border when off */
-            val outlineDashed: Color get() = if (Palette.day) Color(0xFF5E6874) else Color(0xFF55555E)
+            val outlineDashed: Color get() = if (Palette.camper) Color(0xFF86694F) else if (Palette.day) Color(0xFF5E6874) else Color(0xFF55555E)
             /** Back bench inside the large mirror */
-            val bench: Color get() = if (Palette.day) Color(0xFFC9CED5) else Color(0xFF2A2A30)
+            val bench: Color get() = if (Palette.camper) Color(0xFFEADFD2) else if (Palette.day) Color(0xFFC9CED5) else Color(0xFF2A2A30)
             /** Odometer digit frame */
-            val odometerFrame: Color = Color(0xFF000000)
+            val odometerFrame: Color get() = if (Palette.camper) Color(0xFF2A1D13) else Color(0xFF000000)
             /** Odometer drums 1-3 behind sign.white digits (D-IR-20 day palette: proposed token) */
-            val odometerDrum: Color get() = if (Palette.day) Color(0xFF1C1C1F) else Color(0xFF1C1C1F)
+            val odometerDrum: Color get() = if (Palette.camper) Color(0xFF3A2A1D) else if (Palette.day) Color(0xFF1C1C1F) else Color(0xFF1C1C1F)
         }
         object interior {
             /** Roof liner and A-pillars */
-            val liner: Color get() = if (Palette.day) Color(0xFFB4BAC2) else Color(0xFF0E0E10)
+            val liner: Color get() = if (Palette.camper) Color(0xFFD2BEA6) else if (Palette.day) Color(0xFFB4BAC2) else Color(0xFF0E0E10)
             /** Static roadside poles; itinerary row connector stub */
-            val pole: Color get() = if (Palette.day) Color(0xFF7D838C) else Color(0xFF55565C)
+            val pole: Color get() = if (Palette.camper) Color(0xFF8A735D) else if (Palette.day) Color(0xFF7D838C) else Color(0xFF55565C)
         }
         object mirror {
             /** Mirror glass background and crew silhouettes in the small mirror */
-            val glass: Color get() = if (Palette.day) Color(0xFF3A3F47) else Color(0xFF0D0D0F)
+            val glass: Color get() = if (Palette.camper) Color(0xFF4A3525) else if (Palette.day) Color(0xFF3A3F47) else Color(0xFF0D0D0F)
             /** Diagonal glare band on the small mirror */
-            val glare: Color get() = if (Palette.day) Color(0xFFFFFFFF).copy(alpha = 0.22f) else Color(0xFFFFFFFF).copy(alpha = 0.08f)
+            val glare: Color get() = if (Palette.camper) Color(0xFFFFFFFF).copy(alpha = 0.22f) else if (Palette.day) Color(0xFFFFFFFF).copy(alpha = 0.22f) else Color(0xFFFFFFFF).copy(alpha = 0.08f)
             /** Mirror caption, back links on sky, adult silhouette in the large mirror */
-            val label: Color get() = if (Palette.day) Color(0xFF15181C) else Color(0xFFE9E2F2)
+            val label: Color get() = if (Palette.camper) Color(0xFF2C1E13) else if (Palette.day) Color(0xFF15181C) else Color(0xFFE9E2F2)
         }
         object text {
             /** Main text on dark */
-            val primary: Color get() = if (Palette.day) Color(0xFF15181C) else Color(0xFFF4F4F0)
+            val primary: Color get() = if (Palette.camper) Color(0xFF2C1E13) else if (Palette.day) Color(0xFF15181C) else Color(0xFFF4F4F0)
             /** Secondary text on dark */
-            val secondary: Color get() = if (Palette.day) Color(0xFF3D4550) else Color(0xFFB9B9C0)
+            val secondary: Color get() = if (Palette.camper) Color(0xFF5C4636) else if (Palette.day) Color(0xFF3D4550) else Color(0xFFB9B9C0)
             /** Labels, captions, back links (min 11 sp) */
-            val muted: Color get() = if (Palette.day) Color(0xFF545D69) else Color(0xFF8C8C93)
+            val muted: Color get() = if (Palette.camper) Color(0xFF6E5847) else if (Palette.day) Color(0xFF545D69) else Color(0xFF8C8C93)
             /** Stop note line on Road ahead */
-            val note: Color get() = if (Palette.day) Color(0xFF2F3640) else Color(0xFFC4C4CA)
+            val note: Color get() = if (Palette.camper) Color(0xFF4F3B2C) else if (Palette.day) Color(0xFF2F3640) else Color(0xFFC4C4CA)
             /** Empty-seat label "свободно" (AA fix; mockup #8C8C93 = 4.27:1) */
-            val seatEmpty: Color get() = if (Palette.day) Color(0xFF48505B) else Color(0xFFA0A0A7)
+            val seatEmpty: Color get() = if (Palette.camper) Color(0xFF644E3E) else if (Palette.day) Color(0xFF48505B) else Color(0xFFA0A0A7)
             /** Text and pictograms on white or yellow */
-            val onLight: Color get() = if (Palette.day) Color(0xFF15181C) else Color(0xFF141416)
+            val onLight: Color get() = if (Palette.camper) Color(0xFF2C1E13) else if (Palette.day) Color(0xFF15181C) else Color(0xFF141416)
             /** Small label on the white Waybill button */
-            val onLightMuted: Color = Color(0xFF55565C)
+            val onLightMuted: Color get() = if (Palette.camper) Color(0xFF5C4636) else Color(0xFF55565C)
             /** Disabled glyphs and labels (WCAG-exempt, still >= 3:1 on #161618) */
-            val disabled: Color get() = if (Palette.day) Color(0xFF646C77) else Color(0xFF6C6C74)
+            val disabled: Color get() = if (Palette.camper) Color(0xFF85705E) else if (Palette.day) Color(0xFF646C77) else Color(0xFF6C6C74)
         }
         object sign {
             /** GOST blue: overhead sign, service signs, exit sign, hotel button, city badge */
-            val blue: Color = Color(0xFF1E4FA3)
+            val blue: Color get() = if (Palette.camper) Color(0xFF1E4FA3) else Color(0xFF1E4FA3)
             /** Selected overhead-sign row (AA fix; mockup rgba(255,255,255,.14) = #3E68B0 gives yellow 3.82:1) */
-            val blueSelected: Color = Color(0xFF163B7A)
+            val blueSelected: Color get() = if (Palette.camper) Color(0xFF163B7A) else Color(0xFF163B7A)
             /** Pressed overhead-sign row and pressed blue button */
-            val bluePressed: Color = Color(0xFF1A468F)
+            val bluePressed: Color get() = if (Palette.camper) Color(0xFF1A468F) else Color(0xFF1A468F)
             /** Small text on blue signs (header, footer) */
-            val blueText: Color = Color(0xFFD6E0F5)
+            val blueText: Color get() = if (Palette.camper) Color(0xFFD6E0F5) else Color(0xFFD6E0F5)
             /** Loading placeholder plates on blue signs */
-            val plate: Color = Color(0xFFFFFFFF).copy(alpha = 0.1f)
+            val plate: Color get() = if (Palette.camper) Color(0xFFFFFFFF).copy(alpha = 0.1f) else Color(0xFFFFFFFF).copy(alpha = 0.1f)
             /** Shimmer highlight on placeholder plates */
-            val plateHighlight: Color = Color(0xFFFFFFFF).copy(alpha = 0.2f)
+            val plateHighlight: Color get() = if (Palette.camper) Color(0xFFFFFFFF).copy(alpha = 0.2f) else Color(0xFFFFFFFF).copy(alpha = 0.2f)
             /** Tourist (sight) signs; place badge */
-            val brown: Color = Color(0xFF6B3E26)
+            val brown: Color get() = if (Palette.camper) Color(0xFF6B3E26) else Color(0xFF6B3E26)
             /** City sign plate, sign borders, pictogram plates */
-            val white: Color = Color(0xFFF4F4F0)
+            val white: Color get() = if (Palette.camper) Color(0xFFFFFAF2) else Color(0xFFF4F4F0)
             /** City-sign border, pictogram strokes */
-            val black: Color = Color(0xFF141416)
+            val black: Color get() = if (Palette.camper) Color(0xFF2A1D13) else Color(0xFF141416)
         }
         object accent {
             /** Selection, primary CTAs, prices, focus ring; dark backgrounds only */
-            val yellow: Color = Color(0xFFFFD23F)
+            val yellow: Color get() = if (Palette.camper) Color(0xFFF5A867) else Color(0xFFFFD23F)
             /** Pressed yellow CTA; pressed yellow link (mockup a:hover) */
-            val yellowPressed: Color get() = if (Palette.day) Color(0xFFF2C21F) else Color(0xFFFFE27A)
+            val yellowPressed: Color get() = if (Palette.camper) Color(0xFFEB9550) else if (Palette.day) Color(0xFFF2C21F) else Color(0xFFFFE27A)
             /** Start-button ring, fuel-gauge E arc */
-            val red: Color = Color(0xFFD8402B)
+            val red: Color get() = if (Palette.camper) Color(0xFFB23A22) else Color(0xFFD8402B)
             /** Start-button pulse ring at t=0 */
-            val redPulse: Color = Color(0xFFD8402B).copy(alpha = 0.55f)
+            val redPulse: Color get() = if (Palette.camper) Color(0xFFB23A22).copy(alpha = 0.55f) else Color(0xFFD8402B).copy(alpha = 0.55f)
             /** Red text on dark: gauge "E", overspend, offline plate (AA fix; #D8402B = 4.27:1 on well) */
-            val redText: Color get() = if (Palette.day) Color(0xFF9A1F17) else Color(0xFFE6604A)
+            val redText: Color get() = if (Palette.camper) Color(0xFFA3301B) else if (Palette.day) Color(0xFF9A1F17) else Color(0xFFE6604A)
             /** Yellow as TEXT or thin line (prices, «вести», icons, radio, input focus border, cursor, progress fill, step check) (D-IR-20 day palette: proposed token) */
-            val yellowText: Color get() = if (Palette.day) Color(0xFF805300) else Color(0xFFFFD23F)
+            val yellowText: Color get() = if (Palette.camper) Color(0xFFA84B14) else if (Palette.day) Color(0xFF805300) else Color(0xFFFFD23F)
         }
         object signal {
             /** Turn signal only */
-            val green: Color get() = if (Palette.day) Color(0xFF2E8A4A) else Color(0xFF6FD18A)
+            val green: Color get() = if (Palette.camper) Color(0xFF588157) else if (Palette.day) Color(0xFF2E8A4A) else Color(0xFF6FD18A)
         }
         object navi {
             /** Navigator display background */
-            val screen: Color get() = if (Palette.day) Color(0xFFF7F9FB) else Color(0xFF0B1218)
+            val screen: Color get() = if (Palette.camper) Color(0xFFFBF6F0) else if (Palette.day) Color(0xFFF7F9FB) else Color(0xFF0B1218)
             /** Inputs and chips on the navigator; selected hotel row */
-            val field: Color get() = if (Palette.day) Color(0xFFFFFFFF) else Color(0xFF16222C)
+            val field: Color get() = if (Palette.camper) Color(0xFFFFFDF9) else if (Palette.day) Color(0xFFFFFFFF) else Color(0xFF16222C)
             /** Input border; outline button border; street badge */
-            val fieldBorder: Color get() = if (Palette.day) Color(0xFF6E7A88) else Color(0xFF2B3D4D)
+            val fieldBorder: Color get() = if (Palette.camper) Color(0xFF7A5E48) else if (Palette.day) Color(0xFF6E7A88) else Color(0xFF2B3D4D)
             /** Navigator labels, secondary actions */
-            val label: Color get() = if (Palette.day) Color(0xFF1E4FA3) else Color(0xFF7FA6D9)
+            val label: Color get() = if (Palette.camper) Color(0xFFA84B14) else if (Palette.day) Color(0xFF1E4FA3) else Color(0xFF7FA6D9)
             /** Field captions, sub-lines */
-            val labelSecondary: Color get() = if (Palette.day) Color(0xFF46576A) else Color(0xFF8FA4B8)
+            val labelSecondary: Color get() = if (Palette.camper) Color(0xFF644E3E) else if (Palette.day) Color(0xFF46576A) else Color(0xFF8FA4B8)
             /** Distances, reason sentence, chip text */
-            val text: Color get() = if (Palette.day) Color(0xFF15181C) else Color(0xFFB9C6D3)
+            val text: Color get() = if (Palette.camper) Color(0xFF2C1E13) else if (Palette.day) Color(0xFF15181C) else Color(0xFFB9C6D3)
             /** Placeholder and section labels on the navigator (AA fix; mockup #5F7487 = 3.34:1 on field) */
-            val hint: Color get() = if (Palette.day) Color(0xFF4F5B68) else Color(0xFF768DA3)
+            val hint: Color get() = if (Palette.camper) Color(0xFF6E5847) else if (Palette.day) Color(0xFF4F5B68) else Color(0xFF768DA3)
             /** Suggestion row background */
-            val list: Color get() = if (Palette.day) Color(0xFFFFFFFF) else Color(0xFF0F1A22)
+            val list: Color get() = if (Palette.camper) Color(0xFFFFFDF9) else if (Palette.day) Color(0xFFFFFFFF) else Color(0xFF0F1A22)
             /** Selected suggestion row */
-            val listSelected: Color get() = if (Palette.day) Color(0xFFDCE6F7) else Color(0xFF1A2C3B)
+            val listSelected: Color get() = if (Palette.camper) Color(0xFFFCE6D3) else if (Palette.day) Color(0xFFDCE6F7) else Color(0xFF1A2C3B)
             /** List border/dividers, progress-bar track */
-            val divider: Color get() = if (Palette.day) Color(0xFFCDD2D8) else Color(0xFF1E2E3A)
+            val divider: Color get() = if (Palette.camper) Color(0xFFE3D4C3) else if (Palette.day) Color(0xFFCDD2D8) else Color(0xFF1E2E3A)
             /** Dashed button borders (text identifies the control) */
-            val dashed: Color get() = if (Palette.day) Color(0xFF7A8899) else Color(0xFF3A5266)
+            val dashed: Color get() = if (Palette.camper) Color(0xFF9C8169) else if (Palette.day) Color(0xFF7A8899) else Color(0xFF3A5266)
             /** Unselected radio ring (WCAG 1.4.11 fix; mockup #3A5266 = 2.31:1 on screen) */
-            val radio: Color get() = if (Palette.day) Color(0xFF64707E) else Color(0xFF5A7893)
+            val radio: Color get() = if (Palette.camper) Color(0xFF7A6350) else if (Palette.day) Color(0xFF64707E) else Color(0xFF5A7893)
         }
         object sky {
             /** Sunset band 1 (top) */
-            val band1: Color get() = if (Palette.day) Color(0xFF86BCE3) else Color(0xFF2B2850)
+            val band1: Color get() = if (Palette.camper) Color(0xFFF1D3B3) else if (Palette.day) Color(0xFF86BCE3) else Color(0xFF2B2850)
             /** Sunset band 2; mirror sky */
-            val band2: Color get() = if (Palette.day) Color(0xFFA3CCEA) else Color(0xFF4E3768)
+            val band2: Color get() = if (Palette.camper) Color(0xFFF4DCC1) else if (Palette.day) Color(0xFFA3CCEA) else Color(0xFF4E3768)
             /** Sunset band 3 */
-            val band3: Color get() = if (Palette.day) Color(0xFFBFDCF0) else Color(0xFF8E4A6B)
+            val band3: Color get() = if (Palette.camper) Color(0xFFF6E4CF) else if (Palette.day) Color(0xFFBFDCF0) else Color(0xFF8E4A6B)
             /** Sunset band 4 */
-            val band4: Color get() = if (Palette.day) Color(0xFFD8E9F3) else Color(0xFFD9655A)
+            val band4: Color get() = if (Palette.camper) Color(0xFFF8EBDC) else if (Palette.day) Color(0xFFD8E9F3) else Color(0xFFD9655A)
             /** Sunset band 5 (horizon) */
-            val band5: Color get() = if (Palette.day) Color(0xFFEAF2F2) else Color(0xFFF29A5E)
+            val band5: Color get() = if (Palette.camper) Color(0xFFFAF1E7) else if (Palette.day) Color(0xFFEAF2F2) else Color(0xFFF29A5E)
             /** Night sky on Exit */
-            val night: Color = Color(0xFF121130)
+            val night: Color get() = if (Palette.camper) Color(0xFF2B2018) else Color(0xFF121130)
             /** Hill silhouette */
-            val hills: Color get() = if (Palette.day) Color(0xFF8FA79E) else Color(0xFF3C3346)
+            val hills: Color get() = if (Palette.camper) Color(0xFFA9B48F) else if (Palette.day) Color(0xFF8FA79E) else Color(0xFF3C3346)
         }
         object scene {
             /** Sun disc; town lights on Exit */
-            val sun: Color get() = if (Palette.day) Color(0xFFFFF3C9) else Color(0xFFFFD99A)
+            val sun: Color get() = if (Palette.camper) Color(0xFFFFD9A0) else if (Palette.day) Color(0xFFFFF3C9) else Color(0xFFFFD99A)
             /** Crescent moon on Exit */
-            val moon: Color = Color(0xFFF2E3B3)
+            val moon: Color get() = if (Palette.camper) Color(0xFFF2E3B3) else Color(0xFFF2E3B3)
             /** Stars on Exit */
-            val star: Color = Color(0xFFF4F4F0)
+            val star: Color get() = if (Palette.camper) Color(0xFFFFF6E8) else Color(0xFFF4F4F0)
             /** Fields (day/dusk); mirror ground */
-            val groundDay: Color get() = if (Palette.day) Color(0xFF86A96F) else Color(0xFF2C3A33)
+            val groundDay: Color get() = if (Palette.camper) Color(0xFF9CAF7E) else if (Palette.day) Color(0xFF86A96F) else Color(0xFF2C3A33)
             /** Fields at night (Exit) */
-            val groundNight: Color = Color(0xFF1A231F)
+            val groundNight: Color get() = if (Palette.camper) Color(0xFF1F2A1C) else Color(0xFF1A231F)
             /** Asphalt; itinerary road column */
-            val road: Color get() = if (Palette.day) Color(0xFF62666D) else Color(0xFF3A3A3F)
+            val road: Color get() = if (Palette.camper) Color(0xFF6E6258) else if (Palette.day) Color(0xFF62666D) else Color(0xFF3A3A3F)
             /** Asphalt at night (Exit) */
-            val roadNight: Color = Color(0xFF2E2E33)
+            val roadNight: Color get() = if (Palette.camper) Color(0xFF2E2A27) else Color(0xFF2E2E33)
             /** Road edge lines and lane dashes */
-            val roadEdge: Color get() = if (Palette.day) Color(0xFFFFFFFF) else Color(0xFFF4F4F0)
+            val roadEdge: Color get() = if (Palette.camper) Color(0xFFFFFAF2) else if (Palette.day) Color(0xFFFFFFFF) else Color(0xFFF4F4F0)
             /** Road edge lines at night (Exit) */
-            val roadEdgeNight: Color = Color(0xFFD9D9D2)
+            val roadEdgeNight: Color get() = if (Palette.camper) Color(0xFFD9D2C6) else Color(0xFFD9D9D2)
             /** Headlight beam on Exit */
-            val headlight: Color = Color(0xFFFFECAA).copy(alpha = 0.1f)
+            val headlight: Color get() = if (Palette.camper) Color(0xFFFFECAA).copy(alpha = 0.1f) else Color(0xFFFFECAA).copy(alpha = 0.1f)
         }
         object crew {
             /** Adult silhouette (large mirror) */
-            val adult: Color get() = if (Palette.day) Color(0xFF2E343C) else Color(0xFFE9E2F2)
+            val adult: Color get() = if (Palette.camper) Color(0xFF4A3525) else if (Palette.day) Color(0xFF2E343C) else Color(0xFFE9E2F2)
             /** Child silhouette (large mirror) */
-            val child: Color get() = if (Palette.day) Color(0xFFD99A00) else Color(0xFFFFD23F)
+            val child: Color get() = if (Palette.camper) Color(0xFFE87A3D) else if (Palette.day) Color(0xFFD99A00) else Color(0xFFFFD23F)
             /** Dog in the boot */
-            val dog: Color get() = if (Palette.day) Color(0xFFA8743A) else Color(0xFFC99A5B)
+            val dog: Color get() = if (Palette.camper) Color(0xFFB07A45) else if (Palette.day) Color(0xFFA8743A) else Color(0xFFC99A5B)
         }
         object paper {
             /** Waybill paper */
-            val sheet: Color get() = if (Palette.day) Color(0xFFFAFBFC) else Color(0xFFEEF2F4)
+            val sheet: Color get() = if (Palette.camper) Color(0xFFFFFBF5) else if (Palette.day) Color(0xFFFAFBFC) else Color(0xFFEEF2F4)
             /** Form lines, row dividers */
-            val lines: Color = Color(0xFF9FB0BE)
+            val lines: Color get() = if (Palette.camper) Color(0xFFC9B6A1) else Color(0xFF9FB0BE)
             /** Printed text, table rules */
-            val text: Color = Color(0xFF22313D)
+            val text: Color get() = if (Palette.camper) Color(0xFF2C1E13) else Color(0xFF22313D)
             /** Printed small labels (AA fix; mockup #5B7186 = 4.49:1) */
-            val label: Color = Color(0xFF53687C)
+            val label: Color get() = if (Palette.camper) Color(0xFF644E3E) else Color(0xFF53687C)
             /** Handwriting ink */
-            val ink: Color = Color(0xFF1B3FA0)
+            val ink: Color get() = if (Palette.camper) Color(0xFF1E4FA3) else Color(0xFF1B3FA0)
             /** Handwritten overspend (new; #D8402B on paper = 3.98:1) */
-            val inkRed: Color = Color(0xFFB3261E)
+            val inkRed: Color get() = if (Palette.camper) Color(0xFFB23A22) else Color(0xFFB3261E)
             /** Stamp (drawn at 0.85 alpha = #715AAD effective) */
-            val stamp: Color = Color(0xFF5B3FA0)
+            val stamp: Color get() = if (Palette.camper) Color(0xFFB23A22) else Color(0xFF5B3FA0)
             /** Clipboard clip */
-            val clip: Color = Color(0xFF8C8C93)
+            val clip: Color get() = if (Palette.camper) Color(0xFF8A735D) else Color(0xFF8C8C93)
             /** Clip inset bottom edge */
-            val clipShadow: Color = Color(0xFF5D5D63)
+            val clipShadow: Color get() = if (Palette.camper) Color(0xFF5C4636) else Color(0xFF5D5D63)
         }
         object city {
             /** City-walk scene: evening sky behind the facades (= sky.band1) */
-            val sky: Color get() = if (Palette.day) Color(0xFF86BCE3) else Color(0xFF2B2850)
+            val sky: Color get() = if (Palette.camper) Color(0xFFF1D3B3) else if (Palette.day) Color(0xFF86BCE3) else Color(0xFF2B2850)
             /** City scene: near facades */
-            val facadeA: Color get() = if (Palette.day) Color(0xFFC2A88F) else Color(0xFF3B3046)
+            val facadeA: Color get() = if (Palette.camper) Color(0xFFCDA27C) else if (Palette.day) Color(0xFFC2A88F) else Color(0xFF3B3046)
             /** City scene: middle facades */
-            val facadeB: Color get() = if (Palette.day) Color(0xFFD3C3B3) else Color(0xFF4A3B55)
+            val facadeB: Color get() = if (Palette.camper) Color(0xFFDDC3A6) else if (Palette.day) Color(0xFFD3C3B3) else Color(0xFF4A3B55)
             /** City scene: far facades and roof line */
-            val facadeC: Color get() = if (Palette.day) Color(0xFFB6C3CF) else Color(0xFF2E2939)
+            val facadeC: Color get() = if (Palette.camper) Color(0xFFC9B9A6) else if (Palette.day) Color(0xFFB6C3CF) else Color(0xFF2E2939)
             /** Lit windows and shop fronts (= scene.sun tone) */
-            val window: Color get() = if (Palette.day) Color(0xFFE6F0F7) else Color(0xFFFFD99A)
+            val window: Color get() = if (Palette.camper) Color(0xFFFBEBD3) else if (Palette.day) Color(0xFFE6F0F7) else Color(0xFFFFD99A)
             /** Unlit windows */
-            val windowOff: Color get() = if (Palette.day) Color(0xFF5E6A78) else Color(0xFF231F2D)
+            val windowOff: Color get() = if (Palette.camper) Color(0xFF6B5545) else if (Palette.day) Color(0xFF5E6A78) else Color(0xFF231F2D)
             /** Street-lamp heads and their glow core */
-            val lamp: Color get() = if (Palette.day) Color(0xFFE9ECEF) else Color(0xFFFFE7A8)
+            val lamp: Color get() = if (Palette.camper) Color(0xFFEFE6DC) else if (Palette.day) Color(0xFFE9ECEF) else Color(0xFFFFE7A8)
             /** Street-lamp glow disc */
-            val lampGlow: Color get() = if (Palette.day) Color(0xFFFFFFFF).copy(alpha = 0.12f) else Color(0xFFFFE7A8).copy(alpha = 0.18f)
+            val lampGlow: Color get() = if (Palette.camper) Color(0xFFFFFFFF).copy(alpha = 0.12f) else if (Palette.day) Color(0xFFFFFFFF).copy(alpha = 0.12f) else Color(0xFFFFE7A8).copy(alpha = 0.18f)
             /** Pavement of the walk column and the city scene */
-            val sidewalk: Color get() = if (Palette.day) Color(0xFFB9BEC4) else Color(0xFF4A4A50)
+            val sidewalk: Color get() = if (Palette.camper) Color(0xFFCFC2B3) else if (Palette.day) Color(0xFFB9BEC4) else Color(0xFF4A4A50)
             /** Pavement tile joints */
-            val joint: Color get() = if (Palette.day) Color(0xFFA0A6AE) else Color(0xFF3B3B41)
+            val joint: Color get() = if (Palette.camper) Color(0xFFB8A998) else if (Palette.day) Color(0xFFA0A6AE) else Color(0xFF3B3B41)
             /** Kerb line beside the pavement */
-            val curb: Color get() = if (Palette.day) Color(0xFF7D838C) else Color(0xFF8C8C93)
+            val curb: Color get() = if (Palette.camper) Color(0xFF8A7A6A) else if (Palette.day) Color(0xFF7D838C) else Color(0xFF8C8C93)
             /** Moving footprints in the walk column */
-            val footprint: Color get() = if (Palette.day) Color(0xFF3A3F47).copy(alpha = 0.45f) else Color(0xFFF4F4F0).copy(alpha = 0.55f)
+            val footprint: Color get() = if (Palette.camper) Color(0xFF4A3525).copy(alpha = 0.45f) else if (Palette.day) Color(0xFF3A3F47).copy(alpha = 0.45f) else Color(0xFFF4F4F0).copy(alpha = 0.55f)
         }
         object photo {
             /** Photo frame background: placeholder, letterbox mat, loading base */
-            val mat: Color get() = if (Palette.day) Color(0xFFDFE3E7) else Color(0xFF232327)
+            val mat: Color get() = if (Palette.camper) Color(0xFFEFE6DC) else if (Palette.day) Color(0xFFDFE3E7) else Color(0xFF232327)
             /** Placeholder pattern and shimmer highlight */
-            val matHighlight: Color get() = if (Palette.day) Color(0xFFEDF0F3) else Color(0xFF2E2E33)
+            val matHighlight: Color get() = if (Palette.camper) Color(0xFFF7F0E8) else if (Palette.day) Color(0xFFEDF0F3) else Color(0xFF2E2E33)
             /** Bottom gradient behind the photo credit (alpha at the bottom edge) */
-            val scrim: Color = Color(0xFF000000).copy(alpha = 0.62f)
+            val scrim: Color get() = if (Palette.camper) Color(0xFF000000).copy(alpha = 0.62f) else Color(0xFF000000).copy(alpha = 0.62f)
             /** Photo credit text on the scrim */
-            val credit: Color = Color(0xFFF4F4F0)
+            val credit: Color get() = if (Palette.camper) Color(0xFFF4F4F0) else Color(0xFFF4F4F0)
             /** 1 dp inner border of the photo frame (keeps white photos from bleeding into white text) */
-            val border: Color get() = if (Palette.day) Color(0xFFA9B0B9) else Color(0xFF3A3A42)
+            val border: Color get() = if (Palette.camper) Color(0xFFA68E77) else if (Palette.day) Color(0xFFA9B0B9) else Color(0xFF3A3A42)
             /** Placeholder illustration lines */
-            val ink: Color get() = if (Palette.day) Color(0xFF78808B) else Color(0xFF8C8C93)
+            val ink: Color get() = if (Palette.camper) Color(0xFF8A735D) else if (Palette.day) Color(0xFF78808B) else Color(0xFF8C8C93)
             /** Placeholder illustration fills (dome, trees, glass) */
-            val accent: Color get() = if (Palette.day) Color(0xFFB3BAC3) else Color(0xFFB9B9C0)
+            val accent: Color get() = if (Palette.camper) Color(0xFFCDBCA8) else if (Palette.day) Color(0xFFB3BAC3) else Color(0xFFB9B9C0)
             /** Placeholder mat: museum */
-            val phMuseum: Color get() = if (Palette.day) Color(0xFFE0E1E5) else Color(0xFF26262B)
+            val phMuseum: Color get() = if (Palette.camper) Color(0xFFEFE6DC) else if (Palette.day) Color(0xFFE0E1E5) else Color(0xFF26262B)
             /** Placeholder mat: church, monastery, kremlin */
-            val phChurch: Color get() = if (Palette.day) Color(0xFFE4DFE8) else Color(0xFF2A2630)
+            val phChurch: Color get() = if (Palette.camper) Color(0xFFF0E4DE) else if (Palette.day) Color(0xFFE4DFE8) else Color(0xFF2A2630)
             /** Placeholder mat: park, garden */
-            val phPark: Color get() = if (Palette.day) Color(0xFFDCE5DD) else Color(0xFF222A25)
+            val phPark: Color get() = if (Palette.camper) Color(0xFFE5EADB) else if (Palette.day) Color(0xFFDCE5DD) else Color(0xFF222A25)
             /** Placeholder mat: monument, memorial, square */
-            val phMonument: Color get() = if (Palette.day) Color(0xFFE1E1E3) else Color(0xFF28282C)
+            val phMonument: Color get() = if (Palette.camper) Color(0xFFEEE7DF) else if (Palette.day) Color(0xFFE1E1E3) else Color(0xFF28282C)
             /** Placeholder mat: viewpoint, embankment */
-            val phView: Color get() = if (Palette.day) Color(0xFFDBE2E9) else Color(0xFF22272E)
+            val phView: Color get() = if (Palette.camper) Color(0xFFE4E8E5) else if (Palette.day) Color(0xFFDBE2E9) else Color(0xFF22272E)
             /** Placeholder mat: bar, рюмочная, pub, craft */
-            val phBar: Color get() = if (Palette.day) Color(0xFFE7E0DA) else Color(0xFF2B2522)
+            val phBar: Color get() = if (Palette.camper) Color(0xFFF2E4D5) else if (Palette.day) Color(0xFFE7E0DA) else Color(0xFF2B2522)
             /** Placeholder mat: town, hotel area, other */
-            val phCity: Color get() = if (Palette.day) Color(0xFFE0DFE6) else Color(0xFF25242C)
+            val phCity: Color get() = if (Palette.camper) Color(0xFFECE5DD) else if (Palette.day) Color(0xFFE0DFE6) else Color(0xFF25242C)
         }
         object budget {
             /** «Не помещается в бюджет» plate fill */
-            val overFill: Color get() = if (Palette.day) Color(0xFFFBE6E2) else Color(0xFF2A1816)
+            val overFill: Color get() = if (Palette.camper) Color(0xFFF9E1D9) else if (Palette.day) Color(0xFFFBE6E2) else Color(0xFF2A1816)
             /** «Не помещается» plate border (= accent.red) */
-            val overBorder: Color = Color(0xFFD8402B)
+            val overBorder: Color get() = if (Palette.camper) Color(0xFFB23A22) else Color(0xFFD8402B)
             /** «Впритык» text and dot (= accent.yellow) */
-            val tight: Color get() = if (Palette.day) Color(0xFF805300) else Color(0xFFFFD23F)
+            val tight: Color get() = if (Palette.camper) Color(0xFF8A4E0A) else if (Palette.day) Color(0xFF805300) else Color(0xFFFFD23F)
         }
         object kind {
             /** Category tag fill (МУЗЕЙ, ПАРК…) on rows and cards (Sprint 4) */
-            val fill: Color get() = if (Palette.day) Color(0xFFF3E7DD) else Color(0xFF2A1E17)
+            val fill: Color get() = if (Palette.camper) Color(0xFFF6E6D6) else if (Palette.day) Color(0xFFF3E7DD) else Color(0xFF2A1E17)
             /** Category tag border (= tourist brown) */
-            val border: Color = Color(0xFF6B3E26)
+            val border: Color get() = if (Palette.camper) Color(0xFF6B3E26) else Color(0xFF6B3E26)
             /** Category tag text (AA on fill) */
-            val text: Color get() = if (Palette.day) Color(0xFF6B3E26) else Color(0xFFE0B48F)
+            val text: Color get() = if (Palette.camper) Color(0xFF6B3E26) else if (Palette.day) Color(0xFF6B3E26) else Color(0xFFE0B48F)
         }
         object stretch {
             /** «РАЗМИНКА N МИН» tag fill (fun preset stops) */
-            val fill: Color get() = if (Palette.day) Color(0xFFFFF4CC) else Color(0xFF2B2A12)
+            val fill: Color get() = if (Palette.camper) Color(0xFFFDEBD3) else if (Palette.day) Color(0xFFFFF4CC) else Color(0xFF2B2A12)
             /** «РАЗМИНКА» tag border */
-            val border: Color get() = if (Palette.day) Color(0xFFA87400) else Color(0xFF8A7A1E)
+            val border: Color get() = if (Palette.camper) Color(0xFFB36A1E) else if (Palette.day) Color(0xFFA87400) else Color(0xFF8A7A1E)
             /** «РАЗМИНКА» tag text (= accent.yellow) */
-            val text: Color get() = if (Palette.day) Color(0xFF805300) else Color(0xFFFFD23F)
+            val text: Color get() = if (Palette.camper) Color(0xFF8A4E0A) else if (Palette.day) Color(0xFF805300) else Color(0xFFFFD23F)
         }
         object hours {
             /** Opening hours «открыто» text / dot (Sprint 4 walks, cards) */
-            val open: Color get() = if (Palette.day) Color(0xFF1B6B34) else Color(0xFF7FD38A)
+            val open: Color get() = if (Palette.camper) Color(0xFF44703F) else if (Palette.day) Color(0xFF1B6B34) else Color(0xFF7FD38A)
             /** «открыто» pill fill */
-            val openFill: Color get() = if (Palette.day) Color(0xFF1B6B34).copy(alpha = 0.12f) else Color(0xFF7FD38A).copy(alpha = 0.12f)
+            val openFill: Color get() = if (Palette.camper) Color(0xFF44703F).copy(alpha = 0.12f) else if (Palette.day) Color(0xFF1B6B34).copy(alpha = 0.12f) else Color(0xFF7FD38A).copy(alpha = 0.12f)
             /** «сегодня закрыто» text (= accent.redText) */
-            val closed: Color get() = if (Palette.day) Color(0xFF9A1F17) else Color(0xFFE6604A)
+            val closed: Color get() = if (Palette.camper) Color(0xFFA3301B) else if (Palette.day) Color(0xFF9A1F17) else Color(0xFFE6604A)
             /** «закрыто» pill fill */
-            val closedFill: Color get() = if (Palette.day) Color(0xFF9A1F17).copy(alpha = 0.1f) else Color(0xFFE6604A).copy(alpha = 0.14f)
+            val closedFill: Color get() = if (Palette.camper) Color(0xFFA3301B).copy(alpha = 0.1f) else if (Palette.day) Color(0xFF9A1F17).copy(alpha = 0.1f) else Color(0xFFE6604A).copy(alpha = 0.14f)
             /** «часы не указаны» (= text.secondary) */
-            val unknown: Color get() = if (Palette.day) Color(0xFF3D4550) else Color(0xFFB9B9C0)
+            val unknown: Color get() = if (Palette.camper) Color(0xFF5C4636) else if (Palette.day) Color(0xFF3D4550) else Color(0xFFB9B9C0)
         }
         object info {
             /** Green info plate fill: how the walk was adapted to the crew */
-            val fill: Color get() = if (Palette.day) Color(0xFFE2F0E4) else Color(0xFF1C2A1E)
+            val fill: Color get() = if (Palette.camper) Color(0xFFE6EEDF) else if (Palette.day) Color(0xFFE2F0E4) else Color(0xFF1C2A1E)
             /** Green info plate border */
-            val border: Color get() = if (Palette.day) Color(0xFF8DB796) else Color(0xFF2F4A33)
+            val border: Color get() = if (Palette.camper) Color(0xFF9DB58F) else if (Palette.day) Color(0xFF8DB796) else Color(0xFF2F4A33)
             /** Green info plate check disc */
-            val mark: Color get() = if (Palette.day) Color(0xFF1B6B34) else Color(0xFF7FD38A)
+            val mark: Color get() = if (Palette.camper) Color(0xFF44703F) else if (Palette.day) Color(0xFF1B6B34) else Color(0xFF7FD38A)
         }
         object odometer {
             /** Odometer tag under a Road-ahead sign («193 км») */
-            val fill: Color = Color(0xFF000000)
+            val fill: Color get() = if (Palette.camper) Color(0xFF2A1D13) else Color(0xFF000000)
             /** Odometer tag border (= dash.outline) */
-            val border: Color = Color(0xFF3A3A42)
+            val border: Color get() = if (Palette.camper) Color(0xFF5C4636) else Color(0xFF3A3A42)
         }
         object overlay {
             /** Scrim behind bottom sheets and dialogs (new) */
-            val scrim: Color get() = if (Palette.day) Color(0xFF15181C).copy(alpha = 0.45f) else Color(0xFF000000).copy(alpha = 0.6f)
+            val scrim: Color get() = if (Palette.camper) Color(0xFF2C1E13).copy(alpha = 0.45f) else if (Palette.day) Color(0xFF15181C).copy(alpha = 0.45f) else Color(0xFF000000).copy(alpha = 0.6f)
             /** Keyboard focus ring, 2dp, offset 2dp */
-            val focus: Color get() = if (Palette.day) Color(0xFF1E4FA3) else Color(0xFFFFD23F)
+            val focus: Color get() = if (Palette.camper) Color(0xFF1E4FA3) else if (Palette.day) Color(0xFF1E4FA3) else Color(0xFFFFD23F)
             /** Returned-row highlight on Road ahead / walk list (motion.returnToItem) */
-            val returnFlash: Color get() = if (Palette.day) Color(0xFFFFD23F).copy(alpha = 0.3f) else Color(0xFFFFD23F).copy(alpha = 0.14f)
+            val returnFlash: Color get() = if (Palette.camper) Color(0xFFF4A261).copy(alpha = 0.3f) else if (Palette.day) Color(0xFFFFD23F).copy(alpha = 0.3f) else Color(0xFFFFD23F).copy(alpha = 0.14f)
+        }
+        /** Fork camper-ui (CEO 31.10): the «Кемпер-гид» paper palette of the Craft components (design/tokens-camper.json). */
+        object camper {
+            /** Camper: page background behind every screen (--bg-paper) */
+            val page: Color = Color(0xFFF5EFEB)
+            /** Camper: card paper (CraftCard, secondary button, idle icon tile; --card-paper) */
+            val paper: Color = Color(0xFFFAF4EE)
+            /** Camper: header bar, tab bar, sunken wells and the «Заменить» button fill */
+            val header: Color = Color(0xFFEFE6DC)
+            /** Camper: input / read-only field fill (white paper) */
+            val field: Color = Color(0xFFFFFDF9)
+            /** Camper: brown border of cards, buttons, fields, tiles and badges (--border-brown) */
+            val border: Color = Color(0xFF4A3525)
+            /** Camper: hard offset shadow of cards (3, 4 dp; --border-brown at 25 %) */
+            val shadow: Color = Color(0xFF4A3525).copy(alpha = 0.25f)
+            /** Camper: thin and dashed dividers inside cards (--border-brown at 20 %) */
+            val divider: Color = Color(0xFF4A3525).copy(alpha = 0.2f)
+            /** Camper: main text (--text-dark, darkened 2 % for 4.5:1 on dash.outline) */
+            val ink: Color = Color(0xFF2C1E13)
+            /** Camper: secondary text, field captions (8.0:1 on paper) */
+            val inkSoft: Color = Color(0xFF5C4636)
+            /** Camper: muted labels and footnotes (>= 4.5:1 on page, paper, header) */
+            val inkMuted: Color = Color(0xFF6E5847)
+            /** Camper: primary accent fill (CraftButton, active tab and tile, selected chip; --accent-orange) */
+            val orange: Color = Color(0xFFE87A3D)
+            /** Camper: pressed primary button fill (ink label 4.8:1) */
+            val orangePressed: Color = Color(0xFFD96E31)
+            /** Camper: orange as TEXT on paper (overlines «КЕМПЕР-ГИД», links, prices) = accent.yellowText */
+            val orangeText: Color = Color(0xFFA84B14)
+            /** Camper: text and icons on camper.orange fills (= camper.ink, 5.4:1; the mockup white was 2.88:1) */
+            val onOrange: Color = Color(0xFF2C1E13)
+            /** Camper: text and icons on camper.green / blue / stamp fills (mockup white) */
+            val onAccent: Color = Color(0xFFFFFFFF)
+            /** Camper: badge fill, logo tile (--accent-amber) */
+            val amber: Color = Color(0xFFF4A261)
+            /** Camper: badge text on amber (mockup brown) */
+            val onAmber: Color = Color(0xFF4A3525)
+            /** Camper: green accent fill, badges «Включён», walking mode (--accent-green #588157, 2 % darker for 4.5:1 with white) */
+            val green: Color = Color(0xFF557C54)
+            /** Camper: green as TEXT on paper (savings «−4 000 ₽», «Резерв») */
+            val greenText: Color = Color(0xFF44703F)
+            /** Camper: blue accent (abroad, border badge; --accent-blue = sign.blue) */
+            val blue: Color = Color(0xFF1E4FA3)
+            /** Camper: stamp red (dashed stamp «ПРОВЕРЕНО», over-budget disc) */
+            val stamp: Color = Color(0xFFB23A22)
         }
     }
     object type {

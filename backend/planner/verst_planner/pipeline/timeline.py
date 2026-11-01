@@ -70,26 +70,65 @@ class Slot:
     drive_min: float  # driving minutes from the previous stop, incl. both detour halves
 
 
+TOWN_POOL = "town"
+"""Pool of an evening or morning stop in the overnight town (`pipeline.town_visit`, acceptance V1)."""
+
+
+def _first_evening(stops: Sequence[PlannedStop]) -> int | None:
+    """The first evening stop in the overnight town: a `TOWN_POOL` stop at the overnight's km."""
+    last = stops[-1] if stops else None
+    if last is None or last.kind is not StopKind.OVERNIGHT:
+        return None
+    return next(
+        (i for i, s in enumerate(stops) if s.pool == TOWN_POOL and s.km_at >= last.km_at - 1e-9), None
+    )
+
+
+def detour_halves(stops: Sequence[PlannedStop]) -> list[tuple[float, float]]:
+    """`(inbound, outbound)` detour minutes of every stop: half and half (A§6.6), except an evening in the
+    overnight town — its first stop carries the drive into town (half the overnight's detour) and the hotel
+    after it none, so the town's sights are seen after arriving in town, not before."""
+    out = [(s.detour_min / 2, s.detour_min / 2) for s in stops]
+    k = _first_evening(stops)
+    if k is not None:
+        approach = stops[-1].detour_min / 2
+        out[k] = (approach + stops[k].detour_min / 2, stops[k].detour_min / 2)
+        out[-1] = (0.0, approach)
+    return out
+
+
+def detour_km_halves(stops: Sequence[PlannedStop]) -> list[tuple[float, float]]:
+    """`detour_halves` in km (the `km_from_prev` rows)."""
+    out = [(s.detour_km / 2, s.detour_km / 2) for s in stops]
+    k = _first_evening(stops)
+    if k is not None:
+        approach = stops[-1].detour_km / 2
+        out[k] = (approach + stops[k].detour_km / 2, stops[k].detour_km / 2)
+        out[-1] = (0.0, approach)
+    return out
+
+
 def schedule_day(day: DayPlan, profile: Profile) -> list[Slot]:
     """A§6.6: arrival/departure of every stop of `day` (stops ordered by km, START first)."""
     t = day.start_at
     pos = day.km_start
     prev_half = 0.0
     out: list[Slot] = []
-    for s in day.stops:
+    halves = detour_halves(day.stops)
+    for s, (half_in, half_out) in zip(day.stops, halves, strict=True):
         if s.kind is StopKind.START:
             out.append(Slot(None, t, 0.0))
             pos = s.km_at
             continue
-        leg = profile.drive(pos, s.km_at) + s.detour_min / 2
+        leg = profile.drive(pos, s.km_at) + half_in
         t = t + timedelta(minutes=leg)
         arrive = t
         depart = (
             None if s.kind in (StopKind.OVERNIGHT, StopKind.FINISH) else t + timedelta(minutes=s.dwell_min)
         )
         out.append(Slot(arrive, depart, leg + prev_half))
-        t = (depart or t) + timedelta(minutes=s.detour_min / 2)
-        prev_half = s.detour_min / 2
+        t = (depart or t) + timedelta(minutes=half_out)
+        prev_half = half_out
         pos = s.km_at
     return out
 

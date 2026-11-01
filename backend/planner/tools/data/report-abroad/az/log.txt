@@ -1,0 +1,60 @@
+{"labels": {"Q227": "Azerbaijan"}, "capitals": ["Q9248"], "currencies": ["AZN"], "tz": ["UTC+04:00"], "ok": true}
+{"mismatches": {}, "resolved": {}}
+town classes: 547
+towns: 123 candidates from 547 classes
+towns: 121; missing must-have: []
+pois: 0/121 towns, 209 rows, 0 failed
+pois: 50/121 towns, 551 rows, 0 failed
+pois: 100/121 towns, 656 rows, 0 failed
+pois: 779 rows, 0 towns failed
+forms: 111 towns; fixture oracle 47/48
+classes: 10052 ids; resolved {}; unresolved []
+wikidata: 0/615
+wikidata: 615 items, 326 with ru Wikipedia
+wikipedia: 0/326
+wikipedia: 326 pages, 326 with an extract
+voyage: 136 Q-ids in listings
+extract: https://download.geofabrik.de/asia/azerbaijan-latest.osm.pbf
+-rw-r--r-- 1 runner runner 46641338 Oct 30 02:50 /home/runner/work/_temp/c.osm.pbf
+bars: 190 rows from 222 named features, 94 towns (extract)
+food: 3360 rows from 4924 named features, 94 towns (extract)
+parks: 383 rows from 637 named parks and gardens, 121 towns (extract)
+osm: 3614 POI candidates, 34 paid parking places
+geosearch: 0/1500
+geosearch: 500/1500
+geosearch: 1000/1500
+candidates: 525 photo files
+credits: 50/525
+credits: 520 of 525 files
+photo meta: 50/525
+photo meta: 520 of 525 files
+credits: 50/399
+credits: 399 of 399 files
+photo meta: 50/399
+photo meta: 399 of 399 files
+{
+ "towns": 92,
+ "pois": 374,
+ "bars": 190,
+ "food": 1729,
+ "links": 0,
+ "credits": 152,
+ "bytes": {
+  "catalogue_meta.json.gz": 5635,
+  "catalogue_towns.json.gz": 4713,
+  "catalogue_pois.json.gz": 32290,
+  "catalogue_bars.json.gz": 4368,
+  "catalogue_food.json.gz": 35666
+ },
+ "totalBytes": 82672
+}
+{
+ "version": "wd-20261030-abroad2",
+ "count": 288,
+ "townsSha256": "ebb65eb8a6ec8f8b23ef166ef6720966bf07ea4a8460d18f2555f384adc8886e",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 8148,
+ "sha256": "169ae3fa8cbf9ec93fda0e1b29061a30a00a4b325405415bb3952f1eaf1a9597"
+}
+tzCheck: {"checked": true, "ok": true, "mismatches": []}
+regions: [{"code": "AZ-ABS", "nameRu": "Апшеронский район", "tz": "Asia/Baku"}, {"code": "AZ-AGA", "nameRu": "Агстафинский район", "tz": "Asia/Baku"}, {"code": "AZ-AGC", "nameRu": "Агджабединский район", "tz": "Asia/Baku"}, {"code": "AZ-AGM", "nameRu": "Агдамский район", "tz": "Asia/Baku"}, {"code": "AZ-AGS", "nameRu": "Агдашский район", "tz": "Asia/Baku"}, {"code": "AZ-AGU", "nameRu": "Ахсуйский район", "tz": "Asia/Baku"}, {"code": "AZ-AST", "nameRu": "Астаринский район", "tz": "Asia/Baku"}, {"code": "AZ-BA", "nameRu": "Баку", "tz": "Asia/Baku"}, {"code": "AZ-BAB", "nameRu": "Бабекский район", "tz": "Asia/Baku"}, {"code": "AZ-BAL", "nameRu": "Балакенский район", "tz": "Asia/Baku"}, {"code": "AZ-BAR", "nameRu": "Бардинский район", "tz": "Asia/Baku"}, {"code": "AZ-BEY", "nameRu": "Бейлаганский район", "tz": "Asia/Baku"}, {"code": "AZ-BIL", "nameRu": "Билясуварский район", "tz": "Asia/Baku"}, {"code": "AZ-CAB", "nameRu": "Джебраильский район", "tz": "Asia/Baku"}, {"code": "AZ-CAL", "nameRu": "Джалилабадский район", "tz": "Asia/Baku"}, {"code": "AZ-CUL", "nameRu": "Джульфинский район", "tz": "Asia/Baku"}, {"code": "AZ-FUZ", "nameRu": "Физулинский район", "tz": "Asia/Baku"}, {"code": "AZ-GA", "nameRu": "Гянджа", "tz": "Asia/Baku"}, {"code": "AZ-GAD", "nameRu": "Кедабекский район", "tz": "Asia/Baku"}, {"code": "AZ-GOR", "nameRu": "Геранбойский район", "tz": "Asia/Baku"}, {"code": "AZ-GOY", "nameRu": "Гёйчайский район", "tz": "Asia/Baku"}, {"code": "AZ-GYG", "nameRu": "Гёйгёльский район", "tz": "Asia/Baku"}, {"code": "AZ-HAC", "nameRu": "Аджикабулский район", "tz": "Asia/Baku"}, {"code": "AZ-IMI", "nameRu": "Имишлинский район", "tz": "Asia/Baku"}, {"code": "AZ-ISM", "nameRu": "Исмаиллинский район", "tz": "Asia/Baku"}, {"code": "AZ-KAN", "nameRu": "Кенгерлинский район", "tz": "Asia/Baku"}, {"code": "AZ-KUR", "nameRu": "Кюрдамирский район", "tz": "Asia/Baku"}, {"code": "AZ-LA", "nameRu": "Ленкорань", "tz": "Asia/Baku"}, {"code": "AZ-LAC", "nameRu": "Лачинский район", "tz": "Asia/Baku"}, {"code": "AZ-LAN", "nameRu": "Ленкоранский район", "tz": "Asia/Baku"}, {"code": "AZ-LER", "nameRu": "Лерикский район", "tz": "Asia/Baku"}, {"code": "AZ-MAS", "nameRu": "Масаллинский район", "tz": "Asia/Baku"}, {"code": "AZ-MI", "nameRu": "Мингечевир", "tz": "Asia/Baku"}, {"code": "AZ-NEF", "nameRu": "Нефтечалинский район", "tz": "Asia/Baku"}, {"code": "AZ-NV", "nameRu": "Нахичевань", "tz": "Asia/Baku"}, {"code": "AZ-NX", "nameRu": "Нахичеванская Автономная Республика", "tz": "Asia/Baku"}, {"code": "AZ-OGU", "nameRu": "Огузский район", "tz": "Asia/Baku"}, {"code": "AZ-QAB", "nameRu": "Габалинский район", "tz": "Asia/Baku"}, {"code": "AZ-QAX", "nameRu": "Гахский район", "tz": "Asia/Baku"}, {"code": "AZ-QAZ", "nameRu": "Газахский район", "tz": "Asia/Baku"}, {"code": "AZ-QBA", "nameRu": "Губинский район", "tz": "Asia/Baku"}, {"code": "AZ-QBI", "nameRu": "Губадлинский район", "tz": "Asia/Baku"}, {"code": "AZ-QOB", "nameRu": "Гобустанский район", "tz": "Asia/Baku"}, {"code": "AZ-SA", "nameRu": "Шеки", "tz": "Asia/Baku"}, {"code": "AZ-SAB", "nameRu": "Сабирабадский район", "tz": "Asia/Baku"}, {"code": "AZ-SAL", "nameRu": "Сальянский район", "tz": "Asia/Baku"}, {"code": "AZ-SAT", "nameRu": "Саатлинский район", "tz": "Asia/Baku"}, {"code": "AZ-SIY", "nameRu": "Сиазаньский район", "tz": "Asia/Baku"}, {"code": "AZ-SKR", "nameRu": "Шамкирский район", "tz": "Asia/Baku"}, {"code": "AZ-SM", "nameRu": "Сумгаит", "tz": "Asia/Baku"}, {"code": "AZ-SMI", "nameRu": "Шемахинский район", "tz": "Asia/Baku"}, {"code": "AZ-SMX", "nameRu": "Самухский район", "tz": "Asia/Baku"}, {"code": "AZ-SR", "nameRu": "Ширван", "tz": "Asia/Baku"}, {"code": "AZ-SUS", "nameRu": "Шушинский район", "tz": "Asia/Baku"}, {"code": "AZ-TAR", "nameRu": "Тертерский район", "tz": "Asia/Baku"}, {"code": "AZ-TOV", "nameRu": "Товузский район", "tz": "Asia/Baku"}, {"code": "AZ-UCA", "nameRu": "Уджарский район", "tz": "Asia/Baku"}, {"code": "AZ-XA", "nameRu": "Ханкенди", "tz": "Asia/Baku"}, {"code": "AZ-XAC", "nameRu": "Хачмазский район", "tz": "Asia/Baku"}, {"code": "AZ-XCI", "nameRu": "Ходжалинский район", "tz": "Asia/Baku"}, {"code": "AZ-XVD", "nameRu": "Ходжавендский район", "tz": "Asia/Baku"}, {"code": "AZ-YAR", "nameRu": "Ярдымлинский район", "tz": "Asia/Baku"}, {"code": "AZ-YE", "nameRu": "Евлах", "tz": "Asia/Baku"}, {"code": "AZ-ZAQ", "nameRu": "Закатальский район", "tz": "Asia/Baku"}]

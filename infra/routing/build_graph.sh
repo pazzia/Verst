@@ -30,7 +30,11 @@ esac
 mkdir -p "$DATA/osm"
 fetch() {  # url, out
   echo "download $1"
-  curl -fL --retry 5 --retry-delay 20 --retry-all-errors -o "$2.part" "$1"
+  if [ -n "${FETCH_PBF:-}" ]; then  # CI: tools/ci/fetch_pbf.sh, 8 ranged parts + md5 (one connection timed out, 30.10)
+    "$FETCH_PBF" "$1" "$2.part"
+  else
+    curl -fL --retry 5 --retry-delay 20 --retry-all-errors -o "$2.part" "$1"
+  fi
   mv "$2.part" "$2"
 }
 timestamp() {  # the replication timestamp in the PBF header (osmium-fileinfo(1)), "unknown" without osmium

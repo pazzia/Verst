@@ -9,6 +9,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
+from typing import Any
 
 from verst_planner.config import PlannerConfig
 from verst_planner.domain.enums import RoadClass, WarningCode
@@ -30,6 +31,7 @@ from verst_planner.geo.index import PolylineIndex
 from verst_planner.hours import OpeningHours, parse
 from verst_planner.pipeline.timeline import Profile
 from verst_planner.ports import (
+    BorderPort,
     Clock,
     GeocodingPort,
     ParkingPort,
@@ -52,6 +54,7 @@ class Ports:
     regions: RegionLocator
     geocoding: GeocodingPort
     parking: ParkingPort | None = None  # ADR-0015 §4; None = no parking data (fixture worlds)
+    borders: BorderPort | None = None  # CEO 29.10: trips abroad (server `world_v1`); None = the Russia box
 
 
 def _zero_cost(stop: PlannedStop, inp: NormalizedInput) -> int:
@@ -73,6 +76,8 @@ class PlanContext:
     rerun: int = 0
     corridor_towns: list[TownCandidate] = field(default_factory=list)
     """Corridor towns (set once the corridor is built) for the default meal check near a km."""
+    ext: dict[str, Any] = field(default_factory=dict)
+    """Per-run data of a planner extension (the trips-abroad planner keeps its legs here)."""
     _regions: dict[tuple[float, float], RegionInfo] = field(default_factory=dict)
     _region_by_code: dict[str, RegionInfo] = field(default_factory=dict)
     _hours: dict[str, OpeningHours | None] = field(default_factory=dict)

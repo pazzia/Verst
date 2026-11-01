@@ -169,7 +169,7 @@ sealed class AnalyticsEvent(val name: String) {
     enum class RoutingSource(val wire: String) { ROAD("road"), FALLBACK("fallback") }
 
     /** `web` = the maps site in the browser (no maps app on the phone). */
-    enum class NaviApp(val wire: String) { YANDEX_NAVIGATOR("yandex_navigator"), YANDEX_MAPS("yandex_maps"), TWO_GIS("2gis"), WEB("web") }
+    enum class NaviApp(val wire: String) { YANDEX_NAVIGATOR("yandex_navigator"), YANDEX_MAPS("yandex_maps"), GOOGLE_MAPS("google_maps"), TWO_GIS("2gis"), WEB("web") }
 
     /** `unknown`: the system share sheet does not tell the app which app was chosen. */
     enum class ShareChannel(val wire: String) { MESSENGER("messenger"), SOCIAL("social"), OTHER("other"), UNKNOWN("unknown") }

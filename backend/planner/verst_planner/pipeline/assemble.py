@@ -5,9 +5,9 @@ Ids are `d{day}s{nn}` (nn from 01 within the day); `seq` is the global order fro
 
 from __future__ import annotations
 
-import itertools
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from verst_planner.domain.enums import SIGN_BY_KIND, SignType, Source, StopKind, Tag
 from verst_planner.domain.facts import (
@@ -41,7 +41,7 @@ from verst_planner.explain.reasons import stop_reason
 from verst_planner.geo.polyline import interpolate
 from verst_planner.pipeline import Corridor, PlanContext, round_half_up
 from verst_planner.pipeline.rest import fun_for, roadside_name
-from verst_planner.pipeline.timeline import Profile, Slot, day_end, local_minute
+from verst_planner.pipeline.timeline import Profile, Slot, day_end, detour_km_halves, local_minute
 
 SYNTHETIC_ROADSIDE = ("syn_r_", "syn_f_")  # the catalogue's generated rest areas and fuel stations
 
@@ -131,11 +131,17 @@ def render_stop(
     ctx: PlanContext,
     view: StopView | None = None,
     sid: str | None = None,
+    day_tz: str | None = None,
+    mark_local: bool = False,
 ) -> ScheduledStop:
+    """`day_tz`: the clock of the stop's day (QA B-4: a day's times never go backwards at a zone border);
+    `mark_local`: the day's first stop in another zone says its local time in the reason."""
     v = view or StopView()
-    tz = ctx.tz_of(s.region_code, s.point)
+    own_tz = ctx.tz_of(s.region_code, s.point)
+    tz = day_tz or own_tz
     arrive = local_minute(slot.arrive, tz) if slot.arrive is not None else None
     depart = local_minute(slot.depart, tz) if slot.depart is not None else None
+    local_tz, local_time_ru, local_reason = _local_time(slot, tz, own_tz, ctx)
     if s.kind is StopKind.OVERNIGHT:
         sign = SignType.HOTEL if s.place is not None else SignType.CITY
         reason = v.overnight_text
@@ -143,6 +149,8 @@ def render_stop(
         sign = SIGN_BY_KIND[s.kind]
         when = depart if s.kind is StopKind.START else arrive
         reason = stop_reason(s, inp, ctx.cfg, ctx.templates, when, inp.round_trip)
+    if mark_local and local_reason:
+        reason = f"{reason} {local_reason}" if reason else local_reason
     note = v.note
     if note is None and s.place is not None and s.place.source is Source.OSM:
         note = ru.text("note.unverified")
@@ -183,13 +191,37 @@ def render_stop(
         fun_for=fun_for(s.place, inp) if s.reason_key.startswith("rest.fun.") and s.place is not None else (),
         unknown_facts=tuple(f.value for f in facts),
         unknown_ru=unknown_ru,
+        local_tz=local_tz,
+        local_time_ru=local_time_ru,
     )
 
 
+MINUS = "\u2212"
+
+
+def _local_time(slot: Slot, tz: str, own_tz: str, ctx: PlanContext) -> tuple[str | None, str | None, str]:
+    """`(local_tz, local_time_ru, reason sentence)` of a stop whose own zone's clock differs from `tz` at
+    its arrival (departure for START), else `(None, None, "")`."""
+    at = slot.arrive if slot.arrive is not None else slot.depart
+    if at is None or own_tz == tz:
+        return None, None, ""
+    own = at.astimezone(ZoneInfo(own_tz))
+    shift_min = (own.utcoffset() or timedelta(0)) - (at.astimezone(ZoneInfo(tz)).utcoffset() or timedelta(0))
+    hours = round(shift_min.total_seconds() / 3600)
+    if hours == 0:
+        return None, None, ""
+    time_ru = local_minute(at, own_tz).strftime("%H:%M")
+    shift = f"{'+' if hours > 0 else MINUS}{abs(hours)}"
+    text = ctx.templates.render("tz.local", time=time_ru, shift=shift)
+    return own_tz, text, text
+
+
 def km_from_prev_row(stops: list[PlannedStop]) -> list[int]:
+    halves = detour_km_halves(stops)
     row = [0]
-    for prev, s in itertools.pairwise(stops):
-        row.append(round_half_up(s.km_at - prev.km_at + (prev.detour_km + s.detour_km) / 2))
+    for i in range(1, len(stops)):
+        prev, s = stops[i - 1], stops[i]
+        row.append(round_half_up(s.km_at - prev.km_at + halves[i - 1][1] + halves[i][0]))
     return row
 
 
@@ -209,10 +241,14 @@ def render_day(
     ids: list[str] | None = None,
 ) -> DayResult:
     row = km_from_prev_row(plan_stops)
-    stops = tuple(
-        render_stop(s, slot, day_no, i, seq0 + i, row[i], inp, ctx, views.get(i), ids[i] if ids else None)
-        for i, (s, slot) in enumerate(zip(plan_stops, slots, strict=True))
-    )
+    rendered: list[ScheduledStop] = []
+    marked = False
+    for i, (s, slot) in enumerate(zip(plan_stops, slots, strict=True)):
+        sid = ids[i] if ids else None
+        r = render_stop(s, slot, day_no, i, seq0 + i, row[i], inp, ctx, views.get(i), sid, tz, not marked)
+        marked = marked or r.local_tz is not None
+        rendered.append(r)
+    stops = tuple(rendered)
     km = round_half_up(km_end - km_start + sum(s.detour_km for s in plan_stops))
     return DayResult(
         day=day_no,

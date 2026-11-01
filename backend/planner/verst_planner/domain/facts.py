@@ -40,6 +40,7 @@ class Fact(StrEnum):
     TICKET = "ticket"
     FUEL = "fuel"
     DOGS = "dogs"
+    PRICE = "price"  # CEO 29.10: a night or a meal abroad — no price data there (never a rouble default)
 
 
 def rank_rating(p: Place) -> float:

@@ -13,15 +13,24 @@ import math
 import re
 from datetime import timedelta
 
+from verst_planner.config import FunSightsCfg, PlannerConfig
 from verst_planner.domain.enums import Meal, Mood, Source, StopKind, Tag
-from verst_planner.domain.facts import confirmed_free, rank_rating
-from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, Place, PlannedStop, Town
+from verst_planner.domain.facts import Known, confirmed_free, rank_rating, tag_state
+from verst_planner.domain.model import (
+    Candidate,
+    DayPlan,
+    LatLon,
+    NormalizedInput,
+    Place,
+    PlannedStop,
+    Town,
+)
 from verst_planner.explain import ru
 from verst_planner.explain.reasons import sight_reason
 from verst_planner.geo.distance import haversine_km
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.meals import best_lunch, lunch_candidates, needs_lunch, plan_meals
-from verst_planner.pipeline.rest import RestPool, day_ok
+from verst_planner.pipeline.rest import FUN_FIT, RestPool, day_ok, fun_affinity
 from verst_planner.pipeline.timeline import Profile, insert_stop, local, schedule_day
 
 NOTABLE = frozenset({Tag.KREMLIN, Tag.MONASTERY, Tag.MUSEUM, Tag.VIEW})
@@ -127,6 +136,118 @@ def category_of(p: Place) -> str:
     return kind_of(p.name_ru, base, desc)
 
 
+# ---------------------------------------------------------------------------------------- admission
+# Acceptance 2026-10-28 (traveller K1, K3): which places may be an *added* road-trip sight at all. User vias
+# and ready-route stops are never filtered (the user chose them); the rules apply to the corridor pool, so
+# stage 9, the rest/fun stops and the alternatives all see the same places.
+
+DOG_CLOSED_KINDS = frozenset({"museum", "interactive", "theatre", "zoo"})
+"""K3: kinds a dog is not let into by their nature (an exhibition indoors, a stage, a zoo)."""
+DOG_TICKETED_KINDS = frozenset({"kremlin", "monastery"})
+"""K3: a kremlin or monastery with an entry ticket is a museum territory (Ростовский кремль, Горицкий)."""
+KID_KINDS = frozenset({"zoo", "playground", "interactive", "park"})
+"""K1 (d): what the «Весело и познавательно» copy promises a child: «площадки, зоопарки и интерактивные
+музеи» (a park is where the playground is)."""
+LEVER_FREE_KINDS = frozenset({"park", "playground", "viewpoint", "embankment", "nature"})
+"""K1 (c): open public spaces the `sights_free` lever may put in place of a paid sight (besides a curated
+free place): never an arbitrary free «объект культурного наследия»."""
+SHOPPING = re.compile(
+    r"(?i)(?:^|[\s«\"(-])(?:"
+    + "|".join(map(re.escape, ru.words("sight.kind_words.shopping")))
+    + r")(?=$|[\s»\",.)-])"
+)
+
+
+def dog_closed(p: Place) -> bool:
+    """K3: a dog crew does not get this place as an added stop. A confirmed «dogs allowed» always passes
+    and a confirmed «no» never does (ADR-0019 E-6); an unknown policy is not guessed — only the places
+    closed by their type are left out: museums (also a kremlin or monastery that is a museum), stages,
+    zoos, shopping centres (ГУМ), a kremlin or monastery with an entry ticket. Every other place keeps its
+    «не проверено» line."""
+    state = tag_state(p, Tag.DOGS_ALLOWED)
+    if state is not Known.UNKNOWN:
+        return state is Known.NO
+    cat = category_of(p)
+    if cat in DOG_CLOSED_KINDS or Tag.MUSEUM in p.tags or SHOPPING.search(p.name_ru):
+        return True
+    walled = cat in DOG_TICKETED_KINDS or bool({Tag.KREMLIN, Tag.MONASTERY} & p.tags)
+    return walled and not confirmed_free(p) and (p.ticket_adult_rub or 0) > 0
+
+
+def minor_open_data(p: Place, cfg: PlannerConfig) -> bool:
+    """K1 (b): an open-data place that is not worth a road stop — a bare name (card level 1: no photo and
+    no text; a playground is exempt, its value is the playground), or a «15-minute» sight (a monument, a
+    theatre building, a square: `short_dwell_max_min`) below `short_min_quality`. A 15-minute stop costs
+    half an hour with its detour; only a landmark («Рабочий и колхозница», q 0.70) earns it."""
+    if p.quality is None:
+        return False
+    if p.card_level is not None and p.card_level <= 1 and category_of(p) != "playground":
+        return True
+    dwell = p.dwell_min or cfg.dwell_min.sight_default
+    return dwell <= cfg.sights.short_dwell_max_min and p.quality < cfg.sights.short_min_quality
+
+
+def lever_free_ok(p: Place, inp: NormalizedInput) -> bool:
+    """K1 (c), ADR-0011 `sights_free`: free for this crew AND either a curated place or an open public space
+    (park, playground, viewpoint, embankment, nature)."""
+    if is_paid_place(p, inp):
+        return False
+    return p.source is Source.CURATED or category_of(p) in LEVER_FREE_KINDS
+
+
+def _near(a: LatLon, b: LatLon, km: float) -> bool:
+    return haversine_km(a, b) <= km
+
+
+def chosen_points(inp: NormalizedInput) -> list[LatLon]:
+    """Points the user chose to visit: the destination and the vias (their zones are never emptied)."""
+    pts = [v.point for v in inp.vias]
+    if inp.destination is not None:
+        pts.append(inp.destination.point)
+    return pts
+
+
+def in_home_zone(p: Place, inp: NormalizedInput, cfg: PlannerConfig) -> bool:
+    """K1 (a): within `home_zone_km` of the trip start (also the finish of a round trip) and not near the
+    destination or a via. ВДНХ at 08:22 is still Москва: the trip has not begun."""
+    km = cfg.sights.home_zone_km
+    if not _near(p.point, inp.origin.point, km):
+        return False
+    return not any(_near(p.point, q, km) for q in chosen_points(inp))
+
+
+def near_day_ends(p: Place, day: DayPlan, inp: NormalizedInput, cfg: PlannerConfig) -> bool:
+    """K1 (a): an open-data sight within `home_zone_km` of the day's start town (the last overnight) or of
+    the day's overnight town. The town's own sights come as the evening or morning in that town
+    (`plan_town_visits`), not as a transit stop on the way out or in. Curated places are hand-picked and
+    stay (Церковь Покрова на Нерли at Владимир); the destination and the vias keep their zones."""
+    if p.quality is None:
+        return False
+    km = cfg.sights.home_zone_km
+    first, last = day.stops[0], day.stops[-1]
+    ends = [last] if last.kind is StopKind.OVERNIGHT else []
+    if day.day > 1:
+        ends.append(first)  # the start of a later day is the last overnight town
+    for s in ends:
+        centre = s.town.point if s.town is not None else s.point
+        if _near(p.point, centre, km) and not any(_near(p.point, q, km) for q in chosen_points(inp)):
+            return True
+    return False
+
+
+def admit_sights(corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
+    """Drop the corridor sights no added stop may use (K1 a/b, K3), once, before any stage reads them."""
+    cfg = ctx.cfg
+    dog = inp.crew.dog
+    corridor.sights = [
+        c
+        for c in corridor.sights
+        if not (dog and dog_closed(c.place))
+        and not minor_open_data(c.place, cfg)
+        and not in_home_zone(c.place, inp, cfg)
+    ]
+
+
 def effective_quality(p: Place) -> float:
     """Open-data quality, or a curated place's rating on the same 0..1 scale (3.6 → 0, 4.9 → 1)."""
     if p.quality is not None:
@@ -134,12 +255,15 @@ def effective_quality(p: Place) -> float:
     return max(0.0, min(1.0, (rank_rating(p) - 3.6) / 1.3))
 
 
-def detour_ok(c: Candidate) -> bool:
+def detour_ok(c: Candidate, fun: FunSightsCfg | None = None) -> bool:
     """The tiered detour budget (open-data world): q ≥ 0.70 up to 45 min, q ≥ 0.55 up to 25 min, else
-    the plain rule (`quality_ok`: a detour of at most FAR_DETOUR_KM)."""
+    the plain rule (`quality_ok`: a detour of at most FAR_DETOUR_KM). `fun` («Весело и познавательно», CEO
+    2026-10-29): any sight of quality ≥ `fun.min_quality` may also take up to `fun.detour_min`."""
     if c.place.quality is not None and c.place.quality < MIN_QUALITY:
         return False
     q = effective_quality(c.place)
+    if fun is not None and q >= fun.min_quality and c.detour_min <= fun.detour_min:
+        return True
     if q >= TOP_QUALITY:
         return c.detour_min <= TOP_DETOUR_MIN
     if q >= MID_QUALITY:
@@ -272,7 +396,10 @@ def sight_score(c: Candidate, inp: NormalizedInput) -> float:
 def is_paid(c: Candidate, inp: NormalizedInput) -> bool:
     """ADR-0011 `sights_free`: a ticket costs this crew money. ADR-0019 E-2: an unknown price is not
     free, so the «бесплатные места» lever does not keep it (only `free_entry` or a 0 ₽ ticket are free)."""
-    p = c.place
+    return is_paid_place(c.place, inp)
+
+
+def is_paid_place(p: Place, inp: NormalizedInput) -> bool:
     if confirmed_free(p):
         return False
     if p.ticket_adult_rub is None:
@@ -313,11 +440,17 @@ def plan_sights(
         return
     profile = ctx.profile_for(corridor.route)
     max_n = ctx.cfg.sights.max_per_day.of(inp.mood)
+    if max_n <= 0:
+        return
     used = _used(days)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
+    rests = RestPool.for_trip(corridor, inp, ctx)
     centres = big_city_centres(corridor)
     own = own_big_cities(inp, corridor, days)
     open_data = bool(ctx.cfg.sights.diversity)
+    # CEO 2026-10-29: «Весело и познавательно» admits more sights (open data: a longer detour, a lower score)
+    fun = ctx.cfg.sights.fun if open_data and inp.mood is Mood.FUN else None
+    min_score = fun.min_score if fun is not None else ctx.cfg.sights.min_score
+    long_per_day = fun.long_per_day if fun is not None else TOP_PER_DAY
     # open data: secular sights first over the whole trip, then the religious ones while the trip share
     # stays ≤ RELIGIOUS_SHARE (a lone church on a sparse road would only be dropped by the repair)
     for religious in (False, True) if open_data else (None,):
@@ -328,9 +461,10 @@ def plan_sights(
                 for c in corridor.sights
                 if day.km_start < c.km_at < day.km_end
                 and c.place.id not in used
-                and sight_score(c, inp) >= ctx.cfg.sights.min_score
-                and not (ctx.knobs.sights_free and is_paid(c, inp))
-                and (detour_ok(c) and not not_a_sight(c.place) if open_data else quality_ok(c))
+                and sight_score(c, inp) >= min_score
+                and not (ctx.knobs.sights_free and not lever_free_ok(c.place, inp))
+                and not near_day_ends(c.place, day, inp, ctx.cfg)
+                and (detour_ok(c, fun) and not not_a_sight(c.place) if open_data else quality_ok(c))
                 and not in_foreign_centre(c, centres, own, open_data)
                 and (
                     religious is None
@@ -338,7 +472,9 @@ def plan_sights(
                 )
             ]
             if open_data:  # quality first, so a 45-minute Владимир is tried before a nearby bust
-                pool.sort(key=lambda c: (not signature(c.place), -_open_score(c, inp), c.km_at, c.place.id))
+                pool.sort(
+                    key=lambda c: (not signature(c.place), -open_score(c, inp, ctx.cfg), c.km_at, c.place.id)
+                )
             else:
                 pool.sort(key=lambda c: (-round(sight_score(c, inp), 9), c.km_at, c.place.id))
             for c in pool:
@@ -346,7 +482,9 @@ def plan_sights(
                     break
                 if c.place.id in used or not diversity_ok(day, c, open_data):
                     continue
-                if open_data and long_detour(c) and _long_today(day) >= TOP_PER_DAY:
+                if open_data and long_detour(c) and (
+                    _long_today(day) >= long_per_day or _detour_town_seen(day, c)
+                ):
                     continue
                 if religious and not _religious_room(days):
                     break
@@ -355,7 +493,7 @@ def plan_sights(
                 if (
                     day_ok(day, inp, ctx, profile, rests, used | {c.place.id})
                     or (open_data and _with_moved_lunch(day, stop, corridor, inp, ctx, profile, rests, used))
-                    or (open_data and _with_later_start(day, stop, inp, ctx, profile, rests, used))
+                    or (open_data and with_later_start(day, stop, inp, ctx, profile, rests, used))
                 ):
                     n += 1
                     used.add(c.place.id)
@@ -450,7 +588,7 @@ LATER_START_MAX_MIN = 90  # the morning in the overnight town: wait at most this
 NEAR_START_KM = 5.0
 
 
-def _with_later_start(
+def with_later_start(
     day: DayPlan,
     stop: PlannedStop,
     inp: NormalizedInput,
@@ -493,12 +631,26 @@ def _religious_room(days: list[DayPlan]) -> bool:
     return rel + 1 <= RELIGIOUS_SHARE * (len(rows) + 1)
 
 
-def _open_score(c: Candidate, inp: NormalizedInput) -> float:
+def open_score(c: Candidate, inp: NormalizedInput, cfg: PlannerConfig) -> float:
     """Open-data ranking: quality dominates, the detour costs a little (45 min ≈ 0.15 of quality), the crew
-    fit a little more (a walk for the dog, a playground for the child)."""
+    fit a little more (a walk for the dog, a playground for the child) and, with a child, the kinds the
+    «Весело и познавательно» copy promises (K1 d: `sights.kid_bonus`)."""
     t = c.place.tags
     crew = 0.05 * (Tag.WALK in t and inp.crew.dog) + 0.05 * (Tag.PLAYGROUND in t and inp.crew.children > 0)
+    if inp.crew.children > 0 and category_of(c.place) in KID_KINDS:
+        crew += cfg.sights.kid_bonus
+    if inp.mood is Mood.FUN and fun_affinity(c, inp) >= FUN_FIT:
+        crew += cfg.sights.fun.kind_bonus  # CEO 2026-10-29: the kinds the «Весело» copy promises this crew
     return round(effective_quality(c.place) - c.detour_min / 300 + crew, 9)
+
+
+SAME_DETOUR_KM = 3.0
+"""Two long-detour sights this close are one off-route town: one detour, one stop (a second stop in Дмитров
+would be costed as a second 35-minute drive in and out)."""
+
+
+def _detour_town_seen(day: DayPlan, c: Candidate) -> bool:
+    return any(haversine_km(s.point, c.place.point) <= SAME_DETOUR_KM for s in _day_sights(day))
 
 
 def _long_today(day: DayPlan) -> int:
@@ -520,7 +672,7 @@ def lowest_sight(day: DayPlan) -> int:
 def plan_lunches(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
     """Stage 8 with the lunch probes checked by `day_ok` (rests reserved)."""
     profile = ctx.profile_for(corridor.route)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
+    rests = RestPool.for_trip(corridor, inp, ctx)
     used = _used(days)
     plan_meals(days, corridor, inp, ctx, ok=lambda d: day_ok(d, inp, ctx, profile, rests, used))
 
@@ -572,6 +724,6 @@ def plan_lunch_after_sights(
     """Stage 8b over every day still without a lunch that now overlaps the lunch window."""
     profile = ctx.profile_for(corridor.route)
     used = _used(days)
-    rests = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
+    rests = RestPool.for_trip(corridor, inp, ctx)
     for day in days:
         lunch_after_sights_day(day, corridor, inp, ctx, profile, used, rests)

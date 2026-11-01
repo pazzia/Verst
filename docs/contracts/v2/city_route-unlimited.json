@@ -35,8 +35,8 @@
    "endAt": null,
    "unlimited": true,
    "tz": "Europe/Moscow",
-   "walkKm": 9.6,
-   "walkMin": 127,
+   "walkKm": 11.9,
+   "walkMin": 159,
    "durationMin": null,
    "requestedDurationMin": null,
    "crewNotesRu": [],
@@ -76,6 +76,7 @@
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
      "tappable": true,
+     "unknownFacts": [],
      "poiKind": "temple",
      "poiKindRu": "Храм",
      "placeSource": "wikidata",
@@ -83,6 +84,34 @@
     },
     {
      "id": "w02",
+     "poiId": "osm_w129285240",
+     "kind": "park",
+     "nameRu": "Дворцовая площадь",
+     "lat": 55.80133,
+     "lon": 49.11147,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 35,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 7,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": false,
+     "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
+    },
+    {
+     "id": "w03",
      "poiId": "pl_kaz_kremlin",
      "kind": "kremlin",
      "nameRu": "Казанский кремль",
@@ -91,8 +120,8 @@
      "arriveAt": null,
      "departAt": null,
      "dwellMin": 50,
-     "walkKmFromPrev": 1.3,
-     "walkMinFromPrev": 17,
+     "walkKmFromPrev": 0.8,
+     "walkMinFromPrev": 10,
      "costRub": 0,
      "hoursVerified": true,
      "hours": {
@@ -103,36 +132,10 @@
      "noteRu": null,
      "hasPhoto": true,
      "tappable": true,
+     "unknownFacts": [],
      "poiKind": "kremlin",
      "poiKindRu": "Кремль",
      "placeSource": "curated",
-     "placeAttributionRu": null
-    },
-    {
-     "id": "w03",
-     "poiId": "Q55934833",
-     "kind": "monument",
-     "nameRu": "Мергасовский дом",
-     "lat": 55.79394,
-     "lon": 49.11762,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 10,
-     "walkKmFromPrev": 1.4,
-     "walkMinFromPrev": 19,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": null,
-      "openNow": null,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true,
-     "poiKind": "monument",
-     "poiKindRu": "Памятник",
-     "placeSource": "wikidata",
      "placeAttributionRu": null
     },
     {
@@ -145,8 +148,8 @@
      "arriveAt": null,
      "departAt": null,
      "dwellMin": 20,
-     "walkKmFromPrev": 0.5,
-     "walkMinFromPrev": 6,
+     "walkKmFromPrev": 1.8,
+     "walkMinFromPrev": 25,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -157,6 +160,7 @@
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
      "tappable": true,
+     "unknownFacts": [],
      "poiKind": "attraction",
      "poiKindRu": "Достопримечательность",
      "placeSource": "wikidata",
@@ -164,33 +168,6 @@
     },
     {
      "id": "w05",
-     "poiId": "Q4089831",
-     "kind": "church",
-     "nameRu": "Богоявленский собор",
-     "lat": 55.78819,
-     "lon": 49.11892,
-     "arriveAt": null,
-     "departAt": null,
-     "dwellMin": 20,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 5,
-     "costRub": 0,
-     "hoursVerified": false,
-     "hours": {
-      "todayRu": "08:00–20:00",
-      "openNow": true,
-      "source": "default"
-     },
-     "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
-     "tappable": true,
-     "poiKind": "temple",
-     "poiKindRu": "Храм",
-     "placeSource": "wikidata",
-     "placeAttributionRu": null
-    },
-    {
-     "id": "w06",
      "poiId": "Q21643726",
      "kind": "monument",
      "nameRu": "Памятник Габдулле Тукаю",
@@ -199,8 +176,8 @@
      "arriveAt": null,
      "departAt": null,
      "dwellMin": 10,
-     "walkKmFromPrev": 0.4,
-     "walkMinFromPrev": 6,
+     "walkKmFromPrev": 0.8,
+     "walkMinFromPrev": 11,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -208,16 +185,17 @@
       "openNow": null,
       "source": "default"
      },
-     "noteRu": "Часы работы уточняйте",
+     "noteRu": null,
      "hasPhoto": true,
      "tappable": true,
+     "unknownFacts": [],
      "poiKind": "monument",
      "poiKindRu": "Памятник",
      "placeSource": "wikidata",
      "placeAttributionRu": null
     },
     {
-     "id": "w07",
+     "id": "w06",
      "poiId": "Q3585726",
      "kind": "church",
      "nameRu": "Храм Воздвижения Святого Креста",
@@ -238,13 +216,14 @@
      "noteRu": null,
      "hasPhoto": true,
      "tappable": true,
+     "unknownFacts": [],
      "poiKind": "temple",
      "poiKindRu": "Храм",
      "placeSource": "wikidata",
      "placeAttributionRu": null
     },
     {
-     "id": "w08",
+     "id": "w07",
      "poiId": "Q2528801",
      "kind": "attraction",
      "nameRu": "Мечеть аль-Марджани",
@@ -265,23 +244,24 @@
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
      "tappable": true,
+     "unknownFacts": [],
      "poiKind": "temple",
      "poiKindRu": "Храм",
      "placeSource": "wikidata",
      "placeAttributionRu": null
     },
     {
-     "id": "w09",
-     "poiId": "Q1587654",
-     "kind": "attraction",
-     "nameRu": "Мечеть Нурулла",
-     "lat": 55.78291,
-     "lon": 49.11456,
+     "id": "w08",
+     "poiId": "osm_w81652828",
+     "kind": "park",
+     "nameRu": "Парк Тинчурина",
+     "lat": 55.77403,
+     "lon": 49.10782,
      "arriveAt": null,
      "departAt": null,
-     "dwellMin": 20,
-     "walkKmFromPrev": 0.5,
-     "walkMinFromPrev": 7,
+     "dwellMin": 35,
+     "walkKmFromPrev": 1.1,
+     "walkMinFromPrev": 15,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -290,23 +270,24 @@
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
+     "hasPhoto": false,
      "tappable": true,
-     "poiKind": "temple",
-     "poiKindRu": "Храм",
-     "placeSource": "wikidata",
-     "placeAttributionRu": null
+     "unknownFacts": [],
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
-     "id": "w10",
-     "poiId": "Q24933508",
-     "kind": "monument",
-     "nameRu": "Дом Галиаскара Камала",
-     "lat": 55.78183,
-     "lon": 49.10752,
+     "id": "w09",
+     "poiId": "osm_w81652761",
+     "kind": "park",
+     "nameRu": "Сад Молодоженов",
+     "lat": 55.77502,
+     "lon": 49.1002,
      "arriveAt": null,
      "departAt": null,
-     "dwellMin": 10,
+     "dwellMin": 35,
      "walkKmFromPrev": 0.6,
      "walkMinFromPrev": 8,
      "costRub": 0,
@@ -317,15 +298,16 @@
       "source": "default"
      },
      "noteRu": "Часы работы уточняйте",
-     "hasPhoto": true,
+     "hasPhoto": false,
      "tappable": true,
-     "poiKind": "monument",
-     "poiKindRu": "Памятник",
-     "placeSource": "wikidata",
-     "placeAttributionRu": null
+     "unknownFacts": [],
+     "poiKind": "park",
+     "poiKindRu": "Парк",
+     "placeSource": "osm",
+     "placeAttributionRu": "Данные о месте: © участники OpenStreetMap"
     },
     {
-     "id": "w11",
+     "id": "w10",
      "poiId": "Q1634187",
      "kind": "attraction",
      "nameRu": "Султановская мечеть",
@@ -334,8 +316,8 @@
      "arriveAt": null,
      "departAt": null,
      "dwellMin": 20,
-     "walkKmFromPrev": 0.3,
-     "walkMinFromPrev": 4,
+     "walkKmFromPrev": 1.5,
+     "walkMinFromPrev": 20,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -346,6 +328,35 @@
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
      "tappable": true,
+     "unknownFacts": [],
+     "poiKind": "temple",
+     "poiKindRu": "Храм",
+     "placeSource": "wikidata",
+     "placeAttributionRu": null
+    },
+    {
+     "id": "w11",
+     "poiId": "Q1587654",
+     "kind": "attraction",
+     "nameRu": "Мечеть Нурулла",
+     "lat": 55.78291,
+     "lon": 49.11456,
+     "arriveAt": null,
+     "departAt": null,
+     "dwellMin": 20,
+     "walkKmFromPrev": 0.5,
+     "walkMinFromPrev": 6,
+     "costRub": 0,
+     "hoursVerified": false,
+     "hours": {
+      "todayRu": null,
+      "openNow": null,
+      "source": "default"
+     },
+     "noteRu": "Часы работы уточняйте",
+     "hasPhoto": true,
+     "tappable": true,
+     "unknownFacts": [],
      "poiKind": "temple",
      "poiKindRu": "Храм",
      "placeSource": "wikidata",
@@ -361,8 +372,8 @@
      "arriveAt": null,
      "departAt": null,
      "dwellMin": 20,
-     "walkKmFromPrev": 1.4,
-     "walkMinFromPrev": 19,
+     "walkKmFromPrev": 1.6,
+     "walkMinFromPrev": 21,
      "costRub": 0,
      "hoursVerified": false,
      "hours": {
@@ -373,6 +384,7 @@
      "noteRu": "Часы работы уточняйте",
      "hasPhoto": true,
      "tappable": true,
+     "unknownFacts": [],
      "poiKind": "temple",
      "poiKindRu": "Храм",
      "placeSource": "wikidata",
@@ -406,20 +418,16 @@
      49.1058
     ],
     [
+     55.80133,
+     49.11147
+    ],
+    [
      55.803535,
      49.119986
     ],
     [
-     55.79394,
-     49.11762
-    ],
-    [
      55.79083,
      49.11917
-    ],
-    [
-     55.78819,
-     49.11892
     ],
     [
      55.78528,
@@ -434,16 +442,20 @@
      49.1175
     ],
     [
-     55.78291,
-     49.11456
+     55.77403,
+     49.10782
     ],
     [
-     55.78183,
-     49.10752
+     55.77502,
+     49.1002
     ],
     [
      55.784,
      49.109
+    ],
+    [
+     55.78291,
+     49.11456
     ],
     [
      55.79361,

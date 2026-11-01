@@ -12,7 +12,8 @@ Sub-commands
   lint    --root DIR              Error/Fatal issues from ``**/build/reports/lint-results-*.xml``
   logcat  --log F                 Python tracebacks, fatal exceptions and Verst* tags from logcat
   instrument --log F              failures from ``am instrument -r`` raw output
-  apk     --apk F [--warn-mb N --fail-mb N]   size, sha256, ABIs; exit 1 above the fail budget
+  apk     --apk F [--warn-mb N --fail-mb N]   size, sha256, ABIs; exit 1 above the fail budget or when the
+                                              APK packs the server-only catalogue abroad (CEO 29.10)
   steps   --json STR --job NAME   step outcomes from ``toJSON(steps)``
   summarize                       summary.md from everything written so far
 
@@ -351,6 +352,29 @@ def cmd_instrument(a: argparse.Namespace, o: Out) -> int:
 
 
 # ------------------------------------------------------------------------------------------------ apk
+# CEO 29.10: the catalogue of trips abroad (backend/planner/abroad/<cc>/catalogue_*.json.gz) is planned on the
+# server only and must never ship in the APK. Chaquopy packs the Python code into archives inside the APK
+# (assets/chaquopy/app.imy), so nested archives are searched too.
+NESTED_ARCHIVES = (".imy", ".zip", ".jar")
+
+
+def abroad_entries(z: zipfile.ZipFile, prefix: str = "", depth: int = 0) -> list[str]:
+    """Entries of the APK (and of the archives in it) under a directory named `abroad`."""
+    import io
+
+    out = []
+    for name in z.namelist():
+        if "abroad" in name.split("/")[:-1]:
+            out.append(prefix + name)
+        if depth < 2 and name.endswith(NESTED_ARCHIVES):
+            try:
+                with zipfile.ZipFile(io.BytesIO(z.read(name))) as inner:
+                    out += abroad_entries(inner, f"{prefix}{name}!/", depth + 1)
+            except zipfile.BadZipFile:
+                continue
+    return out
+
+
 def cmd_apk(a: argparse.Namespace, o: Out) -> int:
     apk = Path(a.apk)
     if not apk.exists():
@@ -366,12 +390,17 @@ def cmd_apk(a: argparse.Namespace, o: Out) -> int:
         for info in z.infolist():
             top = info.filename.split("/")[0] if "/" in info.filename else info.filename
             by_top[top] = by_top.get(top, 0) + info.compress_size
+        abroad = abroad_entries(z)
     mb = size / 1_000_000
     info_d = {"file": apk.name, "bytes": size, "mb": round(mb, 2), "sha256": hashlib.sha256(data).hexdigest(),
               "abis": abis, "largestEntries": dict(sorted(by_top.items(), key=lambda kv: -kv[1])[:12]),
-              "warnMb": a.warn_mb, "failMb": a.fail_mb}
+              "warnMb": a.warn_mb, "failMb": a.fail_mb, "abroadEntries": abroad[:20]}
     o.write("apk.json", json.dumps(info_d, indent=2) + "\n")
     o.section("apk", info_d)
+    if abroad:
+        o.emit("error", f"the APK packs the server-only catalogue abroad: {', '.join(abroad[:5])}",
+               title="APK content")
+        return 1
     if mb > a.fail_mb:
         o.emit("error", f"APK is {mb:.1f} MB, budget {a.fail_mb} MB", title="APK size budget")
         return 1

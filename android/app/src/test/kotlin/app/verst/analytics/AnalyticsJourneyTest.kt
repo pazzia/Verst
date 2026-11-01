@@ -103,10 +103,11 @@ class AnalyticsJourneyTest {
         override suspend fun patchCost(tripJson: String, patchJson: String): EngineResult<PlanResultDto> = EngineResult.Ok(planned)
     }
 
-    /** The navigator app is installed and opens. */
+    /** Яндекс Карты are installed and open (CEO 29.10: the day goes to the maps app, not the navigator). */
     private val launcher = object : HandoffLauncher {
         override fun navigatorInstalled() = true
-        override fun open(links: HandoffLinksDto, walk: Boolean) = HandoffTarget.Navigator
+        override fun mapsInstalled() = true
+        override fun open(links: HandoffLinksDto, walk: Boolean) = HandoffTarget.Maps
     }
 
     private fun TestScope.settle(ms: Long = 1_000) {
@@ -119,6 +120,8 @@ class AnalyticsJourneyTest {
         val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { testScheduler.currentTime }) {}
         flow.analytics = rec
         flow.handoffLauncher = launcher
+        flow.mapsChoiceRead = { app.verst.core.model.MapsChoice.AUTO }
+        flow.countrySource = app.verst.nav.CountrySource { "RU" }
         return flow
     }
 
@@ -333,7 +336,7 @@ class AnalyticsJourneyTest {
             listOf(
                 "waybill_opened" to mapOf("trip_id" to t, "total_bucket" to Buckets.total(planned.trip.cost.totalRub), "over_budget" to planned.trip.cost.overBudget),
                 "reserve_toggled" to mapOf("trip_id" to t, "state" to if (planned.trip.cost.reserveOn) "off" else "on"),
-                "navigator_opened" to mapOf("trip_id" to t, "app" to "yandex_navigator", "day" to 1),
+                "navigator_opened" to mapOf("trip_id" to t, "app" to "yandex_maps", "day" to 1),
                 "feedback_sent" to mapOf("trip_id" to t, "kind" to "closed"),
                 "trip_shared" to mapOf("trip_id" to t, "channel" to "unknown"),
             ),

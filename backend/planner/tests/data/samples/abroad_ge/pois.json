@@ -1,0 +1,62 @@
+[
+ {
+  "qid": "Q900301",
+  "name": "Тестовая мечеть",
+  "desc": "мечеть",
+  "lat": 41.701,
+  "lon": 44.801,
+  "roots": [
+   "Q32815"
+  ],
+  "sitelinks": 20,
+  "heritage": true,
+  "image": null,
+  "townQid": "Q900201",
+  "nameLang": "ru"
+ },
+ {
+  "qid": "Q900302",
+  "name": "Test Museum",
+  "desc": null,
+  "lat": 41.702,
+  "lon": 44.802,
+  "roots": [
+   "Q33506"
+  ],
+  "sitelinks": 12,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900201",
+  "nameLang": "en"
+ },
+ {
+  "qid": "Q900303",
+  "name": "Тестовый мавзолей",
+  "desc": null,
+  "lat": 42.271,
+  "lon": 42.701,
+  "roots": [
+   "Q162875"
+  ],
+  "sitelinks": 8,
+  "heritage": true,
+  "image": null,
+  "townQid": "Q900202",
+  "nameLang": "ru"
+ },
+ {
+  "qid": "Q900304",
+  "name": "Тестовый парк",
+  "desc": null,
+  "lat": 41.705,
+  "lon": 44.805,
+  "roots": [
+   "Q22698"
+  ],
+  "sitelinks": 15,
+  "heritage": false,
+  "image": null,
+  "townQid": "Q900201",
+  "nameLang": "ru"
+ }
+]

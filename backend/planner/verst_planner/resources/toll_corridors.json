@@ -1,0 +1,51 @@
+{
+  "_about": [
+    "Acceptance 2026-10-28 (QA B-1): tolls on an approximate route (the road model, Route.synthetic: a straight leg x the road factor, no road refs), the phone's main offline mode.",
+    "A leg of such a route whose both ends lie within followKm of a toll corridor is taken to drive that toll road between the two projections. Its price is the corridor's whole-road price x the share of the corridor the leg covers, marked «примерно» in the waybill. A projection within endSnapKm of a corridor end is that end: the toll road starts and ends at the city's ring road, the anchor is the city centre.",
+    "Prices are NOT new figures: each one is the whole-road sum from resources/toll_rates.json («how» of that road, category 1, as of the same date). Anchor points are the centres of the towns the road passes (catalogue coordinates), so the corridor is a polyline through them, not the road's geometry.",
+    "A road without a whole-road price in toll_rates.json (М-1, М-3, ЦКАД: only short sections known) has no corridor here: an approximate route along it says the tolls are not counted."
+  ],
+  "asOf": "2026-03-02",
+  "followKm": 50,
+  "minSpanKm": 30,
+  "endSnapKm": 25,
+  "corridors": [
+    {
+      "ref": "М-11",
+      "anchors": [
+        {"town": "Москва", "lat": 55.75056, "lon": 37.6175},
+        {"town": "Тверь", "lat": 56.85783, "lon": 35.92193},
+        {"town": "Великий Новгород", "lat": 58.52099, "lon": 31.27579},
+        {"town": "Санкт-Петербург", "lat": 59.95, "lon": 30.31667}
+      ],
+      "weekdayRub": 4850,
+      "weekendRub": 5495,
+      "how": "toll_rates.json М-11: whole toll road km 15-684, weekday 950 (km 15-58) + 3 900 (km 58-684), weekend 1 295 + 4 200"
+    },
+    {
+      "ref": "М-12",
+      "anchors": [
+        {"town": "Москва", "lat": 55.75056, "lon": 37.6175},
+        {"town": "Владимир", "lat": 56.12861, "lon": 40.40583},
+        {"town": "Нижний Новгород", "lat": 56.32694, "lon": 44.0075},
+        {"town": "Чебоксары", "lat": 56.13333, "lon": 47.25},
+        {"town": "Казань", "lat": 55.79083, "lon": 49.11444}
+      ],
+      "weekdayRub": 5909,
+      "weekendRub": null,
+      "how": "toll_rates.json М-12: Москва — Казань (Шали) 5 909 ₽ = 3 450 + 2 397 + 62; weekend variant not found"
+    },
+    {
+      "ref": "М-4",
+      "anchors": [
+        {"town": "Москва", "lat": 55.75056, "lon": 37.6175},
+        {"town": "Воронеж", "lat": 51.67167, "lon": 39.21056},
+        {"town": "Ростов-на-Дону", "lat": 47.2225, "lon": 39.71},
+        {"town": "Краснодар", "lat": 45.03333, "lon": 38.98333}
+      ],
+      "weekdayRub": 5040,
+      "weekendRub": 6090,
+      "how": "toll_rates.json М-4: Москва — Краснодар 5 040 weekday / 6 090 weekend"
+    }
+  ]
+}

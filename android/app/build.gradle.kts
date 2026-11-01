@@ -33,20 +33,31 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = buildNumber
-        versionName = "0.2.$buildNumber-mock"
+        // «0.3.162» from CI (VERST_VERSION, android.yml); a local build says so
+        versionName = System.getenv("VERST_VERSION") ?: "0.3.$buildNumber-local"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") } // M§3.3; Compose ships libandroidx.graphics.path.so
         buildConfigField("int", "BUILD_NUMBER", "$buildNumber")
         buildConfigField("String", "GIT_SHA", "\"${(System.getenv("VERST_GIT_SHA") ?: "local").take(12)}\"")
         // D-IR-20 build details: the UTC time CI built the APK (local builds say "local")
         buildConfigField("String", "BUILD_DATE", "\"${System.getenv("VERST_BUILD_DATE") ?: "local"}\"")
+        // SRV-01: the test backend (ADR-0020); empty = no server, the phone engine only
+        buildConfigField("String", "SERVER_URL", "\"${System.getenv("VERST_SERVER_URL") ?: ""}\"")
     }
+    // Security review 28.10 (К-1): the demo signing key is a CI secret, never in the repository. CI decodes
+    // VERST_SIGNING_KEYSTORE_B64 to a file and passes its path and passwords; without it (local builds, a missing
+    // secret) the demo APK gets the throwaway debug key and will not install over a CI build.
+    // a secret pasted with a trailing line break is still the same password
+    fun signingEnv(name: String): String? = System.getenv(name)?.trimEnd('\r', '\n')
+    val demoKeystore = System.getenv("VERST_SIGNING_KEYSTORE")?.let { file(it) }?.takeIf { it.isFile }
     signingConfigs {
-        create("demo") {
-            storeFile = file("demo.keystore")
-            storePassword = "verstdemo"
-            keyAlias = "verst-demo"
-            keyPassword = "verstdemo"
+        if (demoKeystore != null) {
+            create("demo") {
+                storeFile = demoKeystore
+                storePassword = signingEnv("VERST_SIGNING_STORE_PASSWORD")
+                keyAlias = signingEnv("VERST_SIGNING_KEY_ALIAS")
+                keyPassword = signingEnv("VERST_SIGNING_KEY_PASSWORD")
+            }
         }
     }
     buildTypes {
@@ -55,13 +66,12 @@ android {
             isDebuggable = false
             isMinifyEnabled = false
             applicationIdSuffix = ".demo"
-            signingConfig = signingConfigs.getByName("demo")
+            signingConfig = signingConfigs.getByName(if (demoKeystore != null) "demo" else "debug")
             matchingFallbacks += listOf("release")
             buildConfigField("String", "APPMETRICA_API_KEY", "\"$appMetricaTestKey\"")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
-            signingConfig = signingConfigs.getByName("demo")
             buildConfigField("String", "APPMETRICA_API_KEY", "\"$appMetricaTestKey\"")
         }
         // After `demo` on purpose: `initWith(release)` above must not copy the release key into the demo APK.

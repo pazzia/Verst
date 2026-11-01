@@ -1,6 +1,7 @@
 package app.verst.feature.city
 
 import androidx.compose.foundation.background
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,6 +43,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -60,6 +65,7 @@ import app.verst.feature.common.HoursPill
 import app.verst.feature.common.HoursState
 import app.verst.feature.common.KindTag
 import app.verst.feature.common.kindWord
+import app.verst.feature.common.cuisineWords
 import app.verst.feature.common.crewShort
 import app.verst.nav.CityPicker
 import app.verst.nav.DOG_WALK
@@ -116,6 +122,8 @@ data class WalkUi(
     /** `NOT_ENOUGH_POIS` after a filter change: the plate replaces the column. */
     val few: WalkFew? = null,
     val excludedCount: Int = 0,
+    /** CEO 29.10: the maps app the walk opens in (the same preference as the car: Яндекс Карты or Google Карты). */
+    val maps: app.verst.nav.HandoffApp = app.verst.nav.HandoffApp.MAPS,
 )
 
 interface WalkActions : PickerActions {
@@ -143,10 +151,15 @@ interface WalkActions : PickerActions {
 /** 5.11 «Прогулка»: 5.5 with the city strip, the walking column, the walk hand-off and the cost plate. */
 @Composable
 fun WalkScreen(ui: WalkUi, a: WalkActions) {
+    if (Palette.camper) return WalkScreenCamper(ui = ui, a = a)
     val w = ui.walk
     val scroll = rememberScrollState()
     val rows = remember(w.id) { mutableStateMapOf<String, Int>() }
     var content by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    // CEO 29.10: the walker rides the walk column like the car on Road ahead — the column's place in the list
+    var viewportH by remember { mutableStateOf(0) }
+    var section by remember { mutableStateOf(0 to 0) }
+    val density = LocalDensity.current
     val requesters = remember(w.id) { mutableMapOf<String, FocusRequester>() }
     var highlight by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(ui.focusSeq) {
@@ -181,56 +194,68 @@ fun WalkScreen(ui: WalkUi, a: WalkActions) {
                     }
                     WalkTitleSign(w, Modifier.padding(start = 20.dp, end = 20.dp, top = 56.dp).fillMaxWidth())
                 }
-                Column(
-                    Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).testTag("walk.list").onGloballyPositioned { content = it },
-                ) {
-                    // S3-FINAL P2-02: every stop has default hours → the top line says it once, rows stay quiet
-                    val allDefaultHours = w.stops.filter { it.poiId != null }.let { st -> st.isNotEmpty() && st.all { !it.hoursVerified } }
-                    Intro(ui, a)
-                    val few = ui.few
-                    if (few != null) {
-                        // 5.11 §10.5: the plate replaces the column; no cost footer, no «Другой вариант»
-                        Box(Modifier.padding(horizontal = 20.dp)) { FewPlate(few, ui.filters?.selected ?: w.preset, ui.excludedCount, a::suggestion) }
-                        Spacer(Modifier.height(24.dp))
-                    } else {
-                        Box {
-                            // 5.11 §10.2: while rebuilding the previous walk stays, dimmed to 35 %, under the pill
-                            Column(Modifier.fillMaxWidth().dimmed(ui.building)) {
-                                Column(Modifier.fillMaxWidth().walkColumn()) {
-                                    val start = RuFormat.clock(w.startAt) ?: ""
-                                    val finish = RuFormat.clock(w.endAt) ?: ""
-                                    Txt(
-                                        when {
-                                            w.untimed -> stringResource(R.string.walk_untimed_header)
-                                            w.startsTomorrow() -> stringResource(R.string.walk_header_tomorrow, start, finish)
-                                            else -> stringResource(R.string.walk_header, start, finish)
-                                        },
-                                        T.title.sm, C.accent.yellowText,
-                                        Modifier.padding(start = 72.dp, end = 16.dp, bottom = 10.dp).semantics { heading() }.testTag("walk.header"),
-                                    )
-                                    EndRow(stringResource(R.string.walk_start_row), w.start.label ?: w.townName ?: "", if (w.untimed) "" else start)
-                                    val dog = ui.filters?.dog == true
-                                    w.stops.forEach { s ->
-                                        WalkStopRow(
-                                            s, w.people, s.id == highlight, allDefaultHours, w.untimed, dog,
-                                            requesters.getOrPut(s.id) { FocusRequester() }, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y },
-                                        ) { a.stop(s) }
+                Box(Modifier.weight(1f).fillMaxWidth().onSizeChanged { viewportH = it.height }) {
+                    Column(
+                        Modifier.fillMaxSize().verticalScroll(scroll).testTag("walk.list").onGloballyPositioned { content = it },
+                    ) {
+                        // S3-FINAL P2-02: every stop has default hours → the top line says it once, rows stay quiet
+                        val allDefaultHours = w.stops.filter { it.poiId != null }.let { st -> st.isNotEmpty() && st.all { !it.hoursVerified } }
+                        Intro(ui, a)
+                        val few = ui.few
+                        if (few != null) {
+                            // 5.11 §10.5: the plate replaces the column; no cost footer, no «Другой вариант»
+                            Box(Modifier.padding(horizontal = 20.dp)) { FewPlate(few, ui.filters?.selected ?: w.preset, ui.excludedCount, a::suggestion) }
+                            Spacer(Modifier.height(24.dp))
+                        } else {
+                            Box {
+                                // 5.11 §10.2: while rebuilding the previous walk stays, dimmed to 35 %, under the pill
+                                Column(Modifier.fillMaxWidth().dimmed(ui.building)) {
+                                    Column(
+                                        Modifier.fillMaxWidth().walkColumn()
+                                            .onGloballyPositioned { c -> content?.let { root -> if (root.isAttached && c.isAttached) section = root.localPositionOf(c, Offset.Zero).y.roundToInt() to c.size.height } },
+                                    ) {
+                                        val start = RuFormat.clock(w.startAt) ?: ""
+                                        val finish = RuFormat.clock(w.endAt) ?: ""
+                                        Txt(
+                                            when {
+                                                w.untimed -> stringResource(R.string.walk_untimed_header)
+                                                w.startsTomorrow() -> stringResource(R.string.walk_header_tomorrow, start, finish)
+                                                else -> stringResource(R.string.walk_header, start, finish)
+                                            },
+                                            T.title.sm, C.accent.yellowText,
+                                            Modifier.padding(start = 72.dp, end = 16.dp, bottom = 10.dp).semantics { heading() }.testTag("walk.header"),
+                                        )
+                                        EndRow(stringResource(R.string.walk_start_row), w.start.label ?: w.townName ?: "", if (w.untimed) "" else start)
+                                        val dog = ui.filters?.dog == true
+                                        w.stops.forEach { s ->
+                                            WalkStopRow(
+                                                s, w.people, s.id == highlight, allDefaultHours, w.untimed, dog,
+                                                requesters.getOrPut(s.id) { FocusRequester() }, { content }, { y -> if (rows[s.id] != y) rows[s.id] = y },
+                                            ) { a.stop(s) }
+                                        }
+                                        val fin = w.finish
+                                        if (fin != null) EndRow(stringResource(R.string.walk_finish_row), fin.label ?: "", if (w.untimed) "" else finish)
+                                        Spacer(Modifier.height(16.dp))
                                     }
-                                    val fin = w.finish
-                                    if (fin != null) EndRow(stringResource(R.string.walk_finish_row), fin.label ?: "", if (w.untimed) "" else finish)
-                                    Spacer(Modifier.height(16.dp))
-                                }
-                                Box(Modifier.padding(horizontal = 20.dp)) {
-                                    if (ui.otherNone) {
-                                        OtherNone()
-                                    } else {
-                                        WideButton(stringResource(R.string.walk_other), "walk.other", enabled = !ui.building, onClick = a::other, height = 56.dp)
+                                    Box(Modifier.padding(horizontal = 20.dp)) {
+                                        if (ui.otherNone) {
+                                            OtherNone()
+                                        } else {
+                                            WideButton(stringResource(R.string.walk_other), "walk.other", enabled = !ui.building, onClick = a::other, height = 56.dp)
+                                        }
                                     }
+                                    Spacer(Modifier.height(24.dp))
                                 }
-                                Spacer(Modifier.height(24.dp))
+                                if (ui.building) RebuildPill(Modifier.align(Alignment.TopStart).padding(start = 72.dp, end = 16.dp, top = 30.dp))
                             }
-                            if (ui.building) RebuildPill(Modifier.align(Alignment.TopStart).padding(start = 72.dp, end = 16.dp, top = 30.dp))
                         }
+                    }
+                    // CEO 29.10: the walker rides the visible part of the pavement with the scroll (as the car does)
+                    val (secY, secH) = section
+                    if (ui.few == null && secH > 0 && viewportH > 0) {
+                        val top = with(density) { (secY - scroll.value).coerceAtLeast(0).toDp().value }
+                        val bottom = with(density) { (secY + secH - scroll.value).coerceAtMost(viewportH).toDp().value }
+                        WalkerMarker(top, bottom, if (scroll.maxValue > 0) scroll.value.toFloat() / scroll.maxValue else 0f)
                     }
                 }
                 if (ui.few == null) Footer(w)
@@ -333,11 +358,22 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         }
         // L3a: the walk hand-off, one button per part when the engine split the walk
         val parts = ui.handoff?.parts.orEmpty()
-        val label = if (ui.target == HandoffTarget.Maps || ui.target == HandoffTarget.MapsDryRun) stringResource(R.string.handoff_walk_cta) else stringResource(R.string.handoff_web)
+        val label = when (ui.target) {
+            HandoffTarget.Maps, HandoffTarget.MapsDryRun -> stringResource(R.string.handoff_walk_cta)
+            HandoffTarget.Google, HandoffTarget.GoogleDryRun -> stringResource(R.string.handoff_walk_cta_google)
+            else -> stringResource(if (ui.maps == app.verst.nav.HandoffApp.GOOGLE) R.string.handoff_google_web else R.string.handoff_web)
+        }
         if (parts.size > 1) {
             parts.forEach { p ->
-                // the part on its own line: «Открыть Яндекс Карты в браузере» / «Часть 1 из 2» (never clipped)
-                WideButton(label, "walk.handoff.${p.index}", walker = true, height = 60.dp, sub = stringResource(R.string.handoff_part, p.index, parts.size), onClick = { a.handoff(p.index) })
+                // the part on its own line: «Открыть Яндекс Карты в браузере» / «Часть 1 из 2 · до …» (never clipped);
+                // CEO 31.10: the part names where it ends, the last one of a round walk «обратно к старту»
+                val end = p.points.lastOrNull()
+                val sub = when {
+                    end?.role == "destination" && w.returnToStart -> stringResource(R.string.handoff_part_back, p.index, parts.size)
+                    !end?.nameRu.isNullOrBlank() -> stringResource(R.string.handoff_part_to, p.index, parts.size, end?.nameRu.orEmpty())
+                    else -> stringResource(R.string.handoff_part, p.index, parts.size)
+                }
+                WideButton(label, "walk.handoff.${p.index}", walker = true, height = 60.dp, sub = sub, onClick = { a.handoff(p.index) })
             }
         } else {
             WideButton(label, "walk.handoff", walker = true, enabled = true, onClick = { a.handoff(1) })
@@ -360,6 +396,11 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
         }
         CrewPlates(ui, a)
         for (warn in w.warnings) {
+            if (warn.code == "PRICE_UNKNOWN") {
+                // CEO 29.10: OSM gives no prices for cafés and restaurants — our copy (RU / EN), the same plate
+                WarningBox(stringResource(R.string.walk_warn_price_unknown), "walk.warn.price")
+                continue
+            }
             val m = warn.messageRu ?: continue
             if (warn.code in CrewWarningCodes) continue // the crew plates above
             if (warn.code == "SHORTER_THAN_ASKED") continue // said once, by the note under the ±15 % line (5.11 §9)
@@ -368,10 +409,19 @@ private fun Intro(ui: WalkUi, a: WalkActions) {
                 if (w.stops.any { !it.hoursVerified && it.poiId != null }) Txt(m, T.body.sm, C.text.muted, Modifier.testTag("walk.hours"))
                 continue
             }
-            Box(Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r10)).padding(horizontal = 12.dp, vertical = 10.dp)) {
-                Txt(m, T.body.md, C.text.secondary)
-            }
+            WarningBox(m)
         }
+    }
+}
+
+/** An engine walk warning: an outlined plate with the sentence. */
+@Composable
+private fun WarningBox(text: String, tag: String? = null) {
+    Box(
+        Modifier.fillMaxWidth().border(DesignTokens.stroke.w1, C.dash.outline, RoundedCornerShape(DesignTokens.radius.r10))
+            .then(if (tag != null) Modifier.testTag(tag) else Modifier).padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Txt(text, T.body.md, C.text.secondary)
     }
 }
 
@@ -484,6 +534,35 @@ private fun WalkTitleSign(w: WalkRouteDto, modifier: Modifier) {
     }
 }
 
+/** The walker disc (no generated token yet; the car's is `size.carMarkerW/H`). */
+private val WalkerSize = 26.dp
+
+/**
+ * CEO 29.10: the walker on the walk column, as the car on Road ahead (components §26.3 `CarMarker`): a 26 dp disc
+ * with the pedestrian glyph (`walker`, §17.5) centred on the pavement (x 14–60). It does not walk by itself — it
+ * stands still and moves only with the scroll, at [progress] (0 = the list top, 1 = its end) of the visible
+ * pavement between [top] and [bottom] (dp in the list's viewport), so it is where the reader is in the walk. No
+ * time animation, so nothing changes with reduced motion.
+ */
+@Composable
+private fun WalkerMarker(top: Float, bottom: Float, progress: Float) {
+    val len = bottom - top - WalkerSize.value
+    if (len <= 0f) return
+    val y = progress.coerceIn(0f, 1f) * len
+    Box(
+        Modifier.offset(x = 37.dp - WalkerSize / 2, y = (top + y).dp).size(WalkerSize)
+            .drawBehind {
+                val r = size.minDimension / 2
+                // a soft shadow on the pavement, the yellow disc (the «you are here» colour of the car), its outline
+                drawCircle(C.city.footprint, r, center + Offset(0f, 1.5f * density))
+                drawCircle(C.accent.yellow, r)
+                drawCircle(C.text.onLight, r - 0.75f * density, style = androidx.compose.ui.graphics.drawscope.Stroke(1.5f * density))
+            }
+            .testTag("walk.walker").clearAndSetSemantics {},
+        contentAlignment = Alignment.Center,
+    ) { WalkerIcon(C.text.onLight, 18.dp) }
+}
+
 /** components §21 `WalkColumn`: pavement x 14–60, kerbs, joints every 24 dp, a centre joint. */
 private fun Modifier.walkColumn(): Modifier = drawBehind {
     val dp = 1.dp.toPx()
@@ -519,8 +598,12 @@ private fun WalkStopRow(
 ) {
     val line = stringResource(R.string.walk_next, distance(s.walkKmFromPrev), s.walkMinFromPrev)
     val time = if (untimed) "" else RuFormat.clock(s.arriveAt) ?: ""
-    val cost = if (s.costRub > 0) stringResource(R.string.walk_footer_total, app.verst.settings.AppPrefs.money(s.costRub)) else null
-    val cd = listOfNotNull(line, time, s.nameRu, s.noteRu, cost).joinToString(", ")
+    // CEO 29.10: an unknown price (OSM cafés, restaurants) is «цена не указана» — never 0 ₽ or nothing at all
+    val cost = if (s.costRub > 0 && !s.priceUnknown) stringResource(R.string.walk_footer_total, app.verst.settings.AppPrefs.money(s.costRub)) else null
+    val priceUnknown = if (s.priceUnknown) stringResource(R.string.walk_stop_price_unknown) else null
+    val kindText = s.poiKindRu?.uppercase() ?: kindWord(s.poiKind ?: s.kind)
+    val cuisine = if (s.isFood) cuisineWords(s.cuisine) else null
+    val cd = listOfNotNull(line, time, s.nameRu, cuisine, s.noteRu, cost, priceUnknown).joinToString(", ")
     val tap by rememberUpdatedState(onTap)
     val reduced = LocalReducedMotion.current
     val m = DesignTokens.motion.returnToItem
@@ -544,7 +627,7 @@ private fun WalkStopRow(
             .testTag("walk.stop.${s.id}"),
     ) {
         Box(Modifier.padding(start = 72.dp).widthIn(min = 68.dp), contentAlignment = Alignment.TopCenter) {
-            if (s.isBar) BarSign(s.kind) else RoadSign("tourist", s.nameRu, app.verst.feature.common.signTags(s.poiKind ?: s.kind, listOf(s.kind)))
+            if (s.isBar || s.isFood) BarSign(s.kind) else RoadSign("tourist", s.nameRu, app.verst.feature.common.signTags(s.poiKind ?: s.kind, listOf(s.kind)))
         }
         Column(Modifier.weight(1f).padding(start = 4.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(Modifier.fillMaxWidth()) {
@@ -555,7 +638,9 @@ private fun WalkStopRow(
             // S4 5.11 §10.3: the category tag; timed rows «открыто до 20:00», untimed rows the hours pill
             val hours = s.hours
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                (s.poiKindRu?.uppercase() ?: kindWord(s.poiKind ?: s.kind))?.let { KindTag(it) }
+                kindText?.let { KindTag(it) }
+                // CEO 29.10: «КАФЕ · грузинская кухня» — the cuisine words beside the tag while there is room
+                if (cuisine != null) Txt(cuisine, T.body.sm, C.text.muted, Modifier.weight(1f, fill = false).testTag("walk.stop.cuisine"), maxLines = 1)
                 if (!untimed && hours != null && hours.source != "default") TimedHours(hours)
             }
             if (untimed) UntimedHours(hours)
@@ -568,6 +653,7 @@ private fun WalkStopRow(
             (parts + listOfNotNull(dogNo)).takeIf { it.isNotEmpty() }?.joinToString(". ", postfix = ".")
                 ?.let { Txt(it, T.body.md, C.text.note, Modifier.testTag("walk.stop.note")) }
             if (cost != null) Txt(cost, T.body.mdStrong, C.accent.yellowText)
+            if (priceUnknown != null) Txt(priceUnknown, T.body.sm, C.text.muted, Modifier.testTag("walk.stop.price.unknown"))
         }
     }
 }
@@ -597,7 +683,10 @@ private fun UntimedHours(h: app.verst.core.model.dto.WalkHoursDto?) {
     }
 }
 
-/** components §21 bar sign: the `service` look with `glass` (bar, рюмочная) or `mug` (pub, craft). */
+/**
+ * components §21 bar sign: the `service` look with `glass` (bar, рюмочная) or `mug` (pub, craft); CEO 29.10: the
+ * walk food places in the same look — `cup` (café), `cutlery` (restaurant, fast food, food court).
+ */
 @Composable
 internal fun BarSign(kind: String) {
     Box(
@@ -605,8 +694,16 @@ internal fun BarSign(kind: String) {
             .clip(RoundedCornerShape(3.dp)).background(C.sign.white),
         contentAlignment = Alignment.Center,
     ) {
-        app.verst.core.ui.components.GlyphIcon(if (kind == "pub" || kind == "craft" || kind == "beer") Glyph.MUG else Glyph.GLASS, C.text.onLight, 22.dp)
+        app.verst.core.ui.components.GlyphIcon(walkSignGlyph(kind), C.text.onLight, 22.dp)
     }
+}
+
+/** The §21 bar-sign pictogram of a walk stop kind. */
+internal fun walkSignGlyph(kind: String): Glyph = when (kind) {
+    "pub", "craft", "beer" -> Glyph.MUG
+    "cafe" -> Glyph.CUP
+    "restaurant", "fast_food", "food_court" -> Glyph.CUTLERY
+    else -> Glyph.GLASS
 }
 
 /** 5.11 footer: a summary plate (not a button) «СКОЛЬКО СТОИТ ПРОГУЛКА · ≈ 2 400 ₽ на всех». */
@@ -623,7 +720,12 @@ private fun Footer(w: WalkRouteDto) {
         Column(Modifier.weight(1f)) {
             Txt(stringResource(R.string.walk_footer_label), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (total <= 0) {
+                if (total <= 0 && w.priceUnknown) {
+                    // CEO 29.10: the prices of the cafés are unknown — never «Бесплатно» for them
+                    Txt(stringResource(R.string.walk_footer_price_unknown), T.amount, C.text.onLight, Modifier.testTag("walk.price.unknown"), maxLines = 1)
+                    Spacer(Modifier.weight(1f))
+                    Txt(stringResource(R.string.walk_footer_price_unknown_sub), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                } else if (total <= 0) {
                     // 5.11 §9 (S3-QA P1-03): never «≈ 0 ₽»; no per-person line
                     Txt(stringResource(R.string.walk_footer_free), T.amount, C.text.onLight, Modifier.testTag("walk.free"), maxLines = 1)
                     Spacer(Modifier.weight(1f))
@@ -631,7 +733,10 @@ private fun Footer(w: WalkRouteDto) {
                 } else {
                     Txt(stringResource(R.string.walk_footer_total, app.verst.settings.AppPrefs.money(total)), T.amount, C.text.onLight, maxLines = 1)
                     Spacer(Modifier.weight(1f))
-                    Txt(stringResource(R.string.walk_footer_per_person, app.verst.settings.AppPrefs.money(per)), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+                    // CEO 29.10: with unknown café prices the sum leaves them out — say so instead of a per-person sum
+                    val sub = if (w.priceUnknown) stringResource(R.string.walk_footer_without_food)
+                    else stringResource(R.string.walk_footer_per_person, app.verst.settings.AppPrefs.money(per))
+                    Txt(sub, T.body.smStrong, C.text.onLightMuted, maxLines = 1)
                 }
             }
         }

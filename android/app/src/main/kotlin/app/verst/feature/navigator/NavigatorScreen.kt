@@ -1,6 +1,7 @@
 package app.verst.feature.navigator
 
 import androidx.compose.foundation.background
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -97,10 +98,22 @@ data class NavigatorUi(
     /** 5.12 §2: the address search under the field. */
     val online: Boolean = true,
     val addressQuery: Boolean = false,
+    /** The address row above the town / place rows (an address-looking query, or nothing else matched). */
+    val addressFirst: Boolean = true,
     val addressState: AddressState = AddressState.Idle,
     val addressResults: List<SuggestionDto> = emptyList(),
     /** 5.12 §5: КУДА autofocuses (false after a GPS fix set ОТКУДА). */
     val focusTo: Boolean = true,
+    /**
+     * CEO 29.10: КУДА is an address abroad and nothing can plan it now (offline, or no server in this build; the phone
+     * engine plans only in Russia): the plate and the button that opens the road in [abroadMaps] (the preferred maps app).
+     */
+    val abroad: Boolean = false,
+    val abroadMaps: app.verst.nav.HandoffApp = app.verst.nav.HandoffApp.MAPS,
+    /** CEO 29.10 (wave 1): КУДА is abroad and the server plans it — one line says so, ПОЕХАЛИ works. */
+    val abroadServer: Boolean = false,
+    /** The plate's reason: this build has no server (else: no internet now). */
+    val abroadNoServer: Boolean = false,
 )
 
 /** 5.12: location and address answers of the Navigator. */
@@ -130,7 +143,10 @@ fun NavigatorScreen(
     onEditFrom: () -> Unit,
     onStart: () -> Unit,
     location: LocationActions = NoLocation,
+    /** CEO 29.10: the abroad plate's button → the maps app with ОТКУДА and КУДА. */
+    onAbroadMaps: () -> Unit = {},
 ) {
+    if (Palette.camper) return NavigatorScreenCamper(ui = ui, onBack = onBack, onQuery = onQuery, onPick = onPick, onEditFrom = onEditFrom, onStart = onStart, location = location, onAbroadMaps = onAbroadMaps)
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
     var inputFocused by remember { mutableStateOf(false) }
@@ -179,7 +195,7 @@ fun NavigatorScreen(
                         BackLink(back, C.text.muted, stringResource(R.string.cd_back, back), onBack, Modifier.padding(start = 16.dp).offset(y = (-8).dp))
                     }
                 }
-                Panel(ui, typing, onQuery, pick, onEditFrom, location, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = if (typing) 8.dp else 0.dp, bottom = if (typing) 6.dp else 28.dp))
+                Panel(ui, typing, onQuery, pick, onEditFrom, location, onAbroadMaps, { inputFocused = it }, Modifier.weight(1f).padding(horizontal = 14.dp).padding(top = if (typing) 8.dp else 0.dp, bottom = if (typing) 6.dp else 28.dp))
                 // 5.2 §1: the caption row hides while typing (IME open on a focused field) and returns after a pick.
                 if (!typing) Caption(ui, onStart)
             }
@@ -201,6 +217,7 @@ private fun Panel(
     onPick: (SuggestionDto) -> Unit,
     onEditFrom: () -> Unit,
     location: LocationActions,
+    onAbroadMaps: () -> Unit,
     onFocus: (Boolean) -> Unit,
     modifier: Modifier,
 ) {
@@ -275,9 +292,12 @@ private fun Panel(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (ui.editingFrom && typing) MyLocationRow(ui.gps == GpsState.Waiting, location::myLocation)
-            if (!picked && ui.addressQuery) AddressBlock(ui, q, location::findAddress, onPick)
+            if (!picked && ui.addressQuery && ui.addressFirst) AddressBlock(ui, q, location::findAddress, onPick)
             when {
-                picked -> Unit
+                picked -> {
+                    if (ui.abroad) AbroadPlate(ui.destination?.name.orEmpty(), ui.abroadMaps, ui.abroadNoServer, onAbroadMaps)
+                    if (ui.abroadServer) AbroadServerLine()
+                }
                 q.length < 2 -> if (ui.popular.isNotEmpty()) {
                     Txt(stringResource(R.string.navigator_popular), T.label.md, C.navi.hint, Modifier.padding(top = 4.dp))
                     Rows(ui.popular.take(6), ui.rowKm, onPick)
@@ -291,6 +311,8 @@ private fun Panel(
                 )
                 else -> Rows(ui.suggestions, ui.rowKm, onPick)
             }
+            // a street that also matched towns («Мира» → «Мирный»): the address row after them
+            if (!picked && ui.addressQuery && !ui.addressFirst) AddressBlock(ui, q, location::findAddress, onPick)
         }
     }
 }
@@ -492,7 +514,8 @@ private fun Caption(ui: NavigatorUi, onStart: () -> Unit) {
         "UNREACHABLE" -> stringResource(R.string.error_unreachable)
         else -> null
     }
-    val enabled = dest != null && error == null && !ui.outsideRussia // 5.12: a Russian start first
+    // 5.12: a Russian start first; CEO 29.10: and a Russian destination (abroad: the plate, no plan)
+    val enabled = dest != null && error == null && !ui.outsideRussia && !ui.abroad
     Row(
         Modifier.fillMaxWidth().padding(start = 22.dp, end = 20.dp, bottom = 26.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -539,6 +562,39 @@ private fun androidx.compose.foundation.layout.BoxScope.LocationSheet(windowH: a
     }
 }
 
+/**
+ * CEO 29.10: КУДА is abroad and cannot be planned now. Only the server plans trips abroad (the phone engine knows only
+ * Russia), so the plate says honestly why not now — no internet, or no server in this build — and offers the road
+ * itself in the preferred maps app (ОТКУДА → КУДА), instead of a plan that would fail.
+ */
+@Composable
+private fun AbroadPlate(place: String, maps: app.verst.nav.HandoffApp, noServer: Boolean, onMaps: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(DesignTokens.radius.r10)).background(C.navi.list).padding(12.dp).testTag("navigator.abroad"),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Txt(stringResource(R.string.navigator_abroad_title), T.list.title, C.text.primary)
+        Txt(stringResource(if (noServer) R.string.navigator_abroad_body_no_server else R.string.navigator_abroad_body, place), T.body.sm, C.navi.labelSecondary)
+        val label = stringResource(if (maps == app.verst.nav.HandoffApp.GOOGLE) R.string.handoff_google_car else R.string.handoff_maps_car)
+        Box(
+            Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).clip(RoundedCornerShape(DesignTokens.radius.r10))
+                .background(C.accent.yellow).clickable(role = Role.Button, onClick = onMaps).testTag("navigator.abroad.maps")
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center,
+        ) { Txt(label, T.button.md, C.text.onLight, maxLines = 1) }
+    }
+}
+
+/** CEO 29.10 (wave 1): КУДА abroad goes to the server — one line under the picked КУДА. */
+@Composable
+private fun AbroadServerLine() {
+    Row(Modifier.fillMaxWidth().padding(top = 4.dp).testTag("navigator.abroad.server"), verticalAlignment = Alignment.CenterVertically) {
+        app.verst.core.ui.components.GlyphIcon(app.verst.core.ui.components.Glyph.INFO, C.navi.labelSecondary, 14.dp)
+        Spacer(Modifier.width(6.dp))
+        Txt(stringResource(R.string.abroad_server_line), T.body.sm, C.navi.labelSecondary)
+    }
+}
+
 /** 5.12 §1 outside Russia: the state block in place of ОТКУДА. */
 @Composable
 private fun OutsideRussia(onChoose: () -> Unit) {
@@ -571,6 +627,13 @@ private fun AddressBlock(ui: NavigatorUi, q: String, onFind: () -> Unit, onPick:
             Txt(stringResource(R.string.addr_attribution), T.caption.md, C.navi.hint, Modifier.fillMaxWidth().height(24.dp).testTag("address.attribution"), align = TextAlign.End)
         }
         else -> {
+            // designer В-2: the error right under the field, above the action, in the error colour
+            if (ui.addressState == AddressState.None) {
+                Txt(stringResource(R.string.addr_none), T.body.sm, C.accent.redText, Modifier.testTag("address.none"))
+            }
+            if (ui.addressState == AddressState.Failed) {
+                Txt(stringResource(R.string.addr_failed), T.body.sm, C.accent.redText, Modifier.testTag("address.failed"))
+            }
             val searching = ui.addressState == AddressState.Searching
             Row(
                 Modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.suggestionRowMinH)
@@ -585,12 +648,6 @@ private fun AddressBlock(ui: NavigatorUi, q: String, onFind: () -> Unit, onPick:
                     if (searching) stringResource(R.string.addr_searching) else stringResource(R.string.addr_find_query, q),
                     T.list.title, C.accent.yellowText, Modifier.weight(1f), maxLines = 1,
                 )
-            }
-            if (ui.addressState == AddressState.None) {
-                Txt(stringResource(R.string.addr_none), T.body.sm, C.navi.labelSecondary, Modifier.testTag("address.none"))
-            }
-            if (ui.addressState == AddressState.Failed) {
-                Txt(stringResource(R.string.addr_failed), T.body.sm, C.text.muted, Modifier.testTag("address.failed"))
             }
         }
     }

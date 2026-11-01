@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEV_SECRET = "dev-only-not-a-secret"
@@ -26,6 +26,14 @@ class Settings(BaseSettings):
     graphhopper_url: str | None = None
     graphhopper_timeout_s: float = Field(6.0, gt=0, le=30)
     synthetic_fallback: bool = False  # GraphHopper down → road model (flagged) instead of 503 UPSTREAM
+    # CEO 31.10: a point outside the graph's extract → the road model (flagged) instead of 404 UNREACHABLE
+    graph_coverage_fallback: bool = True
+
+    # CEO 29.10 (trips abroad, server only): the catalogues abroad (`<dir>/<cc>/catalogue_*.json.gz`; unset =
+    # backend/planner/abroad next to the engine; missing or empty = Russia only) and the Bank of Russia rates
+    # file of tools/ci/fetch_rates.py (unset = money abroad in the local currency only).
+    abroad_dir: str | None = None
+    rates_file: str | None = None
 
     clock: str = "system"  # "system" | "golden" | ISO datetime with offset (tests and demos)
     plan_timeout_s: float = Field(25.0, gt=0, le=120)
@@ -46,10 +54,19 @@ class Settings(BaseSettings):
     feedback_text_days: int = Field(180, ge=1)  # R-07 (в): free text is cleared after this many days
 
     public_base_url: str = "http://localhost:8000"  # share links: {public_base_url}/s/{slug}
+
+    # Partner links (ENG-03, CEO 01.11): the Travelpayouts account; all empty = plain links.
+    tp_token: SecretStr = SecretStr("")  # API token (Travelpayouts profile); never logged
+    tp_marker: str = ""  # partner id
+    tp_trs: str = ""  # project id
+    tp_timeout_s: float = Field(4.0, gt=0, le=15)
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
     @model_validator(mode="after")
     def _check(self) -> Settings:
+        tp = (bool(self.tp_token.get_secret_value()), bool(self.tp_marker), bool(self.tp_trs))
+        if any(tp) and not all(tp):
+            raise ValueError("partner links need VERST_TP_TOKEN, VERST_TP_MARKER and VERST_TP_TRS (or none)")
         if self.routing == "graphhopper" and not self.graphhopper_url:
             raise ValueError("VERST_ROUTING=graphhopper needs VERST_GRAPHHOPPER_URL")
         if self.env == "prod":

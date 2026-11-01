@@ -25,13 +25,17 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual((c.fuel.usable_frac, c.fuel.lookahead_km), (0.8, 40))
         d = c.dwell_min
         self.assertEqual(
-            (d.coffee, d.fuel, d.fuel_coffee, d.rest, d.lunch, d.sight_default), (15, 10, 15, 20, 60, 60)
+            (d.coffee, d.fuel, d.fuel_coffee, d.lunch, d.sight_default), (15, 10, 15, 60, 60)
         )
+        # CEO 2026-10-29 «Как едем»: long breaks for «Спокойно»
+        rd = c.rest_dwell_min
+        self.assertEqual((rd.calm, rd.more_stops, rd.just_drive, rd.fun), (30, 20, 20, 20))
         self.assertEqual(d.via, 30)
         self.assertEqual(c.lunch_window, (time(12, 0), time(14, 30)))
         self.assertEqual(c.lunch_sweet_spot, (time(12, 30), time(13, 30)))
         b = c.day_budget_min
-        self.assertEqual((b.calm, b.more_stops, b.just_drive), (540, 600, 600))
+        # CEO 2026-10-29: «Только доехать» the longest day, «Спокойно» the shortest
+        self.assertEqual((b.calm, b.more_stops, b.just_drive, b.fun), (540, 600, 720, 660))
         k = c.corridor_km
         self.assertEqual((k.sight, k.food, k.fuel, k.rest), (15, 15, 15, 15))
         self.assertEqual((k.fuel_motorway, k.rest_motorway, k.town, k.lodging_from_town), (5, 5, 25, 10))

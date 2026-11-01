@@ -166,7 +166,7 @@ class Sprint4Test {
                 flow.locate()
             }
             compose.waitUntil(15_000) { flow.gps == GpsState.On && flow.origin.label == "Ярославль" }
-            compose.onNodeWithTag("windshield.city").performClick()
+            compose.onNodeWithTag("windshield.city").performScrollTo().performClick()
             waitTag("city.preset.overview", 20_000)
             compose.runOnUiThread { flow.selectCityPreset("overview") }
             compose.onNodeWithTag("city.go").performClick()
@@ -187,6 +187,8 @@ class Sprint4Test {
             while (flow.back()) Unit
             Net.breaker.reset()
             (flow.address as NominatimClient).baseUrl = base
+            // these journeys test the Nominatim replies; the phone's geocoder (CEO 29.10 fallback) would answer instead
+            flow.addressFallback = null
         }
         waitTag("windshield.navi")
         compose.onNodeWithTag("windshield.navi").performClick()
@@ -277,7 +279,7 @@ class Sprint4Test {
             flow.locate()
         }
         compose.waitUntil(15_000) { flow.gps == GpsState.On && flow.origin.label == "Ярославль" }
-        compose.onNodeWithTag("windshield.city").performClick()
+        compose.onNodeWithTag("windshield.city").performScrollTo().performClick()
         waitTag("city.preset.overview", 20_000)
         // the city values persist between visits (bug c): start this journey from 4 h
         compose.runOnUiThread { flow.setCityDuration(240) }

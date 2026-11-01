@@ -20,6 +20,7 @@ from verst_api.engine import route_request
 from verst_api.errors import ApiError, from_engine
 from verst_api.privacy import log_point, mask_contacts, scrub_trip
 from verst_api.routing import route_to_json
+from verst_api.sanity import check_saved_trip, public_trip
 from verst_api.schemas import (
     DeviceIn,
     DeviceOut,
@@ -66,6 +67,20 @@ async def register_device(body: DeviceIn, ctx: Ctx, _limit: RegisterLimit) -> De
     """ADR-0007: an anonymous device and its bearer token (shown once; the server keeps only its sha256)."""
     device_id, token = await store.create_device(ctx.pool, body.appVersion, body.locale)
     return DeviceOut(deviceId=device_id, token=token)
+
+
+@router.delete("/v1/devices/me", status_code=204, responses=ERRORS)
+async def forget_device(ctx: Ctx, device: AnyDevice) -> Response:
+    """Security review M-2: consent withdrawn; the device, its saved trips and feedback are deleted."""
+    await store.forget_device(ctx.pool, device.id)
+    log.info("device forgotten")
+    return Response(status_code=204)
+
+
+@router.get("/privacy", response_class=HTMLResponse, include_in_schema=False)
+async def privacy_page(_limit: PublicLimit) -> HTMLResponse:
+    """The privacy notice the app links to before «Строить на сервере» (security review B-1)."""
+    return HTMLResponse(share_page.privacy(), headers=share_page.HEADERS)
 
 
 # ---------------------------------------------------------------------------------------------- planning
@@ -163,10 +178,13 @@ async def save_trip(body: SaveTripIn, ctx: Ctx, device: SaveDevice) -> SavedTrip
     """Save a trip (planned here or on the phone) and get its share link. The server keeps only the
     privacy-reduced copy (R-07): towns instead of user points and labels, coordinates to 2 decimals."""
     raw = body.trip.model_dump(exclude_unset=True)
+    check_saved_trip(raw)  # QA B-2: plausible units before anything is computed or stored
     engine = ctx.engine
 
     def reduce() -> tuple[dict[str, Any], str]:
         scrubbed = scrub_trip(raw, engine.town_of)
+        # the cost lines and totals are the engine's, recomputed from the units, not the phone's numbers
+        scrubbed["cost"] = engine.recompute_cost(scrubbed)
         return scrubbed, engine.share_text(scrubbed)  # share_text also validates the trip and its version
 
     scrubbed, text = await engine.call(reduce)
@@ -210,7 +228,7 @@ async def shared_trip(ctx: Ctx, _limit: PublicLimit, slug: Slug) -> SharedTripOu
         days=saved.days,
         approxDistances=saved.synthetic,
         shareText=saved.share_text,
-        trip=saved.trip,
+        trip=public_trip(saved.trip),  # security B-3: no crew, budget, date, vehicle or engine state
     )
 
 
@@ -241,14 +259,19 @@ async def feedback(body: FeedbackIn, ctx: Ctx, device: FeedbackDevice) -> Feedba
 
 @router.get("/v1/links/hotel", response_model=LinkOut, responses=ERRORS)
 async def hotel_link(q: Annotated[HotelLinkQuery, Query()], ctx: Ctx, device: AnyDevice) -> LinkOut:
-    """Partner link stub until LEG-02: a plain city search on Yandex Travel, `affiliate: false`."""
+    """A Yandex Travel search for the hotel's town and the stay: a Travelpayouts partner link when the
+    account is configured (`affiliate: true`), else the plain search (ENG-03)."""
     engine = ctx.engine
     poi = await engine.call(lambda: engine.poi(q.placeId))
     if poi.get("kind") != "hotel":
         raise ApiError("INVALID_INPUT", {"field": "placeId", "reason": "not_a_hotel"})
     town = poi.get("townName") or poi.get("nameRu")
     url = links.hotel_search_url(str(town), q.checkin, q.nights, q.adults, q.childrenAges) if town else None
-    return LinkOut(url=url, partner=links.PARTNER, affiliate=False)
+    if url is None or not ctx.affiliate.enabled:
+        return LinkOut(url=url, partner=links.PARTNER, affiliate=False)
+    wrapped = await asyncio.to_thread(ctx.affiliate.wrap, url, links.sub_id(q.tripId, q.stopId))
+    metrics.PARTNER_LINKS.labels("affiliate" if wrapped else "fallback").inc()
+    return LinkOut(url=wrapped or url, partner=links.PARTNER, affiliate=wrapped is not None)
 
 
 # ---------------------------------------------------------------------------------------------- ops

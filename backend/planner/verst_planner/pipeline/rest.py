@@ -29,7 +29,14 @@ from verst_planner.geo.distance import haversine_km
 from verst_planner.geo.polyline import interpolate
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.checks import day_valid, lunch_out_of_window, over_budget, sights_still_open
-from verst_planner.pipeline.timeline import Profile, eta_if_inserted, insert_stop, local, schedule_day
+from verst_planner.pipeline.timeline import (
+    Profile,
+    detour_halves,
+    eta_if_inserted,
+    insert_stop,
+    local,
+    schedule_day,
+)
 
 MAX_REST_SIGHT_DWELL = 30
 # ADR-0015 §5 «Весело и познавательно»: interesting stops in the rest slots, within a 15-min detour,
@@ -39,11 +46,30 @@ FUN_DETOUR_FALLBACK_MIN = 30  # M8: when nothing interesting is within 15 min of
 FUN_DWELL = (30, 45)
 FUN_BONUS = 5.0  # above a rest area with a playground, WC and a walk (5.5) for a fitting stop
 FUN_PREFER: dict[str, frozenset[str]] = {
-    "child": frozenset({"playground", "interactive", "zoo", "park", "nature", "museum"}),
+    # acceptance 2026-10-28 (K1 d): the copy promises a child «площадки, зоопарки и интерактивные музеи»;
+    # an art museum is no longer a child's fun stop by default (it still fits the adults)
+    "child": frozenset({"playground", "interactive", "zoo", "park", "nature"}),
     "dog": frozenset({"park", "nature", "embankment", "viewpoint"}),
-    "adults": frozenset({"museum", "viewpoint", "kremlin", "nature", "square", "park", "embankment"}),
+    # CEO 2026-10-29: «весело» for adults is also the playful places — attractions, interactive museums, zoos
+    "adults": frozenset(
+        {
+            "museum",
+            "viewpoint",
+            "kremlin",
+            "nature",
+            "square",
+            "park",
+            "embankment",
+            "attraction",
+            "interactive",
+            "zoo",
+        }
+    ),
 }
+FUN_FIT = 1.5  # `fun_affinity` of a kind the crew's «Весело» copy promises (0.5 + 1.0)
 INDOOR = frozenset({"museum", "theatre", "interactive"})
+KID_FUN_KINDS = frozenset({"zoo", "playground", "interactive", "park"})  # = sights.KID_KINDS
+KID_FUN_EXTRA = 0.5
 EXTENDED_MIN_DRIVE = 45  # A§16.11.1 step 3: driving since b0 in [max(45, R - 60), R + 30]
 EXTENDED_AFTER = 30
 ROUND_DRIVE_MIN = 15
@@ -67,12 +93,13 @@ class DriveClock:
     def of(cls, day: DayPlan, profile: Profile) -> DriveClock:
         kms, arr, dep = [], [], []
         t = 0.0
+        halves = detour_halves(day.stops)
         for i, s in enumerate(day.stops):
             if i > 0:
-                t += profile.drive(day.stops[i - 1].km_at, s.km_at) + s.detour_min / 2
+                t += profile.drive(day.stops[i - 1].km_at, s.km_at) + halves[i][0]
             kms.append(s.km_at)
             arr.append(t)
-            t += s.detour_min / 2 if i > 0 else 0.0
+            t += halves[i][1] if i > 0 else 0.0
             dep.append(t)
         return cls(kms, arr, dep, profile)
 
@@ -114,6 +141,8 @@ def fun_affinity(c: Candidate, inp: NormalizedInput) -> float:
     if cat == "playground" and inp.crew.children == 0:
         return -1.0  # a playground is for a child (and dogs are not let in)
     score = 0.5 + (1.0 if cat in FUN_PREFER[fun_group(inp)] else 0.0)
+    if inp.crew.children > 0 and cat in KID_FUN_KINDS:
+        score += KID_FUN_EXTRA  # K1 d: a playground, zoo or science centre before a lake or a viewpoint
     if inp.crew.children > 0 and cat in ("temple", "monastery", "church"):
         score -= 0.5
     return score
@@ -191,17 +220,21 @@ def _reason(inp: NormalizedInput, dwell: int, drove_min: float) -> tuple[str, di
     return "rest.generic", {**base, "drive": ru.duration_genitive(rounded_drive(drove_min))}
 
 
-def rest_pool(corridor: Corridor, fun: bool = False, secular: bool = False) -> list[Candidate]:
+def rest_pool(
+    corridor: Corridor, fun: bool = False, secular: bool = False, sights: bool = True
+) -> list[Candidate]:
     """Rest areas, short sights and fuel stations with a cafe (A§6.8), sorted by km; also the REST
     alternatives pool. `fun` («Весело и познавательно») adds every sight within the fun detour. `secular`
-    (the open-data world, ADR-0015 §2): no church as a break — the religious share is the sights' budget."""
+    (the open-data world, ADR-0015 §2): no church as a break — the religious share is the sights' budget.
+    `sights` False («Только доехать», CEO 2026-10-29): rest areas and cafés at fuel stations only."""
     from verst_planner.pipeline.sights import RELIGIOUS, category_of, not_a_sight
 
     pool = [*corridor.rest, *[c for c in corridor.fuel if Tag.CAFE_AT_FUEL in c.place.tags]]
     pool += [
         c
         for c in corridor.sights
-        if (
+        if sights
+        and (
             (c.place.dwell_min or 60) <= MAX_REST_SIGHT_DWELL
             or (fun and c.detour_min <= FUN_DETOUR_FALLBACK_MIN)
         )
@@ -217,6 +250,7 @@ def make_rest_stop(c: Candidate, inp: NormalizedInput, ctx: PlanContext, drove_m
     """A rest-pool candidate as a stop: rest area (20 min), coffee at a fuel station (15 min, kind FUEL)
     or a short sight (its own dwell, at least a break, reason `sight.default`)."""
     dm = ctx.cfg.dwell_min
+    rest_min = ctx.cfg.rest_dwell_min.of(inp.mood)
     if c.place.type is PlaceType.FUEL:
         kind, dwell, coffee = StopKind.FUEL, dm.coffee, True
         key, params = _reason(inp, dwell, drove_min)
@@ -230,12 +264,12 @@ def make_rest_stop(c: Candidate, inp: NormalizedInput, ctx: PlanContext, drove_m
     elif c.place.type is PlaceType.SIGHT:
         kind, dwell, coffee = (
             StopKind.SIGHT,
-            max(c.place.dwell_min or dm.rest, ctx.cfg.rest.break_min_dwell),
+            max(c.place.dwell_min or rest_min, ctx.cfg.rest.break_min_dwell),
             False,
         )
         key, params = sight_reason(dwell, inp.crew, c.place)
     else:
-        kind, dwell, coffee = StopKind.REST, dm.rest, False
+        kind, dwell, coffee = StopKind.REST, rest_min, False
         key, params = _reason(inp, dwell, drove_min)
     return PlannedStop(
         kind=kind,
@@ -288,8 +322,17 @@ class RestPool:
         self.kms = [c.km_at for c in self.cands]
 
     @classmethod
-    def of(cls, corridor: Corridor, fun: bool = False, secular: bool = False) -> RestPool:
-        return cls(rest_pool(corridor, fun, secular), corridor.route)
+    def of(
+        cls, corridor: Corridor, fun: bool = False, secular: bool = False, sights: bool = True
+    ) -> RestPool:
+        return cls(rest_pool(corridor, fun, secular, sights), corridor.route)
+
+    @classmethod
+    def for_trip(cls, corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> RestPool:
+        """The trip's rest pool: fun stops for «Весело», no sights for «Только доехать»."""
+        return cls.of(
+            corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity), inp.mood is not Mood.JUST_DRIVE
+        )
 
     def between(self, lo: float, hi: float) -> list[Candidate]:
         return self.cands[bisect.bisect_left(self.kms, lo) : bisect.bisect_right(self.kms, hi)]
@@ -392,6 +435,8 @@ def plan_rests_day(
         def drive_since(c: Candidate, gap: _Gap = gap, clock: DriveClock = clock) -> float | None:
             """Driving since b0 at arrival for an unused candidate inside the day, else None."""
             if c.place.id in taken or not (day.km_start < c.km_at < day.km_end):
+                return None
+            if c.place.type is PlaceType.SIGHT and not sight_break_ok(c.place, day, inp, ctx):
                 return None
             return clock.at(c.km_at) + c.detour_min / 2 - gap.t0
 
@@ -538,11 +583,22 @@ def _road_ref_at(route: Route, km: float) -> str | None:
     return None
 
 
+def sight_break_ok(p: Place, day: DayPlan, inp: NormalizedInput, ctx: PlanContext) -> bool:
+    """A sight as a break follows the stage-9 day rules (acceptance 2026-10-28 K1): not an open-data sight
+    on the way out of or into the overnight town, and under the `sights_free` lever only a curated free
+    place or an open public space."""
+    from verst_planner.pipeline.sights import lever_free_ok, near_day_ends
+
+    if near_day_ends(p, day, inp, ctx.cfg):
+        return False
+    return not (ctx.knobs.sights_free and not lever_free_ok(p, inp))
+
+
 def plan_rests(days: list[DayPlan], corridor: Corridor, inp: NormalizedInput, ctx: PlanContext) -> None:
     """Stage 7 over every day (runs after lunch and sights, A§16.2)."""
     profile = ctx.profile_for(corridor.route)
     used = {s.place.id for d in days for s in d.stops if s.place is not None}
-    pool = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
+    pool = RestPool.for_trip(corridor, inp, ctx)
     for day in days:
         for s in plan_rests_day(day, pool, used, inp, ctx, profile):
             if s.place is not None:

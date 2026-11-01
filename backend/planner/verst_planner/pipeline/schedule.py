@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from verst_planner.domain.enums import Meal, Mood, WarningCode
+from verst_planner.domain.enums import Meal, WarningCode
 from verst_planner.domain.model import Alternative, DayPlan, NormalizedInput, PlanWarning
 from verst_planner.pipeline import Corridor, PlanContext, round_half_up
 from verst_planner.pipeline import fuel as fuel_stage
@@ -12,7 +12,14 @@ from verst_planner.pipeline import rest as rest_stage
 from verst_planner.pipeline import sights as sights_stage
 from verst_planner.pipeline.checks import closed_sights, lunch_out_of_window, over_budget
 from verst_planner.pipeline.rest import RestPool, remove_rests
-from verst_planner.pipeline.timeline import Profile, Slot, day_duration_min, refresh_day_starts, schedule_day
+from verst_planner.pipeline.timeline import (
+    Profile,
+    Slot,
+    day_duration_min,
+    detour_km_halves,
+    refresh_day_starts,
+    schedule_day,
+)
 
 REPAIR_GUARD = 100
 
@@ -102,7 +109,7 @@ def final_repair(
     fixed one), re-plan a lunch that left its window (stage 8b, once), then re-plan the day's rests. Every
     change is followed by a fresh check, so `hours_open`, `lunch_window` and `break_spacing` hold."""
     profile = ctx.profile_for(corridor.route)
-    pool = RestPool.of(corridor, inp.mood is Mood.FUN, bool(ctx.cfg.sights.diversity))
+    pool = RestPool.for_trip(corridor, inp, ctx)
     warnings: list[PlanWarning] = []
     for day in days:
         lunch_replanned = False
@@ -145,9 +152,11 @@ def stop_km_from_prev(days: list[DayPlan]) -> list[list[int]]:
     """
     out: list[list[int]] = []
     for d in days:
+        halves = detour_km_halves(d.stops)
         row = [0]
-        for prev, s in zip(d.stops, d.stops[1:], strict=False):
-            row.append(round_half_up(s.km_at - prev.km_at + (prev.detour_km + s.detour_km) / 2))
+        for i in range(1, len(d.stops)):
+            prev, s = d.stops[i - 1], d.stops[i]
+            row.append(round_half_up(s.km_at - prev.km_at + halves[i - 1][1] + halves[i][0]))
         out.append(row)
     return out
 

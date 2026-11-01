@@ -144,8 +144,9 @@ fun VerstFlow.locate(fromRow: Boolean = false) {
             loadCityPresets()
         }
         if (connectivity.online) {
-            val a = address.reverse(p.lat, p.lon)
-            if (a is app.verst.data.net.AddressResult.Ok && origin == o) originAddress = a.value
+            val street = (address.reverse(p.lat, p.lon) as? app.verst.data.net.AddressResult.Ok)?.value
+                ?: (addressFallback?.reverse(p.lat, p.lon) as? app.verst.data.net.AddressResult.Ok)?.value
+            if (street != null && origin == o) originAddress = street
         }
     }
 }
@@ -163,7 +164,13 @@ internal suspend fun VerstFlow.nearestTown(p: GeoPoint): SuggestionDto? {
 
 // ---- addresses (5.12 §2)
 
-/** «Найти адрес» row: the query has a digit, «ул», «пр», «пер», «д.» or a comma. */
+/**
+ * CEO 29.10: «Найти адрес» is offered for any query of 3+ characters — a bare street («Ленина», «улица Мира») is
+ * the main thing people type. It comes first when the query [looksLikeAddress] or no town / place matched.
+ */
+fun VerstFlow.addressOffered(q: String): Boolean = looksLikeAddress(q) || q.trim().length >= 3
+
+/** The query reads as an address: a digit, a comma or a street word («ул», «улица», «проспект», «д.»…). */
 fun VerstFlow.looksLikeAddress(q: String): Boolean {
     val t = q.trim().lowercase()
     if (t.length < 3) return false
@@ -173,7 +180,7 @@ fun VerstFlow.looksLikeAddress(q: String): Boolean {
 /** Explicit submit (the action row or the IME «Найти»): one Nominatim request, never per keystroke. */
 fun VerstFlow.submitAddress() {
     val q = query.trim()
-    if (!looksLikeAddress(q)) return
+    if (!addressOffered(q)) return
     if (!connectivity.online) {
         addressState = AddressState.Offline
         return
@@ -181,7 +188,13 @@ fun VerstFlow.submitAddress() {
     addressJob?.cancel()
     addressState = AddressState.Searching
     addressJob = scope.launch {
-        when (val r = address.search(q)) {
+        var r = address.search(q, origin)
+        // CEO 29.10: OSM has no such street / house here, or Nominatim is unreachable → the phone's geocoder
+        if (r is app.verst.data.net.AddressResult.Failed || (r as? app.verst.data.net.AddressResult.Ok)?.value?.isEmpty() == true) {
+            val f = addressFallback?.search(q, origin)
+            if (f is app.verst.data.net.AddressResult.Ok && f.value.isNotEmpty()) r = f
+        }
+        when (r) {
             is app.verst.data.net.AddressResult.Ok -> {
                 addressResults = r.value
                 addressState = if (r.value.isEmpty()) AddressState.None else AddressState.Done
@@ -204,4 +217,7 @@ internal fun VerstFlow.clearAddresses() {
     addressState = AddressState.Idle
 }
 
-private val ADDRESS_WORDS = listOf("ул", "пр", "пер", "д", "просп", "наб", "пл", "ш")
+private val ADDRESS_WORDS = listOf(
+    "ул", "улица", "пр", "пр-т", "просп", "проспект", "пер", "переулок", "д", "дом", "наб", "набережная", "пл",
+    "площадь", "ш", "шоссе", "б-р", "бульвар", "проезд", "туп", "тупик", "мкр", "микрорайон", "корп", "стр", "кв",
+)

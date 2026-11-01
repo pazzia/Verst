@@ -280,12 +280,12 @@ dependencies {
 
 ### 3.4 Signing and versioning
 
-- **`android/app/demo.keystore` is committed.** It is a PKCS12 file generated once in the sandbox (DEV-100):
-  ```
-  keytool -genkeypair -keystore android/app/demo.keystore -storetype PKCS12 -storepass verstdemo -keypass verstdemo \
-          -alias verst-demo -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Verst Demo,O=Verst,C=RU"
-  ```
-  Same key on every CI run, so each new APK installs **over** the previous one and saved trips survive. It is a demo key with no store identity, so committing it is safe. The RuStore upload key will be a GitHub secret (A§12.4) and is never this one.
+- **Superseded 28.10.2026 (security review К-1):** the demo key is no longer committed. The old
+  `demo.keystore` (and its passwords, which stayed in git history) is treated as compromised. The new demo key lives
+  in GitHub Secrets (`VERST_SIGNING_KEYSTORE_B64`, `VERST_SIGNING_STORE_PASSWORD`, `VERST_SIGNING_KEY_ALIAS`,
+  `VERST_SIGNING_KEY_PASSWORD`); CI decodes it into `$RUNNER_TEMP` and Gradle reads `VERST_SIGNING_KEYSTORE`. Without
+  the secret the demo APK gets the throwaway debug key (a CI warning says so) and does not install over earlier
+  builds. Same key on every CI run, so each new APK installs over the previous one and saved trips survive.
 - `versionCode = github.run_number` (monotonic), `versionName = 0.2.<n>-mock`, `BuildConfig.GIT_SHA`.
 - The settings sheet footer (D-4) reads «Сборка <n> · <sha7> · демо-данные». Exact copy: DES-104.
 
@@ -638,12 +638,12 @@ The engine finishes in ~0.2–0.6 s, but the Drive screen follows the 5.4 §6 ti
 | --- | --- | --- | --- |
 | `build` | push to main and PRs (path filter), `workflow_dispatch` | toolchain probe → `:app:assembleDemo :app:assembleDemoAndroidTest` → `:core-model:test :core-ui:testDebugUnitTest :app:testDemoUnitTest` (screenshots inside) → `:app:lintDemo :core-ui:lintDebug` → APK budget → upload `apks` → diagnostics → upload `diag-build` | 7 / 18 min |
 | `e2e` | `build` green (dispatch input `run_e2e`) | KVM, cached AVD (API 34 google_apis x86_64), `tools/ci/run_e2e.sh` (install, `am start -W` cold start, `am instrument -e package app.verst.e2e`, pull `files/e2e`, logcat) → diagnostics → `diag-e2e` | 10 / 15 min |
-| `release` | main, push or dispatch `release`, and `e2e` green (or dispatch `force_release`) | pre-release **`mvp-mock-<run_number>`** with `verst-mvp-mock-<n>.apk` + `.sha256` + Russian notes; then recreate **`mvp-mock-latest`** with `verst-mock-latest.apk`; prune to the 10 newest numbered | 1 min |
+| `release` | main, push or dispatch `release`, and `e2e` green (or dispatch `force_release`) | pre-release **`verst-<run_number>`** «Верста 0.3.<n>» with `Verst-0.3.<n>.apk` + `.sha256` + Russian notes; then recreate **`verst-latest`** with `Verst-latest.apk`; prune to the 10 newest numbered (0.2 builds: `mvp-mock-*`, old key) | 1 min |
 | `ci-logs` | always | merge `diag-*` artifacts → `tools/ci/combine_run.py` → `tools/ci/publish_ci_logs.sh` | 1 min |
 
 - Caching: `gradle/actions/setup-gradle` (Gradle user home, dependencies, Robolectric android-all jars, Chaquopy's Maven artifacts; read-only off main) and `actions/cache` for the AVD.
 - Concurrency: one run per ref, and a newer push cancels the older run (saves billed minutes).
-- The CEO's stable link is `https://github.com/pazzia/Verst/releases/download/mvp-mock-latest/verst-mock-latest.apk`. The repo is private, so it needs the CEO logged in to GitHub in the phone browser.
+- The CEO's stable link is `https://github.com/pazzia/Verst/releases/download/verst-latest/Verst-latest.apk`. The repo is private, so it needs the CEO logged in to GitHub in the phone browser.
 
 ### 12.2 Diagnosability without job logs
 
@@ -756,7 +756,7 @@ Engine-ready budget: ≤ 5 s on the emulator (was 4 s).
 | Use | Endpoint | Rules |
 | --- | --- | --- |
 | Photos | `commons.wikimedia.org/wiki/Special:FilePath/<file>?width=800\|400` → redirect to `upload.wikimedia.org` | Coil with the UA, cached 64 MB; the placeholder when offline or failed; attribution line |
-| Addresses | `nominatim.openstreetmap.org/search`, `/reverse` | Explicit submit only (the Nominatim policy forbids autocomplete), ≤ 1 req/s, `countrycodes=ru`, `accept-language=ru`, UA, «© OpenStreetMap», 24 h cache. CI tests use MockWebServer, never the real service |
+| Addresses | `nominatim.openstreetmap.org/search`, `/reverse` | Explicit submit only (the Nominatim policy forbids autocomplete), ≤ 1 req/s, no country filter since CEO 29.10 (a `viewbox` near the user ranks local streets first; a row abroad names its country; CEO 29.10 wave 1: it is planned only on the server — online with a server in the build, whatever «Где строить маршрут» says, after the tester's server consent, never falling back to the phone; offline or without a server the Navigator hands it to the maps app), `accept-language=ru`, UA, «© OpenStreetMap», 24 h cache. CI tests use MockWebServer, never the real service |
 
 ### 15.4 Road ahead focus (requirement 2.1)
 

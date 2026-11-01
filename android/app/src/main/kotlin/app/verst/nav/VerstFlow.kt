@@ -95,12 +95,14 @@ sealed interface Toast {
     data object EngineFailed : Toast
     data object NeedInternet : Toast
 
-    /** 5.13 hand-off toasts. */
-    data class HandoffWeb(val walk: Boolean) : Toast
+    /** 5.13 hand-off toasts; [google]: Google Карты were the app (not installed → the browser). */
+    data class HandoffWeb(val walk: Boolean, val google: Boolean = false) : Toast
     data object HandoffOffline : Toast
     data object HandoffFailed : Toast
-    /** 5.13 §5: «Открываем Яндекс Карты / Навигатор» (1 s) before the app opens. */
-    data class HandoffOpen(val navi: Boolean) : Toast
+    /** ENG-03: no browser or app took the booking link. */
+    data object BookingFailed : Toast
+    /** 5.13 §5: «Открываем Яндекс Карты / Google Карты / Навигатор» (1 s) before the app opens. */
+    data class HandoffOpen(val app: HandoffApp) : Toast
 
     /** 5.12 location toasts ([town] = the origin that stays). */
     data class LocationDenied(val town: String) : Toast
@@ -180,6 +182,9 @@ class VerstFlow(
         internal set
     /** The phone's position; set by the app (LocationManager), null in tests without one. */
     var locator: Locator? = null
+
+    /** CEO 29.10: the phone's geocoder, asked when Nominatim fails or finds nothing (search and «where am I»). */
+    var addressFallback: app.verst.data.net.AddressSearch? = null
     /** Shows the system permission dialog (coarse, or fine for «Точнее»); the activity answers through [onLocationPermission]. */
     var askLocationPermission: ((precise: Boolean) -> Unit)? = null
     /** Opens the app's system settings (blocked permission) / the location settings (location off). */
@@ -196,6 +201,13 @@ class VerstFlow(
         internal set
     /** e2e: record the hand-off without leaving the app. */
     var debugHandoffDryRun = false
+
+    // ---- hotel booking (ENG-03)
+    /** The partner link from the server for a night (set by the app; null = the plain search built here). */
+    var hotelLinks: (suspend (app.verst.core.model.HotelLinkQuery) -> String?)? = null
+    /** The last booking link opened (debug panel, tests). */
+    var lastBookingUrl: String? by mutableStateOf(null)
+        internal set
     /** D-5 stop menu (long-press on a Road-ahead row) and its engine hand-off. */
     var stopMenu: StopDto? by mutableStateOf(null)
         internal set
@@ -206,22 +218,34 @@ class VerstFlow(
         internal set
     var dayHandoff: HandoffDto? by mutableStateOf(null)
         internal set
-    /** 5.13 §5 (S4) the hand-off sheet, and «Запомнить выбор» (persisted with the defaults). */
+    /**
+     * 5.13 §5 (S4) the hand-off sheet, and «Запомнить выбор» (persisted with the defaults): with it on, the maps app
+     * picked in the sheet becomes the «Настройки → Навигация» choice.
+     */
     var handoffSheet: HandoffSheet? by mutableStateOf(null)
         internal set
     var handoffRemember by mutableStateOf(false)
         internal set
-    var handoffRememberedApp: HandoffApp? by mutableStateOf(null)
-        internal set
     /**
-     * ADR-0015 §1: the build's Яндекс signing key (MainActivity, from BuildConfig). Without it the hand-off is
-     * unsigned: Карты get the whole day and the Навигатор the next point only (5 unsigned launches a day).
+     * CEO 29.10 «Навигация»: the user's maps choice (AppPrefs in the app; unit tests swap both for a variable).
+     * Compose reads it through AppPrefs' state, so the screens follow a change.
+     */
+    var mapsChoiceRead: () -> app.verst.core.model.MapsChoice = { app.verst.settings.AppPrefs.settings.mapsApp }
+    var mapsChoiceWrite: (app.verst.core.model.MapsChoice) -> Unit = { c -> app.verst.settings.AppPrefs.update { it.copy(mapsApp = c) } }
+    /** Where the phone is now (TelephonyManager, set by the app); null = unknown → Яндекс Карты. */
+    var countrySource: CountrySource? = null
+    /**
+     * ADR-0015 §1: the build's Яндекс signing key (MainActivity, from BuildConfig). CEO 29.10: we do not get a key, so
+     * the Навигатор gets the next point only and the whole day goes to the maps apps; the signer stays for the record.
      */
     var handoffSigner: app.verst.core.model.HandoffSigner? = null
     val handoffSigned: Boolean get() = handoffSigner != null
 
     // ---- 5.9 cards
     var card: CardState? by mutableStateOf(null)
+
+    /** CEO 29.10: the cards' reverse-geocoded street addresses for this session, per place id (else row id). */
+    internal val cardAddresses = HashMap<String, String>()
 
     /** D-7 report sheet: the place, the reason (one of [app.verst.core.model.Reports.REASONS]), the comment. */
     var report: ReportTarget? by mutableStateOf(null)
@@ -232,6 +256,9 @@ class VerstFlow(
     var aboutData by mutableStateOf(false)
     /** 5.5 §10.6: the stop whose ParkingSheet is open (Road ahead). */
     var roadParking: StopDto? by mutableStateOf(null)
+        internal set
+    /** CEO 29.10 (trips abroad): the border stop whose sheet is open (documents, fees, facts with sources). */
+    var roadBorder: StopDto? by mutableStateOf(null)
         internal set
 
     // ---- 5.8 budget fit
@@ -279,7 +306,10 @@ class VerstFlow(
     /** S4 5.11 §10.2: «Другой вариант» found nothing new — the button is disabled until the input changes. */
     var walkOtherNone by mutableStateOf(false)
         internal set
-    /** S4 5.11 §10.5 / 5.10: `NOT_ENOUGH_POIS` with the engine's verified suggestions (never guessed here). */
+    /**
+     * S4 5.11 §10.5 / 5.10: `NOT_ENOUGH_POIS` with the engine's verified suggestions (never guessed here); CEO 29.10:
+     * with `reason: "no_data"` it carries the engine's `messageRu` instead of «мало мест».
+     */
     var walkFew: WalkFew? by mutableStateOf(null)
         internal set
     /** M6: request input → the engine's `requestKey` (stale answers and same-request rebuilds). */
@@ -526,6 +556,7 @@ class VerstFlow(
     internal fun naviApp(target: HandoffTarget): AnalyticsEvent.NaviApp? = when (target) {
         HandoffTarget.Navigator, HandoffTarget.NavigatorDryRun -> AnalyticsEvent.NaviApp.YANDEX_NAVIGATOR
         HandoffTarget.Maps, HandoffTarget.MapsDryRun -> AnalyticsEvent.NaviApp.YANDEX_MAPS
+        HandoffTarget.Google, HandoffTarget.GoogleDryRun -> AnalyticsEvent.NaviApp.GOOGLE_MAPS
         HandoffTarget.Browser, HandoffTarget.BrowserDryRun -> AnalyticsEvent.NaviApp.WEB
         HandoffTarget.None -> null
     }
@@ -568,6 +599,7 @@ class VerstFlow(
         originGen = origin.label
         known.clear()
         rowKm.clear()
+        cardAddresses.clear() // another world's place ids
         popular = emptyList()
         destination = null
         loadRoutes()
@@ -727,6 +759,14 @@ class VerstFlow(
 
     /** System back and every back link. Sheets close first. Returns false on the root (the activity finishes). */
     fun back(): Boolean {
+        if (abroadConsentAsk) {
+            answerAbroadConsent(false)
+            return true
+        }
+        if (roadBorder != null) {
+            closeBorder()
+            return true
+        }
         if (ageGate != null) {
             answerAge(false)
             return true
@@ -933,7 +973,8 @@ class VerstFlow(
     }
 
     internal fun fetchRowKm(rows: List<SuggestionDto>) {
-        val missing = rows.filter { it.pointKey !in rowKm }
+        // CEO 29.10: no engine km for an address abroad (the engine does not route outside Russia)
+        val missing = rows.filter { it.pointKey !in rowKm && !it.abroad }
         if (missing.isEmpty()) return
         val from = origin
         scope.launch {
@@ -989,9 +1030,44 @@ class VerstFlow(
 
     val destinationPoint: GeoPoint? get() = destination?.let { GeoPoint(it.name, it.lat, it.lon) }
 
+    /**
+     * CEO 29.10: the picked КУДА is an address abroad. The phone engine plans only in Russia (`INVALID_INPUT`
+     * outside_russia): no estimate is asked for it, and (wave 1) only the server plans it — see [abroadOnServer].
+     */
+    val destinationAbroad: Boolean get() = readyRoute == null && destination?.abroad == true
+
+    /**
+     * CEO 29.10 (trips abroad, wave 1): this build has a server, which plans trips abroad. The app's gateway knows it;
+     * unit tests with a fake engine set it.
+     */
+    var serverConfigured: () -> Boolean = { (gateway as? app.verst.engine.ServerPlannerGateway)?.serverConfigured == true }
+
+    /** Security review В-1: the tester's consent to plan on the server (AppPrefs in the app; unit tests swap both). */
+    var serverConsentRead: () -> Boolean = { app.verst.settings.AppPrefs.settings.serverConsent }
+    var serverConsentWrite: () -> Unit = { app.verst.settings.AppPrefs.update { it.copy(serverConsent = true) } }
+
+    /**
+     * CEO 29.10 (wave 1): КУДА is abroad and the server can plan it now (a server in this build, the phone online) —
+     * whatever «Где строить маршрут» says. The screens say so in one line («Поездку за границу строит сервер Версты —
+     * нужен интернет.»).
+     */
+    val abroadOnServer: Boolean get() = destinationAbroad && serverConfigured() && connectivity.online
+
+    /**
+     * КУДА is abroad and nothing can plan it now (offline, or a build without a server): the Navigator's plate with the
+     * maps hand-off ([abroadHandoff]); no plan is sent.
+     */
+    val abroadBlocked: Boolean get() = destinationAbroad && !abroadOnServer
+
+    /** Security review В-1 before the first trip abroad: the settings' consent dialog («Согласен» / «Не сейчас»). */
+    var abroadConsentAsk by mutableStateOf(false)
+        private set
+
     /** ПОЕХАЛИ on 5.2 → Instruments with A → B. */
     fun openInstrumentsFree() {
         val d = destination ?: return
+        // CEO 29.10: never a doomed plan abroad — only the server plans there (the plate says why when it can't)
+        if (d.abroad && !(serverConfigured() && connectivity.online)) return
         readyRoute = null
         if (!dailyKmTouched) dailyKm = TripMath.defaultDailyKm(rowKm[d.pointKey] ?: 0)
         push(Route.Instruments)
@@ -1003,7 +1079,8 @@ class VerstFlow(
     fun draft(): PlanRequest? = if (readyRoute != null || destinationPoint != null) request() else null
 
     private fun estimateTarget(): PlanRequest? =
-        if ((top == Route.Navigator && !editingFrom) || top == Route.Instruments) draft() else null
+        if (destinationAbroad) null // CEO 29.10: the engine rejects a destination abroad — nothing to estimate
+        else if ((top == Route.Navigator && !editingFrom) || top == Route.Instruments) draft() else null
 
     /** The engine's km/days of the draft: exact for this request, stale while a newer estimate runs, or null. */
     val figures: TripFiguresPick.Picked?
@@ -1094,15 +1171,37 @@ class VerstFlow(
         dailyKm = dailyKm,
         budgetRub = budgetCustom ?: BudgetPresets[budgetIndex],
         mood = mood,
+        vehicle = carVehicle(),
+        avoidTolls = app.verst.settings.AppPrefs.settings.avoidTolls,
+        abroad = destinationAbroad, // CEO 29.10: the server plans it, never the phone
     )
+
+    /** The car from the settings (traveller К4), or null while it is the engine's default car. */
+    private fun carVehicle(): app.verst.core.model.VehicleInput? {
+        val s = app.verst.settings.AppPrefs.settings
+        val car = app.verst.core.model.VehicleInput(s.consumption, s.fuelType, s.tankL)
+        val default = app.verst.core.model.VehicleInput(
+            app.verst.core.model.Car.DEFAULT_CONSUMPTION, app.verst.core.model.Car.DEFAULT_FUEL, app.verst.core.model.Car.DEFAULT_TANK,
+        )
+        return car.takeIf { it != default }
+    }
 
     /** The budget the gauge shows: a no-fit «Поднять бюджет до …» value, else the preset. */
     val budgetRub: Int? get() = budgetCustom ?: BudgetPresets[budgetIndex]
 
     // ------------------------------------------------------------------------------------------ drive
 
-    /** ПОЕХАЛИ on 5.3 → Drive; the plan runs on `verst-python`, the steps are paced ≥ 400 ms (5.4 §6). */
+    /**
+     * ПОЕХАЛИ on 5.3 → Drive; the plan runs on `verst-python` (or the server), the steps are paced ≥ 400 ms (5.4 §6).
+     * CEO 29.10: a trip abroad goes to the server only — nothing without one or offline (the plate), and the consent
+     * dialog first when the tester has not agreed to plan on the server yet.
+     */
     fun go() {
+        if (abroadBlocked) return // a plan abroad on the phone would only fail (`INVALID_INPUT` outside_russia)
+        if (destinationAbroad && !serverConsentRead()) {
+            abroadConsentAsk = true
+            return
+        }
         if (top != Route.Drive) push(Route.Drive)
         val r = request()
         track {
@@ -1114,6 +1213,14 @@ class VerstFlow(
             )
         }
         startPlan(r, planId = UUID.randomUUID().toString()) // tracking plan §2.5 q3: a new trip_id per ПОЕХАЛИ only
+    }
+
+    /** The consent dialog's answer: «Согласен» records the consent and plans on the server; «Не сейчас» stays. */
+    fun answerAbroadConsent(agree: Boolean) {
+        abroadConsentAsk = false
+        if (!agree) return
+        serverConsentWrite()
+        if (serverConsentRead()) go()
     }
 
     fun retryPlan() = startPlan(lastPlanRequest ?: request())
@@ -1228,6 +1335,7 @@ class VerstFlow(
         openedFromSaved = fromSaved
         expandedLine = null
         replace = null
+        roadBorder = null
         stopMenu = null
         stopHandoff = null
         dayMenu = null
@@ -1254,9 +1362,16 @@ class VerstFlow(
 
     fun driveAction(code: String): DriveAction = when (code) {
         "INVALID_INPUT" -> DriveAction.TO_INSTRUMENTS
-        "UNREACHABLE", "TOO_SHORT" -> DriveAction.CHANGE_ROUTE
+        "UNREACHABLE", "TOO_SHORT", app.verst.engine.ServerPlannerGateway.ABROAD_NO_SERVER -> DriveAction.CHANGE_ROUTE
+        app.verst.engine.ServerPlannerGateway.ABROAD_NO_CONSENT -> DriveAction.TO_INSTRUMENTS
         else -> DriveAction.RETRY
     }
+
+    /**
+     * CEO 29.10: the engine's verdict about a point abroad (a closed border, no crossing, a country it does not plan)
+     * is about the route — back to the Navigator with the server's own sentence; the rest by [code][driveAction].
+     */
+    fun driveAction(e: EngineErrorDto): DriveAction = if (e.abroadVerdict) DriveAction.CHANGE_ROUTE else driveAction(e.code)
 
     /** Error CTA: retry, back to Instruments, or back to the Navigator with the error in its caption. */
     fun onDriveError(action: DriveAction, message: String) {
@@ -1499,7 +1614,8 @@ class VerstFlow(
         originLabel = origin.label, originLat = origin.lat, originLon = origin.lon, originGen = originGen,
         locationAsked = locationAsked, originFromGps = originFromGps,
         walkAdults = cityAdults, walkChildren = cityChildren, walkDog = cityDog,
-        handoffRemember = handoffRemember, handoffApp = handoffRememberedApp?.name,
+        // CEO 29.10: the remembered app is the «Навигация» setting now (AppSettings.mapsApp)
+        handoffRemember = handoffRemember, handoffApp = null,
     )
 
     private fun applyDefaults(d: DefaultsDto) {
@@ -1519,7 +1635,6 @@ class VerstFlow(
         cityChildren = d.walkChildren.coerceIn(0, 9)
         cityDog = d.walkDog
         handoffRemember = d.handoffRemember
-        handoffRememberedApp = d.handoffApp?.let { n -> HandoffApp.entries.firstOrNull { it.name == n } }
         val o = GeoPoint(d.originLabel, d.originLat, d.originLon)
         if (o != origin) {
             origin = o
@@ -1630,29 +1745,51 @@ enum class GpsState { Off, Waiting, On, Failed }
 /** The answers to the post-trip question «Вы съездили?» (tracking plan §2.3, VAL-04). */
 enum class DrivenAnswer { FULL, PARTIAL, NO }
 
-/** Where a hand-off went. */
-/** Where a hand-off went (or would go: the dry runs of the e2e). */
-enum class HandoffTarget { Navigator, Maps, Browser, None, NavigatorDryRun, MapsDryRun, BrowserDryRun }
+/** Where a hand-off went (or would go: the dry runs of the e2e). [Maps] = Яндекс Карты, [Google] = Google Карты. */
+enum class HandoffTarget { Navigator, Maps, Google, Browser, None, NavigatorDryRun, MapsDryRun, GoogleDryRun, BrowserDryRun }
 
 /** Opens ADR-0014 links outside the app: car navigator → maps → web, walk maps → web (the activity uses intents). */
 interface HandoffLauncher {
     fun navigatorInstalled(): Boolean
     fun mapsInstalled(): Boolean = false
+    /** CEO 29.10: the Google Maps app (`com.google.android.apps.maps`). */
+    fun googleInstalled(): Boolean = false
     fun open(links: HandoffLinksDto, walk: Boolean): HandoffTarget
 
     /**
-     * 5.13 §5 (S4): open exactly the app the user chose with [uri]; Карты without the app → [web] in the browser;
-     * Навигатор without the app → [HandoffTarget.None] (the sheet offers the store instead).
+     * 5.13 §5 (S4): open exactly the app the user chose with [uri]; Яндекс / Google Карты without the app → [web] in
+     * the browser; Навигатор without the app → [HandoffTarget.None] (the sheet offers the store instead).
      */
-    fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget =
-        open(if (app == HandoffApp.NAVI) HandoffLinksDto(navigator = uri) else HandoffLinksDto(maps = uri, web = web), walk = app == HandoffApp.MAPS)
+    fun openIn(app: HandoffApp, uri: String?, web: String?): HandoffTarget = when (app) {
+        HandoffApp.NAVI -> open(HandoffLinksDto(navigator = uri), walk = false)
+        HandoffApp.MAPS -> open(HandoffLinksDto(maps = uri, web = web), walk = true)
+        HandoffApp.GOOGLE -> open(HandoffLinksDto(web = web), walk = true)
+    }
 
     /** «Установить из магазина приложений». */
     fun openStore(app: HandoffApp) = Unit
 }
 
-/** The two hand-off apps of the S4 sheet (5.13 §5). */
-enum class HandoffApp { MAPS, NAVI }
+/**
+ * The hand-off apps of the S4 sheet (5.13 §5): [MAPS] Яндекс Карты and [GOOGLE] Google Карты take every point of the
+ * day (CEO 29.10); [NAVI] Яндекс Навигатор takes one point from us, so it only goes to the next point.
+ */
+enum class HandoffApp { MAPS, GOOGLE, NAVI }
+
+/** The sheet row / launcher app of a maps app. */
+val app.verst.core.model.MapsApp.handoffApp: HandoffApp
+    get() = when (this) {
+        app.verst.core.model.MapsApp.YANDEX -> HandoffApp.MAPS
+        app.verst.core.model.MapsApp.GOOGLE -> HandoffApp.GOOGLE
+    }
+
+/**
+ * Where the phone is now, ISO 3166 alpha-2 (CEO 29.10: TelephonyManager network → SIM → the system locale in the
+ * app); null = unknown. An interface so unit tests can fake the country.
+ */
+fun interface CountrySource {
+    fun country(): String?
+}
 
 /** 5.13 §5: the open hand-off sheet: [day] or the «До след.» scope ([day] = null), and the engine's day hand-off. */
 data class HandoffSheet(val day: Int?, val handoff: HandoffDto? = null, val handoffDay: Int = day ?: 1)
@@ -1676,7 +1813,7 @@ data class ReportTarget(val name: String, val placeId: String?, val stopId: Stri
 data class CardState(val source: CardSource, val rowId: String, val poiId: String?, val ui: app.verst.feature.card.CardUi)
 
 /** 5.10 18+ dialog: the alcohol preset or the «бары» interest waiting for the answer. */
-data class AgeGate(val preset: String? = null, val interest: String? = null)
+data class AgeGate(val preset: String? = null, val interest: String? = null, val thenBuild: Boolean = false)
 
 /** 5.12 §2 address search state under the ОТКУДА / КУДА field. */
 /**
@@ -1697,20 +1834,48 @@ val CityPresetOrder = listOf(DOG_WALK, "overview", "museums", "ryumochnye", "bee
 /** How a walk is requested (5.11 §10.2): it decides what a `NOT_ENOUGH_POIS` does. */
 enum class WalkBuild { GO, FILTER, OTHER, REMOVE }
 
-/** `NOT_ENOUGH_POIS` for the request ([durationMin], [unlimited]) with the engine's verified suggestions. */
+/**
+ * `NOT_ENOUGH_POIS` for the request ([durationMin], [unlimited]) with the engine's verified suggestions. CEO 29.10:
+ * [noData] — the engine's `reason: "no_data"`: our catalogue has no such places in this town (a gap of our base, not
+ * a small town); the plate then says the engine's [messageRu] and offers other walks only.
+ */
 data class WalkFew(
     val durationMin: Int?,
     val unlimited: Boolean,
     val suggestions: List<app.verst.core.model.dto.WalkSuggestion>,
     val count: Int?,
-)
+    val noData: Boolean = false,
+    val messageRu: String? = null,
+) {
+    companion object {
+        /** The plate state of a `NOT_ENOUGH_POIS` [e] answering a request for [durationMin] / [unlimited]. */
+        fun of(durationMin: Int?, unlimited: Boolean, e: app.verst.core.model.dto.EngineErrorDto): WalkFew = if (e.isNoData) {
+            // a longer walk or the removed places back would not find what we never loaded: other walks only
+            WalkFew(durationMin, unlimited, e.walkSuggestions.filter { it.preset != null }, e.count, noData = true, messageRu = e.messageRu)
+        } else {
+            WalkFew(durationMin, unlimited, e.walkSuggestions, e.count)
+        }
+    }
+}
 
 /** The picker sheets of 5.10 (prefs) and 5.11 (filter bar). */
 enum class CityPicker { DURATION, PRESET, CREW, BUDGET, PACE }
 
-/** The R1 local links as an ADR-0014 hand-off (the fallback when the engine call fails). */
-fun NaviHandoff.toDto(day: Int?, mode: String = "car"): HandoffDto =
-    HandoffDto(mode, day, listOf(HandoffPartDto(1, emptyList(), HandoffLinksDto(navi, mapsApp, web))), truncated = false)
+/**
+ * The R1 local links as an ADR-0014 hand-off (the fallback when the engine call fails). The points carry their roles
+ * like the engine's (`origin` only when the route does not start at the phone), so Google Карты get the same route.
+ */
+fun NaviHandoff.toDto(day: Int?, mode: String = "car"): HandoffDto {
+    val pts = points.mapIndexed { i, p ->
+        val role = when {
+            i == 0 && !fromHere && points.size > 1 -> "origin"
+            i == points.lastIndex -> "destination"
+            else -> "via"
+        }
+        app.verst.core.model.dto.HandoffPointDto(p.lat, p.lon, role = role)
+    }
+    return HandoffDto(mode, day, listOf(HandoffPartDto(1, pts, HandoffLinksDto(navi, mapsApp, web))), truncated = false)
+}
 
 /** Great-circle distance for «the nearest town». */
 object TownMath {

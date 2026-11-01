@@ -170,7 +170,7 @@ ym(METRIKA_ID, 'reachGoal', 'tg_click', {
 | `reserve_toggled` | Переключён запас 10 % | `state`: `on`/`off` | Доверие к запасу |
 | `hotel_link_clicked` | «Забронировать ночь» нажата, и внешний браузер открыт | `stop_id`; `price_bucket` (§2.4) | Денежная воронка; шаг воронки |
 | `excursion_link_clicked` | Нажата ссылка на экскурсию, браузер открыт | `place_id` | Денежная воронка |
-| `navigator_opened` | Запущена передача маршрута в навигатор | `app`: `yandex_navigator`/`yandex_maps`/`2gis`; `day`: int | Реальное использование в дороге |
+| `navigator_opened` | Запущена передача маршрута в навигатор или карты | `app`: `yandex_navigator`/`yandex_maps`/`google_maps` (CEO 29.10)/`2gis`/`web`; `day`: int | Реальное использование в дороге |
 | `trip_saved` | Поездка сохранена на устройстве | `start_date`: `гггг-мм-дд`; `days`: int (**добавка**, §2.5) | Ценность; шаг воронки |
 | `trip_shared` | Отправлено через системное меню «Поделиться» | `channel` (пакет приложения-получателя, обобщённо: `messenger`/`social`/`other`) | Вирусность |
 | `pro_waitlist_joined` | Отправлена форма «Хочу Pro» (без оплаты) | `source` | Спрос на Pro |

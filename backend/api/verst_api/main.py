@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from verst_api import API_VERSION, errors, store
+from verst_api import API_VERSION, errors, links, store
 from verst_api.db import make_pool, migrate_up
 from verst_api.deps import Context
 from verst_api.engine import Engine
@@ -52,7 +52,7 @@ def create_app(
         pool = make_pool(settings.database_url, settings.db_pool_max)
         await pool.open()
         await asyncio.get_running_loop().run_in_executor(None, engine.load)
-        ctx = Context(settings, pool, engine)
+        ctx = Context(settings, pool, engine, links.AffiliateLinks(links.travelpayouts(settings)))
         app.state.ctx = ctx
         cleaner = asyncio.create_task(_cleanup_loop(ctx))
         log.info("verst-api started", extra={"env": settings.env, "routing": engine.routing_mode})

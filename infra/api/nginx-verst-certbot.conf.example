@@ -1,0 +1,44 @@
+# verst-api behind the `jonasal/nginx-certbot` container (the CEO's test VM): the same rules as the Caddyfile
+# (private endpoints 404, 2 MB bodies, SSE unbuffered, no access log: URIs carry coordinates, R-07).
+# The container issues the Let's Encrypt certificate itself from the ssl_certificate paths below and redirects
+# port 80 to HTTPS with its own redirector; it runs on the host network, so 127.0.0.1:8000 is verst-api.
+#
+#   UC=$(docker inspect nginx-nginx-1 --format '{{range .Mounts}}{{if eq .Destination "/etc/nginx/user_conf.d"}}{{.Source}}{{end}}{{end}}')
+#   sed "s/__DOMAIN__/212-108-82-26.sslip.io/g" nginx-verst-certbot.conf.example > "$UC/verst.conf"
+#   docker restart nginx-nginx-1        # creates the certificate for the new name, then serves it
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name __DOMAIN__;
+
+    ssl_certificate         /etc/letsencrypt/live/__DOMAIN__/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/__DOMAIN__/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/__DOMAIN__/chain.pem;
+    ssl_dhparam             /etc/letsencrypt/dhparams/dhparam.pem;
+
+    access_log off;
+    client_max_body_size 2m;
+    server_tokens off;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options nosniff always;
+
+    location ~ ^/(metrics|readyz|docs|openapi\.json)(/|$) {
+        return 404;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        # replace, never append: the API trusts this header (entrypoint.sh --forwarded-allow-ips)
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Connection "";
+        # the plan progress stream (SSE) must reach the phone event by event
+        proxy_buffering off;
+        proxy_cache off;
+        gzip off;
+        proxy_read_timeout 40s;
+    }
+}

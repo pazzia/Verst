@@ -1,0 +1,130 @@
+{
+  "_about": [
+    "CEO 29.10 (trips abroad, wave 1, server only): the car border crossings the engine routes through, from docs/plan/abroad-wave1-sources.md (search results of 2026-10-29, «не проверено»).",
+    "No source gave a crossing's coordinates (sources doc §11 item 4). `anchor` names the nearest catalogue town on the `country` side: the stop is put there and says so (`coordsApprox`). A crossing without an anchor is put where the straight line between the two waypoints leaves the first country, snapped to the nearest catalogue town on that side.",
+    "`between`: the two countries; the engine finds a path of crossings between any two supported countries (Russia — Georgia — Turkey …). `marker`: a border without a checkpoint (no dwell).",
+    "`wait`: only what a source says about the wait; null = «время ожидания неизвестно» and the planner's buffer (planner_config.json `border.buffer_min`), labelled as a buffer."
+  ],
+  "checkedAt": "2026-10-29",
+  "crossings": [
+    {
+      "id": "ru_by",
+      "between": ["RU", "BY"],
+      "nameRu": "Граница с Беларусью",
+      "marker": true,
+      "anchor": null,
+      "facts": [
+        {"textRu": "Пунктов пропуска на российско-белорусской границе нет, пограничного контроля для граждан России и Беларуси нет (статус на 29.10.2026 не подтверждён)", "sources": [{"url": "https://ilex.by/chto-izmenilos-v-peresechenii-granitsy-belarusi-i-rossii-s-11-01-2025/", "type": "primary"}]},
+        {"textRu": "Гражданам третьих стран пересекать эту границу по суше нельзя", "sources": [{"url": "https://ilex.by/chto-izmenilos-v-peresechenii-granitsy-belarusi-i-rossii-s-11-01-2025/", "type": "primary"}]}
+      ],
+      "risks": [],
+      "wait": null
+    },
+    {
+      "id": "verkhny_lars",
+      "between": ["RU", "GE"],
+      "nameRu": "Граница: Верхний Ларс — Дарьяли",
+      "marker": false,
+      "anchor": {"country": "RU", "region": "RU-SE", "towns": ["Владикавказ"]},
+      "facts": [
+        {"textRu": "Единственный автомобильный переход Россия — Грузия для легковых; Верхний Ларс — в Северной Осетии", "sources": [{"url": "https://lenta.ru/articles/2026/06/11/pravila-vezda-v-gruziyu-2026/", "type": "primary"}, {"url": "https://110km.ru/art/na-mashine-v-gruziyu-cherez-verhniy-lars-rashody-i-strahovki-187021.html", "type": "secondary"}]},
+        {"textRu": "Круглосуточно с 01.06.2013, 39 полос; текущий режим не подтверждён", "sources": [{"url": "https://www.alta.ru/articles/25785/", "type": "primary"}]},
+        {"textRu": "Электронная очередь Росгранстроя — только для грузовых; онлайн-очереди для легковых нет", "sources": [{"url": "https://mintrans.gov.ru/press-center/news/12740", "type": "official"}]},
+        {"textRu": "Открыт ли переход сегодня (погода), ежедневно сообщает Armenpress", "sources": [{"url": "https://armenpress.am/ru/article/1109477/amp", "type": "primary"}]}
+      ],
+      "risks": [
+        {"textRu": "С ноября по март переход закрывают из-за погоды на Крестовом перевале", "months": [11, 12, 1, 2, 3], "sources": [{"url": "https://trans.info/ru/problemyi-na-rossiysko-gruzinskoy-granitse-chto-ne-tak-s-verhnim-larsom-196571", "type": "primary"}]}
+      ],
+      "wait": null
+    },
+    {
+      "id": "psou",
+      "between": ["RU", "AB"],
+      "nameRu": "Граница: Адлер — Псоу",
+      "marker": false,
+      "anchor": {"country": "RU", "region": "RU-KDA", "towns": ["Адлер", "Сочи"]},
+      "facts": [
+        {"textRu": "Самый загруженный автомобильный пункт пропуска России в I квартале 2026 года; идёт реконструкция", "sources": [{"url": "https://samokatus.ru/travel-telegram-feed/Mintrans_Russia/9997", "type": "primary"}]},
+        {"textRu": "После российского контроля пассажиры идут пешком, водитель проезжает с досмотром", "sources": [{"url": "https://rai-da.ru/article/psou-border", "type": "secondary"}, {"url": "https://nashaplaneta.net/blog/otdyh-v-abhazii-na-avtomobile-2026", "type": "secondary"}]}
+      ],
+      "risks": [],
+      "wait": {"textRu": "По сообщениям водителей (вторичные источники): в сезон — до нескольких часов, в сентябре — 20–30 минут", "sources": [{"url": "https://rai-da.ru/article/psou-border", "type": "secondary"}, {"url": "https://nashaplaneta.net/blog/otdyh-v-abhazii-na-avtomobile-2026", "type": "secondary"}]}
+    },
+    {
+      "id": "ru_kz",
+      "between": ["RU", "KZ"],
+      "nameRu": "Граница с Казахстаном",
+      "marker": false,
+      "anchor": null,
+      "facts": [
+        {"textRu": "Самые загруженные автомобильные пункты пропуска в I квартале 2026 года: Бугристое, Сагарчин, Караузек (Росгранстрой). Их координат нет, поэтому пункт на маршруте не выбран — точка там, где маршрут пересекает границу", "sources": [{"url": "https://samokatus.ru/travel-telegram-feed/fgku_rosgranstroy/4429", "type": "primary"}]},
+        {"textRu": "Сырым закрыт для легковых на реконструкцию с 04.08.2025 до конца 2026 года", "sources": [{"url": "https://www.caravan.kz/?p=19124344", "type": "primary"}, {"url": "https://bizmedia.kz/2025-07-22-punkt-propuska-syrymchastichno-zakroyut-do-koncza-2026-goda/", "type": "primary"}]},
+        {"textRu": "Публичной онлайн-очереди для легковых нет: CarGoRuqsat — только для грузовых", "sources": [{"url": "https://24.kg/english/359448_Kazakhstan_launches_e-queue_system_at_two_border_checkpoints_with_Kyrgyzstan", "type": "primary"}]},
+        {"textRu": "Граница в 2026 году работает в штатном режиме, ограничений для граждан России нет", "sources": [{"url": "https://polis812.ru/blog/otkryty-li-graniczy-kazahstana-vezd-dlya-rossiyan-na-mashine/", "type": "secondary"}]}
+      ],
+      "risks": [],
+      "wait": null
+    },
+    {
+      "id": "sadakhlo",
+      "between": ["GE", "AM"],
+      "nameRu": "Граница: Садахло — Баграташен",
+      "marker": false,
+      "anchor": null,
+      "facts": [
+        {"textRu": "Путь из России в Армению: Верхний Ларс → Грузия → Садахло / Баграташен", "sources": [{"url": "https://visasam.ru/oformlenie/sng/peresechenie-granicy-gruzii-i-armenii.html", "type": "secondary"}, {"url": "https://docrocket.ru/articles/granica-rossiya-armeniya", "type": "secondary"}]}
+      ],
+      "risks": [],
+      "wait": null
+    },
+    {
+      "id": "sarpi",
+      "between": ["GE", "TR"],
+      "nameRu": "Граница: Сарпи — Сарп",
+      "marker": false,
+      "anchor": {"country": "GE", "towns": ["Батуми"]},
+      "facts": [
+        {"textRu": "Путь из России в Турцию: Верхний Ларс → Грузия → Сарпи у Батуми; альтернатива — переход Вале", "sources": [{"url": "https://vandrovnik.ru/tr/turkey-road-trip", "type": "secondary"}, {"url": "https://www.autonews.ru/news/6a71ac809a79476d00c5b36c", "type": "primary"}]},
+        {"textRu": "Долги за платные дороги Турции (HGS) проверяют на выезде: с долгом выезд запрещён, оплатить можно на таможне", "sources": [{"url": "https://www.dunya.com/gundem/yabanci-plakali-araclar-icin-yeni-donem-gecis-kurallari-degisti-haberi-834074", "type": "primary"}]}
+      ],
+      "risks": [],
+      "wait": null
+    },
+    {
+      "id": "kz_uz",
+      "between": ["KZ", "UZ"],
+      "nameRu": "Граница Казахстана и Узбекистана",
+      "marker": false,
+      "anchor": null,
+      "facts": [
+        {"textRu": "Общей границы с Россией нет, путь через Казахстан; конкретные переходы Казахстан — Узбекистан не проверялись", "sources": []}
+      ],
+      "risks": [],
+      "wait": null
+    },
+    {
+      "id": "kz_kg",
+      "between": ["KZ", "KG"],
+      "nameRu": "Граница Казахстана и Киргизии",
+      "marker": false,
+      "anchor": null,
+      "facts": [
+        {"textRu": "Общей границы с Россией нет, путь через Казахстан; конкретные переходы Казахстан — Киргизия не проверялись", "sources": []}
+      ],
+      "risks": [],
+      "wait": null
+    },
+    {
+      "id": "yarag_kazmalyar",
+      "between": ["RU", "AZ"],
+      "nameRu": "Граница: Яраг-Казмаляр — Самур",
+      "marker": false,
+      "anchor": null,
+      "facts": [
+        {"textRu": "Самур — круглосуточный международный пункт (таможня Азербайджана); для легковых закрыт до 02.01.2027", "sources": [{"url": "https://customs.gov.az/en/ferdler-ucun/dovlet-serhedinden-buraxilis-menteqeleri/4", "type": "official"}]}
+      ],
+      "risks": [],
+      "wait": null
+    }
+  ]
+}

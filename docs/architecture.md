@@ -541,16 +541,17 @@ WHERE s.status='live' AND s.vehicle_class = 1 AND ST_DWithin(s.geom::geography, 
 | `drive_time_factor` | 1.10 | §6.6 |
 | `day_start_first` | `"08:00"` (used only when `start_at` is None) | §4.3 |
 | `day_start_next` | `"09:00"` | §6.6 |
-| `day_budget_min` | `{"calm":540,"more_stops":600,"just_drive":600}` | §6.9 |
+| `day_budget_min` | `{"calm":540,"more_stops":600,"just_drive":720,"fun":660}` (CEO 2026-10-29: «Только доехать» the longest day, «Спокойно» the shortest) | §6.9 |
 | `split` | `{"window_lo":0.70,"window_hi":1.05,"hard_cap":1.05,"widened_lo":0.40,"widened_hi":1.30,"template_hi":1.05,"template_lo":0.90}` | §6.4–6.5 |
 | `overnight_score` | `{"w_h":3.0,"w_q":2.0,"w_e":1.5,"w_km":2.0,"w_detour":1.0,"h_cap":5,"h_no_parking_weight":0.5,"family_room_min_people":3}` | §6.5 |
-| `overnight_eta_allowance_min` | `{"calm":120,"more_stops":150,"just_drive":30}` | §6.5 |
+| `overnight_eta_allowance_min` | `{"calm":120,"more_stops":150,"just_drive":30,"fun":150}`; `overnight_score.town_interest` `{"calm":1,"more_stops":1,"just_drive":0,"fun":1}` (0: the town's quality and evening do not move «Только доехать»'s overnight) | §6.5 |
 | `fuel` | `{"usable_frac":0.8,"start_frac":1.0,"lookahead_km":40,"lookback_km":100,"coincide_km":2,"evening_next_day_km":60,"evening_window_km":40,"skip_near_finish_frac":0.10,"coffee_after_drive_min":60}` | §6.7 |
-| `rest_interval_min` | `{"calm":120,"more_stops":90,"just_drive":180}` | §6.8 |
+| `rest_interval_min` | `{"calm":120,"more_stops":90,"just_drive":180,"fun":90}`; `rest_dwell_min` `{"calm":30,"more_stops":20,"just_drive":20,"fun":20}` (CEO 2026-10-29: long breaks for «Спокойно»; replaces `dwell_min.rest`) | §6.8 |
 | `rest` | `{"window_before_min":30,"widen_before_min":60,"widen_after_min":15,"min_remaining_drive_min":30,"break_min_dwell":15,"max_detour_min":10,"min_gap_min":60,"extended_detour_min":15}` | §6.8, §16.2, §16.11.1 |
-| `dwell_min` | `{"coffee":15,"fuel":10,"fuel_coffee":15,"rest":20,"lunch":60,"sight_default":60,"via":30}` | §6.6 (SPEC §7.4) |
+| `dwell_min` | `{"coffee":15,"fuel":10,"fuel_coffee":15,"lunch":60,"sight_default":60,"via":30}` | §6.6 (SPEC §7.4) |
 | `lunch_window` | `["12:00","14:30"]`, `lunch_sweet_spot` `["12:30","13:30"]` | §6.8 |
-| `sights` | `{"max_per_day":{"calm":2,"more_stops":4,"just_drive":0},"min_score":2.0}` | §6.9 |
+| `sights` | `{"max_per_day":{"calm":2,"more_stops":4,"just_drive":0,"fun":5},"min_score":2.0,"fun":{"detour_min":45,"min_quality":0.40,"min_score":1.0,"long_per_day":3,"kind_bonus":0.15}}` (CEO 2026-10-29: «Весело и познавательно» admits longer detours and lower scores in the open-data world) | §6.9 |
+| `town_visit` | `{"on":0,"arrive_before":"16:00","evening_late_min":{"fun":90,…0},"evening_max":{"calm":0,"more_stops":2,"just_drive":0,"fun":3},"morning_max":{"calm":1,"more_stops":1,"just_drive":0,"fun":1},"radius_km":4.0}` (`on` = 1 in `russia_v1`; CEO 2026-10-29: no town visits for «Только доехать», no evening run for «Спокойно») | block 1 |
 | `alternatives` | `{"window_min":45,"max":3,"cluster_km":2.0}` | §6.11, §16.11.3 |
 | `cost` | `{"reserve_frac":0.10,"line_step":10,"total_step":100,"child_food_weight_under7":0.5,"assumed_child_age":8,"breakfast_price_frac":0.6,"dinner_last_day_after":"19:00"}` | §7 |
 | `toll_night` | `["00:00","06:00"]` (used when a segment has no own night window) | §7.2 |

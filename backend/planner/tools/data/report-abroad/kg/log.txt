@@ -1,0 +1,58 @@
+{"labels": {"Q813": "Kyrgyzstan"}, "capitals": ["Q9361"], "currencies": ["KGS"], "tz": ["UTC+06:00"], "ok": true}
+{"mismatches": {}, "resolved": {}}
+town classes: 547
+towns: 39 candidates from 547 classes
+towns: 38; missing must-have: []
+pois: 0/38 towns, 20 rows, 0 failed
+pois: 44 rows, 0 towns failed
+forms: 38 towns; fixture oracle 47/48
+classes: 10053 ids; resolved {}; unresolved []
+wikidata: 0/40
+wikidata: 40 items, 27 with ru Wikipedia
+wikipedia: 0/27
+wikipedia: 27 pages, 27 with an extract
+voyage: 136 Q-ids in listings
+extract: https://download.geofabrik.de/asia/kyrgyzstan-latest.osm.pbf
+-rw-r--r-- 1 runner runner 77126720 Oct 30 03:35 /home/runner/work/_temp/c.osm.pbf
+bars: 96 rows from 110 named features, 29 towns (extract)
+food: 1603 rows from 2273 named features, 29 towns (extract)
+parks: 73 rows from 109 named parks and gardens, 38 towns (extract)
+osm: 3227 POI candidates, 64 paid parking places
+geosearch: 0/1500
+geosearch: 500/1500
+geosearch: 1000/1500
+candidates: 74 photo files
+credits: 50/74
+credits: 74 of 74 files
+photo meta: 50/74
+photo meta: 74 of 74 files
+credits: 50/49
+credits: 49 of 49 files
+photo meta: 49/49
+photo meta: 49 of 49 files
+{
+ "towns": 29,
+ "pois": 75,
+ "bars": 95,
+ "food": 892,
+ "links": 0,
+ "credits": 34,
+ "bytes": {
+  "catalogue_meta.json.gz": 2644,
+  "catalogue_towns.json.gz": 1772,
+  "catalogue_pois.json.gz": 4934,
+  "catalogue_bars.json.gz": 2595,
+  "catalogue_food.json.gz": 20152
+ },
+ "totalBytes": 32097
+}
+{
+ "version": "wd-20261030-abroad2",
+ "count": 68,
+ "townsSha256": "e9c833f4304f440ec852a65b002c7dd03279ad9531e0bfba0e59fbf7f10656dd",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 2854,
+ "sha256": "5b33fa3c16273e2bdf54444b0f31620796d9471645dd94b076a8ea848a19293d"
+}
+tzCheck: {"checked": true, "ok": true, "mismatches": []}
+regions: [{"code": "KG-B", "nameRu": "Баткенская область", "tz": "Asia/Bishkek"}, {"code": "KG-C", "nameRu": "Чуйская область", "tz": "Asia/Bishkek"}, {"code": "KG-GB", "nameRu": "Бишкек", "tz": "Asia/Bishkek"}, {"code": "KG-GO", "nameRu": "Ош", "tz": "Asia/Bishkek"}, {"code": "KG-J", "nameRu": "Джалал-Абадская область", "tz": "Asia/Bishkek"}, {"code": "KG-N", "nameRu": "Нарынская область", "tz": "Asia/Bishkek"}, {"code": "KG-O", "nameRu": "Ошская область", "tz": "Asia/Bishkek"}, {"code": "KG-Y", "nameRu": "Иссык-Кульская область", "tz": "Asia/Bishkek"}]

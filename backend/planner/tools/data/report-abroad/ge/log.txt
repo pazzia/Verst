@@ -1,0 +1,62 @@
+{"labels": {"Q23334": "Abkhazia", "Q230": "Georgia"}, "capitals": ["Q994"], "currencies": ["GEL"], "tz": ["UTC+04:00"], "ok": true}
+{"mismatches": {}, "resolved": {}}
+town classes: 547
+towns: 77 candidates from 547 classes
+towns: 73; missing must-have: []
+pois: 0/73 towns, 146 rows, 0 failed
+pois: 50/73 towns, 250 rows, 0 failed
+retry 1/4 in 5s: HTTP Error 502: Bad Gateway
+pois: 304 rows, 0 towns failed
+forms: 71 towns; fixture oracle 47/48
+classes: 10052 ids; resolved {}; unresolved []
+wikidata: 0/285
+wikidata: 285 items, 173 with ru Wikipedia
+wikipedia: 0/173
+wikipedia: 173 pages, 173 with an extract
+voyage: 136 Q-ids in listings
+extract: https://download.geofabrik.de/europe/georgia-latest.osm.pbf
+-rw-r--r-- 1 runner runner 102511615 Oct 30 01:29 /home/runner/work/_temp/c.osm.pbf
+bars: 420 rows from 500 named features, 61 towns (extract)
+food: 3049 rows from 4329 named features, 61 towns (extract)
+parks: 113 rows from 176 named parks and gardens, 73 towns (extract)
+osm: 7421 POI candidates, 166 paid parking places
+geosearch: 0/1500
+geosearch: 500/1500
+geosearch: 1000/1500
+candidates: 1317 photo files
+credits: 50/1317
+credits: 1050/1317
+credits: 1314 of 1317 files
+photo meta: 50/1317
+photo meta: 1050/1317
+photo meta: 1314 of 1317 files
+credits: 50/225
+credits: 225 of 225 files
+photo meta: 50/225
+photo meta: 225 of 225 files
+{
+ "towns": 55,
+ "pois": 313,
+ "bars": 229,
+ "food": 1060,
+ "links": 0,
+ "credits": 183,
+ "bytes": {
+  "catalogue_meta.json.gz": 5786,
+  "catalogue_towns.json.gz": 2646,
+  "catalogue_pois.json.gz": 20619,
+  "catalogue_bars.json.gz": 5781,
+  "catalogue_food.json.gz": 25749
+ },
+ "totalBytes": 60581
+}
+{
+ "version": "wd-20261030-abroad2",
+ "count": 101,
+ "townsSha256": "172504200a939bf93b98ed8fb992bc14f98c192455a2da9d4be272f8358f8361",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 3841,
+ "sha256": "ae57b864cf2bb6dd2587eaa436118c70a4e925c21902b56f76a0b13af1f546de"
+}
+tzCheck: {"checked": true, "ok": true, "mismatches": []}
+regions: [{"code": "GE-25", "nameRu": "Каспский муниципалитет", "tz": "Asia/Tbilisi"}, {"code": "GE-29", "nameRu": "Хелвачаурский муниципалитет", "tz": "Asia/Tbilisi"}, {"code": "GE-37", "nameRu": "Марнеульский муниципалитет", "tz": "Asia/Tbilisi"}, {"code": "GE-44", "nameRu": "Озургетский муниципалитет", "tz": "Asia/Tbilisi"}, {"code": "GE-50", "nameRu": "Сенакский муниципалитет", "tz": "Asia/Tbilisi"}, {"code": "GE-AJ", "nameRu": "Аджария", "tz": "Asia/Tbilisi"}, {"code": "GE-GU", "nameRu": "Гурия", "tz": "Asia/Tbilisi"}, {"code": "GE-IM", "nameRu": "Имеретия", "tz": "Asia/Tbilisi"}, {"code": "GE-KA", "nameRu": "Кахетия", "tz": "Asia/Tbilisi"}, {"code": "GE-KK", "nameRu": "Квемо-Картли", "tz": "Asia/Tbilisi"}, {"code": "GE-MM", "nameRu": "Мцхета-Мтианети", "tz": "Asia/Tbilisi"}, {"code": "GE-RL", "nameRu": "Рача-Лечхуми и Квемо-Сванети", "tz": "Asia/Tbilisi"}, {"code": "GE-SJ", "nameRu": "Самцхе-Джавахети", "tz": "Asia/Tbilisi"}, {"code": "GE-SK", "nameRu": "Шида-Картли", "tz": "Asia/Tbilisi"}, {"code": "GE-SZ", "nameRu": "Самегрело — Земо-Сванети", "tz": "Asia/Tbilisi"}, {"code": "GE-TB", "nameRu": "Тбилиси", "tz": "Asia/Tbilisi"}]

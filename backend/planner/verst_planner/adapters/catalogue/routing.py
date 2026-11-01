@@ -11,6 +11,8 @@ A point farther than `REACH_KM` from every catalogue town and graph node is `Unr
 
 from __future__ import annotations
 
+import itertools
+
 from verst_planner.adapters.fake.routing import FakeRouting
 from verst_planner.adapters.fake.world import FakeWorld
 from verst_planner.domain.enums import RoadClass
@@ -116,25 +118,30 @@ class HybridRouting:
         )
 
     def synthetic(self, req: RouteRequest) -> Route:
-        points = [req.points[0]]
-        cum_km = [0.0]
-        cum_min = [0.0]
-        wp = [0]
-        for a, b in zip(req.points, req.points[1:], strict=False):
-            pts, kms, mins = _leg(a, b, self.model)
-            k0, m0 = cum_km[-1], cum_min[-1]
-            points += pts
-            cum_km += [k0 + k for k in kms]
-            cum_min += [m0 + m for m in mins]
-            wp.append(len(points) - 1)
-        return Route(
-            points=tuple(points),
-            cum_km=tuple(cum_km),
-            cum_min=tuple(cum_min),
-            details=(RouteDetail(0, len(points) - 1, RoadClass.PRIMARY, None, False),),
-            waypoint_idx=tuple(wp),
-            snapped=tuple(req.points),
-            km_total=cum_km[-1],
-            min_total=cum_min[-1],
-            synthetic=True,
-        )
+        return synthetic_route(req.points, self.model)
+
+
+def synthetic_route(waypoints: tuple[LatLon, ...], model: RoadModel) -> Route:
+    """The road model between the waypoints: straight legs x the calibrated ratio (`Route.synthetic`)."""
+    points = [waypoints[0]]
+    cum_km = [0.0]
+    cum_min = [0.0]
+    wp = [0]
+    for a, b in itertools.pairwise(waypoints):
+        pts, kms, mins = _leg(a, b, model)
+        k0, m0 = cum_km[-1], cum_min[-1]
+        points += pts
+        cum_km += [k0 + k for k in kms]
+        cum_min += [m0 + m for m in mins]
+        wp.append(len(points) - 1)
+    return Route(
+        points=tuple(points),
+        cum_km=tuple(cum_km),
+        cum_min=tuple(cum_min),
+        details=(RouteDetail(0, len(points) - 1, RoadClass.PRIMARY, None, False),),
+        waypoint_idx=tuple(wp),
+        snapped=tuple(waypoints),
+        km_total=cum_km[-1],
+        min_total=cum_min[-1],
+        synthetic=True,
+    )

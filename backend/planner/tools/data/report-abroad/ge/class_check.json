@@ -1,0 +1,32 @@
+{
+ "labels": {
+  "Q2977": "cathedral",
+  "Q16970": "church building",
+  "Q230": "Georgia",
+  "Q22698": "park",
+  "Q33506": "museum",
+  "Q32815": "mosque",
+  "Q44613": "monastery",
+  "Q57821": "fortification",
+  "Q23413": "castle",
+  "Q162875": "mausoleum",
+  "Q174782": "square",
+  "Q132834": "madrasa",
+  "Q179700": "statue",
+  "Q839954": "archaeological site",
+  "Q183342": "federal city of Russia",
+  "Q1107656": "garden",
+  "Q1851368": "waterfront",
+  "Q2319498": "architectural landmark",
+  "Q6017969": "scenic viewpoint",
+  "Q7930989": "city or town",
+  "Q263274": "kremlin",
+  "Q570116": "tourist attraction",
+  "Q4989906": "monument",
+  "Q5003624": "memorial"
+ },
+ "mismatches": {},
+ "ok": true,
+ "resolved": {},
+ "unresolved": []
+}

@@ -49,13 +49,19 @@ import app.verst.nav.HandoffSheet
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
-/** What the hand-off sheet needs besides the sheet state (installed apps, signing, «Запомнить выбор»). */
+/**
+ * What the hand-off sheet needs besides the sheet state: installed apps, «Запомнить выбор», and (CEO 29.10) the maps
+ * app that leads here — [preferred] is Яндекс Карты ([HandoffApp.MAPS]) or Google Карты ([HandoffApp.GOOGLE]);
+ * [chosen] = the user picked it in «Настройки» (badge «ваш выбор»), else it follows the country («рекомендуем здесь»).
+ */
 data class HandoffSheetUi(
     val sheet: HandoffSheet,
     val mapsInstalled: Boolean,
     val naviInstalled: Boolean,
-    val signed: Boolean,
     val remember: Boolean,
+    val preferred: HandoffApp = HandoffApp.MAPS,
+    val googleInstalled: Boolean = false,
+    val chosen: Boolean = false,
 )
 
 interface HandoffSheetActions {
@@ -67,9 +73,10 @@ interface HandoffSheetActions {
 }
 
 /**
- * 5.13 §5 (S4) the hand-off sheet: tabs «День N» … «До след.», the scope line, two `HandoffAppCard`s (the
- * recommended one first: unsigned day → Карты with the whole day, «До след.» → Навигатор), the explanation,
- * «Запомнить выбор».
+ * 5.13 §5 (S4) the hand-off sheet: tabs «День N» … «До след.», the scope line, the `HandoffAppCard`s, the
+ * explanation, «Запомнить выбор». CEO 29.10: the preferred maps app first with its badge, the other maps app second
+ * (both take every point of the day in order), the Навигатор last — it takes one point from us, so it goes to the
+ * next point only.
  */
 @Composable
 fun BoxScope.HandoffSheetView(trip: TripDto, ui: HandoffSheetUi, windowH: Dp, a: HandoffSheetActions) {
@@ -110,44 +117,44 @@ fun BoxScope.HandoffSheetView(trip: TripDto, ui: HandoffSheetUi, windowH: Dp, a:
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 PlaceholderPlate(350.dp, 72.dp, C.dash.controlAlt)
                 PlaceholderPlate(350.dp, 72.dp, C.dash.controlAlt)
+                PlaceholderPlate(350.dp, 72.dp, C.dash.controlAlt)
             }
         } else {
-            val mapsCard: @Composable (Boolean) -> Unit = { rec ->
+            val badge = stringResource(if (ui.chosen) R.string.handoff_badge_chosen else R.string.handoff_badge_here)
+            val yandexCard: @Composable (Boolean) -> Unit = { rec ->
                 AppCard(
                     HandoffApp.MAPS, stringResource(R.string.handoff_app_maps),
                     if (next) stringResource(R.string.handoff_maps_next) else stringResource(R.string.handoff_maps_day, pointsText),
                     if (ui.mapsInstalled) null else stringResource(R.string.handoff_maps_missing),
-                    recommended = rec, badge = rec && !next, installed = true, dimGlyph = !ui.mapsInstalled, a = a,
+                    badge = if (rec) badge else null, installed = true, dimGlyph = !ui.mapsInstalled, a = a,
                 )
             }
-            val naviCard: @Composable (Boolean) -> Unit = { rec ->
-                val sub = if (ui.signed && !next) stringResource(R.string.handoff_navi_day, pointsText)
-                else stringResource(R.string.handoff_navi_next, nextName, RuFormat.thousands(nextKm))
+            val googleCard: @Composable (Boolean) -> Unit = { rec ->
                 AppCard(
-                    HandoffApp.NAVI, stringResource(R.string.handoff_app_navi), sub,
-                    when {
-                        !ui.naviInstalled -> stringResource(R.string.handoff_navi_missing)
-                        !ui.signed -> stringResource(R.string.handoff_navi_limit)
-                        else -> null
-                    },
-                    recommended = rec, badge = rec && !next && ui.signed, installed = ui.naviInstalled, dimGlyph = !ui.naviInstalled, a = a,
+                    HandoffApp.GOOGLE, stringResource(R.string.handoff_app_google),
+                    if (next) stringResource(R.string.handoff_maps_next) else stringResource(R.string.handoff_google_day, pointsText),
+                    if (ui.googleInstalled) null else stringResource(R.string.handoff_google_missing),
+                    badge = if (rec) badge else null, installed = true, dimGlyph = !ui.googleInstalled, a = a,
                 )
             }
-            val naviFirst = next || ui.signed
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (naviFirst && ui.naviInstalled) {
-                    naviCard(true)
-                    mapsCard(false)
+                if (ui.preferred == HandoffApp.GOOGLE) {
+                    googleCard(true)
+                    yandexCard(false)
                 } else {
-                    mapsCard(true)
-                    naviCard(false)
+                    yandexCard(true)
+                    googleCard(false)
                 }
+                // the Навигатор: a secondary option, to the next point only (no via points without Яндекс's signature)
+                AppCard(
+                    HandoffApp.NAVI, stringResource(R.string.handoff_app_navi),
+                    stringResource(R.string.handoff_navi_next, nextName, RuFormat.thousands(nextKm)),
+                    if (ui.naviInstalled) stringResource(R.string.handoff_navi_limit) else stringResource(R.string.handoff_navi_missing),
+                    badge = null, installed = ui.naviInstalled, dimGlyph = !ui.naviInstalled, a = a,
+                )
             }
         }
-        Txt(
-            stringResource(if (ui.signed) R.string.handoff_explain_signed else R.string.handoff_explain_unsigned),
-            T.body.smRelaxed, C.text.muted, Modifier.padding(top = 12.dp),
-        )
+        Txt(stringResource(R.string.handoff_explain), T.body.smRelaxed, C.text.muted, Modifier.padding(top = 12.dp))
         // «Запомнить выбор» (switch 44 × 26)
         Row(
             Modifier.fillMaxWidth().padding(top = 8.dp).defaultMinSize(minHeight = DesignTokens.size.touchMin)
@@ -175,15 +182,23 @@ private fun Tab(text: String, cd: String?, selected: Boolean, tag: String, width
     ) { Txt(text, T.body.mdStrong, if (selected) C.text.onLight else C.text.secondary, maxLines = 1) }
 }
 
-/** components §30 `HandoffAppCard`: glyph square 40, title 17/700 + badge, sub 13/17, note 12, out-arrow 16. */
+/**
+ * components §30 `HandoffAppCard`: glyph square 40, title 17/700 + badge, sub 13/17, note 12, out-arrow 16. A card
+ * with a [badge] is the recommended one (the 2 dp yellow border).
+ */
 @Composable
 private fun AppCard(
-    app: HandoffApp, title: String, sub: String, note: String?, recommended: Boolean, badge: Boolean, installed: Boolean, dimGlyph: Boolean,
+    app: HandoffApp, title: String, sub: String, note: String?, badge: String?, installed: Boolean, dimGlyph: Boolean,
     a: HandoffSheetActions,
 ) {
     val shape = RoundedCornerShape(DesignTokens.radius.r12)
     val install = !installed
-    val tag = if (app == HandoffApp.MAPS) "handoff.maps" else "handoff.navi"
+    val recommended = badge != null
+    val tag = when (app) {
+        HandoffApp.MAPS -> "handoff.maps"
+        HandoffApp.GOOGLE -> "handoff.google"
+        HandoffApp.NAVI -> "handoff.navi"
+    }
     Row(
         Modifier.fillMaxWidth().defaultMinSize(minHeight = 72.dp).clip(shape)
             // recommended fill #1F2A14 has no token: `dash.face` + the 2 dp yellow border (dev-notes S4)
@@ -200,15 +215,15 @@ private fun AppCard(
             Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(if (dimGlyph) C.dash.controlAlt else C.sign.white),
             contentAlignment = Alignment.Center,
         ) {
-            GlyphIcon(if (app == HandoffApp.MAPS) Glyph.PIN else Glyph.NAVIGATOR, if (dimGlyph) C.text.muted else C.text.onLight, 22.dp, filled = app == HandoffApp.NAVI)
+            GlyphIcon(if (app == HandoffApp.NAVI) Glyph.NAVIGATOR else Glyph.PIN, if (dimGlyph) C.text.muted else C.text.onLight, 22.dp, filled = app == HandoffApp.NAVI)
         }
         Column(Modifier.weight(1f)) {
           Column(Modifier.alpha(if (install) 0.55f else 1f)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Txt(title, T.title.md, C.text.primary, maxLines = 1)
-                if (badge) {
+                if (badge != null) {
                     Box(Modifier.height(20.dp).clip(RoundedCornerShape(4.dp)).background(C.accent.yellow).padding(horizontal = 6.dp).testTag("$tag.badge"), contentAlignment = Alignment.Center) {
-                        Txt(stringResource(R.string.handoff_badge_day), T.tag.kind, C.text.onLight, maxLines = 1)
+                        Txt(badge, T.tag.kind, C.text.onLight, maxLines = 1)
                     }
                 }
             }

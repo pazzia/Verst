@@ -1,0 +1,32 @@
+{
+ "labels": {
+  "Q232": "Kazakhstan",
+  "Q16970": "church building",
+  "Q23413": "castle",
+  "Q33506": "museum",
+  "Q32815": "mosque",
+  "Q2977": "cathedral",
+  "Q57821": "fortification",
+  "Q44613": "monastery",
+  "Q22698": "park",
+  "Q162875": "mausoleum",
+  "Q174782": "square",
+  "Q132834": "madrasa",
+  "Q183342": "federal city of Russia",
+  "Q179700": "statue",
+  "Q1107656": "garden",
+  "Q263274": "kremlin",
+  "Q5003624": "memorial",
+  "Q570116": "tourist attraction",
+  "Q1851368": "waterfront",
+  "Q839954": "archaeological site",
+  "Q2319498": "architectural landmark",
+  "Q4989906": "monument",
+  "Q6017969": "scenic viewpoint",
+  "Q7930989": "city or town"
+ },
+ "mismatches": {},
+ "ok": true,
+ "resolved": {},
+ "unresolved": []
+}

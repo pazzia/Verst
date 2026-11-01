@@ -1,11 +1,5 @@
 package app.verst.feature.road
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,12 +53,13 @@ import app.verst.core.model.dto.TripDto
 import app.verst.core.ui.R
 import app.verst.core.ui.components.Glyph
 import app.verst.core.ui.components.GlyphIcon
-import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.ui.components.SecondaryButton
 import app.verst.core.ui.components.Txt
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.common.BottomSheet
 import app.verst.feature.common.OpenDataRing
+import app.verst.nav.HandoffApp
+import app.verst.nav.HandoffTarget
 import app.verst.core.ui.theme.DesignTokens.color as C
 import app.verst.core.ui.theme.DesignTokens.type as T
 
@@ -131,18 +126,36 @@ internal fun parkingTotalText(p: ParkingSum, rub: Int = p.rub): String = when (p
     ParkingTotal.UNKNOWN -> stringResource(R.string.road_parking_inline_unknown)
 }
 
-/** components §26 `HandoffCta`: yellow, full width, min-h 60: navigator arrow 26, title 18/700, sub 12/600, chevron. */
+/**
+ * components §26 `HandoffCta`: full width, min-h 60: navigator arrow 26, title 18/700, sub 12/600, chevron. Designer
+ * В-5 (28.10): an outline, not the filled yellow — the plan is read and edited first, leaving for the navigator is
+ * the second step. CEO 29.10: «Вести по картам» opens [maps] (the preferred Яндекс / Google Карты) with every point of
+ * [day]; the sub-line names the app and says when it opens in the browser ([target] = Browser); a long-press opens
+ * the sheet with the choice.
+ */
 @Composable
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
-internal fun HandoffCta(day: Int, onClick: () -> Unit, onLongClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun HandoffCta(
+    day: Int,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    maps: HandoffApp = HandoffApp.MAPS,
+    target: HandoffTarget = HandoffTarget.Maps,
+) {
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     val shape = RoundedCornerShape(DesignTokens.radius.r12)
-    val cd = stringResource(R.string.road_handoff_cta) + ". " + stringResource(R.string.road_handoff_cta_sub, day)
+    val web = target == HandoffTarget.Browser || target == HandoffTarget.BrowserDryRun
+    val sub = when (maps) {
+        HandoffApp.GOOGLE -> stringResource(if (web) R.string.handoff_cta_sub_google_web else R.string.handoff_cta_sub_google, day)
+        HandoffApp.MAPS, HandoffApp.NAVI -> stringResource(if (web) R.string.handoff_cta_sub_yandex_web else R.string.handoff_cta_sub_yandex, day)
+    }
+    val cd = stringResource(R.string.road_handoff_cta) + ". " + sub
     Row(
         modifier.fillMaxWidth().defaultMinSize(minHeight = DesignTokens.size.handoffCtaH).clip(shape)
-            // pressed #E6BD38 has no token: the yellow at 90 % over the dashboard reads the same (dev-notes S4)
-            .background(if (pressed) C.accent.yellow.copy(alpha = 0.9f) else C.accent.yellow)
+            .background(if (pressed) C.accent.yellow.copy(alpha = 0.12f) else androidx.compose.ui.graphics.Color.Transparent)
+            .border(DesignTokens.stroke.w2, C.accent.yellowText, shape)
             .combinedClickable(source, indication = null, role = Role.Button, onLongClick = onLongClick, onClick = onClick)
             .semantics(mergeDescendants = true) { contentDescription = cd }
             .testTag("road.handoff")
@@ -150,12 +163,12 @@ internal fun HandoffCta(day: Int, onClick: () -> Unit, onLongClick: () -> Unit, 
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        GlyphIcon(Glyph.NAVIGATOR, C.text.onLight, 26.dp, filled = true)
+        GlyphIcon(Glyph.NAVIGATOR, C.accent.yellowText, 26.dp, filled = true)
         Column(Modifier.weight(1f)) {
-            Txt(stringResource(R.string.road_handoff_cta), T.cta.lg, C.text.onLight, maxLines = 1)
-            Txt(stringResource(R.string.road_handoff_cta_sub, day), T.body.smStrong, C.text.onLightMuted, maxLines = 1)
+            Txt(stringResource(R.string.road_handoff_cta), T.cta.lg, C.accent.yellowText, maxLines = 1)
+            Txt(sub, T.body.smStrong, C.text.secondary, Modifier.testTag("road.handoff.sub"), maxLines = 1)
         }
-        GlyphIcon(Glyph.RIGHT, C.text.onLight, 18.dp)
+        GlyphIcon(Glyph.RIGHT, C.accent.yellowText, 18.dp)
     }
 }
 
@@ -275,10 +288,13 @@ internal fun CostsLine(price: String?, parking: ParkingDto?, showParking: Boolea
 }
 
 /** A 44 dp touch box that lays out 36 high (the costs line is min-h 36; the touch target keeps 44). */
-internal fun Modifier.touch36(): Modifier = this.layout { m, c ->
+internal fun Modifier.touch36(): Modifier = touchAt(36.dp)
+
+/** A 44 dp touch box that lays out [height] high. */
+internal fun Modifier.touchAt(height: Dp): Modifier = this.layout { m, c ->
     val t = DesignTokens.size.touchMin.roundToPx()
     val p = m.measure(c.copy(minHeight = t, maxHeight = if (c.hasBoundedHeight) maxOf(t, c.maxHeight) else t))
-    val h = 36.dp.roundToPx()
+    val h = height.roundToPx()
     layout(p.width, h) { p.place(0, (h - p.height) / 2) }
 }
 
@@ -377,19 +393,14 @@ internal fun Legends(openData: Boolean, posts: Boolean, onAbout: () -> Unit, abo
 
 /**
  * components §26.3 `CarMarker`: an 18 × 32 top-down car, front at the bottom (it drives down the list), in the car
- * lane x 13–31, looping over the visible road at `motion.carMarker` speed; parked at the top with reduced motion.
+ * lane x 13–31. CEO 29.10: it does not drive by itself — it stands still and moves only with the scroll, at
+ * [progress] (0 = the list top, 1 = its end) of the visible road, so it is where the reader is in the trip.
  */
 @Composable
-internal fun BoxScope.CarMarker(top: Float, bottom: Float) {
+internal fun BoxScope.CarMarker(top: Float, bottom: Float, progress: Float) {
     val len = bottom - top - DesignTokens.size.carMarkerH.value
     if (len <= 0f) return
-    val reduced = LocalReducedMotion.current
-    val y = if (reduced) 0f else {
-        val ms = (len / DesignTokens.motion.carMarker.speedDpPerS * 1000).toInt().coerceAtLeast(1000)
-        val t = rememberInfiniteTransition(label = "car")
-        val v by t.animateFloat(0f, 1f, infiniteRepeatable(tween(ms, easing = LinearEasing), RepeatMode.Restart), label = "carY")
-        v * len
-    }
+    val y = progress.coerceIn(0f, 1f) * len
     Canvas(
         Modifier.offset(x = 13.dp, y = (top + y).dp).size(DesignTokens.size.carMarkerW, DesignTokens.size.carMarkerH)
             .testTag("road.car").clearAndSetSemantics {},

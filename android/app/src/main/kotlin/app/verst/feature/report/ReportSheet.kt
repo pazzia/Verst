@@ -1,6 +1,7 @@
 package app.verst.feature.report
 
 import androidx.compose.foundation.background
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -67,6 +68,7 @@ interface ReportActions {
  */
 @Composable
 fun BoxScope.ReportSheet(ui: ReportUi, windowH: Dp, a: ReportActions) {
+    if (Palette.camper) return ReportSheetCamper(ui, windowH, a)
     BottomSheet(stringResource(R.string.report_title), a::close, "report", windowH, pane = stringResource(R.string.report_title)) {
         Txt(ui.name, T.body.sm, C.text.muted, Modifier.testTag("report.place"), maxLines = 1)
         Spacer(Modifier.height(12.dp))

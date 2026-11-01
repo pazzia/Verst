@@ -5,7 +5,8 @@
 `forms(name, morph)` is pure given a morphology object with pymorphy3's `parse(word)` interface, so the
 sandbox tests it with a stub. Rules: inflect every word that parses as a noun (Geox preferred) or an
 adjective; keep prepositional phrases of hyphenated names («Ростов-на-Дону») and words that do not parse;
-keep the capitalisation. `name_overrides.tsv` and the fixture forms win over this (build_catalogue).
+keep the capitalisation. `name_overrides.tsv` and the fixture forms win over this (build_catalogue). Abroad,
+only the towns with a Russian label (`nameLang` = ru) are inflected.
 """
 
 from __future__ import annotations
@@ -89,13 +90,19 @@ def forms(name: str, morph: Any) -> dict[str, str]:
     return {k: form(name, morph, case) for k, case in CASES.items()}
 
 
+def russian_named(towns: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The towns whose name is a Russian label: every Russian town; abroad (CEO 29.10) not «Kutaisi»
+    (`nameLang` en), which gets no Russian forms."""
+    return [t for t in towns if t.get("nameLang", "ru") == "ru"]
+
+
 def main(argv: list[str]) -> int:
     import pymorphy3  # CI only (requirements of data.yml)
 
     raw = Path(argv[0])
     morph = pymorphy3.MorphAnalyzer(lang="ru")
     towns = json.loads((raw / "towns.json").read_text("utf-8"))
-    out = {t["qid"]: forms(t["name"], morph) for t in towns}
+    out = {t["qid"]: forms(t["name"], morph) for t in russian_named(towns)}
     (raw / "forms.json").write_text(json.dumps(out, ensure_ascii=False), "utf-8")
     report = oracle(morph)
     report["pymorphy3"] = pymorphy3.__version__

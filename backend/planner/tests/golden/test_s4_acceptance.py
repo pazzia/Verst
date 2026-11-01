@@ -115,17 +115,20 @@ class S4AcceptanceTest(unittest.TestCase):
         return out
 
     def test_g14_fryazino_ekaterinburg(self) -> None:
-        """M8 tiered detours: Владимир (Золотые ворота, крюк ≈ 35 мин) on day 1. Days 2-3 (Горбатов →
-        Мариинский Посад → Сарапул, 480 and 552 km at a child's pace) have no tier-eligible sight that fits
-        the day limit — Козьмодемьянск (q 0.61, 24 min) needs 99 min the day does not have, Нижний is 59
-        min off M-7 — so the per-day rule is checked on the days that have room (see dev-notes M8)."""
+        """Acceptance 2026-10-28 (K2): the anchor towns. Day 1 now ends in Нижний Новгород (509 km at a
+        child's pace, arrival ≈ 17:00) instead of Горбатов, so the Владимир detour (Золотые ворота) no longer
+        fits day 1 and the last day (≈ 630 km) has no room either; the quality sight is the morning in
+        Нижний (its kremlin). Before: Владимир on day 1 (M8 tiered detours, see dev-notes M8)."""
         trip = plan("G14_fryazino_ekaterinburg_child")
         self.check_quality_rules(trip)
         playgrounds = [s for s in sights(trip) if self.category(s) == "playground"]
         self.assertLessEqual(len(playgrounds), 2)
-        days = {d["day"] for d in trip["daysList"]}
-        with_quality = {s["day"] for s in self.quality_sights(trip)}
-        self.assertTrue({min(days), max(days)} <= with_quality, with_quality)
+        nights = [d["stops"][-1]["name"] for d in trip["daysList"][:-1]]
+        self.assertEqual(nights[0], "Нижний Новгород")
+        good = self.quality_sights(trip)
+        self.assertTrue(good, [s["name"] for s in sights(trip)])
+        morning = [s for s in good if s["day"] == 2 and s["reason"].startswith("Утро в городе ночёвки")]
+        self.assertTrue(morning, [s["name"] for s in good])
 
     def test_g18_moscow_kazan_m12(self) -> None:
         """M8: ≥ 3 quality sights on Москва → Казань by M-12, one of them off the motorway with an honest
@@ -173,14 +176,16 @@ class S4AcceptanceTest(unittest.TestCase):
             self.assertEqual(u["source"] == "zone" and u["rub"] > 0, in_centre, s["name"])
             self.assertEqual(s["parking"]["rub"], u["rub"])
             self.assertTrue(s["parking"]["zoneRu"])
+        # acceptance 2026-10-28 (K1 a): a trip *from* Москва has no sight in Москва any more (the home
+        # zone), so the paid-zone check runs the other way: Москва is the destination, its centre is allowed
         kremlin = json.loads(
             mobile.plan(
                 "russia_v1",
                 "g16b",
                 json.dumps(
                     {
-                        "origin": {"lat": 55.7558, "lon": 37.6173, "label": "Москва"},
-                        "destination": {"lat": 54.1961, "lon": 37.6182, "label": "Тула"},
+                        "origin": {"lat": 54.1961, "lon": 37.6182, "label": "Тула"},
+                        "destination": {"lat": 55.7558, "lon": 37.6173, "label": "Москва"},
                         "crew": {"adults": 2},
                         "dailyKm": 500,
                         "startAt": "2026-10-26T09:00",

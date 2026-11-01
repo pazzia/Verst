@@ -1,6 +1,7 @@
 package app.verst.feature.common
 
 import androidx.compose.foundation.background
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -80,8 +81,11 @@ fun BoxScope.BottomSheet(
     pane: String = title,
     /** 5.9 C2: the mini RoadSign before the title (cards). */
     leading: (@Composable () -> Unit)? = null,
+    /** Camper design: a line above the title (the card's kind overline); the classic sheet has none. */
+    overline: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    if (Palette.camper) return BottomSheetCamper(title, onClose, tag, maxHeight, badge, pane, leading, overline, content)
     val close = stringResource(R.string.common_close)
     val reduced = LocalReducedMotion.current
     val enter = remember { Animatable(if (reduced) 1f else 0f) }
@@ -164,6 +168,7 @@ fun Modifier.scaled(k: Float): Modifier = layout { m, _ ->
 /** components §16 `PlateToast`: bottom-centred above [bottom], text + optional yellow action, polite live region. */
 @Composable
 fun BoxScope.PlateToast(text: String, bottom: Dp, action: String? = null, onAction: () -> Unit = {}) {
+    if (Palette.camper) return PlateToastCamper(text, bottom, action, onAction)
     // Toast in: α 0 → 1, 8 dp → 0, 200 ms decelerate (motion.md §2.2), re-run for each new text.
     val reduced = LocalReducedMotion.current
     val p = remember(text) { Animatable(if (reduced) 1f else 0f) }
@@ -222,6 +227,7 @@ fun BoxScope.NaviDialog(
     /** S4 `AgeGateDialog`: «Нет» / «Да» side by side, equal width («Да» yellow, right). */
     sideBySide: Boolean = false,
 ) {
+    if (Palette.camper) return NaviDialogCamper(title, body, primary, secondary, tag, onPrimary, onSecondary, sideBySide)
     Box(Modifier.matchParentSize().background(C.overlay.scrim).clickable(remember { MutableInteractionSource() }, indication = null, onClick = onSecondary))
     if (sideBySide) {
         Column(

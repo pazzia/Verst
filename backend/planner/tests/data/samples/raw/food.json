@@ -1,0 +1,120 @@
+[
+ {
+  "osm": "n9101",
+  "name": "Ресторан (пример) «Волжский»",
+  "lat": 57.6275,
+  "lon": 39.887,
+  "tags": {
+   "amenity": "restaurant",
+   "cuisine": "russian;regional",
+   "opening_hours": "Mo-Su 12:00-23:00"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9102",
+  "name": "Кафе (пример) «Пирожковая»",
+  "lat": 57.625,
+  "lon": 39.89,
+  "tags": {
+   "amenity": "cafe",
+   "opening_hours": "Mo-Su 08:00-20:00"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "w9103",
+  "name": "Столовая (пример) у Волги",
+  "lat": 57.629,
+  "lon": 39.895,
+  "tags": {
+   "amenity": "restaurant"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9104",
+  "name": "Сетевой фастфуд (пример)",
+  "lat": 57.624,
+  "lon": 39.882,
+  "tags": {
+   "amenity": "fast_food",
+   "brand": "Пример"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9105",
+  "name": "Сетевая кофейня (пример)",
+  "lat": 57.6245,
+  "lon": 39.883,
+  "tags": {
+   "amenity": "cafe",
+   "brand:wikidata": "Q0"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9106",
+  "name": "Кафе Лукойл",
+  "lat": 57.626,
+  "lon": 39.884,
+  "tags": {
+   "amenity": "cafe"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9107",
+  "name": "",
+  "lat": 57.6261,
+  "lon": 39.8846,
+  "tags": {
+   "amenity": "cafe"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9108",
+  "name": "Чебуречная (пример)",
+  "lat": 57.623,
+  "lon": 39.886,
+  "tags": {
+   "amenity": "fast_food",
+   "opening_hours": "bad hours text",
+   "cuisine": "Chebureki"
+  },
+  "townQid": "Q900002"
+ },
+ {
+  "osm": "n9109",
+  "name": "Кафе (пример) в Суздале",
+  "lat": 56.42,
+  "lon": 40.444,
+  "tags": {
+   "amenity": "cafe",
+   "opening_hours": "Mo-Su 10:00-20:00"
+  },
+  "townQid": "Q900003"
+ },
+ {
+  "osm": "n9110",
+  "name": "Ресторан (пример) без города",
+  "lat": 57.0,
+  "lon": 39.0,
+  "tags": {
+   "amenity": "restaurant"
+  },
+  "townQid": "Q0"
+ },
+ {
+  "osm": "n9111",
+  "name": "Бар не еда (пример)",
+  "lat": 57.6262,
+  "lon": 39.8847,
+  "tags": {
+   "amenity": "bar"
+  },
+  "townQid": "Q900002"
+ }
+]

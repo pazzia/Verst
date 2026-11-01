@@ -25,6 +25,7 @@ import app.verst.core.model.GeoPoint
 import app.verst.engine.ChaquopyPlannerGateway
 import app.verst.nav.GpsState
 import app.verst.nav.HandoffTarget
+import app.verst.nav.preferredMaps
 import app.verst.nav.Route
 import app.verst.nav.Seat
 import java.io.File
@@ -258,7 +259,7 @@ class Sprint3Test {
         }
         compose.waitUntil(15_000) { flow.gps == GpsState.On && flow.origin.label == "Ярославль" }
         waitTag("windshield.city")
-        compose.onNodeWithTag("windshield.city").performClick()
+        compose.onNodeWithTag("windshield.city").performScrollTo().performClick()
         waitTag("city.preset.overview", 20_000)
         shot("67-city-presets")
         compose.onNodeWithTag("city.preset.overview").performClick()
@@ -278,9 +279,23 @@ class Sprint3Test {
         compose.waitUntil(5_000) { flow.lastHandoff != null }
         val (links, target) = flow.lastHandoff!!
         Log.i("VerstE2e", "S3-4 walk handoff $target ${links.web}")
-        assertEquals(HandoffTarget.BrowserDryRun, target) // no Yandex apps on the emulator
-        assertTrue(links.web!!.startsWith("https://yandex.ru/maps/?rtext="))
-        assertTrue(links.web!!.endsWith("&rtt=pd"))
+        // CEO 29.10: the preferred maps app by the phone's country (the emulator may report "us" → Google Карты,
+        // which the Google APIs image has); no Яндекс apps on the emulator → the web route
+        val google = flow.preferredMaps == app.verst.nav.HandoffApp.GOOGLE
+        val installed = if (google) flow.handoffLauncher?.googleInstalled() == true else flow.handoffLauncher?.mapsInstalled() == true
+        val expected = when {
+            !installed -> HandoffTarget.BrowserDryRun
+            google -> HandoffTarget.GoogleDryRun
+            else -> HandoffTarget.MapsDryRun
+        }
+        assertEquals(expected, target)
+        if (google) {
+            assertTrue(links.web!!, links.web!!.startsWith("https://www.google.com/maps/dir/?api=1"))
+            assertTrue(links.web!!, links.web!!.contains("travelmode=walking"))
+        } else {
+            assertTrue(links.web!!.startsWith("https://yandex.ru/maps/?rtext="))
+            assertTrue(links.web!!.endsWith("&rtt=pd"))
+        }
         // 18+: «По рюмочным» asks every time; «Нет» sends nothing
         back()
         waitTag("city.go")
@@ -348,7 +363,7 @@ class Sprint3Test {
             val rq = server.takeRequest()
             Log.i("VerstE2e", "S3-6 ${rq.path} UA=${rq.getHeader("User-Agent")}")
             assertTrue(rq.getHeader("User-Agent")!!.startsWith("Verst/0.3"))
-            assertTrue(rq.path!!.contains("countrycodes=ru"))
+            assertTrue("CEO 29.10: no country filter", !rq.path!!.contains("countrycodes"))
             compose.onNodeWithTag("address.row.0").performClick()
             compose.waitUntil(5_000) { flow.destination?.kind == "address" }
             assertEquals("Советская улица, 1", flow.destination!!.name)
@@ -508,7 +523,7 @@ class Sprint3Test {
         }
         compose.waitUntil(20_000) { flow.gps == GpsState.On && flow.origin.label == town }
         waitTag("windshield.city")
-        compose.onNodeWithTag("windshield.city").performClick()
+        compose.onNodeWithTag("windshield.city").performScrollTo().performClick()
         compose.waitUntil(20_000) { !flow.cityLoading && (flow.cityPresets?.town?.name == town || flow.cityError != null) }
         val p = flow.cityPresets?.presets?.firstOrNull { it.preset == preset }
         Log.i("VerstE2e", "R4 presets $town: ${flow.cityPresets?.presets?.map { "${it.preset}:${it.available}:${it.count}" }} tz=${flow.cityPresets?.town?.tz}")

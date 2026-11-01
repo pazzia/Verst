@@ -52,8 +52,10 @@ def overnight_reason(
     cfg: PlannerConfig,
     t: ReasonTemplates,
     route_title: str | None = None,
+    norm_from_km: int | None = None,
 ) -> OvernightText:
-    """One sentence for an overnight (US-08) plus the names of the towns considered."""
+    """One sentence for an overnight (US-08) plus the names of the towns considered. `norm_from_km`: the
+    user's own daily km when the budget fit raised it (V2)."""
     candidates = tuple(st.town.name_ru for st in sorted(choice.considered, key=lambda st: st.km_at))
     if choice.fallback is OvernightFallback.TEMPLATE and choice.hotel is not None:
         return OvernightText(t.render("overnight.template", route=route_title or ""), candidates)
@@ -90,7 +92,13 @@ def overnight_reason(
             if factor == "overnight.shift.hotels":
                 params["crew_suffix"] = crew_suffix(inp.crew, cfg, t)
             text = t.render(factor, **params)
-    if day_km <= inp.daily_km:
+    if norm_from_km is not None and norm_from_km < inp.daily_km:
+        # V2: «Ваши 350 км» would be the fitter's 350, not the user's 300
+        if day_km <= norm_from_km:
+            text += t.render("overnight.cap_ok", daily_km=norm_from_km)
+        else:
+            text += t.render("overnight.cap_raised", daily_km=inp.daily_km)
+    elif day_km <= inp.daily_km:
         text += t.render("overnight.cap_ok", daily_km=inp.daily_km)
     return OvernightText(text, candidates)
 
@@ -154,7 +162,9 @@ def _stop_reason(
         s.place is not None
         and s.place.source is Source.OSM
         and s.kind is StopKind.SIGHT
-        and not s.reason_key.startswith("rest.fun.")  # ADR-0015 §5: the fun stop says why it was chosen
+        # ADR-0015 §5: the fun stop says why it was chosen; so does an evening or a morning in the overnight
+        # town (acceptance 2026-10-28 V1)
+        and not s.reason_key.startswith(("rest.fun.", "town."))
     ):
         return t.render("sight.osm")
     if s.kind is StopKind.SIGHT and s.fixed:

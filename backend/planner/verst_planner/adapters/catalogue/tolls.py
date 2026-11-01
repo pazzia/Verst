@@ -1,4 +1,5 @@
-"""`RoadRateTolls` (ENG-02): tolls on a route with real geometry, priced per km of the road.
+"""`RoadRateTolls` (ENG-02): tolls on a route with real geometry, priced per km of the road; `CorridorTolls`
+(acceptance 2026-10-28, QA B-1): tolls on an approximate route, by the toll corridor it follows.
 
 The world's explicit segments (`FakeTollRepository`) win where the route drives them. Every other run of
 `RouteDetail.toll` is priced as its length x the road's rate from `resources/toll_rates.json` (category 1,
@@ -8,13 +9,15 @@ invented.
 
 from __future__ import annotations
 
+import itertools
 import json
 from dataclasses import dataclass
 from datetime import date, time
 from decimal import ROUND_HALF_UP, Decimal
 
 from verst_planner import resources
-from verst_planner.domain.model import Route, TollHit, TollSegment
+from verst_planner.domain.model import LatLon, Route, TollHit, TollSegment
+from verst_planner.geo.distance import haversine_km, project_on_segment
 from verst_planner.ports import TollRepository
 
 MIN_RUN_KM = 1.0
@@ -142,3 +145,122 @@ def _uncovered(a: float, b: float, covered: list[tuple[float, float]]) -> list[t
                 nxt.append((c1, p1))
         pieces = nxt
     return pieces
+
+
+# ---------------------------------------------------------------------------------- approximate routes
+
+
+@dataclass(frozen=True, slots=True)
+class TollCorridor:
+    """A toll road as a polyline through the towns it passes, with its whole-road price (toll_rates.json)."""
+
+    ref: str
+    anchors: tuple[LatLon, ...]
+    weekday_rub: Decimal
+    weekend_rub: Decimal | None
+
+    def length_km(self) -> float:
+        return sum(haversine_km(a, b) for a, b in itertools.pairwise(self.anchors))
+
+    def project(self, p: LatLon) -> tuple[float, float]:
+        """`(km along the polyline, distance from it)` of the nearest point of the corridor to `p`."""
+        best = (0.0, float("inf"))
+        along = 0.0
+        for a, b in itertools.pairwise(self.anchors):
+            seg = haversine_km(a, b)
+            t, d = project_on_segment(p, a, b)
+            if d < best[1]:
+                best = (along + t * seg, d)
+            along += seg
+        return best
+
+
+@dataclass(frozen=True, slots=True)
+class TollCorridors:
+    as_of: date
+    follow_km: float
+    min_span_km: float
+    end_snap_km: float
+    corridors: tuple[TollCorridor, ...]
+
+    @staticmethod
+    def from_dict(d: dict[str, object]) -> TollCorridors:
+        rows = d["corridors"]
+        assert isinstance(rows, list)
+        out = []
+        for c in rows:
+            weekend = c.get("weekendRub")
+            out.append(
+                TollCorridor(
+                    str(c["ref"]),
+                    tuple(LatLon(float(a["lat"]), float(a["lon"])) for a in c["anchors"]),
+                    Decimal(str(c["weekdayRub"])),
+                    Decimal(str(weekend)) if weekend is not None else None,
+                )
+            )
+        return TollCorridors(
+            date.fromisoformat(str(d["asOf"])),
+            float(str(d["followKm"])),
+            float(str(d["minSpanKm"])),
+            float(str(d["endSnapKm"])),
+            tuple(out),
+        )
+
+    @staticmethod
+    def from_resources() -> TollCorridors:
+        return TollCorridors.from_dict(json.loads(resources.read_text("toll_corridors.json")))
+
+
+class CorridorTolls:
+    """`TollRepository` of the composed world (acceptance 2026-10-28, QA B-1): `inner` (the world's segments
+    and the per-km rates, ENG-02) on routes with road geometry; on an approximate route (`Route.synthetic`,
+    no road refs) a leg whose both ends lie within `follow_km` of a toll corridor drives that road between
+    their projections, priced as the corridor's whole-road price x the covered share, marked approximate.
+    A leg along no known corridor has no tolls here; the engine says they are not counted."""
+
+    def __init__(self, inner: TollRepository, corridors: TollCorridors) -> None:
+        self.inner = inner
+        self.corridors = corridors
+
+    def segments_on_route(self, route: Route) -> list[TollHit]:
+        if not route.synthetic:
+            return self.inner.segments_on_route(route)
+        hits: list[TollHit] = []
+        wp = route.waypoint_idx
+        for i, j in itertools.pairwise(wp):
+            a, b = route.points[i], route.points[j]
+            for c in self.corridors.corridors:
+                hit = self._leg_hit(c, a, b, route.cum_km[i], route.cum_km[j])
+                if hit is not None:
+                    hits.append(hit)
+                    break  # one toll road per leg: the corridors do not overlap beyond their shared start
+        hits.sort(key=lambda h: (h.km_from, h.segment.id))
+        return hits
+
+    def _leg_hit(self, c: TollCorridor, a: LatLon, b: LatLon, km_a: float, km_b: float) -> TollHit | None:
+        (fa, da), (fb, db) = c.project(a), c.project(b)
+        follow = self.corridors.follow_km
+        if da > follow or db > follow or abs(fb - fa) < self.corridors.min_span_km:
+            return None
+        length = c.length_km()
+        lo, hi = sorted((fa, fb))
+        snap = self.corridors.end_snap_km
+        lo = 0.0 if lo <= snap else lo
+        hi = length if length - hi <= snap else hi
+        share = Decimal(str(round((hi - lo) / length, 4)))
+        day = _money(c.weekday_rub * share)
+        weekend = _money(c.weekend_rub * share) if c.weekend_rub is not None else None
+        seg = TollSegment(
+            id=f"corridor:{c.ref}:{round(km_a)}",
+            road_ref=c.ref,
+            name_ru=c.ref,
+            tariff_day_rub=day,
+            tariff_night_rub=day,  # no night tariffs are known for a whole road
+            vehicle_class=1,
+            night_from=time(0),
+            night_to=time(0),
+            as_of=self.corridors.as_of,
+            tariff_weekend_rub=weekend,
+            approx=True,
+        )
+        return TollHit(seg, min(km_a, km_b), max(km_a, km_b))

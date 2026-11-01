@@ -1,0 +1,75 @@
+{"labels": {"Q23334": "Abkhazia", "Q230": "Georgia"}, "capitals": ["Q40811"], "currencies": [], "tz": ["UTC+03:00"], "ok": true}
+{"mismatches": {}, "resolved": {}}
+town classes: 547
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 60 items failed (<HTTPError 429: 'Too Many Requests'>); halving
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 60 items failed (<HTTPError 429: 'Too Many Requests'>); halving
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 60 items failed (<HTTPError 504: 'Gateway Timeout'>); halving
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 60 items failed (<HTTPError 504: 'Gateway Timeout'>); halving
+retry 1/2 in 45s: HTTP Error 429: Too Many Requests
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+query of 60 items failed (<HTTPError 504: 'Gateway Timeout'>); halving
+retry 1/2 in 5s: HTTP Error 504: Gateway Timeout
+towns: 77 candidates from 547 classes
+towns: 4; missing must-have: []
+pois: 0/4 towns, 8 rows, 0 failed
+pois: 14 rows, 0 towns failed
+forms: 4 towns; fixture oracle 47/48
+classes: 10052 ids; resolved {}; unresolved []
+wikidata: 0/14
+wikidata: 14 items, 12 with ru Wikipedia
+wikipedia: 0/12
+wikipedia: 12 pages, 12 with an extract
+voyage: 136 Q-ids in listings
+extract: https://download.geofabrik.de/europe/georgia-latest.osm.pbf
+-rw-r--r-- 1 runner runner 102511615 Oct 30 01:57 /home/runner/work/_temp/c.osm.pbf
+bars: 10 rows from 500 named features, 3 towns (extract)
+food: 224 rows from 4329 named features, 3 towns (extract)
+parks: 12 rows from 176 named parks and gardens, 4 towns (extract)
+osm: 7421 POI candidates, 166 paid parking places
+geosearch: 0/1500
+geosearch: 500/1500
+geosearch: 1000/1500
+candidates: 1110 photo files
+credits: 50/1110
+credits: 1050/1110
+credits: 1110 of 1110 files
+photo meta: 50/1110
+photo meta: 1050/1110
+photo meta: 1110 of 1110 files
+credits: 50/12
+credits: 12 of 12 files
+photo meta: 12/12
+photo meta: 12 of 12 files
+{
+ "towns": 3,
+ "pois": 18,
+ "bars": 10,
+ "food": 56,
+ "links": 0,
+ "credits": 9,
+ "bytes": {
+  "catalogue_meta.json.gz": 1859,
+  "catalogue_towns.json.gz": 320,
+  "catalogue_pois.json.gz": 1889,
+  "catalogue_bars.json.gz": 512,
+  "catalogue_food.json.gz": 1962
+ },
+ "totalBytes": 6542
+}
+{
+ "version": "wd-20261030-abroad2",
+ "count": 8,
+ "townsSha256": "3673d80c507b4be6681176ab3a5ea2e68e0b5e93643b825ca7c03cbf91b1b10e",
+ "file": "catalogue_parks.json.gz",
+ "bytes": 813,
+ "sha256": "7dae9fb8e30b5fa9b1eb6e8c98821b1fe42b5b6b4997968c9534a05784bb706d"
+}
+tzCheck: {"checked": true, "ok": false, "mismatches": ["GE-AB"]}
+regions: [{"code": "GE-AB", "nameRu": "Абхазия", "tz": "Europe/Moscow"}]
+::warning::AB: region zones disagree with Wikidata P421: ['GE-AB']

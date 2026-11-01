@@ -5,8 +5,10 @@
     python3 tools/data/bars_from_extract.py RAW_DIR bars.geojsonseq      # writes RAW_DIR/bars.json
 
 Runs 1 and 2 lost 90+ min to Overpass (502/504 on the country-wide query on three mirrors, read timeouts per
-town), so the extract is the primary source and `fetch_overpass.py` the fallback. Same output and the same
-town assignment (`fetch_overpass.assign`); `elements_from_features` is pure and tested in the sandbox.
+town), so the extract is the primary source and `fetch_overpass.py` the fallback. Same output; the town
+assignment is `fetch_overpass.assign` over every catalogue town (`all_towns`, `radius_all_m`, CEO 2026-10-29 —
+the Overpass fallback keeps the bigger and touristic towns only). `elements_from_features` is pure and tested
+in the sandbox; `food_from_extract.py` uses it too.
 """
 
 from __future__ import annotations
@@ -19,9 +21,22 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fetch_overpass import assign, towns_to_query
+from fetch_overpass import all_towns, assign, radius_all_m
 
 KINDS = {"n": "node", "w": "way", "r": "relation"}
+
+
+def osm_object(fid: str) -> tuple[str, int] | None:
+    """The OSM object of an `osmium export --add-unique-id=type_id` feature id: `n1`/`w2`/`r3` as they are, and
+    an area `a<id>` back to its way (`a246` → way 123: area id = 2 × way id) or relation (`a91` → relation 45:
+    2 × relation id + 1). osmium writes a closed way or multipolygon that is an area (a bar or café drawn as its
+    building) with an `a…` id only: before 31.10 every such place was lost (parks found it on 29.10)."""
+    if len(fid) < 2 or not fid[1:].isdigit():
+        return None
+    n = int(fid[1:])
+    if fid[0] == "a":
+        return ("relation", (n - 1) // 2) if n % 2 else ("way", n // 2)
+    return (KINDS[fid[0]], n) if fid[0] in KINDS else None
 
 
 def _coords(geom: dict[str, Any]) -> list[list[float]]:
@@ -40,34 +55,36 @@ def _coords(geom: dict[str, Any]) -> list[list[float]]:
 
 
 def elements_from_features(lines: Iterable[str], require_name: bool = True) -> list[dict[str, Any]]:
-    """GeoJSON-seq features (`id` = n123/w123/r123) → Overpass-shaped elements with a centre point."""
+    """GeoJSON-seq features (`id` = n123/w123/r123/a246) → Overpass-shaped elements with a centre point (an
+    `a…` area is its way or relation; the first feature of an object wins)."""
     out = []
+    seen: set[tuple[str, int]] = set()
     for raw in lines:
         line = raw.strip().lstrip("\x1e")
         if not line:
             continue
         f = json.loads(line)
-        fid = str(f.get("id", ""))
+        obj = osm_object(str(f.get("id", "")))
         pts = _coords(f.get("geometry") or {})
-        if not fid or fid[0] not in KINDS or not pts:
+        if obj is None or not pts or obj in seen:
             continue
         lon = sum(p[0] for p in pts) / len(pts)
         lat = sum(p[1] for p in pts) / len(pts)
         tags = {k: v for k, v in (f.get("properties") or {}).items() if isinstance(v, str)}
         if require_name and not tags.get("name"):
             continue
-        out.append({"type": KINDS[fid[0]], "id": int(fid[1:]), "lat": lat, "lon": lon, "tags": tags})
+        seen.add(obj)
+        out.append({"type": obj[0], "id": obj[1], "lat": lat, "lon": lon, "tags": tags})
     return out
 
 
 def main(argv: list[str]) -> int:
     raw, seq = Path(argv[0]), Path(argv[1])
     towns = json.loads((raw / "towns.json").read_text("utf-8"))
-    pois = json.loads((raw / "pois.json").read_text("utf-8"))
-    pick = towns_to_query(towns, pois)
+    pick = all_towns(towns)
     with seq.open(encoding="utf-8") as fh:
         elements = elements_from_features(fh)
-    bars = assign(elements, pick)
+    bars = assign(elements, pick, radius_all_m)
     (raw / "bars.json").write_text(json.dumps(bars, ensure_ascii=False), "utf-8")
     (raw / "bars_failed.json").write_text("[]", "utf-8")
     print(f"bars: {len(bars)} rows from {len(elements)} named features, {len(pick)} towns (extract)")

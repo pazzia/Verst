@@ -63,6 +63,27 @@ object AppPrefs {
     /** The symbol of the currency actually shown (roubles when the build has no rate for the chosen one). */
     fun symbol(): String = Money.symbol(Money.effective(settings.currency, rates))
 
+    // ------------------------------------------------------------------------------------------ server (SRV-01)
+
+    /** The backend this build talks to (`VERST_SERVER_URL` at build time); null = the phone engine only. */
+    val serverUrl: String? = BuildConfig.SERVER_URL.takeIf { it.isNotBlank() }
+
+    /** The device registration on the server, in `files/settings/server.json` (ADR-0007: the token is shown once). */
+    val serverAuth: app.verst.data.net.ServerClient.AuthStore = object : app.verst.data.net.ServerClient.AuthStore {
+        override fun load(): app.verst.data.net.ServerAuth? = dir?.let { d ->
+            try {
+                read(File(d, "server.json"))?.let { EngineJson.json.decodeFromString(app.verst.data.net.ServerAuth.serializer(), it) }
+            } catch (_: Exception) {
+                null
+            }
+        }
+
+        override fun save(auth: app.verst.data.net.ServerAuth?) {
+            val f = File(dir ?: return, "server.json")
+            if (auth == null) f.delete() else write(f, EngineJson.json.encodeToString(app.verst.data.net.ServerAuth.serializer(), auth))
+        }
+    }
+
     // ------------------------------------------------------------------------------------------ builds
 
     /** Adds this build to `builds.json` the first time it runs on the phone (newest first, at most 50). */

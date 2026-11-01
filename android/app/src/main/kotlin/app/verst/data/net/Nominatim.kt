@@ -24,14 +24,17 @@ sealed interface AddressResult<out T> {
 
 /** The address search the app uses (Nominatim in the app; a fake in unit tests). */
 interface AddressSearch {
-    suspend fun search(query: String): AddressResult<List<SuggestionDto>>
+    /** [near]: where the user is (the GPS fix or the chosen town) — its streets rank first (CEO 29.10). */
+    suspend fun search(query: String, near: app.verst.core.model.GeoPoint? = null): AddressResult<List<SuggestionDto>>
     suspend fun reverse(lat: Double, lon: Double): AddressResult<String?>
 }
 
 /**
  * DEV-302 / ADR-0012 §5: Nominatim `/search` and `/reverse`, **only on an explicit submit** (the usage policy
  * forbids autocomplete), ≤ 1 request per second (a token bucket shared by both: a second call waits), a 24 h
- * in-memory cache, `countrycodes=ru`, `accept-language=ru`, the Verst User-Agent (the shared OkHttp client).
+ * in-memory cache, `accept-language=ru`, the Verst User-Agent (the shared OkHttp client). CEO 29.10: no
+ * `countrycodes` — «Прага» or any address abroad is found too (the `viewbox` near the user keeps local streets
+ * first); a foreign row carries its country (the screen says the trip abroad is not planned).
  * CI never talks to the real service: the tests point [baseUrl] at MockWebServer.
  */
 class NominatimClient(
@@ -49,16 +52,23 @@ class NominatimClient(
     @Volatile var requests = 0
         private set
 
-    override suspend fun search(query: String): AddressResult<List<SuggestionDto>> {
+    override suspend fun search(query: String, near: app.verst.core.model.GeoPoint?): AddressResult<List<SuggestionDto>> {
         val q = query.trim()
         if (q.isEmpty()) return AddressResult.Ok(emptyList())
         val url = baseUrl.trimEnd('/').plus("/search").toHttpUrl().newBuilder()
             .addQueryParameter("q", q)
             .addQueryParameter("format", "jsonv2")
             .addQueryParameter("addressdetails", "1")
-            .addQueryParameter("countrycodes", "ru")
             .addQueryParameter("accept-language", "ru")
-            .addQueryParameter("limit", "5")
+            .addQueryParameter("limit", "10")
+            .apply {
+                // «Ленина 5» means the user's own town first: a ±0.4° box around them, preferred but not a limit
+                if (near != null) {
+                    val f = { v: Double -> "%.4f".format(java.util.Locale.US, v) }
+                    addQueryParameter("viewbox", "${f(near.lon - NEAR_DEG)},${f(near.lat + NEAR_DEG)},${f(near.lon + NEAR_DEG)},${f(near.lat - NEAR_DEG)}")
+                    addQueryParameter("bounded", "0")
+                }
+            }
             .build().toString()
         return get(url) { body -> parseSearch(body) }
     }
@@ -107,6 +117,10 @@ class NominatimClient(
                 AddressResult.Ok(v)
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
+            } catch (e: java.net.UnknownHostException) {
+                AddressResult.Offline // designer В-2: airplane mode before the system notices is offline, not «try again»
+            } catch (e: java.net.ConnectException) {
+                AddressResult.Offline
             } catch (e: Exception) {
                 AddressResult.Failed(e.toString())
             }
@@ -114,6 +128,8 @@ class NominatimClient(
     }
 
     companion object {
+        /** Half the side of the «near» box (≈ 45 km north–south). */
+        const val NEAR_DEG = 0.4
         const val DEFAULT_BASE = "https://nominatim.openstreetmap.org"
         const val CACHE_MS = 24L * 60 * 60 * 1000
         private val json = Json { ignoreUnknownKeys = true }
@@ -137,7 +153,30 @@ class NominatimClient(
             return a.str("city") ?: a.str("town") ?: a.str("village") ?: a.str("municipality") ?: a.str("county") ?: a.str("state")
         }
 
-        /** Up to 5 address rows: kind `address`, name «ул. Советская, 1», subtitle = the city (the screen adds «адрес ·»). */
+        /**
+         * The country the trip is planned in: the engine plans Crimea and Sevastopol as Russia, so a geocoder's «ua»
+         * there is not «abroad» (no «за границу» plate, no country in the subtitle; the engine answers itself).
+         */
+        fun planCountry(code: String?, lat: Double, lon: Double): String? =
+            if (code == "ua" && lat in 44.3..46.3 && lon in 32.4..36.7) "ru" else code
+
+        /** The ISO country code of a row, lower case («ru», «cz»); null when Nominatim does not give it. */
+        fun countryCode(o: JsonObject): String? = (o["address"] as? JsonObject)?.str("country_code")?.lowercase()
+
+        /**
+         * CEO 29.10: the subtitle of a row — the city, and abroad « · <country>» («Прага · Чехия»); a Russian row (or
+         * one without a country code) stays the city alone.
+         */
+        fun subtitle(city: String?, country: String?, countryCode: String?): String {
+            val abroad = countryCode != null && !countryCode.equals("ru", ignoreCase = true)
+            val parts = listOfNotNull(city?.takeIf { it.isNotBlank() }, country?.takeIf { abroad && it.isNotBlank() && it != city })
+            return parts.joinToString(" · ")
+        }
+
+        /**
+         * Up to 8 address rows: kind `address`, name «ул. Советская, 1», subtitle = the city (the screen adds
+         * «адрес ·»), abroad with the country («Прага · Чехия») and its [SuggestionDto.countryCode].
+         */
         fun parseSearch(body: String): List<SuggestionDto> {
             val arr = json.parseToJsonElement(body) as? JsonArray ?: return emptyList()
             return arr.mapNotNull { e ->
@@ -145,8 +184,13 @@ class NominatimClient(
                 val lat = o.str("lat")?.toDoubleOrNull() ?: return@mapNotNull null
                 val lon = o.str("lon")?.toDoubleOrNull() ?: return@mapNotNull null
                 val name = streetLabel(o) ?: return@mapNotNull null
-                SuggestionDto("address", name, city(o) ?: "", lat, lon, id = o.str("place_id")?.let { "osm_$it" })
-            }.distinctBy { it.name + it.subtitle }.take(5)
+                val code = planCountry(countryCode(o), lat, lon)
+                val country = (o["address"] as? JsonObject)?.str("country")
+                SuggestionDto(
+                    "address", name, subtitle(city(o), country, code), lat, lon,
+                    id = o.str("place_id")?.let { "osm_$it" }, countryCode = code,
+                )
+            }.distinctBy { it.name + it.subtitle }.take(8)
         }
     }
 }
