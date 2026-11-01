@@ -25,8 +25,6 @@ data class AppSettings(
     val language: AppLanguage = AppLanguage.RU,
     val currency: String = Money.RUB,
     val theme: AppTheme = AppTheme.NIGHT,
-    /** CEO 01.11: both designs stay; the camper one is the default. The classic theme applies to CLASSIC only. */
-    val design: AppDesign = AppDesign.CAMPER,
     val storage: TripStorage = TripStorage.DEVICE,
     /** SAF tree URI of the folder that mirrors saved trips (storage = FOLDER). */
     val folderUri: String? = null,
@@ -43,6 +41,8 @@ data class AppSettings(
     val avoidTolls: Boolean = false,
     /** CEO 29.10 «Навигация»: which maps app gets the day's route (automatic = by the country the phone is in). */
     val mapsApp: MapsChoice = MapsChoice.AUTO,
+    /** CEO 01.11: both designs stay; the camper one is the default. The classic theme applies to CLASSIC only. */
+    val design: AppDesign = AppDesign.CAMPER,
 ) {
     /** A setting that only takes effect after the app restarts (the palette is read once per process). */
     fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme || design != old.design

@@ -1867,12 +1867,16 @@ class ScreensScreenshotTest {
     }
 
     @Test
-    fun settingsDesignChoiceInBothDesigns() {
+    fun settingsDesignChoiceInTheClassicDesign() {
         val spy = SettingsSpy()
         shot("settings", "design-classic") { app.verst.feature.settings.SettingsScreen(settingsUi, spy) }
         compose.onNodeWithTag("settings.design.CAMPER").performScrollTo().assertIsSelected()
         compose.onNodeWithTag("settings.design.CLASSIC").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
         assertEquals(listOf("design:CLASSIC"), spy.calls)
+    }
+
+    @Test
+    fun settingsDesignChoiceInTheCamperDesign() {
         app.verst.core.ui.theme.Palette.camper = true
         try {
             val camperSpy = SettingsSpy()
