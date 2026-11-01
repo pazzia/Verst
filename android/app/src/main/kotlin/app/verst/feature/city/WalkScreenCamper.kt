@@ -91,7 +91,7 @@ import app.verst.core.ui.components.craftShadow
 import app.verst.core.ui.components.craftSurface
 import app.verst.core.ui.theme.DesignTokens
 import app.verst.feature.card.CardActions
-import app.verst.feature.card.CardSheet
+import app.verst.feature.card.CardSheetCamper
 import app.verst.feature.card.CardUi
 import app.verst.feature.common.HoursPill
 import app.verst.feature.common.HoursState

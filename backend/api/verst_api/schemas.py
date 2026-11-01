@@ -250,12 +250,15 @@ class HotelLinkQuery(Request):
     nights: int = Field(1, ge=1, le=30)
     adults: int = Field(2, ge=1, le=7)
     childrenAges: list[int] = Field(default_factory=list, max_length=5)
+    # ENG-03: the partner sub-id (attribution of a booking to a trip night); never personal data
+    tripId: str | None = Field(None, max_length=64)
+    stopId: str | None = Field(None, max_length=64)
 
 
 class LinkOut(BaseModel):
     url: str | None
     partner: Literal["yandex_travel"]
-    affiliate: Literal[False]
+    affiliate: bool  # true: a Travelpayouts partner link (ENG-03); false: the plain search
 
 
 class ErrorBody(BaseModel):

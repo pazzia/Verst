@@ -28,7 +28,7 @@ import androidx.compose.ui.semantics.customActions
 import app.verst.core.ui.components.LocalReducedMotion
 import app.verst.core.model.dto.HandoffDto
 import app.verst.feature.card.CardActions
-import app.verst.feature.card.CardSheet
+import app.verst.feature.card.CardSheetCamper
 import app.verst.feature.card.CardUi
 import app.verst.nav.HandoffTarget
 import androidx.compose.ui.semantics.onClick

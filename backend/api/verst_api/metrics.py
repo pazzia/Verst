@@ -28,6 +28,9 @@ PLAN_SECONDS = Histogram(
 PLAN_SYNTHETIC = Counter("verst_plan_synthetic_total", "Plans returned with approxDistances (road model)")
 ROUTING_FALLBACK = Counter("verst_routing_fallback_total", "GraphHopper failures answered by the road model")
 ROUTE_REQUESTS = Counter("verst_route_requests_total", "POST /v1/route outcomes", ["outcome"])
+PARTNER_LINKS = Counter(
+    "verst_partner_links_total", "GET /v1/links/hotel with an account: wrapped or fallback", ["outcome"]
+)
 
 CONTENT_TYPE = CONTENT_TYPE_LATEST
 

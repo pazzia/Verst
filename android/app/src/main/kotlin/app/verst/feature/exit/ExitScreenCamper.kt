@@ -69,7 +69,7 @@ import app.verst.feature.common.NaviDialog
 import app.verst.feature.common.PlateToast
 import app.verst.feature.common.ScreenRoot
 import app.verst.feature.common.toastText
-import app.verst.feature.road.CraftPlate
+import app.verst.feature.road.CraftPlateCamper
 import app.verst.nav.Toast
 import kotlin.math.roundToInt
 import app.verst.core.ui.theme.DesignTokens.color as C

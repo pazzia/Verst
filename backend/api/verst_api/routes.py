@@ -259,14 +259,19 @@ async def feedback(body: FeedbackIn, ctx: Ctx, device: FeedbackDevice) -> Feedba
 
 @router.get("/v1/links/hotel", response_model=LinkOut, responses=ERRORS)
 async def hotel_link(q: Annotated[HotelLinkQuery, Query()], ctx: Ctx, device: AnyDevice) -> LinkOut:
-    """Partner link stub until LEG-02: a plain city search on Yandex Travel, `affiliate: false`."""
+    """A Yandex Travel search for the hotel's town and the stay: a Travelpayouts partner link when the
+    account is configured (`affiliate: true`), else the plain search (ENG-03)."""
     engine = ctx.engine
     poi = await engine.call(lambda: engine.poi(q.placeId))
     if poi.get("kind") != "hotel":
         raise ApiError("INVALID_INPUT", {"field": "placeId", "reason": "not_a_hotel"})
     town = poi.get("townName") or poi.get("nameRu")
     url = links.hotel_search_url(str(town), q.checkin, q.nights, q.adults, q.childrenAges) if town else None
-    return LinkOut(url=url, partner=links.PARTNER, affiliate=False)
+    if url is None or not ctx.affiliate.enabled:
+        return LinkOut(url=url, partner=links.PARTNER, affiliate=False)
+    wrapped = await asyncio.to_thread(ctx.affiliate.wrap, url, links.sub_id(q.tripId, q.stopId))
+    metrics.PARTNER_LINKS.labels("affiliate" if wrapped else "fallback").inc()
+    return LinkOut(url=wrapped or url, partner=links.PARTNER, affiliate=wrapped is not None)
 
 
 # ---------------------------------------------------------------------------------------------- ops

@@ -5,14 +5,14 @@ from __future__ import annotations
 import math
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Annotated, Any
 
 from fastapi import Depends, Request
 from psycopg_pool import AsyncConnectionPool
 
-from verst_api import store
+from verst_api import links, store
 from verst_api.engine import Engine
 from verst_api.errors import ApiError
 from verst_api.privacy import device_tag, ip_key
@@ -28,6 +28,7 @@ class Context:
     settings: Settings
     pool: AsyncConnectionPool
     engine: Engine
+    affiliate: links.AffiliateLinks = field(default_factory=lambda: links.AffiliateLinks(None))
 
 
 def context(request: Request) -> Context:
