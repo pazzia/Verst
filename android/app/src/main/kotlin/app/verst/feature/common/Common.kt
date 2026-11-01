@@ -70,6 +70,7 @@ fun toastText(t: app.verst.nav.Toast): String = when (t) {
     )
     app.verst.nav.Toast.HandoffOffline -> stringResource(R.string.handoff_offline)
     app.verst.nav.Toast.HandoffFailed -> stringResource(R.string.handoff_failed)
+    app.verst.nav.Toast.BookingFailed -> stringResource(R.string.exit_booking_failed)
     is app.verst.nav.Toast.HandoffOpen -> stringResource(
         when (t.app) {
             app.verst.nav.HandoffApp.NAVI -> R.string.handoff_open_navi

@@ -47,20 +47,49 @@ fun VerstFlow.selectHotel(stopId: String, placeId: String) {
     }
 }
 
-/** «Забронировать ночь» / «Открыть бронирование» → the mock partner sheet (D-13); offline → toast. */
+/**
+ * «Забронировать ночь» / «Открыть бронирование» (ENG-03, CEO 01.11): the real hotel search for the night's town,
+ * date and crew opens in the browser (or the partner's app): the partner link from the server when the tester
+ * agreed to the server, else the plain search built on the phone. «Забронировали?» waits for the return.
+ * Offline → toast. Without a launcher (unit tests) or in the e2e dry run the link is only recorded ([lastBookingUrl]).
+ */
 fun VerstFlow.book() {
     if (!connectivity.online) {
         showToast(Toast.NeedInternet)
         return
     }
-    partnerOpen = true
-    // ENG-05 `hotel_link_clicked`: in this build the mock partner sheet stands for the partner's page (D-13)
+    val sid = exitStopId ?: return
+    val r = result ?: return
+    val stop = r.trip.daysList.flatMap { it.stops }.firstOrNull { it.id == sid } ?: return
+    // ENG-05 `hotel_link_clicked`
     track {
-        val sid = exitStopId ?: return@track null
-        val stop = result?.trip?.daysList?.flatMap { it.stops }?.firstOrNull { it.id == sid }
-        val hotel = stop?.hotelOptions?.firstOrNull { it.placeId == selectedHotel(sid) }
+        val hotel = stop.hotelOptions.firstOrNull { it.placeId == selectedHotel(sid) }
         AnalyticsEvent.HotelLinkClicked(tripId, sid, Buckets.price(hotel?.priceCrewRub))
     }
+    val q = app.verst.core.model.HotelLinks.forStop(stop, r.trip.input.crew, tripId, selectedHotel(sid))
+    if (q == null) {
+        showToast(Toast.BookingFailed)
+        return
+    }
+    val source = hotelLinks
+    if (source == null) {
+        openBooking(sid, q.plainUrl())
+    } else {
+        scope.launch { openBooking(sid, source(q) ?: q.plainUrl()) }
+    }
+}
+
+private fun VerstFlow.openBooking(stopId: String, url: String) {
+    lastBookingUrl = url
+    val launcher = handoffLauncher
+    if (launcher != null && !debugHandoffDryRun) {
+        val target = launcher.open(app.verst.core.model.dto.HandoffLinksDto(web = url), walk = true)
+        if (target == HandoffTarget.None) {
+            showToast(Toast.BookingFailed)
+            return
+        }
+    }
+    if (exitStopId == stopId && !isBooked(stopId)) bookedDialog = true
 }
 
 fun VerstFlow.needInternet() = showToast(Toast.NeedInternet)

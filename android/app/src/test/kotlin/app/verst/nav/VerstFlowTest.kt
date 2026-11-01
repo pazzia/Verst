@@ -221,10 +221,12 @@ class VerstFlowTest {
         assertEquals(1, gw.hotelPatches.size)
         assertTrue(gw.hotelPatches.single().contains(other.placeId))
 
-        // Booking: CTA → mock partner sheet → dismissal → «Забронировали?» → yes → booked + toast with undo.
+        // Booking (ENG-03): CTA → the hotel search for the night's town and date → «Забронировали?» → yes → booked.
         flow.book()
-        assertTrue(flow.partnerOpen)
-        flow.closePartner()
+        assertFalse(flow.partnerOpen)
+        val link = flow.lastBookingUrl!!
+        assertTrue(link, link.startsWith("https://travel.yandex.ru/hotels/search/?text="))
+        assertTrue(link, link.contains("checkinDate=") && link.contains("checkoutDate="))
         assertTrue(flow.bookedDialog)
         flow.answerBooked(true)
         val booked = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == night.id }

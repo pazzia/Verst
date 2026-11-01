@@ -21,6 +21,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import okhttp3.Call
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -145,6 +146,40 @@ class ServerClient(
         throw ServerUnavailable("unauthorised after a new registration")
     }
 
+    /**
+     * ENG-03: `GET /v1/links/hotel` — the partner link (or the plain search) for the night [q]; null on any failure
+     * or without a place id, and the caller opens the plain search built on the phone. Short timeout: a tap waits.
+     */
+    suspend fun hotelLink(q: app.verst.core.model.HotelLinkQuery): String? = withContext(Dispatchers.IO) {
+        val base = baseUrl()?.trimEnd('/') ?: return@withContext null
+        val placeId = q.placeId ?: return@withContext null
+        try {
+            val token = token(base)
+            val url = "$base/v1/links/hotel".toHttpUrl().newBuilder()
+                .addQueryParameter("placeId", placeId)
+                .addQueryParameter("checkin", q.checkin)
+                .addQueryParameter("nights", q.nights.toString())
+                .addQueryParameter("adults", q.adults.toString())
+                .apply { q.childrenAges.forEach { addQueryParameter("childrenAges", it.toString()) } }
+                .apply { q.tripId?.let { addQueryParameter("tripId", it.take(64)) } }
+                .addQueryParameter("stopId", q.stopId.take(64))
+                .build()
+            val req = Request.Builder().url(url).header("Authorization", "Bearer $token").build()
+            http().newBuilder().callTimeout(LINK_TIMEOUT_S, TimeUnit.SECONDS).build().newCall(req).execute().use { r ->
+                if (r.code == 401) store.save(null) // the server forgot us: register again on the next call
+                if (r.code != 200) return@withContext null
+                val o = EngineJson.json.parseToJsonElement(r.body?.string() ?: "").jsonObject
+                (o["url"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.startsWith("https://") }
+            }
+        } catch (e: IOException) {
+            Log.w(TAG, "hotel link: ${e.message}")
+            null
+        } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "hotel link: bad answer")
+            null
+        }
+    }
+
     /** Runs [call] on the IO pool; cancelling the caller cancels the call, so a blocked read ends at once. */
     private suspend fun <T> execute(call: Call, read: (Response) -> T): T = coroutineScope {
         val watcher = launch {
@@ -244,6 +279,7 @@ class ServerClient(
 
     companion object {
         private const val TAG = "VerstServer"
+        private const val LINK_TIMEOUT_S = 4L
 
         /** Engine answers about the trip itself: the phone engine would say the same, so they are not retried. */
         val FINAL = setOf("UNREACHABLE", "TOO_SHORT")

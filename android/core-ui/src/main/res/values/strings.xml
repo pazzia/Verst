@@ -376,6 +376,7 @@
     <string name="exit_book">Забронировать ночь</string>
     <string name="exit_book_partner">через Яндекс Путешествия</string>
     <string name="exit_book_open">Открыть бронирование</string>
+    <string name="exit_booking_failed">Не получилось открыть бронирование. Попробуйте ещё раз</string>
     <string name="exit_booked_price">забронировано</string>
     <string name="exit_link_error">Не получилось открыть бронирование. Попробуйте ещё раз</string>
     <string name="exit_return_title">Забронировали?</string>

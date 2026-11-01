@@ -45,6 +45,8 @@ class VerstApp : Application(), coil.ImageLoaderFactory {
             it.locator = AndroidLocator(this)
             it.addressFallback = app.verst.platform.AndroidGeocoder(this)
             it.countrySource = app.verst.platform.TelephonyCountrySource(this) // CEO 29.10: the maps app by country
+            // ENG-03: the partner link comes from the server only with the tester's consent to the server
+            it.hotelLinks = { q -> if (app.verst.settings.AppPrefs.settings.serverConsent) server.hotelLink(q) else null }
         }
     }
 

@@ -127,9 +127,7 @@ class RoundR1Test {
         compose.onNodeWithTag("road.hotel.${night.id}").performClick()
         waitTag("exit.panel")
         assertEquals(Route.Exit, flow.top)
-        compose.onNodeWithTag("exit.book").performClick()
-        waitTag("partner")
-        compose.onNodeWithTag("partner.back").performScrollTo().performClick()
+        compose.onNodeWithTag("exit.book").performClick() // ENG-03: the dry run records the hotel search link
         waitTag("booked")
         compose.onNodeWithTag("booked.yes").performClick()
         compose.waitUntil(5_000) { flow.isBooked(night.id) }

@@ -407,6 +407,7 @@
     <string name="exit_book">Book the night</string>
     <string name="exit_book_partner">via a partner</string>
     <string name="exit_book_open">Open booking</string>
+    <string name="exit_booking_failed">Could not open the booking. Please try again</string>
     <string name="exit_booked_price">booked</string>
     <string name="exit_link_error">Couldn\'t open the booking. Please try again</string>
     <string name="exit_return_title">Did you book?</string>

@@ -291,7 +291,7 @@ class SliceJourneyTest {
         Log.i("VerstE2e", "golden ring km windshield=$signKm plan=${flow.result!!.trip.km}")
         assertEquals(signKm, flow.result!!.trip.km) // one trip, one distance from the Windshield on
 
-        // 5.7 Exit: night 1 → another hotel (local first, engine after) → mock partner → «Забронировали?» → booked.
+        // 5.7 Exit: night 1 → another hotel (local first, engine after) → the hotel search → «Забронировали?» → booked.
         val night = flow.result!!.trip.daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.size >= 2 }
         compose.onNodeWithTag("road.hotel.${night.id}").performScrollTo().performClick()
         waitTag("exit.panel")
@@ -303,12 +303,14 @@ class SliceJourneyTest {
         compose.waitUntil(10_000) { !flow.costBusy && flow.result!!.trip.daysList.flatMap { it.stops }.first { it.id == night.id }.selectedHotelId == pick.placeId }
         Log.i("VerstE2e", "hotel ${pick.placeId} total $before → ${flow.result!!.trip.cost.totalRub}")
         shot("23-exit-other-hotel")
+        // ENG-03: the real hotel search opens outside the app; the dry run records the link instead of leaving
+        compose.runOnUiThread { flow.debugHandoffDryRun = true }
         compose.onNodeWithTag("exit.book").performClick()
-        waitTag("partner")
-        compose.onNodeWithTag("partner.badge", useUnmergedTree = true).assertExists()
-        shot("24-mock-partner")
-        compose.onNodeWithTag("partner.back").performScrollTo().performClick()
         waitTag("booked")
+        val link = flow.lastBookingUrl.orEmpty()
+        Log.i("VerstE2e", "booking link $link")
+        assertTrue(link, link.startsWith("https://travel.yandex.ru/hotels/search/") || link.startsWith("https://tp.media/"))
+        compose.runOnUiThread { flow.debugHandoffDryRun = false }
         shot("25-booked-dialog")
         compose.onNodeWithTag("booked.yes").performClick()
         compose.waitUntil(5_000) { flow.isBooked(night.id) }

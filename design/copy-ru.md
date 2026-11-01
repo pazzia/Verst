@@ -425,6 +425,7 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `exit_book` | Забронировать ночь | |
 | `exit_book_partner` | через Яндекс Путешествия | |
 | `exit_book_open` | Открыть бронирование | booked |
+| `exit_booking_failed` | Не получилось открыть бронирование. Попробуйте ещё раз | ENG-03: no browser took the link |
 | `exit_booked_price` | забронировано | |
 | `exit_link_error` | Не получилось открыть бронирование. Попробуйте ещё раз | toast |
 | `exit_return_title` | Забронировали? | dialog |

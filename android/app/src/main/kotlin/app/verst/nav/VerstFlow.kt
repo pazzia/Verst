@@ -99,6 +99,8 @@ sealed interface Toast {
     data class HandoffWeb(val walk: Boolean, val google: Boolean = false) : Toast
     data object HandoffOffline : Toast
     data object HandoffFailed : Toast
+    /** ENG-03: no browser or app took the booking link. */
+    data object BookingFailed : Toast
     /** 5.13 §5: «Открываем Яндекс Карты / Google Карты / Навигатор» (1 s) before the app opens. */
     data class HandoffOpen(val app: HandoffApp) : Toast
 
@@ -199,6 +201,13 @@ class VerstFlow(
         internal set
     /** e2e: record the hand-off without leaving the app. */
     var debugHandoffDryRun = false
+
+    // ---- hotel booking (ENG-03)
+    /** The partner link from the server for a night (set by the app; null = the plain search built here). */
+    var hotelLinks: (suspend (app.verst.core.model.HotelLinkQuery) -> String?)? = null
+    /** The last booking link opened (debug panel, tests). */
+    var lastBookingUrl: String? by mutableStateOf(null)
+        internal set
     /** D-5 stop menu (long-press on a Road-ahead row) and its engine hand-off. */
     var stopMenu: StopDto? by mutableStateOf(null)
         internal set
