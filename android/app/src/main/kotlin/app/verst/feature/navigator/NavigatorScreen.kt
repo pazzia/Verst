@@ -1,6 +1,7 @@
 package app.verst.feature.navigator
 
 import androidx.compose.foundation.background
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -145,6 +146,7 @@ fun NavigatorScreen(
     /** CEO 29.10: the abroad plate's button → the maps app with ОТКУДА and КУДА. */
     onAbroadMaps: () -> Unit = {},
 ) {
+    if (Palette.camper) return NavigatorScreenCamper(ui = ui, onBack = onBack, onQuery = onQuery, onPick = onPick, onEditFrom = onEditFrom, onStart = onStart, location = location, onAbroadMaps = onAbroadMaps)
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
     var inputFocused by remember { mutableStateOf(false) }

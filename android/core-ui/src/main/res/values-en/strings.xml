@@ -928,6 +928,10 @@
     <string name="settings_theme_system">System</string>
     <string name="settings_theme_restart">The theme applies after the app restarts</string>
     <string name="settings_restart">Restart</string>
+    <string name="settings_design">DESIGN</string>
+    <string name="settings_design_camper">Camper</string>
+    <string name="settings_design_classic">Classic</string>
+    <string name="settings_design_restart">The design applies after the app restarts</string>
     <string name="settings_storage">WHERE TO KEEP TRIPS</string>
     <string name="settings_storage_device">On this phone</string>
     <string name="settings_storage_device_sub">In the app\'s storage. Works offline</string>
@@ -1070,4 +1074,14 @@
     <string name="cuisine_chicken">chicken</string>
     <string name="cuisine_vegetarian">vegetarian</string>
     <string name="cuisine_vegan">vegan</string>
+    <!-- Camper fork (CEO 31.10): app header and tab bar -->
+    <string name="camper_brand">VERSTA</string>
+    <string name="camper_tagline">CAMPER GUIDE</string>
+    <string name="camper_tab_windshield">Start</string>
+    <string name="camper_tab_instruments">Gauges</string>
+    <string name="camper_tab_road">Road</string>
+    <string name="camper_tab_city">On foot</string>
+    <string name="camper_tab_waybill">Waybill</string>
+    <string name="cd_camper_tab_need_trip">Build a route first</string>
+    <string name="cd_camper_tabs">Sections</string>
 </resources>

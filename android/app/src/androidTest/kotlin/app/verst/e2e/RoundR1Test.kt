@@ -158,7 +158,7 @@ class RoundR1Test {
         val r = flow.result!!
         val gateway = app.verst.engine.ChaquopyPlannerGateway(E2e.engine, app.verst.core.model.DefaultWorld)
         // 5.13 §5 (S4): «вести» of day 1 → the hand-off sheet with the engine's v3 links (ADR-0015 §1).
-        compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("road.day.1.navigator", useUnmergedTree = true).performScrollTo().performClick()
         waitTag("handoff")
         compose.waitUntil(10_000) { flow.handoffSheet?.handoff != null }
         shot("42-handoff-sheet")

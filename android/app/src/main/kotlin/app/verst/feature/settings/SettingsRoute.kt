@@ -17,6 +17,7 @@ import app.verst.BuildConfig
 import app.verst.MainActivity
 import app.verst.VerstApp
 import app.verst.core.model.AppLanguage
+import app.verst.core.model.AppDesign
 import app.verst.core.model.AppTheme
 import app.verst.core.model.Car
 import app.verst.core.model.MapsChoice
@@ -49,9 +50,11 @@ fun SettingsRoute(flow: VerstFlow) {
         BuildConfig.VERSION_NAME, BuildConfig.BUILD_NUMBER, BuildConfig.GIT_SHA, BuildConfig.BUILD_DATE,
         ready?.info?.engineVersion, ready?.info?.python, catalogue,
     )
+    val designPending = (s.design == AppDesign.CAMPER) != Palette.camper
     val ui = SettingsUi(
         s, AppPrefs.rates, build, AppPrefs.builds, AppPrefs.folderStatus,
-        themePending = Themes.isDay(ctx, s.theme) != Palette.day, copied = copied,
+        themePending = designPending || (!Palette.camper && Themes.isDay(ctx, s.theme) != Palette.day),
+        designPending = designPending, copied = copied,
         serverUrl = AppPrefs.serverUrl, serverChecking = serverChecking, serverCheck = serverCheck, lastPlan = app.gateway.lastPlan,
         serverConsentAsk = consentAsk, serverForgotten = forgotten,
         country = flow.phoneCountry,
@@ -75,6 +78,10 @@ fun SettingsRoute(flow: VerstFlow) {
 
             override fun theme(t: AppTheme) {
                 AppPrefs.update { it.copy(theme = t) }
+            }
+
+            override fun design(d: AppDesign) {
+                AppPrefs.update { it.copy(design = d) }
             }
 
             override fun restart() {

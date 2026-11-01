@@ -1,6 +1,7 @@
 package app.verst.feature.city
 
 import androidx.compose.foundation.background
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -150,6 +151,7 @@ interface WalkActions : PickerActions {
 /** 5.11 «Прогулка»: 5.5 with the city strip, the walking column, the walk hand-off and the cost plate. */
 @Composable
 fun WalkScreen(ui: WalkUi, a: WalkActions) {
+    if (Palette.camper) return WalkScreenCamper(ui = ui, a = a)
     val w = ui.walk
     val scroll = rememberScrollState()
     val rows = remember(w.id) { mutableStateMapOf<String, Int>() }

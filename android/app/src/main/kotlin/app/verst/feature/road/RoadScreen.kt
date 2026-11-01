@@ -1,6 +1,7 @@
 package app.verst.feature.road
 
 import androidx.compose.foundation.background
+import app.verst.core.ui.theme.Palette
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -232,6 +233,7 @@ interface RoadActions {
 /** 5.5 Road ahead: the day-by-day signs of the plan, «заменить» (D-6), save/share, the Waybill footer. */
 @Composable
 fun RoadScreen(ui: RoadUi, a: RoadActions) {
+    if (Palette.camper) return RoadScreenCamper(ui = ui, a = a)
     val trip = ui.trip
     // S3-R1 focus restore: the scroll position and the rows' offsets in the scrolled content.
     val scroll = rememberScrollState()
@@ -519,6 +521,7 @@ internal object DataLicence {
  */
 @Composable
 internal fun androidx.compose.foundation.layout.BoxScope.AboutDataSheet(windowH: androidx.compose.ui.unit.Dp, onClose: () -> Unit) {
+    if (Palette.camper) return AboutDataSheetCamper(windowH, onClose)
     val context = androidx.compose.ui.platform.LocalContext.current
     val uri = androidx.compose.ui.platform.LocalUriHandler.current
     val notice = remember {

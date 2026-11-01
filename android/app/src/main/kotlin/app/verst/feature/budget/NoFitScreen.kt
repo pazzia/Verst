@@ -1,6 +1,7 @@
 package app.verst.feature.budget
 
 import androidx.compose.animation.core.Animatable
+import app.verst.core.ui.theme.Palette
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,6 +70,7 @@ interface NoFitActions {
  */
 @Composable
 fun NoFitScreen(nf: NoFitDto, a: NoFitActions) {
+    if (Palette.camper) return NoFitScreenCamper(nf = nf, a = a)
     val min = nf.minimumTotalRub
     val cd = stringResource(R.string.cd_budget_nofit, app.verst.settings.AppPrefs.money(nf.budgetRub), app.verst.settings.AppPrefs.money(min))
     ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {

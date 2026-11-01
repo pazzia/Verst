@@ -259,7 +259,7 @@ class Sprint3Test {
         }
         compose.waitUntil(15_000) { flow.gps == GpsState.On && flow.origin.label == "Ярославль" }
         waitTag("windshield.city")
-        compose.onNodeWithTag("windshield.city").performClick()
+        compose.onNodeWithTag("windshield.city").performScrollTo().performClick()
         waitTag("city.preset.overview", 20_000)
         shot("67-city-presets")
         compose.onNodeWithTag("city.preset.overview").performClick()
@@ -523,7 +523,7 @@ class Sprint3Test {
         }
         compose.waitUntil(20_000) { flow.gps == GpsState.On && flow.origin.label == town }
         waitTag("windshield.city")
-        compose.onNodeWithTag("windshield.city").performClick()
+        compose.onNodeWithTag("windshield.city").performScrollTo().performClick()
         compose.waitUntil(20_000) { !flow.cityLoading && (flow.cityPresets?.town?.name == town || flow.cityError != null) }
         val p = flow.cityPresets?.presets?.firstOrNull { it.preset == preset }
         Log.i("VerstE2e", "R4 presets $town: ${flow.cityPresets?.presets?.map { "${it.preset}:${it.available}:${it.count}" }} tz=${flow.cityPresets?.town?.tz}")

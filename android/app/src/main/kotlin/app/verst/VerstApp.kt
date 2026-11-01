@@ -56,6 +56,7 @@ class VerstApp : Application(), coil.ImageLoaderFactory {
         // D-IR-20: settings first — the activity reads the language, the tokens read the theme
         app.verst.settings.AppPrefs.init(this)
         app.verst.core.ui.theme.Palette.day = app.verst.settings.Themes.isDay(this, app.verst.settings.AppPrefs.settings.theme)
+        app.verst.core.ui.theme.Palette.camper = app.verst.settings.AppPrefs.settings.design == app.verst.core.model.AppDesign.CAMPER
         engine = EngineHost(this)
         engine.start()
     }

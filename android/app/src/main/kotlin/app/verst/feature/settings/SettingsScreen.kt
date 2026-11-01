@@ -1,6 +1,7 @@
 package app.verst.feature.settings
 
 import androidx.compose.foundation.background
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -29,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.verst.core.model.AppLanguage
 import app.verst.core.model.AppSettings
+import app.verst.core.model.AppDesign
 import app.verst.core.model.AppTheme
 import app.verst.core.model.Car
 import app.verst.core.model.MapsApp
@@ -74,6 +76,8 @@ data class SettingsUi(
     val folderStatus: FolderStatus?,
     /** The theme picked differs from the palette this process draws with: offer a restart. */
     val themePending: Boolean,
+    /** CEO 01.11: the design picked differs from the one this process draws (the restart note names the design). */
+    val designPending: Boolean = false,
     val copied: Boolean = false,
     /** SRV-01: the backend of this build (null = none), the last connection check and where the last plan ran. */
     val serverUrl: String? = null,
@@ -93,6 +97,8 @@ interface SettingsActions {
     fun language(l: AppLanguage)
     fun currency(code: String)
     fun theme(t: AppTheme)
+    /** CEO 01.11: «Кемпер» / «Классический»; applies after a restart, like the theme. */
+    fun design(d: AppDesign) {}
     fun restart()
     fun storageDevice()
     fun pickFolder()
@@ -114,6 +120,7 @@ interface SettingsActions {
 
 @Composable
 fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
+    if (Palette.camper) return SettingsScreenCamper(ui = ui, a = a)
     ScreenRoot(C.dash.raised) {
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp).testTag("settings"),
@@ -181,6 +188,15 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
                 Modifier.testTag("settings.rate"),
             )
 
+            Section(stringResource(R.string.settings_design))
+            Choices(
+                listOf(
+                    AppDesign.CAMPER to stringResource(R.string.settings_design_camper),
+                    AppDesign.CLASSIC to stringResource(R.string.settings_design_classic),
+                ),
+                ui.settings.design, "settings.design", a::design,
+            )
+
             Section(stringResource(R.string.settings_theme))
             Choices(
                 listOf(
@@ -191,7 +207,7 @@ fun SettingsScreen(ui: SettingsUi, a: SettingsActions) {
                 ui.settings.theme, "settings.theme", a::theme,
             )
             if (ui.themePending) {
-                Note(stringResource(R.string.settings_theme_restart))
+                Note(stringResource(if (ui.designPending) R.string.settings_design_restart else R.string.settings_theme_restart))
                 Button(stringResource(R.string.settings_restart), "settings.restart", C.accent.yellow, C.text.onLight, a::restart)
             }
 

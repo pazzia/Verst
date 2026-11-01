@@ -11,6 +11,10 @@ enum class AppLanguage(val tag: String) { RU("ru-RU"), EN("en-US") }
 @Serializable
 enum class AppTheme { NIGHT, DAY, SYSTEM }
 
+/** CEO 01.11: the look of the app; CAMPER is «Кемпер-гид» (paper, Craft components), CLASSIC the original dashboard. */
+@Serializable
+enum class AppDesign { CAMPER, CLASSIC }
+
 /** Where saved trips live. CLOUD needs accounts and the server; it is shown, not selectable yet. */
 @Serializable
 enum class TripStorage { DEVICE, FOLDER, CLOUD }
@@ -21,6 +25,8 @@ data class AppSettings(
     val language: AppLanguage = AppLanguage.RU,
     val currency: String = Money.RUB,
     val theme: AppTheme = AppTheme.NIGHT,
+    /** CEO 01.11: both designs stay; the camper one is the default. The classic theme applies to CLASSIC only. */
+    val design: AppDesign = AppDesign.CAMPER,
     val storage: TripStorage = TripStorage.DEVICE,
     /** SAF tree URI of the folder that mirrors saved trips (storage = FOLDER). */
     val folderUri: String? = null,
@@ -39,7 +45,7 @@ data class AppSettings(
     val mapsApp: MapsChoice = MapsChoice.AUTO,
 ) {
     /** A setting that only takes effect after the app restarts (the palette is read once per process). */
-    fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme
+    fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme || design != old.design
 
     companion object {
         fun decode(text: String?): AppSettings = try {

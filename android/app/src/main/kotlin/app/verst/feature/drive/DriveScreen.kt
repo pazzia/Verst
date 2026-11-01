@@ -1,6 +1,7 @@
 package app.verst.feature.drive
 
 import androidx.compose.foundation.layout.Arrangement
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -91,6 +92,7 @@ fun DriveScreen(
     onDone: () -> Unit,
     onErrorAction: (DriveAction, String) -> Unit,
 ) {
+    if (Palette.camper) return DriveScreenCamper(ui = ui, kmLabel = kmLabel, action = action, onCancel = onCancel, onDone = onDone, onErrorAction = onErrorAction)
     ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
             WindshieldScene(maxHeight - DashHeight + 20.dp, hills = false, sunX = 161f, refHeight = 560f, sky = DriveSky, road = DriveRoad, sunCenterY = 304f,

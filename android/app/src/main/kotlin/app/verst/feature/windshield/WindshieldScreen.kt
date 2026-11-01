@@ -1,6 +1,7 @@
 package app.verst.feature.windshield
 
 import androidx.compose.foundation.Canvas
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import kotlinx.coroutines.withTimeoutOrNull
@@ -146,6 +147,7 @@ fun WindshieldScreen(
     onCity: () -> Unit = {},
     onYouAre: () -> Unit = {},
 ) {
+    if (Palette.camper) return WindshieldScreenCamper(ui = ui, onSelect = onSelect, onStart = onStart, onNavigator = onNavigator, onRetry = onRetry, trips = trips, onDebug = onDebug, onSettings = onSettings, onCity = onCity, onYouAre = onYouAre)
     ScreenRoot(C.dash.base, statusBar = C.interior.liner) {
         BoxWithConstraints(Modifier.matchParentSize()) {
             var signBottom by remember { mutableStateOf(290f) }

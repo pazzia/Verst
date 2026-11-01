@@ -20,6 +20,19 @@ DAY = ROOT / "design/tokens-day.json"
 
 VAL = re.compile(r"^(?P<ind> *)val (?P<name>\w+): Color(?: = (?P<plain>.+)| get\(\) = if \(Palette\.day\) .+ else (?P<night>.+))$")
 
+# CEO 01.11: apply_camper_palette.py wraps every colour token as `get() = if (Palette.camper) <camper> else <classic>`;
+# both scripts first unwrap it, so they stay idempotent in either order.
+CAMPER_WRAP = re.compile(r"^(?P<ind> *)val (?P<name>\w+): Color get\(\) = if \(Palette\.camper\) (?P<camper>Color\(0x[0-9A-F]{8}\)(?:\.copy\(alpha = [0-9.e-]+f\))?) else (?P<rest>.+)$")
+
+
+def unwrap_camper(line: str) -> str:
+    m = CAMPER_WRAP.match(line)
+    if not m:
+        return line
+    rest = m.group("rest")
+    sep = " get() = " if rest.startswith("if (Palette.day)") else " = "
+    return "%sval %s: Color%s%s" % (m.group("ind"), m.group("name"), sep, rest)
+
 
 def kcolor(leaf: dict) -> str:
     base = "Color(0xFF%s)" % leaf["value"][1:].upper()
@@ -58,6 +71,7 @@ def main() -> None:
     switched = 0
     seen: set[tuple[str, ...]] = set()
     for line in lines:
+        line = unwrap_camper(line)
         stripped = line.strip()
         ind = len(line) - len(line.lstrip(" "))
         m_obj = re.match(r"^ *object (\w+) \{$", line)

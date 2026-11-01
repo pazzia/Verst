@@ -1,6 +1,7 @@
 package app.verst.feature.waybill
 
 import androidx.compose.animation.Crossfade
+import app.verst.core.ui.theme.Palette
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.keyframes
@@ -106,6 +107,7 @@ private const val NONE = "—"
  */
 @Composable
 fun WaybillScreen(ui: WaybillUi, a: WaybillActions) {
+    if (Palette.camper) return WaybillScreenCamper(ui = ui, a = a)
     ScreenRoot(C.dash.raised) {
         Column(Modifier.fillMaxSize()) {
             Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 14.dp)) {

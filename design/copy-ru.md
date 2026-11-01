@@ -1284,6 +1284,10 @@ These keys were written straight into `strings.xml` during the CEO rounds of 27�
 | `settings_theme_system` | Как в системе | |
 | `settings_theme_restart` | Тема применится после перезапуска приложения | |
 | `settings_restart` | Перезапустить | |
+| `settings_design` | ДИЗАЙН | CEO 01.11: both designs stay selectable |
+| `settings_design_camper` | Кемпер | |
+| `settings_design_classic` | Классический | |
+| `settings_design_restart` | Дизайн применится после перезапуска приложения | |
 | `settings_storage` | ГДЕ ХРАНИТЬ ПОЕЗДКИ | |
 | `settings_storage_device` | На этом телефоне | |
 | `settings_storage_device_sub` | В памяти приложения. Работает без интернета | |
@@ -1450,3 +1454,19 @@ These keys were written straight into `strings.xml` during the CEO rounds of 27�
 | `cuisine_chicken` | курица | |
 | `cuisine_vegetarian` | вегетарианское меню | |
 | `cuisine_vegan` | веганское меню | |
+
+## 18. Camper fork (CEO 31.10)
+
+Fork `camper-ui`, design «Кемпер-гид» (`design/camper/mockup-13-screens.html`): the app header and the bottom tab bar drawn by `VerstRoot` (MainActivity) around every screen.
+
+| Key | Text | Notes |
+| --- | --- | --- |
+| `camper_brand` | ВЕРСТА | header wordmark next to the van tile (uppercase stored) |
+| `camper_tagline` | КЕМПЕР-ГИД | small orange overline under the wordmark |
+| `camper_tab_windshield` | Старт | tab 1 → Windshield (the root) |
+| `camper_tab_instruments` | Приборы | tab 2 → Instruments when a destination or a ready route is chosen, else the Navigator |
+| `camper_tab_road` | Дорога | tab 3 → Road ahead; dimmed until a trip is built |
+| `camper_tab_city` | Пешком | tab 4 → «По городу пешком» |
+| `camper_tab_waybill` | Путевой | tab 5 → Waybill; dimmed until a trip is built |
+| `cd_camper_tab_need_trip` | Сначала постройте дорогу | TalkBack state of a dimmed tab (Дорога, Путевой) |
+| `cd_camper_tabs` | Разделы | TalkBack pane title of the tab bar |

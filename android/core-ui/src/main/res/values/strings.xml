@@ -924,6 +924,10 @@
     <string name="settings_theme_system">Как в системе</string>
     <string name="settings_theme_restart">Тема применится после перезапуска приложения</string>
     <string name="settings_restart">Перезапустить</string>
+    <string name="settings_design">ДИЗАЙН</string>
+    <string name="settings_design_camper">Кемпер</string>
+    <string name="settings_design_classic">Классический</string>
+    <string name="settings_design_restart">Дизайн применится после перезапуска приложения</string>
     <string name="settings_storage">ГДЕ ХРАНИТЬ ПОЕЗДКИ</string>
     <string name="settings_storage_device">На этом телефоне</string>
     <string name="settings_storage_device_sub">В памяти приложения. Работает без интернета</string>
@@ -1060,4 +1064,13 @@
     <string name="cuisine_chicken">курица</string>
     <string name="cuisine_vegetarian">вегетарианское меню</string>
     <string name="cuisine_vegan">веганское меню</string>
+    <string name="camper_brand">ВЕРСТА</string>
+    <string name="camper_tagline">КЕМПЕР-ГИД</string>
+    <string name="camper_tab_windshield">Старт</string>
+    <string name="camper_tab_instruments">Приборы</string>
+    <string name="camper_tab_road">Дорога</string>
+    <string name="camper_tab_city">Пешком</string>
+    <string name="camper_tab_waybill">Путевой</string>
+    <string name="cd_camper_tab_need_trip">Сначала постройте дорогу</string>
+    <string name="cd_camper_tabs">Разделы</string>
 </resources>

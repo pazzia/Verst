@@ -100,6 +100,12 @@ class ScreensScreenshotTest {
 
     private val root = File(System.getProperty("verst.repoRoot") ?: "../..")
 
+    /** CEO 01.11: these shots cover the classic design; the emulator journey runs the default (camper) one. */
+    @org.junit.Before
+    fun classicDesign() {
+        app.verst.core.ui.theme.Palette.camper = false
+    }
+
     private val routes = listOf(
         ReadyRouteDto("rr_tula_yasnaya", "Тула · Ясная Поляна", "2 дня · Толстой и пряники", 414, 207, "weekend", true, 2, 2, "t_moscow", "S"),
         ReadyRouteDto("rr_yaroslavl", "Ярославль", "2 дня · по М-8", 526, 263, "weekend", true, 2, 2, "t_moscow", "NE"),
@@ -1786,6 +1792,7 @@ class ScreensScreenshotTest {
         override fun currency(code: String) { calls += "currency:$code" }
         override fun theme(t: app.verst.core.model.AppTheme) { calls += "theme:$t" }
         override fun restart() { calls += "restart" }
+        override fun design(d: app.verst.core.model.AppDesign) { calls += "design:$d" }
         override fun storageDevice() { calls += "device" }
         override fun pickFolder() { calls += "folder" }
         override fun writeFolderNow() { calls += "now" }
@@ -1857,6 +1864,28 @@ class ScreensScreenshotTest {
         compose.onNodeWithTag("settings.consumption.more").performScrollTo().performClick()
         compose.onNodeWithTag("settings.tolls.true").performScrollTo().performClick()
         assertEquals(listOf("consumption:1", "tolls:true"), spy.calls.drop(2))
+    }
+
+    @Test
+    fun settingsDesignChoiceInBothDesigns() {
+        val spy = SettingsSpy()
+        shot("settings", "design-classic") { app.verst.feature.settings.SettingsScreen(settingsUi, spy) }
+        compose.onNodeWithTag("settings.design.CAMPER").performScrollTo().assertIsSelected()
+        compose.onNodeWithTag("settings.design.CLASSIC").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        assertEquals(listOf("design:CLASSIC"), spy.calls)
+        app.verst.core.ui.theme.Palette.camper = true
+        try {
+            val camperSpy = SettingsSpy()
+            val pending = settingsUi.copy(settings = settingsUi.settings.copy(design = app.verst.core.model.AppDesign.CLASSIC), themePending = true, designPending = true)
+            shot("settings", "design-camper") { app.verst.feature.settings.SettingsScreen(pending, camperSpy) }
+            compose.onNodeWithTag("settings.design.CLASSIC").performScrollTo().assertIsSelected()
+            compose.onNodeWithText("Дизайн применится после перезапуска приложения").performScrollTo().assertIsDisplayed()
+            assertTrue(compose.onAllNodesWithTag("settings.theme.DAY").fetchSemanticsNodes().isEmpty()) // one camper palette
+            compose.onNodeWithTag("settings.restart").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+            assertEquals(listOf("restart"), camperSpy.calls)
+        } finally {
+            app.verst.core.ui.theme.Palette.camper = false
+        }
     }
 
     @Test

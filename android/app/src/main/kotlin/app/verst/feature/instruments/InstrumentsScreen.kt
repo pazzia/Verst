@@ -1,6 +1,7 @@
 package app.verst.feature.instruments
 
 import androidx.compose.foundation.Canvas
+import app.verst.core.ui.theme.Palette
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -134,6 +135,7 @@ interface InstrumentsActions {
 /** 5.3 Instruments, simplified: crew in the mirror, km per day, budget presets, mood; ПОЕХАЛИ. */
 @Composable
 fun InstrumentsScreen(ui: InstrumentsUi, a: InstrumentsActions) {
+    if (Palette.camper) return InstrumentsScreenCamper(ui = ui, a = a)
     ScreenRoot(C.dash.raised, statusBar = C.sky.band1) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxWidth().height(232.dp)) {

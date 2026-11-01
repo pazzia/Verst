@@ -1,6 +1,7 @@
 package app.verst.feature.city
 
 import androidx.compose.foundation.Canvas
+import app.verst.core.ui.theme.Palette
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -131,6 +132,7 @@ interface CityActions : PickerActions {
 /** 5.10 «По городу» (S4 §10): a fresh walk setup — start, who goes, which walk, how long, wishes. */
 @Composable
 fun CityScreen(ui: CityUi, a: CityActions) {
+    if (Palette.camper) return CityScreenCamper(ui = ui, a = a)
     ScreenRoot(C.city.sky, statusBar = C.city.sky) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val windowH = maxHeight
