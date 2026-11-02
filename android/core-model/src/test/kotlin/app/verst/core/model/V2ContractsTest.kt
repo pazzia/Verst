@@ -88,7 +88,9 @@ class V2ContractsTest {
         assertEquals("https://creativecommons.org/licenses/by-sa/4.0/", src.licenceUrl)
         assertTrue(src.abridged)
         val hotel = ok(EngineJson.poiDetails(envelope("poi_details-hotel.json")))
-        assertTrue(hotel.isFictional)
+        // CEO 02.11: a real OpenStreetMap hotel — not fictional, credited to OSM
+        assertFalse(hotel.isFictional)
+        assertTrue(hotel.attributionRu.any { it.contains("OpenStreetMap") })
         // release-s3: only single photographs may be area photos — when there is one, it is labelled as such
         hotel.image?.let { assertTrue(it.isArea); assertTrue(it.labelRu!!.startsWith("Фото района")) }
         val bar = ok(EngineJson.poiDetails(envelope("poi_details-bar.json")))
