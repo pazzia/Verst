@@ -234,9 +234,11 @@ class Sprint3Test {
         shot("64-road-after-card")
         val night = stops.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
         compose.onNodeWithTag("road.stop.${night.id}").performScrollTo().performClick()
-        waitTag("card.fictional")
+        waitTag("card.kind")
         compose.waitUntil(20_000) { has("photo.loaded") || has("photo.error") || has("photo.none") }
         if (has("photo.loaded")) compose.onNodeWithText("ФОТО РАЙОНА").assertExists()
+        // D-IR-27: the night is a real OSM hotel — never called invented
+        assertTrue("real hotel called fictional", !has("card.fictional"))
         shot("65-card-hotel-area")
         back()
         // fuel / rest rows have no click semantics (M§15.5)

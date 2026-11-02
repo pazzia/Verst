@@ -503,6 +503,7 @@
     <string name="card_area_plate">ФОТО РАЙОНА</string>
     <string name="card_hotel_fictional">Гостиница в демо-сборке вымышленная — на фото район, а не она</string>
     <string name="card_hotel_fictional_nophoto">Гостиница в демо-сборке вымышленная</string>
+    <string name="card_hotel_area_photo">На фото район, а не сама гостиница</string>
     <string name="card_photo_none">Фото пока нет</string>
     <string name="card_photo_offline">Фото загрузится, когда будет интернет</string>
     <string name="card_photo_error">Фото не загрузилось</string>
@@ -873,6 +874,7 @@
     <string name="border_fee_counted">%1$s · учтено в суммах за границей</string>
     <string name="cd_border_source">Открыть источник: %1$s</string>
     <string name="road_total_abroad_incomplete">Итог без расходов за границей</string>
+    <string name="road_total_no_nights">Итог без ночёвок</string>
     <string name="waybill_abroad_title">За границей</string>
     <string name="waybill_abroad_country">%1$s · ≈ %2$s км</string>
     <string name="waybill_abroad_fuel">Топливо: %1$s</string>

@@ -773,6 +773,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `card_area_plate` | ФОТО РАЙОНА | plate on the hotel photo (uppercase copy) |
 | `card_hotel_fictional` | Гостиница в демо-сборке вымышленная — на фото район, а не она | under the hotel photo |
 | `card_hotel_fictional_nophoto` | Гостиница в демо-сборке вымышленная | hotel card while the area photo is a placeholder (none / error / offline): the «на фото район» clause and the `card_photo_area` credit are hidden (S3-QA P1-05) |
+| `card_hotel_area_photo` | На фото район, а не сама гостиница | a real OSM hotel (D-IR-27, `isFictional` false) while the area photo is on screen; nothing while it is a placeholder |
 | `card_photo_none` | Фото пока нет | placeholder (no file / no free licence) |
 | `card_photo_offline` | Фото загрузится, когда будет интернет | placeholder offline |
 | `card_photo_error` | Фото не загрузилось | placeholder HTTP error |
@@ -1213,6 +1214,7 @@ These keys were written straight into `strings.xml` during the CEO rounds of 27�
 | `border_fee_counted` | {x} · учтено в суммах за границей | |
 | `cd_border_source` | Открыть источник: {x} | |
 | `road_total_abroad_incomplete` | Итог без расходов за границей | |
+| `road_total_no_nights` | Итог без ночёвок | D-IR-27: a chosen hotel has no price (real OSM hotel), the total leaves the night out; replaces the «в бюджете» badge |
 | `waybill_abroad_title` | За границей | |
 | `waybill_abroad_country` | {x} · ≈ {y} км | |
 | `waybill_abroad_fuel` | Топливо: {x} | |

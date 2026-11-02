@@ -147,7 +147,7 @@ private fun Sheet(ui: WaybillUi, a: WaybillActions) {
             TableHeader()
             cost.lines.filter { it.key != "reserve" }.forEach { line ->
                 if (line.key == "parking") ParkingLine(line, trip, ui.expanded == line.key) { a.toggleLine(line.key) }
-                else CostLine(line, ui.expanded == line.key) { a.toggleLine(line.key) }
+                else CostLine(line, ui.expanded == line.key, if (line.key == "lodging") unpricedNights(trip) else 0) { a.toggleLine(line.key) }
             }
             cost.lines.firstOrNull { it.key == "reserve" }?.let { ReserveRow(it, cost.reserveOn, ui.busy, a::toggleReserve) }
             TotalRow(cost.totalRub)
@@ -255,10 +255,11 @@ private fun BreakdownRow(text: String, amount: String, tag: String?, muted: Bool
 
 /** components §11 `CostLine`: name + chevron, the engine formula, the sum; expands to the breakdown. */
 @Composable
-private fun CostLine(line: CostLineDto, expanded: Boolean, onClick: () -> Unit) {
-    val sum = app.verst.settings.AppPrefs.amount(line.rub)
+private fun CostLine(line: CostLineDto, expanded: Boolean, unpriced: Int = 0, onClick: () -> Unit) {
+    // D-IR-27: a night without a known price is not «0» — «—» alone, «+ ?» next to the priced nights
+    val sum = unpricedSum(line.rub, unpriced)
     val state = stringResource(if (expanded) R.string.cd_waybill_collapse else R.string.cd_waybill_expand)
-    val cd = stringResource(R.string.cd_waybill_line, line.title, app.verst.settings.AppPrefs.money(line.rub), line.formula, state)
+    val cd = stringResource(R.string.cd_waybill_line, line.title, unpricedSum(line.rub, unpriced, money = true), line.formula, state)
     Column(
         Modifier.fillMaxWidth().animateContentSize()
             .clickable(enabled = line.breakdown.isNotEmpty(), role = Role.Button, onClick = onClick)

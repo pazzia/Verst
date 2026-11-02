@@ -278,6 +278,7 @@
     <string name="border_fee_counted">%1$s · counted in the sums abroad</string>
     <string name="cd_border_source">Open the source: %1$s</string>
     <string name="road_total_abroad_incomplete">Total without the costs abroad</string>
+    <string name="road_total_no_nights">Total without the nights</string>
     <string name="waybill_abroad_title">Abroad</string>
     <string name="waybill_abroad_country">%1$s · ≈ %2$s km</string>
     <string name="waybill_abroad_fuel">Fuel: %1$s</string>
@@ -534,6 +535,7 @@
     <string name="card_area_plate">PHOTO OF THE AREA</string>
     <string name="card_hotel_fictional">The hotel in the demo build is fictional — the photo shows the area, not the hotel</string>
     <string name="card_hotel_fictional_nophoto">The hotel in the demo build is fictional</string>
+    <string name="card_hotel_area_photo">The photo shows the area, not the hotel itself</string>
     <string name="card_photo_none">No photo yet</string>
     <string name="card_photo_offline">The photo will load once you\'re online</string>
     <string name="card_photo_error">The photo didn\'t load</string>

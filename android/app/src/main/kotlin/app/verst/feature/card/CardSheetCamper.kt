@@ -117,11 +117,17 @@ fun BoxScope.CardSheetCamper(ui: CardUi, windowH: Dp, a: CardActions) {
             illustration = illWord?.let { Illustration(it, caption = descText.isNullOrBlank()) },
         )
         if (ui.kind == "hotel") {
-            // 5.9 §3: «на фото район, а не она» only while the area photo is on screen
-            Txt(
-                stringResource(if (photoShown) R.string.card_hotel_fictional else R.string.card_hotel_fictional_nophoto),
-                CraftType.caption, C.camper.inkSoft, Modifier.padding(top = 6.dp).testTag("card.fictional"),
-            )
+            // 5.9 §3: «на фото район, а не она» only while the area photo is on screen. D-IR-27: a real OSM hotel
+            // (isFictional false) is never called invented — only the area clause, and only over the photo.
+            val fictional = d?.isFictional == true
+            val note = when {
+                fictional -> stringResource(if (photoShown) R.string.card_hotel_fictional else R.string.card_hotel_fictional_nophoto)
+                photoShown -> stringResource(R.string.card_hotel_area_photo)
+                else -> null
+            }
+            if (note != null) {
+                Txt(note, CraftType.caption, C.camper.inkSoft, Modifier.padding(top = 6.dp).testTag(if (fictional) "card.fictional" else "card.area.note"))
+            }
         }
         // the fictional status is said once (S3-QA P1-05): no engine «Демо: вымышленная гостиница» line
         val desc = descText

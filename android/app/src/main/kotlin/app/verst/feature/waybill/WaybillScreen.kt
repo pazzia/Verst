@@ -100,6 +100,21 @@ private val SumCol = 70.dp
 private val TotalCol = 150.dp // 100 in the spec for «≈ 30 500»; our value carries «₽» (common_estimate_rub)
 private const val NONE = "—"
 
+/** D-IR-27: overnights whose chosen hotel has no price (a real OSM hotel); the engine total leaves them out. */
+internal fun unpricedNights(trip: TripDto): Int = trip.daysList.flatMap { it.stops }.count { s ->
+    s.hotelOptions.isNotEmpty() && (s.hotelOptions.firstOrNull { it.placeId == s.selectedHotelId } ?: s.hotelOptions.first()).priceCrewRub == null
+}
+
+/** A line sum with unpriced nights: «—» when nothing is priced, «12 000 + ?» next to priced ones. */
+internal fun unpricedSum(rub: Int, unpriced: Int, money: Boolean = false): String {
+    val p = app.verst.settings.AppPrefs
+    return when {
+        unpriced == 0 -> if (money) p.money(rub) else p.amount(rub)
+        rub == 0 -> NONE
+        else -> (if (money) p.money(rub) else p.amount(rub)) + " + ?"
+    }
+}
+
 /**
  * 5.6 Waybill, simplified (DEV-SLICE-2): the paper sheet with the engine's cost lines and formulas, one line
  * expanded at a time, the reserve switch re-costed by the engine (`patch_cost`), issued / left against the
@@ -154,7 +169,7 @@ private fun Sheet(ui: WaybillUi, a: WaybillActions) {
                 TableHeader()
                 cost.lines.filter { it.key != "reserve" }.forEach { line ->
                     if (line.key == "parking") ParkingLine(line, trip, ui.expanded == line.key) { a.toggleLine(line.key) }
-                    else CostLine(line, ui.expanded == line.key) { a.toggleLine(line.key) }
+                    else CostLine(line, ui.expanded == line.key, if (line.key == "lodging") unpricedNights(trip) else 0) { a.toggleLine(line.key) }
                 }
                 cost.lines.firstOrNull { it.key == "reserve" }?.let { ReserveRow(it, cost.reserveOn, ui.busy, a::toggleReserve) }
                 TotalRow(cost.totalRub)
@@ -267,10 +282,11 @@ private fun TableHeader() {
 
 /** components §11 `CostLine`: name + chevron, the engine formula in hand, the sum; expands to the breakdown. */
 @Composable
-private fun CostLine(line: CostLineDto, expanded: Boolean, onClick: () -> Unit) {
-    val sum = app.verst.settings.AppPrefs.amount(line.rub)
+private fun CostLine(line: CostLineDto, expanded: Boolean, unpriced: Int = 0, onClick: () -> Unit) {
+    // D-IR-27: a night without a known price is not «0» — «—» alone, «+ ?» next to the priced nights
+    val sum = unpricedSum(line.rub, unpriced)
     val state = stringResource(if (expanded) R.string.cd_waybill_collapse else R.string.cd_waybill_expand)
-    val cd = stringResource(R.string.cd_waybill_line, line.title, app.verst.settings.AppPrefs.money(line.rub), line.formula, state)
+    val cd = stringResource(R.string.cd_waybill_line, line.title, unpricedSum(line.rub, unpriced, money = true), line.formula, state)
     Column(
         Modifier.fillMaxWidth().animateContentSize()
             .clickable(enabled = line.breakdown.isNotEmpty(), role = Role.Button, onClick = onClick)

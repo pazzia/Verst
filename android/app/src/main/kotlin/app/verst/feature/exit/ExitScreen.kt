@@ -320,10 +320,12 @@ private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, i
         Column(Modifier.weight(1f)) {
             Txt(o.name, T.title.sm, C.text.primary, maxLines = 1)
             if (tags.isNotEmpty()) Txt(tags, T.body.sm, C.navi.labelSecondary, maxLines = 2)
+            // D-IR-27: no price → the note under the name (beside it, it squeezed the name out), no «≈»
+            if (o.priceCrewRub == null && !booked) Txt(price, T.body.sm, C.accent.yellowText, maxLines = 2)
         }
         if (booked) {
             Txt(stringResource(R.string.exit_booked_badge), T.body.smStrong, C.accent.yellowText, maxLines = 1)
-        } else {
+        } else if (o.priceCrewRub != null) {
             Txt(stringResource(R.string.common_estimate_rub, price), T.title.sm, C.accent.yellowText, maxLines = 1)
         }
     }
