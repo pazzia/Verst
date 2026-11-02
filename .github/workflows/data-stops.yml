@@ -16,6 +16,9 @@ on:
     paths: [backend/planner/tools/data/data-stops.request]
   workflow_dispatch:
 
+permissions:
+  contents: write   # the orphan bot/data-stops-N branch
+
 concurrency:
   group: data-stops
   cancel-in-progress: false

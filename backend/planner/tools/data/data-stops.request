@@ -1,2 +1,3 @@
 # Edit and push a ccr-* branch to run .github/workflows/data-stops.yml (real lodgings, fuel, rest areas from OSM).
 2026-11-02 CEO «настоящие отели, кафе, АЗС, а не выдумка»: first build, counts and sizes for the decision
+2026-11-02 run 2: publish (run 1 built 12 530 lodgings + 28 902 roadside places, the push lacked contents: write)
