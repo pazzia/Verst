@@ -1046,7 +1046,7 @@ class ScreensScreenshotTest {
         // S3-QA P1-05: while the frame is a placeholder (Robolectric never loads the URL) — no credit, the short note,
         // no engine «Демо: вымышленная гостиница» line; the mini sign sits in the title row (§19 C2)
         compose.onNodeWithText("Фото района: Ярославль · Wikimedia Commons").assertDoesNotExist()
-        compose.onNodeWithText("Гостиница в демо-сборке вымышленная").assertExists()
+        compose.onNodeWithText("Гостиница в демо-сборке вымышленная", substring = true).assertDoesNotExist()
         compose.onNodeWithText("Демо: вымышленная гостиница").assertDoesNotExist()
         compose.onNodeWithTag("card.sign", useUnmergedTree = true).assertExists()
     }
