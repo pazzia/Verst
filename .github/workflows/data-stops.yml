@@ -1,0 +1,85 @@
+# CEO 02.11 («чтобы все кафешки, достопримечательности и отели были настоящими, а не выдумкой для демо»): real
+# lodgings (hotels, motels, guest houses, hostels) of the shipped catalogue's towns and every fuel station, rest
+# area and services place of Russia, from the Geofabrik extract (OSM, ODbL 1.0). backend/planner/tools/data/
+# build_stops.py writes catalogue_lodging.json.gz and catalogue_roadside.json.gz next to the shipped catalogue,
+# with a report of counts (what was kept, what was dropped and why) and sizes.
+#
+# Trigger from a working branch (ccr-*): edit backend/planner/tools/data/data-stops.request and push; or, once
+# this file is on the default branch, Actions → data-stops → Run workflow.
+# Result: bot/data-stops-<run_number> (the two files and catalogue_stops.lock with the report), an orphan branch
+# (GITHUB_TOKEN may not push a history that changes workflows). Merge with
+#   git checkout origin/bot/data-stops-N -- backend/planner/verst_planner/resources/catalogue_{lodging,roadside}.json.gz backend/planner/tools/data/catalogue_stops.lock
+name: data-stops
+on:
+  push:
+    branches: ["ccr-*"]
+    paths: [backend/planner/tools/data/data-stops.request]
+  workflow_dispatch:
+
+concurrency:
+  group: data-stops
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  stops:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 170
+    env:
+      RES: backend/planner/verst_planner/resources
+      T: backend/planner/tools/data
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Lodging and roadside places (Geofabrik russia-latest + osmium)
+        timeout-minutes: 150
+        run: |
+          sudo apt-get install -y -qq osmium-tool >/dev/null
+          mkdir -p out
+          tools/ci/fetch_pbf.sh https://download.geofabrik.de/russia-latest.osm.pbf "$RUNNER_TEMP/ru.osm.pbf" | tee out/log.txt
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/tourism=hotel,motel,guest_house,hostel \
+            -o "$RUNNER_TEMP/lodging.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/lodging.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/lodging.geojsonseq" --overwrite
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/amenity=fuel nwr/highway=rest_area,services \
+            -o "$RUNNER_TEMP/roadside.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/roadside.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/roadside.geojsonseq" --overwrite
+          wc -l "$RUNNER_TEMP/lodging.geojsonseq" "$RUNNER_TEMP/roadside.geojsonseq" | tee -a out/log.txt
+          python3 $T/build_stops.py "$RUNNER_TEMP/lodging.geojsonseq" "$RUNNER_TEMP/roadside.geojsonseq" "$RES" \
+            --lock $T/catalogue_stops.lock 2>&1 | tee -a out/log.txt
+          cp "$RES"/catalogue_lodging.json.gz "$RES"/catalogue_roadside.json.gz $T/catalogue_stops.lock out/
+      - name: Summary
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "### Real stops from OSM"
+            echo '```json'
+            cat $T/catalogue_stops.lock 2>/dev/null || echo "no lock (the build failed, see the log)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: stops
+          path: out/
+          retention-days: 30
+      - name: Push to bot/data-stops-${{ github.run_number }}
+        if: ${{ success() }}
+        run: |
+          git config user.name "verst-ci"
+          git config user.email "verst-ci@users.noreply.github.com"
+          KEEP="$RUNNER_TEMP/keep"; mkdir -p "$KEEP/$RES" "$KEEP/$T"
+          cp -a "$RES"/catalogue_lodging.json.gz "$RES"/catalogue_roadside.json.gz "$KEEP/$RES/"
+          cp -a $T/catalogue_stops.lock out/log.txt "$KEEP/$T/"
+          git checkout -q --orphan "bot/data-stops-${{ github.run_number }}"
+          git read-tree --empty && git clean -fdq
+          cp -a "$KEEP"/. .
+          git add -f backend
+          git commit -qm "data: real lodgings and roadside places from the OSM extract, run ${{ github.run_id }} (ODbL 1.0)"
+          git push origin "bot/data-stops-${{ github.run_number }}"

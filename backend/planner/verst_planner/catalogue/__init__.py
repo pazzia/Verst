@@ -72,6 +72,24 @@ PARKS_FILE = "catalogue_parks.json.gz"
 PARK_KINDS = ("park", "garden")
 PARK_COLS = ("id", "name", "kind", "lat", "lon", "town", "area", "poi", "hours")
 
+# CEO 02.11 «настоящие точки, не выдумка»: real lodgings and roadside places from the OSM extract
+# (`tools/data/build_stops.py`, ODbL), separate files like the parks, read by `load_packaged_stops`.
+# `catalogue_lodging`: named hotels, motels, guest houses and hostels of a catalogue town (`town` indexes
+# `catalogue_towns` of the build named by `townsSha256`). OSM has no prices: `stars` / `rooms` as tagged or
+# null,
+# `dog` 1 = dogs allowed, 0 = not, null = unknown (OSM `dog` / `pets`), `phone` and `site` as tagged or null.
+LODGING_FILE = "catalogue_lodging.json.gz"
+LODGING_KINDS = ("hotel", "motel", "guest_house", "hostel")
+LODGING_COLS = ("id", "name", "kind", "lat", "lon", "town", "stars", "rooms", "dog", "phone", "site")
+# `catalogue_roadside`: every fuel station, rest area and highway services place in the country (no town).
+# `name` is null for an unnamed one or when its name is a deny-listed brand (the app shows a generic name).
+# `fuel` / `nofuel`: bit masks of the fuels tagged yes / no (1 = АИ-92, 2 = АИ-95, 4 = ДТ; `FUEL_BITS`);
+# `hours` = OSM opening_hours or null; `wc` / `cafe` 1 / 0 / null.
+ROADSIDE_FILE = "catalogue_roadside.json.gz"
+ROADSIDE_KINDS = ("fuel", "rest_area", "services")
+ROADSIDE_COLS = ("id", "name", "kind", "lat", "lon", "hours", "fuel", "nofuel", "wc", "cafe")
+FUEL_BITS = {"ai92": 1, "ai95": 2, "dt": 4}
+
 
 class CatalogueError(Exception):
     """Missing or malformed catalogue resources (`NO_CATALOGUE` at the bridge)."""
@@ -463,11 +481,18 @@ __all__ = [
     "FILES",
     "FOOD_COLS",
     "FOOD_KINDS",
+    "FUEL_BITS",
+    "LODGING_COLS",
+    "LODGING_FILE",
+    "LODGING_KINDS",
     "PARKS_FILE",
     "PARK_COLS",
     "PARK_KINDS",
     "POI_COLS",
     "POI_KINDS",
+    "ROADSIDE_COLS",
+    "ROADSIDE_FILE",
+    "ROADSIDE_KINDS",
     "TOWN_COLS",
     "CatBar",
     "CatFood",
