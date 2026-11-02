@@ -460,6 +460,14 @@ def plan_rests_day(
                     return False
             return gap.t1 - clock.at(c.km_at) >= need_after - EPS
 
+        def kind_ok(c: Candidate) -> bool:
+            """The extended window too follows the sight kind rules (two playgrounds in a row, CEO 02.11)."""
+            if c.place.type is not PlaceType.SIGHT or not ctx.cfg.sights.diversity:
+                return True
+            from verst_planner.pipeline.sights import diversity_ok
+
+            return diversity_ok(day, c)
+
         span = [(c, d0) for c in pool.between(gap.km0, gap.km1) if (d0 := drive_since(c)) is not None]
         scored = [(c, d0) for c, d0 in span if admissible(c, d0)]
         windows = [
@@ -474,6 +482,7 @@ def plan_rests_day(
                 (c, d0)
                 for c, d0 in span
                 if c.detour_min <= rc.extended_detour_min
+                and kind_ok(c)
                 and max(float(EXTENDED_MIN_DRIVE), r - rc.widen_before_min) - EPS
                 <= d0
                 <= r + EXTENDED_AFTER + EPS

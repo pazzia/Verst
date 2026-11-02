@@ -8,10 +8,12 @@ import dataclasses
 import json
 import unittest
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
 from tests.unit import test_mobile_v2
 from verst_planner import mobile
+from verst_planner.cost.money import round_to
 from verst_planner.cost.recompute import effective_parking, recompute
 from verst_planner.domain import codec
 from verst_planner.domain.model import AltUnits, CostOverrides, Crew, LatLon, ParkingUnit
@@ -92,7 +94,8 @@ class AltParkingTest(unittest.TestCase):
         parks = effective_parking(units, CostOverrides(replaced={"d1s02": alt}))
         self.assertEqual((parks[0].stop_id, parks[0].name_ru, parks[0].rub), ("d1s02", "Музей", 200))
         line = next(x for x in a.lines if x.key.value == "parking")
-        self.assertEqual(line.rub, 200)
+        others = sum(x.rub or 0 for x in units.parking[1:])  # the other stops of the contract
+        self.assertEqual(line.rub, round_to(Decimal(200 + others), units.line_step))
 
     def test_alt_units_json_roundtrip(self) -> None:
         alt = AltUnits(

@@ -494,9 +494,8 @@ def _flag(v: Any) -> bool | None:
     return None if v is None else bool(v)
 
 
-def _fuels(mask: Any) -> frozenset[str]:
-    m = int(mask or 0)
-    return frozenset(k for k, bit in FUEL_BITS.items() if m & bit)
+_FUEL_SETS = tuple(frozenset(k for k, bit in FUEL_BITS.items() if m & bit) for m in range(8))
+"""The 8 fuel masks as shared frozensets (29 000 stations, a handful of distinct sets)."""
 
 
 def stops_from_docs(
@@ -506,38 +505,27 @@ def stops_from_docs(
     lodgings: list[CatLodging] = []
     if lodging is not None:
         kinds = lodging["kinds"]
-        for r in decode_table(lodging, LODGING_COLS, "lodging"):
-            lodgings.append(
-                CatLodging(
-                    id=str(r["id"]),
-                    name=str(r["name"]),
-                    kind=str(kinds[r["kind"]]),
-                    point=LatLon(r["lat"] / COORD_SCALE, r["lon"] / COORD_SCALE),
-                    town=towns[r["town"]].id,
-                    stars=r["stars"],
-                    rooms=r["rooms"],
-                    dog=_flag(r["dog"]),
-                    phone=r["phone"],
-                    site=r["site"],
-                )
+        lodgings = [
+            CatLodging(
+                str(i), str(nm), str(kinds[k]), LatLon(la / COORD_SCALE, lo / COORD_SCALE), towns[t].id,
+                st, rm, _flag(dg), ph, si,
             )
+            for i, nm, k, la, lo, t, st, rm, dg, ph, si in zip(
+                *columns(lodging, LODGING_COLS, "lodging"), strict=True
+            )
+        ]  # fmt: skip
     side: list[CatRoadside] = []
     if roadside is not None:
         kinds = roadside["kinds"]
-        for r in decode_table(roadside, ROADSIDE_COLS, "roadside"):
-            side.append(
-                CatRoadside(
-                    id=str(r["id"]),
-                    name=r["name"],
-                    kind=str(kinds[r["kind"]]),
-                    point=LatLon(r["lat"] / COORD_SCALE, r["lon"] / COORD_SCALE),
-                    hours=r["hours"],
-                    fuels=_fuels(r["fuel"]),
-                    fuels_no=_fuels(r["nofuel"]),
-                    wc=_flag(r["wc"]),
-                    cafe=_flag(r["cafe"]),
-                )
+        side = [
+            CatRoadside(
+                str(i), nm, str(kinds[k]), LatLon(la / COORD_SCALE, lo / COORD_SCALE), hr,
+                _FUEL_SETS[fy or 0], _FUEL_SETS[fn or 0], _flag(wc), _flag(cf),
             )
+            for i, nm, k, la, lo, hr, fy, fn, wc, cf in zip(
+                *columns(roadside, ROADSIDE_COLS, "roadside"), strict=True
+            )
+        ]  # fmt: skip
     return lodgings, side
 
 

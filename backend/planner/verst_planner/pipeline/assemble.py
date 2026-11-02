@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from verst_planner.domain.enums import SIGN_BY_KIND, SignType, Source, StopKind, Tag
+from verst_planner.domain.enums import SIGN_BY_KIND, PlaceType, SignType, Source, StopKind, Tag
 from verst_planner.domain.facts import (
     HOURS_TYPES,
     Fact,
@@ -46,6 +46,16 @@ from verst_planner.pipeline.timeline import Profile, Slot, day_end, detour_km_ha
 SYNTHETIC_ROADSIDE = ("syn_r_", "syn_f_")  # the catalogue's generated rest areas and fuel stations
 
 REGION_STEP_KM = 10.0
+
+
+def generic_roadside(p: Place) -> bool:
+    """A roadside place with no name of its own: a synthetic one, or a real OSM fuel station or rest area
+    that OSM does not name (or whose brand the app does not show, CEO 02.11); M9 names it by town or km."""
+    return p.id.startswith(SYNTHETIC_ROADSIDE) or (
+        p.source is Source.OSM
+        and p.type in (PlaceType.FUEL, PlaceType.REST)
+        and p.name_ru in (ru.text("synthetic.fuel"), ru.text("synthetic.rest"))
+    )
 
 
 def stop_id(day: int, idx: int) -> str:
@@ -169,7 +179,7 @@ def render_stop(
     open_data = s.place is not None and s.place.source is Source.OSM
     # CEO 02.11: a night at a real hotel always says where its price is (and the dog check with a dog)
     unknown_ru = None if open_data and s.kind is not StopKind.OVERNIGHT else unknown_line(facts, inp)
-    if ctx.cfg.sights.diversity and s.place is not None and s.place.id.startswith(SYNTHETIC_ROADSIDE):
+    if ctx.cfg.sights.diversity and s.place is not None and generic_roadside(s.place):
         name = roadside_name(s.km_at, s.point, None, ctx, s.name_ru)  # M9: never a bare rest area name
     return ScheduledStop(
         id=sid or stop_id(day_no, idx),

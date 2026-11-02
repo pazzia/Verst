@@ -23,6 +23,9 @@ def walk(**kw: Any) -> str:
     return json.dumps({"start": YAR, **kw})
 
 
+REAL_HOTEL = "osm_n10175244917"  # «Богоявленский», Ярославль (catalogue_lodging, OSM)
+
+
 class MobileV2Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -177,8 +180,11 @@ class MobileV2Test(unittest.TestCase):
     def test_poi_details(self) -> None:
         sight = call(mobile.poi_details(R, "pl_yar_ilya"))
         self.assertEqual((sight["kind"], sight["isFictional"]), ("sight", False))
-        hotel = call(mobile.poi_details(R, "pl_yar_hotel_strelka"))
-        self.assertTrue(hotel["isFictional"])
+        # CEO 02.11: a real OSM hotel — not fictional, credited to OpenStreetMap, no invented description
+        hotel = call(mobile.poi_details(R, REAL_HOTEL))
+        self.assertFalse(hotel["isFictional"])
+        self.assertIsNone(hotel["descriptionRu"])
+        self.assertIn("© участники OpenStreetMap", hotel["attributionRu"])
         if hotel["image"] is not None:
             self.assertTrue(hotel["image"]["isArea"])
             self.assertIn("Фото района", hotel["image"]["labelRu"])

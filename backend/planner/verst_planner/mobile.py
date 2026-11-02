@@ -49,7 +49,14 @@ from verst_planner import handoff as handoff_mod
 from verst_planner.adapters.catalogue import CataloguePorts, CatalogueWorld, build_catalogue_ports, compose
 from verst_planner.adapters.catalogue.world import WORLD_ID as CATALOGUE_WORLD
 from verst_planner.adapters.fake import GOLDEN_CLOCK, FakePorts, FakeWorld, build_fakes
-from verst_planner.catalogue import Catalogue, CatalogueError, CatPark, load_packaged, load_packaged_parks
+from verst_planner.catalogue import (
+    Catalogue,
+    CatalogueError,
+    CatPark,
+    load_packaged,
+    load_packaged_parks,
+    load_packaged_stops,
+)
 from verst_planner.catalogue.photos import image_urls
 from verst_planner.city import presets as city_presets_mod
 from verst_planner.city.route import NotEnoughPois, WalkTown, build_walk, request_key
@@ -292,6 +299,11 @@ OPEN_DATA_CONFIG: dict[str, Any] = {
     "overnight_score": {"anchors": 1},
     "town_visit": {"on": 1},
 }
+
+
+def catalogue_config(real_stops: bool) -> dict[str, Any]:
+    """`OPEN_DATA_CONFIG`; with the real OSM stops no night is costed at a town average (CEO 02.11)."""
+    return {**OPEN_DATA_CONFIG, "cost": {"lodging_estimate": 0}} if real_stops else dict(OPEN_DATA_CONFIG)
 
 
 def _planner(fakes: FakePorts | CataloguePorts, clock: Any, config: dict[str, Any] | None = None) -> Planner:
@@ -1019,7 +1031,9 @@ def _load_catalogue() -> dict[str, Any]:
             cat = load_packaged()
         except CatalogueError as e:
             raise EngineFailure("NO_CATALOGUE", str(e)) from e
-        cw = compose(base.world, cat)
+        # CEO 02.11: the real OSM lodgings and roadside places replace every invented stop
+        lodgings, roadside = load_packaged_stops(cat)
+        cw = compose(base.world, cat, stops=(lodgings, roadside) if lodgings or roadside else None)
         ports = build_catalogue_ports(cw, _CLOCK.now())
         bars: GridIndex[str] = GridIndex(0.05)
         for b in cat.bars:
@@ -1035,7 +1049,7 @@ def _load_catalogue() -> dict[str, Any]:
         if was_enabled:
             gc.enable()
     gc.freeze()
-    planner = _planner(ports, _CLOCK, OPEN_DATA_CONFIG)
+    planner = _planner(ports, _CLOCK, catalogue_config(cw.real_stops))
     _WORLDS[CATALOGUE_WORLD] = _World(cw.world, ports, planner, cw, bars, food, parks if park_list else None)
     _CATALOGUE[:] = [cat]
     _PARKS.clear()
@@ -1093,7 +1107,7 @@ def _load_abroad(path: Any = None, rates_path: Any = None) -> dict[str, Any]:
         routing=base.fakes.routing,
         model=road_model(),
         clock=_CLOCK,
-        config=PlannerConfig.from_dict(OPEN_DATA_CONFIG),
+        config=PlannerConfig.from_dict(catalogue_config(base.catalogue.real_stops)),
         templates=ReasonTemplates.default(),
         parking=base.fakes.parking,
     )
@@ -1852,6 +1866,30 @@ def _poi_details(world: Any, place_id: Any) -> dict[str, Any]:
             "attributionRu": attribution,
             "wikidataId": w.catalogue.qid_of_place.get(p.id) if w.catalogue else None,
             **place_source(w, p.id),
+        }
+    if p is not None and p.type is PlaceType.LODGING and p.source is Source.OSM:
+        # CEO 02.11: a real hotel from OpenStreetMap — what OSM says, nothing more (no price, no photo of it)
+        town = w.world.towns.get(p.town_id or "")
+        info = w.catalogue.lodging_info.get(p.id) if w.catalogue else None
+        file, credit = _area_photo(w, town) if town else (None, None)
+        return {
+            "id": p.id,
+            "kind": "hotel",
+            "poiKind": p.category,
+            "nameRu": p.name_ru,
+            "descriptionRu": None,
+            "townName": town.name_ru if town else None,
+            "lat": p.point.lat,
+            "lon": p.point.lon,
+            "image": _image(w, file, credit, town) if town else None,
+            "hours": None,
+            "ticket": None,
+            "website": info.site if info else None,
+            "phone": info.phone if info else None,
+            "stars": info.stars if info else None,
+            "isFictional": False,
+            "attributionRu": [ru.text("poi.osm")],
+            "wikidataId": None,
         }
     if p is not None and p.type is PlaceType.LODGING:
         town = w.world.towns.get(p.town_id or "")

@@ -20,7 +20,6 @@ from verst_planner.catalogue import Catalogue, CatFood, CatLodging, CatPoi, CatR
 from verst_planner.domain.enums import FuelType, PlaceStatus, PlaceType, RoadClass, Source, Tag
 from verst_planner.domain.model import LatLon, PartnerIds, Place, RegionInfo, Town
 from verst_planner.explain import ru
-from verst_planner.geo.grid import GridIndex
 
 WORLD_ID = "russia_v1"
 
@@ -173,6 +172,9 @@ REAL_STOPS_FIXTURE_TYPES = frozenset({PlaceType.LODGING, PlaceType.FOOD, PlaceTy
 """The fixture world's hand-made places of these types are dropped when the real OSM stops are loaded: they
 were made for the demo (CEO 02.11: real hotels, not invented ones)."""
 FOOD_DWELL_MIN = 60
+FOOD_TRIP_CAP = 12
+"""Cafés per town a trip's lunch can stop at (the walk reads every café from the catalogue itself)."""
+FOOD_TRIP_ORDER = {"restaurant": 0, "cafe": 1, "food_court": 2, "fast_food": 3}
 ROADSIDE_TYPE = {"fuel": PlaceType.FUEL, "rest_area": PlaceType.REST, "services": PlaceType.REST}
 FUEL_OF = {"ai92": FuelType.AI92, "ai95": FuelType.AI95, "dt": FuelType.DT}
 REGION_RADIUS_KM = 2000.0
@@ -305,6 +307,11 @@ class CatalogueWorld:
     real_stops: bool = False
     """CEO 02.11: the real OSM lodgings, food and roadside places replace every invented one (no synthetic
     hotels, cafés, fuel or rest places, no fixture ones of those types)."""
+    lodging_info: dict[str, CatLodging] = field(default_factory=dict)
+    """The real lodgings' OSM facts the place does not carry (stars, website, phone) for the hotel card."""
+    roadside: list[CatRoadside] = field(default_factory=list)
+    """The real fuel stations and rest areas: built into places only along a queried corridor (29 000 of them
+    would double the catalogue load on the phone), like the synthetic ones were."""
 
 
 def with_bypasses(
@@ -436,21 +443,31 @@ def _add_real_stops(
         if tid is None:
             continue
         places[lo.id] = lodging_place(lo, tid, towns[tid].region_code)
+        out.lodging_info[lo.id] = lo
         count[tid] = count.get(tid, 0) + 1
     for tid, t in list(towns.items()):
         n = count.get(tid, 0)
         if t.lodging_count_cache != n:
             towns[tid] = dataclasses.replace(t, lodging_count_cache=n)
+    by_town: dict[str, list[CatFood]] = {}
     for f in cat.food:
         tid = out.town_of_qid.get(f.town)
         if tid is not None and f.id not in places:
+            by_town.setdefault(tid, []).append(f)
+    for tid, lst in by_town.items():
+        # restaurants and cafés with known hours first, then by distance from the centre
+        centre = towns[tid].point
+        lst.sort(
+            key=lambda f: (
+                FOOD_TRIP_ORDER.get(f.kind, 9),
+                f.hours is None,
+                (f.point.lat - centre.lat) ** 2 + (f.point.lon - centre.lon) ** 2,
+                f.id,
+            )
+        )
+        for f in lst[:FOOD_TRIP_CAP]:
             places[f.id] = food_place(f, tid, towns[tid].region_code)
-    regions: GridIndex[str] = GridIndex(0.5)
-    for t in sorted(towns.values(), key=lambda t: t.id):
-        regions.add(t.point, t.region_code)
-    for r in roadside:
-        hit = regions.nearest(r.point, REGION_RADIUS_KM)
-        places[r.id] = roadside_place(r, hit[1] if hit is not None else "RU")
+    out.roadside = list(roadside)
 
 
 def point_of(cw: CatalogueWorld, place_id: str) -> LatLon | None:
