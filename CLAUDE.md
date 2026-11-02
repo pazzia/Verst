@@ -35,6 +35,14 @@ Android road-trip planner for Russia and 9 neighbour countries: a Kotlin/Compose
 - Never commit `.env`, keystores, tokens or passwords. The commit guard (`tools/hooks/guard_commit.py`)
   blocks them. Secrets live in GitHub Secrets or in `.env` on the server.
 
+**APK size (D-IR-26)**
+- CI budget: warn above 45 MB, fail above 60 MB (`android.yml`, `diagnose.py apk`).
+- Going over it is allowed only with the CEO's permission, asked **before** the change. The request shows:
+  1. the size it adds (measured from a CI build, not estimated);
+  2. evidence that it really improves the app;
+  3. why the same result cannot be done on the server instead.
+- Never raise the budget or silence the check on your own.
+
 **Server and law**
 - **152-FZ:** the Netherlands VM (`docs/ops/test-server.md`) is for tests only. A server in Russia comes before
   any beta with outside users.

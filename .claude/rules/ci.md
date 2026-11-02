@@ -13,3 +13,5 @@ paths:
   and short.
 - Never print secrets; signing material only from GitHub Secrets.
 - A red build is work now. A flake is not a root cause: re-run once only to confirm, then fix.
+- **APK size budget (D-IR-26):** 45 MB warn, 60 MB fail. Raising it needs the CEO's permission first, with the
+  measured size added, evidence that it improves the app, and why it cannot live on the server.
