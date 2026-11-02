@@ -24,7 +24,8 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 - **Real stops (D-IR-27, 02.11):** the plan uses only real OpenStreetMap hotels, fuel stations, rest areas and cafés.
   - Data: `catalogue_lodging` (12 530) and `catalogue_roadside` (28 902) from `data-stops.yml` run 2.
   - A night has no price («по ссылке «Забронировать»»), so the total leaves it out.
-  - Engine, server and app changes are in commit 3302307; android CI on it is the check.
+  - Engine, server and app changes: 3302307. The fix 7732c49 reads the roadside places on the first plan: the emulator catalogue load had gone to 2 041 ms against a 2 000 ms budget.
+  - Side effect: with hotel nights left out of the total, the CEO budget case (30 000 ₽) fits on the first plan and «Подогнали под бюджет» is not shown. The budget check does not count hotels now.
   - Known gap: on long legs with a child, lunch is often skipped because the real cafés sit in town centres, 25–55 min off the road. Next step: roadside cafés outside towns from OSM.
 
 ## Waiting on the CEO
