@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import dataclasses
 import math
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 
 from verst_planner import resources
@@ -178,7 +179,8 @@ FOOD_TRIP_ORDER = {"restaurant": 0, "cafe": 1, "food_court": 2, "fast_food": 3}
 ROADSIDE_TYPE = {"fuel": PlaceType.FUEL, "rest_area": PlaceType.REST, "services": PlaceType.REST}
 FUEL_OF = {"ai92": FuelType.AI92, "ai95": FuelType.AI95, "dt": FuelType.DT}
 REGION_RADIUS_KM = 2000.0
-Stops = tuple[list[CatLodging], list[CatRoadside]]
+Stops = tuple[list[CatLodging], Callable[[], Sequence[CatRoadside]]]
+"""The real lodgings, and the loader of the real roadside places (read on the first corridor query)."""
 
 
 def lodging_place(lo: CatLodging, town_id: str, region: str) -> Place:
@@ -309,9 +311,9 @@ class CatalogueWorld:
     hotels, cafés, fuel or rest places, no fixture ones of those types)."""
     lodging_info: dict[str, CatLodging] = field(default_factory=dict)
     """The real lodgings' OSM facts the place does not carry (stars, website, phone) for the hotel card."""
-    roadside: list[CatRoadside] = field(default_factory=list)
-    """The real fuel stations and rest areas: built into places only along a queried corridor (29 000 of them
-    would double the catalogue load on the phone), like the synthetic ones were."""
+    roadside: Callable[[], Sequence[CatRoadside]] = tuple
+    """The loader of the real fuel stations and rest areas: read on the first corridor query and built into
+    places only along it (29 000 of them would add a third to the phone's catalogue load)."""
 
 
 def with_bypasses(
@@ -467,7 +469,7 @@ def _add_real_stops(
         )
         for f in lst[:FOOD_TRIP_CAP]:
             places[f.id] = food_place(f, tid, towns[tid].region_code)
-    out.roadside = list(roadside)
+    out.roadside = roadside
 
 
 def point_of(cw: CatalogueWorld, place_id: str) -> LatLon | None:

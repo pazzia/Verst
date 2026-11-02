@@ -178,10 +178,14 @@ class Sprint3Test {
             compose.onNodeWithTag("road.total").performClick()
             waitTag("waybill.sheet")
             shot("62-waybill-ceo-fitted")
-            // S3-R3: the lever lines «Подогнали под бюджет» on screen
-            waitTag("waybill.levers")
-            compose.onNodeWithTag("waybill.levers", useUnmergedTree = true).performScrollTo()
-            shot("62b-waybill-ceo-levers")
+            // S3-R3: the lever lines «Подогнали под бюджет» on screen when the engine fitted the plan. Since the
+            // real OSM hotels (D-IR-27) a night has no price and the total leaves it out, so the CEO case may fit
+            // on the first plan (no `budgetFit`, no levers); the lines stay covered by ScreensScreenshotTest.
+            if (flow.result!!.trip.budgetFit?.levers.orEmpty().isNotEmpty()) {
+                waitTag("waybill.levers")
+                compose.onNodeWithTag("waybill.levers", useUnmergedTree = true).performScrollTo()
+                shot("62b-waybill-ceo-levers")
+            }
         } else {
             waitTag("nofit")
             shot("61-nofit-ceo")

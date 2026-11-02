@@ -73,7 +73,8 @@ PARK_KINDS = ("park", "garden")
 PARK_COLS = ("id", "name", "kind", "lat", "lon", "town", "area", "poi", "hours")
 
 # CEO 02.11 «настоящие точки, не выдумка»: real lodgings and roadside places from the OSM extract
-# (`tools/data/build_stops.py`, ODbL), separate files like the parks, read by `load_packaged_stops`.
+# (`tools/data/build_stops.py`, ODbL), separate files like the parks, read by `load_packaged_lodgings` and
+# `load_packaged_roadside`.
 # `catalogue_lodging`: named hotels, motels, guest houses and hostels of a catalogue town (`town` indexes
 # `catalogue_towns` of the build named by `townsSha256`). OSM has no prices: `stars` / `rooms` as tagged or
 # null,
@@ -498,57 +499,61 @@ _FUEL_SETS = tuple(frozenset(k for k, bit in FUEL_BITS.items() if m & bit) for m
 """The 8 fuel masks as shared frozensets (29 000 stations, a handful of distinct sets)."""
 
 
-def stops_from_docs(
-    lodging: Any, roadside: Any, towns: Sequence[CatTown]
-) -> tuple[list[CatLodging], list[CatRoadside]]:
-    """`catalogue_lodging` (town indexes = `towns` in file order) and `catalogue_roadside` decoded."""
-    lodgings: list[CatLodging] = []
-    if lodging is not None:
-        kinds = lodging["kinds"]
-        lodgings = [
-            CatLodging(
-                str(i), str(nm), str(kinds[k]), LatLon(la / COORD_SCALE, lo / COORD_SCALE), towns[t].id,
-                st, rm, _flag(dg), ph, si,
-            )
-            for i, nm, k, la, lo, t, st, rm, dg, ph, si in zip(
-                *columns(lodging, LODGING_COLS, "lodging"), strict=True
-            )
-        ]  # fmt: skip
-    side: list[CatRoadside] = []
-    if roadside is not None:
-        kinds = roadside["kinds"]
-        side = [
-            CatRoadside(
-                str(i), nm, str(kinds[k]), LatLon(la / COORD_SCALE, lo / COORD_SCALE), hr,
-                _FUEL_SETS[fy or 0], _FUEL_SETS[fn or 0], _flag(wc), _flag(cf),
-            )
-            for i, nm, k, la, lo, hr, fy, fn, wc, cf in zip(
-                *columns(roadside, ROADSIDE_COLS, "roadside"), strict=True
-            )
-        ]  # fmt: skip
-    return lodgings, side
+def lodgings_from_doc(lodging: Any, towns: Sequence[CatTown]) -> list[CatLodging]:
+    """`catalogue_lodging` decoded (town indexes = `towns` in file order)."""
+    kinds = lodging["kinds"]
+    return [
+        CatLodging(
+            str(i), str(nm), str(kinds[k]), LatLon(la / COORD_SCALE, lo / COORD_SCALE), towns[t].id,
+            st, rm, _flag(dg), ph, si,
+        )
+        for i, nm, k, la, lo, t, st, rm, dg, ph, si in zip(
+            *columns(lodging, LODGING_COLS, "lodging"), strict=True
+        )
+    ]  # fmt: skip
 
 
-def load_packaged_stops(cat: Catalogue) -> tuple[list[CatLodging], list[CatRoadside]]:
-    """The packaged real lodgings and roadside places (CEO 02.11). The lodgings are read only when their
-    `townsSha256` is the shipped `catalogue_towns`; a missing file reads as empty (no invented stand-in)."""
+def roadside_from_doc(roadside: Any) -> list[CatRoadside]:
+    """`catalogue_roadside` decoded."""
+    kinds = roadside["kinds"]
+    return [
+        CatRoadside(
+            str(i), nm, str(kinds[k]), LatLon(la / COORD_SCALE, lo / COORD_SCALE), hr,
+            _FUEL_SETS[fy or 0], _FUEL_SETS[fn or 0], _flag(wc), _flag(cf),
+        )
+        for i, nm, k, la, lo, hr, fy, fn, wc, cf in zip(
+            *columns(roadside, ROADSIDE_COLS, "roadside"), strict=True
+        )
+    ]  # fmt: skip
+
+
+def load_packaged_lodgings(cat: Catalogue) -> list[CatLodging]:
+    """The packaged real lodgings (CEO 02.11), read only when their `townsSha256` is the shipped
+    `catalogue_towns`; a missing file reads as empty (no invented stand-in)."""
     try:
         towns_sha = hashlib.sha256(resources.read_bytes(FILES["towns"])).hexdigest()
+        doc = load_gz(resources.read_bytes(LODGING_FILE), LODGING_FILE)
     except (FileNotFoundError, OSError):
-        return [], []
-    docs: dict[str, Any] = {}
-    for key, name in (("lodging", LODGING_FILE), ("roadside", ROADSIDE_FILE)):
-        try:
-            docs[key] = load_gz(resources.read_bytes(name), name)
-        except (FileNotFoundError, OSError):
-            docs[key] = None
-    lodging = docs["lodging"]
-    if not isinstance(lodging, dict) or lodging.get("townsSha256") != towns_sha:
-        lodging = None
+        return []
+    if not isinstance(doc, dict) or doc.get("townsSha256") != towns_sha:
+        return []
     try:
-        return stops_from_docs(lodging, docs["roadside"], cat.towns)
+        return lodgings_from_doc(doc, cat.towns)
     except (KeyError, IndexError, TypeError, ValueError) as e:
-        raise CatalogueError(f"stops: malformed ({e!r})") from e
+        raise CatalogueError(f"lodging: malformed ({e!r})") from e
+
+
+def load_packaged_roadside() -> list[CatRoadside]:
+    """The packaged real fuel stations and rest areas (CEO 02.11); a missing file reads as empty. Read on the
+    first corridor query, not with the catalogue: 29 000 rows cost a third of the phone's catalogue load."""
+    try:
+        doc = load_gz(resources.read_bytes(ROADSIDE_FILE), ROADSIDE_FILE)
+    except (FileNotFoundError, OSError):
+        return []
+    try:
+        return roadside_from_doc(doc)
+    except (KeyError, IndexError, TypeError, ValueError) as e:
+        raise CatalogueError(f"roadside: malformed ({e!r})") from e
 
 
 def load_packaged() -> Catalogue:
@@ -604,7 +609,11 @@ __all__ = [
     "from_docs",
     "load_gz",
     "load_packaged",
+    "load_packaged_lodgings",
     "load_packaged_parks",
+    "load_packaged_roadside",
+    "lodgings_from_doc",
     "parks_from_doc",
+    "roadside_from_doc",
     "to_coord",
 ]

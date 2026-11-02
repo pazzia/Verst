@@ -54,8 +54,9 @@ from verst_planner.catalogue import (
     CatalogueError,
     CatPark,
     load_packaged,
+    load_packaged_lodgings,
     load_packaged_parks,
-    load_packaged_stops,
+    load_packaged_roadside,
 )
 from verst_planner.catalogue.photos import image_urls
 from verst_planner.city import presets as city_presets_mod
@@ -1032,8 +1033,8 @@ def _load_catalogue() -> dict[str, Any]:
         except CatalogueError as e:
             raise EngineFailure("NO_CATALOGUE", str(e)) from e
         # CEO 02.11: the real OSM lodgings and roadside places replace every invented stop
-        lodgings, roadside = load_packaged_stops(cat)
-        cw = compose(base.world, cat, stops=(lodgings, roadside) if lodgings or roadside else None)
+        lodgings = load_packaged_lodgings(cat)
+        cw = compose(base.world, cat, stops=(lodgings, load_packaged_roadside) if lodgings else None)
         ports = build_catalogue_ports(cw, _CLOCK.now())
         bars: GridIndex[str] = GridIndex(0.05)
         for b in cat.bars:

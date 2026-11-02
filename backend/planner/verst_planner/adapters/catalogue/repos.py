@@ -9,7 +9,7 @@ coordinates, so `get_places` rebuilds them for `replace_stop` without any state.
 from __future__ import annotations
 
 import itertools
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 from verst_planner.adapters.catalogue.synthetic import roadside, roadside_id, roadside_region_point
 from verst_planner.adapters.catalogue.world import roadside_place
@@ -59,16 +59,15 @@ class IndexedPlaceRepository(FakePlaceRepository):
         world: FakeWorld,
         regions: RegionByNearestTown,
         synthetic_roadside: bool = True,
-        roadside: Sequence[CatRoadside] = (),
+        roadside: Callable[[], Sequence[CatRoadside]] = tuple,
     ) -> None:
         super().__init__(world)
         self.regions = regions
         self.synthetic_roadside = synthetic_roadside
         """False with the real OSM roadside places (CEO 02.11): no invented fuel or rest place, ever."""
-        self.roadside: dict[str, CatRoadside] = {r.id: r for r in roadside}
-        self.roadside_index: GridIndex[CatRoadside] = GridIndex(0.1)
-        for r in roadside:
-            self.roadside_index.add(r.point, r)
+        self._roadside_loader = roadside
+        self._roadside_by_id: dict[str, CatRoadside] | None = None
+        self._roadside_index: GridIndex[CatRoadside] = GridIndex(0.1)
         self._roadside_places: dict[str, Place] = {}
         self.place_index: GridIndex[Place] = GridIndex(0.1)
         self.town_index: GridIndex[Town] = GridIndex(0.25)
@@ -96,13 +95,23 @@ class IndexedPlaceRepository(FakePlaceRepository):
                 found[p.id] = p
         for p in self._roadside(q):
             found[p.id] = p
-        if self.roadside and (PlaceType.FUEL in q.types or PlaceType.REST in q.types):
-            for _pt, r in self.roadside_index.near_line(q.line, q.radius_km):
+        if PlaceType.FUEL in q.types or PlaceType.REST in q.types:
+            self._load_roadside()
+            for _pt, r in self._roadside_index.near_line(q.line, q.radius_km):
                 if distance_to_line_km(r.point, q.line) <= q.radius_km:
                     rp = self._real_roadside(r)
                     if rp.type in q.types:
                         found[rp.id] = rp
         return sorted(found.values(), key=lambda p: p.id)
+
+    def _load_roadside(self) -> dict[str, CatRoadside]:
+        """The real roadside places by id, read and indexed on first use."""
+        if self._roadside_by_id is None:
+            rows = self._roadside_loader()
+            self._roadside_by_id = {r.id: r for r in rows}
+            for r in rows:
+                self._roadside_index.add(r.point, r)
+        return self._roadside_by_id
 
     def _real_roadside(self, r: CatRoadside) -> Place:
         """The place of a real OSM fuel station or rest area, built once on first use."""
@@ -160,8 +169,9 @@ class IndexedPlaceRepository(FakePlaceRepository):
         out: dict[str, Place] = {}
         for i in ids:
             p = self.world.places.get(i)
-            if p is None and i in self.roadside:
-                p = self._real_roadside(self.roadside[i])
+            if p is None and not self.synthetic_roadside:
+                r = self._load_roadside().get(i)
+                p = self._real_roadside(r) if r is not None else None
             if p is None and self.synthetic_roadside:
                 at = roadside_region_point(i)
                 p = roadside(i, self.regions.code_at(at)) if at is not None else None
