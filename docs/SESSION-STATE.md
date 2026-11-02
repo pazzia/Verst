@@ -15,6 +15,12 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
   - In it: the CCGS ideas 1–4 (this file, `CLAUDE.md`, `.claude/rules`, the commit guard, «Что нового» in releases).
   - Also in it: the maps-API research `docs/research/maps-apis-2026-11.md`.
 
+- **Yandex MapKit:** the CEO got a free key (02.11). The terms of 01.09.2026 are analysed in `docs/research/yandex-mapkit-terms.md`.
+  - Free only for a free open app; at most 1 000 unique users a day.
+  - No storing Yandex data; no own turn-by-turn; no live tracking.
+  - Required: logo and «Открыть в Картах», a terms link in «О программе», and consent for Yandex collecting IP, device id and location (п. 8.1).
+  - Not integrated yet: waiting for the CEO to choose the screen.
+
 ## Waiting on the CEO
 
 1. Update the test server to `main` (commands in `docs/ops/test-server.md`, «Обновить сервер»).
@@ -23,6 +29,7 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
    - legal entity, D-IR-09;
    - a lawyer on the «Реклама» label at the booking button (R-05);
    - a server in Russia before the beta.
+5. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
 4. The Yandex Navigator signing key: **not yet** (D-IR-17). The form asks for a company, a site and a store link. It comes after the legal entity, the domain and RuStore, before the closed beta.
 
 ## Next (when the CEO says)
