@@ -8,6 +8,7 @@ open data, not curated); every other catalogue town gets fictional hotels and ca
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from dataclasses import dataclass, field
 
@@ -15,9 +16,11 @@ from verst_planner import resources
 from verst_planner.adapters.catalogue.synthetic import cafes_for, hotels_for
 from verst_planner.adapters.fake.prices import FakePriceRepository
 from verst_planner.adapters.fake.world import Edge, FakeWorld, Node
-from verst_planner.catalogue import Catalogue, CatPoi
-from verst_planner.domain.enums import PlaceStatus, PlaceType, RoadClass, Source, Tag
+from verst_planner.catalogue import Catalogue, CatFood, CatLodging, CatPoi, CatRoadside
+from verst_planner.domain.enums import FuelType, PlaceStatus, PlaceType, RoadClass, Source, Tag
 from verst_planner.domain.model import LatLon, PartnerIds, Place, RegionInfo, Town
+from verst_planner.explain import ru
+from verst_planner.geo.grid import GridIndex
 
 WORLD_ID = "russia_v1"
 
@@ -164,6 +167,120 @@ def poi_place(p: CatPoi, town_id: str, region: str) -> Place:
     )
 
 
+# ------------------------------------------------------------------ real stops (CEO 02.11, option a)
+
+REAL_STOPS_FIXTURE_TYPES = frozenset({PlaceType.LODGING, PlaceType.FOOD, PlaceType.FUEL, PlaceType.REST})
+"""The fixture world's hand-made places of these types are dropped when the real OSM stops are loaded: they
+were made for the demo (CEO 02.11: real hotels, not invented ones)."""
+FOOD_DWELL_MIN = 60
+ROADSIDE_TYPE = {"fuel": PlaceType.FUEL, "rest_area": PlaceType.REST, "services": PlaceType.REST}
+FUEL_OF = {"ai92": FuelType.AI92, "ai95": FuelType.AI95, "dt": FuelType.DT}
+REGION_RADIUS_KM = 2000.0
+Stops = tuple[list[CatLodging], list[CatRoadside]]
+
+
+def lodging_place(lo: CatLodging, town_id: str, region: str) -> Place:
+    """A real OSM lodging: no price (OSM has none: the night says so), dogs only as tagged, no rating."""
+    tags: frozenset[Tag] = frozenset({Tag.DOGS_ALLOWED}) if lo.dog is True else frozenset()
+    tags_no: frozenset[Tag] = frozenset({Tag.DOGS_ALLOWED}) if lo.dog is False else frozenset()
+    return Place(
+        id=lo.id,
+        type=PlaceType.LODGING,
+        name_ru=lo.name,
+        point=lo.point,
+        address=None,
+        region_code=region,
+        town_id=town_id,
+        opening_hours=None,
+        dwell_min=None,
+        avg_check_rub=None,
+        price_night_rub=None,
+        ticket_adult_rub=None,
+        ticket_child_rub=None,
+        rating_internal=None,
+        tags=tags,
+        description_ru=None,
+        partner_ids=_NO_PARTNERS,
+        source=Source.OSM,
+        verified_at=None,
+        status=PlaceStatus.LIVE,
+        category=lo.kind,
+        tags_no=tags_no,
+    )
+
+
+def food_place(f: CatFood, town_id: str, region: str) -> Place:
+    """A real OSM restaurant or café for a lunch stop: no check (OSM has none)."""
+    return Place(
+        id=f.id,
+        type=PlaceType.FOOD,
+        name_ru=f.name,
+        point=f.point,
+        address=None,
+        region_code=region,
+        town_id=town_id,
+        opening_hours=f.hours if f.hours and _hours_ok(f.hours) else None,
+        dwell_min=FOOD_DWELL_MIN,
+        avg_check_rub=None,
+        price_night_rub=None,
+        ticket_adult_rub=None,
+        ticket_child_rub=None,
+        rating_internal=None,
+        tags=frozenset(),
+        description_ru=None,
+        partner_ids=_NO_PARTNERS,
+        source=Source.OSM,
+        verified_at=None,
+        status=PlaceStatus.LIVE,
+        category=f.kind,
+    )
+
+
+def roadside_place(r: CatRoadside, region: str) -> Place:
+    """A real OSM fuel station or rest area: fuels, toilets and a café only as tagged."""
+    ptype = ROADSIDE_TYPE[r.kind]
+    tags: set[Tag] = set()
+    tags_no: set[Tag] = set()
+    hours = r.hours if r.hours and _hours_ok(r.hours) else None
+    if hours == "24/7":
+        tags.add(Tag.H24)
+    if r.wc is True:
+        tags.add(Tag.WC)
+    elif r.wc is False:
+        tags_no.add(Tag.WC)
+    if ptype is PlaceType.FUEL and r.cafe is True:
+        tags.add(Tag.CAFE_AT_FUEL)
+    elif ptype is PlaceType.FUEL and r.cafe is False:
+        tags_no.add(Tag.CAFE_AT_FUEL)
+    generic = "fuel" if ptype is PlaceType.FUEL else "rest"
+    return Place(
+        id=r.id,
+        type=ptype,
+        name_ru=r.name or ru.text(f"synthetic.{generic}"),
+        point=r.point,
+        address=None,
+        region_code=region,
+        town_id=None,
+        opening_hours=hours,
+        dwell_min=None,
+        avg_check_rub=None,
+        price_night_rub=None,
+        ticket_adult_rub=None,
+        ticket_child_rub=None,
+        rating_internal=None,
+        tags=frozenset(tags),
+        description_ru=None,
+        partner_ids=_NO_PARTNERS,
+        source=Source.OSM,
+        verified_at=None,
+        status=PlaceStatus.LIVE,
+        category=r.kind,
+        tags_no=frozenset(tags_no),
+        fuel_kinds=frozenset(FUEL_OF[f] for f in r.fuels),
+        fuel_kinds_no=frozenset(FUEL_OF[f] for f in r.fuels_no),
+    )
+
+
 def town_quality(sitelinks_sum: int) -> int:
     if sitelinks_sum >= 300:
         return 3
@@ -185,6 +302,9 @@ class CatalogueWorld:
     poi_kind: dict[str, str] = field(default_factory=dict)
     """Composed sight id → catalogue POI kind (fixture sights from their tags)."""
     synthetic_towns: set[str] = field(default_factory=set)
+    real_stops: bool = False
+    """CEO 02.11: the real OSM lodgings, food and roadside places replace every invented one (no synthetic
+    hotels, cafés, fuel or rest places, no fixture ones of those types)."""
 
 
 def with_bypasses(
@@ -221,13 +341,17 @@ def with_bypasses(
     return nodes, edges, adjacency
 
 
-def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> CatalogueWorld:
+def compose(
+    fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID, stops: Stops | None = None
+) -> CatalogueWorld:
     regions: dict[str, RegionInfo] = dict(cat.regions)
     regions.update(fixture.regions)  # fixture names/tz win for the regions they define
     prices = FakePriceRepository(fixture)
     towns: dict[str, Town] = dict(fixture.towns)
     places: dict[str, Place] = dict(fixture.places)
-    out = CatalogueWorld(world=fixture, catalogue=cat)
+    out = CatalogueWorld(world=fixture, catalogue=cat, real_stops=stops is not None)
+    if stops is not None:
+        places = {k: p for k, p in places.items() if p.type not in REAL_STOPS_FIXTURE_TYPES}
 
     linked_qids: dict[str, str] = {}
     for fid, link in cat.links.items():
@@ -259,6 +383,8 @@ def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> Cat
         towns[t.id] = town
         out.town_of_qid[t.id] = t.id
         out.qid_of_place[t.id] = t.id
+        if stops is not None:
+            continue
         out.synthetic_towns.add(t.id)
         for h in hotels_for(town, prices.lodging_default_night(t.population)):
             places[h.id] = h
@@ -275,6 +401,9 @@ def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> Cat
         places[place.id] = place
         out.qid_of_place[place.id] = p.id
         out.poi_kind[place.id] = p.kind
+
+    if stops is not None:
+        _add_real_stops(towns, places, out, cat, stops)
 
     nodes, edges, adjacency = with_bypasses(fixture)
     out.world = FakeWorld(
@@ -294,6 +423,34 @@ def compose(fixture: FakeWorld, cat: Catalogue, world_id: str = WORLD_ID) -> Cat
         adjacency=adjacency,
     )
     return out
+
+
+def _add_real_stops(
+    towns: dict[str, Town], places: dict[str, Place], out: CatalogueWorld, cat: Catalogue, stops: Stops
+) -> None:
+    """Real lodgings and lunch places of the towns, and the roadside places of the country (CEO 02.11)."""
+    lodgings, roadside = stops
+    count: dict[str, int] = {}
+    for lo in lodgings:
+        tid = out.town_of_qid.get(lo.town)
+        if tid is None:
+            continue
+        places[lo.id] = lodging_place(lo, tid, towns[tid].region_code)
+        count[tid] = count.get(tid, 0) + 1
+    for tid, t in list(towns.items()):
+        n = count.get(tid, 0)
+        if t.lodging_count_cache != n:
+            towns[tid] = dataclasses.replace(t, lodging_count_cache=n)
+    for f in cat.food:
+        tid = out.town_of_qid.get(f.town)
+        if tid is not None and f.id not in places:
+            places[f.id] = food_place(f, tid, towns[tid].region_code)
+    regions: GridIndex[str] = GridIndex(0.5)
+    for t in sorted(towns.values(), key=lambda t: t.id):
+        regions.add(t.point, t.region_code)
+    for r in roadside:
+        hit = regions.nearest(r.point, REGION_RADIUS_KM)
+        places[r.id] = roadside_place(r, hit[1] if hit is not None else "RU")
 
 
 def point_of(cw: CatalogueWorld, place_id: str) -> LatLon | None:

@@ -56,10 +56,11 @@ def hotel_score(h: Candidate, tc: TownCandidate) -> float:
     )
 
 
-def night_cost(h: Candidate, inp: NormalizedInput, ctx: PlanContext) -> int:
-    """Rooms x price of one night for the crew (family rooms when that lever is on, ADR-0011)."""
+def night_cost(h: Candidate, inp: NormalizedInput, ctx: PlanContext) -> int | None:
+    """Rooms x price of one night for the crew (family rooms when that lever is on, ADR-0011); None when
+    the hotel has no known price (a real OSM one, CEO 02.11)."""
     rooms, price, _explicit = room_plan(h.place, inp.crew, ctx.knobs.family_rooms)
-    return rooms * price
+    return None if price is None else rooms * price
 
 
 def rank_hotels(
@@ -68,10 +69,25 @@ def rank_hotels(
     inp: NormalizedInput | None = None,
     ctx: PlanContext | None = None,
 ) -> list[Candidate]:
+    dog = inp is not None and inp.crew.dog
     if inp is not None and ctx is not None and ctx.knobs.lodging_cheap:
-        # ADR-0011 lever 1: the cheapest night for this crew first, then the usual hotel score
-        return sorted(passing, key=lambda h: (night_cost(h, inp, ctx), -hotel_score(h, tc), h.place.id))
-    return sorted(passing, key=lambda h: (-hotel_score(h, tc), h.place.price_night_rub or 0, h.place.id))
+        # ADR-0011 lever 1: the cheapest night for this crew first (unknown prices last), then the hotel score
+        def cheap(h: Candidate) -> tuple[bool, bool, int, float, str]:
+            cost = night_cost(h, inp, ctx)
+            dog_unknown = dog and Tag.DOGS_ALLOWED not in h.place.tags
+            return (dog_unknown, cost is None, cost or 0, -hotel_score(h, tc), h.place.id)
+
+        return sorted(passing, key=cheap)
+    # CEO 02.11: with a dog, a hotel confirmed to take dogs comes before one whose policy is unknown
+    return sorted(
+        passing,
+        key=lambda h: (
+            dog and Tag.DOGS_ALLOWED not in h.place.tags,
+            -hotel_score(h, tc),
+            h.place.price_night_rub or 0,
+            h.place.id,
+        ),
+    )
 
 
 def day_start_estimate(d: int, inp: NormalizedInput, ctx: PlanContext) -> datetime:
@@ -134,8 +150,9 @@ class _Scorer:
         total = (
             s.w_h * h + s.w_q * q + s.w_e * e - s.w_km * abs(tc.km_at - target) / 100 - s.w_detour * det / 15
         )
-        if self.ctx.knobs.lodging_cheap and passing:
-            total -= W_PRICE * min(night_cost(x, self.inp, self.ctx) for x in passing) / 1000
+        priced = [c for x in passing if (c := night_cost(x, self.inp, self.ctx)) is not None]
+        if self.ctx.knobs.lodging_cheap and priced:
+            total -= W_PRICE * min(priced) / 1000
         if anchor(tc, self.ctx):
             total += s.w_big_town
         return ScoredTown(tc.town, tc.km_at, total, h, q, e, det)

@@ -626,6 +626,7 @@ def units_to_json(u: CostUnits) -> Json:
             for t in u.tolls
         ],
         **({"tollsUnknown": True} if u.tolls_unknown else {}),
+        **({"nightsUnpriced": u.nights_unpriced} if u.nights_unpriced else {}),
         "nights": [
             {
                 "stopId": n.stop_id,
@@ -752,6 +753,7 @@ def units_from_json(d: Mapping[str, Any]) -> CostUnits:
             for x in d.get("parking", [])
         ),
         tolls_unknown=bool(d.get("tollsUnknown", False)),
+        nights_unpriced=int(d.get("nightsUnpriced", 0)),
     )
 
 

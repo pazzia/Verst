@@ -445,7 +445,8 @@ class TollUnit:
 @dataclass(frozen=True, slots=True)
 class HotelPrice:
     place_id: str
-    price_night_rub: int
+    price_night_rub: int | None
+    """None = unknown (a real OSM hotel, CEO 02.11): the night is not in the rouble total."""
     breakfast_included: bool = False
     """Breakfast confirmed included; unknown = False, so the morning meal is costed (ADR-0019 E-3)."""
     rooms: int | None = None
@@ -517,6 +518,9 @@ class CostUnits:
     """Mood is already «Только доехать» (then the `just_drive` overspend hint is not offered)."""
     parking: tuple[ParkingUnit, ...] = ()
     """ADR-0015 §4 per-stop parking; empty = no parking data (no «Парковки» line, fixture worlds)."""
+    nights_unpriced: int = 0
+    """CEO 02.11: nights at real hotels with no known price; they are not in `nights` (nor in the total), and
+    the total note says so."""
     tolls_unknown: bool = False
     """Acceptance 2026-10-28 (QA B-1): the route is approximate and follows no known toll corridor, so the
     tolls line says «не учтены» instead of «платных дорог нет». False with `avoidTolls` (the free roads)."""
@@ -557,9 +561,10 @@ class HotelOption:
     place_id: str
     name_ru: str
     tags: tuple[Tag, ...]
-    price_night_rub: int
+    price_night_rub: int | None
+    """None = unknown (a real OSM hotel, CEO 02.11): «цена — по ссылке «Забронировать»»."""
     rooms: int
-    price_crew_rub: int
+    price_crew_rub: int | None
     verified: bool
     # OI-41: distance from the route (motorway exit) to the hotel in metres, for the 5.7 exit sign «800 м».
     exit_distance_m: int = 0

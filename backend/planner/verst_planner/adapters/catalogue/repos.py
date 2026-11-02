@@ -52,9 +52,13 @@ class RegionByNearestTown:
 
 
 class IndexedPlaceRepository(FakePlaceRepository):
-    def __init__(self, world: FakeWorld, regions: RegionByNearestTown) -> None:
+    def __init__(
+        self, world: FakeWorld, regions: RegionByNearestTown, synthetic_roadside: bool = True
+    ) -> None:
         super().__init__(world)
         self.regions = regions
+        self.synthetic_roadside = synthetic_roadside
+        """False with the real OSM roadside places (CEO 02.11): no invented fuel or rest place, ever."""
         self.place_index: GridIndex[Place] = GridIndex(0.1)
         self.town_index: GridIndex[Town] = GridIndex(0.25)
         self.lodgings: dict[str, list[Place]] = {}
@@ -84,6 +88,8 @@ class IndexedPlaceRepository(FakePlaceRepository):
         return sorted(found.values(), key=lambda p: p.id)
 
     def _roadside(self, q: CorridorQuery) -> list[Place]:
+        if not self.synthetic_roadside:
+            return []
         kinds = [
             (k, every, offset)
             for k, t, every, offset in (
@@ -130,7 +136,7 @@ class IndexedPlaceRepository(FakePlaceRepository):
         out: dict[str, Place] = {}
         for i in ids:
             p = self.world.places.get(i)
-            if p is None:
+            if p is None and self.synthetic_roadside:
                 at = roadside_region_point(i)
                 p = roadside(i, self.regions.code_at(at)) if at is not None else None
             if p is not None:

@@ -28,6 +28,7 @@
     "приёма",
     "приёмов"
   ],
+  "plural.night": ["ночёвки", "ночёвок", "ночёвок"],
   "plural.seat": [
     "место",
     "места",
@@ -95,6 +96,8 @@
   "abroad.fee.no_period": "Нет тарифа на такой срок — не учтён",
   "abroad.night_no_hotel": "Ночёвка за границей: гостиниц там в наших данных нет — найдите место на месте; цену не считаем.",
   "unknown.price_abroad": "Цена за границей неизвестна — в рублёвый итог не входит",
+  "unknown.price": "Цена ночи — по ссылке «Забронировать», в итог не входит",
+  "unknown.item.price": "цена ночи",
   "unknown.many": "Не проверено: {facts} — уточните",
   "unknown.item.hours": "часы работы",
   "unknown.item.fuel": "есть ли {fuel}",
@@ -138,6 +141,8 @@
   "cost.lodging.join": " + ",
   "cost.lodging.default_suffix": " (средняя цена)",
   "cost.lodging.none": "без ночёвок",
+  "cost.lodging.unknown": "цены отелей — по ссылке «Забронировать»",
+  "cost.lodging.plus_unknown": "+ ещё {n} — цена по ссылке «Забронировать»",
   "cost.lodging.row": "Ночь {day}: {town}",
   "cost.lodging.row_formula": "{rooms} × {price}",
   "cost.food.uniform": "{people} чел. × {meals} {meals_word} × {check}",
@@ -155,6 +160,7 @@
   "cost.tickets.unknown": "+ ещё {n} — цена билета неизвестна",
   "cost.tickets.only_unknown": "{n} {seats_word} — цена билета неизвестна",
   "cost.total.no_tickets": "Без билетов в {n} {seats_word} — цена неизвестна",
+  "cost.total.no_nights": "Без {n} {nights_word} — цены отелей по ссылке «Забронировать»",
   "cost.tickets.row": "{adults} × {adult}",
   "cost.tickets.row_children": "{adults} × {adult} + {children} × {child}",
   "cost.reserve": "на пробки и «давай заедем»",

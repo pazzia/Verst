@@ -51,7 +51,7 @@ def road_model() -> RoadModel:
 def build_catalogue_ports(cw: CatalogueWorld, now: datetime = GOLDEN_CLOCK) -> CataloguePorts:
     world = cw.world
     regions = RegionByNearestTown(world)
-    places = IndexedPlaceRepository(world, regions)
+    places = IndexedPlaceRepository(world, regions, synthetic_roadside=not cw.real_stops)
     reach: GridIndex[str] = GridIndex(0.5)
     for t in sorted(world.towns.values(), key=lambda t: t.id):
         reach.add(t.point, t.id)

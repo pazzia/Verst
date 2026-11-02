@@ -196,7 +196,10 @@ class Planner:
         if s.kind is StopKind.OVERNIGHT:
             if s.place is not None and s.place.price_night_rub is not None:
                 rooms, price, _explicit = room_plan(s.place, crew, ctx.knobs.family_rooms)
+                assert price is not None
                 return overnight_cost(price, crew, rooms)
+            if s.place is not None or not self.cfg.cost.lodging_estimate:
+                return 0  # CEO 02.11: a real hotel has no price in OSM (the stop says so), no estimate
             pop = s.town.population if s.town is not None else 0
             return overnight_cost(self.ports.prices.lodging_default_night(pop), crew)
         if s.kind is StopKind.FUEL and s.litres > 0:
@@ -652,10 +655,19 @@ class Planner:
         if patch.hotel_choice is not None:
             sid, pid = patch.hotel_choice
             night = next((n for n in units.nights if n.stop_id == sid), None)
-            if night is None:
+            stop = next((s for d in plan.days_list for s in d.stops if s.id == sid), None)
+            if night is None and stop is not None and any(h.place_id == pid for h in stop.hotel_options):
+                # CEO 02.11: a night at real hotels with no price is not in the cost units: only the pick
+                days_list = tuple(_with_hotel(d, sid, pid, crew) for d in plan.days_list)
+                patch = dataclasses.replace(patch, hotel_choice=None)
+            elif night is None:
                 raise NotFound("stop", sid)
+        if patch.hotel_choice is not None:
+            sid, pid = patch.hotel_choice
+            night = next((n for n in units.nights if n.stop_id == sid), None)
+            assert night is not None
             option = next((o for o in night.options if o.place_id == pid), None)
-            if option is None:
+            if option is None or option.price_night_rub is None:
                 raise NotFound("place", pid)
             nights = tuple(
                 NightUnit(
@@ -831,7 +843,11 @@ def _recrew_day(d: DayResult, units: CostUnits, inp: NormalizedInput, cfg: Plann
         elif s.id in nights:
             cost = overnight_cost(nights[s.id].price_night_rub, crew)
         options = tuple(
-            dataclasses.replace(h, rooms=rooms, price_crew_rub=rooms * h.price_night_rub)
+            dataclasses.replace(
+                h,
+                rooms=rooms,
+                price_crew_rub=None if h.price_night_rub is None else rooms * h.price_night_rub,
+            )
             for h in s.hotel_options
         )
         alts = []
@@ -864,7 +880,9 @@ def _with_hotel(d: DayResult, sid: str, pid: str, crew: Crew) -> DayResult:
                     selected_hotel_id=pid,
                     place_id=pid,
                     tags=opt.tags,
-                    cost_rub=overnight_cost(opt.price_night_rub, crew, opt.rooms),
+                    cost_rub=0
+                    if opt.price_night_rub is None
+                    else overnight_cost(opt.price_night_rub, crew, opt.rooms),
                 )
         out.append(s)
     return dataclasses.replace(d, stops=tuple(out))
@@ -1008,7 +1026,7 @@ def _cost_input(
                 c.name_ru,
                 c.hotel.place if c.hotel else None,
                 tuple(h.place for h in c.hotel_options),
-                prices.lodging_default_night(pop),
+                prices.lodging_default_night(pop) if ctx.cfg.cost.lodging_estimate else None,
                 _town_check(c.town, corridor, ctx),
                 ctx.knobs.family_rooms,
             )

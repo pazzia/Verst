@@ -22,11 +22,14 @@ def family_price(p: Place) -> int:
     return math.floor((p.price_night_rub or 0) * FAMILY_PRICE_FACTOR / 100 + 0.5) * 100
 
 
-def room_plan(p: Place, crew: Crew, family: bool) -> tuple[int, int, bool]:
+def room_plan(p: Place, crew: Crew, family: bool) -> tuple[int, int | None, bool]:
     """`(rooms, price per room, explicit)`: standard rooms, or family rooms (≤ 4 guests each) when the knob
-    is on, the hotel has them and they cost less in total. `explicit`: store the result in the units."""
-    price = p.price_night_rub or 0
+    is on, the hotel has them and they cost less in total. `explicit`: store the result in the units.
+    A hotel with no known price (a real OSM one, CEO 02.11) keeps None: never a 0 ₽ night."""
     std = standard_rooms(crew)
+    if p.price_night_rub is None:
+        return std, None, False
+    price = p.price_night_rub
     if not family or Tag.FAMILY_ROOM not in p.tags or not price:
         return std, price, False
     fam_rooms = -(-(crew.adults + crew.children) // FAMILY_ROOM_GUESTS)
