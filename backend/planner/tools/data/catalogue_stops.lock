@@ -1,0 +1,53 @@
+{
+ "version": "wd-20261031-osm3",
+ "report": {
+  "version": "wd-20261031-osm3",
+  "lodging": {
+   "features": 24899,
+   "kind": 92,
+   "private": 10,
+   "denied": 30,
+   "noTown": 12237,
+   "kept": 12530,
+   "byKind": {
+    "hotel": 9073,
+    "hostel": 1518,
+    "guest_house": 1521,
+    "motel": 418
+   },
+   "towns": 930,
+   "townsTotal": 1114,
+   "withPhone": 4588,
+   "withSite": 4422,
+   "dogKnown": 8
+  },
+  "roadside": {
+   "features": 29446,
+   "kind": 493,
+   "private": 51,
+   "brandHidden": 8835,
+   "kept": 28902,
+   "byKind": {
+    "fuel": 26659,
+    "services": 303,
+    "rest_area": 1940
+   },
+   "named": 11397,
+   "fuelKnown": 12597,
+   "hoursKnown": 11883
+  }
+ },
+ "files": {
+  "catalogue_lodging.json.gz": {
+   "count": 12530,
+   "bytes": 316366,
+   "sha256": "0a92d23810e44079f4ff66d5e6940c2c189ebf5f8d034088aa3a13672f8a0790"
+  },
+  "catalogue_roadside.json.gz": {
+   "count": 28902,
+   "bytes": 428327,
+   "sha256": "9aaf8b6199dc4307509677af03ceae06e9c9615c4e1fa29e24d4fc7ea778a38e"
+  }
+ },
+ "townsSha256": "9ff68f042d50dc7c803c8725493f94efc82e7e5d5452889a850c9c91b460f22f"
+}
