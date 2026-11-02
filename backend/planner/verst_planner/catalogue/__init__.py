@@ -162,6 +162,38 @@ class CatPark:
 
 
 @dataclass(frozen=True, slots=True)
+class CatLodging:
+    """A real OSM hotel, motel, guest house or hostel of a catalogue town (`catalogue_lodging`, CEO 02.11).
+    No price: OSM has none (the night says «цена — по ссылке «Забронировать»», ADR-0019)."""
+
+    id: str
+    name: str
+    kind: str  # hotel | motel | guest_house | hostel
+    point: LatLon
+    town: str  # the town's Wikidata id
+    stars: int | None
+    rooms: int | None
+    dog: bool | None  # True = dogs allowed, False = not, None = unknown
+    phone: str | None
+    site: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class CatRoadside:
+    """A real OSM fuel station, rest area or highway services place (`catalogue_roadside`, CEO 02.11)."""
+
+    id: str
+    name: str | None  # None = unnamed, or a brand name the app does not show
+    kind: str  # fuel | rest_area | services
+    point: LatLon
+    hours: str | None
+    fuels: frozenset[str]  # FUEL_BITS keys tagged yes
+    fuels_no: frozenset[str]  # tagged no
+    wc: bool | None
+    cafe: bool | None
+
+
+@dataclass(frozen=True, slots=True)
 class CatFood:
     """An OSM restaurant, café, fast food place or food court (no prices: OSM has none)."""
 
@@ -458,6 +490,79 @@ def load_packaged_parks(cat: Catalogue) -> list[CatPark]:
         raise CatalogueError(f"parks: malformed ({e!r})") from e
 
 
+def _flag(v: Any) -> bool | None:
+    return None if v is None else bool(v)
+
+
+def _fuels(mask: Any) -> frozenset[str]:
+    m = int(mask or 0)
+    return frozenset(k for k, bit in FUEL_BITS.items() if m & bit)
+
+
+def stops_from_docs(
+    lodging: Any, roadside: Any, towns: Sequence[CatTown]
+) -> tuple[list[CatLodging], list[CatRoadside]]:
+    """`catalogue_lodging` (town indexes = `towns` in file order) and `catalogue_roadside` decoded."""
+    lodgings: list[CatLodging] = []
+    if lodging is not None:
+        kinds = lodging["kinds"]
+        for r in decode_table(lodging, LODGING_COLS, "lodging"):
+            lodgings.append(
+                CatLodging(
+                    id=str(r["id"]),
+                    name=str(r["name"]),
+                    kind=str(kinds[r["kind"]]),
+                    point=LatLon(r["lat"] / COORD_SCALE, r["lon"] / COORD_SCALE),
+                    town=towns[r["town"]].id,
+                    stars=r["stars"],
+                    rooms=r["rooms"],
+                    dog=_flag(r["dog"]),
+                    phone=r["phone"],
+                    site=r["site"],
+                )
+            )
+    side: list[CatRoadside] = []
+    if roadside is not None:
+        kinds = roadside["kinds"]
+        for r in decode_table(roadside, ROADSIDE_COLS, "roadside"):
+            side.append(
+                CatRoadside(
+                    id=str(r["id"]),
+                    name=r["name"],
+                    kind=str(kinds[r["kind"]]),
+                    point=LatLon(r["lat"] / COORD_SCALE, r["lon"] / COORD_SCALE),
+                    hours=r["hours"],
+                    fuels=_fuels(r["fuel"]),
+                    fuels_no=_fuels(r["nofuel"]),
+                    wc=_flag(r["wc"]),
+                    cafe=_flag(r["cafe"]),
+                )
+            )
+    return lodgings, side
+
+
+def load_packaged_stops(cat: Catalogue) -> tuple[list[CatLodging], list[CatRoadside]]:
+    """The packaged real lodgings and roadside places (CEO 02.11). The lodgings are read only when their
+    `townsSha256` is the shipped `catalogue_towns`; a missing file reads as empty (no invented stand-in)."""
+    try:
+        towns_sha = hashlib.sha256(resources.read_bytes(FILES["towns"])).hexdigest()
+    except (FileNotFoundError, OSError):
+        return [], []
+    docs: dict[str, Any] = {}
+    for key, name in (("lodging", LODGING_FILE), ("roadside", ROADSIDE_FILE)):
+        try:
+            docs[key] = load_gz(resources.read_bytes(name), name)
+        except (FileNotFoundError, OSError):
+            docs[key] = None
+    lodging = docs["lodging"]
+    if not isinstance(lodging, dict) or lodging.get("townsSha256") != towns_sha:
+        lodging = None
+    try:
+        return stops_from_docs(lodging, docs["roadside"], cat.towns)
+    except (KeyError, IndexError, TypeError, ValueError) as e:
+        raise CatalogueError(f"stops: malformed ({e!r})") from e
+
+
 def load_packaged() -> Catalogue:
     """The catalogue shipped in `verst_planner/resources` (raises `CatalogueError`)."""
     docs: dict[str, Any] = {}
@@ -496,8 +601,10 @@ __all__ = [
     "TOWN_COLS",
     "CatBar",
     "CatFood",
+    "CatLodging",
     "CatPark",
     "CatPoi",
+    "CatRoadside",
     "CatTown",
     "Catalogue",
     "CatalogueError",
