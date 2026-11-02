@@ -3,7 +3,7 @@
 The working memory between sessions and compactions (CLAUDE.md, «Read first»). Facts only, newest first.
 Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and `docs/decisions.md`.
 
-**Updated:** 2026-11-02
+**Updated:** 2026-11-03
 
 ## Now
 
@@ -20,6 +20,12 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
   - No storing Yandex data; no own turn-by-turn; no live tracking.
   - Required: logo and «Открыть в Картах», a terms link in «О программе», and consent for Yandex collecting IP, device id and location (п. 8.1).
   - Not integrated yet: waiting for the CEO to choose the screen.
+
+- **Real stops (D-IR-27, 02.11):** the plan uses only real OpenStreetMap hotels, fuel stations, rest areas and cafés.
+  - Data: `catalogue_lodging` (12 530) and `catalogue_roadside` (28 902) from `data-stops.yml` run 2.
+  - A night has no price («по ссылке «Забронировать»»), so the total leaves it out.
+  - Engine, server and app changes are in commit 3302307; android CI on it is the check.
+  - Known gap: on long legs with a child, lunch is often skipped because the real cafés sit in town centres, 25–55 min off the road. Next step: roadside cafés outside towns from OSM.
 
 ## Waiting on the CEO
 
