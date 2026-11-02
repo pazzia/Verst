@@ -26,6 +26,9 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
   - A night has no price («по ссылке «Забронировать»»), so the total leaves it out.
   - Engine, server and app changes: 3302307. The fix 7732c49 reads the roadside places on the first plan: the emulator catalogue load had gone to 2 041 ms against a 2 000 ms budget.
   - Side effect: with hotel nights left out of the total, the CEO budget case (30 000 ₽) fits on the first plan and «Подогнали под бюджет» is not shown. The budget check does not count hotels now.
+  - App (c6a8936): a real hotel card has no «вымышленная» line; the hotel row shows «цена — по ссылке» under the name; the waybill «Ночёвки» shows «—» for unpriced nights; the Road footer says «Итог без ночёвок» instead of «в бюджете».
+  - Green on 0.3.199 (run 41547293291), seen on the camper emulator shots (22-exit, 65-card, 151-waybill, 10-road). Emulator catalogue median: 1 668 ms against a 2 000 ms budget. APK 49.85 MB (over the 45 MB warning, under the 60 MB fail).
+  - Not merged: waiting for «Сливай».
   - Known gap: on long legs with a child, lunch is often skipped because the real cafés sit in town centres, 25–55 min off the road. Next step: roadside cafés outside towns from OSM.
 
 ## Waiting on the CEO
