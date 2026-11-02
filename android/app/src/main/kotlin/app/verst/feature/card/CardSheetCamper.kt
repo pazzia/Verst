@@ -351,8 +351,9 @@ private fun facts(ui: CardUi): List<String> {
             val tags = tagLine(h)
             if (tags.isNotBlank()) out += tags
             out += if (ui.booked) stringResource(R.string.exit_booked_price)
-            else stringResource(R.string.common_estimate_rub, app.verst.settings.AppPrefs.money(h.priceCrewRub.takeIf { it > 0 } ?: h.priceNightRub)) +
-                " " + stringResource(R.string.card_per_night)
+            else (h.priceCrewRub?.takeIf { it > 0 } ?: h.priceNightRub)?.let {
+                stringResource(R.string.common_estimate_rub, app.verst.settings.AppPrefs.money(it)) + " " + stringResource(R.string.card_per_night)
+            } ?: stringResource(R.string.exit_price_on_link) // CEO 02.11: a real hotel, no price in OSM
         }
         return out
     }
