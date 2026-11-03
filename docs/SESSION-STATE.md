@@ -7,7 +7,7 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 
 ## Now
 
-- **Test server ops (D-IR-29/30, PR #8 `a63d9e9`):** `test-server.yml` + `infra/api/server-ops.sh`; trigger = a new line in `infra/api/test-server.request` pushed on the ccr branch (or workflow_dispatch). Not live until the CEO's key setup.
+- **Test server ops (D-IR-29/30, PR #8 `a63d9e9`):** `test-server.yml` + `infra/api/server-ops.sh`; trigger = a new line in `infra/api/test-server.request` pushed on the ccr branch (or workflow_dispatch). Live since 03.11 21:39 (first `status`: api, postgres, graphhopper, backup healthy; /healthz ok). The server checkout is on the branch `ccr-013d3489-181fz2`, not `main`: the CEO is asked to switch it. The pinned host key is `infra/api/test-server.known_hosts` (ed25519 SHA256:Nx9n4W…); the workflow fixes are on the branch, not yet in `main`.
 - **Release:** `main` = PR #7 (`54ada56`), «Верста» 0.3.209 at `releases/download/verst-latest/Verst-latest.apk` (03.11), all CI green. PR #6 = real stops, fuel names, roadside cafés; PR #7 = catalogue load headroom (walk grids lazy, ≤ 20 hotels per town as places).
 - **Two designs (D-IR-24):** «Кемпер» is the default, «Классический» is chosen in Settings. The `camper-ui` branch and `verst-camper-latest` (0.3.187) are frozen.
 - **Hotel booking (D-IR-25):** «Забронировать ночь» opens the real Yandex Travel search. The Travelpayouts wrapper on the server is off until `VERST_TP_*` are set.
