@@ -325,7 +325,7 @@ def read_tsv(path: Path) -> list[list[str]]:
 
 def denylist() -> list[str]:
     return [
-        line.strip().casefold()
+        line.strip().removeprefix("copy:").casefold()  # D-IR-28: a `copy:` brand is still kept out of names
         for line in DENYLIST.read_text("utf-8").splitlines()
         if line.strip() and not line.startswith("#")
     ]

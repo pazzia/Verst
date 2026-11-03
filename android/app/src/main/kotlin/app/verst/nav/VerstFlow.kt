@@ -1091,7 +1091,8 @@ class VerstFlow(
     // ------------------------------------------------------------------------------------------ instruments
 
     /** The draft request when it has a target (destination or ready route), else null. */
-    fun draft(): PlanRequest? = if (readyRoute != null || destinationPoint != null) request() else null
+    /** The trip being set up; the CEO 03.11 lunch answer is left out (asked only on ПОЕХАЛИ, it does not move km). */
+    fun draft(): PlanRequest? = if (readyRoute != null || destinationPoint != null) request().copy(roadsideFood = null) else null
 
     private fun estimateTarget(): PlanRequest? =
         if (destinationAbroad) null // CEO 29.10: the engine rejects a destination abroad — nothing to estimate

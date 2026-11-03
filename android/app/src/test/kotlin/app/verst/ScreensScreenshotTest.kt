@@ -123,7 +123,7 @@ class ScreensScreenshotTest {
         // Release review P0-1: no real brand in any rendered text or TalkBack label of any screen state.
         BrandDenyList.allow(compose.activity) // only the hand-off app names (S3-R1)
         val texts = BrandDenyList.texts(compose.onRoot(useUnmergedTree = true).fetchSemanticsNode())
-        assertEquals("$screen/$state", emptyList<String>(), texts.flatMap { BrandDenyList.hits(it) })
+        assertEquals("$screen/$state", emptyList<String>(), texts.flatMap { BrandDenyList.hits(it, BrandDenyList.screenBrands) })
     }
 
     @Test

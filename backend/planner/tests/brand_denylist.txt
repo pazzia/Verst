@@ -3,18 +3,19 @@
 # HYG-01: the release gates (tests/unit/test_brands.py `starts_word`, Kotlin `BrandDenyList.hits`) match an
 # entry where it starts a word (not preceded by a letter): «в Яндексе», «Суточно.ру» hit, «круглосуточно» does
 # not. tools/data/build_catalogue.py `denied` drops a name containing an entry anywhere (stricter pre-filter).
-# Fuel
-Лукойл
-Lukoil
-Роснефть
-Rosneft
-Газпромнефть
-Gazprom
-Татнефть
-Башнефть
-Нефтьмагистраль
-Shell
-Teboil
+# Fuel. D-IR-28 (CEO 03.11 «Добавляй настоящие имена заправок»): `copy:` = denied in the app's own copy (strings,
+# engine texts) but allowed in OSM place data (a fuel station's real name in a plan, a contract, a rendered stop).
+copy:Лукойл
+copy:Lukoil
+copy:Роснефть
+copy:Rosneft
+copy:Газпромнефть
+copy:Gazprom
+copy:Татнефть
+copy:Башнефть
+copy:Нефтьмагистраль
+copy:Shell
+copy:Teboil
 # Maps / navigation / stores
 Яндекс
 Yandex
