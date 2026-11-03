@@ -176,7 +176,15 @@ FOOD_DWELL_MIN = 60
 FOOD_TRIP_CAP = 12
 """Cafés per town a trip's lunch can stop at (the walk reads every café from the catalogue itself)."""
 FOOD_TRIP_ORDER = {"restaurant": 0, "cafe": 1, "food_court": 2, "fast_food": 3}
-ROADSIDE_TYPE = {"fuel": PlaceType.FUEL, "rest_area": PlaceType.REST, "services": PlaceType.REST}
+ROADSIDE_TYPE = {
+    "fuel": PlaceType.FUEL,
+    "rest_area": PlaceType.REST,
+    "services": PlaceType.REST,
+    # CEO 03.11: roadside cafés (no town; `is_roadside_food`)
+    "cafe": PlaceType.FOOD,
+    "restaurant": PlaceType.FOOD,
+    "fast_food": PlaceType.FOOD,
+}
 FUEL_OF = {"ai92": FuelType.AI92, "ai95": FuelType.AI95, "dt": FuelType.DT}
 REGION_RADIUS_KM = 2000.0
 Stops = tuple[list[CatLodging], Callable[[], Sequence[CatRoadside]]]
@@ -241,7 +249,8 @@ def food_place(f: CatFood, town_id: str, region: str) -> Place:
 
 
 def roadside_place(r: CatRoadside, region: str) -> Place:
-    """A real OSM fuel station or rest area: fuels, toilets and a café only as tagged."""
+    """A real OSM fuel station, rest area or roadside café (CEO 03.11): fuels, toilets and a café only as
+    tagged, its real name (a chain name too, CEO 03.11)."""
     ptype = ROADSIDE_TYPE[r.kind]
     tags: set[Tag] = set()
     tags_no: set[Tag] = set()
@@ -266,7 +275,7 @@ def roadside_place(r: CatRoadside, region: str) -> Place:
         region_code=region,
         town_id=None,
         opening_hours=hours,
-        dwell_min=None,
+        dwell_min=FOOD_DWELL_MIN if ptype is PlaceType.FOOD else None,
         avg_check_rub=None,
         price_night_rub=None,
         ticket_adult_rub=None,

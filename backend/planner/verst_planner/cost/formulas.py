@@ -164,17 +164,13 @@ def tickets_formula(paid: int, adults: int, children: int, unknown: int = 0) -> 
 
 
 def total_note(unknown_tickets: int, unpriced_nights: int = 0) -> str | None:
-    """ADR-0019 E-2: the total leaves out the tickets whose price is unknown; CEO 02.11: and the nights at
-    real hotels with no known price (their price is on the booking link)."""
+    """ADR-0019 E-2: the total leaves out the tickets whose price is unknown; CEO 02.11/03.11: and the nights
+    at real hotels with no known price («Стоимость ночёвок в отелях не учитывается», the price is on the
+    booking link)."""
     parts = []
     if unpriced_nights:
-        parts.append(
-            ru.text(
-                "cost.total.no_nights",
-                n=unpriced_nights,
-                nights_word=ru.plural_word(unpriced_nights, "plural.night"),
-            )
-        )
+        # CEO 03.11: said in the total and the calculation until a partner or an open source gives the prices
+        parts.append(ru.text("cost.total.no_nights"))
     if unknown_tickets:
         parts.append(
             ru.text(

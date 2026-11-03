@@ -50,7 +50,7 @@ REGION_STEP_KM = 10.0
 
 def generic_roadside(p: Place) -> bool:
     """A roadside place with no name of its own: a synthetic one, or a real OSM fuel station or rest area
-    that OSM does not name (or whose brand the app does not show, CEO 02.11); M9 names it by town or km."""
+    that OSM does not name (a chain name is shown since CEO 03.11); M9 names it by town or km."""
     return p.id.startswith(SYNTHETIC_ROADSIDE) or (
         p.source is Source.OSM
         and p.type in (PlaceType.FUEL, PlaceType.REST)

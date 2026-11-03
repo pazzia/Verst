@@ -63,6 +63,7 @@ from verst_planner.domain.model import (
     TripInput,
     TripPlan,
     Vehicle,
+    roadside_food_default,
 )
 
 Json = dict[str, Any]
@@ -124,6 +125,7 @@ _INPUT_KEYS = frozenset(
         "avoidTolls",
         "reserveOn",
         "simplify",
+        "roadsideFood",
     }
 )
 _POINT_KEYS = frozenset({"lat", "lon", "label", "placeId", "townId"})
@@ -292,6 +294,7 @@ def input_from_json(d: Mapping[str, Any]) -> TripInput:
         avoid_tolls=_bool_field(d, "avoidTolls", False),
         reserve_on=_bool_field(d, "reserveOn", True),
         simplify=_bool_field(d, "simplify", False),
+        roadside_food=None if d.get("roadsideFood") is None else _bool_field(d, "roadsideFood", True),
     )
 
 
@@ -311,7 +314,7 @@ def input_to_json(i: TripInput) -> Json:
         "avoidTolls": i.avoid_tolls,
         "reserveOn": i.reserve_on,
         "simplify": i.simplify,
-    }
+    } | ({} if i.roadside_food is None else {"roadsideFood": i.roadside_food})
 
 
 def normalized_to_json(n: NormalizedInput) -> Json:
@@ -331,18 +334,21 @@ def normalized_to_json(n: NormalizedInput) -> Json:
         "avoidTolls": n.avoid_tolls,
         "reserveOn": n.reserve_on,
         "simplify": n.simplify,
-    }
+    } | (  # CEO 03.11: only when it differs from the crew default (the goldens keep their bytes)
+        {} if n.roadside_food == roadside_food_default(n.crew) else {"roadsideFood": n.roadside_food}
+    )
 
 
 def normalized_from_json(d: Mapping[str, Any]) -> NormalizedInput:
     dest = d.get("destination")
+    crew = _crew_from_json(d["crew"])
     return NormalizedInput(
         origin=_point_input_from_json(d["origin"], "origin"),
         destination=None if dest is None else _point_input_from_json(dest, "destination"),
         vias=tuple(_point_input_from_json(v, f"vias[{i}]") for i, v in enumerate(d["vias"])),
         ready_route_id=d["readyRouteId"],
         round_trip=bool(d["roundTrip"]),
-        crew=_crew_from_json(d["crew"]),
+        crew=crew,
         daily_km=int(d["dailyKm"]),
         budget_rub=d["budget"],
         vehicle=_vehicle_from_json(d["vehicle"]),
@@ -352,6 +358,7 @@ def normalized_from_json(d: Mapping[str, Any]) -> NormalizedInput:
         reserve_on=bool(d["reserveOn"]),
         simplify=bool(d["simplify"]),
         tz=d["tz"],
+        roadside_food=bool(d.get("roadsideFood", roadside_food_default(crew))),
     )
 
 

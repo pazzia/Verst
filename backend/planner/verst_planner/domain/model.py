@@ -89,6 +89,16 @@ class Crew:
         return self.adults + self.children
 
 
+def is_roadside_food(p: Place) -> bool:
+    """CEO 03.11: a real OSM café outside every town (catalogue town cafés carry their `town_id`)."""
+    return p.type is PlaceType.FOOD and p.source is Source.OSM and p.town_id is None
+
+
+def roadside_food_default(crew: Crew) -> bool:
+    """CEO 03.11: roadside cafés count for lunch unless a child is aboard (then the app asks explicitly)."""
+    return crew.children == 0
+
+
 @dataclass(frozen=True, slots=True)
 class Vehicle:
     consumption_l_per_100km: float = 8.0
@@ -118,6 +128,9 @@ class TripInput:
     avoid_tolls: bool = False
     reserve_on: bool = True
     simplify: bool = False
+    roadside_food: bool | None = None
+    """CEO 03.11: lunch at roadside cafés too. None = the crew default (`roadside_food_default`): yes
+    without children; with a child only town cafés (a roadside café may have no proper toilet)."""
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -139,6 +152,7 @@ class NormalizedInput:
     reserve_on: bool
     simplify: bool
     tz: str
+    roadside_food: bool = True
 
 
 # ---------------------------------------------------------------- 4.4 place DB read models

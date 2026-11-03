@@ -53,6 +53,10 @@ class RegionByNearestTown:
         return self.world.regions.get(code) or RegionInfo(code, code, FALLBACK_TZ)
 
 
+REAL_ROADSIDE_TYPES = frozenset({PlaceType.FUEL, PlaceType.REST, PlaceType.FOOD})
+"""The types of the real OSM roadside places (FOOD: the roadside cafés, CEO 03.11)."""
+
+
 class IndexedPlaceRepository(FakePlaceRepository):
     def __init__(
         self,
@@ -95,7 +99,7 @@ class IndexedPlaceRepository(FakePlaceRepository):
                 found[p.id] = p
         for p in self._roadside(q):
             found[p.id] = p
-        if PlaceType.FUEL in q.types or PlaceType.REST in q.types:
+        if q.types & REAL_ROADSIDE_TYPES:
             self._load_roadside()
             for _pt, r in self._roadside_index.near_line(q.line, q.radius_km):
                 if distance_to_line_km(r.point, q.line) <= q.radius_km:

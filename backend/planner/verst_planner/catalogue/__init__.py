@@ -184,11 +184,12 @@ class CatLodging:
 
 @dataclass(frozen=True, slots=True)
 class CatRoadside:
-    """A real OSM fuel station, rest area or highway services place (`catalogue_roadside`, CEO 02.11)."""
+    """A real OSM fuel station, rest area, highway services place (`catalogue_roadside`, CEO 02.11) or a
+    roadside café (CEO 03.11)."""
 
     id: str
-    name: str | None  # None = unnamed, or a brand name the app does not show
-    kind: str  # fuel | rest_area | services
+    name: str | None  # None = unnamed (a chain name is kept, CEO 03.11)
+    kind: str  # ROADSIDE_KINDS: fuel | rest_area | services | cafe | restaurant | fast_food
     point: LatLon
     hours: str | None
     fuels: frozenset[str]  # FUEL_BITS keys tagged yes

@@ -17,6 +17,7 @@ from verst_planner.domain.model import (
     PointInput,
     ReadyRoute,
     TripInput,
+    roadside_food_default,
 )
 from verst_planner.explain import ru
 from verst_planner.pipeline import PlanContext
@@ -115,6 +116,7 @@ def normalize_input(raw: TripInput, ctx: PlanContext) -> NormalizedInput:
         reserve_on=raw.reserve_on,
         simplify=raw.simplify,
         tz=tz,
+        roadside_food=raw.roadside_food if raw.roadside_food is not None else roadside_food_default(raw.crew),
     )
 
 

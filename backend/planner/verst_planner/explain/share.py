@@ -29,4 +29,6 @@ def share_text(plan: TripPlan) -> str:
             lines.append(ru.text("share.stop", time=hhmm, name=s.name_ru))
     people = plan.input.crew.adults + plan.input.crew.children
     lines.append(ru.text("share.total", total=ru.fmt_rub(plan.cost.total_rub), people=people))
+    if plan.cost.units.nights_unpriced:  # CEO 03.11: the shared total says the hotels are not in it
+        lines.append(ru.text("share.no_nights"))
     return "\n".join(lines)

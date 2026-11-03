@@ -7,7 +7,15 @@ from datetime import datetime
 
 from verst_planner.domain.enums import Meal, StopKind, Tag
 from verst_planner.domain.facts import rank_rating
-from verst_planner.domain.model import Candidate, DayPlan, NormalizedInput, PlannedStop, Town, TownCandidate
+from verst_planner.domain.model import (
+    Candidate,
+    DayPlan,
+    NormalizedInput,
+    PlannedStop,
+    Town,
+    TownCandidate,
+    is_roadside_food,
+)
 from verst_planner.explain import ru
 from verst_planner.pipeline import Corridor, PlanContext
 from verst_planner.pipeline.checks import (
@@ -38,6 +46,9 @@ def lunch_score(c: Candidate, inp: NormalizedInput, eta_local: datetime, ctx: Pl
         + 1.0 * bool(PARKING & t)
         + 0.5 * (Tag.VIEW in t)
         + 0.5 * in_window(eta_local, ctx.cfg.lunch_sweet_spot)
+        # CEO 03.11: a roadside café with a child aboard — a known toilet first, a known «no» last
+        + 1.0 * (inp.crew.children > 0 and is_roadside_food(c.place) and Tag.WC in t)
+        - 2.0 * (inp.crew.children > 0 and is_roadside_food(c.place) and Tag.WC in c.place.tags_no)
         - c.detour_min / 5
         - economy
     )
@@ -61,6 +72,9 @@ def make_lunch_stop(
     params: dict[str, str | int | float] = {}
     if Tag.KIDS_MENU in t and inp.crew.children > 0:
         key = "lunch.kids"
+    elif is_roadside_food(c.place):
+        # CEO 03.11: a roadside café — no detour into a town; a toilet said only when OSM says so
+        key = "lunch.roadside_wc" if Tag.WC in t else "lunch.roadside"
     elif PARKING & t:
         key = "lunch.parking"
     else:
