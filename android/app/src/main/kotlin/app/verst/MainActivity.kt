@@ -309,7 +309,7 @@ fun VerstRoot(flow: VerstFlow) {
         val tabs = chrome && !imeUp
         // a sheet of the screen is open: the bars are dimmed with it and a tap on them closes it (system back);
         // the root dialogs below draw their own scrim over the whole window
-        val rootDialog = flow.report != null || flow.deleteAsk != null || flow.abroadConsentAsk || flow.limitDialog
+        val rootDialog = flow.report != null || flow.deleteAsk != null || flow.abroadConsentAsk || flow.roadsideFoodAsk || flow.limitDialog
         val closeSheet: () -> Unit = { flow.back() }
         val onScrim: (() -> Unit)? = if (overlayOpen(flow) && !rootDialog) closeSheet else null
         Box(Modifier.fillMaxSize().background(DesignTokens.color.camper.page)) {
@@ -337,7 +337,7 @@ private fun overlayOpen(flow: VerstFlow): Boolean =
     flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
         flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
         flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null ||
-        flow.roadBorder != null || flow.abroadConsentAsk
+        flow.roadBorder != null || flow.abroadConsentAsk || flow.roadsideFoodAsk
 
 /** The toasts that are not owned by one screen, inside the screen area (between the header and the tab bar). */
 @Composable
@@ -388,6 +388,14 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
             stringResource(UiR.string.settings_server_consent_title), stringResource(UiR.string.abroad_consent_body),
             stringResource(UiR.string.settings_server_consent_yes), stringResource(UiR.string.settings_server_consent_no),
             "abroad.consent", { flow.answerAbroadConsent(true) }, { flow.answerAbroadConsent(false) },
+        )
+    }
+    if (flow.roadsideFoodAsk) {
+        // CEO 03.11: with a child, where lunch may be — asked on every ПОЕХАЛИ; the scrim answers the safe «в городах»
+        NaviDialog(
+            stringResource(UiR.string.roadside_food_title), stringResource(UiR.string.roadside_food_body),
+            stringResource(UiR.string.roadside_food_yes), stringResource(UiR.string.roadside_food_no),
+            "roadside.food", { flow.answerRoadsideFood(true) }, { flow.answerRoadsideFood(false) },
         )
     }
     if (flow.limitDialog) {

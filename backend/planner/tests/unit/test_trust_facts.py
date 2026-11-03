@@ -324,7 +324,9 @@ class CostTest(unittest.TestCase):
         self.assertEqual((back.total_note_ru, back.units.tickets[0].known), (res.total_note_ru, False))
         # a unit without the breakfast flag (older JSON) never claims the breakfast
         night = codec.units_to_json(
-            build_units(cost_input(hotel=make_place("h", PlaceType.LODGING)), self.inp, CFG)
+            build_units(
+                cost_input(hotel=make_place("h", PlaceType.LODGING, price_night_rub=4000)), self.inp, CFG
+            )
         )
         stripped = copy.deepcopy(night)
         del stripped["nights"][0]["options"][0]["breakfastIncluded"]

@@ -933,10 +933,14 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
     val over = budget != null && (minimum || (c.overBudget && !tight))
     val fits = budget != null && !over && !tight
     // CEO 29.10 (trips abroad): the rouble total leaves the costs abroad out — the label says so
-    val incomplete = trip.abroad?.roubleTotalIncomplete == true
+    val abroadIncomplete = trip.abroad?.roubleTotalIncomplete == true
+    // D-IR-27: a night at a real hotel has no price and the total leaves it out — no «в бюджете» badge then
+    val noNights = app.verst.feature.waybill.unpricedNights(trip) > 0
+    val incomplete = abroadIncomplete || noNights
+    val incompleteText = stringResource(if (abroadIncomplete) R.string.road_total_abroad_incomplete else R.string.road_total_no_nights)
     val label = when {
         over -> stringResource(R.string.road_waybill_over, app.verst.settings.AppPrefs.money((c.totalRub - budget!!).coerceAtLeast(0)))
-        incomplete -> stringResource(R.string.road_total_abroad_incomplete)
+        incomplete -> incompleteText
         else -> stringResource(R.string.road_waybill_label)
     }
     val total = rub(c.totalRub)
@@ -945,7 +949,7 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
     val parkingRub = if (parkingOn) c.lines.firstOrNull { it.key == "parking" }?.rub ?: parkingSum.rub else null
     val parkingText = parkingRub?.let { parkingTotalText(parkingSum, it) }
     val cd = stringResource(R.string.cd_road_waybill, app.verst.settings.AppPrefs.money(c.totalRub)) + ". " + perPerson +
-        (if (incomplete) ". " + stringResource(R.string.road_total_abroad_incomplete) else "") +
+        (if (incomplete) ". " + incompleteText else "") +
         (parkingText?.let { ". " + stringResource(R.string.road_footer_parking) + " " + it } ?: "")
     Row(
         Modifier
@@ -977,7 +981,7 @@ private fun Footer(trip: TripDto, minimum: Boolean, parkingOn: Boolean, onClick:
                 } else {
                     val tag = when {
                         over -> "road.over"
-                        incomplete -> "road.abroad.incomplete"
+                        incomplete -> if (abroadIncomplete) "road.abroad.incomplete" else "road.no_nights"
                         else -> "road.label"
                     }
                     Txt(label, T.body.smStrong, if (over) C.accent.redText else C.camper.inkSoft, Modifier.testTag(tag), maxLines = 1)

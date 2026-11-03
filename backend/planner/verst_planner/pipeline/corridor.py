@@ -15,6 +15,7 @@ from verst_planner.domain.model import (
     PlannedStop,
     Route,
     TownCandidate,
+    is_roadside_food,
 )
 from verst_planner.explain import ru
 from verst_planner.geo.distance import haversine_km, point_segment_km
@@ -156,6 +157,8 @@ def build_corridor(route: Route, inp: NormalizedInput, ctx: PlanContext) -> Corr
             continue
         if p.type is PlaceType.FUEL and fuel_state(p, inp.vehicle.fuel_type) is Known.NO:
             continue  # ADR-0019 E-4: a station known not to sell the car's fuel is no fuel stop
+        if not inp.roadside_food and is_roadside_food(p):
+            continue  # CEO 03.11: with a child, town cafés only unless the crew said roadside ones are fine
         buckets[p.type].extend(_candidates(p, index, radius_by_type[p.type], motorway.get(p.type), ctx))
 
     lodging_places: dict[str, Place] = {}

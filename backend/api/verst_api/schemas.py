@@ -88,6 +88,8 @@ class TripInputIn(Request):
     avoidTolls: StrictBool | None = None
     reserveOn: StrictBool | None = None
     simplify: StrictBool | None = None
+    # CEO 03.11: lunch at roadside cafés too (default: yes without children, town cafés only with a child)
+    roadsideFood: StrictBool | None = None
 
     def engine_json(self) -> dict[str, Any]:
         return self.model_dump(exclude_unset=True)

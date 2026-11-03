@@ -121,8 +121,11 @@ class S4AcceptanceTest(unittest.TestCase):
         Нижний (its kremlin). Before: Владимир on day 1 (M8 tiered detours, see dev-notes M8)."""
         trip = plan("G14_fryazino_ekaterinburg_child")
         self.check_quality_rules(trip)
-        playgrounds = [s for s in sights(trip) if self.category(s) == "playground"]
-        self.assertLessEqual(len(playgrounds), 2)
+        # CEO 02.11 (real OSM rest areas are sparser than the synthetic ones were): a child's playground break
+        # at most once a day, never two in a row (check_quality_rules)
+        for d in trip["daysList"]:
+            day_sights = [s for s in d["stops"] if s["kind"] == "sight"]
+            self.assertLessEqual(sum(1 for s in day_sights if self.category(s) == "playground"), 1)
         nights = [d["stops"][-1]["name"] for d in trip["daysList"][:-1]]
         self.assertEqual(nights[0], "Нижний Новгород")
         good = self.quality_sights(trip)

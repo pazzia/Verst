@@ -72,6 +72,28 @@ PARKS_FILE = "catalogue_parks.json.gz"
 PARK_KINDS = ("park", "garden")
 PARK_COLS = ("id", "name", "kind", "lat", "lon", "town", "area", "poi", "hours")
 
+# CEO 02.11 «настоящие точки, не выдумка»: real lodgings and roadside places from the OSM extract
+# (`tools/data/build_stops.py`, ODbL), separate files like the parks, read by `load_packaged_lodgings` and
+# `load_packaged_roadside`.
+# `catalogue_lodging`: named hotels, motels, guest houses and hostels of a catalogue town (`town` indexes
+# `catalogue_towns` of the build named by `townsSha256`). OSM has no prices: `stars` / `rooms` as tagged or
+# null,
+# `dog` 1 = dogs allowed, 0 = not, null = unknown (OSM `dog` / `pets`), `phone` and `site` as tagged or null.
+LODGING_FILE = "catalogue_lodging.json.gz"
+LODGING_KINDS = ("hotel", "motel", "guest_house", "hostel")
+LODGING_COLS = ("id", "name", "kind", "lat", "lon", "town", "stars", "rooms", "dog", "phone", "site")
+# `catalogue_roadside`: every fuel station, rest area and highway services place in the country (no town), and
+# (CEO 03.11) the named cafés, restaurants and fast food outside the catalogue towns within ~1 km of a
+# motorway, trunk or primary road. `name` is the OSM name (or brand), a real chain name included (CEO 03.11),
+# null when the place has none (the app shows a generic name).
+# `fuel` / `nofuel`: bit masks of the fuels tagged yes / no (1 = АИ-92, 2 = АИ-95, 4 = ДТ; `FUEL_BITS`);
+# `hours` = OSM opening_hours or null; `wc` / `cafe` 1 / 0 / null.
+ROADSIDE_FILE = "catalogue_roadside.json.gz"
+ROADSIDE_KINDS = ("fuel", "rest_area", "services", "cafe", "restaurant", "fast_food")
+ROADSIDE_FOOD_KINDS = frozenset({"cafe", "restaurant", "fast_food"})
+ROADSIDE_COLS = ("id", "name", "kind", "lat", "lon", "hours", "fuel", "nofuel", "wc", "cafe")
+FUEL_BITS = {"ai92": 1, "ai95": 2, "dt": 4}
+
 
 class CatalogueError(Exception):
     """Missing or malformed catalogue resources (`NO_CATALOGUE` at the bridge)."""
@@ -141,6 +163,39 @@ class CatPark:
     area_m2: int
     poi: str | None  # the `catalogue_pois` id of the same park, if any
     hours: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class CatLodging:
+    """A real OSM hotel, motel, guest house or hostel of a catalogue town (`catalogue_lodging`, CEO 02.11).
+    No price: OSM has none (the night says «цена — по ссылке «Забронировать»», ADR-0019)."""
+
+    id: str
+    name: str
+    kind: str  # hotel | motel | guest_house | hostel
+    point: LatLon
+    town: str  # the town's Wikidata id
+    stars: int | None
+    rooms: int | None
+    dog: bool | None  # True = dogs allowed, False = not, None = unknown
+    phone: str | None
+    site: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class CatRoadside:
+    """A real OSM fuel station, rest area, highway services place (`catalogue_roadside`, CEO 02.11) or a
+    roadside café (CEO 03.11)."""
+
+    id: str
+    name: str | None  # None = unnamed (a chain name is kept, CEO 03.11)
+    kind: str  # ROADSIDE_KINDS: fuel | rest_area | services | cafe | restaurant | fast_food
+    point: LatLon
+    hours: str | None
+    fuels: frozenset[str]  # FUEL_BITS keys tagged yes
+    fuels_no: frozenset[str]  # tagged no
+    wc: bool | None
+    cafe: bool | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -440,6 +495,71 @@ def load_packaged_parks(cat: Catalogue) -> list[CatPark]:
         raise CatalogueError(f"parks: malformed ({e!r})") from e
 
 
+def _flag(v: Any) -> bool | None:
+    return None if v is None else bool(v)
+
+
+_FUEL_SETS = tuple(frozenset(k for k, bit in FUEL_BITS.items() if m & bit) for m in range(8))
+"""The 8 fuel masks as shared frozensets (29 000 stations, a handful of distinct sets)."""
+
+
+def lodgings_from_doc(lodging: Any, towns: Sequence[CatTown]) -> list[CatLodging]:
+    """`catalogue_lodging` decoded (town indexes = `towns` in file order)."""
+    kinds = lodging["kinds"]
+    return [
+        CatLodging(
+            str(i), str(nm), str(kinds[k]), LatLon(la / COORD_SCALE, lo / COORD_SCALE), towns[t].id,
+            st, rm, _flag(dg), ph, si,
+        )
+        for i, nm, k, la, lo, t, st, rm, dg, ph, si in zip(
+            *columns(lodging, LODGING_COLS, "lodging"), strict=True
+        )
+    ]  # fmt: skip
+
+
+def roadside_from_doc(roadside: Any) -> list[CatRoadside]:
+    """`catalogue_roadside` decoded."""
+    kinds = roadside["kinds"]
+    return [
+        CatRoadside(
+            str(i), nm, str(kinds[k]), LatLon(la / COORD_SCALE, lo / COORD_SCALE), hr,
+            _FUEL_SETS[fy or 0], _FUEL_SETS[fn or 0], _flag(wc), _flag(cf),
+        )
+        for i, nm, k, la, lo, hr, fy, fn, wc, cf in zip(
+            *columns(roadside, ROADSIDE_COLS, "roadside"), strict=True
+        )
+    ]  # fmt: skip
+
+
+def load_packaged_lodgings(cat: Catalogue) -> list[CatLodging]:
+    """The packaged real lodgings (CEO 02.11), read only when their `townsSha256` is the shipped
+    `catalogue_towns`; a missing file reads as empty (no invented stand-in)."""
+    try:
+        towns_sha = hashlib.sha256(resources.read_bytes(FILES["towns"])).hexdigest()
+        doc = load_gz(resources.read_bytes(LODGING_FILE), LODGING_FILE)
+    except (FileNotFoundError, OSError):
+        return []
+    if not isinstance(doc, dict) or doc.get("townsSha256") != towns_sha:
+        return []
+    try:
+        return lodgings_from_doc(doc, cat.towns)
+    except (KeyError, IndexError, TypeError, ValueError) as e:
+        raise CatalogueError(f"lodging: malformed ({e!r})") from e
+
+
+def load_packaged_roadside() -> list[CatRoadside]:
+    """The packaged real fuel stations and rest areas (CEO 02.11); a missing file reads as empty. Read on the
+    first corridor query, not with the catalogue: 29 000 rows cost a third of the phone's catalogue load."""
+    try:
+        doc = load_gz(resources.read_bytes(ROADSIDE_FILE), ROADSIDE_FILE)
+    except (FileNotFoundError, OSError):
+        return []
+    try:
+        return roadside_from_doc(doc)
+    except (KeyError, IndexError, TypeError, ValueError) as e:
+        raise CatalogueError(f"roadside: malformed ({e!r})") from e
+
+
 def load_packaged() -> Catalogue:
     """The catalogue shipped in `verst_planner/resources` (raises `CatalogueError`)."""
     docs: dict[str, Any] = {}
@@ -463,16 +583,26 @@ __all__ = [
     "FILES",
     "FOOD_COLS",
     "FOOD_KINDS",
+    "FUEL_BITS",
+    "LODGING_COLS",
+    "LODGING_FILE",
+    "LODGING_KINDS",
     "PARKS_FILE",
     "PARK_COLS",
     "PARK_KINDS",
     "POI_COLS",
     "POI_KINDS",
+    "ROADSIDE_COLS",
+    "ROADSIDE_FILE",
+    "ROADSIDE_FOOD_KINDS",
+    "ROADSIDE_KINDS",
     "TOWN_COLS",
     "CatBar",
     "CatFood",
+    "CatLodging",
     "CatPark",
     "CatPoi",
+    "CatRoadside",
     "CatTown",
     "Catalogue",
     "CatalogueError",
@@ -484,7 +614,11 @@ __all__ = [
     "from_docs",
     "load_gz",
     "load_packaged",
+    "load_packaged_lodgings",
     "load_packaged_parks",
+    "load_packaged_roadside",
+    "lodgings_from_doc",
     "parks_from_doc",
+    "roadside_from_doc",
     "to_coord",
 ]

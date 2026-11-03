@@ -58,7 +58,7 @@ class NightInput:
     town_name_ru: str
     hotel: Place | None
     options: tuple[Place, ...]  # passing lodgings (selected first)
-    default_night_rub: int  # `lodging_default_night(population)`, used when there is no hotel
+    default_night_rub: int | None  # town average when there is no hotel; None = no estimate (CEO 02.11)
     town_check_rub: int  # dinner / breakfast base check of the overnight town (median or default)
     family_rooms: bool = False  # ADR-0011 lever: family rooms where they cost less
 
@@ -141,7 +141,13 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
 
     nights: list[NightUnit] = []
     lodging_dates: list[date] = []
+    unpriced = 0
     for n in ci.nights:
+        if (n.hotel is not None and n.hotel.price_night_rub is None) or (
+            n.hotel is None and n.default_night_rub is None
+        ):
+            unpriced += 1  # CEO 02.11: a real hotel has no price in OSM; the night stays out of the total
+            continue
         plans = {o.id: room_plan(o, inp.crew, n.family_rooms) for o in n.options}
         options = tuple(
             HotelPrice(
@@ -151,7 +157,9 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
         )
         rooms: int | None = None
         if n.hotel is not None:
-            r, price, explicit = room_plan(n.hotel, inp.crew, n.family_rooms)
+            r, hotel_price, explicit = room_plan(n.hotel, inp.crew, n.family_rooms)
+            assert hotel_price is not None  # unpriced hotels left above
+            price = hotel_price
             rooms = r if explicit else None
             default, bf = False, breakfast_confirmed(n.hotel)  # E-3: unknown = breakfast costed
             if n.hotel.verified_at:
@@ -159,6 +167,7 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
             else:
                 lodging_dates.append(ci.defaults_as_of)
         else:
+            assert n.default_night_rub is not None
             price, default, bf = n.default_night_rub, True, False
             lodging_dates.append(ci.defaults_as_of)
         nights.append(
@@ -233,6 +242,7 @@ def build_units(ci: CostInput, inp: NormalizedInput, cfg: PlannerConfig) -> Cost
         mood_just_drive=inp.mood is Mood.JUST_DRIVE,
         parking=ci.parking,
         tolls_unknown=ci.tolls_unknown,
+        nights_unpriced=unpriced,
     )
 
 

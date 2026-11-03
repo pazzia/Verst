@@ -28,6 +28,8 @@
   "lunch.kids": "Обед, есть детское меню.",
   "lunch.parking": "Обед, парковка у входа.",
   "lunch.default": "Обед в {town_prep}.",
+  "lunch.roadside": "Обед в кафе у трассы, без заезда в город.",
+  "lunch.roadside_wc": "Обед в кафе у трассы, есть туалет.",
   "sight.default": "{dwell} на осмотр.",
   "sight.dog_waits": "{dwell} на осмотр. Собака ждёт с одним из взрослых.",
   "sight.dog_ok": "{dwell} на осмотр, с собакой можно.",

@@ -17,7 +17,7 @@ from verst_api.errors import from_envelope
 from verst_api.settings import Settings
 from verst_api.share_page import days_word
 
-HOTEL = "pl_yar_hotel_strelka"  # docs/contracts/v2/poi_details-hotel.json
+HOTEL = "osm_n10175244917"  # a real OSM hotel in Ярославль (docs/contracts/v2/poi_details-hotel.json)
 SIGHT = "Q4357088"  # docs/contracts/v2/poi_details-sight.json
 
 

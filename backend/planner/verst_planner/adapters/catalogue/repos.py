@@ -9,11 +9,13 @@ coordinates, so `get_places` rebuilds them for `replace_stop` without any state.
 from __future__ import annotations
 
 import itertools
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 from verst_planner.adapters.catalogue.synthetic import roadside, roadside_id, roadside_region_point
+from verst_planner.adapters.catalogue.world import roadside_place
 from verst_planner.adapters.fake.places import FakePlaceRepository, distance_to_line_km
 from verst_planner.adapters.fake.world import FakeWorld, point_on_edge
+from verst_planner.catalogue import CatRoadside
 from verst_planner.domain.enums import PlaceStatus, PlaceType
 from verst_planner.domain.model import GeoLabel, GeoSuggestion, LatLon, Place, RegionInfo, Town
 from verst_planner.geo.distance import haversine_km
@@ -51,10 +53,26 @@ class RegionByNearestTown:
         return self.world.regions.get(code) or RegionInfo(code, code, FALLBACK_TZ)
 
 
+REAL_ROADSIDE_TYPES = frozenset({PlaceType.FUEL, PlaceType.REST, PlaceType.FOOD})
+"""The types of the real OSM roadside places (FOOD: the roadside cafés, CEO 03.11)."""
+
+
 class IndexedPlaceRepository(FakePlaceRepository):
-    def __init__(self, world: FakeWorld, regions: RegionByNearestTown) -> None:
+    def __init__(
+        self,
+        world: FakeWorld,
+        regions: RegionByNearestTown,
+        synthetic_roadside: bool = True,
+        roadside: Callable[[], Sequence[CatRoadside]] = tuple,
+    ) -> None:
         super().__init__(world)
         self.regions = regions
+        self.synthetic_roadside = synthetic_roadside
+        """False with the real OSM roadside places (CEO 02.11): no invented fuel or rest place, ever."""
+        self._roadside_loader = roadside
+        self._roadside_by_id: dict[str, CatRoadside] | None = None
+        self._roadside_index: GridIndex[CatRoadside] = GridIndex(0.1)
+        self._roadside_places: dict[str, Place] = {}
         self.place_index: GridIndex[Place] = GridIndex(0.1)
         self.town_index: GridIndex[Town] = GridIndex(0.25)
         self.lodgings: dict[str, list[Place]] = {}
@@ -81,9 +99,34 @@ class IndexedPlaceRepository(FakePlaceRepository):
                 found[p.id] = p
         for p in self._roadside(q):
             found[p.id] = p
+        if q.types & REAL_ROADSIDE_TYPES:
+            self._load_roadside()
+            for _pt, r in self._roadside_index.near_line(q.line, q.radius_km):
+                if distance_to_line_km(r.point, q.line) <= q.radius_km:
+                    rp = self._real_roadside(r)
+                    if rp.type in q.types:
+                        found[rp.id] = rp
         return sorted(found.values(), key=lambda p: p.id)
 
+    def _load_roadside(self) -> dict[str, CatRoadside]:
+        """The real roadside places by id, read and indexed on first use."""
+        if self._roadside_by_id is None:
+            rows = self._roadside_loader()
+            self._roadside_by_id = {r.id: r for r in rows}
+            for r in rows:
+                self._roadside_index.add(r.point, r)
+        return self._roadside_by_id
+
+    def _real_roadside(self, r: CatRoadside) -> Place:
+        """The place of a real OSM fuel station or rest area, built once on first use."""
+        p = self._roadside_places.get(r.id)
+        if p is None:
+            p = self._roadside_places[r.id] = roadside_place(r, self.regions.code_at(r.point))
+        return p
+
     def _roadside(self, q: CorridorQuery) -> list[Place]:
+        if not self.synthetic_roadside:
+            return []
         kinds = [
             (k, every, offset)
             for k, t, every, offset in (
@@ -130,7 +173,10 @@ class IndexedPlaceRepository(FakePlaceRepository):
         out: dict[str, Place] = {}
         for i in ids:
             p = self.world.places.get(i)
-            if p is None:
+            if p is None and not self.synthetic_roadside:
+                r = self._load_roadside().get(i)
+                p = self._real_roadside(r) if r is not None else None
+            if p is None and self.synthetic_roadside:
                 at = roadside_region_point(i)
                 p = roadside(i, self.regions.code_at(at)) if at is not None else None
             if p is not None:

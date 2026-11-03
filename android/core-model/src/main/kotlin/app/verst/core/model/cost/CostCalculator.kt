@@ -29,7 +29,8 @@ data class TollHitDto(val segmentId: String = "", val roadRef: String = "", val 
 @Serializable
 data class HotelPriceDto(
     val placeId: String,
-    val priceNightRub: Int,
+    /** CEO 02.11: null = no known price (a real OSM hotel); such an option never changes the total. */
+    val priceNightRub: Int? = null,
     val breakfastIncluded: Boolean = true,
     /** ADR-0011: the room count the engine chose for this option (family rooms); null = `ceil(adults / 2)`. */
     val rooms: Int? = null,
@@ -219,7 +220,7 @@ object CostCalculator {
         val breakfasts = LinkedHashMap<Int, Int>()
         var cheaper = false
         for (n in u.nights) {
-            val pick = ov.hotelByStop[n.stopId]?.let { pid -> n.options.firstOrNull { it.placeId == pid } }
+            val pick = ov.hotelByStop[n.stopId]?.let { pid -> n.options.firstOrNull { it.placeId == pid && it.priceNightRub != null } }
             val price = pick?.priceNightRub ?: n.priceNightRub
             val breakfast = pick?.breakfastIncluded ?: n.breakfastIncluded
             val sel = pick?.placeId ?: n.selectedPlaceId
@@ -228,7 +229,7 @@ object CostCalculator {
             lodging += BigDecimal(rooms) * BigDecimal(price)
             if (!breakfast) breakfasts[n.day + 1] = n.breakfastCheckRub
             val nightCost = rooms.toLong() * price
-            if (n.options.any { it.placeId != sel && (it.rooms ?: legacyRooms).toLong() * it.priceNightRub < nightCost }) cheaper = true
+            if (n.options.any { o -> o.placeId != sel && o.priceNightRub != null && (o.rooms ?: legacyRooms).toLong() * o.priceNightRub < nightCost }) cheaper = true
         }
         lines["lodging"] = roundTo(lodging, step)
 

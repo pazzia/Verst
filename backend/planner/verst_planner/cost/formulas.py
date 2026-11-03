@@ -82,16 +82,17 @@ def toll_row(road: str, night: bool, rub: int, weekend: bool = False) -> CostBre
 # ------------------------------------------------------------------ lodging
 
 
-def lodging_formula(nights: list[tuple[str, int, int, bool]]) -> str:
-    """`nights` = (town, rooms, price per room, default price)."""
+def lodging_formula(nights: list[tuple[str, int, int, bool]], unpriced: int = 0) -> str:
+    """`nights` = (town, rooms, price per room, default price); `unpriced` = nights with no known price."""
     if not nights:
-        return ru.text("cost.lodging.none")
+        return ru.text("cost.lodging.unknown") if unpriced else ru.text("cost.lodging.none")
     suffix = ru.text("cost.lodging.default_suffix")
     prices = {p for _t, _r, p, _d in nights}
     if len(prices) == 1 and all(r == 1 for _t, r, _p, _d in nights):
         towns = ru.text("cost.lodging.join").join(t for t, _r, _p, _d in nights)
         out = ru.text("cost.lodging.equal", towns=towns, nights=len(nights), price=ru.fmt_int(nights[0][2]))
-        return out + (suffix if any(d for *_x, d in nights) else "")
+        out += suffix if any(d for *_x, d in nights) else ""
+        return out + (" " + ru.text("cost.lodging.plus_unknown", n=unpriced) if unpriced else "")
     items = []
     for town, rooms, price, default in nights:
         if rooms == 1:
@@ -101,7 +102,8 @@ def lodging_formula(nights: list[tuple[str, int, int, bool]]) -> str:
             key = "cost.lodging.item_rooms" if rooms < 5 else "cost.lodging.item_rooms_many"
             item = ru.text(key, town=town, rooms=rooms, price=ru.fmt_int(price))
         items.append(item + (suffix if default else ""))
-    return ru.text("cost.lodging.join").join(items)
+    out = ru.text("cost.lodging.join").join(items)
+    return out + (" " + ru.text("cost.lodging.plus_unknown", n=unpriced) if unpriced else "")
 
 
 def lodging_row(day: int, town: str, rooms: int, price: int, default: bool, rub: int) -> CostBreakdownRow:
@@ -161,13 +163,23 @@ def tickets_formula(paid: int, adults: int, children: int, unknown: int = 0) -> 
     return out + (" " + ru.text("cost.tickets.unknown", n=unknown) if unknown else "")
 
 
-def total_note(unknown_tickets: int) -> str | None:
-    """ADR-0019 E-2: the total leaves out the tickets whose price is unknown."""
-    if not unknown_tickets:
-        return None
-    return ru.text(
-        "cost.total.no_tickets", n=unknown_tickets, seats_word=ru.plural_word(unknown_tickets, "plural.seat")
-    )
+def total_note(unknown_tickets: int, unpriced_nights: int = 0) -> str | None:
+    """ADR-0019 E-2: the total leaves out the tickets whose price is unknown; CEO 02.11/03.11: and the nights
+    at real hotels with no known price («Стоимость ночёвок в отелях не учитывается», the price is on the
+    booking link)."""
+    parts = []
+    if unpriced_nights:
+        # CEO 03.11: said in the total and the calculation until a partner or an open source gives the prices
+        parts.append(ru.text("cost.total.no_nights"))
+    if unknown_tickets:
+        parts.append(
+            ru.text(
+                "cost.total.no_tickets",
+                n=unknown_tickets,
+                seats_word=ru.plural_word(unknown_tickets, "plural.seat"),
+            )
+        )
+    return ". ".join(parts) if parts else None
 
 
 def ticket_row(name: str, adults: int, adult: int, children: int, child: int, rub: int) -> CostBreakdownRow:

@@ -206,6 +206,9 @@ class CostCfg:
     assumed_child_age: int
     breakfast_price_frac: Decimal
     dinner_last_day_after: time
+    lodging_estimate: int = 1
+    """1: a night with no hotel price is costed at the town's average (marked as the average price); 0 (the
+    real OSM hotels, CEO 02.11 option a): such a night has no price and the total says it leaves it out."""
 
 
 @dataclass(frozen=True, slots=True)

@@ -143,7 +143,11 @@ class SliceJourneyTest {
         val instrumentsKm = number(textOf("instruments.meta"))!!
         assertEquals(flow.figures!!.figures.km, instrumentsKm)
         shot("04-instruments")
+        // CEO 03.11: with the child aboard ПОЕХАЛИ asks where lunch may be
         compose.onNodeWithTag("instruments.start").performClick()
+        waitTag("roadside.food")
+        shot("04b-roadside-food-question")
+        compose.onNodeWithTag("roadside.food.no").performClick()
 
         waitTag("drive.back")
         compose.waitUntil(10_000) { flow.drive.lines.size >= 2 || flow.drive.done } // paced steps on the device
@@ -282,7 +286,7 @@ class SliceJourneyTest {
         compose.onNodeWithTag("windshield.start").performClick()
         waitTag("instruments.start")
         shot("09-instruments-golden-ring")
-        compose.onNodeWithTag("instruments.start").performClick()
+        compose.pressStart(flow)
         val t0 = System.nanoTime()
         assertRoadAhead("ready")
         val planMs = (System.nanoTime() - t0) / 1_000_000
@@ -351,7 +355,7 @@ class SliceJourneyTest {
         waitTag("navigator.start", 10_000)
         compose.onNodeWithTag("navigator.start").performClick()
         waitTag("instruments.start")
-        compose.onNodeWithTag("instruments.start").performClick()
+        compose.pressStart(flow)
         waitTag("drive.error.cta", 20_000)
         shot("29-drive-error-unreachable")
         compose.onNodeWithTag("drive.error.cta").performClick() // «Изменить маршрут» → Navigator with the error

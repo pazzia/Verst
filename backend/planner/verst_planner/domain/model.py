@@ -89,6 +89,16 @@ class Crew:
         return self.adults + self.children
 
 
+def is_roadside_food(p: Place) -> bool:
+    """CEO 03.11: a real OSM café outside every town (catalogue town cafés carry their `town_id`)."""
+    return p.type is PlaceType.FOOD and p.source is Source.OSM and p.town_id is None
+
+
+def roadside_food_default(crew: Crew) -> bool:
+    """CEO 03.11: roadside cafés count for lunch unless a child is aboard (then the app asks explicitly)."""
+    return crew.children == 0
+
+
 @dataclass(frozen=True, slots=True)
 class Vehicle:
     consumption_l_per_100km: float = 8.0
@@ -118,6 +128,9 @@ class TripInput:
     avoid_tolls: bool = False
     reserve_on: bool = True
     simplify: bool = False
+    roadside_food: bool | None = None
+    """CEO 03.11: lunch at roadside cafés too. None = the crew default (`roadside_food_default`): yes
+    without children; with a child only town cafés (a roadside café may have no proper toilet)."""
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -139,6 +152,7 @@ class NormalizedInput:
     reserve_on: bool
     simplify: bool
     tz: str
+    roadside_food: bool = True
 
 
 # ---------------------------------------------------------------- 4.4 place DB read models
@@ -445,7 +459,8 @@ class TollUnit:
 @dataclass(frozen=True, slots=True)
 class HotelPrice:
     place_id: str
-    price_night_rub: int
+    price_night_rub: int | None
+    """None = unknown (a real OSM hotel, CEO 02.11): the night is not in the rouble total."""
     breakfast_included: bool = False
     """Breakfast confirmed included; unknown = False, so the morning meal is costed (ADR-0019 E-3)."""
     rooms: int | None = None
@@ -517,6 +532,9 @@ class CostUnits:
     """Mood is already «Только доехать» (then the `just_drive` overspend hint is not offered)."""
     parking: tuple[ParkingUnit, ...] = ()
     """ADR-0015 §4 per-stop parking; empty = no parking data (no «Парковки» line, fixture worlds)."""
+    nights_unpriced: int = 0
+    """CEO 02.11: nights at real hotels with no known price; they are not in `nights` (nor in the total), and
+    the total note says so."""
     tolls_unknown: bool = False
     """Acceptance 2026-10-28 (QA B-1): the route is approximate and follows no known toll corridor, so the
     tolls line says «не учтены» instead of «платных дорог нет». False with `avoidTolls` (the free roads)."""
@@ -557,9 +575,10 @@ class HotelOption:
     place_id: str
     name_ru: str
     tags: tuple[Tag, ...]
-    price_night_rub: int
+    price_night_rub: int | None
+    """None = unknown (a real OSM hotel, CEO 02.11): «цена — по ссылке «Забронировать»»."""
     rooms: int
-    price_crew_rub: int
+    price_crew_rub: int | None
     verified: bool
     # OI-41: distance from the route (motorway exit) to the hotel in metres, for the 5.7 exit sign «800 м».
     exit_distance_m: int = 0

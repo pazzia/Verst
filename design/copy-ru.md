@@ -425,6 +425,7 @@ Spoken formula (`formula_spoken`): «×» → «умножить на», «/100�
 | `exit_book` | Забронировать ночь | |
 | `exit_book_partner` | через Яндекс Путешествия | |
 | `exit_book_open` | Открыть бронирование | booked |
+| `exit_price_on_link` | цена — по ссылке «Забронировать» | CEO 02.11: a real hotel has no price in OSM |
 | `exit_booking_failed` | Не получилось открыть бронирование. Попробуйте ещё раз | ENG-03: no browser took the link |
 | `exit_booked_price` | забронировано | |
 | `exit_link_error` | Не получилось открыть бронирование. Попробуйте ещё раз | toast |
@@ -772,6 +773,7 @@ Specs: `design/screens/5.8`–`5.13`, components §17.5–§23; aligned with ADR
 | `card_area_plate` | ФОТО РАЙОНА | plate on the hotel photo (uppercase copy) |
 | `card_hotel_fictional` | Гостиница в демо-сборке вымышленная — на фото район, а не она | under the hotel photo |
 | `card_hotel_fictional_nophoto` | Гостиница в демо-сборке вымышленная | hotel card while the area photo is a placeholder (none / error / offline): the «на фото район» clause and the `card_photo_area` credit are hidden (S3-QA P1-05) |
+| `card_hotel_area_photo` | На фото район, а не сама гостиница | a real OSM hotel (D-IR-27, `isFictional` false) while the area photo is on screen; nothing while it is a placeholder |
 | `card_photo_none` | Фото пока нет | placeholder (no file / no free licence) |
 | `card_photo_offline` | Фото загрузится, когда будет интернет | placeholder offline |
 | `card_photo_error` | Фото не загрузилось | placeholder HTTP error |
@@ -1197,6 +1199,10 @@ These keys were written straight into `strings.xml` during the CEO rounds of 27�
 | `abroad_error_no_server` | В этой сборке нет сервера — поездку за границу построить нельзя. | |
 | `abroad_error_no_consent` | Чтобы построить поездку за границу, нужно согласие на планирование на сервере. | |
 | `abroad_consent_body` | Поездку за границу строит только сервер Версты. На тестовый сервер в Нидерландах уйдут точки маршрута, состав экипажа, бюджет и машина. Маршрут там не хранится. Без связи такую поездку не построить. | |
+| `roadside_food_title` | Где обедать с ребёнком? | CEO 03.11: asked on every ПОЕХАЛИ with a child aboard (NaviDialog `roadside.food`) |
+| `roadside_food_body` | В городе кафе обычно удобнее для ребёнка. Придорожные ближе к трассе, но в них может не быть нормального туалета. | |
+| `roadside_food_yes` | И придорожные кафе | primary: the engine may pick a roadside café (one with a known toilet first) |
+| `roadside_food_no` | Только в городах | secondary and the scrim: town cafés only |
 | `sign_border` | ГРАНИЦА | |
 | `road_border_open` | Документы и сборы | |
 | `border_label` | ПУНКТ ПРОПУСКА | |
@@ -1212,6 +1218,7 @@ These keys were written straight into `strings.xml` during the CEO rounds of 27�
 | `border_fee_counted` | {x} · учтено в суммах за границей | |
 | `cd_border_source` | Открыть источник: {x} | |
 | `road_total_abroad_incomplete` | Итог без расходов за границей | |
+| `road_total_no_nights` | Итог без стоимости отелей | D-IR-27: a chosen hotel has no price (real OSM hotel), the total leaves the night out; replaces the «в бюджете» badge |
 | `waybill_abroad_title` | За границей | |
 | `waybill_abroad_country` | {x} · ≈ {y} км | |
 | `waybill_abroad_fuel` | Топливо: {x} | |

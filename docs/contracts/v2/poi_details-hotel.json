@@ -3,20 +3,20 @@
   "function": "poi_details",
   "args": {
    "world": "russia_v1",
-   "place_id": "pl_yar_hotel_strelka"
+   "place_id": "osm_n10175244917"
   }
  },
  "response": {
   "ok": true,
   "result": {
-   "id": "pl_yar_hotel_strelka",
+   "id": "osm_n10175244917",
    "kind": "hotel",
-   "poiKind": null,
-   "nameRu": "У Стрелки, в центре",
-   "descriptionRu": "Демо: вымышленная гостиница",
+   "poiKind": "hotel",
+   "nameRu": "Богоявленский",
+   "descriptionRu": null,
    "townName": "Ярославль",
-   "lat": 57.631526230397746,
-   "lon": 39.904632398365415,
+   "lat": 57.62102,
+   "lon": 39.88495,
    "image": {
     "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Znamenskaya_Tower_in_Yaroslavl_01.jpg?width=800",
     "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Znamenskaya_Tower_in_Yaroslavl_01.jpg?width=400",
@@ -32,8 +32,13 @@
    },
    "hours": null,
    "ticket": null,
-   "isFictional": true,
-   "attributionRu": [],
+   "website": "https://hotelbg.ru/",
+   "phone": null,
+   "stars": null,
+   "isFictional": false,
+   "attributionRu": [
+    "© участники OpenStreetMap"
+   ],
    "wikidataId": null
   },
   "ms": 0

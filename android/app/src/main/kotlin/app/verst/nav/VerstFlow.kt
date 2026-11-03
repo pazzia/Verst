@@ -759,6 +759,10 @@ class VerstFlow(
 
     /** System back and every back link. Sheets close first. Returns false on the root (the activity finishes). */
     fun back(): Boolean {
+        if (roadsideFoodAsk) {
+            answerRoadsideFood(null)
+            return true
+        }
         if (abroadConsentAsk) {
             answerAbroadConsent(false)
             return true
@@ -1063,6 +1067,17 @@ class VerstFlow(
     var abroadConsentAsk by mutableStateOf(false)
         private set
 
+    /**
+     * CEO 03.11 «для маршрута с ребёнком надо в явном виде спрашивать»: with a child aboard every ПОЕХАЛИ asks where
+     * lunch may be — town cafés only, or roadside ones too (a roadside café may have no proper toilet).
+     */
+    var roadsideFoodAsk by mutableStateOf(false)
+        private set
+
+    /** The answer for the plan being started (null: no child, the engine's default — roadside cafés allowed). */
+    private var roadsideFood: Boolean? = null
+    private var roadsideFoodAnswered = false
+
     /** ПОЕХАЛИ on 5.2 → Instruments with A → B. */
     fun openInstrumentsFree() {
         val d = destination ?: return
@@ -1076,7 +1091,8 @@ class VerstFlow(
     // ------------------------------------------------------------------------------------------ instruments
 
     /** The draft request when it has a target (destination or ready route), else null. */
-    fun draft(): PlanRequest? = if (readyRoute != null || destinationPoint != null) request() else null
+    /** The trip being set up; the CEO 03.11 lunch answer is left out (asked only on ПОЕХАЛИ, it does not move km). */
+    fun draft(): PlanRequest? = if (readyRoute != null || destinationPoint != null) request().copy(roadsideFood = null) else null
 
     private fun estimateTarget(): PlanRequest? =
         if (destinationAbroad) null // CEO 29.10: the engine rejects a destination abroad — nothing to estimate
@@ -1090,7 +1106,8 @@ class VerstFlow(
     val draftError: EngineErrorDto?
         get() = estimateError?.takeIf { it.first == draft() }?.second
 
-    internal fun record(r: PlanRequest, f: TripFigures) {
+    internal fun record(request: PlanRequest, f: TripFigures) {
+        val r = request.copy(roadsideFood = null) // keyed like `draft()`: the lunch answer does not move km
         known.removeAll { it.first == r }
         known.add(r to f)
         while (known.size > 48) known.removeAt(0)
@@ -1173,6 +1190,7 @@ class VerstFlow(
         mood = mood,
         vehicle = carVehicle(),
         avoidTolls = app.verst.settings.AppPrefs.settings.avoidTolls,
+        roadsideFood = if (children > 0) roadsideFood else null,
         abroad = destinationAbroad, // CEO 29.10: the server plans it, never the phone
     )
 
@@ -1202,8 +1220,13 @@ class VerstFlow(
             abroadConsentAsk = true
             return
         }
+        if (children > 0 && !roadsideFoodAnswered) {
+            roadsideFoodAsk = true
+            return
+        }
         if (top != Route.Drive) push(Route.Drive)
         val r = request()
+        roadsideFoodAnswered = false // the next ПОЕХАЛИ asks again
         track {
             // the engine's estimate of exactly this request; none yet → `unknown`
             val f = figures?.takeUnless { it.stale }?.figures
@@ -1213,6 +1236,15 @@ class VerstFlow(
             )
         }
         startPlan(r, planId = UUID.randomUUID().toString()) // tracking plan §2.5 q3: a new trip_id per ПОЕХАЛИ only
+    }
+
+    /** CEO 03.11: «И придорожные кафе» (true) or «Только в городах» (false) plans; back closes without a plan. */
+    fun answerRoadsideFood(roadside: Boolean?) {
+        roadsideFoodAsk = false
+        if (roadside == null) return
+        roadsideFood = roadside
+        roadsideFoodAnswered = true
+        go()
     }
 
     /** The consent dialog's answer: «Согласен» records the consent and plans on the server; «Не сейчас» stays. */

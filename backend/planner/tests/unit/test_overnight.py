@@ -1,3 +1,4 @@
+import dataclasses
 import unittest
 from typing import Any
 
@@ -117,13 +118,30 @@ class ScoreTest(unittest.TestCase):
 
 
 class FiltersTest(unittest.TestCase):
-    def test_osm_lodging_never_dog_friendly(self) -> None:
+    def test_osm_lodging_dog_policy(self) -> None:
+        """CEO 02.11: a real OSM hotel with an untagged dog policy passes (the night says «не проверено»);
+        one tagged `dog=no` never does; a curated hotel still needs `dogs_allowed`."""
         ctx, _ = setup()
         osm_plain = lodging("o1", "t", {Tag.PARKING}, 300, source=Source.OSM)
         osm_tagged = lodging("o2", "t", {Tag.DOGS_ALLOWED}, 300, source=Source.OSM)
-        self.assertFalse(passes(osm_plain, DOG, ctx))
+        osm_no = lodging("o3", "t", set(), 300, source=Source.OSM)
+        osm_no.place = dataclasses.replace(osm_no.place, tags_no=frozenset({Tag.DOGS_ALLOWED}))
+        curated_plain = lodging("c1", "t", {Tag.PARKING}, 300)
+        self.assertTrue(passes(osm_plain, DOG, ctx))
         self.assertTrue(passes(osm_tagged, DOG, ctx))
+        self.assertFalse(passes(osm_no, DOG, ctx))
+        self.assertFalse(passes(curated_plain, DOG, ctx))
         self.assertTrue(passes(osm_plain, Crew(2, 0, False), ctx))
+
+    def test_osm_lodging_without_price_passes(self) -> None:
+        """CEO 02.11: a real hotel has no price in OSM; it is a lodging all the same."""
+        ctx, _ = setup()
+        osm = lodging("o1", "t", set(), 300, source=Source.OSM)
+        osm.place = dataclasses.replace(osm.place, price_night_rub=None)
+        curated = lodging("c1", "t", set(), 300)
+        curated.place = dataclasses.replace(curated.place, price_night_rub=None)
+        self.assertTrue(passes(osm, Crew(2, 0, False), ctx))
+        self.assertFalse(passes(curated, Crew(2, 0, False), ctx))
 
     def test_family_room_and_price(self) -> None:
         ctx, _ = setup()

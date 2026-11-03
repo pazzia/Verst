@@ -72,7 +72,7 @@ def _selected(n: NightUnit, overrides: CostOverrides) -> tuple[int, bool, str | 
     pid = overrides.hotel_by_stop.get(n.stop_id)
     if pid is not None:
         for o in n.options:
-            if o.place_id == pid:
+            if o.place_id == pid and o.price_night_rub is not None:
                 return o.price_night_rub, o.breakfast_included, o.place_id, o.rooms
     return n.price_night_rub, n.breakfast_included, n.selected_place_id, n.rooms
 
@@ -216,7 +216,7 @@ def recompute(
         if any(
             o.price_night_rub * (std_rooms if o.rooms is None else o.rooms) < price * rooms
             for o in n.options
-            if o.place_id != sel
+            if o.place_id != sel and o.price_night_rub is not None
         ):
             cheaper = True
     lines.append(
@@ -224,7 +224,7 @@ def recompute(
             CostKey.LODGING,
             fm.title(CostKey.LODGING, fuel_t, units.reserve_frac),
             round_to(lodging_exact, step),
-            fm.lodging_formula(night_info),
+            fm.lodging_formula(night_info, units.nights_unpriced),
             _as_of(units, CostKey.LODGING, units.fuel.as_of),
             tuple(lodging_rows),
         )
@@ -354,5 +354,5 @@ def recompute(
         hint_keys=tuple(hints),
         prices_as_of=prices_as_of,
         units=units,
-        total_note_ru=fm.total_note(unknown_tickets),
+        total_note_ru=fm.total_note(unknown_tickets, units.nights_unpriced),
     )

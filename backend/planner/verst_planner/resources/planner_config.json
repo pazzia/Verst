@@ -108,7 +108,8 @@
     "child_food_weight_under7": 0.5,
     "assumed_child_age": 8,
     "breakfast_price_frac": 0.6,
-    "dinner_last_day_after": "19:00"
+    "dinner_last_day_after": "19:00",
+    "lodging_estimate": 1
   },
   "toll_night": ["00:00", "06:00"],
   "border": {"buffer_min": 120}

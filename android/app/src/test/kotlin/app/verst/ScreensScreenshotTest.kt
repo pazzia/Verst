@@ -123,7 +123,7 @@ class ScreensScreenshotTest {
         // Release review P0-1: no real brand in any rendered text or TalkBack label of any screen state.
         BrandDenyList.allow(compose.activity) // only the hand-off app names (S3-R1)
         val texts = BrandDenyList.texts(compose.onRoot(useUnmergedTree = true).fetchSemanticsNode())
-        assertEquals("$screen/$state", emptyList<String>(), texts.flatMap { BrandDenyList.hits(it) })
+        assertEquals("$screen/$state", emptyList<String>(), texts.flatMap { BrandDenyList.hits(it, BrandDenyList.screenBrands) })
     }
 
     @Test
@@ -1040,11 +1040,13 @@ class ScreensScreenshotTest {
         val d = real.copy(image = real.image?.copy(card = null, thumb = null))
         val night = snapshot("G02_golden_ring").daysList.flatMap { it.stops }.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
         shot("card", "hotel-area") { CardOverRoad(card(d.nameRu, "hotel", "hotel", d, night.hotelOptions.first())) }
-        compose.onNodeWithTag("card.fictional", useUnmergedTree = true).assertExists()
+        // D-IR-27: the hotel is a real OSM one — never «вымышленная»; no area clause while the photo is a placeholder
+        compose.onNodeWithTag("card.fictional", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("card.area.note", useUnmergedTree = true).assertDoesNotExist()
         // S3-QA P1-05: while the frame is a placeholder (Robolectric never loads the URL) — no credit, the short note,
         // no engine «Демо: вымышленная гостиница» line; the mini sign sits in the title row (§19 C2)
         compose.onNodeWithText("Фото района: Ярославль · Wikimedia Commons").assertDoesNotExist()
-        compose.onNodeWithText("Гостиница в демо-сборке вымышленная").assertExists()
+        compose.onNodeWithText("Гостиница в демо-сборке вымышленная", substring = true).assertDoesNotExist()
         compose.onNodeWithText("Демо: вымышленная гостиница").assertDoesNotExist()
         compose.onNodeWithTag("card.sign", useUnmergedTree = true).assertExists()
     }

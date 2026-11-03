@@ -376,6 +376,7 @@
     <string name="exit_book">Забронировать ночь</string>
     <string name="exit_book_partner">через Яндекс Путешествия</string>
     <string name="exit_book_open">Открыть бронирование</string>
+    <string name="exit_price_on_link">цена — по ссылке «Забронировать»</string>
     <string name="exit_booking_failed">Не получилось открыть бронирование. Попробуйте ещё раз</string>
     <string name="exit_booked_price">забронировано</string>
     <string name="exit_link_error">Не получилось открыть бронирование. Попробуйте ещё раз</string>
@@ -502,6 +503,7 @@
     <string name="card_area_plate">ФОТО РАЙОНА</string>
     <string name="card_hotel_fictional">Гостиница в демо-сборке вымышленная — на фото район, а не она</string>
     <string name="card_hotel_fictional_nophoto">Гостиница в демо-сборке вымышленная</string>
+    <string name="card_hotel_area_photo">На фото район, а не сама гостиница</string>
     <string name="card_photo_none">Фото пока нет</string>
     <string name="card_photo_offline">Фото загрузится, когда будет интернет</string>
     <string name="card_photo_error">Фото не загрузилось</string>
@@ -857,6 +859,10 @@
     <string name="abroad_error_no_server">В этой сборке нет сервера — поездку за границу построить нельзя.</string>
     <string name="abroad_error_no_consent">Чтобы построить поездку за границу, нужно согласие на планирование на сервере.</string>
     <string name="abroad_consent_body">Поездку за границу строит только сервер Версты. На тестовый сервер в Нидерландах уйдут точки маршрута, состав экипажа, бюджет и машина. Маршрут там не хранится. Без связи такую поездку не построить.</string>
+    <string name="roadside_food_title">Где обедать с ребёнком?</string>
+    <string name="roadside_food_body">В городе кафе обычно удобнее для ребёнка. Придорожные ближе к трассе, но в них может не быть нормального туалета.</string>
+    <string name="roadside_food_yes">И придорожные кафе</string>
+    <string name="roadside_food_no">Только в городах</string>
     <string name="sign_border">ГРАНИЦА</string>
     <string name="road_border_open">Документы и сборы</string>
     <string name="border_label">ПУНКТ ПРОПУСКА</string>
@@ -872,6 +878,7 @@
     <string name="border_fee_counted">%1$s · учтено в суммах за границей</string>
     <string name="cd_border_source">Открыть источник: %1$s</string>
     <string name="road_total_abroad_incomplete">Итог без расходов за границей</string>
+    <string name="road_total_no_nights">Итог без стоимости отелей</string>
     <string name="waybill_abroad_title">За границей</string>
     <string name="waybill_abroad_country">%1$s · ≈ %2$s км</string>
     <string name="waybill_abroad_fuel">Топливо: %1$s</string>

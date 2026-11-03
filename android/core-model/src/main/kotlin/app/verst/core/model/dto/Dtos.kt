@@ -149,9 +149,10 @@ data class HotelOptionDto(
     val placeId: String,
     val name: String,
     val tags: List<String> = emptyList(),
-    val priceNightRub: Int = 0,
+    /** CEO 02.11: null = a real OSM hotel, its price is on the booking link (never 0 ₽). */
+    val priceNightRub: Int? = null,
     val rooms: Int = 1,
-    val priceCrewRub: Int = 0,
+    val priceCrewRub: Int? = null,
     val verified: Boolean = true,
     /** OI-41: route (motorway exit) → hotel, metres; 0 = unknown. */
     val exitDistanceM: Int = 0,

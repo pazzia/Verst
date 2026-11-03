@@ -15,8 +15,14 @@ import org.robolectric.annotation.Config
 /** Release review P0-1 on the Android side: the shared deny-list file (also used by the Python test). */
 object BrandDenyList {
     private val root = File(System.getProperty("verst.repoRoot") ?: "../..")
-    val brands: List<String> = root.resolve("backend/planner/tests/brand_denylist.txt").readLines()
+    private val lines: List<String> = root.resolve("backend/planner/tests/brand_denylist.txt").readLines()
         .map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }
+
+    /** Every brand: the app's own strings name none of them. */
+    val brands: List<String> = lines.map { it.removePrefix("copy:") }
+
+    /** D-IR-28: a rendered screen may show a fuel chain as an OSM place name («Лукойл»); `copy:` lines are skipped. */
+    val screenBrands: List<String> = lines.filterNot { it.startsWith("copy:") }
 
     /** ADR-0014: `android:<glob>` lines of `brand_allowlist.txt` — the only keys that may name the hand-off apps. */
     private val globs: List<Regex> = root.resolve("backend/planner/tests/brand_allowlist.txt").readLines()
@@ -37,10 +43,10 @@ object BrandDenyList {
         }.sortedByDescending { it.length }
     }
 
-    fun hits(text: String): List<String> {
+    fun hits(text: String, list: List<String> = brands): List<String> {
         val t = allowed.fold(text) { acc, a -> acc.replace(a, "") }
         // A brand starts a word: «Суточно» is a brand, «круглосуточно» (5.11 hours «круглосуточно») is not.
-        return brands.filter { b -> Regex("(?<!\\p{L})" + Regex.escape(b), RegexOption.IGNORE_CASE).containsMatchIn(t) }
+        return list.filter { b -> Regex("(?<!\\p{L})" + Regex.escape(b), RegexOption.IGNORE_CASE).containsMatchIn(t) }
             .map { "«$it» in «${text.take(80)}»" }
     }
 

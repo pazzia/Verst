@@ -6,7 +6,7 @@ import itertools
 import math
 from dataclasses import dataclass
 
-from verst_planner.domain.enums import Tag
+from verst_planner.domain.enums import Source, Tag
 from verst_planner.domain.errors import InvalidInput
 from verst_planner.domain.model import Candidate, Crew, NormalizedInput, ReadyRoute, Route, TownCandidate
 from verst_planner.pipeline import Corridor, PlanContext
@@ -28,16 +28,19 @@ def n_days_for(total_km: float, daily_km: int) -> int:
 
 
 def passes(h: Candidate, crew: Crew, ctx: PlanContext) -> bool:
-    """Crew filters (A§6.5). OSM lodgings without `dogs_allowed` never pass the dog filter (SPEC §9)."""
+    """Crew filters (A§6.5). A curated hotel needs a price, `dogs_allowed` for a dog and a family room for a
+    family. A real OSM hotel (CEO 02.11) has no price and rarely says anything about dogs or family rooms:
+    it passes unless it is confirmed to refuse dogs, and the night says what is not checked (ADR-0019)."""
     p = h.place
-    if p.price_night_rub is None:
+    osm = p.source is Source.OSM
+    if p.price_night_rub is None and not osm:
         return False
-    if crew.dog and Tag.DOGS_ALLOWED not in p.tags:
-        return False  # also covers SPEC §9: OSM lodging without dog info is never dog-friendly
+    if crew.dog and (Tag.DOGS_ALLOWED in p.tags_no or (not osm and Tag.DOGS_ALLOWED not in p.tags)):
+        return False
     need_family = (
         crew.children > 0 and crew.adults + crew.children >= ctx.cfg.overnight_score.family_room_min_people
     )
-    return not (need_family and Tag.FAMILY_ROOM not in p.tags)
+    return not (need_family and not osm and Tag.FAMILY_ROOM not in p.tags)
 
 
 def template_nights(template: ReadyRoute, corridor: Corridor) -> list[TownCandidate] | None:

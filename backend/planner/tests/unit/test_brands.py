@@ -25,11 +25,15 @@ ANDROID_ALLOW = [
     for line in (PLANNER_ROOT / "tests" / "brand_allowlist.txt").read_text("utf-8").splitlines()
     if line.startswith("android:")
 ]
-DENY = [
+_LINES = [
     line.strip()
     for line in (PLANNER_ROOT / "tests" / "brand_denylist.txt").read_text("utf-8").splitlines()
     if line.strip() and not line.startswith("#")
 ]
+DENY = [line.removeprefix("copy:") for line in _LINES]
+"""Every brand: the app's own copy (engine resources, Android strings) names none of them."""
+DATA_DENY = [line for line in _LINES if not line.startswith("copy:")]
+"""D-IR-28: place data from OSM (plans, contracts, the catalogue) may name a fuel chain («Лукойл»)."""
 
 
 ALLOW = {
@@ -63,16 +67,18 @@ def starts_word(brand: str, text: str) -> bool:
     return any(m.start() == 0 or not text[m.start() - 1].isalpha() for m in re.finditer(pattern, text, re.I))
 
 
-def hits(texts: Iterator[str]) -> list[str]:
+def hits(texts: Iterator[str], deny: list[str] = DENY) -> list[str]:
     out = []
     for t in texts:
-        out += [f"{b!r} in {t[:80]!r}" for b in DENY if starts_word(b, t)]
+        out += [f"{b!r} in {t[:80]!r}" for b in deny if starts_word(b, t)]
     return out
 
 
 class BrandDenyListTest(unittest.TestCase):
     def test_denylist_loaded(self) -> None:
         self.assertIn("Лукойл", DENY)
+        self.assertNotIn("Лукойл", DATA_DENY)  # D-IR-28
+        self.assertIn("Яндекс", DATA_DENY)
         self.assertIn("Яндекс", DENY)
         self.assertTrue(hits(iter(["АЗС Лукойл, М-8"])))  # the matcher works
 
@@ -102,18 +108,22 @@ class BrandDenyListTest(unittest.TestCase):
                 self.assertEqual(hits(strings(json.loads((WORLDS / f"{name}.json").read_text("utf-8")))), [])
 
     def test_engine_resources_goldens_and_contracts(self) -> None:
-        files = list((PLANNER_ROOT / "verst_planner" / "resources").glob("*.json"))
-        files += list((PLANNER_ROOT / "tests" / "golden").rglob("*.json"))
-        files += [p for p in (REPO / "docs" / "contracts").rglob("*.json")]
-        self.assertGreater(len(files), 20)
-        for f in files:
+        resources = list((PLANNER_ROOT / "verst_planner" / "resources").glob("*.json"))
+        self.assertGreater(len(resources), 5)
+        for f in resources:  # the engine's own copy: no brand at all
             with self.subTest(f.name):
                 self.assertEqual(hits(strings(json.loads(f.read_text("utf-8")))), [])
+        files = list((PLANNER_ROOT / "tests" / "golden").rglob("*.json"))
+        files += [p for p in (REPO / "docs" / "contracts").rglob("*.json")]
+        self.assertGreater(len(files), 20)
+        for f in files:  # plans: OSM place names may name a fuel chain (D-IR-28)
+            with self.subTest(f.name):
+                self.assertEqual(hits(strings(json.loads(f.read_text("utf-8"))), DATA_DENY), [])
         bundles = list((REPO / "docs" / "contracts").rglob("*.json.gz"))
         self.assertGreater(len(bundles), 10)
         for f in bundles:
             with self.subTest(f.name):
-                self.assertEqual(hits(strings(json.loads(gzip.decompress(f.read_bytes())))), [])
+                self.assertEqual(hits(strings(json.loads(gzip.decompress(f.read_bytes()))), DATA_DENY), [])
 
     def test_catalogue_and_composed_world(self) -> None:
         """Every name in the packaged catalogue and in the composed `russia_v1` world (ADR-0012)."""

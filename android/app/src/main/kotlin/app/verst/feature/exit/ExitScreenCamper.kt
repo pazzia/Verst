@@ -240,7 +240,8 @@ private fun Panel(ui: ExitUi, a: ExitActions, modifier: Modifier) {
 @Composable
 private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, index: Int, onClick: () -> Unit) {
     val tags = tagLine(o)
-    val price = app.verst.settings.AppPrefs.money(o.priceCrewRub)
+    // CEO 02.11: a real hotel has no price in OSM — «цена — по ссылке», never «0 ₽»
+    val price = o.priceCrewRub?.let { app.verst.settings.AppPrefs.money(it) } ?: stringResource(R.string.exit_price_on_link)
     val cd = stringResource(R.string.cd_exit_option, o.name, tags, price)
     val shape = RoundedCornerShape(12.dp)
     Row(
@@ -263,10 +264,12 @@ private fun HotelOption(o: HotelOptionDto, selected: Boolean, booked: Boolean, i
         Column(Modifier.weight(1f)) {
             Txt(o.name, T.title.sm, NightText, maxLines = 1)
             if (tags.isNotEmpty()) Txt(tags, T.body.sm, NightSoft, maxLines = 2)
+            // D-IR-27: no price → the note under the name (beside it, it squeezed the name out), no «≈»
+            if (o.priceCrewRub == null && !booked) Txt(price, T.body.sm, C.camper.amber, maxLines = 2)
         }
         if (booked) {
             Txt(stringResource(R.string.exit_booked_badge), T.body.smStrong, C.camper.amber, maxLines = 1)
-        } else {
+        } else if (o.priceCrewRub != null) {
             Txt(stringResource(R.string.common_estimate_rub, price), CraftType.fieldMono.copy(fontWeight = FontWeight.W700), C.camper.amber, maxLines = 1)
         }
     }
@@ -357,7 +360,7 @@ private fun BoxScope.MockPartnerSheet(ui: ExitUi, windowH: Dp, a: ExitActions) {
         if (crew.children > 0) add(stringResource(R.string.waybill_crew_children, crew.children))
         if (crew.dog) add(stringResource(R.string.waybill_crew_dog))
     }.joinToString(stringResource(R.string.common_join_comma))
-    val total = app.verst.settings.AppPrefs.money(o.priceCrewRub * nights)
+    val total = o.priceCrewRub?.let { app.verst.settings.AppPrefs.money(it * nights) } ?: stringResource(R.string.exit_price_on_link)
     val pane = stringResource(R.string.cd_mock_partner, o.name, inDate, outDate, total)
     BottomSheet(stringResource(R.string.mock_partner_title), a::closePartner, "partner", windowH, badge = stringResource(R.string.mock_partner_badge), pane = pane) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

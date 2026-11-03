@@ -129,7 +129,7 @@ class Sprint3Test {
 
     private fun goldenRingRoad(): List<app.verst.core.model.dto.StopDto> {
         readyRoute("rr_golden_ring")
-        compose.onNodeWithTag("instruments.start").performClick()
+        compose.pressStart(flow)
         waitTag("road.total", 60_000)
         return flow.result!!.trip.daysList.flatMap { it.stops }
     }
@@ -166,7 +166,7 @@ class Sprint3Test {
         compose.waitUntil(20_000) { has("instruments.budget") }
         shot("60-instruments-ceo-budget")
         val t0 = System.nanoTime()
-        compose.onNodeWithTag("instruments.start").performClick()
+        compose.pressStart(flow)
         compose.waitUntil(60_000) { flow.top == Route.Road || flow.top == Route.NoFit }
         budgets("ceoPlanMs", (System.nanoTime() - t0) / 1_000_000)
         if (flow.top == Route.Road) {
@@ -178,10 +178,14 @@ class Sprint3Test {
             compose.onNodeWithTag("road.total").performClick()
             waitTag("waybill.sheet")
             shot("62-waybill-ceo-fitted")
-            // S3-R3: the lever lines «Подогнали под бюджет» on screen
-            waitTag("waybill.levers")
-            compose.onNodeWithTag("waybill.levers", useUnmergedTree = true).performScrollTo()
-            shot("62b-waybill-ceo-levers")
+            // S3-R3: the lever lines «Подогнали под бюджет» on screen when the engine fitted the plan. Since the
+            // real OSM hotels (D-IR-27) a night has no price and the total leaves it out, so the CEO case may fit
+            // on the first plan (no `budgetFit`, no levers); the lines stay covered by ScreensScreenshotTest.
+            if (flow.result!!.trip.budgetFit?.levers.orEmpty().isNotEmpty()) {
+                waitTag("waybill.levers")
+                compose.onNodeWithTag("waybill.levers", useUnmergedTree = true).performScrollTo()
+                shot("62b-waybill-ceo-levers")
+            }
         } else {
             waitTag("nofit")
             shot("61-nofit-ceo")
@@ -198,7 +202,7 @@ class Sprint3Test {
             assertTrue("an option that fits", i >= 0)
             compose.onNodeWithTag("nofit.option.$i").performScrollTo().performClick()
             compose.waitUntil(5_000) { flow.top == Route.Instruments }
-            compose.onNodeWithTag("instruments.start").performClick()
+            compose.pressStart(flow)
             compose.waitUntil(60_000) { flow.top == Route.Road }
             waitTag("road.total")
             val total = flow.result!!.trip.cost.totalRub
@@ -212,7 +216,7 @@ class Sprint3Test {
     @Test
     fun s32CardsAndS33FocusAfterTheCard() {
         readyRoute("rr_golden_ring")
-        compose.onNodeWithTag("instruments.start").performClick()
+        compose.pressStart(flow)
         waitTag("road.total", 60_000)
         val stops = flow.result!!.trip.daysList.flatMap { it.stops }
         val sight = stops.filter { it.kind == "sight" }[1]
@@ -230,9 +234,11 @@ class Sprint3Test {
         shot("64-road-after-card")
         val night = stops.first { it.kind == "overnight" && it.hotelOptions.isNotEmpty() }
         compose.onNodeWithTag("road.stop.${night.id}").performScrollTo().performClick()
-        waitTag("card.fictional")
+        waitTag("card.kind")
         compose.waitUntil(20_000) { has("photo.loaded") || has("photo.error") || has("photo.none") }
         if (has("photo.loaded")) compose.onNodeWithText("ФОТО РАЙОНА").assertExists()
+        // D-IR-27: the night is a real OSM hotel — never called invented
+        assertTrue("real hotel called fictional", !has("card.fictional"))
         shot("65-card-hotel-area")
         back()
         // fuel / rest rows have no click semantics (M§15.5)
@@ -322,7 +328,7 @@ class Sprint3Test {
         compose.waitUntil(30_000) { flow.figures?.stale == false }
         compose.onNodeWithTag("navigator.start").performClick()
         waitTag("instruments.start")
-        compose.onNodeWithTag("instruments.start").performClick()
+        compose.pressStart(flow)
         compose.waitUntil(90_000) { flow.top == Route.Road || flow.drive.error != null }
         assertEquals("plan: ${flow.drive.error}", Route.Road, flow.top)
         waitTag("road.total")

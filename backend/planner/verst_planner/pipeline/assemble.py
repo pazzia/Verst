@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from verst_planner.domain.enums import SIGN_BY_KIND, SignType, Source, StopKind, Tag
+from verst_planner.domain.enums import SIGN_BY_KIND, PlaceType, SignType, Source, StopKind, Tag
 from verst_planner.domain.facts import (
     HOURS_TYPES,
     Fact,
@@ -48,6 +48,16 @@ SYNTHETIC_ROADSIDE = ("syn_r_", "syn_f_")  # the catalogue's generated rest area
 REGION_STEP_KM = 10.0
 
 
+def generic_roadside(p: Place) -> bool:
+    """A roadside place with no name of its own: a synthetic one, or a real OSM fuel station or rest area
+    that OSM does not name (a chain name is shown since CEO 03.11); M9 names it by town or km."""
+    return p.id.startswith(SYNTHETIC_ROADSIDE) or (
+        p.source is Source.OSM
+        and p.type in (PlaceType.FUEL, PlaceType.REST)
+        and p.name_ru in (ru.text("synthetic.fuel"), ru.text("synthetic.rest"))
+    )
+
+
 def stop_id(day: int, idx: int) -> str:
     return f"d{day}s{idx + 1:02d}"
 
@@ -71,7 +81,7 @@ def hotel_option(
         sorted_tags(p.tags),
         price,
         n_rooms,
-        n_rooms * price,
+        None if price is None else n_rooms * price,
         p.source is not Source.OSM,
         round(lateral_km * 1000),
     )
@@ -82,6 +92,14 @@ def unknown_facts(s: PlannedStop, inp: NormalizedInput) -> tuple[Fact, ...]:
     station (E-1), a sight's ticket price (E-2), the car's fuel at a fuel stop (E-4) and, with a dog in the
     crew, whether a sight lets dogs in (E-6). Template points and anchors (no place) have none."""
     p = s.place
+    if p is not None and s.kind is StopKind.OVERNIGHT and p.source is Source.OSM:
+        # CEO 02.11: a real hotel — its price is on the booking link; its dog policy is mostly untagged
+        night: list[Fact] = []
+        if p.price_night_rub is None:
+            night.append(Fact.PRICE)
+        if inp.crew.dog and tag_state(p, Tag.DOGS_ALLOWED) is Known.UNKNOWN:
+            night.append(Fact.DOGS)
+        return tuple(night)
     if p is None or s.kind in (StopKind.START, StopKind.FINISH, StopKind.VIA, StopKind.OVERNIGHT):
         return ()
     out: list[Fact] = []
@@ -159,8 +177,9 @@ def render_stop(
     facts = unknown_facts(s, inp)
     # open data: the open-data marker («из открытых данных, уточняйте») already says it (ADR-0019 E-1)
     open_data = s.place is not None and s.place.source is Source.OSM
-    unknown_ru = None if open_data else unknown_line(facts, inp)
-    if ctx.cfg.sights.diversity and s.place is not None and s.place.id.startswith(SYNTHETIC_ROADSIDE):
+    # CEO 02.11: a night at a real hotel always says where its price is (and the dog check with a dog)
+    unknown_ru = None if open_data and s.kind is not StopKind.OVERNIGHT else unknown_line(facts, inp)
+    if ctx.cfg.sights.diversity and s.place is not None and generic_roadside(s.place):
         name = roadside_name(s.km_at, s.point, None, ctx, s.name_ru)  # M9: never a bare rest area name
     return ScheduledStop(
         id=sid or stop_id(day_no, idx),

@@ -24,11 +24,11 @@
  "response": {
   "ok": true,
   "result": {
-   "km": 544,
+   "km": 536,
    "days": 2,
-   "outcome": "no_fit",
-   "totalRub": 28300,
-   "budgetStatus": null
+   "outcome": "plan",
+   "totalRub": 11400,
+   "budgetStatus": "fits"
   },
   "ms": 0
  }

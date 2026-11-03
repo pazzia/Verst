@@ -80,12 +80,16 @@ def schedule_with_rerun(
                 _over(d, profile, budget) or _hours_broken(d, profile, ctx)
             ) and sights_stage.droppable_sights(d):
                 d.stops.pop(sights_stage.lowest_sight(d))
+        if ctx.cfg.sights.diversity:
+            sights_stage.adjacent_kind_repair(bad)  # a drop can make two sights of one kind neighbours
         for d in days:
             d.stops[:] = [s for s in d.stops if not s.auto]
         refresh_day_starts(days, profile, ctx)
         ctx.rerun += 1
         run_stages(days, corridor, inp, ctx, frozen=True)
     warnings = final_repair(days, corridor, inp, ctx)
+    if ctx.cfg.sights.diversity:
+        sights_stage.adjacent_kind_repair(days)  # the final repair may drop a sight between two of one kind
     if refresh_day_starts(days, profile, ctx):
         refresh_day_starts(days, profile, ctx)
     out: list[ScheduledDay] = []
