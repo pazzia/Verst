@@ -1,0 +1,4 @@
+# The test server's SSH host key (public), pinned for .github/workflows/test-server.yml (D-IR-29).
+# Fingerprint SHA256:Nx9n4W/tqEolQYuGF2tlZJ+15aapxwkDaKeQtjhJR5U, read by ssh-keyscan on 03.11.2026; the CEO checks it
+# on the server with: ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+212.108.82.26 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINNwAgZ8fWs9cUxOkNw6PaSK/IEpRQeKvnJZUsoDLWb0

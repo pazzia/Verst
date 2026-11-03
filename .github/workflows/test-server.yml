@@ -6,7 +6,7 @@
 #
 # Secrets (GitHub → Settings → Secrets and variables → Actions):
 #   VERST_TEST_SERVER_SSH_KEY      the private key of that forced-command key (docs/ops/test-server.md §5)
-#   VERST_TEST_SERVER_KNOWN_HOSTS  «212.108.82.26 ssh-ed25519 AAAA…» (the server's host key, no trust on first use)
+#   VERST_TEST_SERVER_KNOWN_HOSTS  optional: the pinned host key in infra/api/test-server.known_hosts wins
 #
 # Trigger from a working branch (ccr-*): add a line «<date> <action> <why>» to infra/api/test-server.request and
 # push; or Actions → test-server → Run workflow once this file is on the default branch.
@@ -65,13 +65,35 @@ jobs:
           KNOWN: ${{ secrets.VERST_TEST_SERVER_KNOWN_HOSTS }}
           ACTION: ${{ steps.pick.outputs.action }}
         run: |
-          if [ -z "$KEY" ] || [ -z "$KNOWN" ]; then
-            echo "::error::secrets VERST_TEST_SERVER_SSH_KEY / VERST_TEST_SERVER_KNOWN_HOSTS are not set (docs/ops/test-server.md §5)"
+          if [ -z "$KEY" ] || { [ -z "$KNOWN" ] && [ ! -s infra/api/test-server.known_hosts ]; }; then
+            echo "::error::the secret VERST_TEST_SERVER_SSH_KEY or the pinned host key is missing (docs/ops/test-server.md §5)"
             exit 3
           fi
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$KEY" > ~/.ssh/verst_ops && chmod 600 ~/.ssh/verst_ops
-          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          # a key pasted through a terminal may lose its line breaks or gain \r: rebuild the OpenSSH layout
+          key="$(printf '%s' "$KEY" | tr -d '\r')"
+          body="$(printf '%s' "$key" | sed -e 's/-----BEGIN OPENSSH PRIVATE KEY-----//' -e 's/-----END OPENSSH PRIVATE KEY-----//' | tr -d ' \n\t')"
+          {
+            echo "-----BEGIN OPENSSH PRIVATE KEY-----"
+            printf '%s' "$body" | fold -w 70
+            echo
+            echo "-----END OPENSSH PRIVATE KEY-----"
+          } > ~/.ssh/verst_ops
+          chmod 600 ~/.ssh/verst_ops
+          # facts that do not reveal the key: its layout as pasted, and its public fingerprint
+          echo "key as pasted: $(printf '%s\n' "$key" | grep -c .) line(s), begin line: $(printf '%s' "$key" | grep -c 'BEGIN OPENSSH PRIVATE KEY'), end line: $(printf '%s' "$key" | grep -c 'END OPENSSH PRIVATE KEY'), body chars: ${#body}"
+          ssh-keygen -y -f ~/.ssh/verst_ops 2>&1 | ssh-keygen -lf - 2>&1 | sed 's/^/  key fingerprint: /' || true
+          if [ -s infra/api/test-server.known_hosts ]; then
+            grep -v '^#' infra/api/test-server.known_hosts > ~/.ssh/known_hosts  # the pinned host key (public)
+          else
+            printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          fi
+          # public facts only (a host key is public): what the secret holds and what the server offers
+          echo "known_hosts: $(grep -c . ~/.ssh/known_hosts) line(s)"
+          awk '{print "  host=" $1 " type=" $2 " key chars=" length($3)}' ~/.ssh/known_hosts
+          ssh-keygen -lf ~/.ssh/known_hosts 2>&1 | sed 's/^/  pinned: /' || true
+          ssh-keyscan -T 10 "$HOST" 2>/dev/null | ssh-keygen -lf - 2>&1 | sed 's/^/  server offers: /' || true
+          ssh-keyscan -T 10 -t ed25519 "$HOST" 2>/dev/null | sed 's/^/  server ed25519 line: /' || true
           ssh -i ~/.ssh/verst_ops -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 \
             "root@$HOST" "$ACTION" 2>&1 | tee out.txt
           rm -f ~/.ssh/verst_ops
