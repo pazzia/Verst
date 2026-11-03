@@ -20,8 +20,9 @@ Android road-trip planner for Russia and 9 neighbour countries: a Kotlin/Compose
 - The CEO writes in Russian. Answer in Russian, plain words, no jargon without a gloss.
 - Times are Moscow time (UTC+3).
 - Recommendations go **line by line**.
-- **Server commands: one line per separate code block**, so each copies with one tap. The CEO runs them;
-  the assistant never runs anything on the CEO's server.
+- **Server commands: one line per separate code block**, so each copies with one tap. The CEO runs them.
+  The one exception (D-IR-29): Claude runs `status`, `update`, `recreate` and `errors` on the test server
+  through `.github/workflows/test-server.yml` (a forced-command key, `infra/api/server-ops.sh`). Nothing else.
 
 **Data and money**
 - **Never invent data.** Unknown is shown as «нет данных» / «не проверено», never as a default

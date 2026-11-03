@@ -1,0 +1,87 @@
+# The test server's whitelisted actions, run by Claude (D-IR-29, CEO 03.11 «будешь сам выполнять эти команды»).
+# This cloud session cannot reach the server (only HTTPS through its proxy), so a GitHub runner does: it logs in
+# with a key that may only run infra/api/server-ops.sh (a forced command in /root/.ssh/authorized_keys) and
+# passes one action: status | update | recreate | errors. Anything else stays with the CEO.
+#
+# Secrets (GitHub → Settings → Secrets and variables → Actions):
+#   VERST_TEST_SERVER_SSH_KEY      the private key of that forced-command key (docs/ops/test-server.md §5)
+#   VERST_TEST_SERVER_KNOWN_HOSTS  «212.108.82.26 ssh-ed25519 AAAA…» (the server's host key, no trust on first use)
+#
+# Trigger from a working branch (ccr-*): add a line «<date> <action> <why>» to infra/api/test-server.request and
+# push; or Actions → test-server → Run workflow once this file is on the default branch.
+name: test-server
+on:
+  push:
+    branches: ["ccr-*"]
+    paths: [infra/api/test-server.request]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "status | update | recreate | errors"
+        type: choice
+        options: [status, update, recreate, errors]
+        default: status
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-server
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ops:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      HOST: 212.108.82.26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Action
+        id: pick
+        env:
+          INPUT_ACTION: ${{ inputs.action }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = workflow_dispatch ]; then
+            a="$INPUT_ACTION"
+          else
+            a="$(grep -v '^#' infra/api/test-server.request | grep -v '^[[:space:]]*$' | tail -n 1 | awk '{print $2}')"
+          fi
+          case "$a" in
+            status|update|recreate|errors) ;;
+            *) echo "::error::unknown action «$a» (status | update | recreate | errors)"; exit 2 ;;
+          esac
+          echo "action=$a" >> "$GITHUB_OUTPUT"
+          echo "action: $a"
+      - name: Run on the test server
+        env:
+          KEY: ${{ secrets.VERST_TEST_SERVER_SSH_KEY }}
+          KNOWN: ${{ secrets.VERST_TEST_SERVER_KNOWN_HOSTS }}
+          ACTION: ${{ steps.pick.outputs.action }}
+        run: |
+          if [ -z "$KEY" ] || [ -z "$KNOWN" ]; then
+            echo "::error::secrets VERST_TEST_SERVER_SSH_KEY / VERST_TEST_SERVER_KNOWN_HOSTS are not set (docs/ops/test-server.md §5)"
+            exit 3
+          fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/verst_ops && chmod 600 ~/.ssh/verst_ops
+          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/verst_ops -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 \
+            "root@$HOST" "$ACTION" 2>&1 | tee out.txt
+          rm -f ~/.ssh/verst_ops
+      - name: Summary
+        if: ${{ !cancelled() }}
+        env:
+          ACTION: ${{ steps.pick.outputs.action }}
+        run: |
+          {
+            echo "### Test server: $ACTION"
+            echo '```'
+            cat out.txt 2>/dev/null || echo "no output"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
