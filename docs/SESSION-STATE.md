@@ -21,6 +21,12 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
   - Required: logo and «Открыть в Картах», a terms link in «О программе», and consent for Yandex collecting IP, device id and location (п. 8.1).
   - Not integrated yet: waiting for the CEO to choose the screen.
 
+- **Fuel names, unpriced hotels, roadside cafés (D-IR-28, 03.11):** green on run 41677282111 (APK 50.2 MB), seen on camper emulator shots (04b question, 150 Road, 151 waybill).
+  - Data run 3 (`bot/data-stops-3`): fuel stations keep real names (20 234 of 28 906 roadside places named); 16 461 roadside cafés within ~1 km of motorway/trunk/primary, outside towns (116 say they have a toilet, 28 say they have none).
+  - Engine: input `roadsideFood` (None = yes without children, town cafés only with a child); reasons «Обед в кафе у трассы…»; the total, the «Ночёвки» line and the shared text say «Стоимость ночёвок в отелях не учитывается».
+  - App: with a child every ПОЕХАЛИ asks «Где обедать с ребёнком?» («И придорожные кафе» / «Только в городах»); the Road footer «Итог без стоимости отелей».
+  - Brand deny-list: fuel chains are `copy:` entries (denied in app/engine copy, allowed in OSM place data).
+  - Count hotel prices once a partner (Travelpayouts / Островок) or an open source gives them.
 - **Real stops (D-IR-27, 02.11):** the plan uses only real OpenStreetMap hotels, fuel stations, rest areas and cafés.
   - Data: `catalogue_lodging` (12 530) and `catalogue_roadside` (28 902) from `data-stops.yml` run 2.
   - A night has no price («по ссылке «Забронировать»»), so the total leaves it out.
@@ -29,7 +35,6 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
   - App (c6a8936): a real hotel card has no «вымышленная» line; the hotel row shows «цена — по ссылке» under the name; the waybill «Ночёвки» shows «—» for unpriced nights; the Road footer says «Итог без ночёвок» instead of «в бюджете».
   - Green on 0.3.199 (run 41547293291), seen on the camper emulator shots (22-exit, 65-card, 151-waybill, 10-road). Emulator catalogue median: 1 668 ms against a 2 000 ms budget. APK 49.85 MB (over the 45 MB warning, under the 60 MB fail).
   - Not merged: waiting for «Сливай».
-  - Known gap: on long legs with a child, lunch is often skipped because the real cafés sit in town centres, 25–55 min off the road. Next step: roadside cafés outside towns from OSM.
 
 ## Waiting on the CEO
 
