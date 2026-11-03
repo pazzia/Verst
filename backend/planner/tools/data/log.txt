@@ -1,0 +1,72 @@
+russia-latest.osm.pbf: 4194615984 bytes, md5 725964e01f0e1a65acd92ef4e893c48d
+/home/runner/work/_temp/ru.osm.pbf: OK
+    44297 /home/runner/work/_temp/lodging.geojsonseq
+    39349 /home/runner/work/_temp/roadside.geojsonseq
+   110678 /home/runner/work/_temp/food.geojsonseq
+   174483 /home/runner/work/_temp/roads.geojsonseq
+   368807 total
+{
+ "version": "wd-20261031-osm3",
+ "report": {
+  "version": "wd-20261031-osm3",
+  "lodging": {
+   "features": 24899,
+   "kind": 92,
+   "private": 10,
+   "denied": 30,
+   "noTown": 12237,
+   "kept": 12530,
+   "byKind": {
+    "hotel": 9073,
+    "hostel": 1518,
+    "guest_house": 1521,
+    "motel": 418
+   },
+   "towns": 930,
+   "townsTotal": 1114,
+   "withPhone": 4588,
+   "withSite": 4422,
+   "dogKnown": 8
+  },
+  "roadsideFood": {
+   "features": 81025,
+   "kind": 30,
+   "private": 77,
+   "inTown": 53919,
+   "farFromRoad": 10538,
+   "kept": 16461,
+   "roadCells": 418740
+  },
+  "roadside": {
+   "features": 29450,
+   "kind": 493,
+   "private": 51,
+   "kept": 28906,
+   "byKind": {
+    "fuel": 26663,
+    "fast_food": 4606,
+    "services": 303,
+    "restaurant": 2427,
+    "cafe": 9428,
+    "rest_area": 1940
+   },
+   "named": 36695,
+   "fuelKnown": 12597,
+   "hoursKnown": 17989
+  }
+ },
+ "files": {
+  "catalogue_lodging.json.gz": {
+   "count": 12530,
+   "bytes": 316365,
+   "sha256": "dc42658d08649ffa6f3d8dab74d25659ab7b20197661c473775d9fd71894ef7e"
+  },
+  "catalogue_roadside.json.gz": {
+   "count": 45367,
+   "bytes": 763295,
+   "sha256": "34f22687efedcf1460420419d343ee9bd3fee4fa2d50baacfcd7da45aba6f3f3"
+  }
+ },
+ "townsSha256": "9ff68f042d50dc7c803c8725493f94efc82e7e5d5452889a850c9c91b460f22f"
+}
+
