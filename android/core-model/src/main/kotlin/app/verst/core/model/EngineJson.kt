@@ -244,6 +244,8 @@ data class PlanRequest(
     /** The car from the settings; null = the engine's default (8 l/100 km, АИ-95, 50 l), not sent. */
     val vehicle: VehicleInput? = null,
     val avoidTolls: Boolean = false,
+    /** CEO 03.11: lunch at roadside cafés too; null = the engine's crew default (yes without children), not sent. */
+    val roadsideFood: Boolean? = null,
     /**
      * CEO 29.10 (trips abroad, wave 1): the destination is abroad, so only the server plans it — whatever «Где строить
      * маршрут» says, and never the phone engine (it knows only Russia). Routing only: not sent to the engine.
@@ -276,6 +278,7 @@ data class PlanRequest(
                 })
             }
             if (avoidTolls) put("avoidTolls", true)
+            if (roadsideFood != null) put("roadsideFood", roadsideFood)
         }
         return body.toString()
     }

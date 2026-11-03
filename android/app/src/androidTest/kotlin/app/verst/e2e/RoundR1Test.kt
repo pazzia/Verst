@@ -108,7 +108,7 @@ class RoundR1Test {
         compose.waitUntil(5_000) { flow.selected?.id == "rr_golden_ring" }
         compose.onNodeWithTag("windshield.start").performClick()
         waitTag("instruments.start")
-        compose.onNodeWithTag("instruments.start").performClick()
+        compose.pressStart(flow)
         waitTag("road.total", 45_000)
         assertEquals(Route.Road, flow.top)
     }

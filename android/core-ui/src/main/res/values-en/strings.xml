@@ -263,6 +263,10 @@
     <string name="abroad_error_no_server">This build has no server, so a trip abroad can\'t be planned.</string>
     <string name="abroad_error_no_consent">To plan a trip abroad, agree to planning on the server.</string>
     <string name="abroad_consent_body">Only the Verst server plans trips abroad. The route points, the crew, the budget and the car go to a test server in the Netherlands. The trip is not stored there. Offline, such a trip cannot be planned.</string>
+    <string name="roadside_food_title">Where to have lunch with a child?</string>
+    <string name="roadside_food_body">In a town a café is usually better for a child. Roadside ones are closer to the road but may have no proper toilet.</string>
+    <string name="roadside_food_yes">Roadside cafés too</string>
+    <string name="roadside_food_no">Only in towns</string>
     <string name="sign_border">BORDER</string>
     <string name="road_border_open">Documents and fees</string>
     <string name="border_label">BORDER CROSSING</string>
@@ -278,7 +282,7 @@
     <string name="border_fee_counted">%1$s · counted in the sums abroad</string>
     <string name="cd_border_source">Open the source: %1$s</string>
     <string name="road_total_abroad_incomplete">Total without the costs abroad</string>
-    <string name="road_total_no_nights">Total without the nights</string>
+    <string name="road_total_no_nights">Total without the hotels</string>
     <string name="waybill_abroad_title">Abroad</string>
     <string name="waybill_abroad_country">%1$s · ≈ %2$s km</string>
     <string name="waybill_abroad_fuel">Fuel: %1$s</string>

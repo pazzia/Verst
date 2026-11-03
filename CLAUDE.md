@@ -30,7 +30,8 @@ Android road-trip planner for Russia and 9 neighbour countries: a Kotlin/Compose
 
 **Brands, keys, secrets**
 - Real brand names («Яндекс», «Google Карты», «2ГИС») only in `handoff_*` / `handoff_settings_*` strings and
-  in `exit_book_partner`. `BrandDenyListTest` checks this.
+  in `exit_book_partner`. `BrandDenyListTest` checks this. Place names from OSM data are not app copy: a fuel
+  station shows its real brand (D-IR-28).
 - The Yandex private signing key is never put into the APK.
 - Never commit `.env`, keystores, tokens or passwords. The commit guard (`tools/hooks/guard_commit.py`)
   blocks them. Secrets live in GitHub Secrets or in `.env` on the server.

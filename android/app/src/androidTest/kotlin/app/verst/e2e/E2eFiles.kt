@@ -1,5 +1,7 @@
 package app.verst.e2e
 
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import app.verst.VerstApp
 import app.verst.engine.EngineHost
@@ -40,5 +42,18 @@ object E2e {
             }
             Thread.sleep(20)
         }
+    }
+}
+
+/**
+ * ПОЕХАЛИ on Instruments. CEO 03.11: with a child aboard the app asks where lunch may be — answered here
+ * «Только в городах» (the engine's own default with a child), or «И придорожные кафе» with [roadside].
+ */
+fun androidx.compose.ui.test.junit4.ComposeTestRule.pressStart(flow: app.verst.nav.VerstFlow, roadside: Boolean = false) {
+    onNodeWithTag("instruments.start").performClick()
+    waitForIdle()
+    if (flow.roadsideFoodAsk) {
+        onNodeWithTag(if (roadside) "roadside.food.yes" else "roadside.food.no").performClick()
+        waitForIdle()
     }
 }
