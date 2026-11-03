@@ -2,6 +2,7 @@
 # This cloud session cannot reach the server (only HTTPS through its proxy), so a GitHub runner does: it logs in
 # with a key that may only run infra/api/server-ops.sh (a forced command in /root/.ssh/authorized_keys) and
 # passes one action: status | update | recreate | errors. Anything else stays with the CEO.
+# D-IR-30: Claude runs update / recreate only after asking the CEO (what will be done, the risks) and his «да».
 #
 # Secrets (GitHub → Settings → Secrets and variables → Actions):
 #   VERST_TEST_SERVER_SSH_KEY      the private key of that forced-command key (docs/ops/test-server.md §5)
