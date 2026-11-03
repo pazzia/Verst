@@ -1106,7 +1106,8 @@ class VerstFlow(
     val draftError: EngineErrorDto?
         get() = estimateError?.takeIf { it.first == draft() }?.second
 
-    internal fun record(r: PlanRequest, f: TripFigures) {
+    internal fun record(request: PlanRequest, f: TripFigures) {
+        val r = request.copy(roadsideFood = null) // keyed like `draft()`: the lunch answer does not move km
         known.removeAll { it.first == r }
         known.add(r to f)
         while (known.size > 48) known.removeAt(0)
