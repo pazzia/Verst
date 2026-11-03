@@ -7,6 +7,7 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 
 ## Now
 
+- **Test server ops (D-IR-29/30, PR #8 `a63d9e9`):** `test-server.yml` + `infra/api/server-ops.sh`; trigger = a new line in `infra/api/test-server.request` pushed on the ccr branch (or workflow_dispatch). Not live until the CEO's key setup.
 - **Release:** `main` = PR #7 (`54ada56`), «Верста» 0.3.209 at `releases/download/verst-latest/Verst-latest.apk` (03.11), all CI green. PR #6 = real stops, fuel names, roadside cafés; PR #7 = catalogue load headroom (walk grids lazy, ≤ 20 hotels per town as places).
 - **Two designs (D-IR-24):** «Кемпер» is the default, «Классический» is chosen in Settings. The `camper-ui` branch and `verst-camper-latest` (0.3.187) are frozen.
 - **Hotel booking (D-IR-25):** «Забронировать ночь» opens the real Yandex Travel search. The Travelpayouts wrapper on the server is off until `VERST_TP_*` are set.
@@ -38,7 +39,7 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 
 ## Waiting on the CEO
 
-1. Update the test server to `main` (commands in `docs/ops/test-server.md`, «Обновить сервер»).
+1. Update the test server to `main` (commands in `docs/ops/test-server.md`, «Обновить сервер»), then the one-time key setup of §5 (D-IR-29) and the two GitHub Secrets `VERST_TEST_SERVER_SSH_KEY` / `VERST_TEST_SERVER_KNOWN_HOSTS`. After that Claude runs `status` / `errors` freely and `update` / `recreate` only after asking (D-IR-30).
 2. Register at Travelpayouts and put `VERST_TP_TOKEN/MARKER/TRS` into the server `.env` (`docs/partners/hotel-affiliate.md` §4).
 3. Decisions:
    - legal entity, D-IR-09;
