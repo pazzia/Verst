@@ -1,3 +1,4 @@
 # One line per run of .github/workflows/test-server.yml: «<date> <action> <why>», the last line wins.
 # Actions: status | update | recreate | errors (infra/api/server-ops.sh). Pushing a ccr-* branch with a new line runs it.
 2026-11-03 status first check of the connection (D-IR-29)
+2026-11-03 status read the server's host key line
