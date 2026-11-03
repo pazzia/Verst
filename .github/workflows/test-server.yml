@@ -6,7 +6,7 @@
 #
 # Secrets (GitHub → Settings → Secrets and variables → Actions):
 #   VERST_TEST_SERVER_SSH_KEY      the private key of that forced-command key (docs/ops/test-server.md §5)
-#   VERST_TEST_SERVER_KNOWN_HOSTS  «212.108.82.26 ssh-ed25519 AAAA…» (the server's host key, no trust on first use)
+#   VERST_TEST_SERVER_KNOWN_HOSTS  optional: the pinned host key in infra/api/test-server.known_hosts wins
 #
 # Trigger from a working branch (ccr-*): add a line «<date> <action> <why>» to infra/api/test-server.request and
 # push; or Actions → test-server → Run workflow once this file is on the default branch.

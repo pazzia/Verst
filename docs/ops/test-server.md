@@ -232,11 +232,12 @@ cat /root/.ssh/verst_github_actions
 ```
    Скопируйте весь текст, включая строки `-----BEGIN…` и `-----END…`, в GitHub → репозиторий Verst → Settings →
    Secrets and variables → Actions → New repository secret, имя `VERST_TEST_SERVER_SSH_KEY`.
-4. Показать «отпечаток» сервера, чтобы GitHub знал, что заходит именно на него:
+4. «Отпечаток» сервера уже записан в репозитории (`infra/api/test-server.known_hosts`, ключ сервера открытый).
+   Проверить, что он ваш (должно быть `SHA256:Nx9n4W/tqEolQYuGF2tlZJ+15aapxwkDaKeQtjhJR5U`):
 ```
-echo "212.108.82.26 $(cut -d' ' -f1,2 /etc/ssh/ssh_host_ed25519_key.pub)"
+ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 ```
-   Строку целиком — во второй секрет `VERST_TEST_SERVER_KNOWN_HOSTS`.
+   Секрет `VERST_TEST_SERVER_KNOWN_HOSTS` не нужен (если файл в репозитории есть, он главнее).
 5. Удалить закрытый ключ с сервера (он теперь только в GitHub):
 ```
 rm /root/.ssh/verst_github_actions
