@@ -3,3 +3,4 @@
 2026-11-03 status first check of the connection (D-IR-29)
 2026-11-03 status read the server's host key line
 2026-11-03 status first check with the pinned host key
+2026-11-03 status after rebuilding the pasted key layout

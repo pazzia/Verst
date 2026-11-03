@@ -70,7 +70,19 @@ jobs:
             exit 3
           fi
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$KEY" > ~/.ssh/verst_ops && chmod 600 ~/.ssh/verst_ops
+          # a key pasted through a terminal may lose its line breaks or gain \r: rebuild the OpenSSH layout
+          key="$(printf '%s' "$KEY" | tr -d '\r')"
+          body="$(printf '%s' "$key" | sed -e 's/-----BEGIN OPENSSH PRIVATE KEY-----//' -e 's/-----END OPENSSH PRIVATE KEY-----//' | tr -d ' \n\t')"
+          {
+            echo "-----BEGIN OPENSSH PRIVATE KEY-----"
+            printf '%s' "$body" | fold -w 70
+            echo
+            echo "-----END OPENSSH PRIVATE KEY-----"
+          } > ~/.ssh/verst_ops
+          chmod 600 ~/.ssh/verst_ops
+          # facts that do not reveal the key: its layout as pasted, and its public fingerprint
+          echo "key as pasted: $(printf '%s\n' "$key" | grep -c .) line(s), begin line: $(printf '%s' "$key" | grep -c 'BEGIN OPENSSH PRIVATE KEY'), end line: $(printf '%s' "$key" | grep -c 'END OPENSSH PRIVATE KEY'), body chars: ${#body}"
+          ssh-keygen -y -f ~/.ssh/verst_ops 2>&1 | ssh-keygen -lf - 2>&1 | sed 's/^/  key fingerprint: /' || true
           if [ -s infra/api/test-server.known_hosts ]; then
             grep -v '^#' infra/api/test-server.known_hosts > ~/.ssh/known_hosts  # the pinned host key (public)
           else
