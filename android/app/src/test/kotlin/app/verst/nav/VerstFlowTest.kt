@@ -143,6 +143,11 @@ class VerstFlowTest {
         // Plan: the engine's trip km is used everywhere afterwards, even if an estimate had said otherwise.
         assertEquals(542, planned.trip.km) // G01: the plan's number differs from what the fake estimate said
         flow.go()
+        // CEO 03.11: with the child aboard ПОЕХАЛИ asks where lunch may be first; no plan before the answer
+        assertTrue(flow.roadsideFoodAsk)
+        assertEquals(Route.Instruments, flow.top)
+        flow.answerRoadsideFood(true)
+        assertEquals(true, flow.lastPlanRequest!!.roadsideFood)
         settle(10_000)
         assertEquals(Route.Road, flow.top)
         assertEquals(planned.trip.km, flow.result!!.trip.km)

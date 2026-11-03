@@ -311,6 +311,7 @@ class AnalyticsJourneyTest {
         settle() // the estimate of the changed request
         rec.clear()
         flow.go()
+        flow.answerRoadsideFood(false) // CEO 03.11: with a child ПОЕХАЛИ asks where lunch may be
         settle(10_000)
         assertEquals(
             mapOf("km_bucket" to "500-800", "days" to 2, "dog" to true, "children" to "1", "mood" to "fun", "ready_route_id" to "none"),
