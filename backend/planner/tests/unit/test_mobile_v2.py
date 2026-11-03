@@ -23,7 +23,7 @@ def walk(**kw: Any) -> str:
     return json.dumps({"start": YAR, **kw})
 
 
-REAL_HOTEL = "osm_n10175244917"  # «Богоявленский», Ярославль (catalogue_lodging, OSM)
+REAL_HOTEL = "osm_w63746734"  # «Спорт», Ярославль (catalogue_lodging, OSM)
 
 
 class MobileV2Test(unittest.TestCase):

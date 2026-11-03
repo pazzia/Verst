@@ -9,17 +9,26 @@ from __future__ import annotations
 
 import itertools
 import math
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 
 from verst_planner.domain.model import LatLon
 from verst_planner.geo.distance import KM_PER_DEG_LAT, KM_PER_DEG_LON_EQUATOR, haversine_km
 
 
 class GridIndex[T]:
-    def __init__(self, cell_deg: float = 0.1) -> None:
+    def __init__(
+        self, cell_deg: float = 0.1, source: Callable[[], Iterable[tuple[LatLon, T]]] | None = None
+    ) -> None:
+        """`source`: the items, read on the first query instead of now (the phone's catalogue load, M9)."""
         self.cell = cell_deg
         self._cells: dict[tuple[int, int], list[tuple[LatLon, T]]] = {}
         self.size = 0
+        self._source = source
+
+    def _fill(self) -> None:
+        if self._source is not None:
+            source, self._source = self._source, None
+            self.extend(source())
 
     def _key(self, p: LatLon) -> tuple[int, int]:
         return math.floor(p.lat / self.cell), math.floor(p.lon / self.cell)
@@ -29,8 +38,17 @@ class GridIndex[T]:
         self.size += 1
 
     def extend(self, items: Iterable[tuple[LatLon, T]]) -> None:
+        """`add` for many items, without a call per item (the catalogue load adds ~80 000)."""
+        cells, cell, floor, n = self._cells, self.cell, math.floor, 0
         for p, item in items:
-            self.add(p, item)
+            key = (floor(p.lat / cell), floor(p.lon / cell))
+            bucket = cells.get(key)
+            if bucket is None:
+                cells[key] = [(p, item)]
+            else:
+                bucket.append((p, item))
+            n += 1
+        self.size += n
 
     def _span(self, p: LatLon, radius_km: float) -> tuple[int, int, int, int]:
         dlat = radius_km / KM_PER_DEG_LAT
@@ -45,6 +63,7 @@ class GridIndex[T]:
 
     def candidates(self, p: LatLon, radius_km: float) -> Iterator[tuple[LatLon, T]]:
         """Every item in the buckets a circle of `radius_km` around `p` touches (a superset)."""
+        self._fill()
         lat0, lat1, lon0, lon1 = self._span(p, radius_km)
         for i in range(lat0, lat1 + 1):
             for j in range(lon0, lon1 + 1):
@@ -70,6 +89,7 @@ class GridIndex[T]:
         """A superset of the items within `radius_km` of the polyline (each item once, bucket order)."""
         if not line:
             return
+        self._fill()
         seen: set[tuple[int, int]] = set()
         pairs = list(itertools.pairwise(line)) if len(line) > 1 else [(line[0], line[0])]
         for a, b in pairs:

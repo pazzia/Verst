@@ -29,18 +29,18 @@
    "trip": {
     "id": null,
     "title": "Золотое кольцо · коротко",
-    "km": 536,
+    "km": 539,
     "days": 2,
     "nights": 1,
     "roundTrip": true,
     "daysList": [
      {
       "day": 1,
-      "km": 268,
-      "driveMin": 232,
+      "km": 271,
+      "driveMin": 234,
       "tz": "Europe/Moscow",
       "startAt": "2026-10-24T08:00",
-      "endAt": "2026-10-24T14:52",
+      "endAt": "2026-10-24T14:54",
       "overBudget": false,
       "stops": [
        {
@@ -71,7 +71,7 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 0,
-        "kmLeft": 536
+        "kmLeft": 539
        },
        {
         "id": "d1s02",
@@ -109,7 +109,7 @@
         ],
         "unknownRu": "Пускают ли с собакой — не проверено",
         "kmDriven": 73,
-        "kmLeft": 463,
+        "kmLeft": 466,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -264,9 +264,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:44",
+            "arriveAt": "2026-10-24T14:46",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          },
@@ -378,9 +378,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:34",
+            "arriveAt": "2026-10-24T14:36",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          },
@@ -492,9 +492,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:34",
+            "arriveAt": "2026-10-24T14:36",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          }
@@ -508,7 +508,7 @@
         ],
         "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните",
         "kmDriven": 143,
-        "kmLeft": 393,
+        "kmLeft": 396,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -643,9 +643,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:52",
+            "arriveAt": "2026-10-24T14:54",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          },
@@ -742,9 +742,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:52",
+            "arriveAt": "2026-10-24T14:54",
             "departAt": null,
-            "kmFromPrev": 59
+            "kmFromPrev": 61
            }
           ]
          },
@@ -841,9 +841,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:52",
+            "arriveAt": "2026-10-24T14:54",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          }
@@ -852,7 +852,7 @@
         "hotelOptions": [],
         "selectedHotelId": null,
         "kmDriven": 209,
-        "kmLeft": 327,
+        "kmLeft": 330,
         "parking": {
          "rub": null,
          "rubPerHour": null,
@@ -870,16 +870,16 @@
         "day": 1,
         "kind": "overnight",
         "sign": "hotel",
-        "placeId": "osm_n10175244917",
+        "placeId": "osm_n13060056001",
         "townId": "t_yaroslavl",
         "name": "Ярославль",
         "note": "не проверено",
-        "lat": 57.62102,
-        "lon": 39.88495,
-        "arriveAt": "2026-10-24T14:52",
+        "lat": 57.60927,
+        "lon": 39.89467,
+        "arriveAt": "2026-10-24T14:54",
         "departAt": null,
         "tz": "Europe/Moscow",
-        "kmFromPrev": 60,
+        "kmFromPrev": 61,
         "kmAt": 263,
         "dwellMin": 0,
         "tags": [],
@@ -891,26 +891,6 @@
         "alternativesNote": null,
         "hotelOptions": [
          {
-          "placeId": "osm_n10175244917",
-          "name": "Богоявленский",
-          "tags": [],
-          "priceNightRub": null,
-          "rooms": 2,
-          "priceCrewRub": null,
-          "verified": false,
-          "exitDistanceM": 305
-         },
-         {
-          "placeId": "osm_n12480737801",
-          "name": "Усадьба 18 век",
-          "tags": [],
-          "priceNightRub": null,
-          "rooms": 2,
-          "priceCrewRub": null,
-          "verified": false,
-          "exitDistanceM": 99
-         },
-         {
           "placeId": "osm_n13060056001",
           "name": "Moonrise",
           "tags": [],
@@ -919,15 +899,35 @@
           "priceCrewRub": null,
           "verified": false,
           "exitDistanceM": 1459
+         },
+         {
+          "placeId": "osm_n1668344241",
+          "name": "Гостевой дом Академии Пастухова",
+          "tags": [],
+          "priceNightRub": null,
+          "rooms": 2,
+          "priceCrewRub": null,
+          "verified": false,
+          "exitDistanceM": 736
+         },
+         {
+          "placeId": "osm_n3702949988",
+          "name": "City-Hostel",
+          "tags": [],
+          "priceNightRub": null,
+          "rooms": 2,
+          "priceCrewRub": null,
+          "verified": false,
+          "exitDistanceM": 470
          }
         ],
-        "selectedHotelId": "osm_n10175244917",
+        "selectedHotelId": "osm_n13060056001",
         "unknownFacts": [
          "price",
          "dogs"
         ],
         "unknownRu": "Не проверено: цена ночи, пускают ли с собакой — уточните",
-        "kmDriven": 268,
+        "kmDriven": 271,
         "kmLeft": 268
        }
       ]
@@ -951,8 +951,8 @@
         "townId": "t_yaroslavl",
         "name": "Ярославль",
         "note": null,
-        "lat": 57.62102,
-        "lon": 39.88495,
+        "lat": 57.60927,
+        "lon": 39.89467,
         "arriveAt": null,
         "departAt": "2026-10-25T09:00",
         "tz": "Europe/Moscow",
@@ -968,7 +968,7 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 268,
+        "kmDriven": 271,
         "kmLeft": 268
        },
        {
@@ -1126,7 +1126,7 @@
          "dogs"
         ],
         "unknownRu": null,
-        "kmDriven": 270,
+        "kmDriven": 273,
         "kmLeft": 266,
         "parking": {
          "rub": 0,
@@ -1542,7 +1542,7 @@
          "dogs"
         ],
         "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните",
-        "kmDriven": 332,
+        "kmDriven": 335,
         "kmLeft": 204,
         "parking": {
          "rub": 0,
@@ -1956,7 +1956,7 @@
          "dogs"
         ],
         "unknownRu": "Пускают ли с собакой — не проверено",
-        "kmDriven": 395,
+        "kmDriven": 398,
         "kmLeft": 141,
         "parking": {
          "rub": 0,
@@ -2325,7 +2325,7 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 536,
+        "kmDriven": 539,
         "kmLeft": 0,
         "parking": {
          "rub": 380,
@@ -2365,7 +2365,7 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 536,
+        "kmDriven": 539,
         "kmLeft": 0
        }
       ]
@@ -2376,8 +2376,8 @@
       {
        "key": "fuel",
        "title": "Бензин АИ-95",
-       "rub": 2660,
-       "formula": "536 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 4 регионам)",
+       "rub": 2670,
+       "formula": "539 км × 8 л/100 × ≈ 61,90 ₽ (средняя по 4 регионам)",
        "asOf": "2026-10",
        "enabled": true,
        "breakdown": [
@@ -2398,8 +2398,8 @@
         },
         {
          "label": "Ярославская область",
-         "formula": "300 км × 8 л/100 × 61,90 ₽ = 1 490 ₽",
-         "rub": 1490
+         "formula": "303 км × 8 л/100 × 61,90 ₽ = 1 500 ₽",
+         "rub": 1500
         }
        ]
       },
@@ -2506,7 +2506,7 @@
       }
      ],
      "reserveOn": true,
-     "subtotalRub": 10390,
+     "subtotalRub": 10400,
      "totalRub": 11400,
      "perPersonRub": 2300,
      "budgetRub": 20000,
@@ -2541,12 +2541,12 @@
         {
          "regionCode": "RU-YAR",
          "regionName": "Ярославская область",
-         "km": 300.209,
+         "km": 303.212,
          "priceRub": "61.90"
         }
        ],
        "asOf": "2026-10",
-       "tripKm": 536
+       "tripKm": 539
       },
       "tolls": [],
       "nightsUnpriced": 1,
@@ -3834,7 +3834,7 @@
       ],
       [
        "RU-YAR",
-       300.209
+       303.212
       ]
      ],
      "tollHits": [],
@@ -3938,13 +3938,13 @@
          "stopId": "d1s05",
          "kind": "overnight",
          "kmAt": 263.0,
-         "detourKm": 0.7917044996877165,
-         "detourMin": 3,
+         "detourKm": 3.7944196710348366,
+         "detourMin": 8,
          "dwellMin": 0,
          "fixed": true,
          "auto": false,
          "score": 28.5,
-         "placeId": "osm_n10175244917",
+         "placeId": "osm_n13060056001",
          "regionCode": "RU-YAR",
          "reasonKey": "",
          "reasonParams": [],
@@ -21945,7 +21945,7 @@
      ]
     }
    },
-   "shareText": "Золотое кольцо · коротко · 536 км · 2 дня\nДень 1 · 268 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Русь\n14:52 Ярославль\nДень 2 · 268 км\n09:00 Ярославль\n09:04 Детская площадка для малышей\n10:18 Набережная озера Неро\n11:41 Никитский монастырь\n14:28 Ёж и Устрица\n15:28 Москва\nИтого ≈ 11 400 ₽ на 5 чел.\nСтоимость ночёвок в отелях не учитывается.",
+   "shareText": "Золотое кольцо · коротко · 539 км · 2 дня\nДень 1 · 271 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Русь\n14:54 Ярославль\nДень 2 · 268 км\n09:00 Ярославль\n09:04 Детская площадка для малышей\n10:18 Набережная озера Неро\n11:41 Никитский монастырь\n14:28 Ёж и Устрица\n15:28 Москва\nИтого ≈ 11 400 ₽ на 5 чел.\nСтоимость ночёвок в отелях не учитывается.",
    "pricesMonthRu": "октябрь",
    "pricesYear": "2026",
    "townPrepRu": {

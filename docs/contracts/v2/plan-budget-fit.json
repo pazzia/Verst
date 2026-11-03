@@ -36,11 +36,11 @@
     "daysList": [
      {
       "day": 1,
-      "km": 268,
-      "driveMin": 232,
+      "km": 271,
+      "driveMin": 234,
       "tz": "Europe/Moscow",
       "startAt": "2026-10-24T08:00",
-      "endAt": "2026-10-24T14:52",
+      "endAt": "2026-10-24T14:54",
       "overBudget": false,
       "stops": [
        {
@@ -264,9 +264,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:44",
+            "arriveAt": "2026-10-24T14:46",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          },
@@ -376,9 +376,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:59",
+            "arriveAt": "2026-10-24T15:01",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          },
@@ -490,9 +490,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:34",
+            "arriveAt": "2026-10-24T14:36",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          }
@@ -641,9 +641,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:52",
+            "arriveAt": "2026-10-24T14:54",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          },
@@ -740,9 +740,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:52",
+            "arriveAt": "2026-10-24T14:54",
             "departAt": null,
-            "kmFromPrev": 59
+            "kmFromPrev": 61
            }
           ]
          },
@@ -839,9 +839,9 @@
            {
             "stopId": "d1s05",
             "seq": 5,
-            "arriveAt": "2026-10-24T14:52",
+            "arriveAt": "2026-10-24T14:54",
             "departAt": null,
-            "kmFromPrev": 60
+            "kmFromPrev": 61
            }
           ]
          }
@@ -868,16 +868,16 @@
         "day": 1,
         "kind": "overnight",
         "sign": "hotel",
-        "placeId": "osm_n10175244917",
+        "placeId": "osm_n13060056001",
         "townId": "t_yaroslavl",
         "name": "Ярославль",
         "note": "не проверено",
-        "lat": 57.62102,
-        "lon": 39.88495,
-        "arriveAt": "2026-10-24T14:52",
+        "lat": 57.60927,
+        "lon": 39.89467,
+        "arriveAt": "2026-10-24T14:54",
         "departAt": null,
         "tz": "Europe/Moscow",
-        "kmFromPrev": 60,
+        "kmFromPrev": 61,
         "kmAt": 263,
         "dwellMin": 0,
         "tags": [],
@@ -889,26 +889,6 @@
         "alternativesNote": null,
         "hotelOptions": [
          {
-          "placeId": "osm_n10175244917",
-          "name": "Богоявленский",
-          "tags": [],
-          "priceNightRub": null,
-          "rooms": 2,
-          "priceCrewRub": null,
-          "verified": false,
-          "exitDistanceM": 305
-         },
-         {
-          "placeId": "osm_n12480737801",
-          "name": "Усадьба 18 век",
-          "tags": [],
-          "priceNightRub": null,
-          "rooms": 2,
-          "priceCrewRub": null,
-          "verified": false,
-          "exitDistanceM": 99
-         },
-         {
           "placeId": "osm_n13060056001",
           "name": "Moonrise",
           "tags": [],
@@ -917,26 +897,46 @@
           "priceCrewRub": null,
           "verified": false,
           "exitDistanceM": 1459
+         },
+         {
+          "placeId": "osm_n1668344241",
+          "name": "Гостевой дом Академии Пастухова",
+          "tags": [],
+          "priceNightRub": null,
+          "rooms": 2,
+          "priceCrewRub": null,
+          "verified": false,
+          "exitDistanceM": 735
+         },
+         {
+          "placeId": "osm_n3702949988",
+          "name": "City-Hostel",
+          "tags": [],
+          "priceNightRub": null,
+          "rooms": 2,
+          "priceCrewRub": null,
+          "verified": false,
+          "exitDistanceM": 469
          }
         ],
-        "selectedHotelId": "osm_n10175244917",
+        "selectedHotelId": "osm_n13060056001",
         "unknownFacts": [
          "price",
          "dogs"
         ],
         "unknownRu": "Не проверено: цена ночи, пускают ли с собакой — уточните",
-        "kmDriven": 268,
-        "kmLeft": 493
+        "kmDriven": 271,
+        "kmLeft": 490
        }
       ]
      },
      {
       "day": 2,
-      "km": 265,
-      "driveMin": 252,
+      "km": 262,
+      "driveMin": 249,
       "tz": "Europe/Moscow",
       "startAt": "2026-10-25T09:00",
-      "endAt": "2026-10-25T16:37",
+      "endAt": "2026-10-25T16:34",
       "overBudget": false,
       "stops": [
        {
@@ -949,8 +949,8 @@
         "townId": "t_yaroslavl",
         "name": "Ярославль",
         "note": null,
-        "lat": 57.62102,
-        "lon": 39.88495,
+        "lat": 57.60927,
+        "lon": 39.89467,
         "arriveAt": null,
         "departAt": "2026-10-25T09:00",
         "tz": "Europe/Moscow",
@@ -966,8 +966,8 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 268,
-        "kmLeft": 493
+        "kmDriven": 271,
+        "kmLeft": 490
        },
        {
         "id": "d2s02",
@@ -1113,9 +1113,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:21",
+            "arriveAt": "2026-10-25T16:18",
             "departAt": null,
-            "kmFromPrev": 5
+            "kmFromPrev": 4
            }
           ]
          },
@@ -1234,9 +1234,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:21",
+            "arriveAt": "2026-10-25T16:18",
             "departAt": null,
-            "kmFromPrev": 5
+            "kmFromPrev": 4
            }
           ]
          },
@@ -1257,7 +1257,7 @@
            "placeId": "Q4504840",
            "priceRub": "61.90",
            "regionName": "Ярославская область",
-           "tripKmDelta": -1,
+           "tripKmDelta": 0,
            "parkingRub": 0,
            "parkingRubPerHour": 0,
            "parkingHours": 1,
@@ -1352,9 +1352,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:08",
+            "arriveAt": "2026-10-25T16:05",
             "departAt": null,
-            "kmFromPrev": 5
+            "kmFromPrev": 4
            }
           ]
          }
@@ -1367,8 +1367,8 @@
          "dogs"
         ],
         "unknownRu": "Не проверено: часы работы, пускают ли с собакой — уточните",
-        "kmDriven": 271,
-        "kmLeft": 490,
+        "kmDriven": 274,
+        "kmLeft": 487,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -1420,8 +1420,8 @@
          "dogs"
         ],
         "unknownRu": "Пускают ли с собакой — не проверено",
-        "kmDriven": 346,
-        "kmLeft": 415,
+        "kmDriven": 349,
+        "kmLeft": 412,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -1480,7 +1480,7 @@
            "placeId": "n4833038185",
            "priceRub": "61.60",
            "regionName": "Ивановская область",
-           "tripKmDelta": 0,
+           "tripKmDelta": 1,
            "parkingRub": 0,
            "parkingRubPerHour": 0,
            "parkingHours": 1,
@@ -1567,9 +1567,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:37",
+            "arriveAt": "2026-10-25T16:34",
             "departAt": null,
-            "kmFromPrev": 5
+            "kmFromPrev": 4
            }
           ]
          },
@@ -1673,9 +1673,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:40",
+            "arriveAt": "2026-10-25T16:37",
             "departAt": null,
-            "kmFromPrev": 5
+            "kmFromPrev": 4
            }
           ]
          },
@@ -1696,7 +1696,7 @@
            "placeId": "n7809798621",
            "priceRub": "61.60",
            "regionName": "Ивановская область",
-           "tripKmDelta": 1,
+           "tripKmDelta": 2,
            "parkingRub": 0,
            "parkingRubPerHour": 0,
            "parkingHours": 1,
@@ -1779,9 +1779,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:41",
+            "arriveAt": "2026-10-25T16:38",
             "departAt": null,
-            "kmFromPrev": 5
+            "kmFromPrev": 4
            }
           ]
          }
@@ -1789,8 +1789,8 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 451,
-        "kmLeft": 310,
+        "kmDriven": 454,
+        "kmLeft": 307,
         "parking": {
          "rub": 0,
          "rubPerHour": 0,
@@ -1918,9 +1918,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:42",
+            "arriveAt": "2026-10-25T16:39",
             "departAt": null,
-            "kmFromPrev": 5
+            "kmFromPrev": 4
            }
           ]
          },
@@ -1941,7 +1941,7 @@
            "placeId": "osm_n694059803",
            "priceRub": "61.40",
            "regionName": "Владимирская область",
-           "tripKmDelta": 1
+           "tripKmDelta": 2
           },
           "stop": {
            "id": "d2s05",
@@ -2014,9 +2014,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:41",
+            "arriveAt": "2026-10-25T16:38",
             "departAt": null,
-            "kmFromPrev": 6
+            "kmFromPrev": 5
            }
           ]
          },
@@ -2037,7 +2037,7 @@
            "placeId": "osm_n1446383451",
            "priceRub": "61.60",
            "regionName": "Ивановская область",
-           "tripKmDelta": 9
+           "tripKmDelta": 10
           },
           "stop": {
            "id": "d2s05",
@@ -2109,9 +2109,9 @@
            {
             "stopId": "d2s06",
             "seq": 11,
-            "arriveAt": "2026-10-25T16:53",
+            "arriveAt": "2026-10-25T16:50",
             "departAt": null,
-            "kmFromPrev": 56
+            "kmFromPrev": 54
            }
           ]
          }
@@ -2119,8 +2119,8 @@
         "alternativesNote": null,
         "hotelOptions": [],
         "selectedHotelId": null,
-        "kmDriven": 526,
-        "kmLeft": 235,
+        "kmDriven": 529,
+        "kmLeft": 232,
         "amenities": [
          "wc",
          "24h"
@@ -2132,16 +2132,16 @@
         "day": 2,
         "kind": "overnight",
         "sign": "hotel",
-        "placeId": "osm_n1010502869",
+        "placeId": "osm_n11672279969",
         "townId": "t_suzdal",
         "name": "Суздаль",
         "note": "не проверено",
-        "lat": 56.42966,
-        "lon": 40.43224,
-        "arriveAt": "2026-10-25T16:37",
+        "lat": 56.41278,
+        "lon": 40.44518,
+        "arriveAt": "2026-10-25T16:34",
         "departAt": null,
         "tz": "Europe/Moscow",
-        "kmFromPrev": 5,
+        "kmFromPrev": 4,
         "kmAt": 523,
         "dwellMin": 0,
         "tags": [],
@@ -2152,16 +2152,6 @@
         "alternatives": [],
         "alternativesNote": null,
         "hotelOptions": [
-         {
-          "placeId": "osm_n1010502869",
-          "name": "У Каменки",
-          "tags": [],
-          "priceNightRub": null,
-          "rooms": 2,
-          "priceCrewRub": null,
-          "verified": false,
-          "exitDistanceM": 1105
-         },
          {
           "placeId": "osm_n11672279969",
           "name": "Пушкарская слобода",
@@ -2181,9 +2171,19 @@
           "priceCrewRub": null,
           "verified": false,
           "exitDistanceM": 358
+         },
+         {
+          "placeId": "osm_n11817291332",
+          "name": "Царедворье",
+          "tags": [],
+          "priceNightRub": null,
+          "rooms": 2,
+          "priceCrewRub": null,
+          "verified": false,
+          "exitDistanceM": 136
          }
         ],
-        "selectedHotelId": "osm_n1010502869",
+        "selectedHotelId": "osm_n11672279969",
         "unknownFacts": [
          "price",
          "dogs"
@@ -2213,8 +2213,8 @@
         "townId": "t_suzdal",
         "name": "Суздаль",
         "note": null,
-        "lat": 56.42966,
-        "lon": 40.43224,
+        "lat": 56.41278,
+        "lon": 40.44518,
         "arriveAt": null,
         "departAt": "2026-10-26T09:00",
         "tz": "Europe/Moscow",
@@ -3885,7 +3885,7 @@
       {
        "key": "fuel",
        "title": "Бензин АИ-95",
-       "rub": 3760,
+       "rub": 3770,
        "formula": "761 км × 8 л/100 × ≈ 61,80 ₽ (средняя по 6 регионам)",
        "asOf": "2026-10",
        "enabled": true,
@@ -3902,13 +3902,13 @@
         },
         {
          "label": "Владимирская область",
-         "formula": "139 км × 8 л/100 × 61,40 ₽ = 680 ₽",
-         "rub": 680
+         "formula": "137 км × 8 л/100 × 61,40 ₽ = 670 ₽",
+         "rub": 670
         },
         {
          "label": "Ярославская область",
-         "formula": "196 км × 8 л/100 × 61,90 ₽ = 970 ₽",
-         "rub": 970
+         "formula": "199 км × 8 л/100 × 61,90 ₽ = 990 ₽",
+         "rub": 990
         },
         {
          "label": "Костромская область",
@@ -4051,7 +4051,7 @@
       }
      ],
      "reserveOn": true,
-     "subtotalRub": 22390,
+     "subtotalRub": 22400,
      "totalRub": 24600,
      "perPersonRub": 4900,
      "budgetRub": 30000,
@@ -4080,13 +4080,13 @@
         {
          "regionCode": "RU-VLA",
          "regionName": "Владимирская область",
-         "km": 139.05,
+         "km": 136.603,
          "priceRub": "61.40"
         },
         {
          "regionCode": "RU-YAR",
          "regionName": "Ярославская область",
-         "km": 195.972,
+         "km": 198.975,
          "priceRub": "61.90"
         },
         {
@@ -5866,11 +5866,11 @@
       ],
       [
        "RU-VLA",
-       139.05
+       136.603
       ],
       [
        "RU-YAR",
-       195.972
+       198.975
       ],
       [
        "RU-KOS",
@@ -5982,13 +5982,13 @@
          "stopId": "d1s05",
          "kind": "overnight",
          "kmAt": 263.0,
-         "detourKm": 0.7917044996877275,
-         "detourMin": 3,
+         "detourKm": 3.794419671034841,
+         "detourMin": 8,
          "dwellMin": 0,
          "fixed": true,
          "auto": false,
          "score": 28.5,
-         "placeId": "osm_n10175244917",
+         "placeId": "osm_n13060056001",
          "regionCode": "RU-YAR",
          "reasonKey": "",
          "reasonParams": [],
@@ -6121,13 +6121,13 @@
          "stopId": "d2s06",
          "kind": "overnight",
          "kmAt": 523.0,
-         "detourKm": 2.873065858369984,
-         "detourMin": 6,
+         "detourKm": 0.4257496280210869,
+         "detourMin": 0,
          "dwellMin": 0,
          "fixed": true,
          "auto": false,
          "score": 22.5,
-         "placeId": "osm_n1010502869",
+         "placeId": "osm_n11672279969",
          "regionCode": "RU-VLA",
          "reasonKey": "",
          "reasonParams": [],
@@ -27782,7 +27782,7 @@
      ]
     }
    },
-   "shareText": "Золотое кольцо · 761 км · 3 дня\nДень 1 · 268 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Русь\n14:52 Ярославль\nДень 2 · 265 км\n09:00 Ярославль\n09:04 Стрелка и Волжская набережная\n11:01 Ипатьевский монастырь\n14:10 Bazar кулинария\n16:21 Лукойл\n16:37 Суздаль\nДень 3 · 228 км\n09:00 Суздаль\n09:02 Собор Рождества Пресвятой Богородицы\n09:58 Смотровая у Успенского собора\n11:43 Свято-Введенский монастырь\n13:56 The Бык\n14:56 Москва\nИтого ≈ 24 600 ₽ на 5 чел.\nСтоимость ночёвок в отелях не учитывается.",
+   "shareText": "Золотое кольцо · 761 км · 3 дня\nДень 1 · 271 км\n08:00 Москва\n09:05 Троице-Сергиева лавра\n11:35 Плещеево озеро\n13:02 Русь\n14:54 Ярославль\nДень 2 · 262 км\n09:00 Ярославль\n09:04 Стрелка и Волжская набережная\n11:01 Ипатьевский монастырь\n14:10 Bazar кулинария\n16:21 Лукойл\n16:34 Суздаль\nДень 3 · 228 км\n09:00 Суздаль\n09:02 Собор Рождества Пресвятой Богородицы\n09:58 Смотровая у Успенского собора\n11:43 Свято-Введенский монастырь\n13:56 The Бык\n14:56 Москва\nИтого ≈ 24 600 ₽ на 5 чел.\nСтоимость ночёвок в отелях не учитывается.",
    "pricesMonthRu": "октябрь",
    "pricesYear": "2026",
    "townPrepRu": {

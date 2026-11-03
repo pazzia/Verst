@@ -174,6 +174,8 @@ REAL_STOPS_FIXTURE_TYPES = frozenset({PlaceType.LODGING, PlaceType.FOOD, PlaceTy
 were made for the demo (CEO 02.11: real hotels, not invented ones)."""
 FOOD_DWELL_MIN = 60
 FOOD_TRIP_CAP = 12
+LODGING_TOWN_CAP = 20
+"""Hotels per town kept as places (03.11, the phone's catalogue load: 12 530 → ~6 000); a night offers 2-3."""
 """Cafés per town a trip's lunch can stop at (the walk reads every café from the catalogue itself)."""
 FOOD_TRIP_ORDER = {"restaurant": 0, "cafe": 1, "food_court": 2, "fast_food": 3}
 ROADSIDE_TYPE = {
@@ -449,14 +451,30 @@ def _add_real_stops(
     """Real lodgings and lunch places of the towns, and the roadside places of the country (CEO 02.11)."""
     lodgings, roadside = stops
     count: dict[str, int] = {}
+    by_town_l: dict[str, list[CatLodging]] = {}
     for lo in lodgings:
         tid = out.town_of_qid.get(lo.town)
         if tid is None:
             continue
-        places[lo.id] = lodging_place(lo, tid, towns[tid].region_code)
-        out.lodging_info[lo.id] = lo
+        by_town_l.setdefault(tid, []).append(lo)
         count[tid] = count.get(tid, 0) + 1
-    for tid, t in list(towns.items()):
+    for tid, hotels in by_town_l.items():
+        if len(hotels) > LODGING_TOWN_CAP:
+            # dogs confirmed first, a known «no» last; then the ones OSM says most about; then the centre
+            centre = towns[tid].point
+            hotels.sort(
+                key=lambda lo: (
+                    lo.dog is not True,
+                    lo.dog is False,
+                    -((lo.stars is not None) + (lo.site is not None) + (lo.phone is not None)),
+                    (lo.point.lat - centre.lat) ** 2 + (lo.point.lon - centre.lon) ** 2,
+                    lo.id,
+                )
+            )
+        for lo in hotels[:LODGING_TOWN_CAP]:
+            places[lo.id] = lodging_place(lo, tid, towns[tid].region_code)
+            out.lodging_info[lo.id] = lo
+    for tid, t in list(towns.items()):  # the town's real hotel count (overnight town choice), not the cap
         n = count.get(tid, 0)
         if t.lodging_count_cache != n:
             towns[tid] = dataclasses.replace(t, lodging_count_cache=n)

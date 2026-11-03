@@ -76,19 +76,16 @@ class IndexedPlaceRepository(FakePlaceRepository):
         self.place_index: GridIndex[Place] = GridIndex(0.1)
         self.town_index: GridIndex[Town] = GridIndex(0.25)
         self.lodgings: dict[str, list[Place]] = {}
-        for p in sorted(world.places.values(), key=lambda p: p.id):
-            if p.status is not PlaceStatus.LIVE:
-                continue
-            self.place_index.add(p.point, p)
+        live = [p for p in sorted(world.places.values(), key=lambda p: p.id) if p.status is PlaceStatus.LIVE]
+        self.place_index.extend((p.point, p) for p in live)
+        for p in live:
             if p.type is PlaceType.LODGING and p.town_id is not None:
                 self.lodgings.setdefault(p.town_id, []).append(p)
-        for t in sorted(world.towns.values(), key=lambda t: t.id):
-            self.town_index.add(t.point, t)
+        self.town_index.extend((t.point, t) for t in sorted(world.towns.values(), key=lambda t: t.id))
         self.graph: GridIndex[bool] = GridIndex(0.25)
         for e in world.edges:
             n = max(1, round(e.km / 5.0))
-            for k in range(n + 1):
-                self.graph.add(point_on_edge(e.pa, e.pb, k / n), True)
+            self.graph.extend((point_on_edge(e.pa, e.pb, k / n), True) for k in range(n + 1))
 
     # ------------------------------------------------------------------ corridor
     def places_in_corridor(self, q: CorridorQuery) -> list[Place]:
@@ -113,8 +110,7 @@ class IndexedPlaceRepository(FakePlaceRepository):
         if self._roadside_by_id is None:
             rows = self._roadside_loader()
             self._roadside_by_id = {r.id: r for r in rows}
-            for r in rows:
-                self._roadside_index.add(r.point, r)
+            self._roadside_index.extend((r.point, r) for r in rows)
         return self._roadside_by_id
 
     def _real_roadside(self, r: CatRoadside) -> Place:

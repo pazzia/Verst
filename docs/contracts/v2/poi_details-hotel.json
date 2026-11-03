@@ -3,20 +3,20 @@
   "function": "poi_details",
   "args": {
    "world": "russia_v1",
-   "place_id": "osm_n10175244917"
+   "place_id": "osm_w63746734"
   }
  },
  "response": {
   "ok": true,
   "result": {
-   "id": "osm_n10175244917",
+   "id": "osm_w63746734",
    "kind": "hotel",
    "poiKind": "hotel",
-   "nameRu": "Богоявленский",
+   "nameRu": "Спорт",
    "descriptionRu": null,
    "townName": "Ярославль",
-   "lat": 57.62102,
-   "lon": 39.88495,
+   "lat": 57.58027,
+   "lon": 39.84175,
    "image": {
     "card": "https://commons.wikimedia.org/wiki/Special:FilePath/Znamenskaya_Tower_in_Yaroslavl_01.jpg?width=800",
     "thumb": "https://commons.wikimedia.org/wiki/Special:FilePath/Znamenskaya_Tower_in_Yaroslavl_01.jpg?width=400",
@@ -32,9 +32,9 @@
    },
    "hours": null,
    "ticket": null,
-   "website": "https://hotelbg.ru/",
-   "phone": null,
-   "stars": null,
+   "website": "http://sport.yaroslavl.ru/",
+   "phone": "+7 4852 447285",
+   "stars": 3,
    "isFictional": false,
    "attributionRu": [
     "© участники OpenStreetMap"
