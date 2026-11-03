@@ -1036,16 +1036,11 @@ def _load_catalogue() -> dict[str, Any]:
         lodgings = load_packaged_lodgings(cat)
         cw = compose(base.world, cat, stops=(lodgings, load_packaged_roadside) if lodgings else None)
         ports = build_catalogue_ports(cw, _CLOCK.now())
-        bars: GridIndex[str] = GridIndex(0.05)
-        for b in cat.bars:
-            bars.add(b.point, b.id)
-        food: GridIndex[str] = GridIndex(0.05)
-        for f in cat.food:
-            food.add(f.point, f.id)
+        # the city-walk indexes fill on the first walk, not with the catalogue (the emulator budget, 03.11)
+        bars: GridIndex[str] = GridIndex(0.05, lambda: ((b.point, b.id) for b in cat.bars))
+        food: GridIndex[str] = GridIndex(0.05, lambda: ((f.point, f.id) for f in cat.food))
         park_list = load_packaged_parks(cat)
-        parks: GridIndex[str] = GridIndex(0.05)
-        for pk in park_list:
-            parks.add(pk.point, pk.id)
+        parks: GridIndex[str] = GridIndex(0.05, lambda: ((pk.point, pk.id) for pk in park_list))
     finally:
         if was_enabled:
             gc.enable()
