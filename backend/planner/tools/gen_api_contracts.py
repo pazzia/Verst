@@ -321,7 +321,7 @@ call(
 
 call("poi_details-sight", "poi_details", world=R, place_id=poi_id("Эрмитаж", SPB))
 call("poi_details-fixture-sight", "poi_details", world=R, place_id="pl_yar_ilya")
-call("poi_details-hotel", "poi_details", world=R, place_id="osm_n10175244917")  # a real OSM hotel
+call("poi_details-hotel", "poi_details", world=R, place_id="osm_w63746734")  # a real OSM hotel
 call("poi_details-bar", "poi_details", world=R, place_id=bar_in(YAR))
 call("poi_details-not-found", "poi_details", world=R, place_id=FUEL_ID)
 # ADR-0019 E-1 / E-2: a card whose opening hours nobody checked, and one whose ticket price is unknown
