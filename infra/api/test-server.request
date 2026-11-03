@@ -1,0 +1,2 @@
+# One line per run of .github/workflows/test-server.yml: «<date> <action> <why>», the last line wins.
+# Actions: status | update | recreate | errors (infra/api/server-ops.sh). Pushing a ccr-* branch with a new line runs it.

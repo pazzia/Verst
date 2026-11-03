@@ -196,6 +196,59 @@ bash /srv/verst/src/infra/routing/fetch_graph.sh
 $C --profile routing up -d --force-recreate graphhopper
 ```
 
+## 5. Как Claude сам выполняет команды на сервере (D-IR-29)
+
+Облачная сессия Claude не может зайти на сервер напрямую: ей открыт только HTTPS через прокси. Поэтому команды
+выполняет GitHub Actions (сценарий `test-server.yml`) с отдельным ключом. Этот ключ умеет запускать только скрипт
+`infra/api/server-ops.sh` и только четыре действия:
+
+| Действие | Что делает |
+| --- | --- |
+| `status` | ветка и коммит на сервере, состояние контейнеров, ответ `/healthz` |
+| `update` | `git pull`, пересборка и перезапуск API, ожидание `/healthz` |
+| `recreate` | перезапуск API с текущим `.env` (после того как вы его поправили) |
+| `errors` | строки WARNING / ERROR из журнала API за 2 часа |
+
+Всё остальное (правка `.env`, база, граф дорог, nginx) по-прежнему делаете вы.
+
+**Перед каждым деплоем (`update`, `recreate`) Claude спрашивает CEO (D-IR-30)** и пишет по пунктам: что будет
+сделано (какие изменения попадут на сервер, что поменяется для приложения и тестировщиков) и какие риски (сколько
+сервер не будет отвечать, что может сломаться, как откатить). Запускает только после ответа «да». `status` и
+`errors` только читают и разрешения не требуют.
+
+### Разовая настройка (на сервере, после обновления кода до `main`)
+
+1. Создать отдельный ключ без пароля (только для GitHub Actions):
+```
+ssh-keygen -t ed25519 -N "" -C verst-github-actions -f /root/.ssh/verst_github_actions
+```
+2. Разрешить этому ключу только скрипт:
+```
+echo "restrict,command=\"/srv/verst/src/infra/api/server-ops.sh\" $(cat /root/.ssh/verst_github_actions.pub)" >> /root/.ssh/authorized_keys
+```
+3. Показать закрытый ключ, чтобы скопировать его в GitHub (не присылайте его в чат):
+```
+cat /root/.ssh/verst_github_actions
+```
+   Скопируйте весь текст, включая строки `-----BEGIN…` и `-----END…`, в GitHub → репозиторий Verst → Settings →
+   Secrets and variables → Actions → New repository secret, имя `VERST_TEST_SERVER_SSH_KEY`.
+4. Показать «отпечаток» сервера, чтобы GitHub знал, что заходит именно на него:
+```
+echo "212.108.82.26 $(cut -d' ' -f1,2 /etc/ssh/ssh_host_ed25519_key.pub)"
+```
+   Строку целиком — во второй секрет `VERST_TEST_SERVER_KNOWN_HOSTS`.
+5. Удалить закрытый ключ с сервера (он теперь только в GitHub):
+```
+rm /root/.ssh/verst_github_actions
+```
+
+### Как отключить
+
+Удалить строку `verst-github-actions` из `/root/.ssh/authorized_keys`:
+```
+sed -i '/verst-github-actions/d' /root/.ssh/authorized_keys
+```
+
 ## 4. Где подробнее
 
 - Сервер и безопасность: `infra/api/README.md`, ADR-0020.

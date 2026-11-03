@@ -7,7 +7,7 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 
 ## Now
 
-- **Release:** `main` = PR #5 (`ed00467`), «Верста» 0.3.193 at `releases/download/verst-latest/Verst-latest.apk`, all CI green.
+- **Release:** `main` = PR #7 (`54ada56`), «Верста» 0.3.209 at `releases/download/verst-latest/Verst-latest.apk` (03.11), all CI green. PR #6 = real stops, fuel names, roadside cafés; PR #7 = catalogue load headroom (walk grids lazy, ≤ 20 hotels per town as places).
 - **Two designs (D-IR-24):** «Кемпер» is the default, «Классический» is chosen in Settings. The `camper-ui` branch and `verst-camper-latest` (0.3.187) are frozen.
 - **Hotel booking (D-IR-25):** «Забронировать ночь» opens the real Yandex Travel search. The Travelpayouts wrapper on the server is off until `VERST_TP_*` are set.
 - **Test server (NL, `docs/ops/test-server.md`):** GraphHopper with the Russia graph is on since 01.11 (`VERST_ROUTING=graphhopper`). The server has not yet been updated to PR #5: the CEO has the commands.
