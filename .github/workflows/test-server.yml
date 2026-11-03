@@ -72,6 +72,11 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "$KEY" > ~/.ssh/verst_ops && chmod 600 ~/.ssh/verst_ops
           printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          # public facts only (a host key is public): what the secret holds and what the server offers
+          echo "known_hosts: $(grep -c . ~/.ssh/known_hosts) line(s)"
+          awk '{print "  host=" $1 " type=" $2 " key chars=" length($3)}' ~/.ssh/known_hosts
+          ssh-keygen -lf ~/.ssh/known_hosts 2>&1 | sed 's/^/  pinned: /' || true
+          ssh-keyscan -T 10 "$HOST" 2>/dev/null | ssh-keygen -lf - 2>&1 | sed 's/^/  server offers: /' || true
           ssh -i ~/.ssh/verst_ops -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 \
             "root@$HOST" "$ACTION" 2>&1 | tee out.txt
           rm -f ~/.ssh/verst_ops
