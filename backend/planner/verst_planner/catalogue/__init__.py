@@ -82,12 +82,15 @@ PARK_COLS = ("id", "name", "kind", "lat", "lon", "town", "area", "poi", "hours")
 LODGING_FILE = "catalogue_lodging.json.gz"
 LODGING_KINDS = ("hotel", "motel", "guest_house", "hostel")
 LODGING_COLS = ("id", "name", "kind", "lat", "lon", "town", "stars", "rooms", "dog", "phone", "site")
-# `catalogue_roadside`: every fuel station, rest area and highway services place in the country (no town).
-# `name` is null for an unnamed one or when its name is a deny-listed brand (the app shows a generic name).
+# `catalogue_roadside`: every fuel station, rest area and highway services place in the country (no town), and
+# (CEO 03.11) the named cafés, restaurants and fast food outside the catalogue towns within ~1 km of a
+# motorway, trunk or primary road. `name` is the OSM name (or brand), a real chain name included (CEO 03.11),
+# null when the place has none (the app shows a generic name).
 # `fuel` / `nofuel`: bit masks of the fuels tagged yes / no (1 = АИ-92, 2 = АИ-95, 4 = ДТ; `FUEL_BITS`);
 # `hours` = OSM opening_hours or null; `wc` / `cafe` 1 / 0 / null.
 ROADSIDE_FILE = "catalogue_roadside.json.gz"
-ROADSIDE_KINDS = ("fuel", "rest_area", "services")
+ROADSIDE_KINDS = ("fuel", "rest_area", "services", "cafe", "restaurant", "fast_food")
+ROADSIDE_FOOD_KINDS = frozenset({"cafe", "restaurant", "fast_food"})
 ROADSIDE_COLS = ("id", "name", "kind", "lat", "lon", "hours", "fuel", "nofuel", "wc", "cafe")
 FUEL_BITS = {"ai92": 1, "ai95": 2, "dt": 4}
 
@@ -590,6 +593,7 @@ __all__ = [
     "POI_KINDS",
     "ROADSIDE_COLS",
     "ROADSIDE_FILE",
+    "ROADSIDE_FOOD_KINDS",
     "ROADSIDE_KINDS",
     "TOWN_COLS",
     "CatBar",

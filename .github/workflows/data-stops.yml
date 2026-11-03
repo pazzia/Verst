@@ -1,7 +1,8 @@
 # CEO 02.11 («чтобы все кафешки, достопримечательности и отели были настоящими, а не выдумкой для демо»): real
 # lodgings (hotels, motels, guest houses, hostels) of the shipped catalogue's towns and every fuel station, rest
-# area and services place of Russia, from the Geofabrik extract (OSM, ODbL 1.0). backend/planner/tools/data/
-# build_stops.py writes catalogue_lodging.json.gz and catalogue_roadside.json.gz next to the shipped catalogue,
+# area and services place of Russia with its real name (CEO 03.11), and the named roadside cafés outside the
+# towns within ~1 km of a motorway, trunk or primary road (CEO 03.11), from the Geofabrik extract (OSM, ODbL 1.0).
+# backend/planner/tools/data/build_stops.py writes catalogue_lodging.json.gz and catalogue_roadside.json.gz next to the shipped catalogue,
 # with a report of counts (what was kept, what was dropped and why) and sizes.
 #
 # Trigger from a working branch (ccr-*): edit backend/planner/tools/data/data-stops.request and push; or, once
@@ -53,8 +54,18 @@ jobs:
             -o "$RUNNER_TEMP/roadside.osm.pbf" --overwrite
           osmium export "$RUNNER_TEMP/roadside.osm.pbf" -f geojsonseq --add-unique-id=type_id \
             -o "$RUNNER_TEMP/roadside.geojsonseq" --overwrite
-          wc -l "$RUNNER_TEMP/lodging.geojsonseq" "$RUNNER_TEMP/roadside.geojsonseq" | tee -a out/log.txt
+          # CEO 03.11: roadside cafés — named food outside the towns within ~1 km of a main road
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" nwr/amenity=cafe,restaurant,fast_food \
+            -o "$RUNNER_TEMP/food.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/food.osm.pbf" -f geojsonseq --add-unique-id=type_id \
+            -o "$RUNNER_TEMP/food.geojsonseq" --overwrite
+          osmium tags-filter "$RUNNER_TEMP/ru.osm.pbf" w/highway=motorway,trunk,primary \
+            -o "$RUNNER_TEMP/roads.osm.pbf" --overwrite
+          osmium export "$RUNNER_TEMP/roads.osm.pbf" -f geojsonseq --geometry-types=linestring \
+            -o "$RUNNER_TEMP/roads.geojsonseq" --overwrite
+          wc -l "$RUNNER_TEMP"/{lodging,roadside,food,roads}.geojsonseq | tee -a out/log.txt
           python3 $T/build_stops.py "$RUNNER_TEMP/lodging.geojsonseq" "$RUNNER_TEMP/roadside.geojsonseq" "$RES" \
+            --food "$RUNNER_TEMP/food.geojsonseq" --roads "$RUNNER_TEMP/roads.geojsonseq" \
             --lock $T/catalogue_stops.lock 2>&1 | tee -a out/log.txt
           cp "$RES"/catalogue_lodging.json.gz "$RES"/catalogue_roadside.json.gz $T/catalogue_stops.lock out/
       - name: Summary

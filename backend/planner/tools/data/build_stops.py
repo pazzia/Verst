@@ -5,7 +5,12 @@
     osmium export lodging.osm.pbf -f geojsonseq --add-unique-id=type_id -o lodging.geojsonseq
     osmium tags-filter russia-latest.osm.pbf nwr/amenity=fuel nwr/highway=rest_area,services -o roadside.osm.pbf
     osmium export roadside.osm.pbf -f geojsonseq --add-unique-id=type_id -o roadside.geojsonseq
-    python3 tools/data/build_stops.py lodging.geojsonseq roadside.geojsonseq CATALOGUE_DIR [--out DIR] [--lock F]
+    osmium tags-filter russia-latest.osm.pbf nwr/amenity=cafe,restaurant,fast_food -o food.osm.pbf
+    osmium export food.osm.pbf -f geojsonseq --add-unique-id=type_id -o food.geojsonseq
+    osmium tags-filter russia-latest.osm.pbf w/highway=motorway,trunk,primary -o roads.osm.pbf
+    osmium export roads.osm.pbf -f geojsonseq --geometry-types=linestring -o roads.geojsonseq
+    python3 tools/data/build_stops.py lodging.geojsonseq roadside.geojsonseq CATALOGUE_DIR \
+        [--food food.geojsonseq --roads roads.geojsonseq] [--out DIR] [--lock F]
 
 Writes `catalogue_lodging.json.gz` and `catalogue_roadside.json.gz` (`verst_planner.catalogue.LODGING_COLS`,
 `ROADSIDE_COLS`) next to the built catalogue, plus a report of counts. The data is what OSM says, nothing is
@@ -14,9 +19,12 @@ added: no prices (OSM has none), no assumed amenities; a missing tag stays null 
 - **Lodging:** named `tourism=hotel|motel|guest_house|hostel` (not private, not disused), assigned to the nearest
   catalogue town whose lodging radius (`LODGING_RADIUS_FACTOR` × the walk radius, at least `LODGING_RADIUS_MIN_M`)
   covers it; others are counted, not kept (the planner books nights in towns). Deny-listed names are dropped.
-- **Roadside:** every `amenity=fuel` and `highway=rest_area|services` of the country, named or not. A
-  deny-listed name or brand (the release rule P0-1: no real brand in the app) leaves `name` null: the station is
-  real, the app calls it «АЗС».
+- **Roadside:** every `amenity=fuel` and `highway=rest_area|services` of the country, named or not, with its
+  real name or brand (CEO 03.11 «Добавляй настоящие имена заправок»; the demo rule P0-1 hid them before).
+- **Roadside food (CEO 03.11):** named `amenity=cafe|restaurant|fast_food` outside every catalogue town's
+  walk radius (the town ones are in `catalogue_food`) and within ~1 km of a motorway, trunk or primary road
+  (`road_cells`: the road lines sampled every 200 m into 0.005° cells; a café counts when its cell or a
+  neighbour holds a road sample). `wc` = OSM `toilets` as tagged, null when unknown.
 
 Pure functions (`lodging_rows`, `roadside_rows`) are tested in the sandbox (tests/unit/test_build_stops.py).
 """
@@ -25,7 +33,9 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import itertools
 import json
+import math
 import sys
 from collections.abc import Iterable
 from pathlib import Path
@@ -38,7 +48,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from bars_from_extract import elements_from_features  # noqa: E402
 from build_catalogue import ODBL_URI, OSM_COPYRIGHT_URI, denied, denylist  # noqa: E402
 from enrich import tidy  # noqa: E402
-from fetch_overpass import assign, radius_all_m  # noqa: E402
+from fetch_overpass import _km, assign, radius_all_m  # noqa: E402
 from parks_from_extract import catalogue_towns  # noqa: E402
 
 from verst_planner.catalogue import (  # noqa: E402
@@ -50,6 +60,7 @@ from verst_planner.catalogue import (  # noqa: E402
     LODGING_KINDS,
     ROADSIDE_COLS,
     ROADSIDE_FILE,
+    ROADSIDE_FOOD_KINDS,
     ROADSIDE_KINDS,
     dump_gz,
     encode_table,
@@ -63,6 +74,9 @@ PRIVATE = frozenset({"private", "no"})
 DISUSED_KEYS = ("disused:tourism", "abandoned:tourism", "disused:amenity", "abandoned:amenity")
 FUEL_TAGS = {"ai92": "fuel:octane_92", "ai95": "fuel:octane_95", "dt": "fuel:diesel"}
 MAX_PHONE, MAX_SITE, MAX_NAME = 32, 100, 80
+ROAD_CELL = 0.005  # degrees: ~550 m of latitude, ~320 m of longitude at 55° N
+ROAD_STEP_KM = 0.2
+ROAD_NEAR = (1, 2)  # cells around a café that may hold a road sample (lat, lon): ~0.6–1.1 km
 
 
 def _yes_no(v: str | None) -> int | None:
@@ -152,10 +166,14 @@ def _roadside_kind(tags: dict[str, str]) -> str | None:
     return hw if hw in ("rest_area", "services") else None
 
 
-def roadside_rows(lines: Iterable[str], deny: list[str]) -> tuple[list[dict[str, Any]], dict[str, int]]:
-    """(rows, counts): every fuel station, rest area and services place, named or not."""
-    counts = {"features": 0, "kind": 0, "private": 0, "brandHidden": 0, "kept": 0}
-    rows = []
+def _kind_code(e: dict[str, Any]) -> str:
+    return {"node": "n", "way": "w", "relation": "r"}[e["type"]]
+
+
+def roadside_rows(lines: Iterable[str]) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """(rows, counts): every fuel station, rest area and services place, named or not, with its real name."""
+    counts = {"features": 0, "kind": 0, "private": 0, "kept": 0}
+    rows: list[dict[str, Any]] = []
     for e in elements_from_features(lines, require_name=False):
         counts["features"] += 1
         tags = e["tags"]
@@ -167,19 +185,16 @@ def roadside_rows(lines: Iterable[str], deny: list[str]) -> tuple[list[dict[str,
             counts["private"] += 1
             continue
         name = tidy(str(tags.get("name") or tags.get("brand") or "").strip()) or None
-        brand = tags.get("brand") or tags.get("operator") or ""
-        if name and (len(name) > MAX_NAME or denied(name, deny) or (brand and denied(brand, deny))):
-            counts["brandHidden"] += 1
+        if name and len(name) > MAX_NAME:
             name = None
         yes = no = 0
         for key, bit in FUEL_BITS.items():
             v = _yes_no(tags.get(FUEL_TAGS[key]))
             yes |= bit if v == 1 else 0
             no |= bit if v == 0 else 0
-        kind_code = {"node": "n", "way": "w", "relation": "r"}[e["type"]]
         rows.append(
             {
-                "id": f"osm_{kind_code}{e['id']}",
+                "id": f"osm_{_kind_code(e)}{e['id']}",
                 "name": name,
                 "kind": ROADSIDE_KINDS.index(kind),
                 "lat": to_coord(e["lat"]),
@@ -189,6 +204,91 @@ def roadside_rows(lines: Iterable[str], deny: list[str]) -> tuple[list[dict[str,
                 "nofuel": no or None,
                 "wc": _yes_no(tags.get("toilets")),
                 "cafe": _yes_no(tags.get("cafe")) if "cafe" in tags else (1 if tags.get("shop") == "cafe" else None),
+            }
+        )
+    rows.sort(key=lambda r: r["id"])
+    counts["kept"] = len(rows)
+    return rows, counts
+
+
+def _cell(lat: float, lon: float) -> tuple[int, int]:
+    return math.floor(lat / ROAD_CELL), math.floor(lon / ROAD_CELL)
+
+
+def road_cells(lines: Iterable[str]) -> set[tuple[int, int]]:
+    """The 0.005° cells a main road passes through: every LineString sampled every `ROAD_STEP_KM`."""
+    cells: set[tuple[int, int]] = set()
+    for line in lines:
+        line = line.strip().lstrip("\x1e")
+        if not line:
+            continue
+        geom = json.loads(line).get("geometry") or {}
+        parts = geom.get("coordinates") or []
+        if geom.get("type") == "LineString":
+            parts = [parts]
+        elif geom.get("type") != "MultiLineString":
+            continue
+        for part in parts:
+            for (lon1, lat1), (lon2, lat2) in itertools.pairwise(part):
+                km = _km(lat1, lon1, lat2, lon2)
+                n = max(1, math.ceil(km / ROAD_STEP_KM))
+                for k in range(n + 1):
+                    f = k / n
+                    cells.add(_cell(lat1 + (lat2 - lat1) * f, lon1 + (lon2 - lon1) * f))
+    return cells
+
+
+def near_road(lat: float, lon: float, cells: set[tuple[int, int]]) -> bool:
+    ci, cj = _cell(lat, lon)
+    di_max, dj_max = ROAD_NEAR
+    return any(
+        (ci + di, cj + dj) in cells for di in range(-di_max, di_max + 1) for dj in range(-dj_max, dj_max + 1)
+    )
+
+
+def roadside_food_rows(
+    lines: Iterable[str], towns: list[dict[str, Any]], cells: set[tuple[int, int]]
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """(rows, counts): named cafés, restaurants and fast food outside the catalogue towns near a main road."""
+    counts = {"features": 0, "kind": 0, "private": 0, "inTown": 0, "farFromRoad": 0, "kept": 0}
+    elements = []
+    for e in elements_from_features(lines):
+        counts["features"] += 1
+        tags = e["tags"]
+        if tags.get("amenity") not in ROADSIDE_FOOD_KINDS:
+            counts["kind"] += 1
+            continue
+        if not _usable(tags):
+            counts["private"] += 1
+            continue
+        name = tidy(str(tags.get("name", "")).strip()) or ""
+        if not name or len(name) > MAX_NAME:
+            counts["kind"] += 1
+            continue
+        elements.append({**e, "tags": {**tags, "name": name}})
+    in_town = {r["osm"] for r in assign(elements, towns, radius_all_m)}
+    rows: list[dict[str, Any]] = []
+    for e in elements:
+        osm = f"{_kind_code(e)}{e['id']}"
+        if osm in in_town:
+            counts["inTown"] += 1
+            continue
+        if not near_road(e["lat"], e["lon"], cells):
+            counts["farFromRoad"] += 1
+            continue
+        tags = e["tags"]
+        rows.append(
+            {
+                "id": f"osm_{osm}",
+                "name": tags["name"],
+                "kind": ROADSIDE_KINDS.index(tags["amenity"]),
+                "lat": to_coord(e["lat"]),
+                "lon": to_coord(e["lon"]),
+                "hours": _first(tags.get("opening_hours"), 120),
+                "fuel": None,
+                "nofuel": None,
+                "wc": _yes_no(tags.get("toilets")),
+                "cafe": None,
             }
         )
     rows.sort(key=lambda r: r["id"])
@@ -209,9 +309,14 @@ def licence(version: str, what: str) -> dict[str, Any]:
 
 
 def build(
-    lodging_seq: Path, roadside_seq: Path, cat_dir: Path, hours_ok: Any = None
+    lodging_seq: Path,
+    roadside_seq: Path,
+    cat_dir: Path,
+    hours_ok: Any = None,
+    food_seq: Path | None = None,
+    roads_seq: Path | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    """(lodging doc, roadside doc, report) for the catalogue in `cat_dir`."""
+    """(lodging doc, roadside doc, report) for the catalogue in `cat_dir`; roadside food with both seqs."""
     towns_bytes = (cat_dir / FILES["towns"]).read_bytes()
     meta = load_gz((cat_dir / FILES["meta"]).read_bytes(), "meta")
     towns = catalogue_towns(cat_dir)
@@ -220,7 +325,15 @@ def build(
     with lodging_seq.open(encoding="utf-8") as fh:
         lrows, lcounts = lodging_rows(fh, towns, deny, town_pos)
     with roadside_seq.open(encoding="utf-8") as fh:
-        rrows, rcounts = roadside_rows(fh, deny)
+        rrows, rcounts = roadside_rows(fh)
+    fcounts: dict[str, int] = {}
+    if food_seq is not None and roads_seq is not None:
+        with roads_seq.open(encoding="utf-8") as fh:
+            cells = road_cells(fh)
+        with food_seq.open(encoding="utf-8") as fh:
+            frows, fcounts = roadside_food_rows(fh, towns, cells)
+        fcounts["roadCells"] = len(cells)
+        rrows = sorted(rrows + frows, key=lambda r: r["id"])
     if hours_ok is not None:
         for r in rrows:
             if r["hours"] and not hours_ok(r["hours"]):
@@ -246,6 +359,7 @@ def build(
         "lodging": {**lcounts, "byKind": by_kind_l, "towns": len({r["town"] for r in lrows}),
                     "townsTotal": len(towns), "withPhone": sum(1 for r in lrows if r["phone"]),
                     "withSite": sum(1 for r in lrows if r["site"]), "dogKnown": sum(1 for r in lrows if r["dog"] is not None)},
+        "roadsideFood": fcounts,
         "roadside": {**rcounts, "byKind": by_kind_r, "named": sum(1 for r in rrows if r["name"]),
                      "fuelKnown": sum(1 for r in rrows if r["fuel"] or r["nofuel"]),
                      "hoursKnown": sum(1 for r in rrows if r["hours"])},
@@ -258,6 +372,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("lodging", type=Path, help="lodging.geojsonseq (osmium export)")
     ap.add_argument("roadside", type=Path, help="roadside.geojsonseq (osmium export)")
     ap.add_argument("catalogue", type=Path, help="the directory of the built catalogue_*.json.gz")
+    ap.add_argument("--food", type=Path, default=None, help="food.geojsonseq (roadside cafés, with --roads)")
+    ap.add_argument("--roads", type=Path, default=None, help="roads.geojsonseq (motorway, trunk, primary lines)")
     ap.add_argument("--out", type=Path, default=None, help="default: the catalogue directory")
     ap.add_argument("--lock", type=Path, default=None, help="write sizes, sha256 and the report here")
     args = ap.parse_args(argv)
@@ -271,7 +387,7 @@ def main(argv: list[str] | None = None) -> int:
             return False
         return True
 
-    ldoc, rdoc, report = build(args.lodging, args.roadside, args.catalogue, hours_ok)
+    ldoc, rdoc, report = build(args.lodging, args.roadside, args.catalogue, hours_ok, args.food, args.roads)
     out = args.out or args.catalogue
     out.mkdir(parents=True, exist_ok=True)
     entry: dict[str, Any] = {"version": report["version"], "report": report, "files": {}}

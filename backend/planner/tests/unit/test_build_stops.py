@@ -80,7 +80,7 @@ class LodgingTest(unittest.TestCase):
 
 
 class RoadsideTest(unittest.TestCase):
-    def test_every_station_brand_hidden_fuels_known(self) -> None:
+    def test_every_station_with_its_real_name_fuels_known(self) -> None:
         rows, counts = stops.roadside_rows(
             [
                 feature(
@@ -95,16 +95,18 @@ class RoadsideTest(unittest.TestCase):
                     toilets="yes",
                 ),
                 feature("n6", 56.1, 38.1, amenity="fuel"),  # unnamed: kept, the app says «АЗС»
+                # brand only: the brand is its name
+                feature("n9", 56.15, 38.15, amenity="fuel", brand="Татнефть"),
                 feature("w7", 56.2, 38.2, highway="rest_area", name="Стоянка у моста"),
                 feature("n8", 56.3, 38.3, amenity="fuel", **{"disused:amenity": "fuel"}),
-            ],
-            ["лукойл"],  # denylist() entries are casefolded
+            ]
         )
-        self.assertEqual(3, counts["kept"])
-        self.assertEqual(1, counts["brandHidden"])
+        self.assertEqual(4, counts["kept"])
         by_id = {r["id"]: r for r in rows}
         lukoil = by_id["osm_n5"]
-        self.assertIsNone(lukoil["name"])  # the real station, without the brand name (release rule P0-1)
+        # CEO 03.11 «Добавляй настоящие имена заправок»: the real chain name stays
+        self.assertEqual("Лукойл", lukoil["name"])
+        self.assertEqual("Татнефть", by_id["osm_n9"]["name"])
         self.assertEqual(
             (FUEL_BITS["ai92"], FUEL_BITS["dt"], "24/7", 1),
             (lukoil["fuel"], lukoil["nofuel"], lukoil["hours"], lukoil["wc"]),
@@ -116,6 +118,49 @@ class RoadsideTest(unittest.TestCase):
         )
         rest = by_id["osm_w7"]
         self.assertEqual((ROADSIDE_KINDS.index("rest_area"), "Стоянка у моста"), (rest["kind"], rest["name"]))
+
+
+def road(fid: str, *pts: tuple[float, float]) -> str:
+    return json.dumps(
+        {
+            "type": "Feature",
+            "id": fid,
+            "geometry": {"type": "LineString", "coordinates": [[lon, lat] for lat, lon in pts]},
+            "properties": {"highway": "trunk"},
+        }
+    )
+
+
+class RoadsideFoodTest(unittest.TestCase):
+    """CEO 03.11 «Добавляй конечно придорожные кафе»: named cafés near a main road and outside the towns."""
+
+    def test_near_a_main_road_outside_towns_only(self) -> None:
+        # a trunk road going east along 56.50° N, 38.00–38.20° E (no town there)
+        cells = stops.road_cells([road("w1", (56.50, 38.00), (56.50, 38.20))])
+        rows, counts = stops.roadside_food_rows(
+            [
+                feature("n1", 56.505, 38.10, amenity="cafe", name="Придорожное", toilets="yes"),  # ~0.6 km
+                feature("n2", 56.56, 38.10, amenity="cafe", name="В лесу"),  # ~6.7 km off the road
+                feature("n3", 57.62, 39.89, amenity="restaurant", name="В Ярославле"),  # a town café
+                feature("n4", 56.50, 38.05, amenity="fast_food"),  # no name
+                feature("n5", 56.50, 38.15, amenity="bar", name="Бар"),  # not food for lunch
+            ],
+            TOWNS,
+            cells,
+        )
+        self.assertEqual(["osm_n1"], [r["id"] for r in rows])
+        self.assertEqual((1, 1), (counts["farFromRoad"], counts["inTown"]))
+        cafe = rows[0]
+        self.assertEqual(
+            (ROADSIDE_KINDS.index("cafe"), "Придорожное", 1), (cafe["kind"], cafe["name"], cafe["wc"])
+        )
+        self.assertIsNone(cafe["hours"])  # nothing assumed
+
+    def test_road_cells_cover_the_whole_line(self) -> None:
+        cells = stops.road_cells([road("w1", (56.0, 38.0), (56.0, 38.5))])  # ~31 km, sampled every 200 m
+        self.assertTrue(stops.near_road(56.0, 38.25, cells))
+        self.assertTrue(stops.near_road(56.0, 38.4999, cells))
+        self.assertFalse(stops.near_road(56.05, 38.25, cells))  # ~5.6 km north
 
 
 if __name__ == "__main__":
