@@ -3,10 +3,15 @@
 The working memory between sessions and compactions (CLAUDE.md, «Read first»). Facts only, newest first.
 Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and `docs/decisions.md`.
 
-**Updated:** 2026-11-03
+**Updated:** 2026-11-04
 
 ## Now
 
+- **04.11, on the branch (not in `main`, waiting for «Сливай»):**
+  - Plan audit of 20 trips on the real catalogue: `docs/review/plan-audit-2026-11-04.md`. Fixed: no open-data playground for adults (`test_real_plans.py`). Main finding: long trips on the phone run on approximate straight legs outside central Russia (no real cafés, towns or hotels along them); the server's GraphHopper does not have this. **CEO decision asked:** plan long trips on the server when online and consented.
+  - Catalogue load: town food stays columns (`_FoodRows`, `food_for_towns`); a reload frees the old world first. Emulator samples: 1 575 / 1 510 / 1 018 ms and 2 037 / 1 716 / 1 207 ms (budget 2 000 ms median); reloads no longer grow. The 2x target was not reached.
+  - CI actions on Node 24 (checkout v5, setup-python v6, upload-artifact v6, download-artifact v7, setup-java v5, cache v5, setup-gradle v5); green on run 41824290305, test-server green.
+  - Release notes: `Тестерам-заменяет:` drops an older wording (`tools/ci/whats_new.py`).
 - **Test server ops (D-IR-29/30, PR #8 `a63d9e9`):** `test-server.yml` + `infra/api/server-ops.sh`; trigger = a new line in `infra/api/test-server.request` pushed on the ccr branch (or workflow_dispatch). Live since 03.11 21:39 (first `status`: api, postgres, graphhopper, backup healthy; /healthz ok). The server checkout is on `main` since 03.11 21:50 (`a63d9e9`); the running api was built at 21:26 from the same code (0.3.209 engine). The pinned host key is `infra/api/test-server.known_hosts` (ed25519 SHA256:Nx9n4W…); fixes merged in PR #9 (`c53cfa5`), `workflow_dispatch` from `main` works.
 - **Release:** «Верста» 0.3.209 from PR #7 (`54ada56`); `main` is now PR #9 (docs and the test-server workflow only), «Верста» 0.3.209 at `releases/download/verst-latest/Verst-latest.apk` (03.11), all CI green. PR #6 = real stops, fuel names, roadside cafés; PR #7 = catalogue load headroom (walk grids lazy, ≤ 20 hotels per town as places).
 - **Two designs (D-IR-24):** «Кемпер» is the default, «Классический» is chosen in Settings. The `camper-ui` branch and `verst-camper-latest` (0.3.187) are frozen.
