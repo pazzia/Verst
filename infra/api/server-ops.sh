@@ -9,7 +9,8 @@
 #   status    branch and commit, containers, /healthz
 #   update    git pull (fast-forward only), rebuild and restart the api, wait for /healthz
 #   recreate  restart the api with the current .env (after the CEO edited it)
-#   errors    the api log's WARNING / ERROR lines of the last 2 hours (no request bodies, no secrets)
+#   errors    a summary of the api log's warnings and errors of the last 2 hours: counts by level, logger and
+#             exception type, no message text (the repository and so the workflow log are public)
 #   rollback  run the api image that served before the last `update` again (D-IR-33): `update` keeps it as
 #             verst-api:previous; the code checkout stays on main, so the next `update` rebuilds from main.
 #             Refused when the last update brought a database migration (the old code may not fit the schema).
@@ -96,8 +97,31 @@ case "$ACTION" in
         health
         ;;
     errors)
+        # The repository is public, so the workflow log is too: only a summary leaves the server — counts by level,
+        # logger and exception type, never a message text (it may carry a request's data; 152-FZ, 04.11)
         cd "$API"
-        "${C[@]}" logs --since 2h --no-color api 2>&1 | grep -E 'WARNING|ERROR|CRITICAL|Traceback' | tail -n 80 || echo "no warnings or errors in the last 2 hours"
+        if command -v python3 > /dev/null; then PY=(python3); else PY=("${C[@]}" exec -T api python3); fi
+        "${C[@]}" logs --since 2h --no-color --no-log-prefix api 2>&1 | "${PY[@]}" -c '
+import collections, json, sys
+counts, other = collections.Counter(), 0
+for line in sys.stdin:
+    try:
+        rec = json.loads(line)
+    except ValueError:
+        other += any(w in line for w in ("WARNING", "ERROR", "CRITICAL", "Traceback"))
+        continue
+    if rec.get("level") not in ("WARNING", "ERROR", "CRITICAL"):
+        continue
+    exc = (rec.get("exc") or "").strip().splitlines()
+    kind = exc[-1].split(":")[0].strip() if exc else "-"
+    counts[(rec["level"], rec.get("logger", "?"), kind)] += 1
+if not counts and not other:
+    print("no warnings or errors in the last 2 hours")
+for (level, logger, kind), n in sorted(counts.items(), key=lambda x: -x[1]):
+    print(f"{n} x {level} {logger} {kind}")
+if other:
+    print(f"{other} non-JSON warning/error line(s) (text not shown)")
+'
         ;;
     *)
         echo "unknown action «$ACTION»: status | update | recreate | errors | rollback" >&2
