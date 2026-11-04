@@ -7,7 +7,8 @@ previous release and this build (CLAUDE.md, «What's new»).
 `--notes-body FILE` reads the previous release's notes and takes its commit from «Коммит: <sha>» or «Собрано из
 коммита <sha>» (when `--since` is empty). Without a usable previous commit, the last 30 commits are read.
 Prints Markdown: a «Что нового» heading and one bullet per change, newest first, duplicates dropped.
-Standard library only.
+A newer commit that rewords a change says so with `Тестерам-заменяет: <the older line>`: the older line is
+dropped, so a release lists each change once, in its final wording. Standard library only.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ import subprocess
 import sys
 
 TRAILER = re.compile(r"^\s*Тестерам\s*:\s*(.+?)\s*$", re.MULTILINE)
+REPLACES = re.compile(r"^\s*Тестерам-заменяет\s*:\s*(.+?)\s*$", re.MULTILINE)
 PREV_SHA = re.compile(r"(?:Коммит:|Собрано из коммита)\s*([0-9a-f]{40})")
 SEP = "\x1e"
 
@@ -42,13 +44,19 @@ def bodies(since: str | None, head: str) -> list[str]:
     return [b for b in out.split(SEP) if b.strip()]
 
 
+def _key(line: str) -> str:
+    return line.rstrip(".").strip().casefold()
+
+
 def items(texts: list[str], limit: int) -> list[str]:
+    """`texts` newest first: the newer line wins, and a `Тестерам-заменяет:` line drops an older one."""
     seen: set[str] = set()
     out: list[str] = []
     for body in texts:
+        seen.update(_key(m.group(1)) for m in REPLACES.finditer(body))
         for m in TRAILER.finditer(body):
             line = m.group(1).rstrip(".")
-            key = line.casefold()
+            key = _key(line)
             if key in seen:
                 continue
             seen.add(key)

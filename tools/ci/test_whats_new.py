@@ -22,6 +22,14 @@ class WhatsNewTest(unittest.TestCase):
             whats_new.items(bodies, 25),
         )
 
+    def test_a_reworded_change_keeps_only_the_final_wording(self) -> None:
+        bodies = [  # newest first
+            "Rename\n\nТестерам: внизу «Дороги» — «Итог без стоимости отелей»\n"
+            "Тестерам-заменяет: итог поездки внизу «Дороги» пишет «Итог без ночёвок».",
+            "Footer\n\nТестерам: итог поездки внизу «Дороги» пишет «Итог без ночёвок»\nТестерам: другое",
+        ]
+        self.assertEqual(["внизу «Дороги» — «Итог без стоимости отелей»", "другое"], whats_new.items(bodies, 25))
+
     def test_previous_commit_from_both_note_kinds(self) -> None:
         sha = "a" * 40
         self.assertEqual(sha, whats_new.previous_commit(f"- Коммит: {sha}\n"))
