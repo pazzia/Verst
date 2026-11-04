@@ -825,7 +825,7 @@ def plan(world: str, request_id: str, input_json: str, listener: Any = None) -> 
 
 def estimate(world: str, request_id: str, input_json: str) -> str:
     """Pre-plan distance and days of a trip input (the same `TripInputDTO` as `plan`):
-    `{"km": int, "days": int}`.
+    `{"km": int, "days": int, …, "approx": true}` (`approx` only when the route is approximate).
 
     One source of truth for every distance the app shows before Road ahead (Navigator caption, Instruments,
     Drive header): it *is* the engine's plan of that input, run without events, so `km`/`days` equal the later
@@ -844,17 +844,19 @@ def estimate(world: str, request_id: str, input_json: str) -> str:
                 "outcome": "no_fit",
                 "totalRub": m.cost.total_rub,
                 "budgetStatus": None,
-            }
+            } | ({"approx": True} if m.approx_distances else {})
         status = None
         if trip.input.budget_rub is not None:
             status = trip.budget_fit.status if trip.budget_fit is not None else "fits"
+        # CEO 04.11: `approx` = the phone's route is approximate (straight legs beyond its road graph): the app
+        # offers to plan the trip on the server, which routes over the real roads
         return {
             "km": trip.km,
             "days": trip.days,
             "outcome": "plan",
             "totalRub": trip.cost.total_rub,
             "budgetStatus": status,
-        }
+        } | ({"approx": True} if trip.approx_distances else {})
 
     return _envelope(run)
 

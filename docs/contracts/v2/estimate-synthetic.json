@@ -29,7 +29,8 @@
    "days": 1,
    "outcome": "plan",
    "totalRub": 4400,
-   "budgetStatus": null
+   "budgetStatus": null,
+   "approx": true
   },
   "ms": 0
  }

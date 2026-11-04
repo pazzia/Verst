@@ -52,6 +52,11 @@ object E2e {
 fun androidx.compose.ui.test.junit4.ComposeTestRule.pressStart(flow: app.verst.nav.VerstFlow, roadside: Boolean = false) {
     onNodeWithTag("instruments.start").performClick()
     waitForIdle()
+    // CEO 04.11: an approximate long trip offers the server once — the journeys stay on the phone engine
+    if (flow.longTripAsk) {
+        onNodeWithTag("long.trip.no").performClick()
+        waitForIdle()
+    }
     if (flow.roadsideFoodAsk) {
         onNodeWithTag(if (roadside) "roadside.food.yes" else "roadside.food.no").performClick()
         waitForIdle()

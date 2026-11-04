@@ -309,7 +309,7 @@ fun VerstRoot(flow: VerstFlow) {
         val tabs = chrome && !imeUp
         // a sheet of the screen is open: the bars are dimmed with it and a tap on them closes it (system back);
         // the root dialogs below draw their own scrim over the whole window
-        val rootDialog = flow.report != null || flow.deleteAsk != null || flow.abroadConsentAsk || flow.roadsideFoodAsk || flow.limitDialog
+        val rootDialog = flow.report != null || flow.deleteAsk != null || flow.abroadConsentAsk || flow.roadsideFoodAsk || flow.longTripAsk || flow.limitDialog
         val closeSheet: () -> Unit = { flow.back() }
         val onScrim: (() -> Unit)? = if (overlayOpen(flow) && !rootDialog) closeSheet else null
         Box(Modifier.fillMaxSize().background(DesignTokens.color.camper.page)) {
@@ -337,7 +337,7 @@ private fun overlayOpen(flow: VerstFlow): Boolean =
     flow.replace != null || flow.tripsSheet || flow.partnerOpen || flow.bookedDialog || flow.deleteAsk != null || flow.limitDialog || flow.resetAsk ||
         flow.card != null || flow.dayMenu != null || flow.stopMenu != null || flow.locationSheet || flow.aboutData || flow.ageGate != null || flow.cityCustomSheet ||
         flow.report != null || flow.cityPicker != null || flow.roadParking != null || flow.handoffSheet != null ||
-        flow.roadBorder != null || flow.abroadConsentAsk || flow.roadsideFoodAsk
+        flow.roadBorder != null || flow.abroadConsentAsk || flow.roadsideFoodAsk || flow.longTripAsk
 
 /** The toasts that are not owned by one screen, inside the screen area (between the header and the tab bar). */
 @Composable
@@ -388,6 +388,14 @@ private fun androidx.compose.foundation.layout.BoxScope.Overlays(flow: VerstFlow
             stringResource(UiR.string.settings_server_consent_title), stringResource(UiR.string.abroad_consent_body),
             stringResource(UiR.string.settings_server_consent_yes), stringResource(UiR.string.settings_server_consent_no),
             "abroad.consent", { flow.answerAbroadConsent(true) }, { flow.answerAbroadConsent(false) },
+        )
+    }
+    if (flow.longTripAsk) {
+        // CEO 04.11 (D-IR-31): a long trip is approximate on the phone — once, offer the server (the consent text)
+        NaviDialog(
+            stringResource(UiR.string.long_trip_title), stringResource(UiR.string.long_trip_body),
+            stringResource(UiR.string.long_trip_yes), stringResource(UiR.string.long_trip_no),
+            "long.trip", { flow.answerLongTrip(true) }, { flow.answerLongTrip(false) },
         )
     }
     if (flow.roadsideFoodAsk) {

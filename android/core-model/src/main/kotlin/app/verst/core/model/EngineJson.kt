@@ -247,6 +247,11 @@ data class PlanRequest(
     /** CEO 03.11: lunch at roadside cafés too; null = the engine's crew default (yes without children), not sent. */
     val roadsideFood: Boolean? = null,
     /**
+     * CEO 04.11 (D-IR-31): the phone's route of this trip is approximate and the tester agreed to plan on the
+     * server: the gateway plans it there (falling back to the phone). Routing only: not sent to the engine.
+     */
+    val longTrip: Boolean = false,
+    /**
      * CEO 29.10 (trips abroad, wave 1): the destination is abroad, so only the server plans it — whatever «Где строить
      * маршрут» says, and never the phone engine (it knows only Russia). Routing only: not sent to the engine.
      */
