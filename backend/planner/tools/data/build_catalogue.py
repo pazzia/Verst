@@ -365,6 +365,28 @@ def load_json(path: Path, default: Any) -> Any:
     return json.loads(path.read_text("utf-8")) if path.exists() else default
 
 
+CURATED_LINKS = HERE / "curated_wikidata.tsv"
+
+
+def curated_links(path: Path = CURATED_LINKS) -> dict[str, dict[str, Any]]:
+    """CEO 04.11: fixture sight → Wikidata item and its Commons photo, picked by a person from the
+    `data-links.yml` candidates (the name match finds none: the fixture point is off or the name differs).
+    Columns: fixture id, QID, Commons file, author, licence, licence URL, why it is the same place."""
+    out: dict[str, dict[str, Any]] = {}
+    if not path.exists():
+        return out
+    for row in read_tsv(path):
+        fid, qid, image, author, licence, url = (row + [""] * 6)[:6]
+        if not (fid and qid.startswith("Q") and image and licence):
+            raise ValueError(f"curated_wikidata.tsv: incomplete row {row}")
+        out[fid] = {
+            "wikidata": qid,
+            "image": image,
+            "credit": {"author": author or None, "licence": licence, "url": url or None, "free": True},
+        }
+    return out
+
+
 def fixture_worlds() -> list[dict[str, Any]]:
     return [json.loads((WORLDS / f"{w}.json").read_text("utf-8")) for w in ("central_russia_v1",)]
 
@@ -807,6 +829,11 @@ def build(
                 continue
             taken.add(qid)
             links[fid] = {"wikidata": qid, "image": r.get("image")}
+    # CEO 04.11: reviewed links win over the name match (`curated_wikidata.tsv`, from `data-links.yml`)
+    for fid, link in curated_links().items():
+        links[fid] = {"wikidata": link["wikidata"], "image": link["image"]}
+        if link["image"] not in credits_in:
+            credits_in[link["image"]] = link["credit"]
 
     # ---- credits (only free files keep their image; GFDL-only files are dropped too, R-10)
     credit_list: list[dict[str, Any]] = []
