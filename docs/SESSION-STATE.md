@@ -47,12 +47,12 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 1. **SSH: key login, then no password for root** (the repo is public, the server takes root passwords). Steps in `docs/ops/test-server.md` §6; the CEO will do it later from a computer.
 2. «Сливай» for the `errors` summary (no message text in public logs, `f204fac`), and an answer: `spike01` manual-only?
 3. Register at Travelpayouts and put `VERST_TP_TOKEN/MARKER/TRS` into the server `.env` (`docs/partners/hotel-affiliate.md` §4).
-2. Decisions:
+4. Decisions:
    - legal entity, D-IR-09;
    - a lawyer on the «Реклама» label at the booking button (R-05);
    - a server in Russia before the beta.
-3. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
-4. The Yandex Navigator signing key: **not yet** (D-IR-17). The form asks for a company, a site and a store link. It comes after the legal entity, the domain and RuStore, before the closed beta.
+5. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
+6. The Yandex Navigator signing key: **not yet** (D-IR-17). The form asks for a company, a site and a store link. It comes after the legal entity, the domain and RuStore, before the closed beta.
 
 ## Next (when the CEO says)
 
