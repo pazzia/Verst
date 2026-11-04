@@ -1034,6 +1034,15 @@ def _load_catalogue() -> dict[str, Any]:
             raise EngineFailure("NO_CATALOGUE", str(e)) from e
         # CEO 02.11: the real OSM lodgings and roadside places replace every invented stop
         lodgings = load_packaged_lodgings(cat)
+        if CATALOGUE_WORLD in _WORLDS or _CATALOGUE:
+            # a reload (the emulator's timing samples, a newer catalogue): the new data has decoded, so the
+            # old world goes before the new one is built and the two never live side by side (04.11: each
+            # reload on the CI emulator was slower than the one before, ~55 MB more peak memory); unfreeze
+            # so its cyclic garbage is collectable again
+            _WORLDS.pop(CATALOGUE_WORLD, None)
+            _CATALOGUE.clear()
+            _PARKS.clear()
+            gc.unfreeze()
         cw = compose(base.world, cat, stops=(lodgings, load_packaged_roadside) if lodgings else None)
         ports = build_catalogue_ports(cw, _CLOCK.now())
         # the city-walk indexes fill on the first walk, not with the catalogue (the emulator budget, 03.11)

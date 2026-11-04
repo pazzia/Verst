@@ -11,9 +11,10 @@ from __future__ import annotations
 
 import gzip
 import hashlib
+import heapq
 import io
 import json
-from collections.abc import Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -226,6 +227,36 @@ class CatParking:
     rub_per_hour: int | None
 
 
+@dataclass(frozen=True, slots=True)
+class _FoodRows:
+    """`catalogue_food` as its columns (FOOD_COLS), decoded into `CatFood` only on demand."""
+
+    id: Sequence[Any]
+    name: Sequence[Any]
+    kind: Sequence[Any]
+    lat: Sequence[Any]
+    lon: Sequence[Any]
+    town: Sequence[Any]
+    hours: Sequence[Any]
+    cuisine: Sequence[Any]
+    kinds: Sequence[str]
+    town_ids: Sequence[str]
+
+    def decode(self, rows: Iterable[int]) -> list[CatFood]:
+        return [
+            CatFood(
+                str(self.id[i]),
+                str(self.name[i]),
+                self.kinds[int(self.kind[i])],
+                LatLon(self.lat[i] / COORD_SCALE, self.lon[i] / COORD_SCALE),
+                self.town_ids[int(self.town[i])],
+                self.hours[i],
+                self.cuisine[i],
+            )
+            for i in rows
+        ]
+
+
 @dataclass(slots=True)
 class Catalogue:
     version: str
@@ -241,24 +272,79 @@ class Catalogue:
     """ADR-0015 §4: paid OSM parking places (fee=yes), with ₽/h when their `charge` parses."""
     area_blocked: frozenset[str] = frozenset()
     """Files that must not be shown as an area photo (5.9 §3: collages, maps, flags, small or very wide)."""
-    food: list[CatFood] = field(default_factory=list)
-    """CEO 2026-10-29: OSM restaurants, cafés, fast food (empty in a catalogue built before the food data)."""
+    food_rows: _FoodRows | None = None
+    """CEO 2026-10-29: OSM restaurants, cafés, fast food (None in a catalogue built before the food data).
+    Kept as columns and decoded on first use of `food` (04.11: 30 000 rows were a third of the phone's
+    catalogue load; the trip planner needs only `food_for_towns`)."""
     town_by_id: dict[str, CatTown] = field(default_factory=dict)
     poi_by_id: dict[str, CatPoi] = field(default_factory=dict)
     bar_by_id: dict[str, CatBar] = field(default_factory=dict)
-    food_by_id: dict[str, CatFood] = field(default_factory=dict)
     kinds_by_town: dict[str, frozenset[str]] = field(default_factory=dict)
     """Town id → the bar and food kinds the catalogue has for it (CEO 2026-10-29: «no data» vs «few»)."""
+    _food: list[CatFood] | None = None
+    _food_by_id: dict[str, CatFood] | None = None
 
     def __post_init__(self) -> None:
         self.town_by_id = {t.id: t for t in self.towns}
         self.poi_by_id = {p.id: p for p in self.pois}
         self.bar_by_id = {b.id: b for b in self.bars}
-        self.food_by_id = {f.id: f for f in self.food}
         kinds: dict[str, set[str]] = {}
-        for town, kind in [(b.town, b.kind) for b in self.bars] + [(f.town, f.kind) for f in self.food]:
-            kinds.setdefault(town, set()).add(kind)
+        for b in self.bars:
+            kinds.setdefault(b.town, set()).add(b.kind)
+        if self.food_rows is not None:
+            fr = self.food_rows
+            for t, k in zip(fr.town, fr.kind, strict=True):
+                kinds.setdefault(fr.town_ids[int(t)], set()).add(fr.kinds[int(k)])
+        elif self._food:
+            for f in self._food:
+                kinds.setdefault(f.town, set()).add(f.kind)
         self.kinds_by_town = {t: frozenset(k) for t, k in kinds.items()}
+
+    @property
+    def food(self) -> list[CatFood]:
+        """Every food place (decoded on first use: the city walks and the abroad worlds)."""
+        if self._food is None:
+            fr = self.food_rows
+            self._food = [] if fr is None else fr.decode(range(len(fr.id)))
+        return self._food
+
+    @food.setter
+    def food(self, value: list[CatFood]) -> None:
+        """Tests replace the food list; the columns and the id index follow it."""
+        self._food = list(value)
+        self._food_by_id = None
+        self.food_rows = None
+
+    @property
+    def food_by_id(self) -> dict[str, CatFood]:
+        if self._food_by_id is None:
+            self._food_by_id = {f.id: f for f in self.food}
+        return self._food_by_id
+
+    @property
+    def food_count(self) -> int:
+        return 0 if self.food_rows is None else len(self.food_rows.id)
+
+    def food_for_towns(self, order: Mapping[str, int], cap: int) -> dict[str, list[CatFood]]:
+        """Catalogue town id → its `cap` best lunch places, decoded alone (the full list stays columns):
+        by `order` of the kind, known hours first, then nearest the town centre, then id."""
+        fr = self.food_rows
+        if fr is None:
+            return {}
+        rank = [order.get(k, 9) for k in fr.kinds]
+        groups: dict[int, list[tuple[int, bool, int, int, str, int]]] = {}
+        rows_in = zip(fr.kind, fr.town, fr.hours, fr.lat, fr.lon, fr.id, strict=True)
+        for i, (k, t, h, la, lo, fid) in enumerate(rows_in):
+            groups.setdefault(int(t), []).append((rank[int(k)], h is None, la, lo, str(fid), i))
+        out: dict[str, list[CatFood]] = {}
+        for t, rows in groups.items():
+            town = self.towns[t]
+            clat, clon = town.point.lat * COORD_SCALE, town.point.lon * COORD_SCALE
+            best = heapq.nsmallest(
+                cap, rows, key=lambda r: (r[0], r[1], (r[2] - clat) ** 2 + (r[3] - clon) ** 2, r[4])
+            )
+            out[town.id] = fr.decode(r[5] for r in best)
+        return out
 
     def credit(self, idx: int | None) -> Credit | None:
         if idx is None or not 0 <= idx < len(self.credits):
@@ -272,7 +358,7 @@ class Catalogue:
             "towns": len(self.towns),
             "pois": len(self.pois),
             "bars": len(self.bars),
-            "food": len(self.food),
+            "food": self.food_count,
         }
 
 
@@ -408,21 +494,19 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any, food: Any = None) -> 
         )
         for a, b, c, d, e, f, g in zip(*b_cols, strict=True)
     ]
-    out_food: list[CatFood] = []
+    food_rows: _FoodRows | None = None
     if food is not None:
+        cols = columns(food, FOOD_COLS, "food")
         food_kinds = list(meta.get("foodKinds", FOOD_KINDS))
-        out_food = [
-            CatFood(
-                str(a),
-                str(b),
-                food_kinds[int(c)],
-                LatLon(d / COORD_SCALE, e / COORD_SCALE),
-                town_ids[int(f)],
-                g,
-                h,
-            )
-            for a, b, c, d, e, f, g, h in zip(*columns(food, FOOD_COLS, "food"), strict=True)
-        ]
+        # validated now, decoded later: every kind and town index must resolve
+        if cols[2] and not (min(map(int, cols[2])) >= 0 and max(map(int, cols[2])) < len(food_kinds)):
+            raise CatalogueError("food: kind index out of range")
+        if cols[5] and not (min(map(int, cols[5])) >= 0 and max(map(int, cols[5])) < len(town_ids)):
+            raise CatalogueError("food: town index out of range")
+        f_id, f_name, f_kind, f_lat, f_lon, f_town, f_hours, f_cuisine = cols
+        food_rows = _FoodRows(
+            f_id, f_name, f_kind, f_lat, f_lon, f_town, f_hours, f_cuisine, food_kinds, town_ids
+        )
     links = {
         str(k): FixtureLink(str(v["wikidata"]), v.get("image"), v.get("credit"))
         for k, v in meta.get("links", {}).items()
@@ -439,7 +523,7 @@ def from_docs(meta: Any, towns: Any, pois: Any, bars: Any, food: Any = None) -> 
         sources=dict(meta.get("sources", {})),
         area_blocked=frozenset(str(f) for f in meta.get("areaBlock", [])),
         parking=parking_points(meta.get("parking")),
-        food=out_food,
+        food_rows=food_rows,
     )
 
 
