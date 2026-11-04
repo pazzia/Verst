@@ -80,6 +80,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.AlternativeDto
+import app.verst.core.model.dto.BigTownsDto
 import app.verst.core.model.dto.DayDto
 import app.verst.core.model.dto.StopDto
 import app.verst.core.model.dto.TripDto
@@ -640,6 +641,30 @@ private fun Intro(trip: TripDto, a: RoadActions) {
                 if (second != null) Txt(second, T.body.sm, C.camper.inkSoft, Modifier.padding(top = 2.dp).testTag("road.warning.nearest"))
             }
         }
+    }
+    trip.bigTowns?.let { b -> BigTownsCard(b, a::bigTowns) }
+}
+
+/** D-IR-34: the plan a day longer with big-town nights, offered with one tap (or, once taken, the way back). */
+@Composable
+private fun BigTownsCard(b: BigTownsDto, onTap: (Boolean) -> Unit) {
+    val text = if (b.on) stringResource(R.string.road_big_towns_on) else stringResource(R.string.road_big_towns_offer, b.nights.joinToString(", "))
+    val action = if (b.on) stringResource(R.string.road_big_towns_back, days(b.days)) else stringResource(R.string.road_big_towns_take)
+    Row(
+        Modifier.fillMaxWidth().padding(end = CraftDefaults.ShadowX).craftSurface()
+            .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+            .testTag("road.bigtowns"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Txt(text, T.body.md, C.camper.ink, Modifier.weight(1f))
+        Box(
+            Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clip(RoundedCornerShape(DesignTokens.radius.r10))
+                .clickable(role = Role.Button) { onTap(!b.on) }
+                .padding(horizontal = 10.dp)
+                .testTag(if (b.on) "road.bigtowns.back" else "road.bigtowns.take"),
+            contentAlignment = Alignment.Center,
+        ) { Txt(action, T.body.mdStrong, C.camper.orangeText, maxLines = 1) }
     }
 }
 

@@ -90,6 +90,8 @@ class TripInputIn(Request):
     simplify: StrictBool | None = None
     # CEO 03.11: lunch at roadside cafés too (default: yes without children, town cafés only with a child)
     roadsideFood: StrictBool | None = None
+    # D-IR-34: «+1 день, ночёвки в больших городах» taken on «Дорога»
+    bigTowns: StrictBool | None = None
 
     def engine_json(self) -> dict[str, Any]:
         return self.model_dump(exclude_unset=True)

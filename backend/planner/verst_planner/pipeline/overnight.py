@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 from verst_planner.domain.enums import OvernightFallback, Tag, WarningCode
 from verst_planner.domain.facts import rank_rating
 from verst_planner.domain.model import (
+    BigTowns,
     Candidate,
     NormalizedInput,
     OvernightChoice,
@@ -34,6 +35,8 @@ W_PRICE = 0.5  # ADR-0011 `lodging_cheap`: score points per 1 000 ₽ of the che
 class OvernightResult:
     choices: list[OvernightChoice]
     warnings: list[PlanWarning] = field(default_factory=list)
+    big_towns: BigTowns | None = None
+    """D-IR-34: the other split (more big-town nights and a day longer, or the shorter one)."""
 
     @property
     def n_days(self) -> int:
@@ -237,10 +240,77 @@ def windows(
     return target, lo, hi, lo2, hi2
 
 
+SPLIT_SEARCH_BUDGET = 300
+"""Alternative overnights tried in all when the greedy split leaves a later day without a town (04.11)."""
+
+
+def _search(
+    d: int, prev: float, n_days: int, corridor: Corridor, scorer: _Scorer, budget: list[int]
+) -> tuple[list[OvernightChoice], list[PlanWarning]] | int:
+    """CEO 04.11 (Фрязино → Екатеринбург: 650 km/day gave 3 days, 700 km/day 4 with a detour): the F1/F2
+    split of boundaries `d..n_days-1` with lookahead. Each boundary tries its towns in the greedy order (F1
+    by score, F2 by closeness to the target) and keeps the first whose remaining days can be split too, so a
+    high-scoring big town that leaves no town for the next day gives way to the next one instead of costing
+    an extra day. The greedy split is always the first one tried: when it works, nothing changes. Returns the
+    failing day of the greedy path when no split exists."""
+    if d >= n_days:
+        return [], []
+    inp, ctx = scorer.inp, scorer.ctx
+    total = corridor.route.km_total
+    target, lo, hi, lo2, hi2 = windows(prev, total, n_days, d, inp.daily_km, ctx)
+    assert lo <= hi + 1e-6, f"split window empty: day {d} [{lo}, {hi}]"
+    towns = [t for t in corridor.towns if t.km_at > prev + EPS]
+    cap_hi = prev + ctx.cfg.split.hard_cap * inp.daily_km
+    f1 = [
+        t
+        for t in towns
+        if (
+            lo - EPS <= t.km_at <= hi + EPS
+            or (anchor(t, ctx) and lo - EPS <= t.km_at and _into_town_km(t, ctx) <= cap_hi + EPS)
+        )
+        and scorer.passing(t)
+    ]
+    if f1:
+        scored = [(t, scorer.score(t, target, prev, d)) for t in f1]
+        ordered = sorted(
+            scored,
+            key=lambda x: (round(x[1].score, 9), -abs(x[0].km_at - target), _neg(x[0].town.id)),
+            reverse=True,
+        )
+        fallback = OvernightFallback.NONE
+    else:
+        f2 = [t for t in towns if lo2 - EPS <= t.km_at <= hi2 + EPS and scorer.passing(t)]
+        if not f2:
+            return d
+        scored = [(t, scorer.score(t, target, prev, d)) for t in f2]
+        ordered = sorted(
+            scored, key=lambda x: (abs(x[0].km_at - target), -round(x[1].score, 9), x[0].town.id)
+        )
+        fallback = OvernightFallback.WIDENED
+    first_fail: int | None = None
+    for i, (tc, st) in enumerate(ordered):
+        if i > 0:
+            if budget[0] <= 0:
+                break
+            budget[0] -= 1
+        rest = _search(d + 1, tc.km_at, n_days, corridor, scorer, budget)
+        if isinstance(rest, int):
+            first_fail = rest if first_fail is None else first_fail
+            continue
+        choice = _choice(d, tc, scorer, [x[1] for x in scored], fallback, st.score, target)
+        choice.day_start_km = prev
+        widened = fallback is OvernightFallback.WIDENED
+        warnings = [_no_lodging(ctx, choice, "widened", corridor)] if widened else []
+        return [choice, *rest[0]], warnings + rest[1]
+    return first_fail if first_fail is not None else d
+
+
 def _try_split(
     n_days: int, allow_f4: bool, corridor: Corridor, scorer: _Scorer
 ) -> tuple[list[OvernightChoice], list[PlanWarning]] | int:
     """The split, or the 1-based day whose boundary has no passing town (F1/F2 failed, F4 not allowed)."""
+    if not allow_f4:
+        return _search(1, 0.0, n_days, corridor, scorer, [SPLIT_SEARCH_BUDGET])
     inp, ctx = scorer.inp, scorer.ctx
     total = corridor.route.km_total
     prev = 0.0
@@ -362,6 +432,13 @@ def choose_overnights(
     ctx: PlanContext,
     profile: Profile | None = None,
 ) -> OvernightResult:
+    """The overnights of an `n`-day split (D-IR-34, CEO 04.11).
+
+    The greedy split (the best-scored town every evening) is kept when it fits in `n` days. When it does
+    not (a big town early leaves a later evening without a town), the lookahead split still fits `n` days
+    and is the plan; the greedy `n + 1` split with its big-town nights is offered as `BigTowns` (one tap
+    on «Дорога» re-plans with `inp.big_towns`). Without a lookahead split the extra day is the plan, as
+    before; without either, F4 (a night without a passing hotel)."""
     prof = profile or ctx.profile_for(corridor.route)
     scorer = _Scorer(corridor, inp, ctx, prof)
     if split.fixed:
@@ -369,21 +446,50 @@ def choose_overnights(
     n = split.n_days
     if n == 1:
         return OvernightResult([])
-    first = _try_split(n, False, corridor, scorer)
-    if not isinstance(first, int):
-        return OvernightResult(*first)
-    failed_day = first
-    if n + 1 <= ctx.cfg.max_days:
-        extra = _try_split(n + 1, False, corridor, scorer)
-        if not isinstance(extra, int):
-            choices, warnings = extra
-            idx = min(failed_day, len(choices)) - 1
-            choices[idx].fallback = OvernightFallback.EXTRA_DAY
-            warnings.append(_no_lodging(ctx, choices[idx], "extra_day", corridor))
-            return OvernightResult(choices, sorted(warnings, key=lambda w: w.day or 0))
-    final = _try_split(n, True, corridor, scorer)
-    assert not isinstance(final, int)
-    return OvernightResult(*final)
+    greedy = _search(1, 0.0, n, corridor, scorer, [0])
+    if not isinstance(greedy, int):
+        return OvernightResult(*greedy)
+    extra = _extra_day(n, greedy, corridor, scorer)
+    short = _try_split(n, False, corridor, scorer)
+    if isinstance(short, int):
+        if extra is not None:
+            return extra
+        final = _try_split(n, True, corridor, scorer)
+        assert not isinstance(final, int)
+        return OvernightResult(*final)
+    if extra is None or not _more_big_towns(extra.choices, short[0], ctx):
+        return OvernightResult(*short)
+    if inp.big_towns:
+        extra.warnings = [w for w in extra.warnings if not w.detail.startswith("extra_day")]
+        extra.big_towns = BigTowns(on=True, days=n, nights=_night_names(short[0]))
+        return extra
+    offer = BigTowns(on=False, days=n + 1, nights=_night_names(extra.choices))
+    return OvernightResult(*short, big_towns=offer)
+
+
+def _extra_day(n: int, failed_day: int, corridor: Corridor, scorer: _Scorer) -> OvernightResult | None:
+    """The `n + 1`-day split (greedy first), the night after the failed boundary marked EXTRA_DAY."""
+    if n + 1 > scorer.ctx.cfg.max_days:
+        return None
+    extra = _try_split(n + 1, False, corridor, scorer)
+    if isinstance(extra, int):
+        return None
+    choices, warnings = extra
+    idx = min(failed_day, len(choices)) - 1
+    choices[idx].fallback = OvernightFallback.EXTRA_DAY
+    warnings.append(_no_lodging(scorer.ctx, choices[idx], "extra_day", corridor))
+    return OvernightResult(choices, sorted(warnings, key=lambda w: w.day or 0))
+
+
+def _more_big_towns(extra: list[OvernightChoice], short: list[OvernightChoice], ctx: PlanContext) -> bool:
+    """The extra day is worth offering only when it sleeps in a big town the shorter plan passes by."""
+    big = ctx.cfg.overnight_score.big_town_population
+    short_ids = {c.town.id for c in short if c.town is not None}
+    return any(c.town is not None and c.town.population >= big and c.town.id not in short_ids for c in extra)
+
+
+def _night_names(choices: list[OvernightChoice]) -> tuple[str, ...]:
+    return tuple(c.name_ru for c in choices)
 
 
 def _from_template(split: DaySplit, scorer: _Scorer) -> OvernightResult:

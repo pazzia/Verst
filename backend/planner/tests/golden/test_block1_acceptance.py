@@ -64,9 +64,18 @@ class Block1AcceptanceTest(unittest.TestCase):
 
     def test_k1_k2_v1_moscow_kazan_children(self) -> None:
         """Москва → Казань, 2 adults + 7 and 12, 300 km/day, «весело и познавательно», no budget."""
-        trip = plan({"origin": MSK, "destination": KAZAN, "crew": KIDS, "dailyKm": 300, "mood": "fun"})
+        inp = {"origin": MSK, "destination": KAZAN, "crew": KIDS, "dailyKm": 300, "mood": "fun"}
+        short = plan(inp)
+        self.check_k1(short)
+        # D-IR-34: the plan keeps the days of the norm; the big-town nights are offered a day longer
+        offer = short["bigTowns"]
+        self.assertEqual((offer["on"], offer["days"]), (False, short["days"] + 1))
+        self.assertEqual(offer["nights"][:2], ["Владимир", "Нижний Новгород"])
+        trip = plan({**inp, "bigTowns": True})
         self.check_k1(trip)
-        self.assertEqual(nights(trip)[:2], ["Владимир", "Нижний Новгород"])
+        self.assertEqual(nights(trip), offer["nights"])
+        self.assertEqual(trip["bigTowns"], {"on": True, "days": short["days"], "nights": nights(short)})
+        self.assertNotIn("no_lodging", [w["code"] for w in trip["warnings"]])  # the extra day was chosen
         for d in trip["daysList"][:-1]:
             evening = [s for s in d["stops"] if s["reason"].startswith("Вечер в городе ночёвки")]
             if d["stops"][-1]["arriveAt"][11:] < "14:00":
@@ -79,6 +88,26 @@ class Block1AcceptanceTest(unittest.TestCase):
                     CFG.town_visit.radius_km + 2.0,
                 )
 
+    def test_more_km_a_day_never_adds_a_day(self) -> None:
+        """CEO 04.11: Фрязино → Екатеринбург, 4 adults + a child, «спокойно»: 650 km/day gave 3 days and
+        700 km/day 4 (a big town on day 1 left day 2 without a town). D-IR-34: the days never grow with the
+        norm; a longer big-town plan is offered, never forced."""
+        inp = {
+            "origin": {"lat": 55.9606, "lon": 38.0456, "label": "Фрязино"},
+            "destination": {"lat": 56.8389, "lon": 60.6057, "label": "Екатеринбург"},
+            "crew": {"adults": 4, "children": 1, "childAges": [8]},
+            "mood": "calm",
+        }
+        days = []
+        for km in range(500, 851, 50):
+            trip = plan({**inp, "dailyKm": km})
+            days.append(trip["days"])
+            offer = trip.get("bigTowns")
+            if offer is not None:
+                self.assertEqual((offer["on"], offer["days"]), (False, trip["days"] + 1), km)
+        self.assertEqual(days, sorted(days, reverse=True), days)
+        self.assertEqual(days[3:5], [3, 3])  # 650 and 700 km/day
+
     def test_v2_budget_fit_says_the_raised_norm(self) -> None:
         trip = plan(
             {
@@ -88,6 +117,7 @@ class Block1AcceptanceTest(unittest.TestCase):
                 "dailyKm": 300,
                 "budget": 40000,
                 "mood": "fun",
+                "bigTowns": True,  # D-IR-34: the shorter plan fits 40 000 ₽ without the fitter
             }
         )
         self.check_k1(trip)

@@ -85,6 +85,7 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import app.verst.core.model.RuFormat
 import app.verst.core.model.dto.AlternativeDto
+import app.verst.core.model.dto.BigTownsDto
 import app.verst.core.model.dto.DayDto
 import app.verst.core.model.dto.StopDto
 import app.verst.core.model.dto.TripDto
@@ -179,6 +180,9 @@ interface RoadActions {
     fun undo()
     /** «Выбрать отель →» on a night row → 5.7 for that night. */
     fun hotel(stopId: String)
+
+    /** D-IR-34: «+1 день» (true) / «Как было» (false) — the trip planned again with or without the big-town nights. */
+    fun bigTowns(on: Boolean) = Unit
 
     /** 5.13 hand-off: the day link opens the day menu; the D-5 stop menu. */
     fun dayNavigator(day: Int) = Unit
@@ -727,6 +731,31 @@ private fun Intro(trip: TripDto, ui: RoadUi, a: RoadActions) {
                 }
             }
         }
+        trip.bigTowns?.let { b -> BigTownsPlate(b, a::bigTowns) }
+    }
+}
+
+/** D-IR-34: the plan a day longer with big-town nights, offered with one tap (or, once taken, the way back). */
+@Composable
+private fun BigTownsPlate(b: BigTownsDto, onTap: (Boolean) -> Unit) {
+    val text = if (b.on) stringResource(R.string.road_big_towns_on) else stringResource(R.string.road_big_towns_offer, b.nights.joinToString(", "))
+    val action = if (b.on) stringResource(R.string.road_big_towns_back, days(b.days)) else stringResource(R.string.road_big_towns_take)
+    Row(
+        Modifier.fillMaxWidth().padding(top = 4.dp)
+            .border(DesignTokens.stroke.w1, C.navi.label, RoundedCornerShape(DesignTokens.radius.r10))
+            .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+            .testTag("road.bigtowns"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Txt(text, T.body.md, C.text.primary, Modifier.weight(1f))
+        Box(
+            Modifier.defaultMinSize(minHeight = DesignTokens.size.touchMin).clip(RoundedCornerShape(DesignTokens.radius.r10))
+                .clickable(role = Role.Button) { onTap(!b.on) }
+                .padding(horizontal = 10.dp)
+                .testTag(if (b.on) "road.bigtowns.back" else "road.bigtowns.take"),
+            contentAlignment = Alignment.Center,
+        ) { Txt(action, T.body.mdStrong, C.navi.label, maxLines = 1) }
     }
 }
 

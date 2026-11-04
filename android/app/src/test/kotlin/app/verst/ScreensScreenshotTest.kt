@@ -943,6 +943,22 @@ class ScreensScreenshotTest {
     }
 
     @Test
+    fun roadBigTownsOffer() {
+        // D-IR-34 (CEO 04.11): the shorter plan, the big-town nights offered a day longer with one tap
+        val trip = snapshot("G02_golden_ring")
+        val offer = app.verst.core.model.dto.BigTownsDto(on = false, days = trip.days + 1, nights = listOf("Владимир", "Нижний Новгород", "Чебоксары"))
+        var taken: Boolean? = null
+        val actions = object : RoadActions by noRoad {
+            override fun bigTowns(on: Boolean) {
+                taken = on
+            }
+        }
+        shot("road", "big-towns-offer") { RoadScreen(RoadUi(trip.copy(bigTowns = offer), "NE"), actions) }
+        compose.onNodeWithTag("road.bigtowns.take").performScrollTo().performClick()
+        assertEquals(true, taken)
+    }
+
+    @Test
     fun roadMinimumOver() {
         val trip = snapshot("G02_golden_ring")
         val budgeted = trip.copy(cost = trip.cost.copy(budgetRub = 40_000, overBudget = false))

@@ -2,6 +2,7 @@ package app.verst.core.model
 
 import java.io.File
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -59,6 +60,9 @@ class EngineJsonTest {
         assertEquals("rr_golden_ring", r["readyRouteId"]!!.jsonPrimitive.content)
         assertEquals("calm", r["mood"]!!.jsonPrimitive.content)
         assertTrue(!r.containsKey("destination"))
+        // D-IR-34: «+1 день, ночёвки в больших городах» is sent only when taken
+        assertTrue(!body.containsKey("bigTowns"))
+        assertEquals(true, Json.parseToJsonElement(free.copy(bigTowns = true).toInputJson()).jsonObject["bigTowns"]!!.jsonPrimitive.boolean)
     }
 
     @Test

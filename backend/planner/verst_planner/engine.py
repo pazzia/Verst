@@ -368,6 +368,8 @@ class Planner:
             ctx,
             engine_state(profile, region_kms, toll_hits, views, corridor, ctx),
         )
+        if nights.big_towns is not None:
+            plan = dataclasses.replace(plan, big_towns=nights.big_towns)
         return self._finished(plan, ctx)
 
     # ------------------------------------------------------------------------------------- extension hooks

@@ -131,6 +131,8 @@ class TripInput:
     roadside_food: bool | None = None
     """CEO 03.11: lunch at roadside cafés too. None = the crew default (`roadside_food_default`): yes
     without children; with a child only town cafés (a roadside café may have no proper toilet)."""
+    big_towns: bool = False
+    """D-IR-34: the traveller took «+1 день, ночёвки в больших городах» on «Дорога»."""
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -153,6 +155,7 @@ class NormalizedInput:
     simplify: bool
     tz: str
     roadside_food: bool = True
+    big_towns: bool = False
 
 
 # ---------------------------------------------------------------- 4.4 place DB read models
@@ -844,6 +847,19 @@ class BudgetFit:
 
 
 @dataclass(frozen=True, slots=True)
+class BigTowns:
+    """D-IR-34 (CEO 04.11): the other overnight split of the same trip.
+
+    `on=False`: the plan is the shorter split; `days`/`nights` are the offered plan a day longer with nights
+    in big towns. `on=True`: the plan is that longer split (`TripInput.big_towns`); `days`/`nights` are the
+    shorter plan to go back to."""
+
+    on: bool
+    days: int
+    nights: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class TripPlan:
     title_ru: str
     km: int
@@ -861,6 +877,8 @@ class TripPlan:
     """The route is synthetic (ADR-0012 §4): distances and times are estimates («≈»)."""
     budget_fit: BudgetFit | None = None
     """ADR-0011: set when the first plan exceeded the budget and the fitter changed the trip."""
+    big_towns: BigTowns | None = None
+    """D-IR-34: the other overnight split; JSON `bigTowns`, absent when there is none (goldens keep bytes)."""
     abroad: Mapping[str, Any] | None = None
     """CEO 29.10 (server only): the part of the trip outside Russia — km, fuel and fees in the local currency
     (dated, sourced, «не проверено»), what is unknown, and whether the rouble total is incomplete. JSON

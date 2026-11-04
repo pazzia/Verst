@@ -148,6 +148,7 @@ import app.verst.nav.pickCityPace
 import app.verst.nav.pickReportReason
 import app.verst.nav.preciseLocation
 import app.verst.nav.refit
+import app.verst.nav.bigTowns
 import app.verst.nav.reportFromCard
 import app.verst.nav.saveWalk
 import app.verst.nav.selectCityPreset
@@ -572,6 +573,7 @@ private fun Screens(flow: VerstFlow, context: Context) {
                         override fun closeReplace() = flow.closeReplace()
                         override fun undo() = flow.undo()
                         override fun hotel(stopId: String) = flow.openExit(stopId)
+                        override fun bigTowns(on: Boolean) = flow.bigTowns(on)
                         override fun dayNavigator(day: Int) = flow.openDayMenu(day)
                         override fun dayMenuGo() = flow.dayMenuGo()
                         override fun closeDayMenu() = flow.closeDayMenu()

@@ -30,6 +30,7 @@ from verst_planner.domain.errors import InvalidInput
 from verst_planner.domain.model import (
     Alternative,
     AltUnits,
+    BigTowns,
     BudgetFit,
     BudgetLever,
     CandidateState,
@@ -126,6 +127,7 @@ _INPUT_KEYS = frozenset(
         "reserveOn",
         "simplify",
         "roadsideFood",
+        "bigTowns",
     }
 )
 _POINT_KEYS = frozenset({"lat", "lon", "label", "placeId", "townId"})
@@ -295,6 +297,7 @@ def input_from_json(d: Mapping[str, Any]) -> TripInput:
         reserve_on=_bool_field(d, "reserveOn", True),
         simplify=_bool_field(d, "simplify", False),
         roadside_food=None if d.get("roadsideFood") is None else _bool_field(d, "roadsideFood", True),
+        big_towns=_bool_field(d, "bigTowns", False),
     )
 
 
@@ -314,7 +317,12 @@ def input_to_json(i: TripInput) -> Json:
         "avoidTolls": i.avoid_tolls,
         "reserveOn": i.reserve_on,
         "simplify": i.simplify,
-    } | ({} if i.roadside_food is None else {"roadsideFood": i.roadside_food})
+    } | ({} if i.roadside_food is None else {"roadsideFood": i.roadside_food}) | _big_towns_key(i.big_towns)
+
+
+def _big_towns_key(on: bool) -> Json:
+    """D-IR-34: only when taken (the goldens keep their bytes)."""
+    return {"bigTowns": True} if on else {}
 
 
 def normalized_to_json(n: NormalizedInput) -> Json:
@@ -336,7 +344,7 @@ def normalized_to_json(n: NormalizedInput) -> Json:
         "simplify": n.simplify,
     } | (  # CEO 03.11: only when it differs from the crew default (the goldens keep their bytes)
         {} if n.roadside_food == roadside_food_default(n.crew) else {"roadsideFood": n.roadside_food}
-    )
+    ) | _big_towns_key(n.big_towns)
 
 
 def normalized_from_json(d: Mapping[str, Any]) -> NormalizedInput:
@@ -359,6 +367,7 @@ def normalized_from_json(d: Mapping[str, Any]) -> NormalizedInput:
         simplify=bool(d["simplify"]),
         tz=d["tz"],
         roadside_food=bool(d.get("roadsideFood", roadside_food_default(crew))),
+        big_towns=bool(d.get("bigTowns", False)),
     )
 
 
@@ -1062,6 +1071,8 @@ def plan_to_json(p: TripPlan, public: bool = True, trip_id: str | None = None) -
         out["approxDistances"] = True  # omitted when false: the golden snapshots stay byte-identical
     if p.budget_fit is not None:
         out["budgetFit"] = budget_fit_to_json(p.budget_fit)
+    if p.big_towns is not None:  # D-IR-34
+        out["bigTowns"] = {"on": p.big_towns.on, "days": p.big_towns.days, "nights": list(p.big_towns.nights)}
     if p.abroad is not None:  # CEO 29.10: only on a trip that leaves Russia (server only)
         out["abroad"] = p.abroad
     if not public:
@@ -1102,4 +1113,7 @@ def plan_from_json(d: Mapping[str, Any]) -> TripPlan:
         approx_distances=bool(d.get("approxDistances", False)),
         budget_fit=None if d.get("budgetFit") is None else budget_fit_from_json(d["budgetFit"]),
         abroad=d.get("abroad"),
+        big_towns=None
+        if d.get("bigTowns") is None
+        else BigTowns(bool(d["bigTowns"]["on"]), int(d["bigTowns"]["days"]), tuple(d["bigTowns"]["nights"])),
     )

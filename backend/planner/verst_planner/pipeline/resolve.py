@@ -117,6 +117,7 @@ def normalize_input(raw: TripInput, ctx: PlanContext) -> NormalizedInput:
         simplify=raw.simplify,
         tz=tz,
         roadside_food=raw.roadside_food if raw.roadside_food is not None else roadside_food_default(raw.crew),
+        big_towns=raw.big_towns,
     )
 
 
