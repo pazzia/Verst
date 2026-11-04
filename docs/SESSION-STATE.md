@@ -8,6 +8,7 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 ## Now
 
 - **04.11, on the branch (not in `main`, waiting for «Сливай»):**
+  - D-IR-31 (CEO option 1): an approximate long trip asks once «Дальняя поездка — точнее на сервере»; yes = server consent + later approximate trips on the server (fallback phone); no = phone, not asked again. Engine `estimate.approx`; `PlanRequest.longTrip`; `AppSettings.longTripAsked`. Seen on the camper emulator shot 05a (Москва → Санкт-Петербург). Green on run 41834108817 (attempt 2; attempt 1 failed the catalogue budget at 2 009 ms, attempt 2 measured 501–1 532 ms: the CI emulator varies ~3x).
   - Plan audit of 20 trips on the real catalogue: `docs/review/plan-audit-2026-11-04.md`. Fixed: no open-data playground for adults (`test_real_plans.py`). Main finding: long trips on the phone run on approximate straight legs outside central Russia (no real cafés, towns or hotels along them); the server's GraphHopper does not have this. **CEO decision asked:** plan long trips on the server when online and consented.
   - Catalogue load: town food stays columns (`_FoodRows`, `food_for_towns`); a reload frees the old world first. Emulator samples: 1 575 / 1 510 / 1 018 ms and 2 037 / 1 716 / 1 207 ms (budget 2 000 ms median); reloads no longer grow. The 2x target was not reached.
   - CI actions on Node 24 (checkout v5, setup-python v6, upload-artifact v6, download-artifact v7, setup-java v5, cache v5, setup-gradle v5); green on run 41824290305, test-server green.
