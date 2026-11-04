@@ -848,8 +848,8 @@ def estimate(world: str, request_id: str, input_json: str) -> str:
         status = None
         if trip.input.budget_rub is not None:
             status = trip.budget_fit.status if trip.budget_fit is not None else "fits"
-        # CEO 04.11: `approx` = the phone's route is approximate (straight legs beyond its road graph): the app
-        # offers to plan the trip on the server, which routes over the real roads
+        # CEO 04.11: `approx` = the phone's route is approximate (straight legs beyond its road graph):
+        # the app offers to plan the trip on the server, which routes over the real roads
         return {
             "km": trip.km,
             "days": trip.days,
