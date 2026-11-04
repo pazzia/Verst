@@ -256,6 +256,8 @@ data class PlanRequest(
      * маршрут» says, and never the phone engine (it knows only Russia). Routing only: not sent to the engine.
      */
     val abroad: Boolean = false,
+    /** D-IR-34: «+1 день, ночёвки в больших городах» taken on «Дорога» (sent only when true). */
+    val bigTowns: Boolean = false,
 ) {
     fun toInputJson(): String {
         fun point(p: GeoPoint): JsonElement = buildJsonObject {
@@ -284,6 +286,7 @@ data class PlanRequest(
             }
             if (avoidTolls) put("avoidTolls", true)
             if (roadsideFood != null) put("roadsideFood", roadsideFood)
+            if (bigTowns) put("bigTowns", true)
         }
         return body.toString()
     }

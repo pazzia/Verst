@@ -1223,6 +1223,10 @@ These keys were written straight into `strings.xml` during the CEO rounds of 27�
 | `cd_border_source` | Открыть источник: {x} | |
 | `road_total_abroad_incomplete` | Итог без расходов за границей | |
 | `road_total_no_nights` | Итог без стоимости отелей | D-IR-27: a chosen hotel has no price (real OSM hotel), the total leaves the night out; replaces the «в бюджете» badge |
+| `road_big_towns_offer` | На день дольше — ночёвки в больших городах: {x} | D-IR-34: the plan keeps the days of the norm; the engine offers the split a day longer with big-town nights (nominative names, comma-separated) |
+| `road_big_towns_take` | +1 день | D-IR-34: re-plans with the big-town nights |
+| `road_big_towns_on` | Ночёвки в больших городах, на день дольше | D-IR-34: the traveller took the offer |
+| `road_big_towns_back` | Как было: {x} | D-IR-34: back to the shorter plan; {x} = «3 дня» |
 | `waybill_abroad_title` | За границей | |
 | `waybill_abroad_country` | {x} · ≈ {y} км | |
 | `waybill_abroad_fuel` | Топливо: {x} | |

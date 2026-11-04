@@ -287,6 +287,10 @@
     <string name="cd_border_source">Open the source: %1$s</string>
     <string name="road_total_abroad_incomplete">Total without the costs abroad</string>
     <string name="road_total_no_nights">Total without the hotels</string>
+    <string name="road_big_towns_offer">A day longer, with nights in big towns: %1$s</string>
+    <string name="road_big_towns_take">+1 day</string>
+    <string name="road_big_towns_on">Nights in big towns, a day longer</string>
+    <string name="road_big_towns_back">As before: %1$s</string>
     <string name="waybill_abroad_title">Abroad</string>
     <string name="waybill_abroad_country">%1$s · ≈ %2$s km</string>
     <string name="waybill_abroad_fuel">Fuel: %1$s</string>

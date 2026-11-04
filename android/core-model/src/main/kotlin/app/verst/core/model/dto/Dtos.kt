@@ -256,7 +256,16 @@ data class TripDto(
     val approxDistances: Boolean = false,
     /** CEO 29.10 (trips abroad, server only): what the trip abroad costs and what the rouble total leaves out. */
     val abroad: AbroadDto? = null,
+    /** D-IR-34: the other overnight split (offered a day longer with big-town nights, or the shorter one to go back to). */
+    val bigTowns: BigTownsDto? = null,
 )
+
+/**
+ * D-IR-34 `trip.bigTowns`. [on] = false: the plan is the shorter split and [days]/[nights] are the offered plan a day
+ * longer with big-town nights; [on] = true: the plan is that longer split and [days]/[nights] are the shorter one.
+ */
+@Serializable
+data class BigTownsDto(val on: Boolean = false, val days: Int = 0, val nights: List<String> = emptyList())
 
 @Serializable
 data class StopEventDto(val id: String? = null, val kind: String? = null, val sign: String? = null, val name: String? = null)

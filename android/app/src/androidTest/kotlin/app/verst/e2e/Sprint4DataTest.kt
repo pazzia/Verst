@@ -160,6 +160,34 @@ class Sprint4DataTest {
         waitTag("road.total", 60_000)
     }
 
+    /**
+     * CEO 04.11 (D-IR-34): Фрязино → Екатеринбург at 700 km/day keeps the 3 days of 650 km/day; the big-town nights are
+     * offered a day longer, one tap plans them, and «Как было» brings the shorter plan back.
+     */
+    @Test
+    fun s4dFryazinoEkaterinburgBigTowns() {
+        from("Фрязино", 55.9606, 38.0456)
+        planTo("Екатеринбург", Mood.CALM, child = true, dailyKm = 700)
+        val short = flow.result!!.trip
+        logTrip("bigtowns-short")
+        val offer = short.bigTowns
+        assertTrue("big-town nights offered: ${short.days} days, $offer", offer != null && !offer.on && offer.days == short.days + 1)
+        compose.onNodeWithTag("road.bigtowns.take").performScrollTo()
+        shot("160-road-big-towns-offer")
+        compose.onNodeWithTag("road.bigtowns.take").performClick()
+        compose.waitUntil(120_000) { flow.top == Route.Road && flow.result?.trip?.bigTowns?.on == true }
+        waitTag("road.total", 60_000)
+        val long = flow.result!!.trip
+        logTrip("bigtowns-long")
+        assertEquals(offer!!.days, long.days)
+        assertEquals(short.days, long.bigTowns!!.days)
+        compose.onNodeWithTag("road.bigtowns.back").performScrollTo()
+        shot("161-road-big-towns-on")
+        compose.onNodeWithTag("road.bigtowns.back").performClick()
+        compose.waitUntil(120_000) { flow.top == Route.Road && flow.result?.trip?.bigTowns?.on == false }
+        assertEquals(short.days, flow.result!!.trip.days)
+    }
+
     @Test
     fun s4dFryazinoGoldenRing() {
         from("Фрязино", 55.9606, 38.0456)

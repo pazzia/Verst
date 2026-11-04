@@ -71,6 +71,18 @@ fun VerstFlow.refit() {
     startPlan(req, planId = tripId?.takeIf { savedId == null } ?: UUID.randomUUID().toString())
 }
 
+/**
+ * D-IR-34: «+1 день» (true) plans the same trip a day longer with big-town nights; «Как было» (false) plans the shorter
+ * one again → Drive, as [refit].
+ */
+fun VerstFlow.bigTowns(on: Boolean) {
+    val req = resultRequest ?: lastPlanRequest ?: return
+    val i = stack.lastIndexOf(Route.Road)
+    if (i >= 0) while (stack.size > i) stack.removeAt(stack.lastIndex)
+    push(Route.Drive)
+    startPlan(req.copy(bigTowns = on), planId = tripId?.takeIf { savedId == null } ?: UUID.randomUUID().toString())
+}
+
 /** Instruments caption: the engine's budget verdict for the current draft (`estimate.outcome`). */
 val VerstFlow.budgetEstimate: EstimateDto?
     get() = draft()?.let { estimates[it] }?.takeIf { it.outcome != null && request().budgetRub != null }

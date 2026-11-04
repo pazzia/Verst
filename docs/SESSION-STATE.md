@@ -7,7 +7,9 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 
 ## Now
 
+- **Day-split bug (D-IR-34, 04.11, `83a2803`, on the branch, not merged):** Фрязино → Екатеринбург gave 3 days at 650 km/day and 4 at 700. Fix: lookahead split keeps the days of the norm; the longer big-town plan is `trip.bigTowns` and «+1 день» on Road (both designs) re-plans with `bigTowns: true`; «Как было: N дня» goes back. Tests: `test_more_km_a_day_never_adds_a_day`, K2 updated (Москва → Казань with children now 3 days, Владимир/Нижний/Чебоксары offered), screenshot `road/big-towns-offer`, emulator `s4dFryazinoEkaterinburgBigTowns` (shots 160/161). Local: `make check` 652 OK, API 130 OK, contracts unchanged. Green on 0.3.217 (run 41883855242; planner, api green): seen on camper emulator shots 160 (offer, 3 days 2 079 km 22 600 ₽) and 161 (taken: 4 days Нижний/Йошкар-Ола/Ижевск, 28 600 ₽, «Как было: 3 дня»), classic unit shot `road/big-towns-offer`. Reported to the CEO; waiting for «Сливай», then ask before `update` (D-IR-30).
 - **Release 0.3.216 (04.11, PR #10 `7cdfe4e`):** verst-latest; the test server runs `7cdfe4e` since 18:26 MSK (update asked and approved; ~14 s downtime, no errors).
+- **Test server on `ef8bced` (PR #12, 19:45 MSK, no restart):** `errors` prints a summary only (public logs); the update kept the running image as the rollback target, so `rollback` works from now on. `spike01` is manual-only. The repository stays public (CEO 04.11).
 - **Rollback (D-IR-33, PR #11 `81e43ee`):** merged; the server ran `update` at 19:06 MSK (no code change, the api was not recreated). The next `update` keeps a rollback image. `spike01` runs on any change of `spike.yml` (the Node 24 bump started it): ask the CEO whether to make it manual-only.
 - **04.11, merged in PR #10:**
   - D-IR-31 (CEO option 1): an approximate long trip asks once «Дальняя поездка — точнее на сервере»; yes = server consent + later approximate trips on the server (fallback phone); no = phone, not asked again. Engine `estimate.approx`; `PlanRequest.longTrip`; `AppSettings.longTripAsked`. Seen on the camper emulator shot 05a (Москва → Санкт-Петербург). Green on run 41834108817 (attempt 2; attempt 1 failed the catalogue budget at 2 009 ms, attempt 2 measured 501–1 532 ms: the CI emulator varies ~3x).
@@ -45,16 +47,17 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 ## Waiting on the CEO
 
 1. **SSH: key login, then no password for root** (the repo is public, the server takes root passwords). Steps in `docs/ops/test-server.md` §6; the CEO will do it later from a computer.
-2. «Сливай» for the `errors` summary (no message text in public logs, `f204fac`), and an answer: `spike01` manual-only?
-3. Register at Travelpayouts and put `VERST_TP_TOKEN/MARKER/TRS` into the server `.env` (`docs/partners/hotel-affiliate.md` §4).
-4. Decisions:
+2. Register at Travelpayouts and put `VERST_TP_TOKEN/MARKER/TRS` into the server `.env` (`docs/partners/hotel-affiliate.md` §4).
+3. Decisions:
    - legal entity, D-IR-09;
    - a lawyer on the «Реклама» label at the booking button (R-05);
    - a server in Russia before the beta.
-5. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
-6. The Yandex Navigator signing key: **not yet** (D-IR-17). The form asks for a company, a site and a store link. It comes after the legal entity, the domain and RuStore, before the closed beta.
+4. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
+5. The Yandex Navigator signing key: **not yet** (D-IR-17). The form asks for a company, a site and a store link. It comes after the legal entity, the domain and RuStore, before the closed beta.
 
 ## Next (when the CEO says)
+
+- **Next after the planning bug (CEO 04.11): Ostrovok (ETG) hotel prices** via the ETG Affiliate API (a test key comes on registration; production after certification). The CEO registers at ETG («API Integration») and puts the key in GitHub Secrets; the session needs `docs.emergingtravel.com` and `api.worldota.net` allowed. Optional: a Travelpayouts request for the Yandex Travel API (they ask 5 000 MAU). Research with sources: the 04.11 chat; Hotellook closed 20.10.2025.
 
 - Ostrovok links for overnights abroad (6 % vs 3 %), after checking its URL template on a real link.
 - 2GIS in the hand-off choice for Kazakhstan, Uzbekistan and Kyrgyzstan.

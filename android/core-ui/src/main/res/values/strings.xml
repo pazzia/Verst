@@ -883,6 +883,10 @@
     <string name="cd_border_source">Открыть источник: %1$s</string>
     <string name="road_total_abroad_incomplete">Итог без расходов за границей</string>
     <string name="road_total_no_nights">Итог без стоимости отелей</string>
+    <string name="road_big_towns_offer">На день дольше — ночёвки в больших городах: %1$s</string>
+    <string name="road_big_towns_take">+1 день</string>
+    <string name="road_big_towns_on">Ночёвки в больших городах, на день дольше</string>
+    <string name="road_big_towns_back">Как было: %1$s</string>
     <string name="waybill_abroad_title">За границей</string>
     <string name="waybill_abroad_country">%1$s · ≈ %2$s км</string>
     <string name="waybill_abroad_fuel">Топливо: %1$s</string>
