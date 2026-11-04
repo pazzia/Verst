@@ -54,8 +54,8 @@ jobs:
       run:
         working-directory: backend/api
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install pinned dependencies (hashes required)
@@ -76,7 +76,7 @@ jobs:
     timeout-minutes: 20
     needs: test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build the image (context = repository root)
         run: docker build -f infra/api/Dockerfile -t verst-api:ci .
       - name: Runs as non-root and imports the app

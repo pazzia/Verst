@@ -41,7 +41,7 @@ jobs:
     env:
       HOST: 212.108.82.26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Action
         id: pick
         env:

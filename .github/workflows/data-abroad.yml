@@ -67,7 +67,7 @@ jobs:
       version: ${{ steps.m.outputs.version }}
       from_run: ${{ steps.m.outputs.from_run }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - id: m
         env:
           IN_COUNTRIES: ${{ inputs.countries }}
@@ -115,8 +115,8 @@ jobs:
       FIRST: ${{ github.workspace }}/data-first
       VERSION: ${{ needs.plan.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: |
@@ -230,7 +230,7 @@ jobs:
           cp -f "$RAW"/class_check.json "$RAW"/country_check.json "$RAW"/forms_report.json "$RAW"/pois_failed.json \
             "$RAW"/log.txt "$GITHUB_WORKSPACE/out/report/$CCL/" 2>/dev/null || true
           tar -C "$RAW" -czf "$GITHUB_WORKSPACE/raw-$CCL.tar.gz" --exclude log.txt .
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: abroad-${{ matrix.cc }}
@@ -253,8 +253,8 @@ jobs:
       RAW: ${{ github.workspace }}/data-raw
       RES: backend/planner/verst_planner/resources
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Parks of the shipped Russian catalogue (Geofabrik russia-latest + osmium)
@@ -271,7 +271,7 @@ jobs:
           cp "$RES/catalogue_parks.json.gz" "$T/catalogue_parks.lock" ru-parks/
           gzip -9n -c "$RAW/parks.json" > ru-parks/parks.json.gz
           cp "$RAW/log.txt" ru-parks/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: ru-parks
@@ -286,8 +286,8 @@ jobs:
     env:
       ABROAD: backend/planner/abroad
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         if: ${{ needs.plan.outputs.matrix != '' || needs.plan.outputs.from_run != '' }}
         with:
           pattern: abroad-*
@@ -295,7 +295,7 @@ jobs:
           path: dl
           run-id: ${{ needs.plan.outputs.from_run || github.run_id }}
           github-token: ${{ github.token }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: ru-parks
