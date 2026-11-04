@@ -1,0 +1,31 @@
+# CEO 04.11: curated sight → Wikidata item and its Commons photo, reviewed by hand from data-links.yml run 1
+# (bot/links-1). Same place by name, town and kind; free licence only (GFDL-only rejected, R-10).
+# fixture_id	qid	commons_file	author	licence	licence_url	note
+pl_prs_goritsky	Q4144213	Gm-trapeznaa-0772.jpg	PereslavlFoto	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Горицкий Успенский монастырь, Переславль
+pl_prs_pleshcheevo	Q997762	Переславль-шелапутин-2014-9158-панорама.jpg	Игорь Шелапутин	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Плещеево озеро
+pl_iva_sitets	Q13668647	Музей ивановского ситца (дом Д.Г. Бурылина).jpg	Ангелок	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Музей ивановского ситца (тот же объект, что pl_iva_chintz)
+pl_vla_nerl	Q1051458	Речная церковь.jpg	E.3	CC0	http://creativecommons.org/publicdomain/zero/1.0/deed.en	Церковь Покрова на Нерли
+pl_gor_old_town	Q134528	View on Gorokhovets town.JPG	Bestalex	CC BY-SA 3.0	http://creativecommons.org/licenses/by-sa/3.0/	Гороховец — историческое поселение (старый город)
+pl_chb_bay	Q3633069	Cheboksary-Bey.jpg	Георгий Долгопский	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Чебоксарский залив
+pl_zel_sviyazhsk	Q78467200	Троицкая улица Свияжска, 2019-01-03.jpg	Евгений Катышев	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Остров-град Свияжск
+pl_tam_aseev	Q24931497	Дом Асеева.JPG	L9202322794	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Усадьба Асеевых, Тамбов
+pl_vgg_mamaev	Q820002	Mamaev kurgan (ОКН).JPG	Администрация Волгоградской области	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Мамаев курган
+pl_tul_yasnaya	Q749556	Tula YasnayaPolyana asv2019-09 img04 orchard.jpg	A.Savin	FAL	http://artlibre.org/licence/lal/en	Ясная Поляна, музей-усадьба
+pl_prs_botik	Q4095162	Botik 2846.jpg	PereslavlFoto	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Ботик Петра I (музей-усадьба)
+pl_prs_blue_stone	Q4420279	Синий камень (закатно).JPG	Elena shlykova	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Синий камень (валун)
+pl_yar_tolchkovo	Q2084804	St. John the Baptist Church, Yaroslavl.JPG	David Gilchrist	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Церковь Иоанна Предтечи в Толчкове
+pl_kos_rows	Q4461032	Traderows-red-kostroma.jpg	A.Savin	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Торговые ряды (Кострома)
+pl_pok_monastery	Q4411352	Введенский монастырь отражение.jpg	Алексей Задонский	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Свято-Введенский Островной монастырь у Покрова
+pl_nnv_pokrovka	Q4091587	Bolshaya Pokrovskaya Street (June 2024) - 3.jpg	Vyacheslav Bukharov	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Большая Покровская улица
+pl_chb_embankment	Q3902288	RedSquare-2006-04-08.jpg	Nickolay Plotnickov (PCode)	Public domain		Красная площадь, Чебоксары
+pl_mch_bogolyubsky	Q4089564	Michurinsk Cathedral 0564.jpg	Ludvig14	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Боголюбский собор (Мичуринск)
+pl_ser_vladychny	Q4105619	Serpukhov VladychnyMonastery Cathedral 003 3644.jpg	Ludvig14	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Введенский Владычный монастырь, Серпухов
+pl_tul_gingerbread	Q4306089	Tula Pryanik Museum.jpg	Celest	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Музей «Тульский пряник»
+pl_tul_belousov	Q4504336	Тула. Центральный парк имени Белоусова.jpg	Sergey Sebelev	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	ЦПКиО им. П. П. Белоусова — Белоусовский парк
+pl_prs_fedorovsky	Q4482750	C-vvedenskaa-6360.jpg	PereslavlFoto	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Феодоровский монастырь (Переславль-Залесский)
+pl_kos_fire_tower	Q2081938	Fire Tower in Kostroma.jpg	WASD	CC BY-SA 3.0	https://creativecommons.org/licenses/by-sa/3.0	Костромская пожарная каланча
+pl_kos_park	Q138781245	Вход в ПКиО, аллея к Ленину.jpg	Vsatinet	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Центральный парк культуры и отдыха (Кострома)
+pl_nnv_rozhdestvenskaya	Q4396177	Streets in Nizhny Novgorod (June 2024) - 9.jpg	Vyacheslav Bukharov	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Рождественская улица, Нижний Новгород
+pl_nnv_fedorovsky	Q97198026	NN 30-06-2022 Fedorovsky Embankment.jpg	Алексей Трефилов	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Набережная Федоровского
+pl_chb_park	Q4290264	Мемориальный парк «Победа».jpg	Vano111ru	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Мемориальный парк «Победа», Чебоксары
+pl_tul_embankment	Q60850576	Тульский кремль и набережная, 20190908.jpg	Bok	CC BY-SA 4.0	https://creativecommons.org/licenses/by-sa/4.0	Казанская набережная — набережная Упы у кремля

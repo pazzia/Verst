@@ -224,6 +224,22 @@ class BuilderRulesTest(unittest.TestCase):
         self.assertEqual(self.b.poi_name("Собор (Москва)", "Казань"), "Собор (Москва)")
 
 
+class CuratedLinksTest(unittest.TestCase):
+    """CEO 04.11 («картинок нет»): the reviewed links of `curated_wikidata.tsv` are in the shipped meta, so a
+    rebuild (which reads the same table) and the shipped catalogue agree; no GFDL-only photo (R-10)."""
+
+    def test_table_is_in_the_shipped_meta(self) -> None:
+        b = builder()
+        rows = b.curated_links()
+        self.assertGreaterEqual(len(rows), 28)
+        meta = cat.load_gz((Path(resources.__file__).parent / cat.FILES["meta"]).read_bytes(), "meta")
+        for fid, link in rows.items():
+            got = meta["links"][fid]
+            self.assertEqual((got["wikidata"], got["image"]), (link["wikidata"], link["image"]), fid)
+            self.assertEqual(meta["credits"][got["credit"]]["licence"], link["credit"]["licence"], fid)
+            self.assertFalse(b.gfdl_only(link["credit"]["licence"]), fid)
+
+
 class BuilderTest(unittest.TestCase):
     docs: dict[str, dict[str, Any]]
     b: Any

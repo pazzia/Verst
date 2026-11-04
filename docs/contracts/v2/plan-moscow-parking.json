@@ -169,7 +169,7 @@
            "poiKind": "monastery",
            "poiKindRu": "Монастырь",
            "whyRu": null,
-           "photoSource": null,
+           "photoSource": "p18",
            "placeSource": "curated",
            "placeAttributionRu": null
           },
@@ -553,7 +553,7 @@
            "poiKind": "museum",
            "poiKindRu": "Музей",
            "whyRu": null,
-           "photoSource": null,
+           "photoSource": "p18",
            "placeSource": "curated",
            "placeAttributionRu": null
           },
@@ -2659,15 +2659,6 @@
        "regionCode": "RU-TUL"
       },
       {
-       "placeId": "Q4306089",
-       "kmAt": 180.97185618592442,
-       "lateralKm": 0.6530718234103008,
-       "detourKm": 1.6979867408667821,
-       "detourMin": 10,
-       "roadClass": "motorway",
-       "regionCode": "RU-TUL"
-      },
-      {
        "placeId": "Q4465264",
        "kmAt": 181.28175547843284,
        "lateralKm": 0.42990350202880917,
@@ -2682,6 +2673,15 @@
        "lateralKm": 0.1609012938668708,
        "detourKm": 0.4183433640538641,
        "detourMin": 0,
+       "roadClass": "motorway",
+       "regionCode": "RU-TUL"
+      },
+      {
+       "placeId": "Q131678068",
+       "kmAt": 181.7122325375049,
+       "lateralKm": 3.5982424304769483,
+       "detourKm": 9.355430319240066,
+       "detourMin": 21,
        "roadClass": "motorway",
        "regionCode": "RU-TUL"
       },

@@ -520,7 +520,7 @@
         "poiKind": "nature",
         "poiKindRu": "Природа",
         "whyRu": null,
-        "photoSource": null,
+        "photoSource": "p18",
         "placeSource": "curated",
         "placeAttributionRu": null
        },
@@ -3468,7 +3468,7 @@
         "poiKind": "monastery",
         "poiKindRu": "Монастырь",
         "whyRu": null,
-        "photoSource": null,
+        "photoSource": "p18",
         "placeSource": "curated",
         "placeAttributionRu": null
        },
@@ -6623,6 +6623,15 @@
        "regionCode": "RU-YAR"
       },
       {
+       "placeId": "Q121278133",
+       "kmAt": 137.37392422538258,
+       "lateralKm": 0.2861882587136889,
+       "detourKm": 0.7440894726555912,
+       "detourMin": 0,
+       "roadClass": "trunk",
+       "regionCode": "RU-YAR"
+      },
+      {
        "placeId": "Q121278130",
        "kmAt": 137.43468069383505,
        "lateralKm": 0.20005168220944886,
@@ -7001,6 +7010,15 @@
        "regionCode": "RU-KOS"
       },
       {
+       "placeId": "Q4430818",
+       "kmAt": 342.0,
+       "lateralKm": 2.7891563858485364,
+       "detourKm": 7.2518066032061945,
+       "detourMin": 13,
+       "roadClass": "primary",
+       "regionCode": "RU-KOS"
+      },
+      {
        "placeId": "Q4505218",
        "kmAt": 342.25317100151096,
        "lateralKm": 0.03996176440390458,
@@ -7015,15 +7033,6 @@
        "lateralKm": 0.3939389458896402,
        "detourKm": 1.0242412593130645,
        "detourMin": 4,
-       "roadClass": "primary",
-       "regionCode": "RU-KOS"
-      },
-      {
-       "placeId": "Q138781245",
-       "kmAt": 342.4779774428751,
-       "lateralKm": 0.08715371526121202,
-       "detourKm": 0.22659965967915124,
-       "detourMin": 0,
        "roadClass": "primary",
        "regionCode": "RU-KOS"
       },
@@ -7316,15 +7325,6 @@
        "regionCode": "RU-VLA"
       },
       {
-       "placeId": "Q1051458",
-       "kmAt": 549.2075238524944,
-       "lateralKm": 9.020033477030594,
-       "detourKm": 23.452087040279547,
-       "detourMin": 37,
-       "roadClass": "primary",
-       "regionCode": "RU-VLA"
-      },
-      {
        "placeId": "Q115274825",
        "kmAt": 549.2893039468049,
        "lateralKm": 7.454642981015567,
@@ -7338,6 +7338,15 @@
        "kmAt": 549.2902239290232,
        "lateralKm": 7.521001478966889,
        "detourKm": 19.554603845313913,
+       "detourMin": 31,
+       "roadClass": "primary",
+       "regionCode": "RU-VLA"
+      },
+      {
+       "placeId": "Q115274827",
+       "kmAt": 549.3097851261416,
+       "lateralKm": 7.42313781071787,
+       "detourKm": 19.300158307866464,
        "detourMin": 31,
        "roadClass": "primary",
        "regionCode": "RU-VLA"

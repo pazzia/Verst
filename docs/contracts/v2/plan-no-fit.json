@@ -522,7 +522,7 @@
         "poiKind": "nature",
         "poiKindRu": "Природа",
         "whyRu": null,
-        "photoSource": null,
+        "photoSource": "p18",
         "placeSource": "curated",
         "placeAttributionRu": null
        },
@@ -4444,6 +4444,15 @@
        "regionCode": "RU-YAR"
       },
       {
+       "placeId": "Q121278133",
+       "kmAt": 137.37392422538258,
+       "lateralKm": 0.2861882587136889,
+       "detourKm": 0.7440894726555912,
+       "detourMin": 0,
+       "roadClass": "trunk",
+       "regionCode": "RU-YAR"
+      },
+      {
        "placeId": "Q121278130",
        "kmAt": 137.43468069383505,
        "lateralKm": 0.20005168220944886,
@@ -4917,6 +4926,15 @@
        "lateralKm": 1.094750729323141,
        "detourKm": 2.846351896240167,
        "detourMin": 6,
+       "roadClass": "trunk",
+       "regionCode": "RU-YAR"
+      },
+      {
+       "placeId": "Q4438814",
+       "kmAt": 388.3714330740605,
+       "lateralKm": 0.14865899429209903,
+       "detourKm": 0.3865133851594575,
+       "detourMin": 0,
        "roadClass": "trunk",
        "regionCode": "RU-YAR"
       },

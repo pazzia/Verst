@@ -830,7 +830,7 @@ def build(
             taken.add(qid)
             links[fid] = {"wikidata": qid, "image": r.get("image")}
     # CEO 04.11: reviewed links win over the name match (`curated_wikidata.tsv`, from `data-links.yml`)
-    for fid, link in curated_links().items():
+    for fid, link in ({} if abroad else curated_links()).items():
         links[fid] = {"wikidata": link["wikidata"], "image": link["image"]}
         if link["image"] not in credits_in:
             credits_in[link["image"]] = link["credit"]

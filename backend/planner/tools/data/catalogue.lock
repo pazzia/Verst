@@ -6,14 +6,14 @@
   "pois": 10921,
   "bars": 5635,
   "food": 29930,
-  "links": 79,
-  "credits": 3632
+  "links": 107,
+  "credits": 3636
  },
- "totalBytes": 1496225,
+ "totalBytes": 1497235,
  "files": {
   "catalogue_meta.json.gz": {
-   "bytes": 98447,
-   "sha256": "0cc2929ca4928f816d16ac1d3d84d882a1db0c7dd7ccb478b9bc3b74150d4e46"
+   "bytes": 99457,
+   "sha256": "e683952763e54498cc0ceaa34d442c6a32026ecb4fd4f34025394f70e52c9a2a"
   },
   "catalogue_towns.json.gz": {
    "bytes": 52995,
