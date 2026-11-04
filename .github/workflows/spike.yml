@@ -3,11 +3,9 @@
 # plans tools/spike01/cases.json and uploads report.md / report.json. Commercial providers are simulated (cost
 # only): no keys are configured.
 name: spike01
+# Manual only (CEO 04.11): up to 2 h of runner time, and in a public repository any pull request touching these
+# paths would start it.
 on:
-  pull_request:
-    paths:
-      - "tools/spike01/**"
-      - ".github/workflows/spike.yml"
   workflow_dispatch:
 
 permissions:
