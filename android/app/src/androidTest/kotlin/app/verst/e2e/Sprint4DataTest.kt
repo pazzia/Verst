@@ -151,6 +151,9 @@ class Sprint4DataTest {
             // the review cases have no budget (G14, G17, G18): «не важно», so no no-fit screen
             flow.budgetIndex = app.verst.core.model.BudgetPresets.lastIndex
         }
+        // as a tester does: the Instruments show the engine's km first (CEO 04.11: the estimate also says whether the
+        // phone's route is approximate, which offers the server once)
+        compose.waitUntil(60_000) { flow.figures?.stale == false }
         compose.pressStart(flow)
         compose.waitUntil(120_000) { flow.top == Route.Road || flow.top == Route.NoFit }
         if (flow.top == Route.NoFit) Log.i("VerstE2e", "S4D no-fit for $query")
