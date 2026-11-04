@@ -252,6 +252,53 @@ rm /root/.ssh/verst_github_actions
 sed -i '/verst-github-actions/d' /root/.ssh/authorized_keys
 ```
 
+## 6. Вход на сервер по ключу вместо пароля (сделать)
+
+Репозиторий публичный, адрес сервера виден всем, а сервер принимает вход под `root` по паролю — это мишень для
+подбора пароля. План (04.11): сначала ключ, потом отключить пароль. **Всё время настройки держите одно окно с
+сервером открытым** — через него можно всё вернуть.
+
+1. На своём компьютере (Mac — «Терминал», Windows — «PowerShell») создать ключ, на вопросы — Enter:
+```
+ssh-keygen -t ed25519
+```
+2. Отправить ключ на сервер (последний раз спросит пароль `root`). Mac:
+```
+ssh-copy-id root@212.108.82.26
+```
+   Windows (PowerShell):
+```
+type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh root@212.108.82.26 "cat >> ~/.ssh/authorized_keys"
+```
+3. В новом окне проверить вход — должен пустить без пароля `root`:
+```
+ssh root@212.108.82.26
+```
+4. Только после шага 3 — на сервере отключить пароль:
+```
+echo "PasswordAuthentication no" > /etc/ssh/sshd_config.d/01-verst-no-password.conf
+```
+```
+echo "KbdInteractiveAuthentication no" >> /etc/ssh/sshd_config.d/01-verst-no-password.conf
+```
+```
+sshd -t
+```
+```
+systemctl reload ssh
+```
+```
+sshd -T | grep -i passwordauthentication
+```
+5. В новом окне снова войти по ключу. Если не пускает — в страховочном окне вернуть пароль:
+```
+rm /etc/ssh/sshd_config.d/01-verst-no-password.conf
+```
+```
+systemctl reload ssh
+```
+Запасной путь — веб-консоль в личном кабинете хостинга.
+
 ## 4. Где подробнее
 
 - Сервер и безопасность: `infra/api/README.md`, ADR-0020.
