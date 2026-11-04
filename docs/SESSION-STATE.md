@@ -8,7 +8,7 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 ## Now
 
 - **Release 0.3.216 (04.11, PR #10 `7cdfe4e`):** verst-latest; the test server runs `7cdfe4e` since 18:26 MSK (update asked and approved; ~14 s downtime, no errors).
-- **On the branch, waiting for «Сливай»:** the `rollback` action (D-IR-33); live from the second `update` after the merge.
+- **Rollback (D-IR-33, PR #11 `81e43ee`):** merged; the server ran `update` at 19:06 MSK (no code change, the api was not recreated). The next `update` keeps a rollback image. `spike01` runs on any change of `spike.yml` (the Node 24 bump started it): ask the CEO whether to make it manual-only.
 - **04.11, merged in PR #10:**
   - D-IR-31 (CEO option 1): an approximate long trip asks once «Дальняя поездка — точнее на сервере»; yes = server consent + later approximate trips on the server (fallback phone); no = phone, not asked again. Engine `estimate.approx`; `PlanRequest.longTrip`; `AppSettings.longTripAsked`. Seen on the camper emulator shot 05a (Москва → Санкт-Петербург). Green on run 41834108817 (attempt 2; attempt 1 failed the catalogue budget at 2 009 ms, attempt 2 measured 501–1 532 ms: the CI emulator varies ~3x).
   - Plan audit of 20 trips on the real catalogue: `docs/review/plan-audit-2026-11-04.md`. Fixed: no open-data playground for adults (`test_real_plans.py`). Main finding: long trips on the phone run on approximate straight legs outside central Russia (no real cafés, towns or hotels along them); the server's GraphHopper does not have this. **CEO decision asked:** plan long trips on the server when online and consented.
