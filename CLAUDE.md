@@ -21,9 +21,10 @@ Android road-trip planner for Russia and 9 neighbour countries: a Kotlin/Compose
 - Times are Moscow time (UTC+3).
 - Recommendations go **line by line**.
 - **Server commands: one line per separate code block**, so each copies with one tap. The CEO runs them.
-  The one exception (D-IR-29): Claude runs `status`, `update`, `recreate` and `errors` on the test server
-  through `.github/workflows/test-server.yml` (a forced-command key, `infra/api/server-ops.sh`). Nothing else.
-- **Before every deploy (`update`, `recreate`) ask the CEO and wait for his «да» (D-IR-30).** The question says,
+  The one exception (D-IR-29, D-IR-33): Claude runs `status`, `update`, `recreate`, `errors` and `rollback` on
+  the test server through `.github/workflows/test-server.yml` (a forced-command key, `infra/api/server-ops.sh`).
+  Nothing else.
+- **Before every deploy (`update`, `recreate`, `rollback`) ask the CEO and wait for his «да» (D-IR-30).** The question says,
   in Russian, line by line:
   1. what will be done (the action, the commits going in, what changes for the app and the testers);
   2. the risks (downtime, what can break, data or settings touched) and how it is rolled back.
