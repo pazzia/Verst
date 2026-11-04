@@ -1464,116 +1464,6 @@
         "replaceable": true,
         "alternatives": [
          {
-          "id": "alt_d2s04_n4833038185",
-          "placeId": "n4833038185",
-          "name": "Саюри",
-          "deltaMin": 0,
-          "deltaRub": 0,
-          "shiftMin": 0,
-          "units": {
-           "deltaKm": 0.517,
-           "regionCode": "RU-IVA",
-           "checkRub": 700,
-           "adultRub": null,
-           "childRub": null,
-           "name": "Саюри",
-           "placeId": "n4833038185",
-           "priceRub": "61.60",
-           "regionName": "Ивановская область",
-           "tripKmDelta": 1,
-           "parkingRub": 0,
-           "parkingRubPerHour": 0,
-           "parkingHours": 1,
-           "parkingSource": "free"
-          },
-          "stop": {
-           "id": "d2s04",
-           "seq": 9,
-           "day": 2,
-           "kind": "food",
-           "sign": "food",
-           "placeId": "n4833038185",
-           "townId": "t_ivanovo",
-           "name": "Саюри",
-           "note": "не проверено",
-           "lat": 56.99772,
-           "lon": 40.96702,
-           "arriveAt": "2026-10-25T14:12",
-           "departAt": "2026-10-25T15:12",
-           "tz": "Europe/Moscow",
-           "kmFromPrev": 108,
-           "kmAt": 446,
-           "dwellMin": 60,
-           "tags": [],
-           "costRub": 3500,
-           "reason": "Обед в Иванове.",
-           "verified": false,
-           "replaceable": true,
-           "alternatives": [],
-           "alternativesNote": null,
-           "hotelOptions": [],
-           "selectedHotelId": null,
-           "unknownFacts": [
-            "hours"
-           ],
-           "unknownRu": null,
-           "parking": {
-            "rub": 0,
-            "rubPerHour": 0,
-            "hours": 1,
-            "source": "free",
-            "zoneRu": "Платных зон рядом нет",
-            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
-            "sundayRu": null,
-            "freeRu": "Бесплатно: вне платных зон"
-           }
-          },
-          "dayPatch": [
-           {
-            "stopId": "d2s01",
-            "seq": 6,
-            "arriveAt": null,
-            "departAt": "2026-10-25T09:00",
-            "kmFromPrev": 0
-           },
-           {
-            "stopId": "d2s02",
-            "seq": 7,
-            "arriveAt": "2026-10-25T09:04",
-            "departAt": "2026-10-25T09:49",
-            "kmFromPrev": 3
-           },
-           {
-            "stopId": "d2s03",
-            "seq": 8,
-            "arriveAt": "2026-10-25T11:01",
-            "departAt": "2026-10-25T12:31",
-            "kmFromPrev": 75
-           },
-           {
-            "stopId": "d2s04",
-            "seq": 9,
-            "arriveAt": "2026-10-25T14:12",
-            "departAt": "2026-10-25T15:12",
-            "kmFromPrev": 108
-           },
-           {
-            "stopId": "d2s05",
-            "seq": 10,
-            "arriveAt": "2026-10-25T16:21",
-            "departAt": "2026-10-25T16:31",
-            "kmFromPrev": 74
-           },
-           {
-            "stopId": "d2s06",
-            "seq": 11,
-            "arriveAt": "2026-10-25T16:34",
-            "departAt": null,
-            "kmFromPrev": 4
-           }
-          ]
-         },
-         {
           "id": "alt_d2s04_n12826137401",
           "placeId": "n12826137401",
           "name": "Цони-Мацони",
@@ -1714,6 +1604,112 @@
            "note": "не проверено",
            "lat": 56.99719,
            "lon": 40.98077,
+           "arriveAt": "2026-10-25T14:14",
+           "departAt": "2026-10-25T15:14",
+           "tz": "Europe/Moscow",
+           "kmFromPrev": 108,
+           "kmAt": 446,
+           "dwellMin": 60,
+           "tags": [],
+           "costRub": 3500,
+           "reason": "Обед в Иванове.",
+           "verified": false,
+           "replaceable": true,
+           "alternatives": [],
+           "alternativesNote": null,
+           "hotelOptions": [],
+           "selectedHotelId": null,
+           "parking": {
+            "rub": 0,
+            "rubPerHour": 0,
+            "hours": 1,
+            "source": "free",
+            "zoneRu": "Платных зон рядом нет",
+            "whereRu": "У объекта или у дороги рядом — смотрите знаки на месте",
+            "sundayRu": null,
+            "freeRu": "Бесплатно: вне платных зон"
+           }
+          },
+          "dayPatch": [
+           {
+            "stopId": "d2s01",
+            "seq": 6,
+            "arriveAt": null,
+            "departAt": "2026-10-25T09:00",
+            "kmFromPrev": 0
+           },
+           {
+            "stopId": "d2s02",
+            "seq": 7,
+            "arriveAt": "2026-10-25T09:04",
+            "departAt": "2026-10-25T09:49",
+            "kmFromPrev": 3
+           },
+           {
+            "stopId": "d2s03",
+            "seq": 8,
+            "arriveAt": "2026-10-25T11:01",
+            "departAt": "2026-10-25T12:31",
+            "kmFromPrev": 75
+           },
+           {
+            "stopId": "d2s04",
+            "seq": 9,
+            "arriveAt": "2026-10-25T14:14",
+            "departAt": "2026-10-25T15:14",
+            "kmFromPrev": 108
+           },
+           {
+            "stopId": "d2s05",
+            "seq": 10,
+            "arriveAt": "2026-10-25T16:25",
+            "departAt": "2026-10-25T16:35",
+            "kmFromPrev": 74
+           },
+           {
+            "stopId": "d2s06",
+            "seq": 11,
+            "arriveAt": "2026-10-25T16:38",
+            "departAt": null,
+            "kmFromPrev": 4
+           }
+          ]
+         },
+         {
+          "id": "alt_d2s04_n5765340153",
+          "placeId": "n5765340153",
+          "name": "Чеширский кот",
+          "deltaMin": 4,
+          "deltaRub": 10,
+          "shiftMin": 4,
+          "units": {
+           "deltaKm": 1.101,
+           "regionCode": "RU-IVA",
+           "checkRub": 700,
+           "adultRub": null,
+           "childRub": null,
+           "name": "Чеширский кот",
+           "placeId": "n5765340153",
+           "priceRub": "61.60",
+           "regionName": "Ивановская область",
+           "tripKmDelta": 2,
+           "parkingRub": 0,
+           "parkingRubPerHour": 0,
+           "parkingHours": 1,
+           "parkingSource": "free"
+          },
+          "stop": {
+           "id": "d2s04",
+           "seq": 9,
+           "day": 2,
+           "kind": "food",
+           "sign": "food",
+           "placeId": "n5765340153",
+           "townId": "t_ivanovo",
+           "name": "Чеширский кот",
+           "note": "не проверено",
+           "lat": 56.99566,
+           "lon": 40.97812,
            "arriveAt": "2026-10-25T14:14",
            "departAt": "2026-10-25T15:14",
            "tz": "Europe/Moscow",
@@ -8193,6 +8189,15 @@
        "regionCode": "RU-MOW"
       },
       {
+       "placeId": "n1161652566",
+       "kmAt": 0.0,
+       "lateralKm": 0.5963813658509672,
+       "detourKm": 1.5505915512125148,
+       "detourMin": 4,
+       "roadClass": "trunk",
+       "regionCode": "RU-MOW"
+      },
+      {
        "placeId": "n12378180801",
        "kmAt": 0.08002008411443981,
        "lateralKm": 0.3183536505953318,
@@ -8243,15 +8248,6 @@
        "lateralKm": 0.029943581972021408,
        "detourKm": 0.07785331312725566,
        "detourMin": 0,
-       "roadClass": "trunk",
-       "regionCode": "RU-MOW"
-      },
-      {
-       "placeId": "n10557552960",
-       "kmAt": 0.888780595354593,
-       "lateralKm": 0.49259687569838023,
-       "detourKm": 1.2807518768157886,
-       "detourMin": 4,
        "roadClass": "trunk",
        "regionCode": "RU-MOW"
       },
@@ -8922,10 +8918,10 @@
        "regionCode": "RU-YAR"
       },
       {
-       "placeId": "n12786849501",
-       "kmAt": 262.5985773100784,
-       "lateralKm": 0.6360695803844001,
-       "detourKm": 1.6537809089994402,
+       "placeId": "n14133485002",
+       "kmAt": 261.46717795879704,
+       "lateralKm": 0.6225703222797125,
+       "detourKm": 1.6186828379272526,
        "detourMin": 4,
        "roadClass": "trunk",
        "regionCode": "RU-YAR"
@@ -8945,15 +8941,6 @@
        "lateralKm": 0.2457562862036139,
        "detourKm": 0.6389663441293961,
        "detourMin": 0,
-       "roadClass": "primary",
-       "regionCode": "RU-YAR"
-      },
-      {
-       "placeId": "n4173420815",
-       "kmAt": 263.30758528432676,
-       "lateralKm": 0.4015972186477236,
-       "detourKm": 1.0441527684840812,
-       "detourMin": 4,
        "roadClass": "primary",
        "regionCode": "RU-YAR"
       },
@@ -8990,6 +8977,15 @@
        "lateralKm": 0.3104384811063432,
        "detourKm": 0.8071400508764923,
        "detourMin": 3,
+       "roadClass": "primary",
+       "regionCode": "RU-YAR"
+      },
+      {
+       "placeId": "n3045972936",
+       "kmAt": 264.2250402216484,
+       "lateralKm": 0.24129794659044046,
+       "detourKm": 0.6273746611351452,
+       "detourMin": 0,
        "roadClass": "primary",
        "regionCode": "RU-YAR"
       },
@@ -9147,6 +9143,15 @@
        "regionCode": "RU-IVA"
       },
       {
+       "placeId": "n12826133001",
+       "kmAt": 445.0037907899,
+       "lateralKm": 0.9224517768959182,
+       "detourKm": 2.3983746199293874,
+       "detourMin": 6,
+       "roadClass": "primary",
+       "regionCode": "RU-IVA"
+      },
+      {
        "placeId": "n7809798621",
        "kmAt": 446.1366981944562,
        "lateralKm": 0.5346771135407404,
@@ -9165,29 +9170,20 @@
        "regionCode": "RU-IVA"
       },
       {
+       "placeId": "n4343320991",
+       "kmAt": 446.3674095860554,
+       "lateralKm": 1.0671444379220585,
+       "detourKm": 2.774575538597352,
+       "detourMin": 6,
+       "roadClass": "primary",
+       "regionCode": "RU-IVA"
+      },
+      {
        "placeId": "n5765340153",
        "kmAt": 446.3764863790108,
        "lateralKm": 0.4663724047358484,
        "detourKm": 1.212568252313206,
        "detourMin": 4,
-       "roadClass": "primary",
-       "regionCode": "RU-IVA"
-      },
-      {
-       "placeId": "n4519794964",
-       "kmAt": 446.4598101337048,
-       "lateralKm": 0.5919048855066865,
-       "detourKm": 1.538952702317385,
-       "detourMin": 4,
-       "roadClass": "primary",
-       "regionCode": "RU-IVA"
-      },
-      {
-       "placeId": "n4833038185",
-       "kmAt": 446.48599449667074,
-       "lateralKm": 0.2417257233962033,
-       "detourKm": 0.6284868808301286,
-       "detourMin": 0,
        "roadClass": "primary",
        "regionCode": "RU-IVA"
       },
@@ -9552,15 +9548,6 @@
        "regionCode": "RU-VLA"
       },
       {
-       "placeId": "n2314684547",
-       "kmAt": 641.578672061631,
-       "lateralKm": 0.08563818502172636,
-       "detourKm": 0.22265928105648855,
-       "detourMin": 0,
-       "roadClass": "trunk",
-       "regionCode": "RU-VLA"
-      },
-      {
        "placeId": "n1195441926",
        "kmAt": 642.0892793869012,
        "lateralKm": 0.04045153613623369,
@@ -9610,6 +9597,15 @@
        "kmAt": 643.6666081169842,
        "lateralKm": 0.05009994489118472,
        "detourKm": 0.13025985671708026,
+       "detourMin": 0,
+       "roadClass": "trunk",
+       "regionCode": "RU-VLA"
+      },
+      {
+       "placeId": "n4362159482",
+       "kmAt": 644.4509477531468,
+       "lateralKm": 0.17658583086031482,
+       "detourKm": 0.45912316023681854,
        "detourMin": 0,
        "roadClass": "trunk",
        "regionCode": "RU-VLA"
@@ -10281,11 +10277,11 @@
        "regionCode": "RU-MOW"
       },
       {
-       "placeId": "n11358722148",
+       "placeId": "n1161652566",
        "kmAt": 745.0,
-       "lateralKm": 0.6849556800204721,
-       "detourKm": 1.7808847680532276,
-       "detourMin": 5,
+       "lateralKm": 0.5975083767755619,
+       "detourKm": 1.553521779616461,
+       "detourMin": 4,
        "roadClass": "trunk",
        "regionCode": "RU-MOW"
       },

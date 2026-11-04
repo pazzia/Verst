@@ -478,24 +478,14 @@ def _add_real_stops(
         n = count.get(tid, 0)
         if t.lodging_count_cache != n:
             towns[tid] = dataclasses.replace(t, lodging_count_cache=n)
-    by_town: dict[str, list[CatFood]] = {}
-    for f in cat.food:
-        tid = out.town_of_qid.get(f.town)
-        if tid is not None and f.id not in places:
-            by_town.setdefault(tid, []).append(f)
-    for tid, lst in by_town.items():
-        # restaurants and cafés with known hours first, then by distance from the centre
-        centre = towns[tid].point
-        lst.sort(
-            key=lambda f: (
-                FOOD_TRIP_ORDER.get(f.kind, 9),
-                f.hours is None,
-                (f.point.lat - centre.lat) ** 2 + (f.point.lon - centre.lon) ** 2,
-                f.id,
-            )
-        )
-        for f in lst[:FOOD_TRIP_CAP]:
-            places[f.id] = food_place(f, tid, towns[tid].region_code)
+    # restaurants and cafés with known hours first, then by distance from the centre; only these are decoded
+    for qid, lst in cat.food_for_towns(FOOD_TRIP_ORDER, FOOD_TRIP_CAP).items():
+        tid = out.town_of_qid.get(qid)
+        if tid is None:
+            continue
+        for f in lst:
+            if f.id not in places:
+                places[f.id] = food_place(f, tid, towns[tid].region_code)
     out.roadside = roadside
 
 

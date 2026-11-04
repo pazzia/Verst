@@ -461,7 +461,10 @@ def plan_rests_day(
             return gap.t1 - clock.at(c.km_at) >= need_after - EPS
 
         def kind_ok(c: Candidate) -> bool:
-            """The extended window too follows the sight kind rules (two playgrounds in a row, CEO 02.11)."""
+            """The extended window too follows the sight kind rules (two playgrounds in a row, CEO 02.11) and
+            the M9 rule that an open-data playground is a break only for a child (audit 04.11)."""
+            if inp.crew.children == 0 and c.place.quality is not None and Tag.PLAYGROUND in c.place.tags:
+                return False
             if c.place.type is not PlaceType.SIGHT or not ctx.cfg.sights.diversity:
                 return True
             from verst_planner.pipeline.sights import diversity_ok

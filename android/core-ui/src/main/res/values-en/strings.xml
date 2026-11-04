@@ -267,6 +267,10 @@
     <string name="roadside_food_body">In a town a café is usually better for a child. Roadside ones are closer to the road but may have no proper toilet.</string>
     <string name="roadside_food_yes">Roadside cafés too</string>
     <string name="roadside_food_no">Only in towns</string>
+    <string name="long_trip_title">A long trip — more precise on the server</string>
+    <string name="long_trip_body">The phone knows the roads of central Russia only; beyond them the route is approximate — a straight line, with no real cafés or hotels along the road. The Verst server routes over the real roads. The route points, the crew, the budget and the car go to a test server in the Netherlands; the trip is not stored there. Offline, the phone plans the trip.</string>
+    <string name="long_trip_yes">Plan on the server</string>
+    <string name="long_trip_no">On the phone</string>
     <string name="sign_border">BORDER</string>
     <string name="road_border_open">Documents and fees</string>
     <string name="border_label">BORDER CROSSING</string>

@@ -759,6 +759,10 @@ class VerstFlow(
 
     /** System back and every back link. Sheets close first. Returns false on the root (the activity finishes). */
     fun back(): Boolean {
+        if (longTripAsk) {
+            answerLongTrip(null)
+            return true
+        }
         if (roadsideFoodAsk) {
             answerRoadsideFood(null)
             return true
@@ -1068,6 +1072,20 @@ class VerstFlow(
         private set
 
     /**
+     * CEO 04.11 (D-IR-31): the phone's route of this trip is approximate (the engine's estimate says `approx`): the
+     * first time, ПОЕХАЛИ asks to plan such trips on the server (real roads, real cafés and hotels along them).
+     */
+    var longTripAsk by mutableStateOf(false)
+        private set
+
+    var longTripAskedRead: () -> Boolean = { app.verst.settings.AppPrefs.settings.longTripAsked }
+    var longTripAskedWrite: () -> Unit = { app.verst.settings.AppPrefs.update { it.copy(longTripAsked = true) } }
+
+    /** The draft's route is approximate on the phone and the server could plan it now (online, a server build). */
+    private val longTripServerPossible: Boolean
+        get() = !destinationAbroad && draft()?.let { estimates[it]?.approx } == true && serverConfigured() && connectivity.online
+
+    /**
      * CEO 03.11 «для маршрута с ребёнком надо в явном виде спрашивать»: with a child aboard every ПОЕХАЛИ asks where
      * lunch may be — town cafés only, or roadside ones too (a roadside café may have no proper toilet).
      */
@@ -1092,7 +1110,7 @@ class VerstFlow(
 
     /** The draft request when it has a target (destination or ready route), else null. */
     /** The trip being set up; the CEO 03.11 lunch answer is left out (asked only on ПОЕХАЛИ, it does not move km). */
-    fun draft(): PlanRequest? = if (readyRoute != null || destinationPoint != null) request().copy(roadsideFood = null) else null
+    fun draft(): PlanRequest? = if (readyRoute != null || destinationPoint != null) baseRequest().copy(roadsideFood = null) else null
 
     private fun estimateTarget(): PlanRequest? =
         if (destinationAbroad) null // CEO 29.10: the engine rejects a destination abroad — nothing to estimate
@@ -1107,7 +1125,7 @@ class VerstFlow(
         get() = estimateError?.takeIf { it.first == draft() }?.second
 
     internal fun record(request: PlanRequest, f: TripFigures) {
-        val r = request.copy(roadsideFood = null) // keyed like `draft()`: the lunch answer does not move km
+        val r = request.copy(roadsideFood = null, longTrip = false) // keyed like `draft()`: neither moves km
         known.removeAll { it.first == r }
         known.add(r to f)
         while (known.size > 48) known.removeAt(0)
@@ -1178,7 +1196,8 @@ class VerstFlow(
         budgetIndex = (budgetIndex + delta).coerceIn(0, BudgetPresets.lastIndex)
     }
 
-    fun request(): PlanRequest = PlanRequest(
+    /** The request as set up, without the routing choice of [request] (the draft and its estimates). */
+    private fun baseRequest(): PlanRequest = PlanRequest(
         origin = origin,
         destination = if (readyRoute == null) destinationPoint else null,
         readyRouteId = readyRoute?.id,
@@ -1193,6 +1212,9 @@ class VerstFlow(
         roadsideFood = if (children > 0) roadsideFood else null,
         abroad = destinationAbroad, // CEO 29.10: the server plans it, never the phone
     )
+
+    /** The request ПОЕХАЛИ plans: CEO 04.11 — an approximate long trip goes to the server with the consent. */
+    fun request(): PlanRequest = baseRequest().copy(longTrip = longTripServerPossible && serverConsentRead())
 
     /** The car from the settings (traveller К4), or null while it is the engine's default car. */
     private fun carVehicle(): app.verst.core.model.VehicleInput? {
@@ -1220,6 +1242,10 @@ class VerstFlow(
             abroadConsentAsk = true
             return
         }
+        if (longTripServerPossible && !serverConsentRead() && !longTripAskedRead()) {
+            longTripAsk = true
+            return
+        }
         if (children > 0 && !roadsideFoodAnswered) {
             roadsideFoodAsk = true
             return
@@ -1236,6 +1262,18 @@ class VerstFlow(
             )
         }
         startPlan(r, planId = UUID.randomUUID().toString()) // tracking plan §2.5 q3: a new trip_id per ПОЕХАЛИ only
+    }
+
+    /**
+     * CEO 04.11: «Построить на сервере» (true) records the consent and plans there; «На телефоне» (false) plans on the
+     * phone. Either way the question is not asked again; back (null) closes without a plan.
+     */
+    fun answerLongTrip(server: Boolean?) {
+        longTripAsk = false
+        if (server == null) return
+        longTripAskedWrite()
+        if (server) serverConsentWrite()
+        go()
     }
 
     /** CEO 03.11: «И придорожные кафе» (true) or «Только в городах» (false) plans; back closes without a plan. */

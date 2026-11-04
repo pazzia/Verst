@@ -96,3 +96,5 @@ English. Anything the CEO reads (reports, `docs/ops`, research for him) is in Ru
 - `tools/ci/whats_new.py` collects the `Тестерам:` trailers between the previous release and the build commit.
 - `android.yml` puts them into every release's notes under «Что нового».
 - `docs/WHATS-NEW.md` is the running list for people; `/changelog` updates it from the same trailers.
+- A change reworded later: the newer commit adds `Тестерам-заменяет: <the older line>`, so the release notes
+  carry the final wording only.

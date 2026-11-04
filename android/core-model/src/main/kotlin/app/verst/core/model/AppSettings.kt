@@ -43,6 +43,8 @@ data class AppSettings(
     val mapsApp: MapsChoice = MapsChoice.AUTO,
     /** CEO 01.11: both designs stay; the camper one is the default. The classic theme applies to CLASSIC only. */
     val design: AppDesign = AppDesign.CAMPER,
+    /** CEO 04.11 (D-IR-31): the one-time question «Дальняя поездка — точнее на сервере» was answered. */
+    val longTripAsked: Boolean = false,
 ) {
     /** A setting that only takes effect after the app restarts (the palette is read once per process). */
     fun needsRestartComparedTo(old: AppSettings): Boolean = theme != old.theme || design != old.design

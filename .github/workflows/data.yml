@@ -30,8 +30,8 @@ jobs:
       OUT: ${{ github.workspace }}/backend/planner/verst_planner/resources
       FIRST: ${{ github.workspace }}/data-first
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: pip install "pymorphy3==2.0.2" "pymorphy3-dicts-ru==2.4.417150.4580142"
@@ -111,7 +111,7 @@ jobs:
             --n 50 --seed "${{ github.run_id }}" 2>&1 | tee -a "$RAW/log.txt"
       - name: Archive the raw responses
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: data-raw
           path: data-raw

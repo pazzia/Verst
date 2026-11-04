@@ -1203,6 +1203,10 @@ These keys were written straight into `strings.xml` during the CEO rounds of 27�
 | `roadside_food_body` | В городе кафе обычно удобнее для ребёнка. Придорожные ближе к трассе, но в них может не быть нормального туалета. | |
 | `roadside_food_yes` | И придорожные кафе | primary: the engine may pick a roadside café (one with a known toilet first) |
 | `roadside_food_no` | Только в городах | secondary and the scrim: town cafés only |
+| `long_trip_title` | Дальняя поездка — точнее на сервере | CEO 04.11 (D-IR-31): asked once, on ПОЕХАЛИ, when the phone's route is approximate (NaviDialog `long.trip`) |
+| `long_trip_body` | Телефон знает дороги только центральной России, дальше маршрут приблизительный — по прямой, без настоящих кафе и отелей вдоль трассы. Сервер Версты строит по настоящим дорогам. На тестовый сервер в Нидерландах уйдут точки маршрута, состав экипажа, бюджет и машина; маршрут там не хранится. Без связи поездку построит телефон. | the consent text: the same data as the settings' server consent |
+| `long_trip_yes` | Построить на сервере | primary: records the server consent; later approximate trips go to the server without asking |
+| `long_trip_no` | На телефоне | secondary and the scrim: plans on the phone; not asked again (Settings → «Где строить маршрут» can still switch) |
 | `sign_border` | ГРАНИЦА | |
 | `road_border_open` | Документы и сборы | |
 | `border_label` | ПУНКТ ПРОПУСКА | |

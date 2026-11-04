@@ -47,7 +47,9 @@ class ServerPlannerGateway(
 
     override suspend fun planOutcome(requestId: String, request: PlanRequest, onEvent: (PlanEventDto) -> Unit): EngineResult<PlanOutcome> {
         if (request.abroad) return abroad(request, onEvent)
-        if (!enabled() || !server.configured) return phone.planOutcome(requestId, request, onEvent)
+        // CEO 04.11 (D-IR-31): an approximate long trip goes to the server with the consent, whatever the setting
+        val wanted = enabled() || (request.longTrip && consent())
+        if (!wanted || !server.configured) return phone.planOutcome(requestId, request, onEvent)
         if (!online()) return fallback(requestId, request, onEvent, "offline")
         val t0 = now()
         return try {

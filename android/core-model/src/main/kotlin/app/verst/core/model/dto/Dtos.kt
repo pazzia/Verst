@@ -384,6 +384,8 @@ data class EstimateDto(
     val outcome: String? = null,
     val totalRub: Int? = null,
     val budgetStatus: String? = null,
+    /** CEO 04.11: the phone's route is approximate (straight legs beyond its road graph). */
+    val approx: Boolean = false,
 )
 
 /** `mobile.reverse`: the town at a point with its name forms (OI-39). */

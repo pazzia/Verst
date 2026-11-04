@@ -36,8 +36,8 @@ jobs:
       RES: backend/planner/verst_planner/resources
       T: backend/planner/tools/data
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Lodging and roadside places (Geofabrik russia-latest + osmium)
@@ -77,7 +77,7 @@ jobs:
             cat $T/catalogue_stops.lock 2>/dev/null || echo "no lock (the build failed, see the log)"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: stops

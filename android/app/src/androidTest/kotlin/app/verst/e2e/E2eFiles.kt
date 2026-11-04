@@ -52,6 +52,18 @@ object E2e {
 fun androidx.compose.ui.test.junit4.ComposeTestRule.pressStart(flow: app.verst.nav.VerstFlow, roadside: Boolean = false) {
     onNodeWithTag("instruments.start").performClick()
     waitForIdle()
+    // CEO 04.11: an approximate long trip offers the server once — the journeys stay on the phone engine
+    if (flow.longTripAsk) {
+        // the question itself on screen once per run (the camper design): «Visible change = seen»
+        val shot = java.io.File(java.io.File(E2e.dir(), "screens").apply { mkdirs() }, "05a-long-trip-question.png")
+        if (!shot.exists()) {
+            Thread.sleep(300)
+            InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+                ?.let { bmp -> shot.outputStream().use { bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) } }
+        }
+        onNodeWithTag("long.trip.no").performClick()
+        waitForIdle()
+    }
     if (flow.roadsideFoodAsk) {
         onNodeWithTag(if (roadside) "roadside.food.yes" else "roadside.food.no").performClick()
         waitForIdle()

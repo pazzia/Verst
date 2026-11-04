@@ -55,6 +55,9 @@ class VerstFlowTest {
         /** What `estimate` answers; the plan answers [planned] (its km wins once it exists). */
         var estimateKm = 540
 
+        /** CEO 04.11: the estimate says the phone's route is approximate. */
+        var estimateApprox = false
+
         override var world: String = "central_russia_v1"
         val hotelPatches = mutableListOf<String>()
         override suspend fun setClock(spec: String): EngineResult<Unit> = EngineResult.Ok(Unit)
@@ -78,7 +81,7 @@ class VerstFlowTest {
             estimates += request
             // a ready route: its round-trip km plus 10 per adult and 1 per child, so a crew change changes the number
             val rr = routes.firstOrNull { it.id == request.readyRouteId }
-            return EngineResult.Ok(EstimateDto(rr?.let { it.kmTotal + 10 * request.adults + request.children } ?: estimateKm, 2))
+            return EngineResult.Ok(EstimateDto(rr?.let { it.kmTotal + 10 * request.adults + request.children } ?: estimateKm, 2, approx = estimateApprox))
         }
         /** Plans asked (CEO 29.10: never one for a destination abroad). */
         var plans = 0
@@ -898,6 +901,59 @@ class VerstFlowTest {
     }
     private val tbilisi = SuggestionDto("address", "Тбилиси", "Тбилиси · Грузия", 41.7151, 44.8271, countryCode = "ge")
     private val baku = SuggestionDto("address", "Баку", "Баку · Азербайджан", 40.4093, 49.8671, countryCode = "az")
+
+    /**
+     * CEO 04.11 (D-IR-31): an approximate long trip asks once whether to plan on the server. «Построить на сервере»
+     * records the consent and plans there although the setting says «Телефон»; «На телефоне» plans on the phone and the
+     * question is not asked again.
+     */
+    @Test
+    fun aLongApproximateTripOffersTheServerOnce() = runTest {
+        for (yes in listOf(true, false)) {
+            val phone = FakeGateway().apply { estimateApprox = true }
+            val server = FakeServer().apply { answer = EngineResult.Ok(app.verst.core.model.dto.PlanOutcome.Plan(planned)) }
+            val net = app.verst.engine.Connectivity()
+            var consent = false
+            var asked = false
+            val gw = app.verst.engine.ServerPlannerGateway(phone, server, enabled = { false }, online = { net.online }, consent = { consent })
+            val flow = VerstFlow(gw, backgroundScope, MemoryTripStore(), io = StandardTestDispatcher(testScheduler), now = { 7 }, connectivity = net) {}
+            flow.serverConsentRead = { consent }
+            flow.serverConsentWrite = { consent = true }
+            flow.longTripAskedRead = { asked }
+            flow.longTripAskedWrite = { asked = true }
+            settle()
+            flow.openNavigator()
+            settle()
+            flow.pick(yar)
+            settle()
+            flow.openInstrumentsFree()
+            settle()
+            flow.go()
+            assertTrue(flow.longTripAsk)
+            assertEquals(Route.Instruments, flow.top)
+            flow.answerLongTrip(yes)
+            assertFalse(flow.longTripAsk)
+            assertTrue(asked)
+            assertEquals(yes, consent)
+            settle(10_000)
+            assertEquals(Route.Road, flow.top)
+            if (yes) {
+                assertEquals(1, server.inputs.size)
+                assertFalse("routing only", server.inputs.single().contains("longTrip"))
+                assertEquals(0, phone.plans)
+                assertTrue(flow.lastPlanRequest!!.longTrip)
+            } else {
+                assertTrue(server.inputs.isEmpty())
+                assertEquals(1, phone.plans)
+                assertFalse(flow.lastPlanRequest!!.longTrip)
+            }
+            // the next long trip: no question either way
+            flow.back()
+            settle()
+            flow.go()
+            assertFalse(flow.longTripAsk)
+        }
+    }
 
     /**
      * «Где строить маршрут»: Телефон (`enabled = false`), yet a destination abroad goes to the server — after the

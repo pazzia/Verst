@@ -3,18 +3,22 @@
 The working memory between sessions and compactions (CLAUDE.md, «Read first»). Facts only, newest first.
 Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and `docs/decisions.md`.
 
-**Updated:** 2026-11-03
+**Updated:** 2026-11-04
 
 ## Now
 
-- **Test server ops (D-IR-29/30, PR #8 `a63d9e9`):** `test-server.yml` + `infra/api/server-ops.sh`; trigger = a new line in `infra/api/test-server.request` pushed on the ccr branch (or workflow_dispatch). Live since 03.11 21:39 (first `status`: api, postgres, graphhopper, backup healthy; /healthz ok). The server checkout is on `main` since 03.11 21:50 (`a63d9e9`); the running api was built at 21:26 from the same code (0.3.209 engine). The pinned host key is `infra/api/test-server.known_hosts` (ed25519 SHA256:Nx9n4W…); the workflow fixes are on the branch, not yet in `main`.
-- **Release:** `main` = PR #7 (`54ada56`), «Верста» 0.3.209 at `releases/download/verst-latest/Verst-latest.apk` (03.11), all CI green. PR #6 = real stops, fuel names, roadside cafés; PR #7 = catalogue load headroom (walk grids lazy, ≤ 20 hotels per town as places).
+- **04.11, on the branch (not in `main`, waiting for «Сливай»):**
+  - D-IR-31 (CEO option 1): an approximate long trip asks once «Дальняя поездка — точнее на сервере»; yes = server consent + later approximate trips on the server (fallback phone); no = phone, not asked again. Engine `estimate.approx`; `PlanRequest.longTrip`; `AppSettings.longTripAsked`. Seen on the camper emulator shot 05a (Москва → Санкт-Петербург). Green on run 41834108817 (attempt 2; attempt 1 failed the catalogue budget at 2 009 ms, attempt 2 measured 501–1 532 ms: the CI emulator varies ~3x).
+  - Plan audit of 20 trips on the real catalogue: `docs/review/plan-audit-2026-11-04.md`. Fixed: no open-data playground for adults (`test_real_plans.py`). Main finding: long trips on the phone run on approximate straight legs outside central Russia (no real cafés, towns or hotels along them); the server's GraphHopper does not have this. **CEO decision asked:** plan long trips on the server when online and consented.
+  - Catalogue load: town food stays columns (`_FoodRows`, `food_for_towns`); a reload frees the old world first. Emulator samples: 1 575 / 1 510 / 1 018 ms and 2 037 / 1 716 / 1 207 ms (budget 2 000 ms median); reloads no longer grow. The 2x target was not reached.
+  - CI actions on Node 24 (checkout v5, setup-python v6, upload-artifact v6, download-artifact v7, setup-java v5, cache v5, setup-gradle v5); green on run 41824290305, test-server green.
+  - Release notes: `Тестерам-заменяет:` drops an older wording (`tools/ci/whats_new.py`).
+- **Test server ops (D-IR-29/30, PR #8 `a63d9e9`):** `test-server.yml` + `infra/api/server-ops.sh`; trigger = a new line in `infra/api/test-server.request` pushed on the ccr branch (or workflow_dispatch). Live since 03.11 21:39 (first `status`: api, postgres, graphhopper, backup healthy; /healthz ok). The server checkout is on `main` since 03.11 21:50 (`a63d9e9`); the running api was built at 21:26 from the same code (0.3.209 engine). The pinned host key is `infra/api/test-server.known_hosts` (ed25519 SHA256:Nx9n4W…); fixes merged in PR #9 (`c53cfa5`), `workflow_dispatch` from `main` works.
+- **Release:** «Верста» 0.3.209 from PR #7 (`54ada56`); `main` is now PR #9 (docs and the test-server workflow only), «Верста» 0.3.209 at `releases/download/verst-latest/Verst-latest.apk` (03.11), all CI green. PR #6 = real stops, fuel names, roadside cafés; PR #7 = catalogue load headroom (walk grids lazy, ≤ 20 hotels per town as places).
 - **Two designs (D-IR-24):** «Кемпер» is the default, «Классический» is chosen in Settings. The `camper-ui` branch and `verst-camper-latest` (0.3.187) are frozen.
 - **Hotel booking (D-IR-25):** «Забронировать ночь» opens the real Yandex Travel search. The Travelpayouts wrapper on the server is off until `VERST_TP_*` are set.
-- **Test server (NL, `docs/ops/test-server.md`):** GraphHopper with the Russia graph is on since 01.11 (`VERST_ROUTING=graphhopper`). The server has not yet been updated to PR #5: the CEO has the commands.
-- **Working branch** `ccr-013d3489-181fz2` was restarted from `main` after the merge.
-  - In it: the CCGS ideas 1–4 (this file, `CLAUDE.md`, `.claude/rules`, the commit guard, «Что нового» in releases).
-  - Also in it: the maps-API research `docs/research/maps-apis-2026-11.md`.
+- **Test server (NL, `docs/ops/test-server.md`):** GraphHopper with the Russia graph is on since 01.11 (`VERST_ROUTING=graphhopper`). Runs the 0.3.209 code since 03.11.
+- **Working branch** `ccr-013d3489-181fz2` = `main` after PR #9.
 
 - **Yandex MapKit:** the CEO got a free key (02.11). The terms of 01.09.2026 are analysed in `docs/research/yandex-mapkit-terms.md`.
   - Free only for a free open app; at most 1 000 unique users a day.
@@ -35,17 +39,15 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
   - Side effect: with hotel nights left out of the total, the CEO budget case (30 000 ₽) fits on the first plan and «Подогнали под бюджет» is not shown. The budget check does not count hotels now.
   - App (c6a8936): a real hotel card has no «вымышленная» line; the hotel row shows «цена — по ссылке» under the name; the waybill «Ночёвки» shows «—» for unpriced nights; the Road footer says «Итог без ночёвок» instead of «в бюджете».
   - Green on 0.3.199 (run 41547293291), seen on the camper emulator shots (22-exit, 65-card, 151-waybill, 10-road). Emulator catalogue median: 1 668 ms against a 2 000 ms budget. APK 49.85 MB (over the 45 MB warning, under the 60 MB fail).
-  - Not merged: waiting for «Сливай».
 
 ## Waiting on the CEO
 
-1. Update the test server to `main` (commands in `docs/ops/test-server.md`, «Обновить сервер»), then the one-time key setup of §5 (D-IR-29) and the two GitHub Secrets `VERST_TEST_SERVER_SSH_KEY` / `VERST_TEST_SERVER_KNOWN_HOSTS`. After that Claude runs `status` / `errors` freely and `update` / `recreate` only after asking (D-IR-30).
-2. Register at Travelpayouts and put `VERST_TP_TOKEN/MARKER/TRS` into the server `.env` (`docs/partners/hotel-affiliate.md` §4).
-3. Decisions:
+1. Register at Travelpayouts and put `VERST_TP_TOKEN/MARKER/TRS` into the server `.env` (`docs/partners/hotel-affiliate.md` §4).
+2. Decisions:
    - legal entity, D-IR-09;
    - a lawyer on the «Реклама» label at the booking button (R-05);
    - a server in Russia before the beta.
-5. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
+3. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
 4. The Yandex Navigator signing key: **not yet** (D-IR-17). The form asks for a company, a site and a store link. It comes after the legal entity, the domain and RuStore, before the closed beta.
 
 ## Next (when the CEO says)

@@ -825,7 +825,7 @@ def plan(world: str, request_id: str, input_json: str, listener: Any = None) -> 
 
 def estimate(world: str, request_id: str, input_json: str) -> str:
     """Pre-plan distance and days of a trip input (the same `TripInputDTO` as `plan`):
-    `{"km": int, "days": int}`.
+    `{"km": int, "days": int, …, "approx": true}` (`approx` only when the route is approximate).
 
     One source of truth for every distance the app shows before Road ahead (Navigator caption, Instruments,
     Drive header): it *is* the engine's plan of that input, run without events, so `km`/`days` equal the later
@@ -844,17 +844,19 @@ def estimate(world: str, request_id: str, input_json: str) -> str:
                 "outcome": "no_fit",
                 "totalRub": m.cost.total_rub,
                 "budgetStatus": None,
-            }
+            } | ({"approx": True} if m.approx_distances else {})
         status = None
         if trip.input.budget_rub is not None:
             status = trip.budget_fit.status if trip.budget_fit is not None else "fits"
+        # CEO 04.11: `approx` = the phone's route is approximate (straight legs beyond its road graph):
+        # the app offers to plan the trip on the server, which routes over the real roads
         return {
             "km": trip.km,
             "days": trip.days,
             "outcome": "plan",
             "totalRub": trip.cost.total_rub,
             "budgetStatus": status,
-        }
+        } | ({"approx": True} if trip.approx_distances else {})
 
     return _envelope(run)
 
@@ -1034,6 +1036,15 @@ def _load_catalogue() -> dict[str, Any]:
             raise EngineFailure("NO_CATALOGUE", str(e)) from e
         # CEO 02.11: the real OSM lodgings and roadside places replace every invented stop
         lodgings = load_packaged_lodgings(cat)
+        if CATALOGUE_WORLD in _WORLDS or _CATALOGUE:
+            # a reload (the emulator's timing samples, a newer catalogue): the new data has decoded, so the
+            # old world goes before the new one is built and the two never live side by side (04.11: each
+            # reload on the CI emulator was slower than the one before, ~55 MB more peak memory); unfreeze
+            # so its cyclic garbage is collectable again
+            _WORLDS.pop(CATALOGUE_WORLD, None)
+            _CATALOGUE.clear()
+            _PARKS.clear()
+            gc.unfreeze()
         cw = compose(base.world, cat, stops=(lodgings, load_packaged_roadside) if lodgings else None)
         ports = build_catalogue_ports(cw, _CLOCK.now())
         # the city-walk indexes fill on the first walk, not with the catalogue (the emulator budget, 03.11)

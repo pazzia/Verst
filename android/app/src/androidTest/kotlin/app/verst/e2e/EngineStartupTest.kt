@@ -29,12 +29,13 @@ class EngineStartupTest {
         while (E2e.engine.catalogueMs.value == null && (System.nanoTime() - c0) / 1_000_000 < 15_000) Thread.sleep(20)
         val catalogue = E2e.engine.catalogueMs.value
         assertTrue("catalogue loaded", catalogue != null)
-        // Two more loads on the engine thread, timed like EngineHost (load_catalogue + selfcheck): one sample on the
+        // Four more loads on the engine thread, timed like EngineHost (load_catalogue + selfcheck): one sample on the
         // shared CI emulator swings with host load (2 539 ms on 26.10, 2 817 ms on 27.10 on code that passed before
-        // and after). The budget below applies to the median of three, so one stall does not fail the build and a
-        // real regression (every load slower) still does.
-        val samples = listOf(catalogue!!) + List(2) { reloadCatalogueMs() }
-        val median = samples.sorted()[1]
+        // and after; the same code measured 501–1 532 ms and 1 420–2 069 ms on 04.11). The budget below applies to
+        // the median of five (CEO 04.11, option 1; was three), so two stalls do not fail the build and a real
+        // regression (every load slower) still does. The 2 000 ms budget itself is unchanged.
+        val samples = listOf(catalogue!!) + List(4) { reloadCatalogueMs() }
+        val median = samples.sorted()[samples.size / 2]
         json.put("catalogueMs", catalogue).put("readyPlusCatalogueMs", t.totalMs + catalogue)
             .put("catalogueSamplesMs", org.json.JSONArray(samples)).put("catalogueMedianMs", median)
         File(E2e.dir(), "timings.json").writeText(json.toString(2))

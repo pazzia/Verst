@@ -75,9 +75,9 @@ jobs:
     env:
       OUT: ${{ github.workspace }}/ci-out/planner
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload diagnostics
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: diag-planner
           path: ci-out/
@@ -113,18 +113,18 @@ jobs:
       DIAG: ${{ github.workspace }}/ci-out/build
       VERST_SCREENSHOTS_DIR: ${{ github.workspace }}/ci-out/screenshots
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
@@ -263,7 +263,7 @@ jobs:
         run: |
           mkdir -p dist
           cp android/app/build/outputs/apk/demo/app-demo.apk "dist/Verst-$VERST_VERSION.apk"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
         with:
           name: Verst-${{ env.VERST_VERSION }}
@@ -273,7 +273,7 @@ jobs:
 
       - name: Upload APKs
         if: ${{ !cancelled() && steps.assemble.outcome == 'success' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: apks
           path: |
@@ -299,7 +299,7 @@ jobs:
 
       - name: Upload diagnostics
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: diag-build
           path: ci-out/
@@ -316,11 +316,11 @@ jobs:
     env:
       OUT: ${{ github.workspace }}/ci-out/e2e
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: tools/ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: apks
           path: apks
@@ -334,7 +334,7 @@ jobs:
           find apks -name '*.apk' -exec ls -l {} \;
 
       - name: AVD cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: avd-cache
         with:
           path: |
@@ -380,7 +380,7 @@ jobs:
 
       - name: Upload diagnostics
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: diag-e2e
           path: ci-out/
@@ -402,13 +402,13 @@ jobs:
       TAG: verst-${{ github.run_number }}
       OUT: ${{ github.workspace }}/ci-out/release
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: tools/ci
           fetch-depth: 0          # «Что нового» reads the commits since the previous release
           filter: blob:none
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: apks
           path: apks
@@ -476,7 +476,7 @@ jobs:
 
       - name: Upload diagnostics
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: diag-release
           path: ci-out/
@@ -499,12 +499,12 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       TAG: verst-test-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: tools/ci
           fetch-depth: 0          # «Что нового» reads the commits since the previous test build
           filter: blob:none
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: apks
           path: apks
@@ -548,11 +548,11 @@ jobs:
       group: ci-logs-publish
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: tools/ci
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         continue-on-error: true   # a run cancelled before any upload still publishes its job results
         with:
           pattern: diag-*

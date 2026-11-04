@@ -863,6 +863,10 @@
     <string name="roadside_food_body">В городе кафе обычно удобнее для ребёнка. Придорожные ближе к трассе, но в них может не быть нормального туалета.</string>
     <string name="roadside_food_yes">И придорожные кафе</string>
     <string name="roadside_food_no">Только в городах</string>
+    <string name="long_trip_title">Дальняя поездка — точнее на сервере</string>
+    <string name="long_trip_body">Телефон знает дороги только центральной России, дальше маршрут приблизительный — по прямой, без настоящих кафе и отелей вдоль трассы. Сервер Версты строит по настоящим дорогам. На тестовый сервер в Нидерландах уйдут точки маршрута, состав экипажа, бюджет и машина; маршрут там не хранится. Без связи поездку построит телефон.</string>
+    <string name="long_trip_yes">Построить на сервере</string>
+    <string name="long_trip_no">На телефоне</string>
     <string name="sign_border">ГРАНИЦА</string>
     <string name="road_border_open">Документы и сборы</string>
     <string name="border_label">ПУНКТ ПРОПУСКА</string>
