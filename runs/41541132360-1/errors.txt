@@ -1,0 +1,2 @@
+[e2e] app.verst.e2e.EngineStartupTest.engineBecomesReady
+[e2e] app.verst.e2e.Sprint3Test.s31CeoBudgetCaseFitsOrShowsTheNoFitScreen

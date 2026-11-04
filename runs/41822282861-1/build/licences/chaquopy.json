@@ -1,0 +1,14 @@
+[
+    {
+        "artifact": "gradle:16.0.0",
+        "source": "gradle-16.0.0.pom",
+        "licence": "MIT License",
+        "url": "https://opensource.org/licenses/MIT"
+    },
+    {
+        "artifact": "target:3.12.7-0",
+        "source": "target-3.12.7-0.pom",
+        "licence": "MIT License",
+        "url": "https://opensource.org/licenses/MIT"
+    }
+]

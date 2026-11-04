@@ -1,0 +1,27 @@
+{
+  "file": "app-demo.apk",
+  "bytes": 50196978,
+  "mb": 50.2,
+  "sha256": "58866740629df3545d5567fbf170a9d65ad435214cf08e95a947c7581adcd39b",
+  "abis": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "largestEntries": {
+    "lib": 24805600,
+    "assets": 15185388,
+    "classes.dex": 4252451,
+    "classes2.dex": 4103940,
+    "resources.arsc": 803084,
+    "res": 596332,
+    "okhttp3": 41543,
+    "kotlin": 12053,
+    "META-INF": 11516,
+    "AndroidManifest.xml": 2539,
+    "DebugProbesKt.bin": 780,
+    "kotlin-tooling-metadata.json": 284
+  },
+  "warnMb": 45.0,
+  "failMb": 60.0,
+  "abroadEntries": []
+}

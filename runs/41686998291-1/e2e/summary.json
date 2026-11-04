@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "run": "41686998291",
+  "sha": "735ea21e313b8f9c07d64efc4e45c9830713bc15",
+  "ref": "refs/pull/6/merge",
+  "job": "e2e",
+  "sections": {
+    "instrument": {
+      "tests": 33,
+      "passed": 33,
+      "failed": 0,
+      "crashed": false,
+      "ok": true
+    },
+    "logcat": {
+      "lines": 52691,
+      "kept": 2458,
+      "tracebacks": 0
+    },
+    "steps.e2e": {
+      "avd-cache": "success",
+      "journey": "success"
+    }
+  }
+}

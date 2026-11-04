@@ -1,0 +1,6 @@
+[unit] Test - AnalyticsJourneyTest > searchInstrumentsWaybillHandoffReportShareAndDrivenEvents
+[unit] Test - VerstFlowTest > oneTripOneDistanceThenWaybillReplaceSaveReopen
+[unit] Gradle: Execution failed for task ':app:testDebugUnitTest'. - Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///home/runner/work/Verst/Verst/android/app/build/reports/tests/testDebugUnitTest/index.html
+[test] app.verst.analytics.AnalyticsJourneyTest > searchInstrumentsWaybillHandoffReportShareAndDrivenEvents: java.util.NoSuchElementException: Collection contains no element matching the predicate.
+[test] app.verst.nav.VerstFlowTest > oneTripOneDistanceThenWaybillReplaceSaveReopen: java.lang.AssertionError: expected:<Road> but was:<Instruments>

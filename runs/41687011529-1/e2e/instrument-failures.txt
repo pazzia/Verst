@@ -1,0 +1,5 @@
+app.verst.e2e.EngineStartupTest.engineBecomesReady
+java.lang.AssertionError: catalogue median 2041 ms > 2000 (samples [1694, 2041, 2420])
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at app.verst.e2e.EngineStartupTest.engineBecomesReady(EngineStartupTest.kt:47)

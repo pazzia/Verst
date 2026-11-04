@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "run": "41698811729",
+  "sha": "54ada56f537868e9f85707403e1fee90697d205e",
+  "ref": "refs/heads/main",
+  "job": "release",
+  "sections": {
+    "steps.release": {
+      "create": "success",
+      "latest": "success"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+app.verst.e2e.EngineStartupTest.engineBecomesReady
+java.lang.AssertionError: catalogue median 2041 ms > 2000 (samples [2041, 2397, 1974])
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at app.verst.e2e.EngineStartupTest.engineBecomesReady(EngineStartupTest.kt:47)
+
+
+app.verst.e2e.Sprint3Test.s31CeoBudgetCaseFitsOrShowsTheNoFitScreen
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 30000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:504)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:339)
+	at app.verst.e2e.Sprint3Test.waitTag(Sprint3Test.kt:105)
+	at app.verst.e2e.Sprint3Test.waitTag$default(Sprint3Test.kt:104)
+	at app.verst.e2e.Sprint3Test.s31CeoBudgetCaseFitsOrShowsTheNoFitScreen(Sprint3Test.kt:182)

@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "run": "41691192321",
+  "sha": "f6df86454858a7e2e448143287069d0cd152cc6b",
+  "ref": "refs/heads/ccr-013d3489-181fz2",
+  "job": "build",
+  "sections": {
+    "gradle.unit": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    },
+    "junit": {
+      "tests": 353,
+      "failures": 0,
+      "skipped": 0
+    },
+    "gradle.lint": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    },
+    "lint": {
+      "Warning": 26,
+      "Hint": 17
+    },
+    "apk": {
+      "file": "app-demo.apk",
+      "bytes": 50196970,
+      "mb": 50.2,
+      "sha256": "553f9dc2152f06787ec34c554d0caf96ec78c7e1947fb52ecbfa53b8bf7c09d8",
+      "abis": [
+        "arm64-v8a",
+        "x86_64"
+      ],
+      "largestEntries": {
+        "lib": 24805600,
+        "assets": 15186610,
+        "classes.dex": 4252451,
+        "classes2.dex": 4103968,
+        "resources.arsc": 803084,
+        "res": 596332,
+        "okhttp3": 41543,
+        "kotlin": 12053,
+        "META-INF": 11516,
+        "AndroidManifest.xml": 2536,
+        "DebugProbesKt.bin": 780,
+        "kotlin-tooling-metadata.json": 284
+      },
+      "warnMb": 45.0,
+      "failMb": 60.0,
+      "abroadEntries": []
+    },
+    "steps.build": {
+      "assemble": "success",
+      "unit": "success",
+      "lint": "success",
+      "licences": "success",
+      "apk": "success"
+    },
+    "gradle.assemble": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    },
+    "gradle.toolchain": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "run": "41539154478",
+  "sha": "3302307c47b54a131a8a46657221839edb109844",
+  "ref": "refs/heads/ccr-013d3489-181fz2",
+  "job": "build",
+  "sections": {
+    "gradle.unit": {
+      "buildFailed": true,
+      "errors": 2,
+      "whatWentWrong": [
+        "Execution failed for task ':core-model:test'.\n> There were failing tests. See the report at: file:///home/runner/work/Verst/Verst/android/core-model/build/reports/tests/test/index.html"
+      ]
+    },
+    "junit": {
+      "tests": 353,
+      "failures": 1,
+      "skipped": 0
+    },
+    "gradle.lint": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    },
+    "lint": {
+      "Warning": 26,
+      "Hint": 17
+    },
+    "apk": {
+      "file": "app-demo.apk",
+      "bytes": 49849702,
+      "mb": 49.85,
+      "sha256": "3bcdf3b5d5c0e2b16ae28a11cd249f4d37181f5865fd1bf4b1953c31e55eb0fa",
+      "abis": [
+        "arm64-v8a",
+        "x86_64"
+      ],
+      "largestEntries": {
+        "lib": 24805600,
+        "assets": 14848727,
+        "classes.dex": 4252451,
+        "classes2.dex": 4101755,
+        "resources.arsc": 799872,
+        "res": 596332,
+        "okhttp3": 41543,
+        "kotlin": 12053,
+        "META-INF": 11516,
+        "AndroidManifest.xml": 2538,
+        "DebugProbesKt.bin": 780,
+        "kotlin-tooling-metadata.json": 284
+      },
+      "warnMb": 45.0,
+      "failMb": 60.0,
+      "abroadEntries": []
+    },
+    "steps.build": {
+      "assemble": "success",
+      "unit": "failure",
+      "lint": "success",
+      "licences": "success",
+      "apk": "success"
+    },
+    "gradle.assemble": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    },
+    "gradle.toolchain": {
+      "buildFailed": false,
+      "errors": 0,
+      "whatWentWrong": []
+    }
+  }
+}

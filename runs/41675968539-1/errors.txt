@@ -1,0 +1,4 @@
+[unit] Test - VerstFlowTest > oneTripOneDistanceThenWaybillReplaceSaveReopen
+[unit] Gradle: Execution failed for task ':app:testDebugUnitTest'. - Execution failed for task ':app:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///home/runner/work/Verst/Verst/android/app/build/reports/tests/testDebugUnitTest/index.html
+[test] app.verst.nav.VerstFlowTest > oneTripOneDistanceThenWaybillReplaceSaveReopen: java.lang.AssertionError: expected:<TripFigures(km=542, days=2)> but was:<TripFigures(km=540, days=2)>

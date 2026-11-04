@@ -1,0 +1,4 @@
+Chaquopy (com.chaquo.python) — licences found in the build's Gradle cache
+
+gradle:16.0.0: MIT License https://opensource.org/licenses/MIT
+target:3.12.7-0: MIT License https://opensource.org/licenses/MIT
