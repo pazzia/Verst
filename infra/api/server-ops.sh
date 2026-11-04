@@ -10,6 +10,9 @@
 #   update    git pull (fast-forward only), rebuild and restart the api, wait for /healthz
 #   recreate  restart the api with the current .env (after the CEO edited it)
 #   errors    the api log's WARNING / ERROR lines of the last 2 hours (no request bodies, no secrets)
+#   rollback  run the api image that served before the last `update` again (D-IR-33): `update` keeps it as
+#             verst-api:previous; the code checkout stays on main, so the next `update` rebuilds from main.
+#             Refused when the last update brought a database migration (the old code may not fit the schema).
 set -euo pipefail
 
 # `update` may pull a new copy of this file: run from a private copy so bash never reads a changed script
@@ -24,6 +27,8 @@ ACTION="${SSH_ORIGINAL_COMMAND:-status}"
 SRC=/srv/verst/src
 API="$SRC/infra/api"
 C=(docker compose -f docker-compose.yml -f docker-compose.host-nginx.yml)
+STATE=/srv/verst/ops-state
+migrations() { find "$SRC/backend/api/migrations" -name '*.sql' ! -name '*.down.sql' 2>/dev/null | sort; }
 
 health() {
     for _ in $(seq 1 30); do
@@ -47,13 +52,43 @@ case "$ACTION" in
         ;;
     update)
         cd "$SRC"
+        mkdir -p "$STATE"
         before="$(git rev-parse --short HEAD)"
+        migrations > "$STATE/migrations-before"
+        # D-IR-33: the image serving now is the rollback target
+        if docker image inspect verst-api:local > /dev/null 2>&1; then
+            docker tag verst-api:local verst-api:previous
+            echo "$before" > "$STATE/previous-commit"
+        fi
         git pull -q --ff-only
         echo "code: $before → $(git log -1 --format='%h %s')"
+        if migrations | cmp -s - "$STATE/migrations-before"; then
+            echo "no" > "$STATE/schema-changed"
+        else
+            echo "yes" > "$STATE/schema-changed"
+            echo "note: this update brings a database migration — a rollback will be refused"
+        fi
         cd "$API"
         "${C[@]}" build api
         "${C[@]}" up -d api
         health
+        ;;
+    rollback)
+        if ! docker image inspect verst-api:previous > /dev/null 2>&1; then
+            echo "no previous image: nothing to roll back to (no update ran since D-IR-33)" >&2
+            exit 3
+        fi
+        if [ "$(cat "$STATE/schema-changed" 2>/dev/null || echo unknown)" != "no" ]; then
+            echo "refused: the last update changed the database schema (or it is unknown); a rollback is the CEO's" >&2
+            exit 4
+        fi
+        echo "rolling back the api to the image of $(cat "$STATE/previous-commit" 2>/dev/null || echo '?')"
+        docker tag verst-api:local verst-api:rolled-back
+        docker tag verst-api:previous verst-api:local
+        cd "$API"
+        "${C[@]}" up -d --force-recreate --no-build api
+        health
+        echo "the code checkout stays on $(cd "$SRC" && git rev-parse --short HEAD); the next update rebuilds from main"
         ;;
     recreate)
         cd "$API"
@@ -65,7 +100,7 @@ case "$ACTION" in
         "${C[@]}" logs --since 2h --no-color api 2>&1 | grep -E 'WARNING|ERROR|CRITICAL|Traceback' | tail -n 80 || echo "no warnings or errors in the last 2 hours"
         ;;
     *)
-        echo "unknown action «$ACTION»: status | update | recreate | errors" >&2
+        echo "unknown action «$ACTION»: status | update | recreate | errors | rollback" >&2
         exit 2
         ;;
 esac
