@@ -56,6 +56,8 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 
 ## Next (when the CEO says)
 
+- **Next after the planning bug (CEO 04.11): Ostrovok (ETG) hotel prices** via the ETG Affiliate API (a test key comes on registration; production after certification). The CEO registers at ETG («API Integration») and puts the key in GitHub Secrets; the session needs `docs.emergingtravel.com` and `api.worldota.net` allowed. Optional: a Travelpayouts request for the Yandex Travel API (they ask 5 000 MAU). Research with sources: the 04.11 chat; Hotellook closed 20.10.2025.
+
 - Ostrovok links for overnights abroad (6 % vs 3 %), after checking its URL template on a real link.
 - 2GIS in the hand-off choice for Kazakhstan, Uzbekistan and Kyrgyzstan.
 - Older open items:
