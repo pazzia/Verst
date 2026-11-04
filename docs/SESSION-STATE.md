@@ -8,6 +8,7 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 ## Now
 
 - **Release 0.3.216 (04.11, PR #10 `7cdfe4e`):** verst-latest; the test server runs `7cdfe4e` since 18:26 MSK (update asked and approved; ~14 s downtime, no errors).
+- **Test server on `ef8bced` (PR #12, 19:45 MSK, no restart):** `errors` prints a summary only (public logs); the update kept the running image as the rollback target, so `rollback` works from now on. `spike01` is manual-only. The repository stays public (CEO 04.11).
 - **Rollback (D-IR-33, PR #11 `81e43ee`):** merged; the server ran `update` at 19:06 MSK (no code change, the api was not recreated). The next `update` keeps a rollback image. `spike01` runs on any change of `spike.yml` (the Node 24 bump started it): ask the CEO whether to make it manual-only.
 - **04.11, merged in PR #10:**
   - D-IR-31 (CEO option 1): an approximate long trip asks once «Дальняя поездка — точнее на сервере»; yes = server consent + later approximate trips on the server (fallback phone); no = phone, not asked again. Engine `estimate.approx`; `PlanRequest.longTrip`; `AppSettings.longTripAsked`. Seen on the camper emulator shot 05a (Москва → Санкт-Петербург). Green on run 41834108817 (attempt 2; attempt 1 failed the catalogue budget at 2 009 ms, attempt 2 measured 501–1 532 ms: the CI emulator varies ~3x).
@@ -45,14 +46,13 @@ Update at the end of every task. Older history: `docs/PROJECT-STATE.md` §3 and 
 ## Waiting on the CEO
 
 1. **SSH: key login, then no password for root** (the repo is public, the server takes root passwords). Steps in `docs/ops/test-server.md` §6; the CEO will do it later from a computer.
-2. «Сливай» for the `errors` summary (no message text in public logs, `f204fac`), and an answer: `spike01` manual-only?
-3. Register at Travelpayouts and put `VERST_TP_TOKEN/MARKER/TRS` into the server `.env` (`docs/partners/hotel-affiliate.md` §4).
-4. Decisions:
+2. Register at Travelpayouts and put `VERST_TP_TOKEN/MARKER/TRS` into the server `.env` (`docs/partners/hotel-affiliate.md` §4).
+3. Decisions:
    - legal entity, D-IR-09;
    - a lawyer on the «Реклама» label at the booking button (R-05);
    - a server in Russia before the beta.
-5. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
-6. The Yandex Navigator signing key: **not yet** (D-IR-17). The form asks for a company, a site and a store link. It comes after the legal entity, the domain and RuStore, before the closed beta.
+4. MapKit: which screen gets the map first (Road day map / city walk / pick a point); put the key into GitHub Secrets `YANDEX_MAPKIT_KEY` and restrict it to `app.verst.demo`.
+5. The Yandex Navigator signing key: **not yet** (D-IR-17). The form asks for a company, a site and a store link. It comes after the legal entity, the domain and RuStore, before the closed beta.
 
 ## Next (when the CEO says)
 
